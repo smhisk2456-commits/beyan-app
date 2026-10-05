@@ -49,7 +49,7 @@ app_target.add_dependency(widget)
 embed = app_target.new_copy_files_build_phase('Embed Foundation Extensions')
 embed.dst_subfolder_spec = '13' # PlugIns
 build_file = embed.add_file_reference(widget.product_reference, true)
-build_file.settings = { 'ATTRIBUTES' => ['RemoveHeadersOnCopy'] }
+build_file.settings = { 'ATTRIBUTES' => ['RemoveHeadersOnCopy', 'CodeSignOnCopy'] }
 
 # Flutter'ın "Thin Binary" betiğinden ÖNCE çalışmalı, aksi halde Xcode "Cycle" hatası verir
 phases = app_target.build_phases
