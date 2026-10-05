@@ -22,17 +22,7 @@ private let hhmm: DateFormatter = {
     return f
 }()
 
-extension View {
-    /// iOS 17+ widget'larda zorunlu olan containerBackground uyumluluğu.
-    @ViewBuilder
-    func beyanWidgetBackground() -> some View {
-        if #available(iOSApplicationExtension 17.0, *) {
-            self.containerBackground(for: .widget) { Color.clear }
-        } else {
-            self
-        }
-    }
-}
+
 
 // MARK: - Konum
 
@@ -284,16 +274,134 @@ struct PrayerInlineView: View {
     }
 }
 
+extension View {
+    @ViewBuilder
+    func beyanWidgetBackground(for family: WidgetFamily) -> some View {
+        if #available(iOSApplicationExtension 17.0, *) {
+            self.containerBackground(for: .widget) {
+                if family == .accessoryRectangular || family == .accessoryCircular || family == .accessoryInline {
+                    Color.clear
+                } else {
+                    LinearGradient(
+                        colors: [Color(red: 0.01, green: 0.22, blue: 0.19), Color(red: 0.00, green: 0.12, blue: 0.10)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                }
+            }
+        } else {
+            if family == .accessoryRectangular || family == .accessoryCircular || family == .accessoryInline {
+                self
+            } else {
+                self.background(
+                    LinearGradient(
+                        colors: [Color(red: 0.01, green: 0.22, blue: 0.19), Color(red: 0.00, green: 0.12, blue: 0.10)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+            }
+        }
+    }
+}
+
+// MARK: - Namaz Vakti Widget Görünümleri
+
+struct PrayerSystemSmallView: View {
+    let entry: PrayerEntry
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Text("Beyân")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundColor(Color(red: 1.0, green: 0.85, blue: 0.45))
+                Spacer()
+                Image(systemName: entry.next.kind.symbol)
+                    .font(.system(size: 14))
+                    .foregroundColor(Color(red: 1.0, green: 0.85, blue: 0.45))
+            }
+            Spacer()
+            Text("Sıradaki Namaz")
+                .font(.system(size: 11))
+                .foregroundColor(.white.opacity(0.7))
+            Text(entry.next.kind.name)
+                .font(.system(size: 22, weight: .bold))
+                .foregroundColor(.white)
+            HStack {
+                Text(hhmm.string(from: entry.next.date))
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundColor(.white)
+                Spacer()
+                Text(entry.next.date, style: .timer)
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(Color(red: 1.0, green: 0.85, blue: 0.45))
+            }
+        }
+        .padding(12)
+    }
+}
+
+struct PrayerSystemMediumView: View {
+    let entry: PrayerEntry
+
+    var body: some View {
+        HStack(spacing: 16) {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 4) {
+                    Image(systemName: "moon.stars.fill")
+                        .font(.system(size: 12))
+                        .foregroundColor(Color(red: 1.0, green: 0.85, blue: 0.45))
+                    Text("Beyân")
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundColor(Color(red: 1.0, green: 0.85, blue: 0.45))
+                }
+                Spacer()
+                Text("Sıradaki Namaz")
+                    .font(.system(size: 11))
+                    .foregroundColor(.white.opacity(0.7))
+                Text(entry.next.kind.name)
+                    .font(.system(size: 26, weight: .bold))
+                    .foregroundColor(.white)
+                Text(entry.next.date, style: .timer)
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundColor(Color(red: 1.0, green: 0.85, blue: 0.45))
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            VStack(alignment: .trailing, spacing: 6) {
+                Text(hhmm.string(from: entry.next.date))
+                    .font(.system(size: 32, weight: .light, design: .rounded))
+                    .foregroundColor(.white)
+                HStack(spacing: 4) {
+                    Image(systemName: entry.current.kind.symbol)
+                        .font(.system(size: 11))
+                        .foregroundColor(.white.opacity(0.6))
+                    Text("\(entry.current.kind.name) \(hhmm.string(from: entry.current.date))")
+                        .font(.system(size: 11))
+                        .foregroundColor(.white.opacity(0.7))
+                }
+            }
+        }
+        .padding(14)
+    }
+}
+
 struct PrayerWidgetView: View {
     @Environment(\.widgetFamily) var family
     let entry: PrayerEntry
 
     var body: some View {
-        switch family {
-        case .accessoryCircular: PrayerCircularView(entry: entry)
-        case .accessoryInline: PrayerInlineView(entry: entry)
-        default: PrayerRectangularView(entry: entry)
+        Group {
+            switch family {
+            case .accessoryCircular: PrayerCircularView(entry: entry)
+            case .accessoryInline: PrayerInlineView(entry: entry)
+            case .systemSmall: PrayerSystemSmallView(entry: entry)
+            case .systemMedium: PrayerSystemMediumView(entry: entry)
+            default: PrayerRectangularView(entry: entry)
+            }
         }
+        .beyanWidgetBackground(for: family)
     }
 }
 
@@ -302,11 +410,11 @@ struct BeyanPrayerWidget: Widget {
 
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: PrayerProvider()) { entry in
-            PrayerWidgetView(entry: entry).beyanWidgetBackground()
+            PrayerWidgetView(entry: entry)
         }
         .configurationDisplayName("Namaz Vakti")
         .description("Şu anki vakit, sıradaki vakit ve canlı geri sayım.")
-        .supportedFamilies([.accessoryRectangular, .accessoryCircular, .accessoryInline])
+        .supportedFamilies([.systemSmall, .systemMedium, .accessoryRectangular, .accessoryCircular, .accessoryInline])
     }
 }
 
@@ -319,7 +427,6 @@ struct VerseEntry: TimelineEntry {
 }
 
 struct VerseProvider: TimelineProvider {
-    /// 15 dakikalık dilimlere göre ayet seçer (her dilimde farklı ayet).
     private static let slot: TimeInterval = 15 * 60
 
     private func verse(at date: Date) -> VerseEntry {
@@ -342,7 +449,7 @@ struct VerseProvider: TimelineProvider {
         let now = Date()
         let slotStart = Date(timeIntervalSince1970: floor(now.timeIntervalSince1970 / Self.slot) * Self.slot)
         var entries = [verse(at: now)]
-        for i in 1...96 { // 24 saat
+        for i in 1...96 {
             entries.append(verse(at: slotStart.addingTimeInterval(Double(i) * Self.slot)))
         }
         completion(Timeline(entries: entries, policy: .atEnd))
@@ -367,16 +474,89 @@ struct VerseRectangularView: View {
     }
 }
 
+struct VerseSystemSmallView: View {
+    let entry: VerseEntry
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Text("Günün Ayeti")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundColor(Color(red: 1.0, green: 0.85, blue: 0.45))
+                Spacer()
+                Image(systemName: "book.closed.fill")
+                    .font(.system(size: 11))
+                    .foregroundColor(Color(red: 1.0, green: 0.85, blue: 0.45))
+            }
+            Text(entry.ref)
+                .font(.system(size: 13, weight: .bold))
+                .foregroundColor(.white)
+            Spacer()
+            Text(entry.text)
+                .font(.system(size: 11))
+                .foregroundColor(.white.opacity(0.88))
+                .lineLimit(4)
+                .minimumScaleFactor(0.85)
+        }
+        .padding(12)
+    }
+}
+
+struct VerseSystemMediumView: View {
+    let entry: VerseEntry
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                HStack(spacing: 4) {
+                    Image(systemName: "book.closed.fill")
+                        .font(.system(size: 12))
+                        .foregroundColor(Color(red: 1.0, green: 0.85, blue: 0.45))
+                    Text("Günün Ayet-i Kerimesi")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(Color(red: 1.0, green: 0.85, blue: 0.45))
+                }
+                Spacer()
+                Text(entry.ref)
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundColor(.white)
+            }
+            Text(entry.text)
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(.white.opacity(0.92))
+                .lineLimit(3)
+                .minimumScaleFactor(0.85)
+        }
+        .padding(14)
+    }
+}
+
+struct VerseWidgetView: View {
+    @Environment(\.widgetFamily) var family
+    let entry: VerseEntry
+
+    var body: some View {
+        Group {
+            switch family {
+            case .systemSmall: VerseSystemSmallView(entry: entry)
+            case .systemMedium: VerseSystemMediumView(entry: entry)
+            default: VerseRectangularView(entry: entry)
+            }
+        }
+        .beyanWidgetBackground(for: family)
+    }
+}
+
 struct BeyanVerseWidget: Widget {
     let kind = "BeyanVerseWidget"
 
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: VerseProvider()) { entry in
-            VerseRectangularView(entry: entry).beyanWidgetBackground()
+            VerseWidgetView(entry: entry)
         }
         .configurationDisplayName("Ayet")
-        .description("Kilit ekranında her 15 dakikada bir yeni ayet ve meali.")
-        .supportedFamilies([.accessoryRectangular])
+        .description("Her 15 dakikada bir yeni ayet ve meali.")
+        .supportedFamilies([.systemSmall, .systemMedium, .accessoryRectangular])
     }
 }
 
