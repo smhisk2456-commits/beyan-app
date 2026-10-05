@@ -14,12 +14,6 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up Java (for tools if needed)
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -29,16 +23,25 @@ jobs:
       - name: Install Dependencies
         run: flutter pub get
 
-      - name: Build iOS Release (No Codesign)
+      - name: Add Lock Screen Widget Extension Target
         run: |
-          flutter build ios --release --no-codesign
+          sudo gem install xcodeproj --no-document
+          ruby tools/add_ios_widget_target.rb
+
+      - name: Build iOS Release (No Codesign)
+        run: flutter build ios --release --no-codesign
+
+      - name: Verify Widget Is Embedded
+        run: |
+          ls -la build/ios/iphoneos/Runner.app/PlugIns/
+          test -d build/ios/iphoneos/Runner.app/PlugIns/BeyanWidgetExtension.appex
 
       - name: Package into IPA for Sideloadly
         run: |
           mkdir -p build/ios/ipa/Payload
           cp -r build/ios/iphoneos/Runner.app build/ios/ipa/Payload/
           cd build/ios/ipa
-          zip -r Beyan.ipa Payload
+          zip -qr Beyan.ipa Payload
           echo "IPA Created Successfully!"
 
       - name: Upload IPA Artifact

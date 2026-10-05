@@ -2,13 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
   "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <!--
-  iOS Widget Extension Info.plist
-  Bu dosya Xcode'da "IslamicAppWidget" Extension target'ına aittir.
-  
-  ÖNEMLİ KURULUM ADIMI:
-  Xcode → Runner Target → Signing & Capabilities → + App Group
-  → "group.com.example.islamicApp" ekleyin.
-  Aynı App Group'u IslamicAppWidget target'ına da ekleyin.
+  Beyân iOS Widget Extension Info.plist
+  Xcode target'ı CI sırasında tools/add_ios_widget_target.rb ile eklenir.
 -->
 <plist version="1.0">
 <dict>
@@ -17,10 +12,13 @@
         <key>NSExtensionPointIdentifier</key>
         <string>com.apple.widgetkit-extension</string>
     </dict>
+    <!-- Widget, uygulamanın konum iznini kullanarak bulunduğunuz şehrin vakitlerini hesaplar -->
+    <key>NSWidgetWantsLocation</key>
+    <true/>
     <key>CFBundleDevelopmentRegion</key>
     <string>tr</string>
     <key>CFBundleDisplayName</key>
-    <string>İslami Widget</string>
+    <string>Beyân</string>
     <key>CFBundleExecutable</key>
     <string>$(EXECUTABLE_NAME)</string>
     <key>CFBundleIdentifier</key>
@@ -28,15 +26,12 @@
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundleName</key>
-    <string>IslamicAppWidget</string>
+    <string>$(PRODUCT_NAME)</string>
     <key>CFBundlePackageType</key>
     <string>XPC!</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.0</string>
+    <string>$(MARKETING_VERSION)</string>
     <key>CFBundleVersion</key>
-    <string>1</string>
-    <!-- App Group – Flutter home_widget ile veri paylaşımı -->
-    <key>AppGroupIdentifier</key>
-    <string>group.com.example.islamicApp</string>
+    <string>$(CURRENT_PROJECT_VERSION)</string>
 </dict>
 </plist>
