@@ -1,20 +1,5 @@
 import WidgetKit
 import SwiftUI
-import CoreLocation
-
-// ════════════════════════════════════════════════════════════════
-// Beyân – iPhone Kilit Ekranı Widget'ları
-//
-// 1) "Ayet"        → Sure adı + ayet no (kalın) ve Türkçe meal (3 satır)
-// 2) "Namaz Vakti" → Şu anki vakit, sıradaki vakit ve canlı geri sayım
-//
-// Widget tamamen kendi kendine yeterlidir: App Group gerektirmez
-// (ücretsiz Apple ID + Sideloadly ile de çalışır). Namaz vakitleri
-// uygulamadaki ile aynı yöntemle (Diyanet / Hanefi) cihazda hesaplanır.
-// ════════════════════════════════════════════════════════════════
-
-// MARK: - Ortak Yardımcılar
-
 private let hhmm: DateFormatter = {
     let f = DateFormatter()
     f.locale = Locale(identifier: "tr_TR")
@@ -22,24 +7,20 @@ private let hhmm: DateFormatter = {
     return f
 }()
 
-
-
 // MARK: - Konum
 
 enum WidgetLocation {
     private static let latKey = "beyan_widget_lat"
     private static let lngKey = "beyan_widget_lng"
 
-    /// Önce cihazın son bilinen konumu, sonra kayıtlı konum, en son İstanbul.
     static func coordinate() -> (lat: Double, lng: Double) {
         let defaults = UserDefaults.standard
-        if let loc = CLLocationManager().location {
-            defaults.set(loc.coordinate.latitude, forKey: latKey)
-            defaults.set(loc.coordinate.longitude, forKey: lngKey)
-            return (loc.coordinate.latitude, loc.coordinate.longitude)
-        }
         if defaults.object(forKey: latKey) != nil {
-            return (defaults.double(forKey: latKey), defaults.double(forKey: lngKey))
+            let lat = defaults.double(forKey: latKey)
+            let lng = defaults.double(forKey: lngKey)
+            if lat != 0 && lng != 0 {
+                return (lat, lng)
+            }
         }
         return (41.0082, 28.9784) // İstanbul
     }
