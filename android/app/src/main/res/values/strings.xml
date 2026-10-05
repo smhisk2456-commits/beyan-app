@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Beyân</string>
+    <string name="widget_description">Namaz vakitleri ve günlük ayet widget\'ı</string>
+    <string name="next_prayer">Sıradaki Namaz</string>
+    <string name="daily_verse">Günün Ayeti</string>
+</resources>

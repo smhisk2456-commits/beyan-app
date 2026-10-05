@@ -1,0 +1,55 @@
+// App-level build.gradle
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+    // Flutter Gradle Plugin – Flutter SDK'dan otomatik uygulanır
+    id 'dev.flutter.flutter-gradle-plugin'
+}
+
+android {
+    namespace "com.example.islamic_app"
+    compileSdk flutter.compileSdkVersion
+    ndkVersion flutter.ndkVersion
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
+
+    defaultConfig {
+        applicationId "com.example.islamic_app"
+        // geolocator ve home_widget için minSdk 21 gereklidir
+        minSdkVersion flutter.minSdkVersion
+        targetSdkVersion flutter.targetSdkVersion
+        versionCode flutter.versionCode
+        versionName flutter.versionName
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.debug
+
+        }
+    }
+}
+
+flutter {
+    source '../..'
+}
+
+dependencies {
+    // WorkManager – Arka plan görevleri için
+    implementation 'androidx.work:work-runtime-ktx:2.9.0'
+    // Widget güncellemeleri için
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+}
+
