@@ -7,7 +7,7 @@ import '../widget_service.dart';
 
 /// Lüks Ayarlar ve Dil Seçimi Alt Menüsü
 class WidgetSettingsDialog extends ConsumerStatefulWidget {
-  const WidgetSettingsDialog({Key? key}) : super(key: key);
+  const WidgetSettingsDialog({super.key});
 
   @override
   ConsumerState<WidgetSettingsDialog> createState() => _WidgetSettingsDialogState();
@@ -72,7 +72,7 @@ class _WidgetSettingsDialogState extends ConsumerState<WidgetSettingsDialog> {
         color: isDark ? const Color(0xFF071B18) : Colors.white,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         border: Border.all(
-          color: const Color(0xFFD4AF37).withOpacity(0.3),
+          color: const Color(0xFFD4AF37).withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -99,7 +99,7 @@ class _WidgetSettingsDialogState extends ConsumerState<WidgetSettingsDialog> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFD4AF37).withOpacity(0.15),
+                  color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
@@ -148,7 +148,7 @@ class _WidgetSettingsDialogState extends ConsumerState<WidgetSettingsDialog> {
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? const Color(0xFF033E35).withOpacity(isDark ? 0.6 : 0.12)
+                            ? const Color(0xFF033E35).withValues(alpha: isDark ? 0.6 : 0.12)
                             : (isDark ? const Color(0xFF0D2823) : const Color(0xFFF0F5F3)),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(

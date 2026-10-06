@@ -190,10 +190,10 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.12),
+                  color: Colors.white.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: const Color(0xFFD4AF37).withOpacity(0.5),
+                    color: const Color(0xFFD4AF37).withValues(alpha: 0.5),
                     width: 1,
                   ),
                 ),
@@ -300,12 +300,12 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                   ),
                   borderRadius: BorderRadius.circular(22),
                   border: Border.all(
-                    color: const Color(0xFFD4AF37).withOpacity(0.35),
+                    color: const Color(0xFFD4AF37).withValues(alpha: 0.35),
                     width: 1.2,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
+                      color: Colors.black.withValues(alpha: 0.3),
                       blurRadius: 18,
                       offset: const Offset(0, 6),
                     ),
@@ -341,7 +341,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                       activeDhikr['meaning']!,
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.white.withOpacity(0.65),
+                        color: Colors.white.withValues(alpha: 0.65),
                         fontStyle: FontStyle.italic,
                       ),
                       textAlign: TextAlign.center,
@@ -366,10 +366,10 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFD4AF37).withOpacity(0.18),
+                        color: const Color(0xFFD4AF37).withValues(alpha: 0.18),
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
-                          color: const Color(0xFFD4AF37).withOpacity(0.5),
+                          color: const Color(0xFFD4AF37).withValues(alpha: 0.5),
                         ),
                       ),
                       child: Text(
@@ -420,17 +420,17 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                             stops: [0.0, 0.7, 1.0],
                           ),
                           border: Border.all(
-                            color: const Color(0xFFD4AF37).withOpacity(0.6),
+                            color: const Color(0xFFD4AF37).withValues(alpha: 0.6),
                             width: 2,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFFD4AF37).withOpacity(0.2),
+                              color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
                               blurRadius: 28,
                               spreadRadius: 2,
                             ),
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.4),
+                              color: Colors.black.withValues(alpha: 0.4),
                               blurRadius: 16,
                               offset: const Offset(0, 8),
                             ),
@@ -487,7 +487,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                     label: const Text('Sıfırla'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: const Color(0xFFD4AF37),
-                      side: BorderSide(color: const Color(0xFFD4AF37).withOpacity(0.4)),
+                      side: BorderSide(color: const Color(0xFFD4AF37).withValues(alpha: 0.4)),
                       padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),

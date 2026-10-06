@@ -90,10 +90,10 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.12),
+                  color: Colors.white.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: const Color(0xFFD4AF37).withOpacity(0.5),
+                    color: const Color(0xFFD4AF37).withValues(alpha: 0.5),
                     width: 1,
                   ),
                 ),
@@ -140,12 +140,12 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                       ),
                       borderRadius: BorderRadius.circular(24),
                       border: Border.all(
-                        color: const Color(0xFFD4AF37).withOpacity(0.35),
+                        color: const Color(0xFFD4AF37).withValues(alpha: 0.35),
                         width: 1.2,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF01201D).withOpacity(0.5),
+                          color: const Color(0xFF01201D).withValues(alpha: 0.5),
                           blurRadius: 20,
                           offset: const Offset(0, 8),
                         ),
@@ -177,9 +177,9 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
-                                color: AppColors.gold.withOpacity(0.2),
+                                color: AppColors.gold.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: AppColors.gold.withOpacity(0.4)),
+                                border: Border.all(color: AppColors.gold.withValues(alpha: 0.4)),
                               ),
                               child: Text(
                                 strings.minutesShort(_selectedInterval),
@@ -199,7 +199,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                           width: double.infinity,
                           padding: const EdgeInsets.all(14),
                           decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.35),
+                            color: Colors.black.withValues(alpha: 0.35),
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(color: Colors.white24),
                           ),

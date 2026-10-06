@@ -250,7 +250,7 @@ class _StatBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
+        color: Colors.white.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: Colors.white24),
       ),
@@ -287,10 +287,10 @@ class _BismillahCard extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(16, 16, 16, 4),
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
       decoration: BoxDecoration(
-        color: AppColors.teal.withOpacity(isDark ? 0.15 : 0.07),
+        color: AppColors.teal.withValues(alpha: isDark ? 0.15 : 0.07),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: AppColors.teal.withOpacity(0.25),
+          color: AppColors.teal.withValues(alpha: 0.25),
           width: 1,
         ),
       ),

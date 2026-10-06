@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../quran/models/surah.dart';
 import '../../quran/widgets/arabic_text_widget.dart';
 
@@ -33,7 +32,7 @@ class SurahListItem extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.2 : 0.03),
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -120,9 +119,9 @@ class _SurahNumber extends StatelessWidget {
       child: CustomPaint(
         painter: _OctagonPainter(
           fillColor: isDark
-              ? const Color(0xFFD4AF37).withOpacity(0.12)
-              : const Color(0xFF033E35).withOpacity(0.06),
-          strokeColor: const Color(0xFFD4AF37).withOpacity(0.65),
+              ? const Color(0xFFD4AF37).withValues(alpha: 0.12)
+              : const Color(0xFF033E35).withValues(alpha: 0.06),
+          strokeColor: const Color(0xFFD4AF37).withValues(alpha: 0.65),
         ),
         child: Center(
           child: Text(
@@ -192,7 +191,7 @@ class _InfoChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withOpacity(isDark ? 0.2 : 0.1),
+        color: color.withValues(alpha: isDark ? 0.2 : 0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(

@@ -34,14 +34,14 @@ class BeyanBottomNavBar extends StatelessWidget {
         color: isDark ? const Color(0xFF0F1A18) : Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.4 : 0.07),
+            color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.07),
             blurRadius: 20,
             offset: const Offset(0, -5),
           ),
         ],
         border: Border(
           top: BorderSide(
-            color: isDark ? Colors.white.withOpacity(0.08) : Colors.grey.shade200,
+            color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.grey.shade200,
             width: 1,
           ),
         ),
@@ -62,7 +62,7 @@ class BeyanBottomNavBar extends StatelessWidget {
                   child: InkWell(
                     onTap: () => onTap(index),
                     borderRadius: BorderRadius.circular(16),
-                    splashColor: AppColors.teal.withOpacity(0.1),
+                    splashColor: AppColors.teal.withValues(alpha: 0.1),
                     highlightColor: Colors.transparent,
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 250),
@@ -81,7 +81,7 @@ class BeyanBottomNavBar extends StatelessWidget {
                             ),
                             decoration: BoxDecoration(
                               color: isSelected
-                                  ? AppColors.teal.withOpacity(isDark ? 0.25 : 0.12)
+                                  ? AppColors.teal.withValues(alpha: isDark ? 0.25 : 0.12)
                                   : Colors.transparent,
                               borderRadius: BorderRadius.circular(16),
                             ),

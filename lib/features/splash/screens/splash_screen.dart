@@ -181,8 +181,8 @@ class _SplashScreenState extends State<SplashScreen>
                         shape: BoxShape.circle,
                         gradient: RadialGradient(
                           colors: [
-                            const Color(0xFFD4AF37).withOpacity(0.22),
-                            const Color(0xFF033E35).withOpacity(0.12),
+                            const Color(0xFFD4AF37).withValues(alpha: 0.22),
+                            const Color(0xFF033E35).withValues(alpha: 0.12),
                             Colors.transparent,
                           ],
                           stops: const [0.0, 0.6, 1.0],
@@ -219,13 +219,13 @@ class _SplashScreenState extends State<SplashScreen>
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFFD4AF37).withOpacity(0.35),
+                              color: const Color(0xFFD4AF37).withValues(alpha: 0.35),
                               blurRadius: 36,
                               spreadRadius: 4,
                               offset: const Offset(0, 10),
                             ),
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.5),
+                              color: Colors.black.withValues(alpha: 0.5),
                               blurRadius: 24,
                               offset: const Offset(0, 12),
                             ),
@@ -333,7 +333,7 @@ class _SplashScreenState extends State<SplashScreen>
                                 decoration: BoxDecoration(
                                   color: index == 1
                                       ? const Color(0xFFD4AF37)
-                                      : const Color(0xFFD4AF37).withOpacity(0.35),
+                                      : const Color(0xFFD4AF37).withValues(alpha: 0.35),
                                   borderRadius: BorderRadius.circular(2),
                                 ),
                               );

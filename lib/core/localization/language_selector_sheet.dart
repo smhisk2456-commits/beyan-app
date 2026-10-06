@@ -18,7 +18,7 @@ class LanguageSelectorSheet extends ConsumerWidget {
         color: isDark ? const Color(0xFF071B18) : Colors.white,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         border: Border.all(
-          color: const Color(0xFFD4AF37).withOpacity(0.3),
+          color: const Color(0xFFD4AF37).withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -46,7 +46,7 @@ class LanguageSelectorSheet extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFD4AF37).withOpacity(0.15),
+                  color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
@@ -76,7 +76,7 @@ class LanguageSelectorSheet extends ConsumerWidget {
               padding: const EdgeInsets.only(bottom: 10),
               child: Material(
                 color: isSelected
-                    ? const Color(0xFF033E35).withOpacity(isDark ? 0.4 : 0.08)
+                    ? const Color(0xFF033E35).withValues(alpha: isDark ? 0.4 : 0.08)
                     : (isDark ? const Color(0xFF0D2823) : const Color(0xFFF7FAF9)),
                 borderRadius: BorderRadius.circular(16),
                 child: InkWell(

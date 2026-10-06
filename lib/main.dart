@@ -13,6 +13,7 @@ import 'features/widget_service/widget_service.dart';
 import 'features/widget_service/background_task_manager.dart';
 
 import 'features/widget_service/screens/widget_center_screen.dart';
+import 'features/notifications/services/notification_service.dart';
 import 'features/splash/screens/splash_screen.dart';
 import 'core/widgets/luxury_floating_dock.dart';
 
@@ -35,6 +36,10 @@ void main() async {
       await taskManager.initialize();
       await taskManager.scheduleWidgetUpdate();
       WidgetService().updateAllWidgets();
+
+      // Ezan ve Vakit Bildirim Servisi
+      await NotificationService.instance.initialize();
+      await NotificationService.instance.scheduleUpcomingPrayers();
     } catch (_) {}
   });
 

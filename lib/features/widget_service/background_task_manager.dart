@@ -51,8 +51,6 @@ class BackgroundTaskManager {
   Future<void> initialize() async {
     await Workmanager().initialize(
       backgroundTaskCallback,
-      // Hata ayıklama için true; release'de false yapın
-      isInDebugMode: false,
     );
   }
 

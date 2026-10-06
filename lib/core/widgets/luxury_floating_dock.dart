@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../localization/app_strings.dart';
-import '../theme/app_theme.dart';
 
 /// Beyân - Yeniden Tasarlanmış Lüks Yüzen Navigasyon Menüsü.
 class LuxuryFloatingDock extends ConsumerWidget {
@@ -46,17 +45,17 @@ class LuxuryFloatingDock extends ConsumerWidget {
                       ),
                       borderRadius: BorderRadius.circular(36),
                       border: Border.all(
-                        color: const Color(0xFFD4AF37).withOpacity(0.4),
+                        color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
                         width: 1.2,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.45),
+                          color: Colors.black.withValues(alpha: 0.45),
                           blurRadius: 30,
                           offset: const Offset(0, 10),
                         ),
                         BoxShadow(
-                          color: const Color(0xFF033E35).withOpacity(0.3),
+                          color: const Color(0xFF033E35).withValues(alpha: 0.3),
                           blurRadius: 16,
                           offset: const Offset(0, -2),
                         ),
@@ -144,12 +143,12 @@ class LuxuryFloatingDock extends ConsumerWidget {
         ),
         decoration: BoxDecoration(
           color: isSelected
-              ? const Color(0xFFD4AF37).withOpacity(0.18)
+              ? const Color(0xFFD4AF37).withValues(alpha: 0.18)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
           border: isSelected
               ? Border.all(
-                  color: const Color(0xFFFFDF7A).withOpacity(0.35),
+                  color: const Color(0xFFFFDF7A).withValues(alpha: 0.35),
                   width: 1,
                 )
               : null,
@@ -208,13 +207,13 @@ class LuxuryFloatingDock extends ConsumerWidget {
             ),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFFD4AF37).withOpacity(isSelected ? 0.65 : 0.4),
+                color: const Color(0xFFD4AF37).withValues(alpha: isSelected ? 0.65 : 0.4),
                 blurRadius: isSelected ? 20 : 16,
                 offset: const Offset(0, 4),
                 spreadRadius: isSelected ? 3 : 1,
               ),
               BoxShadow(
-                color: Colors.black.withOpacity(0.3),
+                color: Colors.black.withValues(alpha: 0.3),
                 blurRadius: 10,
                 offset: const Offset(0, 3),
               ),

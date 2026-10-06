@@ -77,7 +77,7 @@ final prayerProgressProvider = FutureProvider<double>((ref) async {
 /// Widget, `ref.watch(prayerCountdownProvider)` ile otomatik güncellenir.
 final prayerCountdownProvider = StreamProvider<Duration>((ref) {
   // Her saniye tetiklenen timer stream'i
-  return Stream.periodic(const Duration(seconds: 1), (_) => _).asyncMap(
+  return Stream.periodic(const Duration(seconds: 1), (count) => count).asyncMap(
     (_) async {
       // Namaz vakitlerini al (cache'ten gelir, yeniden hesaplanmaz)
       final daily = await ref.watch(dailyPrayerTimesProvider.future);
@@ -89,7 +89,7 @@ final prayerCountdownProvider = StreamProvider<Duration>((ref) {
 /// Countdown'ı formatlanmış string olarak döner (ör: "02:45" veya "1s 30dk").
 final countdownStringProvider = StreamProvider<String>((ref) {
   final service = ref.watch(prayerTimeServiceProvider);
-  return Stream.periodic(const Duration(seconds: 1), (_) => _).asyncMap(
+  return Stream.periodic(const Duration(seconds: 1), (count) => count).asyncMap(
     (_) async {
       final daily = await ref.watch(dailyPrayerTimesProvider.future);
       final remaining = daily.timeUntilNextPrayer;

@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,7 +8,8 @@ import '../../../main.dart';
 import '../../prayer_times/models/prayer_time_model.dart';
 import '../../prayer_times/providers/prayer_time_providers.dart';
 import '../../widget_service/screens/widget_settings_dialog.dart';
-import '../../widget_service/screens/widget_center_screen.dart';
+import '../../qibla/screens/qibla_compass_screen.dart';
+import '../../notifications/screens/notification_settings_sheet.dart';
 import '../widgets/prayer_card_widget.dart';
 
 /// Ana Ekran – Beyân lüks İslami arayüzü (Kur'an listesi menüden kaldırılmış ferah tasarım).
@@ -44,7 +44,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 // Vakitler sekmesine geç
                 ref.read(selectedTabProvider.notifier).state = 1;
               },
-              onOpenQibla: () => _showQiblaDialog(context, strings),
+              onOpenQibla: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const QiblaCompassScreen()),
+                );
+              },
               onOpenZikr: () {
                 // Zikirmatik sekmesine geç (Index 3)
                 ref.read(selectedTabProvider.notifier).state = 3;
@@ -83,10 +88,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFD4AF37).withOpacity(0.12),
+                      color: const Color(0xFFD4AF37).withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: const Color(0xFFD4AF37).withOpacity(0.3),
+                        color: const Color(0xFFD4AF37).withValues(alpha: 0.3),
                       ),
                     ),
                     child: Text(
@@ -142,82 +147,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  void _showQiblaDialog(BuildContext context, AppStrings strings) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        backgroundColor: Theme.of(ctx).brightness == Brightness.dark
-            ? const Color(0xFF0D2823)
-            : Colors.white,
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: const Color(0xFFD4AF37).withOpacity(0.2),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.explore_rounded, color: Color(0xFFD4AF37)),
-            ),
-            const SizedBox(width: 12),
-            Text(strings.actionQibla, style: const TextStyle(fontWeight: FontWeight.bold)),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 8),
-            Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: const Color(0xFFD4AF37), width: 2),
-                gradient: const RadialGradient(
-                  colors: [Color(0xFF033E35), Color(0xFF01201D)],
-                ),
-              ),
-              child: const Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.navigation_rounded, color: Color(0xFFFFDF7A), size: 36),
-                    SizedBox(height: 4),
-                    Text(
-                      '152°',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              '${strings.actionQibla}: 152° Güney-Güneydoğu (İstanbul / Türkiye)',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 13,
-                color: Theme.of(ctx).brightness == Brightness.dark
-                    ? Colors.white70
-                    : AppColors.textSecondary,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(strings.close, style: const TextStyle(color: Color(0xFFD4AF37))),
-          ),
-        ],
-      ),
-    );
-  }
+
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -253,12 +183,12 @@ class _DailyPrayersCardList extends ConsumerWidget {
           color: isDark ? const Color(0xFF071F1B) : Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: const Color(0xFFD4AF37).withOpacity(isDark ? 0.3 : 0.2),
+            color: const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.3 : 0.2),
             width: 1,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(isDark ? 0.25 : 0.04),
+              color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
               blurRadius: 14,
               offset: const Offset(0, 4),
             ),
@@ -277,7 +207,7 @@ class _DailyPrayersCardList extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
                   color: isNext
-                      ? const Color(0xFFD4AF37).withOpacity(isDark ? 0.12 : 0.08)
+                      ? const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.12 : 0.08)
                       : Colors.transparent,
                   border: Border(
                     bottom: BorderSide(
@@ -300,7 +230,7 @@ class _DailyPrayersCardList extends ConsumerWidget {
                         border: Border.all(
                           color: isNext
                               ? const Color(0xFFFFDF7A)
-                              : const Color(0xFFD4AF37).withOpacity(0.2),
+                              : const Color(0xFFD4AF37).withValues(alpha: 0.2),
                           width: 1,
                         ),
                       ),
@@ -412,12 +342,12 @@ class _DailyVerseCompactCard extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: const Color(0xFFD4AF37).withOpacity(0.35),
+          color: const Color(0xFFD4AF37).withValues(alpha: 0.35),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.25),
+            color: Colors.black.withValues(alpha: 0.25),
             blurRadius: 14,
             offset: const Offset(0, 4),
           ),
@@ -431,7 +361,7 @@ class _DailyVerseCompactCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFD4AF37).withOpacity(0.2),
+                  color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(
@@ -477,7 +407,7 @@ class _DailyVerseCompactCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 12,
               height: 1.45,
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withValues(alpha: 0.8),
               fontStyle: FontStyle.italic,
             ),
           ),
@@ -589,7 +519,7 @@ class _ActionCard extends StatelessWidget {
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(isDark ? 0.2 : 0.03),
+                  color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
                   blurRadius: 6,
                   offset: const Offset(0, 2),
                 ),
@@ -602,10 +532,10 @@ class _ActionCard extends StatelessWidget {
                   width: 38,
                   height: 38,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF033E35).withOpacity(isDark ? 0.35 : 0.08),
+                    color: const Color(0xFF033E35).withValues(alpha: isDark ? 0.35 : 0.08),
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: const Color(0xFFD4AF37).withOpacity(0.4),
+                      color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
                       width: 1,
                     ),
                   ),
@@ -670,10 +600,10 @@ class _IslamicAppBar extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.all(4.5),
             decoration: BoxDecoration(
-              color: const Color(0xFFD4AF37).withOpacity(0.2),
+              color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
               shape: BoxShape.circle,
               border: Border.all(
-                color: const Color(0xFFFFDF7A).withOpacity(0.5),
+                color: const Color(0xFFFFDF7A).withValues(alpha: 0.5),
                 width: 1,
               ),
             ),
@@ -705,10 +635,10 @@ class _IslamicAppBar extends ConsumerWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.12),
+                color: Colors.white.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: const Color(0xFFD4AF37).withOpacity(0.5),
+                  color: const Color(0xFFD4AF37).withValues(alpha: 0.5),
                   width: 1,
                 ),
               ),
@@ -729,6 +659,12 @@ class _IslamicAppBar extends ConsumerWidget {
               ),
             ),
           ),
+        ),
+        // Ezan Bildirim Ayarları Butonu
+        IconButton(
+          icon: const Icon(Icons.notifications_active_outlined, color: Color(0xFFFFDF7A)),
+          tooltip: 'Ezan Bildirimleri',
+          onPressed: () => NotificationSettingsSheet.show(context),
         ),
         IconButton(
           icon: const Icon(Icons.settings_outlined, color: Colors.white),

@@ -48,10 +48,10 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.12),
+                  color: Colors.white.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: const Color(0xFFD4AF37).withOpacity(0.5),
+                    color: const Color(0xFFD4AF37).withValues(alpha: 0.5),
                     width: 1,
                   ),
                 ),
@@ -85,12 +85,12 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
                 color: isDark ? const Color(0xFF07201C) : Colors.white,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: const Color(0xFFD4AF37).withOpacity(isDark ? 0.3 : 0.25),
+                  color: const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.3 : 0.25),
                   width: 1,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(isDark ? 0.2 : 0.04),
+                    color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
                     blurRadius: 10,
                     offset: const Offset(0, 3),
                   ),
@@ -148,7 +148,7 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.search_off_rounded,
+                      const Icon(Icons.search_off_rounded,
                           size: 48, color: AppColors.textHint),
                       const SizedBox(height: 12),
                       Text(

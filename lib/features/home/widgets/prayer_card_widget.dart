@@ -1,9 +1,7 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/localization/app_strings.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../prayer_times/models/prayer_time_model.dart';
 import '../../prayer_times/providers/prayer_time_providers.dart';
 
@@ -60,7 +58,7 @@ class _ErrorCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF012E2B),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.redAccent.withOpacity(0.4)),
+        border: Border.all(color: Colors.redAccent.withValues(alpha: 0.4)),
       ),
       child: Column(
         children: [
@@ -109,12 +107,12 @@ class _PrayerCard extends ConsumerWidget {
         ),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: const Color(0xFFD4AF37).withOpacity(0.35),
+          color: const Color(0xFFD4AF37).withValues(alpha: 0.35),
           width: 1.2,
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF012E2B).withOpacity(0.35),
+            color: const Color(0xFF012E2B).withValues(alpha: 0.35),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -178,10 +176,10 @@ class _PrayerCard extends ConsumerWidget {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFD4AF37).withOpacity(0.18),
+                                color: const Color(0xFFD4AF37).withValues(alpha: 0.18),
                                 borderRadius: BorderRadius.circular(10),
                                 border: Border.all(
-                                  color: const Color(0xFFFFDF7A).withOpacity(0.45),
+                                  color: const Color(0xFFFFDF7A).withValues(alpha: 0.45),
                                   width: 1,
                                 ),
                               ),
@@ -317,9 +315,9 @@ class _CountdownBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
       decoration: BoxDecoration(
-        color: const Color(0xFFD4AF37).withOpacity(0.18),
+        color: const Color(0xFFD4AF37).withValues(alpha: 0.18),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFFFDF7A).withOpacity(0.4), width: 1),
+        border: Border.all(color: const Color(0xFFFFDF7A).withValues(alpha: 0.4), width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -361,7 +359,7 @@ class _ProgressBar extends StatelessWidget {
           borderRadius: BorderRadius.circular(4),
           child: LinearProgressIndicator(
             value: progress,
-            backgroundColor: Colors.white.withOpacity(0.15),
+            backgroundColor: Colors.white.withValues(alpha: 0.15),
             valueColor: const AlwaysStoppedAnimation<Color>(
               Color(0xFFFFDF7A),
             ),
@@ -393,7 +391,7 @@ class _MiniPrayerRow extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.22),
+        color: Colors.black.withValues(alpha: 0.22),
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(24),
           bottomRight: Radius.circular(24),
@@ -436,10 +434,10 @@ class _MiniPrayerItem extends StatelessWidget {
       duration: const Duration(milliseconds: 250),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
       decoration: BoxDecoration(
-        color: isActive ? const Color(0xFFD4AF37).withOpacity(0.24) : Colors.transparent,
+        color: isActive ? const Color(0xFFD4AF37).withValues(alpha: 0.24) : Colors.transparent,
         borderRadius: BorderRadius.circular(14),
         border: isActive
-            ? Border.all(color: const Color(0xFFFFDF7A).withOpacity(0.55), width: 1)
+            ? Border.all(color: const Color(0xFFFFDF7A).withValues(alpha: 0.55), width: 1)
             : null,
       ),
       child: Column(
@@ -468,7 +466,7 @@ class _MiniPrayerItem extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Text(

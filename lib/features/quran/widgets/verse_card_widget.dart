@@ -119,9 +119,9 @@ class _VerseHeader extends StatelessWidget {
           height: 36,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: const Color(0xFFD4AF37).withOpacity(isDark ? 0.2 : 0.1),
+            color: const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.2 : 0.1),
             border: Border.all(
-              color: const Color(0xFFD4AF37).withOpacity(0.6),
+              color: const Color(0xFFD4AF37).withValues(alpha: 0.6),
               width: 1,
             ),
           ),
@@ -155,12 +155,12 @@ class _VerseHeader extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
-            color: AppColors.gold.withOpacity(isDark ? 0.2 : 0.1),
+            color: AppColors.gold.withValues(alpha: isDark ? 0.2 : 0.1),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
             verse.reference,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
               color: AppColors.gold,

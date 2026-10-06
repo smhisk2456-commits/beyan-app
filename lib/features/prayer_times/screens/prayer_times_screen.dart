@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/localization/app_strings.dart';
@@ -35,10 +34,10 @@ class PrayerTimesScreen extends ConsumerWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.12),
+                  color: Colors.white.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: const Color(0xFFD4AF37).withOpacity(0.5),
+                    color: const Color(0xFFD4AF37).withValues(alpha: 0.5),
                     width: 1,
                   ),
                 ),
@@ -154,7 +153,7 @@ class _LocationDateCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            Icon(Icons.location_on_rounded, color: AppColors.teal, size: 20),
+            const Icon(Icons.location_on_rounded, color: AppColors.teal, size: 20),
             const SizedBox(width: 8),
             Expanded(
               child: Column(
@@ -228,7 +227,7 @@ class _NextPrayerBanner extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: AppColors.teal.withOpacity(0.3),
+            color: AppColors.teal.withValues(alpha: 0.3),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -268,10 +267,10 @@ class _NextPrayerBanner extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFD4AF37).withOpacity(0.25),
+                    color: const Color(0xFFD4AF37).withValues(alpha: 0.25),
                     borderRadius: BorderRadius.circular(6),
                     border: Border.all(
-                      color: const Color(0xFFFFDF7A).withOpacity(0.4),
+                      color: const Color(0xFFFFDF7A).withValues(alpha: 0.4),
                       width: 1,
                     ),
                   ),
@@ -337,7 +336,7 @@ class _NextPrayerBanner extends StatelessWidget {
                     data: (str) => Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.25),
+                        color: Colors.black.withValues(alpha: 0.25),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
@@ -363,10 +362,10 @@ class _NextPrayerBanner extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
               decoration: BoxDecoration(
-                color: const Color(0xFFD4AF37).withOpacity(0.18),
+                color: const Color(0xFFD4AF37).withValues(alpha: 0.18),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                  color: const Color(0xFFFFDF7A).withOpacity(0.4),
+                  color: const Color(0xFFFFDF7A).withValues(alpha: 0.4),
                   width: 1,
                 ),
               ),
@@ -457,9 +456,9 @@ class _PrayerTimeCard extends ConsumerWidget {
     // Aktif/sıradaki vakit için farklı stil
     Color cardColor;
     if (isNext) {
-      cardColor = AppColors.teal.withOpacity(isDark ? 0.25 : 0.12);
+      cardColor = AppColors.teal.withValues(alpha: isDark ? 0.25 : 0.12);
     } else if (isCurrent) {
-      cardColor = AppColors.gold.withOpacity(isDark ? 0.2 : 0.1);
+      cardColor = AppColors.gold.withValues(alpha: isDark ? 0.2 : 0.1);
     } else {
       cardColor = Theme.of(context).cardColor;
     }
@@ -471,14 +470,14 @@ class _PrayerTimeCard extends ConsumerWidget {
         color: cardColor,
         borderRadius: BorderRadius.circular(14),
         border: isNext
-            ? Border.all(color: AppColors.teal.withOpacity(0.5), width: 1.5)
+            ? Border.all(color: AppColors.teal.withValues(alpha: 0.5), width: 1.5)
             : isCurrent
-                ? Border.all(color: AppColors.gold.withOpacity(0.5), width: 1)
+                ? Border.all(color: AppColors.gold.withValues(alpha: 0.5), width: 1)
                 : null,
         boxShadow: isNext
             ? [
                 BoxShadow(
-                  color: AppColors.teal.withOpacity(0.15),
+                  color: AppColors.teal.withValues(alpha: 0.15),
                   blurRadius: 8,
                   offset: const Offset(0, 3),
                 ),
@@ -497,7 +496,7 @@ class _PrayerTimeCard extends ConsumerWidget {
                 color: _iconBgColor(isDark),
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isNext ? AppColors.teal : (isCurrent ? AppColors.gold : Colors.grey.withOpacity(0.3)),
+                  color: isNext ? AppColors.teal : (isCurrent ? AppColors.gold : Colors.grey.withValues(alpha: 0.3)),
                   width: 1,
                 ),
               ),
@@ -539,7 +538,7 @@ class _PrayerTimeCard extends ConsumerWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: AppColors.gold.withOpacity(0.2),
+                            color: AppColors.gold.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
@@ -555,7 +554,7 @@ class _PrayerTimeCard extends ConsumerWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: AppColors.teal.withOpacity(0.2),
+                            color: AppColors.teal.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
@@ -616,8 +615,8 @@ class _PrayerTimeCard extends ConsumerWidget {
   }
 
   Color _iconBgColor(bool isDark) {
-    if (isNext) return AppColors.teal.withOpacity(0.2);
-    if (isCurrent) return AppColors.gold.withOpacity(0.2);
+    if (isNext) return AppColors.teal.withValues(alpha: 0.2);
+    if (isCurrent) return AppColors.gold.withValues(alpha: 0.2);
     return isDark ? Colors.white10 : Colors.grey.shade100;
   }
 

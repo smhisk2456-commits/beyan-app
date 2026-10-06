@@ -97,14 +97,14 @@ void main() {
     });
 
     test('formatCountdown saat varsa saat gösterir', () {
-      final d = const Duration(hours: 2, minutes: 35, seconds: 10);
+      const d = Duration(hours: 2, minutes: 35, seconds: 10);
       final formatted = service.formatCountdown(d);
       expect(formatted, contains('s'));
       expect(formatted, contains('dk'));
     });
 
     test('formatCountdown saat yoksa MM:SS döner', () {
-      final d = const Duration(minutes: 45, seconds: 30);
+      const d = Duration(minutes: 45, seconds: 30);
       final formatted = service.formatCountdown(d);
       expect(formatted, equals('45:30'));
     });
