@@ -17,12 +17,33 @@ import 'features/widget_service/screens/widget_center_screen.dart';
 import 'features/notifications/services/notification_service.dart';
 import 'features/live_activity/live_activity_service.dart';
 import 'features/monetization/services/ad_service.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'features/monetization/services/premium_service.dart';
 import 'features/splash/screens/splash_screen.dart';
 import 'core/widgets/luxury_floating_dock.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Global Audio Session Ayarı (iOS Sessiz Mod Desteği & Hoparlör Yönlendirmesi)
+  try {
+    await AudioPlayer.global.setAudioContext(
+      AudioContext(
+        iOS: AudioContextIOS(
+          category: AVAudioSessionCategory.playback,
+        ),
+        android: const AudioContextAndroid(
+          isSpeakerphoneOn: false,
+          stayAwake: true,
+          contentType: AndroidContentType.music,
+          usageType: AndroidUsageType.media,
+          audioFocus: AndroidAudioFocus.gain,
+        ),
+      ),
+    );
+  } catch (e) {
+    debugPrint('AudioPlayer global audio context hatası: $e');
+  }
 
   // İnternet olmasa da çevrimdışı (offline) yerel fontları kullan:
   GoogleFonts.config.allowRuntimeFetching = false;

@@ -53,7 +53,11 @@ class _NotificationSettingsSheetState extends State<NotificationSettingsSheet>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      _checkPermission();
+      _checkPermission().then((_) {
+        if (_hasPermission) {
+          _service.scheduleUpcomingPrayers();
+        }
+      });
     }
   }
 
@@ -91,6 +95,9 @@ class _NotificationSettingsSheetState extends State<NotificationSettingsSheet>
       await openAppSettings();
     }
     await _checkPermission();
+    if (_hasPermission) {
+      await _service.scheduleUpcomingPrayers();
+    }
   }
 
   Future<void> _toggleMaster(bool val) async {

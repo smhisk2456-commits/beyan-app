@@ -10,12 +10,32 @@ class AdhanAudioPlayerService {
   factory AdhanAudioPlayerService() => instance;
   AdhanAudioPlayerService._internal() {
     _player = AudioPlayer();
+    _initAudioSession();
     _player.onPlayerStateChanged.listen((state) {
       if (state == PlayerState.completed || state == PlayerState.stopped) {
         _currentlyPlaying = null;
         _stateController.add(null);
       }
     });
+  }
+
+  Future<void> _initAudioSession() async {
+    try {
+      await _player.setAudioContext(
+        AudioContext(
+          iOS: AudioContextIOS(
+            category: AVAudioSessionCategory.playback,
+          ),
+          android: const AudioContextAndroid(
+            isSpeakerphoneOn: false,
+            stayAwake: true,
+            contentType: AndroidContentType.music,
+            usageType: AndroidUsageType.media,
+            audioFocus: AndroidAudioFocus.gain,
+          ),
+        ),
+      );
+    } catch (_) {}
   }
 
   late final AudioPlayer _player;

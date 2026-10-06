@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class QuranReciter {
@@ -21,19 +22,19 @@ final List<QuranReciter> quranRecitersList = [
     id: 'mishary',
     nameTr: 'Mishary Rashid Alafasy',
     nameAr: 'مشاري راشد العفاسي',
-    baseUrl: 'https://server8.quranicaudio.com/quran/mishaari_raashid_al_3afaasee/',
+    baseUrl: 'https://download.quranicaudio.com/quran/mishaari_raashid_al_3afaasee/',
   ),
   const QuranReciter(
     id: 'abdulbaset',
     nameTr: 'AbdulBaset AbdulSamad (Murattal)',
     nameAr: 'عبد الباسط عبد الصمد',
-    baseUrl: 'https://server7.quranicaudio.com/quran/abdul_basit_murattal/',
+    baseUrl: 'https://download.quranicaudio.com/quran/abdul_basit_murattal/',
   ),
   const QuranReciter(
     id: 'ghamdi',
     nameTr: 'Saad Al-Ghamdi',
     nameAr: 'سعد الغامدي',
-    baseUrl: 'https://server7.quranicaudio.com/quran/sa3d_al-ghaamidi/complete/',
+    baseUrl: 'https://download.quranicaudio.com/quran/sa3d_al-ghaamidi/complete/',
   ),
 ];
 
@@ -85,7 +86,29 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
 
   QuranAudioNotifier()
       : super(QuranAudioState(selectedReciter: quranRecitersList.first)) {
+    _initAudioSession();
     _initListeners();
+  }
+
+  Future<void> _initAudioSession() async {
+    try {
+      await _player.setAudioContext(
+        AudioContext(
+          iOS: AudioContextIOS(
+            category: AVAudioSessionCategory.playback,
+          ),
+          android: const AudioContextAndroid(
+            isSpeakerphoneOn: false,
+            stayAwake: true,
+            contentType: AndroidContentType.music,
+            usageType: AndroidUsageType.media,
+            audioFocus: AndroidAudioFocus.gain,
+          ),
+        ),
+      );
+    } catch (e) {
+      debugPrint('QuranAudioNotifier audio context hatası: $e');
+    }
   }
 
   void _initListeners() {
@@ -127,6 +150,7 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
       await _player.play(UrlSource(audioUrl));
       state = state.copyWith(isPlaying: true, isLoading: false);
     } catch (e) {
+      debugPrint('QuranAudio playSurah hatası: $e');
       state = state.copyWith(isLoading: false, isPlaying: false);
     }
   }

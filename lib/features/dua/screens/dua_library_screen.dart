@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/localization/app_strings.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../monetization/widgets/banner_ad_widget.dart';
+import '../../quran/services/quran_audio_service.dart';
+import '../../quran/widgets/quran_audio_player_bar.dart';
 import '../models/dua_model.dart';
 import '../providers/dua_providers.dart';
 
@@ -55,128 +57,140 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
           ),
         ],
       ),
-      body: Column(
+      body: Stack(
         children: [
-          // ── Arama Çubuğu ──────────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-            child: Container(
-              decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF07201C) : Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.35 : 0.25),
-                  width: 1,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
-                    blurRadius: 10,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: TextField(
-                controller: _searchController,
-                style: TextStyle(
-                  color: isDark ? Colors.white : Colors.black87,
-                  fontSize: 14.5,
-                ),
-                decoration: InputDecoration(
-                  hintText: 'Dua, anlam veya kaynak ara...',
-                  hintStyle: TextStyle(
-                    color: isDark ? Colors.white38 : AppColors.textSecondary,
-                    fontSize: 14,
-                  ),
-                  prefixIcon: const Icon(
-                    Icons.search_rounded,
-                    color: Color(0xFFD4AF37),
-                    size: 22,
-                  ),
-                  suffixIcon: _searchController.text.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.close_rounded, size: 18),
-                          onPressed: () {
-                            _searchController.clear();
-                            ref.read(duaSearchQueryProvider.notifier).state = '';
-                            setState(() {});
-                          },
-                        )
-                      : null,
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                ),
-                onChanged: (val) {
-                  ref.read(duaSearchQueryProvider.notifier).state = val;
-                  setState(() {});
-                },
-              ),
-            ),
-          ),
-
-          // ── Kategori Çipleri (Yatay Kaydırılabilir) ────────────────────
-          SizedBox(
-            height: 44,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              physics: const BouncingScrollPhysics(),
-              children: [
-                _buildCategoryChip(
-                  label: 'Tümü (${duas.length})',
-                  isSelected: selectedCategory == null,
-                  onTap: () => ref.read(selectedDuaCategoryProvider.notifier).state = null,
-                  isDark: isDark,
-                ),
-                ...DuaCategory.values.map((cat) {
-                  return _buildCategoryChip(
-                    label: cat.localizedName(strings.language.code),
-                    isSelected: selectedCategory == cat,
-                    onTap: () => ref.read(selectedDuaCategoryProvider.notifier).state = cat,
-                    isDark: isDark,
-                  );
-                }),
-              ],
-            ),
-          ),
-          const SizedBox(height: 6),
-
-          // ── Dua Kartları Listesi ──────────────────────────────────────
-          Expanded(
-            child: duas.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.menu_book_rounded,
-                          size: 54,
-                          color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'Aramanıza uygun dua bulunamadı',
-                          style: TextStyle(
-                            fontSize: 15,
-                            color: isDark ? Colors.white70 : Colors.black54,
-                          ),
-                        ),
-                      ],
+          Column(
+            children: [
+              // ── Arama Çubuğu ──────────────────────────────────────────────
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF07201C) : Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.35 : 0.25),
+                      width: 1,
                     ),
-                  )
-                : ListView.builder(
-                    physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                    itemCount: duas.length,
-                    itemBuilder: (context, index) {
-                      final dua = duas[index];
-                      return _DuaCardItem(dua: dua, isDark: isDark);
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: TextField(
+                    controller: _searchController,
+                    style: TextStyle(
+                      color: isDark ? Colors.white : Colors.black87,
+                      fontSize: 14.5,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: 'Dua, anlam veya kaynak ara...',
+                      hintStyle: TextStyle(
+                        color: isDark ? Colors.white38 : AppColors.textSecondary,
+                        fontSize: 14,
+                      ),
+                      prefixIcon: const Icon(
+                        Icons.search_rounded,
+                        color: Color(0xFFD4AF37),
+                        size: 22,
+                      ),
+                      suffixIcon: _searchController.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.close_rounded, size: 18),
+                              onPressed: () {
+                                _searchController.clear();
+                                ref.read(duaSearchQueryProvider.notifier).state = '';
+                                setState(() {});
+                              },
+                            )
+                          : null,
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    ),
+                    onChanged: (val) {
+                      ref.read(duaSearchQueryProvider.notifier).state = val;
+                      setState(() {});
                     },
                   ),
+                ),
+              ),
+
+              // ── Kategori Çipleri (Yatay Kaydırılabilir) ────────────────────
+              SizedBox(
+                height: 44,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  physics: const BouncingScrollPhysics(),
+                  children: [
+                    _buildCategoryChip(
+                      label: 'Tümü (${duas.length})',
+                      isSelected: selectedCategory == null,
+                      onTap: () => ref.read(selectedDuaCategoryProvider.notifier).state = null,
+                      isDark: isDark,
+                    ),
+                    ...DuaCategory.values.map((cat) {
+                      return _buildCategoryChip(
+                        label: cat.localizedName(strings.language.code),
+                        isSelected: selectedCategory == cat,
+                        onTap: () => ref.read(selectedDuaCategoryProvider.notifier).state = cat,
+                        isDark: isDark,
+                      );
+                    }),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 6),
+
+              // ── Dua Kartları Listesi ──────────────────────────────────────
+              Expanded(
+                child: duas.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.menu_book_rounded,
+                              size: 54,
+                              color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'Aramanıza uygun dua bulunamadı',
+                              style: TextStyle(
+                                fontSize: 15,
+                                color: isDark ? Colors.white70 : Colors.black54,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : ListView.builder(
+                        physics: const BouncingScrollPhysics(),
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                        itemCount: duas.length,
+                        itemBuilder: (context, index) {
+                          final dua = duas[index];
+                          return _DuaCardItem(dua: dua, isDark: isDark);
+                        },
+                      ),
+              ),
+
+              // Alt banner reklam
+              const BannerAdWidget(),
+            ],
           ),
 
-          // Alt banner reklam
-          const BannerAdWidget(),
+          // Alt Mini Tilavet Oynatıcısı
+          const Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: QuranAudioPlayerBar(),
+          ),
         ],
       ),
     );
@@ -256,6 +270,8 @@ class _DuaCardItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final linked = _getLinkedSurah(dua);
+
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
@@ -314,6 +330,33 @@ class _DuaCardItem extends ConsumerWidget {
                     ref.read(favoriteDuasProvider.notifier).toggleFavorite(dua.id);
                   },
                 ),
+                if (linked != null)
+                  Consumer(
+                    builder: (context, ref, _) {
+                      final audioState = ref.watch(quranAudioProvider);
+                      final isPlaying = audioState.isPlaying && audioState.currentSurahId == linked.id;
+                      return IconButton(
+                        icon: Icon(
+                          isPlaying
+                              ? Icons.pause_circle_filled_rounded
+                              : Icons.play_circle_fill_rounded,
+                          color: const Color(0xFFFFDF7A),
+                          size: 24,
+                        ),
+                        tooltip: isPlaying
+                            ? 'Tilaveti Duraklat'
+                            : '${linked.nameTurkish} Tilavetini Dinle',
+                        onPressed: () {
+                          HapticFeedback.mediumImpact();
+                          if (isPlaying) {
+                            ref.read(quranAudioProvider.notifier).togglePlayPause();
+                          } else {
+                            ref.read(quranAudioProvider.notifier).playSurah(linked.id, linked.nameTurkish);
+                          }
+                        },
+                      );
+                    },
+                  ),
                 // Kopyala butonu
                 IconButton(
                   icon: const Icon(
@@ -452,5 +495,42 @@ class _DuaCardItem extends ConsumerWidget {
         ),
       ),
     );
+  }
+}
+
+class _LinkedSurahInfo {
+  final int id;
+  final String nameTurkish;
+  const _LinkedSurahInfo(this.id, this.nameTurkish);
+}
+
+_LinkedSurahInfo? _getLinkedSurah(DuaItem dua) {
+  switch (dua.id) {
+    case 'uyku_3': // Âyetü'l-Kürsî (Bakara 255)
+    case 'aksam_3': // Âmenerresûlü (Bakara 285-286)
+    case 'kuran_1': // Rabbena Âtina (Bakara 201)
+      return const _LinkedSurahInfo(2, 'Bakara');
+    case 'kuran_2': // Âl-i İmrân 8
+    case 'peygamber_5': // Âl-i İmrân 38
+      return const _LinkedSurahInfo(3, 'Âl-i İmrân');
+    case 'peygamber_3': // A'râf 23
+      return const _LinkedSurahInfo(7, 'A\'râf');
+    case 'peygamber_4': // Yûsuf 101
+      return const _LinkedSurahInfo(12, 'Yûsuf');
+    case 'kuran_3': // İbrâhîm 41
+    case 'kuran_5': // İbrâhîm 40
+      return const _LinkedSurahInfo(14, 'İbrâhîm');
+    case 'kuran_6': // Tâhâ 114
+    case 'peygamber_1': // Tâhâ 25-28
+      return const _LinkedSurahInfo(20, 'Tâhâ');
+    case 'sikinti_1': // Enbiyâ 87 (Hz. Yûnus)
+    case 'peygamber_2': // Enbiyâ 83 (Hz. Eyyûb)
+      return const _LinkedSurahInfo(21, 'Enbiyâ');
+    case 'kuran_4': // Furkân 74
+      return const _LinkedSurahInfo(25, 'Furkân');
+    case 'aksam_4': // İhlâs, Felak, Nas
+      return const _LinkedSurahInfo(112, 'İhlâs');
+    default:
+      return null;
   }
 }

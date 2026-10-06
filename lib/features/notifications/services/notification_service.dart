@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
@@ -108,8 +109,29 @@ class NotificationService {
   /// Cihaz bildirim izninin aktif olup olmadığını kontrol eder.
   Future<bool> hasPermission() async {
     try {
+      if (!_isInitialized) {
+        await initialize();
+      }
+
+      if (Platform.isIOS) {
+        final iosImplementation = _notifications
+            .resolvePlatformSpecificImplementation<
+                IOSFlutterLocalNotificationsPlugin>();
+        if (iosImplementation != null) {
+          final options = await iosImplementation.checkPermissions();
+          if (options != null) {
+            final isAuthorized = options.isEnabled ||
+                options.isAlertEnabled ||
+                options.isSoundEnabled ||
+                options.isBadgeEnabled ||
+                options.isProvisionalEnabled;
+            if (isAuthorized) return true;
+          }
+        }
+      }
+
       final status = await Permission.notification.status;
-      return status.isGranted || status.isProvisional;
+      return status.isGranted || status.isProvisional || status.isLimited;
     } catch (e) {
       debugPrint('hasPermission kontrol hatası: $e');
       return true;
@@ -119,31 +141,34 @@ class NotificationService {
   /// Kullanıcıdan bildirim izni talep eder (iOS ve Android).
   Future<bool> requestPermissions() async {
     try {
-      // 1. Genel bildirim izni (Android 13+ & iOS)
-      final status = await Permission.notification.request();
+      if (!_isInitialized) {
+        await initialize();
+      }
 
-      // 2. Android platformuna özel bildirim & tam zamanlı alarm izni
+      if (Platform.isIOS) {
+        final iosImplementation = _notifications
+            .resolvePlatformSpecificImplementation<
+                IOSFlutterLocalNotificationsPlugin>();
+        if (iosImplementation != null) {
+          final granted = await iosImplementation.requestPermissions(
+            alert: true,
+            badge: true,
+            sound: true,
+          );
+          if (granted == true) return true;
+        }
+      }
+
+      // Android platformu
+      final status = await Permission.notification.request();
       final androidImplementation = _notifications
           .resolvePlatformSpecificImplementation<
               AndroidFlutterLocalNotificationsPlugin>();
       if (androidImplementation != null) {
-        await androidImplementation.requestNotificationsPermission();
         try {
+          await androidImplementation.requestNotificationsPermission();
           await androidImplementation.requestExactAlarmsPermission();
         } catch (_) {}
-      }
-
-      // 3. iOS platformuna özel bildirim izinleri
-      final iosImplementation = _notifications
-          .resolvePlatformSpecificImplementation<
-              IOSFlutterLocalNotificationsPlugin>();
-      if (iosImplementation != null) {
-        final granted = await iosImplementation.requestPermissions(
-          alert: true,
-          badge: true,
-          sound: true,
-        );
-        return granted ?? status.isGranted;
       }
 
       return status.isGranted || status.isProvisional;
