@@ -7,6 +7,9 @@ import '../../../core/utils/app_constants.dart';
 import '../models/prayer_time_model.dart';
 import '../providers/prayer_time_providers.dart';
 import '../../../core/widgets/common_widgets.dart' as app_widgets;
+import 'city_selector_sheet.dart';
+import 'calculation_method_sheet.dart';
+import '../../monetization/widgets/banner_ad_widget.dart';
 
 /// Tüm günlük namaz vakitlerini listeleyen tam ekran.
 /// Ana ekranın alt kısmında veya ayrı bir sekme olarak kullanılır.
@@ -25,6 +28,18 @@ class PrayerTimesScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(strings.tabPrayers),
         actions: [
+          // Şehir / Konum Seçici Buton
+          IconButton(
+            icon: const Icon(Icons.location_city_rounded, color: Color(0xFFFFDF7A)),
+            tooltip: 'Şehir Değiştir',
+            onPressed: () => CitySelectorSheet.show(context, ref),
+          ),
+          // Hesaplama Metodu Butonu
+          IconButton(
+            icon: const Icon(Icons.tune_rounded, color: Color(0xFFFFDF7A)),
+            tooltip: 'Hesaplama Yöntemi',
+            onPressed: () => CalculationMethodSheet.show(context, ref),
+          ),
           // Dil Seçici Buton
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
@@ -130,6 +145,8 @@ class _PrayerTimesContent extends ConsumerWidget {
               isCurrent: PrayerName.fromAdhan(daily.currentPrayer) == entry.name,
             ),
           ),
+          const SizedBox(height: 16),
+          const BannerAdWidget(),
           const SizedBox(height: 110),
         ],
       ),

@@ -6,23 +6,22 @@ import '../../../core/widgets/common_widgets.dart' as app_widgets;
 import '../models/surah.dart';
 import '../models/verse.dart';
 import '../providers/quran_providers.dart';
+import '../providers/quran_reading_providers.dart';
+import '../services/quran_audio_service.dart';
 import '../widgets/arabic_text_widget.dart';
 import '../widgets/verse_card_widget.dart';
+import '../widgets/quran_audio_player_bar.dart';
 
-/// Sure Detay Ekranı – Seçilen surenin tüm ayetlerini gösterir.
-///
-/// Özellikler:
-/// - Üst: Sure adı (Arapça, Türkçe, İngilizce) + istatistikler
-/// - Besmele şeridi (Tevbe Suresi hariç)
-/// - Ayet listesi: Arapça (RTL, Amiri, büyük punto) +
-///                 Türkçe okunuş (transliterasyon, italik) +
-///                 Türkçe meal
-/// - Sayfa kaydırma hafızası (ScrollController)
-/// - Kopya ve paylaşım butonu (ayet uzun basışı)
+/// Sure Detay Ekranı – Seçilen surenin tüm ayetlerini ve tilavetini sunar.
 class SurahDetailScreen extends ConsumerStatefulWidget {
   final Surah surah;
+  final int? initialScrollToVerse;
 
-  const SurahDetailScreen({super.key, required this.surah});
+  const SurahDetailScreen({
+    super.key,
+    required this.surah,
+    this.initialScrollToVerse,
+  });
 
   @override
   ConsumerState<SurahDetailScreen> createState() => _SurahDetailScreenState();
@@ -36,6 +35,20 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+
+    // Otomatik son okunan yere kaydırma
+    if (widget.initialScrollToVerse != null && widget.initialScrollToVerse! > 1) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final estimatedOffset = (widget.initialScrollToVerse! - 1) * 220.0;
+        if (_scrollController.hasClients) {
+          _scrollController.animateTo(
+            estimatedOffset,
+            duration: const Duration(milliseconds: 700),
+            curve: Curves.easeOutCubic,
+          );
+        }
+      });
+    }
   }
 
   @override
@@ -61,31 +74,185 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
     );
   }
 
+  void _showFontSizeSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF032B25),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return Consumer(
+          builder: (context, ref, _) {
+            final currentSize = ref.watch(arabicFontSizeProvider);
+            return SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.white24,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    const Text(
+                      'Arapça Yazı Boyutu',
+                      style: TextStyle(
+                        color: Color(0xFFFFDF7A),
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ',
+                      style: TextStyle(
+                        fontFamily: 'Amiri',
+                        fontSize: currentSize,
+                        color: Colors.white,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 14),
+                    Row(
+                      children: [
+                        const Text('A', style: TextStyle(color: Colors.white70, fontSize: 14)),
+                        Expanded(
+                          child: SliderTheme(
+                            data: SliderTheme.of(context).copyWith(
+                              activeTrackColor: const Color(0xFFD4AF37),
+                              inactiveTrackColor: Colors.white24,
+                              thumbColor: const Color(0xFFFFDF7A),
+                            ),
+                            child: Slider(
+                              value: currentSize,
+                              min: 18.0,
+                              max: 38.0,
+                              divisions: 10,
+                              label: '${currentSize.toInt()} pt',
+                              onChanged: (val) {
+                                ref.read(arabicFontSizeProvider.notifier).setFontSize(val);
+                              },
+                            ),
+                          ),
+                        ),
+                        const Text('A', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showReciterSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF032B25),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return Consumer(
+          builder: (context, ref, _) {
+            final audioState = ref.watch(quranAudioProvider);
+            return SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'Kâri (Tilavet Okuyucusu) Seçimi',
+                      style: TextStyle(
+                        color: Color(0xFFFFDF7A),
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    ...quranRecitersList.map((reciter) {
+                      final isSel = audioState.selectedReciter.id == reciter.id;
+                      return ListTile(
+                        leading: Icon(
+                          isSel ? Icons.radio_button_checked : Icons.radio_button_off,
+                          color: const Color(0xFFD4AF37),
+                        ),
+                        title: Text(
+                          reciter.nameTr,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: isSel ? FontWeight.bold : FontWeight.normal,
+                          ),
+                        ),
+                        subtitle: Text(
+                          reciter.nameAr,
+                          style: const TextStyle(fontFamily: 'Amiri', color: Colors.white70),
+                        ),
+                        onTap: () {
+                          ref.read(quranAudioProvider.notifier).setReciter(reciter);
+                          Navigator.pop(ctx);
+                        },
+                      );
+                    }),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final versesAsync = ref.watch(versesBySurahProvider(widget.surah.id));
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final audioState = ref.watch(quranAudioProvider);
+    final isThisSurahPlaying = audioState.currentSurahId == widget.surah.id && audioState.isPlaying;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: versesAsync.when(
-        loading: () => _buildLoadingScaffold(context),
-        error: (e, _) => _buildErrorScaffold(context, e.toString()),
-        data: (verses) => _buildContent(context, verses, isDark),
+      body: Stack(
+        children: [
+          versesAsync.when(
+            loading: () => _buildLoadingScaffold(context),
+            error: (e, _) => _buildErrorScaffold(context, e.toString()),
+            data: (verses) => _buildContent(context, verses, isDark, isThisSurahPlaying),
+          ),
+          // Alt Mini Tilavet Oynatıcısı
+          const Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: QuranAudioPlayerBar(),
+          ),
+        ],
       ),
-      // Yukarı kaydır FAB
       floatingActionButton: _showScrollToTop
-          ? FloatingActionButton.small(
-              onPressed: _scrollToTop,
-              backgroundColor: AppColors.teal,
-              foregroundColor: Colors.white,
-              child: const Icon(Icons.keyboard_arrow_up_rounded),
+          ? Padding(
+              padding: const EdgeInsets.only(bottom: 60),
+              child: FloatingActionButton.small(
+                onPressed: _scrollToTop,
+                backgroundColor: const Color(0xFF033E35),
+                foregroundColor: const Color(0xFFFFDF7A),
+                child: const Icon(Icons.keyboard_arrow_up_rounded),
+              ),
             )
           : null,
     );
   }
 
-  // ── Yükleniyor ─────────────────────────────────────────────
   Widget _buildLoadingScaffold(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(widget.surah.nameTurkish)),
@@ -93,7 +260,6 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
     );
   }
 
-  // ── Hata ───────────────────────────────────────────────────
   Widget _buildErrorScaffold(BuildContext context, String error) {
     return Scaffold(
       appBar: AppBar(title: Text(widget.surah.nameTurkish)),
@@ -104,18 +270,97 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
     );
   }
 
-  // ── Ana İçerik ─────────────────────────────────────────────
   Widget _buildContent(
     BuildContext context,
     List<Verse> verses,
     bool isDark,
+    bool isThisSurahPlaying,
   ) {
     return CustomScrollView(
       controller: _scrollController,
       physics: const BouncingScrollPhysics(),
       slivers: [
         // ── Sure Başlığı AppBar ─────────────────────────────
-        _SurahAppBar(surah: widget.surah, isDark: isDark),
+        SliverAppBar(
+          expandedHeight: 210,
+          pinned: true,
+          backgroundColor: AppColors.teal,
+          actions: [
+            // Kâri Seçimi Butonu
+            IconButton(
+              icon: const Icon(Icons.person_outline_rounded, color: Color(0xFFFFDF7A)),
+              tooltip: 'Kâri Seçimi',
+              onPressed: () => _showReciterSheet(context),
+            ),
+            // Tilavet Dinle Butonu
+            IconButton(
+              icon: Icon(
+                isThisSurahPlaying ? Icons.pause_circle_filled_rounded : Icons.play_circle_fill_rounded,
+                color: const Color(0xFFFFDF7A),
+                size: 28,
+              ),
+              tooltip: isThisSurahPlaying ? 'Tilaveti Duraklat' : 'Sureyi Dinle',
+              onPressed: () {
+                HapticFeedback.mediumImpact();
+                if (isThisSurahPlaying) {
+                  ref.read(quranAudioProvider.notifier).togglePlayPause();
+                } else {
+                  ref.read(quranAudioProvider.notifier).playSurah(widget.surah.id, widget.surah.nameTurkish);
+                }
+              },
+            ),
+            // Yazı Boyutu Butonu
+            IconButton(
+              icon: const Icon(Icons.format_size_rounded, color: Colors.white),
+              tooltip: 'Yazı Boyutu',
+              onPressed: () => _showFontSizeSheet(context),
+            ),
+          ],
+          flexibleSpace: FlexibleSpaceBar(
+            background: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: isDark
+                      ? [const Color(0xFF00695C), const Color(0xFF0D1B2A)]
+                      : [AppColors.tealDark, AppColors.primary],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+              child: SafeArea(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const SizedBox(height: 30),
+                    ArabicText(
+                      widget.surah.nameArabic,
+                      fontSize: 38.0,
+                      lineHeight: 1.6,
+                      color: Colors.white,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      '${widget.surah.nameTurkish}  ·  ${widget.surah.nameEnglish}',
+                      style: const TextStyle(color: Colors.white70, fontSize: 15, letterSpacing: 0.3),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _StatBadge(icon: Icons.format_list_numbered_rounded, label: '${widget.surah.id}. Sure'),
+                        const SizedBox(width: 8),
+                        _StatBadge(icon: Icons.text_fields_rounded, label: widget.surah.verseCountLabel),
+                        const SizedBox(width: 8),
+                        _StatBadge(icon: Icons.place_rounded, label: widget.surah.revelationLabel),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
 
         // ── Besmele (Tevbe Suresi hariç) ───────────────────
         if (widget.surah.id != 9 && widget.surah.id != 1)
@@ -126,120 +371,18 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
         // ── Ayet Listesi ────────────────────────────────────
         SliverList(
           delegate: SliverChildBuilderDelegate(
-            (context, index) => _VerseItem(
-              verse: verses[index],
-              onLongPress: () => _showVerseOptions(
-                context,
-                verses[index],
-              ),
-            ),
+            (context, index) => VerseCard(verse: verses[index]),
             childCount: verses.length,
           ),
         ),
 
-        // Alt boşluk
-        const SliverToBoxAdapter(child: SizedBox(height: 40)),
+        // Alt boşluk (Mini oynatıcı çubuğu için)
+        const SliverToBoxAdapter(child: SizedBox(height: 100)),
       ],
     );
   }
-
-  // ── Ayet Seçenekleri (Kopyala / Paylaş) ───────────────────
-  void _showVerseOptions(BuildContext context, Verse verse) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) => _VerseOptionsSheet(verse: verse),
-    );
-  }
 }
 
-// ════════════════════════════════════════════════════════════════
-// Sure Başlığı SliverAppBar
-// ════════════════════════════════════════════════════════════════
-
-class _SurahAppBar extends StatelessWidget {
-  final Surah surah;
-  final bool isDark;
-  const _SurahAppBar({required this.surah, required this.isDark});
-
-  @override
-  Widget build(BuildContext context) {
-    return SliverAppBar(
-      expandedHeight: 200,
-      pinned: true,
-      backgroundColor: AppColors.teal,
-      flexibleSpace: FlexibleSpaceBar(
-        background: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: isDark
-                  ? [const Color(0xFF00695C), const Color(0xFF0D1B2A)]
-                  : [AppColors.tealDark, AppColors.primary],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-          child: SafeArea(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const SizedBox(height: 40),
-
-                // Arapça sure adı – büyük, ortalı
-                ArabicText(
-                  surah.nameArabic,
-                  fontSize: 38.0,
-                  lineHeight: 1.6,
-                  color: Colors.white,
-                  textAlign: TextAlign.center,
-                ),
-
-                const SizedBox(height: 6),
-
-                // Türkçe + İngilizce isim
-                Text(
-                  '${surah.nameTurkish}  ·  ${surah.nameEnglish}',
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 15,
-                    letterSpacing: 0.3,
-                  ),
-                ),
-
-                const SizedBox(height: 12),
-
-                // İstatistik rozetleri
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _StatBadge(
-                      icon: Icons.format_list_numbered_rounded,
-                      label: '${surah.id}. Sure',
-                    ),
-                    const SizedBox(width: 10),
-                    _StatBadge(
-                      icon: Icons.text_fields_rounded,
-                      label: surah.verseCountLabel,
-                    ),
-                    const SizedBox(width: 10),
-                    _StatBadge(
-                      icon: Icons.place_rounded,
-                      label: surah.revelationLabel,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// İstatistik rozeti.
 class _StatBadge extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -248,7 +391,7 @@ class _StatBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(20),
@@ -257,25 +400,14 @@ class _StatBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: Colors.white70, size: 13),
-          const SizedBox(width: 5),
-          Text(
-            label,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
+          Icon(icon, color: Colors.white70, size: 12),
+          const SizedBox(width: 4),
+          Text(label, style: const TextStyle(color: Colors.white, fontSize: 11.5, fontWeight: FontWeight.w500)),
         ],
       ),
     );
   }
 }
-
-// ════════════════════════════════════════════════════════════════
-// Besmele Kartı
-// ════════════════════════════════════════════════════════════════
 
 class _BismillahCard extends StatelessWidget {
   final bool isDark;
@@ -285,7 +417,7 @@ class _BismillahCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+      padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
       decoration: BoxDecoration(
         color: AppColors.teal.withValues(alpha: isDark ? 0.15 : 0.07),
         borderRadius: BorderRadius.circular(16),
@@ -296,12 +428,10 @@ class _BismillahCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Besmele Arapçası – Amiri, merkezi, geniş
           ArabicText.bismillah(
             color: isDark ? AppColors.arabicTextDark : AppColors.tealDark,
           ),
           const SizedBox(height: 6),
-          // Türkçe okunuş
           Text(
             'Bismillâhirrahmânirrahîm',
             style: TextStyle(
@@ -316,109 +446,3 @@ class _BismillahCard extends StatelessWidget {
     );
   }
 }
-
-// ════════════════════════════════════════════════════════════════
-// Ayet Listesi Satırı
-// ════════════════════════════════════════════════════════════════
-
-class _VerseItem extends StatelessWidget {
-  final Verse verse;
-  final VoidCallback onLongPress;
-
-  const _VerseItem({required this.verse, required this.onLongPress});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onLongPress: onLongPress,
-      child: VerseCard(verse: verse),
-    );
-  }
-}
-
-// ════════════════════════════════════════════════════════════════
-// Ayet İşlem BottomSheet
-// ════════════════════════════════════════════════════════════════
-
-class _VerseOptionsSheet extends StatelessWidget {
-  final Verse verse;
-  const _VerseOptionsSheet({required this.verse});
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Tutaç
-            Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: 12),
-              decoration: BoxDecoration(
-                color: AppColors.divider,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-
-            // Ayet referansı başlık
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              child: Text(
-                '${verse.reference}. Ayet',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-            ),
-
-            const Divider(),
-
-            // Arapça metni kopyala
-            ListTile(
-              leading: const Icon(Icons.copy_rounded),
-              title: const Text('Arapça Metni Kopyala'),
-              onTap: () {
-                Clipboard.setData(ClipboardData(text: verse.arabicText));
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Arapça metin kopyalandı'),
-                    behavior: SnackBarBehavior.floating,
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              },
-            ),
-
-            // Meali kopyala
-            ListTile(
-              leading: const Icon(Icons.translate_rounded),
-              title: const Text('Türkçe Meali Kopyala'),
-              onTap: () {
-                Clipboard.setData(
-                  ClipboardData(
-                    text: '${verse.arabicText}\n\n'
-                        '${verse.turkishMeaning}\n\n'
-                        '[${verse.reference}]',
-                  ),
-                );
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Meal kopyalandı'),
-                    behavior: SnackBarBehavior.floating,
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              },
-            ),
-
-            const SizedBox(height: 8),
-          ],
-        ),
-      ),
-    );
-  }
-}
-

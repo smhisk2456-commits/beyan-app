@@ -7,8 +7,9 @@ import '../../widget_service/screens/widget_settings_dialog.dart';
 import '../../monetization/providers/premium_provider.dart';
 import '../../monetization/screens/premium_paywall_sheet.dart';
 import '../../monetization/widgets/banner_ad_widget.dart';
+import '../models/worship_tracker_model.dart';
 
-/// Lüks Zikirmatik ve Tesbihat Ekranı.
+/// Lüks Zikirmatik ve İbadet Takibi Ekranı
 class ZikirmatikScreen extends ConsumerStatefulWidget {
   const ZikirmatikScreen({super.key});
 
@@ -18,6 +19,7 @@ class ZikirmatikScreen extends ConsumerStatefulWidget {
 
 class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
     with SingleTickerProviderStateMixin {
+  int _activeTab = 0; // 0: Zikirmatik, 1: İbadet Takibi
   int _count = 0;
   int _target = 33;
   int _selectedDhikrIndex = 0;
@@ -27,7 +29,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
   late final AnimationController _pulseController;
   late final Animation<double> _scaleAnimation;
 
-  static const _dhikrList = [
+  final List<Map<String, String>> _dhikrList = [
     {
       'tr': 'Sübhanallâh',
       'en': 'SubhanAllah',
@@ -95,8 +97,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
 
     setState(() {
       _count++;
-      // Kullanıcının isteği: "zikirde ise 33 kere tıkladıktan sonra diğer zikire otomatik aktarsın"
-      if (_count >= 33) {
+      if (_target > 0 && _count >= _target) {
         _completedLaps++;
         HapticFeedback.heavyImpact();
 
@@ -107,7 +108,6 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
         _count = 0;
         _selectedDhikrIndex = nextIndex;
 
-        // Çip listesini yeni seçilen zikre doğru kaydır
         if (_chipScrollController.hasClients) {
           _chipScrollController.animateTo(
             nextIndex * 105.0,
@@ -116,7 +116,6 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
           );
         }
 
-        // Lüks geçiş bildirimi
         final strings = ref.read(appStringsProvider);
         final lang = strings.language;
         final prevTitle = lang == AppLanguage.english
@@ -143,10 +142,10 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                 Expanded(
                   child: Text(
                     lang == AppLanguage.english
-                        ? '$prevTitle completed (33) ➔ Switched to $nextTitle'
+                        ? '$prevTitle completed ($_target) ➔ Switched to $nextTitle'
                         : (lang == AppLanguage.arabic
-                            ? '$prevTitle اكتمل (٣٣) ➔ الانتقال إلى $nextTitle'
-                            : '$prevTitle tamamlandı (33) ➔ $nextTitle\'a geçildi'),
+                            ? '$prevTitle اكتمل ($_target) ➔ الانتقال إلى $nextTitle'
+                            : '$prevTitle tamamlandı ($_target) ➔ $nextTitle\'a geçildi'),
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 12.5,
@@ -162,12 +161,118 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
     });
   }
 
-  void _reset() {
+  void _undo() {
+    if (_count > 0) {
+      HapticFeedback.selectionClick();
+      setState(() => _count--);
+    }
+  }
+
+  void _confirmReset() {
     HapticFeedback.mediumImpact();
-    setState(() {
-      _count = 0;
-      _completedLaps = 0;
-    });
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF032B25),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: Color(0xFFD4AF37), width: 1),
+        ),
+        title: const Text('Zikri Sıfırla', style: TextStyle(color: Color(0xFFFFDF7A))),
+        content: const Text(
+          'Mevcut sayımı ve tur sayısını sıfırlamak istiyor musunuz?',
+          style: TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Vazgeç', style: TextStyle(color: Colors.white60)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFD4AF37),
+              foregroundColor: Colors.black,
+            ),
+            onPressed: () {
+              setState(() {
+                _count = 0;
+                _completedLaps = 0;
+              });
+              Navigator.pop(ctx);
+            },
+            child: const Text('Sıfırla'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showAddCustomDhikrDialog() {
+    final titleController = TextEditingController();
+    final meaningController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF032B25),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: Color(0xFFD4AF37), width: 1),
+        ),
+        title: const Text('Özel Zikir Ekle', style: TextStyle(color: Color(0xFFFFDF7A))),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: titleController,
+              style: const TextStyle(color: Colors.white),
+              decoration: const InputDecoration(
+                labelText: 'Zikir Başlığı (Örn: Lâ Havle...)',
+                labelStyle: TextStyle(color: Colors.white70),
+                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFD4AF37))),
+              ),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: meaningController,
+              style: const TextStyle(color: Colors.white),
+              decoration: const InputDecoration(
+                labelText: 'Anlamı veya Niyeti',
+                labelStyle: TextStyle(color: Colors.white70),
+                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24)),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('İptal', style: TextStyle(color: Colors.white60)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFD4AF37), foregroundColor: Colors.black),
+            onPressed: () {
+              final title = titleController.text.trim();
+              if (title.isNotEmpty) {
+                setState(() {
+                  _dhikrList.add({
+                    'tr': title,
+                    'en': title,
+                    'ar': title,
+                    'meaning': meaningController.text.trim().isNotEmpty ? meaningController.text.trim() : 'Özel zikir',
+                  });
+                  _selectedDhikrIndex = _dhikrList.length - 1;
+                  _count = 0;
+                  _completedLaps = 0;
+                });
+              }
+              Navigator.pop(ctx);
+            },
+            child: const Text('Ekle'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -175,16 +280,20 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
     final strings = ref.watch(appStringsProvider);
     final currentLang = ref.watch(appLanguageProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final activeDhikr = _dhikrList[_selectedDhikrIndex];
-
-    final progress = _target > 0 ? (_count % _target) / _target : 0.0;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text(strings.actionZikr),
+        title: Text(_activeTab == 0 ? strings.actionZikr : 'İbadet Takibi'),
         centerTitle: true,
         actions: [
+          // Özel zikir ekle butonu
+          if (_activeTab == 0)
+            IconButton(
+              icon: const Icon(Icons.add_circle_outline_rounded, color: Color(0xFFFFDF7A)),
+              tooltip: 'Özel Zikir Ekle',
+              onPressed: _showAddCustomDhikrDialog,
+            ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
             child: InkWell(
@@ -236,285 +345,474 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
         ],
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 110),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // ── Zikir Seçim Çipleri ─────────────────────────────────
-              SizedBox(
-                height: 38,
-                child: ListView.separated(
-                  controller: _chipScrollController,
-                  scrollDirection: Axis.horizontal,
-                  physics: const BouncingScrollPhysics(),
-                  itemCount: _dhikrList.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 8),
-                  itemBuilder: (context, index) {
-                    final item = _dhikrList[index];
-                    final isSelected = index == _selectedDhikrIndex;
-                    final title = currentLang == AppLanguage.english
-                        ? item['en']!
-                        : (currentLang == AppLanguage.arabic
-                            ? item['ar']!
-                            : item['tr']!);
-
-                    return ChoiceChip(
-                      label: Text(title),
-                      selected: isSelected,
-                      onSelected: (_) {
-                        HapticFeedback.selectionClick();
-                        setState(() {
-                          _selectedDhikrIndex = index;
-                          _count = 0;
-                          _completedLaps = 0;
-                        });
-                      },
-                      selectedColor: const Color(0xFFD4AF37),
-                      backgroundColor: isDark
-                          ? const Color(0xFF07211C)
-                          : Colors.grey.shade100,
-                      labelStyle: TextStyle(
-                        fontSize: 12,
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                        color: isSelected
-                            ? Colors.black
-                            : (isDark ? Colors.white70 : Colors.black87),
-                      ),
-                      shape: RoundedRectangleBorder(
+        child: Column(
+          children: [
+            // ── Üst Segment Seçici: Zikirmatik / İbadet Takibi ───────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF04201B) : const Color(0xFFE5EEEB),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: const Color(0xFFD4AF37).withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: InkWell(
+                        onTap: () => setState(() => _activeTab = 0),
                         borderRadius: BorderRadius.circular(12),
-                        side: BorderSide(
-                          color: isSelected
-                              ? const Color(0xFFD4AF37)
-                              : Colors.transparent,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          decoration: BoxDecoration(
+                            color: _activeTab == 0 ? const Color(0xFFD4AF37) : Colors.transparent,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Center(
+                            child: Text(
+                              'Zikirmatik',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: _activeTab == 0 ? Colors.black : (isDark ? Colors.white70 : Colors.black87),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                    );
-                  },
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              // ── Zikir Kartı (Arapça & Anlamı) ───────────────────────
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [
-                      Color(0xFF012E2B),
-                      Color(0xFF023E36),
-                      Color(0xFF01201D),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(22),
-                  border: Border.all(
-                    color: const Color(0xFFD4AF37).withValues(alpha: 0.35),
-                    width: 1.2,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.3),
-                      blurRadius: 18,
-                      offset: const Offset(0, 6),
+                    ),
+                    Expanded(
+                      child: InkWell(
+                        onTap: () => setState(() => _activeTab = 1),
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          decoration: BoxDecoration(
+                            color: _activeTab == 1 ? const Color(0xFFD4AF37) : Colors.transparent,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Center(
+                            child: Text(
+                              'İbadet Takibi',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: _activeTab == 1 ? Colors.black : (isDark ? Colors.white70 : Colors.black87),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 ),
+              ),
+            ),
+
+            Expanded(
+              child: _activeTab == 0
+                  ? _buildZikirmatikView(isDark, currentLang)
+                  : _buildWorshipTrackerView(isDark),
+            ),
+
+            // Alt banner reklam
+            const BannerAdWidget(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildZikirmatikView(bool isDark, AppLanguage currentLang) {
+    final activeDhikr = _dhikrList[_selectedDhikrIndex];
+    final progress = _target > 0 ? (_count % _target) / _target : 0.0;
+
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 90),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // ── Zikir Seçim Çipleri ─────────────────────────────────
+          SizedBox(
+            height: 38,
+            child: ListView.separated(
+              controller: _chipScrollController,
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              itemCount: _dhikrList.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              itemBuilder: (context, index) {
+                final item = _dhikrList[index];
+                final isSelected = index == _selectedDhikrIndex;
+                final title = currentLang == AppLanguage.english
+                    ? item['en']!
+                    : (currentLang == AppLanguage.arabic ? item['ar']! : item['tr']!);
+
+                return ChoiceChip(
+                  label: Text(title),
+                  selected: isSelected,
+                  onSelected: (_) {
+                    HapticFeedback.selectionClick();
+                    setState(() {
+                      _selectedDhikrIndex = index;
+                      _count = 0;
+                      _completedLaps = 0;
+                    });
+                  },
+                  selectedColor: const Color(0xFFD4AF37),
+                  backgroundColor: isDark ? const Color(0xFF07211C) : Colors.grey.shade100,
+                  labelStyle: TextStyle(
+                    fontSize: 12,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                    color: isSelected ? Colors.black : (isDark ? Colors.white70 : Colors.black87),
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(
+                      color: isSelected ? const Color(0xFFD4AF37) : Colors.transparent,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+
+          const SizedBox(height: 14),
+
+          // ── Zikir Kartı (Arapça & Anlamı) ───────────────────────
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF012E2B), Color(0xFF023E36), Color(0xFF01201D)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(
+                color: const Color(0xFFD4AF37).withValues(alpha: 0.35),
+                width: 1.2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.3),
+                  blurRadius: 18,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                Text(
+                  activeDhikr['ar']!,
+                  style: const TextStyle(
+                    fontFamily: 'Amiri',
+                    fontSize: 26,
+                    height: 1.5,
+                    color: Color(0xFFFFDF7A),
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                  textDirection: TextDirection.rtl,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  currentLang == AppLanguage.english ? activeDhikr['en']! : activeDhikr['tr']!,
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  activeDhikr['meaning']!,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.white.withValues(alpha: 0.65),
+                    fontStyle: FontStyle.italic,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 20),
+
+          // ── Hedef Seçimi (33, 99, 100, Serbest) ───────────────────
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _targetButton(33),
+              const SizedBox(width: 8),
+              _targetButton(99),
+              const SizedBox(width: 8),
+              _targetButton(100),
+              const SizedBox(width: 8),
+              _targetButton(0, label: '∞'),
+              const Spacer(),
+              if (_completedLaps > 0)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFD4AF37).withValues(alpha: 0.18),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: const Color(0xFFD4AF37).withValues(alpha: 0.5)),
+                  ),
+                  child: Text(
+                    '$_completedLaps Tur',
+                    style: const TextStyle(color: Color(0xFFFFDF7A), fontSize: 12, fontWeight: FontWeight.bold),
+                  ),
+                ),
+            ],
+          ),
+
+          const SizedBox(height: 24),
+
+          // ── Dev Sayaç Dokunma Alanı ─────────────────────────────
+          ScaleTransition(
+            scale: _scaleAnimation,
+            child: GestureDetector(
+              onTap: _increment,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  SizedBox(
+                    width: 220,
+                    height: 220,
+                    child: CircularProgressIndicator(
+                      value: _target > 0 ? progress : 1.0,
+                      strokeWidth: 7,
+                      backgroundColor: isDark ? Colors.white12 : Colors.grey.shade200,
+                      valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFD4AF37)),
+                    ),
+                  ),
+                  Container(
+                    width: 196,
+                    height: 196,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: const RadialGradient(
+                        colors: [Color(0xFF034A40), Color(0xFF012E2B), Color(0xFF011C19)],
+                        stops: [0.0, 0.7, 1.0],
+                      ),
+                      border: Border.all(
+                        color: const Color(0xFFD4AF37).withValues(alpha: 0.6),
+                        width: 2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
+                          blurRadius: 28,
+                          spreadRadius: 2,
+                        ),
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.4),
+                          blurRadius: 16,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          '$_count',
+                          style: const TextStyle(
+                            fontSize: 52,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            letterSpacing: 1.5,
+                          ),
+                        ),
+                        if (_target > 0)
+                          Text(
+                            '/ $_target',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Color(0xFFFFDF7A),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        const SizedBox(height: 6),
+                        const Text(
+                          'DOKUN',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.white54,
+                            letterSpacing: 2.0,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 24),
+
+          // ── Geri Al ve Sıfırla Butonları ─────────────────────────
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              OutlinedButton.icon(
+                onPressed: _undo,
+                icon: const Icon(Icons.undo_rounded, size: 18),
+                label: const Text('Geri Al'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.white70,
+                  side: const BorderSide(color: Colors.white24),
+                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+              ),
+              const SizedBox(width: 14),
+              OutlinedButton.icon(
+                onPressed: _confirmReset,
+                icon: const Icon(Icons.refresh_rounded, size: 18),
+                label: const Text('Sıfırla'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFFD4AF37),
+                  side: BorderSide(color: const Color(0xFFD4AF37).withValues(alpha: 0.5)),
+                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWorshipTrackerView(bool isDark) {
+    final todayEntry = ref.watch(worshipTrackerProvider.notifier).getToday();
+    final completedCount = todayEntry.completedCount;
+
+    return ListView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 90),
+      children: [
+        // ── Günlük Özet Kartı ─────────────────────────────────────
+        Container(
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF012E2B), Color(0xFF034A3E)],
+            ),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: const Color(0xFFD4AF37).withValues(alpha: 0.4)),
+          ),
+          child: Row(
+            children: [
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  SizedBox(
+                    width: 60,
+                    height: 60,
+                    child: CircularProgressIndicator(
+                      value: todayEntry.completionRatio,
+                      strokeWidth: 6,
+                      backgroundColor: Colors.white12,
+                      valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFD4AF37)),
+                    ),
+                  ),
+                  Text(
+                    '$completedCount/7',
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                ],
+              ),
+              const SizedBox(width: 16),
+              const Expanded(
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      activeDhikr['ar']!,
-                      style: const TextStyle(
-                        fontFamily: 'Amiri',
-                        fontSize: 26,
-                        height: 1.5,
-                        color: Color(0xFFFFDF7A),
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                      textDirection: TextDirection.rtl,
+                      'Bugünkü İbadet İlerlemeniz',
+                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFFFFDF7A)),
                     ),
-                    const SizedBox(height: 6),
+                    SizedBox(height: 4),
                     Text(
-                      currentLang == AppLanguage.english
-                          ? activeDhikr['en']!
-                          : activeDhikr['tr']!,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      activeDhikr['meaning']!,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.65),
-                        fontStyle: FontStyle.italic,
-                      ),
-                      textAlign: TextAlign.center,
+                      '5 Vakit Namaz, Kur\'an-ı Kerim tilaveti ve günlük zikrinizi buradan takip edebilirsiniz.',
+                      style: TextStyle(fontSize: 12, color: Colors.white70),
                     ),
                   ],
                 ),
               ),
-
-              const SizedBox(height: 24),
-
-              // ── Hedef & Tur Bilgisi ──────────────────────────────────
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _targetButton(33),
-                  const SizedBox(width: 10),
-                  _targetButton(99),
-                  const SizedBox(width: 10),
-                  _targetButton(0, label: '∞'),
-                  const Spacer(),
-                  if (_completedLaps > 0)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFD4AF37).withValues(alpha: 0.18),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: const Color(0xFFD4AF37).withValues(alpha: 0.5),
-                        ),
-                      ),
-                      child: Text(
-                        '$_completedLaps Tur',
-                        style: const TextStyle(
-                          color: Color(0xFFFFDF7A),
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-
-              const SizedBox(height: 28),
-
-              // ── Dev Sayaç Dokunma Alanı (Interactive Dial) ───────────
-              ScaleTransition(
-                scale: _scaleAnimation,
-                child: GestureDetector(
-                  onTap: _increment,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      // Dış Çember Progress
-                      SizedBox(
-                        width: 220,
-                        height: 220,
-                        child: CircularProgressIndicator(
-                          value: _target > 0 ? progress : 1.0,
-                          strokeWidth: 7,
-                          backgroundColor: isDark ? Colors.white12 : Colors.grey.shade200,
-                          valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFD4AF37)),
-                        ),
-                      ),
-                      // İç Dokunma Butonu
-                      Container(
-                        width: 196,
-                        height: 196,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: const RadialGradient(
-                            colors: [
-                              Color(0xFF034A40),
-                              Color(0xFF012E2B),
-                              Color(0xFF011C19),
-                            ],
-                            stops: [0.0, 0.7, 1.0],
-                          ),
-                          border: Border.all(
-                            color: const Color(0xFFD4AF37).withValues(alpha: 0.6),
-                            width: 2,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
-                              blurRadius: 28,
-                              spreadRadius: 2,
-                            ),
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.4),
-                              blurRadius: 16,
-                              offset: const Offset(0, 8),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              '$_count',
-                              style: const TextStyle(
-                                fontSize: 52,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                                letterSpacing: 1.5,
-                              ),
-                            ),
-                            if (_target > 0)
-                              Text(
-                                '/ $_target',
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  color: Color(0xFFFFDF7A),
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            const SizedBox(height: 6),
-                            const Text(
-                              'DOKUN',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.white54,
-                                letterSpacing: 2.0,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 32),
-
-              // ── Sıfırla & Yardımcı Butonlar ───────────────────────────
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  OutlinedButton.icon(
-                    onPressed: _reset,
-                    icon: const Icon(Icons.refresh_rounded, size: 18),
-                    label: const Text('Sıfırla'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFFD4AF37),
-                      side: BorderSide(color: const Color(0xFFD4AF37).withValues(alpha: 0.4)),
-                      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              // ── Saygılı Alt Banner Reklam (Premium'da otomatik gizlenir) ──
-              const BannerAdWidget(),
             ],
           ),
         ),
+        const SizedBox(height: 18),
+
+        // ── 5 Vakit Namaz Kontrol Listesi ─────────────────────────
+        _buildHabitItem('Sabah Namazı', 'fajr', todayEntry.fajr, Icons.wb_twilight_rounded, isDark),
+        _buildHabitItem('Öğle Namazı', 'dhuhr', todayEntry.dhuhr, Icons.wb_sunny_rounded, isDark),
+        _buildHabitItem('İkindi Namazı', 'asr', todayEntry.asr, Icons.wb_sunny_outlined, isDark),
+        _buildHabitItem('Akşam Namazı', 'maghrib', todayEntry.maghrib, Icons.nights_stay_outlined, isDark),
+        _buildHabitItem('Yatsı Namazı', 'isha', todayEntry.isha, Icons.nightlight_round, isDark),
+        const SizedBox(height: 10),
+
+        // ── Kur'an & Zikir Takibi ────────────────────────────────
+        _buildHabitItem('Günlük Kur\'an Tilaveti', 'quran', todayEntry.quran, Icons.menu_book_rounded, isDark),
+        _buildHabitItem('Günlük Zikir & Tesbihat', 'zikr', todayEntry.zikr, Icons.fingerprint_rounded, isDark),
+      ],
+    );
+  }
+
+  Widget _buildHabitItem(String title, String habitKey, bool isCompleted, IconData icon, bool isDark) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF06221D) : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isCompleted
+              ? const Color(0xFFD4AF37)
+              : (isDark ? const Color(0xFF133B34) : const Color(0xFFE2EBE8)),
+          width: isCompleted ? 1.4 : 1,
+        ),
+      ),
+      child: ListTile(
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: isCompleted
+                ? const Color(0xFFD4AF37).withValues(alpha: 0.2)
+                : (isDark ? Colors.white10 : Colors.grey.shade100),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, color: isCompleted ? const Color(0xFFFFDF7A) : Colors.grey, size: 20),
+        ),
+        title: Text(
+          title,
+          style: TextStyle(
+            fontSize: 14.5,
+            fontWeight: isCompleted ? FontWeight.bold : FontWeight.w500,
+            color: isDark ? Colors.white : Colors.black87,
+            decoration: isCompleted ? TextDecoration.none : null,
+          ),
+        ),
+        trailing: Checkbox(
+          value: isCompleted,
+          activeColor: const Color(0xFFD4AF37),
+          checkColor: Colors.black,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+          onChanged: (_) {
+            HapticFeedback.lightImpact();
+            ref.read(worshipTrackerProvider.notifier).toggleHabit(habitKey: habitKey);
+          },
+        ),
+        onTap: () {
+          HapticFeedback.lightImpact();
+          ref.read(worshipTrackerProvider.notifier).toggleHabit(habitKey: habitKey);
+        },
       ),
     );
   }

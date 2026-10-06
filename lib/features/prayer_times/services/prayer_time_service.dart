@@ -1,32 +1,54 @@
 import 'dart:async';
 import 'package:adhan/adhan.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/utils/app_constants.dart';
 import '../models/prayer_time_model.dart';
+import '../models/city_model.dart';
+import '../models/calculation_settings_model.dart';
 
 /// Namaz vakitlerini hesaplayan ana servis sınıfı.
 ///
 /// Sorumlulukları:
-/// 1. [geolocator] ile kullanıcı konumunu almak.
-///    Konum alınamazsa → İstanbul (41.0082, 28.9784) varsayılanı.
-/// 2. [adhan] paketini kullanarak Diyanet (Turkey) metoduna göre
-///    o günün namaz vakitlerini hesaplamak.
+/// 1. Kullanıcı konumunu (Manuel seçilen şehir veya GPS) almak.
+/// 2. Seçilen hesaplama yöntemine göre (Diyanet, MWL, ISNA, Umm al-Qura vb.)
+///    namaz vakitlerini hesaplamak.
 /// 3. Sıradaki vakti ve kalan süreyi döndürmek.
 class PrayerTimeService {
   // ── Singleton ──────────────────────────────────────────────
   static final PrayerTimeService _instance = PrayerTimeService._internal();
   factory PrayerTimeService() => _instance;
+  static PrayerTimeService get instance => _instance;
   PrayerTimeService._internal();
+
+  static const _prefManualCityKey = 'selected_manual_city_name';
+  static const _prefMethodKey = 'selected_calculation_method';
 
   // ── Konum Servisi ─────────────────────────────────────────
 
-  /// Kullanıcının mevcut konumunu alır.
-  ///
-  /// Hiyerarşi:
-  ///   1. Servis açık + izin verilmiş → GPS konumu
-  ///   2. Herhangi bir hata → İstanbul varsayılanı
+  /// Kullanıcının konumunu alır.
+  /// Öncelik:
+  ///   1. Kullanıcı manuel bir şehir seçtiyse o şehrin koordinatları
+  ///   2. GPS açık ve izin verilmişse GPS koordinatları
+  ///   3. Herhangi bir hata veya izin yoksa İstanbul varsayılanı
   Future<LocationData> getCurrentLocation() async {
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final manualCityName = prefs.getString(_prefManualCityKey);
+
+      if (manualCityName != null && manualCityName.isNotEmpty) {
+        final found = predefinedCitiesList.firstWhere(
+          (c) => c.name.toLowerCase() == manualCityName.toLowerCase(),
+          orElse: () => predefinedCitiesList.first,
+        );
+        return LocationData(
+          latitude: found.latitude,
+          longitude: found.longitude,
+          cityName: found.name,
+          isFromGPS: false,
+        );
+      }
+
       // Konum servisi açık mı?
       final bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
@@ -37,7 +59,6 @@ class PrayerTimeService {
       LocationPermission permission = await Geolocator.checkPermission();
 
       if (permission == LocationPermission.denied) {
-        // İlk kez isteniyor
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
           return _defaultLocation('Konum izni reddedildi');
@@ -45,20 +66,16 @@ class PrayerTimeService {
       }
 
       if (permission == LocationPermission.deniedForever) {
-        // Kullanıcı "bir daha sorma" seçti
         return _defaultLocation('Konum izni kalıcı olarak reddedildi');
       }
 
-      // GPS konumunu al (düşük güç tüketimi için lastKnown önce dene)
+      // GPS konumunu al
       Position? lastKnown;
       try {
         lastKnown = await Geolocator.getLastKnownPosition();
-      } catch (_) {
-        // getLastKnownPosition bazı cihazlarda hata verebilir
-      }
+      } catch (_) {}
 
       if (lastKnown != null) {
-        // Son bilinen konum 30 dakikadan tazeyse ve emülatör sahte konumu değilse kullan
         final age = DateTime.now().difference(lastKnown.timestamp);
         if (age.inMinutes < 30 && !_isEmulatorOrInvalidLocation(lastKnown.latitude, lastKnown.longitude)) {
           return LocationData(
@@ -70,7 +87,6 @@ class PrayerTimeService {
         }
       }
 
-      // Taze GPS konumu al - maksimum 3 saniye bekle, takılırsa hemen İstanbul'a geç
       final Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.medium,
       ).timeout(
@@ -78,9 +94,8 @@ class PrayerTimeService {
         onTimeout: () => throw TimeoutException('Konum zaman aşımı'),
       );
 
-      // Emülatörün varsayılan ABD (California) konumu kontrolü:
       if (_isEmulatorOrInvalidLocation(position.latitude, position.longitude)) {
-        return _defaultLocation('Emülatör GPS konumu algılandı, İstanbul varsayılanı kullanıldı');
+        return _defaultLocation('Emülatör GPS algılandı, varsayılan konum kullanıldı');
       }
 
       return LocationData(
@@ -90,12 +105,11 @@ class PrayerTimeService {
         isFromGPS: true,
       );
     } catch (e) {
-      // Herhangi bir hata durumunda İstanbul'a fallback
       return _defaultLocation('GPS hatası: $e');
     }
   }
 
-  /// Android emülatör sahte konumunu (Mountain View -122.08) veya geçersiz koordinatları tespit eder.
+  /// Android emülatör sahte konumunu veya geçersiz koordinatları tespit eder.
   bool _isEmulatorOrInvalidLocation(double lat, double lon) {
     if (lon < -50 || (lat >= 36.5 && lat <= 38.5 && lon >= -123.0 && lon <= -120.0)) {
       return true;
@@ -119,43 +133,33 @@ class PrayerTimeService {
 
   // ── Namaz Vakitleri Hesaplama ─────────────────────────────
 
-  /// Verilen tarih için namaz vakitlerini hesaplar.
-  ///
-  /// [location] null ise GPS/varsayılan konum otomatik alınır.
-  /// [date] null ise bugünün tarihi kullanılır.
+  /// Verilen tarih ve hesaplama yöntemi için namaz vakitlerini hesaplar.
   Future<DailyPrayerTimes> calculatePrayerTimes({
     LocationData? location,
     DateTime? date,
+    PrayerCalculationMethod? method,
   }) async {
-    // Konum belirleme
     final loc = location ?? await getCurrentLocation();
     final targetDate = date ?? DateTime.now();
 
-    // adhan koordinat nesnesi
     final coordinates = Coordinates(loc.latitude, loc.longitude);
 
-    // ── Diyanet (Turkey) Hesaplama Parametreleri ────────────
-    // adhan 2.0: turkey artık statik property (parantez yok)
-    final params = CalculationMethod.turkey.getParameters();
+    // Hesaplama parametrelerini al
+    final calcMethod = method ?? await getSavedCalculationMethod();
+    final params = calcMethod.getAdhanParameters();
 
-    // Hanefî mezhebine göre Asr vakti hesabı
-    params.madhab = Madhab.hanafi;
-
-    // adhan için DateComponents oluştur
     final dateComponents = DateComponents(
       targetDate.year,
       targetDate.month,
       targetDate.day,
     );
 
-    // Vakitleri hesapla
     final prayerTimes = PrayerTimes(
       coordinates,
       dateComponents,
       params,
     );
 
-    // PrayerEntry listesi oluştur
     final entries = _buildPrayerEntries(prayerTimes);
 
     return DailyPrayerTimes(
@@ -168,7 +172,39 @@ class PrayerTimeService {
     );
   }
 
-  /// Türkiye kalıcı UTC+3 saat dilimi dönüşümü (emülatör UTC olsa bile doğru yerel saat)
+  Future<PrayerCalculationMethod> getSavedCalculationMethod() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final name = prefs.getString(_prefMethodKey);
+      if (name != null) {
+        return PrayerCalculationMethod.values.firstWhere(
+          (m) => m.name == name,
+          orElse: () => PrayerCalculationMethod.diyanet,
+        );
+      }
+    } catch (_) {}
+    return PrayerCalculationMethod.diyanet;
+  }
+
+  Future<void> saveCalculationMethod(PrayerCalculationMethod method) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_prefMethodKey, method.name);
+    } catch (_) {}
+  }
+
+  Future<void> saveManualCity(String? cityName) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      if (cityName == null) {
+        await prefs.remove(_prefManualCityKey);
+      } else {
+        await prefs.setString(_prefManualCityKey, cityName);
+      }
+    } catch (_) {}
+  }
+
+  /// Türkiye kalıcı UTC+3 saat dilimi dönüşümü
   DateTime _toTurkeyTime(DateTime time) {
     if (DateTime.now().timeZoneOffset.inHours == 3) {
       return time.toLocal();
@@ -176,50 +212,25 @@ class PrayerTimeService {
     return time.toUtc().add(const Duration(hours: 3));
   }
 
-  /// [PrayerTimes] nesnesinden [PrayerEntry] listesi üretir.
   List<PrayerEntry> _buildPrayerEntries(PrayerTimes pt) {
     return [
-      PrayerEntry(
-        name: PrayerName.fajr,
-        time: _toTurkeyTime(pt.fajr),
-      ),
-      PrayerEntry(
-        name: PrayerName.sunrise,
-        time: _toTurkeyTime(pt.sunrise),
-      ),
-      PrayerEntry(
-        name: PrayerName.dhuhr,
-        time: _toTurkeyTime(pt.dhuhr),
-      ),
-      PrayerEntry(
-        name: PrayerName.asr,
-        time: _toTurkeyTime(pt.asr),
-      ),
-      PrayerEntry(
-        name: PrayerName.maghrib,
-        time: _toTurkeyTime(pt.maghrib),
-      ),
-      PrayerEntry(
-        name: PrayerName.isha,
-        time: _toTurkeyTime(pt.isha),
-      ),
+      PrayerEntry(name: PrayerName.fajr, time: _toTurkeyTime(pt.fajr)),
+      PrayerEntry(name: PrayerName.sunrise, time: _toTurkeyTime(pt.sunrise)),
+      PrayerEntry(name: PrayerName.dhuhr, time: _toTurkeyTime(pt.dhuhr)),
+      PrayerEntry(name: PrayerName.asr, time: _toTurkeyTime(pt.asr)),
+      PrayerEntry(name: PrayerName.maghrib, time: _toTurkeyTime(pt.maghrib)),
+      PrayerEntry(name: PrayerName.isha, time: _toTurkeyTime(pt.isha)),
     ];
   }
 
-  // ── Yardımcı Metotlar ─────────────────────────────────────
-
-  /// Sıradaki namaz vaktine kalan süreyi döner.
   Duration getTimeUntilNextPrayer(DailyPrayerTimes daily) {
     return daily.timeUntilNextPrayer;
   }
 
-  /// Sıradaki vaktin progress oranını döner (0.0 – 1.0).
-  /// Mevcut vakit başlangıcından sonraki vakte olan ilerleme.
   double getProgressToNextPrayer(DailyPrayerTimes daily) {
     final now = DateTime.now();
     final prayers = daily.prayers;
 
-    // Mevcut vakti bul
     PrayerEntry? current;
     PrayerEntry? next;
 
@@ -241,15 +252,12 @@ class PrayerTimeService {
     return progress.clamp(0.0, 1.0);
   }
 
-  /// Verilen [DateTime]'ı "HH:mm" formatında döner.
   String formatTime(DateTime dt) {
     final h = dt.hour.toString().padLeft(2, '0');
     final m = dt.minute.toString().padLeft(2, '0');
     return '$h:$m';
   }
 
-  /// Kalan süreyi okunabilir formata çevirir.
-  /// Örn: "2s 35dk" veya "45:30"
   String formatCountdown(Duration duration) {
     if (duration == Duration.zero) return '--:--';
     final h = duration.inHours;

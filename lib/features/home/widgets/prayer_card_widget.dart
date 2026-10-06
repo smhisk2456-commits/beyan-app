@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../../core/localization/app_strings.dart';
 import '../../prayer_times/models/prayer_time_model.dart';
 import '../../prayer_times/providers/prayer_time_providers.dart';
+import '../../calendar/services/hijri_calendar_service.dart';
 
 /// Ana ekranın üst kısmında yer alan lüks zümrüt & altın namaz vakti kartı.
 class PrayerCardWidget extends ConsumerWidget {
@@ -277,15 +278,20 @@ class _LocationRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final now = DateTime.now();
+    final hijri = HijriCalendarService.instance.getHijriDate(now);
     String dateStr;
     try {
       final localeTag = language == AppLanguage.english
           ? 'en_US'
           : (language == AppLanguage.arabic ? 'ar_SA' : 'tr_TR');
-      dateStr = DateFormat('E, d MMM y', localeTag).format(now);
+      dateStr = DateFormat('d MMM', localeTag).format(now);
     } catch (_) {
-      dateStr = '${now.day}.${now.month}.${now.year}';
+      dateStr = '${now.day}.${now.month}';
     }
+
+    final hijriStr = language == AppLanguage.arabic
+        ? hijri.formatAr()
+        : '${hijri.day} ${hijri.monthNameTr}';
 
     return Row(
       children: [
@@ -296,9 +302,17 @@ class _LocationRow extends StatelessWidget {
           style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w500),
         ),
         const Spacer(),
-        Text(
-          dateStr,
-          style: const TextStyle(color: Colors.white60, fontSize: 12),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: const Color(0xFFD4AF37).withValues(alpha: 0.3), width: 0.8),
+          ),
+          child: Text(
+            '$hijriStr • $dateStr',
+            style: const TextStyle(color: Color(0xFFFFDF7A), fontSize: 11, fontWeight: FontWeight.w600),
+          ),
         ),
       ],
     );

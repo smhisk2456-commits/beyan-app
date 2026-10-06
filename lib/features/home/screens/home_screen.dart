@@ -14,9 +14,18 @@ import '../../../core/theme/screens/theme_selection_sheet.dart';
 import '../../monetization/providers/premium_provider.dart';
 import '../../monetization/screens/premium_paywall_sheet.dart';
 import '../../monetization/widgets/banner_ad_widget.dart';
+import '../../dua/screens/dua_library_screen.dart';
+import '../../dua/providers/dua_providers.dart';
+import '../../calendar/screens/hijri_calendar_screen.dart';
+import '../../calendar/services/hijri_calendar_service.dart';
+import '../../ramadan/screens/ramadan_dashboard_screen.dart';
+import '../../quran/providers/quran_reading_providers.dart';
+import '../../quran/providers/quran_providers.dart';
+import '../../quran/screens/surah_detail_screen.dart';
+import '../../quran/models/surah.dart';
 import '../widgets/prayer_card_widget.dart';
 
-/// Ana Ekran – Beyân lüks İslami arayüzü (Kur'an listesi menüden kaldırılmış ferah tasarım).
+/// Ana Ekran – Beyân lüks İslami kontrol merkezi.
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
@@ -29,6 +38,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final strings = ref.watch(appStringsProvider);
     final prayerAsync = ref.watch(prayerTimesNotifierProvider);
+    final lastRead = ref.watch(lastReadProvider);
+    final allSurahs = ref.watch(allSurahsProvider).valueOrNull ?? [];
+    final nextReligiousDay = HijriCalendarService.instance.getNextReligiousDay();
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -38,29 +50,54 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           // ── Lüks İslami AppBar ────────────────────────────────
           const _IslamicAppBar(),
 
+          // ── Yaklaşan Dini Gün / Kandil Bildirimi ────────────────
+          if (nextReligiousDay != null)
+            SliverToBoxAdapter(
+              child: _UpcomingReligiousDayBanner(day: nextReligiousDay),
+            ),
+
           // ── Namaz Vakti Kartı (Zümrüt & Altın) ─────────────────
           const SliverToBoxAdapter(child: PrayerCardWidget()),
 
-          // ── Hızlı Erişim Butonları (Vakitler, Kıble, Zikirmatik, Widget)
+          // ── Son Okunan Kur'an'a Devam Etme Kartı ────────────────
+          if (lastRead != null)
+            SliverToBoxAdapter(
+              child: _LastReadQuranCard(
+                lastRead: lastRead,
+                allSurahs: allSurahs,
+              ),
+            ),
+
+          // ── Hızlı Erişim Butonları (Genişletilmiş İslami Matris) ───
           SliverToBoxAdapter(
             child: _QuickActionGrid(
-              onOpenPrayers: () {
-                // Vakitler sekmesine geç
-                ref.read(selectedTabProvider.notifier).state = 1;
-              },
+              onOpenPrayers: () => ref.read(selectedTabProvider.notifier).state = 1,
               onOpenQibla: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => const QiblaCompassScreen()),
                 );
               },
-              onOpenZikr: () {
-                // Zikirmatik sekmesine geç (Index 3)
-                ref.read(selectedTabProvider.notifier).state = 3;
+              onOpenZikr: () => ref.read(selectedTabProvider.notifier).state = 3,
+              onOpenWidget: () => ref.read(selectedTabProvider.notifier).state = 4,
+              onOpenQuran: () => ref.read(selectedTabProvider.notifier).state = 2,
+              onOpenDuas: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const DuaLibraryScreen()),
+                );
               },
-              onOpenWidget: () {
-                // Widget sekmesine geç (Index 4)
-                ref.read(selectedTabProvider.notifier).state = 4;
+              onOpenCalendar: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const HijriCalendarScreen()),
+                );
+              },
+              onOpenRamadan: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const RamadanDashboardScreen()),
+                );
               },
             ),
           ),
@@ -139,8 +176,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           // ── Günün Ayeti (Zarif & Kompakt Kart) ────────────────
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 10),
               child: _DailyVerseCompactCard(),
+            ),
+          ),
+
+          // ── Günün Doğrulanmış Duası Kartı ──────────────────────
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(20, 4, 20, 12),
+              child: _DailyFeaturedDuaCard(),
             ),
           ),
 
@@ -155,8 +200,174 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
     );
   }
+}
 
+// ════════════════════════════════════════════════════════════════
+// Yaklaşan Mübarek Gün / Kandil Şeridi
+// ════════════════════════════════════════════════════════════════
 
+class _UpcomingReligiousDayBanner extends StatelessWidget {
+  final dynamic day; // ReligiousDay
+
+  const _UpcomingReligiousDayBanner({required this.day});
+
+  @override
+  Widget build(BuildContext context) {
+    final days = day.daysRemaining as int;
+    final isToday = day.isToday as bool;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () {
+          HapticFeedback.lightImpact();
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const HijriCalendarScreen()),
+          );
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF03312B), Color(0xFF01241F)],
+            ),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+              width: 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(5),
+                decoration: const BoxDecoration(
+                  color: Color(0xFFD4AF37),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.star_rounded, color: Colors.black, size: 14),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  '${day.title} • ${isToday ? "Bugün!" : "$days gün kaldı"}',
+                  style: const TextStyle(
+                    color: Color(0xFFFFDF7A),
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              const Text(
+                'Takvim ➔',
+                style: TextStyle(color: Colors.white70, fontSize: 11),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ════════════════════════════════════════════════════════════════
+// Son Okunan Kur'an'a Devam Etme Kartı
+// ════════════════════════════════════════════════════════════════
+
+class _LastReadQuranCard extends StatelessWidget {
+  final LastReadPosition lastRead;
+  final List<Surah> allSurahs;
+
+  const _LastReadQuranCard({required this.lastRead, required this.allSurahs});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: () {
+          HapticFeedback.lightImpact();
+          final targetSurah = allSurahs.firstWhere(
+            (s) => s.id == lastRead.surahId,
+            orElse: () => allSurahs.isNotEmpty ? allSurahs.first : const Surah(
+              id: 1,
+              nameArabic: 'الفاتحة',
+              nameTurkish: 'Fâtiha',
+              nameEnglish: 'Al-Fatiha',
+              revelationType: 'meccan',
+              verseCount: 7,
+            ),
+          );
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => SurahDetailScreen(
+                surah: targetSurah,
+                initialScrollToVerse: lastRead.verseNumber,
+              ),
+            ),
+          );
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF012E2B), Color(0xFF02463B)],
+            ),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: const Color(0xFFD4AF37).withValues(alpha: 0.5),
+              width: 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.2),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.menu_book_rounded, color: Color(0xFFFFDF7A), size: 20),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Kur\'an-ı Kerim Okumaya Devam Et',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFFFFDF7A),
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${lastRead.surahName} Suresi • ${lastRead.verseNumber}. Ayet',
+                      style: const TextStyle(fontSize: 12, color: Colors.white70),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.arrow_forward_ios_rounded, color: Color(0xFFFFDF7A), size: 14),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -227,7 +438,6 @@ class _DailyPrayersCardList extends ConsumerWidget {
                 ),
                 child: Row(
                   children: [
-                    // İkon / Rozet
                     Container(
                       width: 38,
                       height: 38,
@@ -259,7 +469,6 @@ class _DailyPrayersCardList extends ConsumerWidget {
                     ),
                     const SizedBox(width: 12),
 
-                    // İsim & Rekat
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -306,7 +515,6 @@ class _DailyPrayersCardList extends ConsumerWidget {
                       ),
                     ),
 
-                    // Saat
                     Text(
                       timeStr,
                       style: TextStyle(
@@ -427,7 +635,111 @@ class _DailyVerseCompactCard extends StatelessWidget {
 }
 
 // ════════════════════════════════════════════════════════════════
-// Hızlı Erişim Butonları Grid
+// Günün Doğrulanmış Duası Kartı
+// ════════════════════════════════════════════════════════════════
+
+class _DailyFeaturedDuaCard extends ConsumerWidget {
+  const _DailyFeaturedDuaCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final dua = ref.watch(dailyFeaturedDuaProvider);
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(20),
+      onTap: () {
+        HapticFeedback.lightImpact();
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const DuaLibraryScreen()),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF02362F), Color(0xFF012620)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: const Color(0xFFD4AF37).withValues(alpha: 0.35),
+            width: 1,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.favorite_outline_rounded,
+                    color: Color(0xFFFFDF7A),
+                    size: 16,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                const Text(
+                  'Günün Niyazı ve Duası',
+                  style: TextStyle(
+                    color: Color(0xFFFFDF7A),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
+                ),
+                const Spacer(),
+                const Text(
+                  'Tüm Dualar ➔',
+                  style: TextStyle(color: Colors.white70, fontSize: 11),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text(
+              dua.arabicText,
+              style: const TextStyle(
+                fontFamily: 'Amiri',
+                fontSize: 17,
+                height: 1.6,
+                color: Colors.white,
+              ),
+              textDirection: TextDirection.rtl,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              dua.turkishMeaning,
+              style: TextStyle(
+                fontSize: 12,
+                height: 1.4,
+                color: Colors.white.withValues(alpha: 0.85),
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              dua.reference,
+              style: const TextStyle(
+                color: Color(0xFFD4AF37),
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ════════════════════════════════════════════════════════════════
+// Hızlı Erişim Butonları Grid (Çift Sıra İslami Matris)
 // ════════════════════════════════════════════════════════════════
 
 class _QuickActionGrid extends ConsumerWidget {
@@ -435,12 +747,20 @@ class _QuickActionGrid extends ConsumerWidget {
   final VoidCallback onOpenQibla;
   final VoidCallback onOpenZikr;
   final VoidCallback onOpenWidget;
+  final VoidCallback onOpenQuran;
+  final VoidCallback onOpenDuas;
+  final VoidCallback onOpenCalendar;
+  final VoidCallback onOpenRamadan;
 
   const _QuickActionGrid({
     required this.onOpenPrayers,
     required this.onOpenQibla,
     required this.onOpenZikr,
     required this.onOpenWidget,
+    required this.onOpenQuran,
+    required this.onOpenDuas,
+    required this.onOpenCalendar,
+    required this.onOpenRamadan,
   });
 
   @override
@@ -450,38 +770,80 @@ class _QuickActionGrid extends ConsumerWidget {
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      child: Row(
+      child: Column(
         children: [
-          _ActionCard(
-            icon: Icons.access_time_filled_rounded,
-            title: strings.tabPrayers,
-            subtitle: '6 Vakit',
-            onTap: onOpenPrayers,
-            isDark: isDark,
+          // 1. Sıra
+          Row(
+            children: [
+              _ActionCard(
+                icon: Icons.access_time_filled_rounded,
+                title: strings.tabPrayers,
+                subtitle: '6 Vakit',
+                onTap: onOpenPrayers,
+                isDark: isDark,
+              ),
+              const SizedBox(width: 8),
+              _ActionCard(
+                icon: Icons.explore_rounded,
+                title: strings.actionQibla,
+                subtitle: strings.actionQiblaSub,
+                onTap: onOpenQibla,
+                isDark: isDark,
+              ),
+              const SizedBox(width: 8),
+              _ActionCard(
+                icon: Icons.fingerprint_rounded,
+                title: strings.actionZikr,
+                subtitle: strings.actionZikrSub,
+                onTap: onOpenZikr,
+                isDark: isDark,
+              ),
+              const SizedBox(width: 8),
+              _ActionCard(
+                icon: Icons.widgets_rounded,
+                title: strings.actionWidget,
+                subtitle: strings.actionWidgetSub,
+                onTap: onOpenWidget,
+                isDark: isDark,
+              ),
+            ],
           ),
-          const SizedBox(width: 8),
-          _ActionCard(
-            icon: Icons.explore_rounded,
-            title: strings.actionQibla,
-            subtitle: strings.actionQiblaSub,
-            onTap: onOpenQibla,
-            isDark: isDark,
-          ),
-          const SizedBox(width: 8),
-          _ActionCard(
-            icon: Icons.fingerprint_rounded,
-            title: strings.actionZikr,
-            subtitle: strings.actionZikrSub,
-            onTap: onOpenZikr,
-            isDark: isDark,
-          ),
-          const SizedBox(width: 8),
-          _ActionCard(
-            icon: Icons.widgets_rounded,
-            title: strings.actionWidget,
-            subtitle: strings.actionWidgetSub,
-            onTap: onOpenWidget,
-            isDark: isDark,
+          const SizedBox(height: 8),
+          // 2. Sıra (Kur'an, Dualar, Hicri Takvim, Ramazan)
+          Row(
+            children: [
+              _ActionCard(
+                icon: Icons.menu_book_rounded,
+                title: strings.tabQuran,
+                subtitle: '114 Sure',
+                onTap: onOpenQuran,
+                isDark: isDark,
+              ),
+              const SizedBox(width: 8),
+              _ActionCard(
+                icon: Icons.auto_stories_rounded,
+                title: 'Dualar',
+                subtitle: '10 Kategori',
+                onTap: onOpenDuas,
+                isDark: isDark,
+              ),
+              const SizedBox(width: 8),
+              _ActionCard(
+                icon: Icons.calendar_month_rounded,
+                title: 'Hicri Takvim',
+                subtitle: 'Kandiller',
+                onTap: onOpenCalendar,
+                isDark: isDark,
+              ),
+              const SizedBox(width: 8),
+              _ActionCard(
+                icon: Icons.nights_stay_rounded,
+                title: 'Ramazan',
+                subtitle: 'İftar/Sahur',
+                onTap: onOpenRamadan,
+                isDark: isDark,
+              ),
+            ],
           ),
         ],
       ),
