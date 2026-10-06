@@ -34,11 +34,11 @@ class AdService {
       }
     }
 
-    // Canlı Prodüksiyon ID'leri (Kullanıcı kendi AdMob hesabını bağladığında burayı güncelleyebilir)
+    // Canlı Prodüksiyon ID'leri
     if (Platform.isAndroid) {
       return 'ca-app-pub-3940256099942544/6300978111';
     } else if (Platform.isIOS) {
-      return 'ca-app-pub-3940256099942544/2934735716';
+      return 'ca-app-pub-1904469452707859/3170946984';
     }
     return '';
   }

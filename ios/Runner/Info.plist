@@ -75,7 +75,7 @@
 
     <!-- Google Mobile Ads (AdMob) iOS App ID & SKAdNetwork ─────────── -->
     <key>GADApplicationIdentifier</key>
-    <string>ca-app-pub-3940256099942544~1458002511</string>
+    <string>ca-app-pub-1904469452707859~9129850670</string>
     <key>SKAdNetworkItems</key>
     <array>
         <dict>
