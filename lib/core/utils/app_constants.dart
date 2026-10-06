@@ -28,7 +28,9 @@ abstract class AppConstants {
   static const String widgetDailyAyahRef = 'widget_daily_ayah_ref';
 
   // ── Widget Names ─────────────────────────────────────────────
-  static const String iOSWidgetName = 'IslamicAppWidget';
+  static const String iOSWidgetName = 'BeyanPrayerWidget';
+  static const String iOSPrayerWidgetName = 'BeyanPrayerWidget';
+  static const String iOSVerseWidgetName = 'BeyanVerseWidget';
   static const String androidWidgetName = 'IslamicAppWidget';
 
   // ── WorkManager ──────────────────────────────────────────────

@@ -104,8 +104,12 @@ class WidgetService {
   Future<void> _refreshNativeWidgets() async {
     // iOS WidgetKit Timeline'ını geçersiz kıl
     await HomeWidget.updateWidget(
-      name: AppConstants.iOSWidgetName,
-      iOSName: AppConstants.iOSWidgetName,
+      name: AppConstants.iOSPrayerWidgetName,
+      iOSName: AppConstants.iOSPrayerWidgetName,
+    );
+    await HomeWidget.updateWidget(
+      name: AppConstants.iOSVerseWidgetName,
+      iOSName: AppConstants.iOSVerseWidgetName,
     );
 
     // Android AppWidget'ı yenile

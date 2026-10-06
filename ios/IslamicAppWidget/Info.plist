@@ -18,7 +18,7 @@
     <key>CFBundleDevelopmentRegion</key>
     <string>tr</string>
     <key>CFBundleDisplayName</key>
-    <string>Beyân</string>
+    <string>Beyan</string>
     <key>CFBundleExecutable</key>
     <string>$(EXECUTABLE_NAME)</string>
     <key>CFBundleIdentifier</key>

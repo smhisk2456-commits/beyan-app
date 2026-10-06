@@ -39,9 +39,9 @@ jobs:
       - name: Package into IPA for Sideloadly
         run: |
           mkdir -p build/ios/ipa/Payload
-          cp -r build/ios/iphoneos/Runner.app build/ios/ipa/Payload/
+          cp -a build/ios/iphoneos/Runner.app build/ios/ipa/Payload/
           cd build/ios/ipa
-          zip -qr Beyan.ipa Payload
+          zip -qry Beyan.ipa Payload
           echo "IPA Created Successfully!"
 
       - name: Upload IPA Artifact
