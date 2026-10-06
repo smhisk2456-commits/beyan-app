@@ -692,13 +692,18 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
 
   Widget _buildWorshipTrackerView(bool isDark) {
     final todayEntry = ref.watch(todayWorshipEntryProvider);
+    final streakData = ref.watch(worshipStreakProvider);
     final completedCount = todayEntry.completedCount;
 
     return ListView(
       physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 90),
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 110),
       children: [
-        // ── Günlük Özet Kartı ─────────────────────────────────────
+        // ── 1. Günlük Seri & Motivasyon Kartı (🔥 10, 30, 50, 100, 200, 400 Gün) ──
+        _buildStreakCard(streakData, isDark),
+        const SizedBox(height: 14),
+
+        // ── 2. Günlük İlerleme Özeti (Tamamlanan / 7) ─────────────────
         Container(
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
@@ -751,7 +756,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
         ),
         const SizedBox(height: 18),
 
-        // ── 5 Vakit Namaz Kontrol Listesi ─────────────────────────
+        // ── 3. 5 Vakit Namaz Kontrol Listesi ─────────────────────────
         _buildHabitItem('Sabah Namazı', 'fajr', todayEntry.fajr, Icons.wb_twilight_rounded, isDark),
         _buildHabitItem('Öğle Namazı', 'dhuhr', todayEntry.dhuhr, Icons.wb_sunny_rounded, isDark),
         _buildHabitItem('İkindi Namazı', 'asr', todayEntry.asr, Icons.wb_sunny_outlined, isDark),
@@ -759,14 +764,606 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
         _buildHabitItem('Yatsı Namazı', 'isha', todayEntry.isha, Icons.nightlight_round, isDark),
         const SizedBox(height: 10),
 
-        // ── Kur'an & Zikir Takibi ────────────────────────────────
+        // ── 4. Kur'an & Zikir Takibi ────────────────────────────────
         _buildHabitItem('Günlük Kur\'an Tilaveti', 'quran', todayEntry.quran, Icons.menu_book_rounded, isDark),
         _buildHabitItem('Günlük Zikir & Tesbihat', 'zikr', todayEntry.zikr, Icons.fingerprint_rounded, isDark),
       ],
     );
   }
 
+  /// Günlük Seri & Motivasyon Kartı
+  Widget _buildStreakCard(WorshipStreakData streak, bool isDark) {
+    final hasStreak = streak.currentStreak > 0;
+    final nextMilestone = streak.nextMilestone;
+
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: isDark
+              ? [const Color(0xFF04241E), const Color(0xFF07382E)]
+              : [const Color(0xFF063B32), const Color(0xFF084F43)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: const Color(0xFFD4AF37).withValues(alpha: 0.5),
+          width: 1.3,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+            blurRadius: 18,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Üst Satır: Seri Başlığı + En İyi Seri Rozeti
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFDF7A).withValues(alpha: 0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Text('🔥', style: TextStyle(fontSize: 20)),
+                  ),
+                  const SizedBox(width: 10),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        hasStreak
+                            ? '${streak.currentStreak}. Gün Serisi'
+                            : 'Günlük Seri Başlat',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFFFFDF7A),
+                        ),
+                      ),
+                      Text(
+                        streak.isTodayCompleted
+                            ? '✨ Bugünkü görevler tamamlandı!'
+                            : 'Bugün için ${7 - streak.todayCompletedCount} görev kaldı',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: streak.isTodayCompleted
+                              ? const Color(0xFF85E3B3)
+                              : Colors.white70,
+                          fontWeight: streak.isTodayCompleted
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              // En İyi Seri
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: Colors.black26,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: const Color(0xFFD4AF37).withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.emoji_events_rounded,
+                        color: Color(0xFFFFDF7A), size: 14),
+                    const SizedBox(width: 4),
+                    Text(
+                      'En İyi: ${streak.bestStreak}',
+                      style: const TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 16),
+
+          // İlerleme ve Bir Sonraki Hedef (10, 30, 50, 100, 200, 400 Gün)
+          if (nextMilestone != null) ...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Text(nextMilestone.badgeIcon,
+                        style: const TextStyle(fontSize: 14)),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Hedef: ${nextMilestone.badgeName}',
+                      style: const TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+                Text(
+                  '${streak.daysToNextMilestone} gün kaldı',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFFFFDF7A),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: LinearProgressIndicator(
+                value: streak.milestoneProgress,
+                minHeight: 7,
+                backgroundColor: Colors.white12,
+                valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFFFDF7A)),
+              ),
+            ),
+            const SizedBox(height: 14),
+          ],
+
+          // Motive Edici Sure & Ödüller Butonu
+          InkWell(
+            onTap: () => _showMilestonesSheet(context, streak, isDark),
+            borderRadius: BorderRadius.circular(14),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: const Color(0xFFD4AF37).withValues(alpha: 0.5),
+                  width: 1,
+                ),
+              ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.workspace_premium_rounded,
+                      color: Color(0xFFFFDF7A), size: 18),
+                  SizedBox(width: 8),
+                  Text(
+                    'Motive Edici Sureler & Ödüller (10-400 Gün)',
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFFFDF7A),
+                    ),
+                  ),
+                  SizedBox(width: 4),
+                  Icon(Icons.chevron_right_rounded,
+                      color: Color(0xFFFFDF7A), size: 18),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Dönüm Noktaları, Sureler ve Ödüller Alt Sayfası
+  void _showMilestonesSheet(BuildContext context, WorshipStreakData streak, bool isDark) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return Container(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.88,
+          ),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF031B17) : const Color(0xFF052B24),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+            border: Border.all(
+              color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+              width: 1.2,
+            ),
+          ),
+          child: Column(
+            children: [
+              // Üst Sürükleme Çizgisi
+              const SizedBox(height: 12),
+              Container(
+                width: 44,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white24,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 14),
+
+              // Başlık
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  children: [
+                    const Text(
+                      'İbadet Serisi Dönüm Noktaları & Beratlar',
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFFFFDF7A),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '5 Vakit namaz, Kur\'an ve zikir ile serinizi koruyun. Her dönüm noktasında (10, 30, 50, 100, 200, 400. gün) motive edici sure ve beratlar kazanın.',
+                      style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.7)),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              const Divider(color: Colors.white12, height: 1),
+
+              // Dönüm Noktaları Listesi
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(18, 14, 18, 24),
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: WorshipStreakMilestone.allMilestones.length,
+                  itemBuilder: (context, index) {
+                    final milestone = WorshipStreakMilestone.allMilestones[index];
+                    final isUnlocked = streak.currentStreak >= milestone.days ||
+                        streak.bestStreak >= milestone.days;
+
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 14),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: isUnlocked
+                            ? const Color(0xFF083C32)
+                            : Colors.white.withValues(alpha: 0.04),
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(
+                          color: isUnlocked
+                              ? const Color(0xFFD4AF37)
+                              : Colors.white12,
+                          width: isUnlocked ? 1.4 : 1,
+                        ),
+                        boxShadow: isUnlocked
+                            ? [
+                                BoxShadow(
+                                  color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                )
+                              ]
+                            : null,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Başlık Satırı
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  Text(milestone.badgeIcon,
+                                      style: const TextStyle(fontSize: 22)),
+                                  const SizedBox(width: 8),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        milestone.title,
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold,
+                                          color: isUnlocked
+                                              ? const Color(0xFFFFDF7A)
+                                              : Colors.white,
+                                        ),
+                                      ),
+                                      Text(
+                                        '${milestone.days}. Gün Hedefi',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: isUnlocked
+                                              ? const Color(0xFF85E3B3)
+                                              : Colors.white60,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              // Rozet Durumu
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 9, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: isUnlocked
+                                      ? const Color(0xFFD4AF37)
+                                      : Colors.white10,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Text(
+                                  isUnlocked
+                                      ? '🏆 KAZANILDI'
+                                      : '🔒 ${milestone.days - streak.currentStreak > 0 ? "${milestone.days - streak.currentStreak} Gün" : "Kilitli"}',
+                                  style: TextStyle(
+                                    fontSize: 10.5,
+                                    fontWeight: FontWeight.bold,
+                                    color: isUnlocked ? Colors.black87 : Colors.white60,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+
+                          // Sure & Ayet Referansı
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: Colors.black26,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.menu_book_rounded,
+                                    color: Color(0xFFFFDF7A), size: 14),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    'Motive Edici Sure: ${milestone.ayahReference}',
+                                    style: const TextStyle(
+                                      color: Color(0xFFFFDF7A),
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+
+                          // Ayet Metni ve Meali (Açılmışsa veya detaylı)
+                          if (isUnlocked) ...[
+                            Text(
+                              milestone.arabicText,
+                              style: const TextStyle(
+                                fontFamily: 'Amiri',
+                                fontSize: 16,
+                                height: 1.6,
+                                color: Color(0xFFFFDF7A),
+                              ),
+                              textAlign: TextAlign.right,
+                              textDirection: TextDirection.rtl,
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              milestone.turkishMeaning,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.white70,
+                                fontStyle: FontStyle.italic,
+                                height: 1.4,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                const Icon(Icons.stars_rounded,
+                                    color: Color(0xFF85E3B3), size: 14),
+                                const SizedBox(width: 5),
+                                Expanded(
+                                  child: Text(
+                                    milestone.spiritualVirtue,
+                                    style: const TextStyle(
+                                      fontSize: 11.5,
+                                      color: Color(0xFF85E3B3),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ] else ...[
+                            Text(
+                              'Bu beratı ve ${milestone.surahName} müjdesini açmak için ${milestone.days} gün boyunca 5 vakit namaz ve zikrinizi eksiksiz tamamlayın.',
+                              style: const TextStyle(
+                                fontSize: 11.5,
+                                color: Colors.white54,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  /// Dönüm Noktasına Ulaşıldığında Tebrik Modalı
+  void _showCelebrationDialog(BuildContext context, WorshipStreakMilestone milestone) {
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.all(22),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF012E2B), Color(0xFF034A3E), Color(0xFF011C18)],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+              borderRadius: BorderRadius.circular(28),
+              border: Border.all(color: const Color(0xFFD4AF37), width: 1.8),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFFD4AF37).withValues(alpha: 0.3),
+                  blurRadius: 30,
+                  spreadRadius: 2,
+                ),
+              ],
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(milestone.badgeIcon, style: const TextStyle(fontSize: 48)),
+                  const SizedBox(height: 10),
+                  const Text(
+                    '🎉 MAŞAALLAH! 🎉',
+                    style: TextStyle(
+                      color: Color(0xFFFFDF7A),
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    '${milestone.days}. GÜN SERİSİNE ULAŞTINIZ!',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFD4AF37)),
+                    ),
+                    child: Text(
+                      milestone.badgeName,
+                      style: const TextStyle(
+                        color: Color(0xFFFFDF7A),
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Motive Edici Sure: ${milestone.surahName}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.black38,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      children: [
+                        Text(
+                          milestone.arabicText,
+                          style: const TextStyle(
+                            fontFamily: 'Amiri',
+                            fontSize: 17,
+                            height: 1.6,
+                            color: Color(0xFFFFDF7A),
+                          ),
+                          textAlign: TextAlign.center,
+                          textDirection: TextDirection.rtl,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          milestone.turkishMeaning,
+                          style: const TextStyle(
+                            fontSize: 12.5,
+                            color: Colors.white70,
+                            fontStyle: FontStyle.italic,
+                            height: 1.4,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    milestone.spiritualVirtue,
+                    style: const TextStyle(
+                      color: Color(0xFF85E3B3),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFD4AF37),
+                      foregroundColor: const Color(0xFF012E2B),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    ),
+                    onPressed: () => Navigator.of(ctx).pop(),
+                    child: const Text(
+                      'Manevi Beratı Kabul Et 🤲',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildHabitItem(String title, String habitKey, bool isCompleted, IconData icon, bool isDark) {
+    Future<void> handleToggle() async {
+      HapticFeedback.lightImpact();
+      final milestone = await ref.read(worshipTrackerProvider.notifier).toggleHabit(habitKey: habitKey);
+      if (milestone != null && mounted) {
+        _showCelebrationDialog(context, milestone);
+      }
+    }
+
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
@@ -804,15 +1401,9 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
           activeColor: const Color(0xFFD4AF37),
           checkColor: Colors.black,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-          onChanged: (_) {
-            HapticFeedback.lightImpact();
-            ref.read(worshipTrackerProvider.notifier).toggleHabit(habitKey: habitKey);
-          },
+          onChanged: (_) => handleToggle(),
         ),
-        onTap: () {
-          HapticFeedback.lightImpact();
-          ref.read(worshipTrackerProvider.notifier).toggleHabit(habitKey: habitKey);
-        },
+        onTap: handleToggle,
       ),
     );
   }

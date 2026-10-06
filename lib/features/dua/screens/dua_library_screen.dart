@@ -189,7 +189,10 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
             left: 0,
             right: 0,
             bottom: 0,
-            child: QuranAudioPlayerBar(),
+            child: SafeArea(
+              top: false,
+              child: QuranAudioPlayerBar(),
+            ),
           ),
         ],
       ),

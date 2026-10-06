@@ -36,6 +36,65 @@ void main() {
       expect(from.fajr, isTrue);
       expect(from.dhuhr, isFalse);
     });
+
+    test('WorshipStreakMilestone tüm 6 dönüm noktasını ve motive edici sureleri içermeli', () {
+      expect(WorshipStreakMilestone.allMilestones.length, 6);
+      final days = WorshipStreakMilestone.allMilestones.map((m) => m.days).toList();
+      expect(days, [10, 30, 50, 100, 200, 400]);
+
+      // 10. gün Asr Suresi
+      expect(WorshipStreakMilestone.allMilestones[0].surahName, 'Asr Suresi');
+      // 30. gün İnşirah Suresi
+      expect(WorshipStreakMilestone.allMilestones[1].surahName, 'İnşirah Suresi');
+      // 50. gün Bakara Suresi
+      expect(WorshipStreakMilestone.allMilestones[2].surahName, 'Bakara Suresi');
+      // 100. gün Mü'minûn Suresi
+      expect(WorshipStreakMilestone.allMilestones[3].surahName, 'Mü\'minûn Suresi');
+      // 200. gün Fetih Suresi
+      expect(WorshipStreakMilestone.allMilestones[4].surahName, 'Fetih Suresi');
+      // 400. gün Fecr Suresi
+      expect(WorshipStreakMilestone.allMilestones[5].surahName, 'Fecr Suresi');
+
+      for (final m in WorshipStreakMilestone.allMilestones) {
+        expect(m.arabicText.isNotEmpty, isTrue);
+        expect(m.turkishMeaning.isNotEmpty, isTrue);
+        expect(m.spiritualVirtue.isNotEmpty, isTrue);
+        expect(m.badgeName.isNotEmpty, isTrue);
+      }
+    });
+
+    test('WorshipTrackerNotifier kesintisiz günlük seriyi doğru hesaplamalı', () {
+      final notifier = WorshipTrackerNotifier();
+      final now = DateTime.now();
+
+      // Hiçbir kayıt yokken seri 0
+      notifier.state = {};
+      expect(notifier.calculateCurrentStreak(), 0);
+
+      // Bugün 7/7 tamamlandığında seri 1
+      final todayKey = WorshipTrackerNotifier.formatDateKey(now);
+      notifier.state = {
+        todayKey: const DailyWorshipEntry(
+          dateKey: '',
+          fajr: true, dhuhr: true, asr: true, maghrib: true, isha: true, quran: true, zikr: true,
+        ),
+      };
+      expect(notifier.calculateCurrentStreak(), 1);
+
+      // Dün ve bugün tamamlandığında seri 2
+      final yesterdayKey = WorshipTrackerNotifier.formatDateKey(now.subtract(const Duration(days: 1)));
+      notifier.state = {
+        todayKey: const DailyWorshipEntry(
+          dateKey: '',
+          fajr: true, dhuhr: true, asr: true, maghrib: true, isha: true, quran: true, zikr: true,
+        ),
+        yesterdayKey: const DailyWorshipEntry(
+          dateKey: '',
+          fajr: true, dhuhr: true, asr: true, maghrib: true, isha: true, quran: true, zikr: true,
+        ),
+      };
+      expect(notifier.calculateCurrentStreak(), 2);
+    });
   });
 
   group('Kur\'an Tilavet ve Okuma Özellikleri Testleri', () {

@@ -23,7 +23,7 @@ class QuranAudioPlayerBar extends ConsumerWidget {
     final currSecs = audioState.position.inSeconds.toDouble().clamp(0.0, totalSecs);
 
     return Container(
-      margin: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF032822) : const Color(0xFF01362F),

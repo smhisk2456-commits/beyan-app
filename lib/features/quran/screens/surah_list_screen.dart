@@ -11,7 +11,6 @@ import '../../quran/providers/quran_reading_providers.dart';
 import '../../quran/screens/surah_detail_screen.dart';
 import '../../home/widgets/surah_list_item.dart';
 import '../../monetization/widgets/banner_ad_widget.dart';
-import '../widgets/quran_audio_player_bar.dart';
 
 /// Bağımsız sure listesi ekranı (Kur'an-ı Kerim Menü Sekmesi).
 class SurahListScreen extends ConsumerStatefulWidget {
@@ -278,14 +277,6 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
               // Alt banner reklam
               const BannerAdWidget(),
             ],
-          ),
-
-          // Alt Mini Tilavet Oynatıcısı
-          const Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: QuranAudioPlayerBar(),
           ),
         ],
       ),
