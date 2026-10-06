@@ -20,8 +20,8 @@ void main() {
     });
 
     test('OLED Black paleti saf siyah (#000000) zemin rengine sahip olmalı', () {
-      final oled = AppThemePalette.oledBlack;
-      expect(oled.darkBackground.value, 0xFF000000);
+      const oled = AppThemePalette.oledBlack;
+      expect(oled.darkBackground.toARGB32(), 0xFF000000);
       expect(oled.accentGold, isNotNull);
     });
 

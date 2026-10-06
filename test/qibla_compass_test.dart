@@ -1,10 +1,14 @@
 import 'package:adhan/adhan.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:islamic_app/features/prayer_times/models/prayer_time_model.dart';
 import 'package:islamic_app/features/notifications/services/notification_service.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  SharedPreferences.setMockInitialValues({});
+
   group('Kıble ve Pusula Testleri', () {
     test('İstanbul için Kıble açısı yaklaşık 152 derece olmalı', () {
       final istanbul = Coordinates(41.0082, 28.9784);
@@ -38,6 +42,11 @@ void main() {
       final s1 = NotificationService.instance;
       final s2 = NotificationService();
       expect(identical(s1, s2), isTrue);
+    });
+
+    test('NotificationService varsayılan makam istanbul olmalı', () async {
+      final service = NotificationService.instance;
+      expect(await service.getSelectedMakam(), isNotNull);
     });
   });
 }

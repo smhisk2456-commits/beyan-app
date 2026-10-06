@@ -5,6 +5,7 @@ import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
+import 'package:permission_handler/permission_handler.dart';
 import '../../prayer_times/models/prayer_time_model.dart';
 import '../../prayer_times/services/prayer_time_service.dart';
 import '../models/adhan_makam.dart';
@@ -54,11 +55,15 @@ class NotificationService {
       const androidSettings =
           AndroidInitializationSettings('@mipmap/ic_launcher');
 
-      // iOS Ayarları
+      // iOS Ayarları (Açılışta izinleri talep et ve ön plandayken de banner/ses göster)
       const darwinSettings = DarwinInitializationSettings(
-        requestAlertPermission: false,
-        requestBadgePermission: false,
-        requestSoundPermission: false,
+        requestAlertPermission: true,
+        requestBadgePermission: true,
+        requestSoundPermission: true,
+        defaultPresentAlert: true,
+        defaultPresentSound: true,
+        defaultPresentBadge: true,
+        defaultPresentBanner: true,
       );
 
       const initSettings = InitializationSettings(
@@ -92,23 +97,43 @@ class NotificationService {
       }
 
       _isInitialized = true;
+
+      // Uygulama açılışında izinleri kontrol et ve gerekirse iste
+      await requestPermissions();
     } catch (e) {
       debugPrint('NotificationService başlatma hatası: $e');
     }
   }
 
-  /// Kullanıcıdan bildirim izni talep eder.
+  /// Cihaz bildirim izninin aktif olup olmadığını kontrol eder.
+  Future<bool> hasPermission() async {
+    try {
+      final status = await Permission.notification.status;
+      return status.isGranted || status.isProvisional;
+    } catch (e) {
+      debugPrint('hasPermission kontrol hatası: $e');
+      return true;
+    }
+  }
+
+  /// Kullanıcıdan bildirim izni talep eder (iOS ve Android).
   Future<bool> requestPermissions() async {
     try {
+      // 1. Genel bildirim izni (Android 13+ & iOS)
+      final status = await Permission.notification.request();
+
+      // 2. Android platformuna özel bildirim & tam zamanlı alarm izni
       final androidImplementation = _notifications
           .resolvePlatformSpecificImplementation<
               AndroidFlutterLocalNotificationsPlugin>();
       if (androidImplementation != null) {
-        final granted =
-            await androidImplementation.requestNotificationsPermission();
-        return granted ?? false;
+        await androidImplementation.requestNotificationsPermission();
+        try {
+          await androidImplementation.requestExactAlarmsPermission();
+        } catch (_) {}
       }
 
+      // 3. iOS platformuna özel bildirim izinleri
       final iosImplementation = _notifications
           .resolvePlatformSpecificImplementation<
               IOSFlutterLocalNotificationsPlugin>();
@@ -118,12 +143,14 @@ class NotificationService {
           badge: true,
           sound: true,
         );
-        return granted ?? false;
+        return granted ?? status.isGranted;
       }
+
+      return status.isGranted || status.isProvisional;
     } catch (e) {
       debugPrint('Bildirim izni isteme hatası: $e');
+      return false;
     }
-    return true;
   }
 
   // ── Tercihler (SharedPreferences) ──────────────────────────
@@ -245,9 +272,12 @@ class NotificationService {
                 ),
                 iOS: DarwinNotificationDetails(
                   presentAlert: true,
+                  presentBanner: true,
+                  presentList: true,
                   presentBadge: true,
                   presentSound: !isSilent,
                   sound: soundResource != null ? '$soundResource.caf' : null,
+                  interruptionLevel: InterruptionLevel.timeSensitive,
                 ),
               ),
               androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
@@ -278,8 +308,11 @@ class NotificationService {
                   ),
                   iOS: DarwinNotificationDetails(
                     presentAlert: true,
+                    presentBanner: true,
+                    presentList: true,
                     presentBadge: false,
                     presentSound: true,
+                    interruptionLevel: InterruptionLevel.timeSensitive,
                   ),
                 ),
                 androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
@@ -305,24 +338,35 @@ class NotificationService {
   /// Anında test bildirimi gönderir (Kullanıcı testi için).
   Future<void> sendTestNotification() async {
     try {
+      final currentMakam = await getSelectedMakam();
+      final isSilent = currentMakam == AdhanMakam.silent;
+      final soundResource = currentMakam.soundResourceName;
+
       await _notifications.show(
         id: 999,
         title: 'Beyân Ezan Bildirimi Testi 🔔',
-        body: 'Bildirim sistemi sorunsuz çalışıyor! Namaz vakitlerinde size haber verilecek.',
-        notificationDetails: const NotificationDetails(
+        body: 'Bildirim sistemi sorunsuz çalışıyor! (${currentMakam.title} seçili).',
+        notificationDetails: NotificationDetails(
           android: AndroidNotificationDetails(
             channelId,
             channelName,
             channelDescription: channelDesc,
-            importance: Importance.high,
-            priority: Priority.high,
-            playSound: true,
+            importance: isSilent ? Importance.low : Importance.high,
+            priority: isSilent ? Priority.low : Priority.high,
+            playSound: !isSilent,
+            sound: soundResource != null
+                ? RawResourceAndroidNotificationSound(soundResource)
+                : null,
             enableVibration: true,
           ),
           iOS: DarwinNotificationDetails(
             presentAlert: true,
+            presentBanner: true,
+            presentList: true,
             presentBadge: true,
-            presentSound: true,
+            presentSound: !isSilent,
+            sound: soundResource != null ? '$soundResource.caf' : null,
+            interruptionLevel: InterruptionLevel.timeSensitive,
           ),
         ),
       );

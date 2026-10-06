@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../prayer_times/models/prayer_time_model.dart';
 import '../models/adhan_makam.dart';
@@ -24,10 +25,12 @@ class NotificationSettingsSheet extends StatefulWidget {
       _NotificationSettingsSheetState();
 }
 
-class _NotificationSettingsSheetState extends State<NotificationSettingsSheet> {
+class _NotificationSettingsSheetState extends State<NotificationSettingsSheet>
+    with WidgetsBindingObserver {
   final _service = NotificationService.instance;
 
   bool _loading = true;
+  bool _hasPermission = true;
   bool _masterEnabled = true;
   bool _earlyReminder = true;
   AdhanMakam _currentMakam = AdhanMakam.istanbul;
@@ -36,13 +39,35 @@ class _NotificationSettingsSheetState extends State<NotificationSettingsSheet> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadSettings();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _checkPermission();
+    }
+  }
+
+  Future<void> _checkPermission() async {
+    final hasPerm = await _service.hasPermission();
+    if (mounted) {
+      setState(() => _hasPermission = hasPerm);
+    }
   }
 
   Future<void> _loadSettings() async {
     final master = await _service.isMasterEnabled();
     final early = await _service.isEarlyReminderEnabled();
     final makam = await _service.getSelectedMakam();
+    final hasPerm = await _service.hasPermission();
 
     for (final p in PrayerName.values) {
       _prayerStates[p] = await _service.isPrayerEnabled(p);
@@ -50,6 +75,7 @@ class _NotificationSettingsSheetState extends State<NotificationSettingsSheet> {
 
     if (mounted) {
       setState(() {
+        _hasPermission = hasPerm;
         _masterEnabled = master;
         _earlyReminder = early;
         _currentMakam = makam;
@@ -58,8 +84,19 @@ class _NotificationSettingsSheetState extends State<NotificationSettingsSheet> {
     }
   }
 
+  Future<void> _requestOrOpenSettings() async {
+    final granted = await _service.requestPermissions();
+    if (!granted) {
+      await openAppSettings();
+    }
+    await _checkPermission();
+  }
+
   Future<void> _toggleMaster(bool val) async {
     HapticFeedback.lightImpact();
+    if (val && !_hasPermission) {
+      await _requestOrOpenSettings();
+    }
     setState(() => _masterEnabled = val);
     await _service.setMasterEnabled(val);
   }
@@ -78,7 +115,39 @@ class _NotificationSettingsSheetState extends State<NotificationSettingsSheet> {
 
   Future<void> _sendTest() async {
     HapticFeedback.mediumImpact();
-    await _service.requestPermissions();
+    final granted = await _service.requestPermissions();
+    await _checkPermission();
+
+    if (!granted && !_hasPermission) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.warning_amber_rounded, color: Colors.orangeAccent, size: 20),
+                SizedBox(width: 10),
+                Expanded(
+                  child: Text('Cihaz bildirim izni kapalı! Lütfen ayarlardan izin verin.'),
+                ),
+              ],
+            ),
+            backgroundColor: Color(0xFF3E1203),
+            action: SnackBarAction(
+              label: 'Ayarlar',
+              textColor: Color(0xFFFFDF7A),
+              onPressed: openAppSettings,
+            ),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(12)),
+            ),
+            duration: Duration(seconds: 4),
+          ),
+        );
+      }
+      return;
+    }
+
     await _service.sendTestNotification();
 
     if (mounted) {
@@ -191,6 +260,78 @@ class _NotificationSettingsSheetState extends State<NotificationSettingsSheet> {
                   ),
 
                   const SizedBox(height: 20),
+
+                  // ── İzin Uyarısı Banner (Eğer kapalıysa) ────────────
+                  if (!_hasPermission) ...[
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.shade900.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: Colors.amber.shade600.withValues(alpha: 0.8),
+                          width: 1.2,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.warning_amber_rounded,
+                            color: Colors.amber,
+                            size: 28,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Cihaz Bildirim İzni Kapalı',
+                                  style: TextStyle(
+                                    color: Colors.amber,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'Ezan vaktinde bildirim alabilmek için sistem ayarlarından izin vermelisiniz.',
+                                  style: TextStyle(
+                                    color: isDark ? Colors.white70 : Colors.black87,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          ElevatedButton(
+                            onPressed: _requestOrOpenSettings,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFD4AF37),
+                              foregroundColor: const Color(0xFF033E35),
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 8,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: const Text(
+                              'İzin Ver',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
 
                   // ── Ana Açma / Kapama Kartı ──────────────────────
                   Container(
