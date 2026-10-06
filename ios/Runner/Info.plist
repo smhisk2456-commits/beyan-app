@@ -35,6 +35,12 @@
     <key>NSLocationAlwaysUsageDescription</key>
     <string>Namaz vakitlerini arka planda güncellemek için konumunuza ihtiyaç duyulmaktadır.</string>
 
+    <!-- Kilit Ekranı / Canlı Etkinlikler (Live Activities & Dynamic Island) ─ -->
+    <key>NSSupportsLiveActivities</key>
+    <true/>
+    <key>NSSupportsLiveActivitiesFrequentUpdates</key>
+    <true/>
+
     <!-- UI Ayarları ─────────────────────────────────────────────── -->
     <key>UILaunchStoryboardName</key>
     <string>LaunchScreen</string>

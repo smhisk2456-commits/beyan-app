@@ -25,7 +25,7 @@ group.set_path('IslamicAppWidget')
 sources = %w[IslamicAppWidget.swift WidgetVerseData.swift].map { |f| group.new_reference(f) }
 group.new_reference('Info.plist')
 widget.add_file_references(sources)
-widget.add_system_frameworks(%w[WidgetKit SwiftUI])
+widget.add_system_frameworks(%w[WidgetKit SwiftUI ActivityKit])
 
 widget.build_configurations.each do |config|
   s = config.build_settings

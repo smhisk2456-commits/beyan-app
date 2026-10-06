@@ -10,6 +10,7 @@ import '../../prayer_times/providers/prayer_time_providers.dart';
 import '../../widget_service/screens/widget_settings_dialog.dart';
 import '../../qibla/screens/qibla_compass_screen.dart';
 import '../../notifications/screens/notification_settings_sheet.dart';
+import '../../../core/theme/screens/theme_selection_sheet.dart';
 import '../widgets/prayer_card_widget.dart';
 
 /// Ana Ekran – Beyân lüks İslami arayüzü (Kur'an listesi menüden kaldırılmış ferah tasarım).
@@ -591,7 +592,7 @@ class _IslamicAppBar extends ConsumerWidget {
       floating: false,
       pinned: true,
       elevation: 0,
-      backgroundColor: const Color(0xFF01201D),
+      backgroundColor: Theme.of(context).appBarTheme.backgroundColor ?? const Color(0xFF01201D),
       centerTitle: false,
       toolbarHeight: 60,
       title: Row(
@@ -626,9 +627,15 @@ class _IslamicAppBar extends ConsumerWidget {
         ],
       ),
       actions: [
+        // Tema Seçici Butonu
+        IconButton(
+          icon: const Icon(Icons.palette_outlined, color: Color(0xFFFFDF7A)),
+          tooltip: 'Görünüm & Tema',
+          onPressed: () => ThemeSelectionSheet.show(context),
+        ),
         // Dil Seçici Buton
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 2),
           child: InkWell(
             borderRadius: BorderRadius.circular(12),
             onTap: () => showLanguageSelectorSheet(context),

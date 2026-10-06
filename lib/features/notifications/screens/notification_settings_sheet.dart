@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../prayer_times/models/prayer_time_model.dart';
+import '../models/adhan_makam.dart';
 import '../services/notification_service.dart';
+import 'adhan_makam_selector_sheet.dart';
 
 /// Ezan ve Namaz Bildirimleri Lüks Ayarlar Menüsü
 class NotificationSettingsSheet extends StatefulWidget {
@@ -28,6 +30,7 @@ class _NotificationSettingsSheetState extends State<NotificationSettingsSheet> {
   bool _loading = true;
   bool _masterEnabled = true;
   bool _earlyReminder = true;
+  AdhanMakam _currentMakam = AdhanMakam.istanbul;
   final Map<PrayerName, bool> _prayerStates = {};
 
   @override
@@ -39,6 +42,7 @@ class _NotificationSettingsSheetState extends State<NotificationSettingsSheet> {
   Future<void> _loadSettings() async {
     final master = await _service.isMasterEnabled();
     final early = await _service.isEarlyReminderEnabled();
+    final makam = await _service.getSelectedMakam();
 
     for (final p in PrayerName.values) {
       _prayerStates[p] = await _service.isPrayerEnabled(p);
@@ -48,6 +52,7 @@ class _NotificationSettingsSheetState extends State<NotificationSettingsSheet> {
       setState(() {
         _masterEnabled = master;
         _earlyReminder = early;
+        _currentMakam = makam;
         _loading = false;
       });
     }
@@ -294,6 +299,102 @@ class _NotificationSettingsSheetState extends State<NotificationSettingsSheet> {
                             onChanged: _masterEnabled ? _toggleEarly : null,
                           ),
                         ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // ── Ezan Makamı & Ses Tonu Kartı ────────────────
+                  AnimatedOpacity(
+                    duration: const Duration(milliseconds: 200),
+                    opacity: _masterEnabled ? 1.0 : 0.4,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(14),
+                      onTap: _masterEnabled
+                          ? () async {
+                              await AdhanMakamSelectorSheet.show(context);
+                              final updated = await _service.getSelectedMakam();
+                              if (mounted) setState(() => _currentMakam = updated);
+                            }
+                          : null,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: isDark ? const Color(0xFF0D2823) : Colors.grey.shade50,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: isDark
+                                ? const Color(0xFF133B34)
+                                : const Color(0xFFD4AF37).withValues(alpha: 0.35),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                _currentMakam.icon,
+                                color: const Color(0xFFFFDF7A),
+                                size: 18,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Ezan Makamı & Ses Tonu',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13,
+                                      color: isDark ? Colors.white : Colors.black87,
+                                    ),
+                                  ),
+                                  Text(
+                                    _currentMakam.title,
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      color: Color(0xFFFFDF7A),
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    'Değiştir',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFFFFDF7A),
+                                    ),
+                                  ),
+                                  SizedBox(width: 4),
+                                  Icon(
+                                    Icons.arrow_forward_ios_rounded,
+                                    size: 10,
+                                    color: Color(0xFFFFDF7A),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),

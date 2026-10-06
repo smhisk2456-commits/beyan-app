@@ -7,6 +7,7 @@ import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import '../../prayer_times/models/prayer_time_model.dart';
 import '../../prayer_times/services/prayer_time_service.dart';
+import '../models/adhan_makam.dart';
 
 /// Ezan ve Namaz Vakti Yerel Bildirim Servisi
 class NotificationService {
@@ -23,6 +24,7 @@ class NotificationService {
   static const String keyMasterEnabled = 'beyan_notif_master';
   static const String keyEarlyReminder = 'beyan_notif_early_15';
   static const String keySoundEnabled = 'beyan_notif_sound';
+  static const String keyAdhanMakam = 'beyan_adhan_makam';
   static const String _keyPrefixPrayer = 'beyan_notif_prayer_';
 
   // Android Channel
@@ -165,6 +167,26 @@ class NotificationService {
     await scheduleUpcomingPrayers();
   }
 
+  /// Seçili Ezan Makamını getirir (Varsayılan: İstanbul)
+  Future<AdhanMakam> getSelectedMakam() async {
+    final prefs = await SharedPreferences.getInstance();
+    final makamStr = prefs.getString(keyAdhanMakam);
+    if (makamStr != null) {
+      return AdhanMakam.values.firstWhere(
+        (m) => m.name == makamStr,
+        orElse: () => AdhanMakam.istanbul,
+      );
+    }
+    return AdhanMakam.istanbul;
+  }
+
+  /// Ezan Makamını değiştirir ve bildirimleri yeniden planlar.
+  Future<void> setSelectedMakam(AdhanMakam makam) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(keyAdhanMakam, makam.name);
+    await scheduleUpcomingPrayers();
+  }
+
   // ── Planlama (Scheduling) ──────────────────────────────────
 
   /// Önümüzdeki 7 günün namaz vakitlerini planlar.
@@ -176,6 +198,7 @@ class NotificationService {
     }
 
     final earlyReminder = await isEarlyReminderEnabled();
+    final currentMakam = await getSelectedMakam();
     final prayerService = PrayerTimeService();
     final now = DateTime.now();
 
@@ -198,25 +221,33 @@ class NotificationService {
             final scheduledTz = tz.TZDateTime.from(p.time, tz.local);
             final timeStr = prayerService.formatTime(p.time);
 
+            // Makam ses detayı
+            final isSilent = currentMakam == AdhanMakam.silent;
+            final soundResource = currentMakam.soundResourceName;
+
             await _notifications.zonedSchedule(
               id: notifId,
               title: 'Vakit Girdi: ${p.name.turkish}',
               body: '${p.name.turkish} namazı vakti girdi ($timeStr). Haydin namaza!',
               scheduledDate: scheduledTz,
-              notificationDetails: const NotificationDetails(
+              notificationDetails: NotificationDetails(
                 android: AndroidNotificationDetails(
                   channelId,
                   channelName,
                   channelDescription: channelDesc,
-                  importance: Importance.high,
-                  priority: Priority.high,
-                  playSound: true,
+                  importance: isSilent ? Importance.low : Importance.high,
+                  priority: isSilent ? Priority.low : Priority.high,
+                  playSound: !isSilent,
+                  sound: soundResource != null
+                      ? RawResourceAndroidNotificationSound(soundResource)
+                      : null,
                   enableVibration: true,
                 ),
                 iOS: DarwinNotificationDetails(
                   presentAlert: true,
                   presentBadge: true,
-                  presentSound: true,
+                  presentSound: !isSilent,
+                  sound: soundResource != null ? '$soundResource.caf' : null,
                 ),
               ),
               androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,

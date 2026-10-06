@@ -1,5 +1,6 @@
 import WidgetKit
 import SwiftUI
+import ActivityKit
 private let hhmm: DateFormatter = {
     let f = DateFormatter()
     f.locale = Locale(identifier: "tr_TR")
@@ -541,12 +542,131 @@ struct BeyanVerseWidget: Widget {
     }
 }
 
+// MARK: - Live Activity & Dynamic Island (ActivityKit)
+
+@available(iOSApplicationExtension 16.1, *)
+struct PrayerActivityAttributes: ActivityAttributes {
+    public struct ContentState: Codable, Hashable {
+        var prayerName: String
+        var prayerTime: String
+        var targetDate: Date
+        var progress: Double
+    }
+    var title: String
+}
+
+@available(iOSApplicationExtension 16.1, *)
+struct PrayerLiveActivityBanner: View {
+    let context: ActivityViewContext<PrayerActivityAttributes>
+
+    var body: some View {
+        VStack(spacing: 8) {
+            HStack {
+                HStack(spacing: 6) {
+                    Image(systemName: "moon.stars.fill")
+                        .foregroundColor(Color(red: 1.0, green: 0.85, blue: 0.45))
+                    Text("Beyân • Sıradaki: \(context.state.prayerName)")
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundColor(.white)
+                }
+                Spacer()
+                Text(context.state.prayerTime)
+                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                    .foregroundColor(Color(red: 1.0, green: 0.85, blue: 0.45))
+            }
+
+            HStack {
+                Text("Vakte Kalan Süre:")
+                    .font(.system(size: 11))
+                    .foregroundColor(.white.opacity(0.7))
+                Spacer()
+                Text(context.state.targetDate, style: .timer)
+                    .font(.system(size: 16, weight: .bold, design: .monospaced))
+                    .foregroundColor(Color(red: 1.0, green: 0.85, blue: 0.45))
+            }
+
+            ProgressView(value: context.state.progress)
+                .tint(Color(red: 1.0, green: 0.85, blue: 0.45))
+        }
+        .padding(14)
+        .background(
+            LinearGradient(
+                colors: [Color(red: 0.01, green: 0.22, blue: 0.19), Color(red: 0.00, green: 0.12, blue: 0.10)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
+    }
+}
+
+@available(iOSApplicationExtension 16.1, *)
+struct BeyanLiveActivityWidget: Widget {
+    var body: some WidgetConfiguration {
+        ActivityConfiguration(for: PrayerActivityAttributes.self) { context in
+            PrayerLiveActivityBanner(context: context)
+        } dynamicIsland: { context in
+            DynamicIsland {
+                DynamicIslandExpandedRegion(.leading) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "sun.max.fill")
+                            .foregroundColor(Color(red: 1.0, green: 0.85, blue: 0.45))
+                        Text(context.state.prayerName)
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundColor(.white)
+                    }
+                    .padding(.leading, 8)
+                }
+                DynamicIslandExpandedRegion(.trailing) {
+                    Text(context.state.prayerTime)
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                        .foregroundColor(Color(red: 1.0, green: 0.85, blue: 0.45))
+                        .padding(.trailing, 8)
+                }
+                DynamicIslandExpandedRegion(.bottom) {
+                    VStack(spacing: 6) {
+                        HStack {
+                            Text("Kalan:")
+                                .font(.system(size: 12))
+                                .foregroundColor(.white.opacity(0.7))
+                            Spacer()
+                            Text(context.state.targetDate, style: .timer)
+                                .font(.system(size: 14, weight: .bold, design: .monospaced))
+                                .foregroundColor(Color(red: 1.0, green: 0.85, blue: 0.45))
+                        }
+                        ProgressView(value: context.state.progress)
+                            .tint(Color(red: 1.0, green: 0.85, blue: 0.45))
+                    }
+                    .padding(.horizontal, 10)
+                    .padding(.bottom, 6)
+                }
+            } compactLeading: {
+                Image(systemName: "moon.stars.fill")
+                    .foregroundColor(Color(red: 1.0, green: 0.85, blue: 0.45))
+                    .font(.system(size: 12))
+            } compactTrailing: {
+                Text(context.state.targetDate, style: .timer)
+                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                    .foregroundColor(Color(red: 1.0, green: 0.85, blue: 0.45))
+                    .frame(width: 48)
+            } minimal: {
+                Image(systemName: "moon.stars.fill")
+                    .foregroundColor(Color(red: 1.0, green: 0.85, blue: 0.45))
+                    .font(.system(size: 11))
+            }
+        }
+    }
+}
+
 // MARK: - Bundle
 
 @main
 struct BeyanWidgetBundle: WidgetBundle {
+    @WidgetBundleBuilder
     var body: some Widget {
         BeyanVerseWidget()
         BeyanPrayerWidget()
+        if #available(iOSApplicationExtension 16.1, *) {
+            BeyanLiveActivityWidget()
+        }
     }
 }

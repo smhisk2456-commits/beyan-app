@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'core/localization/app_strings.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/theme_provider.dart';
 import 'features/home/screens/home_screen.dart';
 import 'features/prayer_times/screens/prayer_times_screen.dart';
 import 'features/quran/screens/surah_list_screen.dart';
@@ -14,6 +15,7 @@ import 'features/widget_service/background_task_manager.dart';
 
 import 'features/widget_service/screens/widget_center_screen.dart';
 import 'features/notifications/services/notification_service.dart';
+import 'features/live_activity/live_activity_service.dart';
 import 'features/splash/screens/splash_screen.dart';
 import 'core/widgets/luxury_floating_dock.dart';
 
@@ -40,6 +42,9 @@ void main() async {
       // Ezan ve Vakit Bildirim Servisi
       await NotificationService.instance.initialize();
       await NotificationService.instance.scheduleUpcomingPrayers();
+
+      // iOS Canlı Etkinlikler & Dinamik Ada Servisi
+      LiveActivityService.instance.startMonitoring();
     } catch (_) {}
   });
 
@@ -53,6 +58,7 @@ class IslamicApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentLang = ref.watch(appLanguageProvider);
+    final themeState = ref.watch(themeProvider);
 
     return MaterialApp(
       title: 'Beyân',
@@ -68,9 +74,9 @@ class IslamicApp extends ConsumerWidget {
         Locale('en'),
         Locale('ar'),
       ],
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
+      theme: AppTheme.buildTheme(themeState.palette, isDark: false),
+      darkTheme: AppTheme.buildTheme(themeState.palette, isDark: true),
+      themeMode: themeState.mode,
       home: const SplashScreen(),
     );
   }

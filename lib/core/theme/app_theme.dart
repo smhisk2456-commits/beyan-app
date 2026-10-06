@@ -1,15 +1,120 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// Uygulamanın renk paleti ve tema tanımları.
-/// Yeşil/Teal tonları esas alınmıştır.
+/// Kullanıcının seçebileceği premium renk paletleri.
+enum AppThemePalette {
+  /// Klasik zümrüt yeşili ve altın
+  emerald,
+
+  /// OLED ekranlar için saf siyah ve amber altın
+  oledBlack,
+
+  /// Kâbe mermeri ve örtü hatları (Koyu bazalt füme)
+  kaabaSlate,
+
+  /// Gece göğü safiri ve şampanya altın
+  deepSapphire,
+}
+
+extension AppThemePaletteExtension on AppThemePalette {
+  String get title {
+    switch (this) {
+      case AppThemePalette.emerald:
+        return 'Zümrüt & Altın';
+      case AppThemePalette.oledBlack:
+        return 'Gece Siyahı (OLED)';
+      case AppThemePalette.kaabaSlate:
+        return 'Kâbe Taş Grisi';
+      case AppThemePalette.deepSapphire:
+        return 'Derin Lacivert';
+    }
+  }
+
+  String get description {
+    switch (this) {
+      case AppThemePalette.emerald:
+        return 'Geleneksel vakarlı zümrüt yeşili ve asil altın';
+      case AppThemePalette.oledBlack:
+        return 'Saf zifiri siyah ve sıcak kehribar, OLED dostu';
+      case AppThemePalette.kaabaSlate:
+        return 'Kâbe mermeri tonları, asil füme ve altın';
+      case AppThemePalette.deepSapphire:
+        return 'Gece göğü safiri ve şampanya altın ışıltısı';
+    }
+  }
+
+  Color get primaryColor {
+    switch (this) {
+      case AppThemePalette.emerald:
+        return const Color(0xFF033E35);
+      case AppThemePalette.oledBlack:
+        return const Color(0xFF14171A);
+      case AppThemePalette.kaabaSlate:
+        return const Color(0xFF262A2F);
+      case AppThemePalette.deepSapphire:
+        return const Color(0xFF0C1B33);
+    }
+  }
+
+  Color get accentGold {
+    switch (this) {
+      case AppThemePalette.emerald:
+        return const Color(0xFFD4AF37);
+      case AppThemePalette.oledBlack:
+        return const Color(0xFFFFB800);
+      case AppThemePalette.kaabaSlate:
+        return const Color(0xFFC5A059);
+      case AppThemePalette.deepSapphire:
+        return const Color(0xFFE5C07B);
+    }
+  }
+
+  Color get darkBackground {
+    switch (this) {
+      case AppThemePalette.emerald:
+        return const Color(0xFF071B18);
+      case AppThemePalette.oledBlack:
+        return const Color(0xFF000000); // Gerçek OLED Black
+      case AppThemePalette.kaabaSlate:
+        return const Color(0xFF101214);
+      case AppThemePalette.deepSapphire:
+        return const Color(0xFF070E1A);
+    }
+  }
+
+  Color get darkSurface {
+    switch (this) {
+      case AppThemePalette.emerald:
+        return const Color(0xFF0D2823);
+      case AppThemePalette.oledBlack:
+        return const Color(0xFF0B0D0F);
+      case AppThemePalette.kaabaSlate:
+        return const Color(0xFF181B1E);
+      case AppThemePalette.deepSapphire:
+        return const Color(0xFF0E1C33);
+    }
+  }
+
+  Color get darkCard {
+    switch (this) {
+      case AppThemePalette.emerald:
+        return const Color(0xFF133630);
+      case AppThemePalette.oledBlack:
+        return const Color(0xFF13171B);
+      case AppThemePalette.kaabaSlate:
+        return const Color(0xFF22262B);
+      case AppThemePalette.deepSapphire:
+        return const Color(0xFF162947);
+    }
+  }
+}
+
+/// Statik geri uyumluluk renkleri.
 abstract class AppColors {
-  // ── Primary Palette (Derin Zümrüt Yeşili) ─────────────────────
   static const Color primary = Color(0xFF033E35);
   static const Color primaryDark = Color(0xFF012E2B);
   static const Color primaryLight = Color(0xFF095A4D);
 
-  // ── Emerald & Green Accents ──────────────────────────────────
   static const Color emerald = Color(0xFF012E2B);
   static const Color emeraldLight = Color(0xFF064E43);
   static const Color teal = Color(0xFF033E35);
@@ -18,41 +123,34 @@ abstract class AppColors {
   static const Color green = Color(0xFF1B5E20);
   static const Color greenLight = Color(0xFF43A047);
 
-  // ── Background & Surface ─────────────────────────────────────
   static const Color background = Color(0xFFF6F8F7);
   static const Color surface = Color(0xFFFFFFFF);
   static const Color cardColor = Color(0xFFFFFFFF);
 
-  // ── Dark Theme (Derin Gece Zümrüdü) ──────────────────────────
   static const Color darkBackground = Color(0xFF071B18);
   static const Color darkSurface = Color(0xFF0D2823);
   static const Color darkCard = Color(0xFF133630);
 
-  // ── Text Colors ──────────────────────────────────────────────
   static const Color textPrimary = Color(0xFF11221F);
   static const Color textSecondary = Color(0xFF5B6E6A);
   static const Color textHint = Color(0xFF94A3A0);
   static const Color textOnPrimary = Color(0xFFFFFFFF);
 
-  // ── Arabic Text ──────────────────────────────────────────────
   static const Color arabicText = Color(0xFF11221F);
-  static const Color arabicTextDark = Color(0xFFF5EEDB);  // Lüks Fildişi ton
+  static const Color arabicTextDark = Color(0xFFF5EEDB);
 
-  // ── Semantic & Luxury Gold ───────────────────────────────────
-  static const Color gold = Color(0xFFD4AF37);            // Asil İslami Altın
-  static const Color goldLight = Color(0xFFFFDF7A);       // Parlak Altın Vurgu
+  static const Color gold = Color(0xFFD4AF37);
+  static const Color goldLight = Color(0xFFFFDF7A);
   static const Color goldDark = Color(0xFFAA8018);
   static const Color divider = Color(0xFFE2EBE8);
   static const Color shadow = Color(0x1A012E2B);
 }
 
-/// Uygulama genelinde kullanılan metin stilleri.
+/// Tipografi
 abstract class AppTextStyles {
-  /// Arapça metinler için özel stil – Amiri fontu ile
   static TextStyle arabicLarge({Color? color}) => TextStyle(
     fontFamily: 'Amiri',
     fontSize: 28.0,
-    // Harekelerin kesişmemesi için geniş satır yüksekliği
     height: 2.0,
     fontWeight: FontWeight.normal,
     color: color ?? AppColors.arabicText,
@@ -76,7 +174,6 @@ abstract class AppTextStyles {
     color: color ?? AppColors.arabicText,
   );
 
-  /// Başlık stilleri – Amiri (başlıklar için)
   static TextStyle headingLarge({Color? color}) => TextStyle(
     fontFamily: 'Amiri',
     fontSize: 26.0,
@@ -94,205 +191,217 @@ abstract class AppTextStyles {
   );
 }
 
-/// Ana tema yapılandırması.
+/// Dinamik ve Palet Duyarlı Tema Fabrikası.
 abstract class AppTheme {
-  // ─────────────────────────── Light Theme ──────────────────────────────
-  static ThemeData get lightTheme => ThemeData(
-    useMaterial3: true,
-    brightness: Brightness.light,
+  /// Varsayılan Light Theme
+  static ThemeData get lightTheme => buildTheme(AppThemePalette.emerald, isDark: false);
 
-    // ── Renk Şeması ─────────────────────────────────────────────
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: AppColors.teal,
-      primary: AppColors.teal,
-      secondary: AppColors.primary,
-      tertiary: AppColors.gold,
-      surface: AppColors.surface,
-      error: const Color(0xFFD32F2F),
+  /// Varsayılan Dark Theme
+  static ThemeData get darkTheme => buildTheme(AppThemePalette.emerald, isDark: true);
+
+  /// Seçili palete göre tema inşa eder.
+  static ThemeData buildTheme(AppThemePalette palette, {required bool isDark}) {
+    if (isDark) {
+      return _buildDarkTheme(palette);
+    } else {
+      return _buildLightTheme(palette);
+    }
+  }
+
+  static ThemeData _buildLightTheme(AppThemePalette palette) {
+    final primary = palette.primaryColor;
+    final gold = palette.accentGold;
+
+    return ThemeData(
+      useMaterial3: true,
       brightness: Brightness.light,
-    ),
-
-    // ── Scaffold ─────────────────────────────────────────────────
-    scaffoldBackgroundColor: AppColors.background,
-
-    // ── AppBar ───────────────────────────────────────────────────
-    appBarTheme: AppBarTheme(
-      backgroundColor: AppColors.teal,
-      foregroundColor: Colors.white,
-      elevation: 0,
-      centerTitle: true,
-      titleTextStyle: GoogleFonts.lato(
-        fontSize: 20,
-        fontWeight: FontWeight.w600,
-        color: Colors.white,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: primary,
+        primary: primary,
+        secondary: primary,
+        tertiary: gold,
+        surface: AppColors.surface,
+        error: const Color(0xFFD32F2F),
+        brightness: Brightness.light,
       ),
-      iconTheme: const IconThemeData(color: Colors.white),
-    ),
-
-    // ── Card ─────────────────────────────────────────────────────
-    cardTheme: CardThemeData(
-      color: AppColors.cardColor,
-      elevation: 2,
-      shadowColor: AppColors.shadow,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-    ),
-
-    // ── Elevated Button ──────────────────────────────────────────
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.teal,
+      scaffoldBackgroundColor: AppColors.background,
+      appBarTheme: AppBarTheme(
+        backgroundColor: primary,
         foregroundColor: Colors.white,
-        elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+        elevation: 0,
+        centerTitle: true,
+        titleTextStyle: GoogleFonts.lato(
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+          color: Colors.white,
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-        textStyle: GoogleFonts.lato(
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      cardTheme: CardThemeData(
+        color: AppColors.cardColor,
+        elevation: 2,
+        shadowColor: AppColors.shadow,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: primary,
+          foregroundColor: Colors.white,
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          textStyle: GoogleFonts.lato(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      textTheme: GoogleFonts.latoTextTheme().copyWith(
+        displayLarge: GoogleFonts.lato(
+          fontSize: 32,
+          fontWeight: FontWeight.bold,
+          color: AppColors.textPrimary,
+        ),
+        titleLarge: GoogleFonts.lato(
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+          color: AppColors.textPrimary,
+        ),
+        titleMedium: GoogleFonts.lato(
           fontSize: 16,
           fontWeight: FontWeight.w600,
+          color: AppColors.textPrimary,
+        ),
+        bodyLarge: GoogleFonts.lato(
+          fontSize: 16,
+          color: AppColors.textPrimary,
+        ),
+        bodyMedium: GoogleFonts.lato(
+          fontSize: 14,
+          color: AppColors.textSecondary,
+        ),
+        bodySmall: GoogleFonts.lato(
+          fontSize: 12,
+          color: AppColors.textHint,
         ),
       ),
-    ),
+      dividerTheme: const DividerThemeData(
+        color: AppColors.divider,
+        thickness: 1,
+        space: 1,
+      ),
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: AppColors.surface,
+        selectedItemColor: primary,
+        unselectedItemColor: AppColors.textHint,
+        elevation: 8,
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: AppColors.surface,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.divider),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.divider),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: primary, width: 2),
+        ),
+      ),
+    );
+  }
 
-    // ── Text Theme ───────────────────────────────────────────────
-    textTheme: GoogleFonts.latoTextTheme().copyWith(
-      displayLarge: GoogleFonts.lato(
-        fontSize: 32,
-        fontWeight: FontWeight.bold,
-        color: AppColors.textPrimary,
-      ),
-      titleLarge: GoogleFonts.lato(
-        fontSize: 20,
-        fontWeight: FontWeight.w600,
-        color: AppColors.textPrimary,
-      ),
-      titleMedium: GoogleFonts.lato(
-        fontSize: 16,
-        fontWeight: FontWeight.w600,
-        color: AppColors.textPrimary,
-      ),
-      bodyLarge: GoogleFonts.lato(
-        fontSize: 16,
-        color: AppColors.textPrimary,
-      ),
-      bodyMedium: GoogleFonts.lato(
-        fontSize: 14,
-        color: AppColors.textSecondary,
-      ),
-      bodySmall: GoogleFonts.lato(
-        fontSize: 12,
-        color: AppColors.textHint,
-      ),
-    ),
+  static ThemeData _buildDarkTheme(AppThemePalette palette) {
+    final bg = palette.darkBackground;
+    final surface = palette.darkSurface;
+    final card = palette.darkCard;
+    final gold = palette.accentGold;
+    final primary = palette.primaryColor;
 
-    // ── Divider ──────────────────────────────────────────────────
-    dividerTheme: const DividerThemeData(
-      color: AppColors.divider,
-      thickness: 1,
-      space: 1,
-    ),
-
-    // ── Bottom Navigation ────────────────────────────────────────
-    bottomNavigationBarTheme: BottomNavigationBarThemeData(
-      backgroundColor: AppColors.surface,
-      selectedItemColor: AppColors.teal,
-      unselectedItemColor: AppColors.textHint,
-      elevation: 8,
-      selectedLabelStyle: GoogleFonts.lato(
-        fontSize: 12,
-        fontWeight: FontWeight.w600,
-      ),
-      unselectedLabelStyle: GoogleFonts.lato(fontSize: 12),
-    ),
-
-    // ── Input Decoration ─────────────────────────────────────────
-    inputDecorationTheme: InputDecorationTheme(
-      filled: true,
-      fillColor: AppColors.surface,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.divider),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.divider),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.teal, width: 2),
-      ),
-    ),
-  );
-
-  // ─────────────────────────── Dark Theme ───────────────────────────────
-  static ThemeData get darkTheme => ThemeData(
-    useMaterial3: true,
-    brightness: Brightness.dark,
-
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: AppColors.teal,
-      primary: AppColors.tealLight,
-      secondary: AppColors.primaryLight,
-      tertiary: AppColors.gold,
-      surface: AppColors.darkSurface,
-      error: const Color(0xFFEF5350),
+    return ThemeData(
+      useMaterial3: true,
       brightness: Brightness.dark,
-    ),
-
-    scaffoldBackgroundColor: AppColors.darkBackground,
-
-    appBarTheme: AppBarTheme(
-      backgroundColor: AppColors.darkSurface,
-      foregroundColor: Colors.white,
-      elevation: 0,
-      centerTitle: true,
-      titleTextStyle: GoogleFonts.lato(
-        fontSize: 20,
-        fontWeight: FontWeight.w600,
-        color: Colors.white,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: primary,
+        primary: gold,
+        secondary: primary,
+        tertiary: gold,
+        surface: surface,
+        error: const Color(0xFFEF5350),
+        brightness: Brightness.dark,
       ),
-    ),
-
-    cardTheme: CardThemeData(
-      color: AppColors.darkCard,
-      elevation: 4,
-      shadowColor: Colors.black45,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+      scaffoldBackgroundColor: bg,
+      appBarTheme: AppBarTheme(
+        backgroundColor: surface,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+        titleTextStyle: GoogleFonts.lato(
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+          color: Colors.white,
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-    ),
-
-    textTheme: GoogleFonts.latoTextTheme(ThemeData.dark().textTheme).copyWith(
-      titleLarge: GoogleFonts.lato(
-        fontSize: 20,
-        fontWeight: FontWeight.w600,
-        color: Colors.white,
+      cardTheme: CardThemeData(
+        color: card,
+        elevation: 4,
+        shadowColor: Colors.black54,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       ),
-      bodyLarge: GoogleFonts.lato(
-        fontSize: 16,
-        color: Colors.white70,
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: gold,
+          foregroundColor: Colors.black,
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          textStyle: GoogleFonts.lato(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
-      bodyMedium: GoogleFonts.lato(
-        fontSize: 14,
-        color: Colors.white60,
+      textTheme: GoogleFonts.latoTextTheme(ThemeData.dark().textTheme).copyWith(
+        titleLarge: GoogleFonts.lato(
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+          color: Colors.white,
+        ),
+        bodyLarge: GoogleFonts.lato(
+          fontSize: 16,
+          color: Colors.white70,
+        ),
+        bodyMedium: GoogleFonts.lato(
+          fontSize: 14,
+          color: Colors.white60,
+        ),
       ),
-    ),
-
-    dividerTheme: const DividerThemeData(
-      color: Color(0xFF2D4A6A),
-      thickness: 1,
-      space: 1,
-    ),
-
-    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      backgroundColor: AppColors.darkSurface,
-      selectedItemColor: AppColors.tealLight,
-      unselectedItemColor: Colors.white38,
-      elevation: 8,
-    ),
-  );
+      dividerTheme: DividerThemeData(
+        color: Colors.white.withValues(alpha: 0.08),
+        thickness: 1,
+        space: 1,
+      ),
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: surface,
+        selectedItemColor: gold,
+        unselectedItemColor: Colors.white38,
+        elevation: 8,
+      ),
+    );
+  }
 }
