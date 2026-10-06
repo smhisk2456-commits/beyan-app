@@ -20,6 +20,12 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Clean Stale Flutter Configs
+        run: |
+          rm -f ios/Flutter/Generated.xcconfig
+          rm -f ios/Flutter/flutter_export_environment.sh
+          rm -rf ios/Flutter/ephemeral
+
       - name: Install Dependencies
         run: flutter pub get
 
@@ -29,7 +35,7 @@ jobs:
           ruby tools/add_ios_widget_target.rb
 
       - name: Build iOS Release (No Codesign)
-        run: flutter build ios --release --no-codesign
+        run: flutter build ios --release --no-codesign --verbose
 
       - name: Verify Widget Is Embedded
         run: |

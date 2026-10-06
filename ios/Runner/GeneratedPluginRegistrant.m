@@ -84,12 +84,6 @@
 @import sqflite_darwin;
 #endif
 
-#if __has_include(<webview_flutter_wkwebview/WebViewFlutterPlugin.h>)
-#import <webview_flutter_wkwebview/WebViewFlutterPlugin.h>
-#else
-@import webview_flutter_wkwebview;
-#endif
-
 #if __has_include(<workmanager_apple/WorkmanagerPlugin.h>)
 #import <workmanager_apple/WorkmanagerPlugin.h>
 #else
@@ -112,7 +106,6 @@
   [PermissionHandlerPlugin registerWithRegistrar:[registry registrarForPlugin:@"PermissionHandlerPlugin"]];
   [SharedPreferencesPlugin registerWithRegistrar:[registry registrarForPlugin:@"SharedPreferencesPlugin"]];
   [SqflitePlugin registerWithRegistrar:[registry registrarForPlugin:@"SqflitePlugin"]];
-  [WebViewFlutterPlugin registerWithRegistrar:[registry registrarForPlugin:@"WebViewFlutterPlugin"]];
   [WorkmanagerPlugin registerWithRegistrar:[registry registrarForPlugin:@"WorkmanagerPlugin"]];
 }
 

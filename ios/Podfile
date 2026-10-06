@@ -1,0 +1,62 @@
+# Set platform to iOS 15.0 for modern APIs, WidgetKit, Live Activities, AdMob 11+, and StoreKit 2
+platform :ios, '15.0'
+
+# CocoaPods analytics sends network stats synchronously affecting flutter build latency.
+ENV['COCOAPODS_DISABLE_STATS'] = 'true'
+
+project 'Runner', {
+  'Debug' => :debug,
+  'Profile' => :release,
+  'Release' => :release,
+}
+
+def flutter_root
+  # Check environment variable first
+  return ENV['FLUTTER_ROOT'] if ENV['FLUTTER_ROOT'] && !ENV['FLUTTER_ROOT'].empty?
+
+  generated_xcode_build_settings_path = File.expand_path(File.join('..', 'Flutter', 'Generated.xcconfig'), __FILE__)
+  if File.exist?(generated_xcode_build_settings_path)
+    File.foreach(generated_xcode_build_settings_path) do |line|
+      matches = line.match(/FLUTTER_ROOT\=(.*)/)
+      if matches
+        path = matches[1].strip
+        return path if File.exist?(path)
+      end
+    end
+  end
+
+  flutter_bin = `which flutter`.strip
+  if !flutter_bin.empty? && File.exist?(flutter_bin)
+    return File.expand_path(File.join(File.dirname(flutter_bin), '..'))
+  end
+
+  raise "FLUTTER_ROOT not found. Make sure flutter is in PATH or run flutter pub get first."
+end
+
+require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
+
+flutter_ios_podfile_setup
+
+target 'Runner' do
+  use_frameworks!
+  use_modular_headers!
+
+  flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+
+  target 'RunnerTests' do
+    inherit! :search_paths
+  end
+end
+
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    flutter_additional_ios_build_settings(target)
+    target.build_configurations.each do |config|
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
+      # Prevent code signing issues in pods when building unsigned IPA
+      config.build_settings['EXPANDED_CODE_SIGN_IDENTITY'] = ""
+      config.build_settings['CODE_SIGNING_REQUIRED'] = "NO"
+      config.build_settings['CODE_SIGNING_ALLOWED'] = "NO"
+    end
+  end
+end

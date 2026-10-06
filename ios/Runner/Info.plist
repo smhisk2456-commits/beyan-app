@@ -62,6 +62,13 @@
     <key>UIViewControllerBasedStatusBarAppearance</key>
     <false/>
 
+    <!-- Network & Media Transport Security ─────────────────────── -->
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsArbitraryLoads</key>
+        <true/>
+    </dict>
+
     <!-- Google Mobile Ads (AdMob) iOS App ID & SKAdNetwork ─────────── -->
     <key>GADApplicationIdentifier</key>
     <string>ca-app-pub-3940256099942544~1458002511</string>
