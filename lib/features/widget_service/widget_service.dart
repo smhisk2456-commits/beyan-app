@@ -24,7 +24,7 @@ class WidgetService {
   // ── iOS App Group Identifier ──────────────────────────────
   /// home_widget'ın iOS'ta SharedPreferences yerine
   /// UserDefaults App Group'unu kullanması için gerekli.
-  static const String _appGroupId = 'group.com.example.islamicApp';
+  static const String _appGroupId = 'group.com.smhisk60.beyan';
 
   // ── Başlatma ───────────────────────────────────────────────
 
