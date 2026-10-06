@@ -24,15 +24,20 @@ class OnboardingTrialPaywallScreen extends ConsumerStatefulWidget {
     bool isDismissible = true,
     VoidCallback? onDismiss,
   }) {
-    return showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      enableDrag: isDismissible,
-      isDismissible: isDismissible,
-      builder: (_) => OnboardingTrialPaywallScreen(
-        isDismissible: isDismissible,
-        onDismiss: onDismiss,
+    return Navigator.of(context).push(
+      PageRouteBuilder(
+        opaque: true,
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            OnboardingTrialPaywallScreen(
+          isDismissible: isDismissible,
+          onDismiss: onDismiss,
+        ),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(
+            opacity: animation,
+            child: child,
+          );
+        },
       ),
     );
   }
@@ -127,25 +132,25 @@ class _OnboardingTrialPaywallScreenState
     final billingDateFormatted =
         DateFormat('d MMM yyyy', 'tr_TR').format(billingStartDate);
 
-    return Container(
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.94,
-      ),
-      decoration: const BoxDecoration(
-        color: Color(0xFF081F1A),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black87,
-            blurRadius: 40,
-            offset: Offset(0, -10),
+    return Scaffold(
+      backgroundColor: const Color(0xFF021612),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFF011410),
+              Color(0xFF04261F),
+              Color(0xFF011511),
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
-        ],
-      ),
-      child: SafeArea(
-        top: false,
-        child: Column(
-          children: [
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
             // ── Üst Kapatma Çubuğu ───────────────────────────────────────────
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
@@ -351,8 +356,9 @@ class _OnboardingTrialPaywallScreenState
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildTimelineStep({
     required IconData icon,
