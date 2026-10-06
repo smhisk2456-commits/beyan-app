@@ -1,6 +1,6 @@
 import '../models/dua_model.dart';
 
-/// Beyân - Doğrulanmış ve Güvenilir Dua Külliyatı
+/// Beyân - Doğrulanmış ve Güvenilir Kapsamlı Dua Külliyatı
 /// Kaynaklar: Sahih-i Buhari, Sahih-i Müslim, Sünen-i Tirmizi, Sünen-i Ebu Davud,
 /// Hisnü'l-Müslim (Müslümanın Sığınağı), Riyazü's-Salihin ve Kur'an-ı Kerim.
 final List<DuaItem> verifiedDuasList = [
@@ -25,6 +25,36 @@ final List<DuaItem> verifiedDuasList = [
     reference: 'Sahih-i Buhari (6306)',
     virtueExplanation: 'Kim bunu inanarak gündüz okur da o gün vefat ederse cennet ehlinden olur.',
   ),
+  const DuaItem(
+    id: 'sabah_3',
+    category: DuaCategory.morning,
+    title: 'Zararlardan Korunma Duası (Sabah 3 Kez)',
+    arabicText: 'بِسْمِ اللَّهِ الَّذِي لَا يَضُرُّ مَعَ اسْمِهِ شَيْءٌ فِي الْأَرْضِ وَلَا فِي السَّمَاءِ وَهُوَ السَّمِيعُ الْعَلِيمُ',
+    transliteration: 'Bismillâhillezî lâ yedurru measmihî şey\'ün fi\'l-ardı ve lâ fi\'s-semâ\' ve hüve\'s-Semîu\'l-Alîm.',
+    turkishMeaning: 'İsmiyle yerde ve gökte hiçbir şeyin zarar veremeyeceği Allah\'ın adıyla. O hakkıyla işiten ve kemaliyle bilendir.',
+    reference: 'Sünen-i Ebu Davud (5088), Tirmizi (3388)',
+    virtueExplanation: 'Sabahleyin 3 defa okuyan kimseye akşama kadar hiçbir musibet ve bela dokunmaz.',
+  ),
+  const DuaItem(
+    id: 'sabah_4',
+    category: DuaCategory.morning,
+    title: 'Sağlık, Afiyet ve Şükür Niyazı',
+    arabicText: 'اللَّهُمَّ عَافِنِي فِي بَدَنِي، اللَّهُمَّ عَافِنِي فِي سَمْعِي، اللَّهُمَّ عَافِنِي فِي بَصَرِي، لَا إِلَهَ إِلَّا أَنْتَ',
+    transliteration: 'Allâhümme âfinî fî bedenî, Allâhümme âfinî fî sem\'î, Allâhümme âfinî fî basarî, lâ ilâhe illâ ente.',
+    turkishMeaning: 'Allah\'ım! Bedenime afiyet ver. Allah\'ım! Kulağıma afiyet ver. Allah\'ım! Gözüme afiyet ver. Senden başka hiçbir ilah yoktur.',
+    reference: 'Sünen-i Ebu Davud (5090)',
+    virtueExplanation: 'Bedenî ve ruhî sıhhatin devamı için sabah ve akşam üçer kez okunması tavsiye edilir.',
+  ),
+  const DuaItem(
+    id: 'sabah_5',
+    category: DuaCategory.morning,
+    title: 'İlim, Rızık ve Kabul Gören Amel',
+    arabicText: 'اللَّهُمَّ إِنِّي أَسْأَلُكَ عِلْمًا نَافِعًا، وَرِزْقًا طَيِّبًا، وَعَمَلًا مُتَقَبَّلًا',
+    transliteration: 'Allâhümme innî es\'elüke ilmen nâfian, ve rızkan tayyiben, ve amelen mütekabbelâ.',
+    turkishMeaning: 'Allah\'ım! Senden faydalı ilim, temiz ve helal rızık ve kabul olunan amel dilerim.',
+    reference: 'Sünen-i İbni Mace (925)',
+    virtueExplanation: 'Peygamberimiz sabah namazının selamından sonra bu duayı okurdu.',
+  ),
 
   // ── 2. AKŞAM DUALARI ──────────────────────────────────────────────────────────
   const DuaItem(
@@ -46,6 +76,26 @@ final List<DuaItem> verifiedDuasList = [
     turkishMeaning: 'Yarattığı şeylerin şerrinden Allah\'ın tastamam kelimelerine sığınırım.',
     reference: 'Sahih-i Müslim (2709)',
     virtueExplanation: 'Bunu akşamleyin 3 kez okuyana o gece hiçbir zararlı şey ve zehir dokunmaz.',
+  ),
+  const DuaItem(
+    id: 'aksam_3',
+    category: DuaCategory.evening,
+    title: 'Âmenerresûlü (Gece Koruyucu İki Ayet)',
+    arabicText: 'آمَنَ الرَّسُولُ بِمَا أُنْزِلَ إِلَيْهِ مِنْ رَبِّهِ وَالْمُؤْمِنُونَ ۚ كُلٌّ آمَنَ بِاللَّهِ وَمَلَائِكَتِهِ وَكُتُبِهِ وَرُسُلِهِ',
+    transliteration: 'Âmene\'r-rasûlü bimâ ünzile ileyhi min Rabbihî ve\'l-mü\'minûn, küllün âmene billâhi ve melâiketihî ve kütübihî ve rusülih.',
+    turkishMeaning: 'Peygamber, Rabbinden kendisine indirilene iman etti, müminler de. Hepsi Allah\'a, meleklerine, kitaplarına ve peygamberlerine iman etti.',
+    reference: 'Bakara Suresi 285. Ayet / Sahih-i Buhari (5008)',
+    virtueExplanation: 'Peygamberimiz: "Kim geceleyin Bakara suresinin son iki ayetini okursa, o iki ayet ona yeter" buyurmuştur.',
+  ),
+  const DuaItem(
+    id: 'aksam_4',
+    category: DuaCategory.evening,
+    title: 'Akşam Vakti İhlas, Felak ve Nas Sureleri',
+    arabicText: 'قُلْ هُوَ اللَّهُ أَحَدٌ ۝ قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ ۝ قُلْ أَعُوذُ بِرَبِّ النَّاسِ',
+    transliteration: 'Kul hüvallâhu ehad... Kul eûzü bi-Rabbi\'l-felak... Kul eûzü bi-Rabbi\'n-nâs...',
+    turkishMeaning: 'De ki: O Allah tektir... De ki: Sabahın Rabbine sığınırım... De ki: İnsanların Rabbine sığınırım...',
+    reference: 'Sünen-i Ebu Davud (5082), Tirmizi (3575)',
+    virtueExplanation: 'Akşam ve sabah üçer defa bu sureleri okumak insanı her türlü kötülükten korumaya kâfidir.',
   ),
 
   // ── 3. GÜNLÜK YAŞAM DUALARI ──────────────────────────────────────────────────
@@ -79,6 +129,36 @@ final List<DuaItem> verifiedDuasList = [
     reference: 'Sahih-i Müslim (713)',
     virtueExplanation: 'Sağ ayakla girilirken salavat getirilip okunur.',
   ),
+  const DuaItem(
+    id: 'gunluk_4',
+    category: DuaCategory.dailyLife,
+    title: 'Camiden Çıkarken Lütuf Duası',
+    arabicText: 'اللَّهُمَّ إِنِّي أَسْأَلُكَ مِنْ فَضْلِكَ',
+    transliteration: 'Allâhümme innî es\'elüke min fadlik.',
+    turkishMeaning: 'Allah\'ım! Ben Senin lütfundan ve ikramından dilerim.',
+    reference: 'Sahih-i Müslim (713)',
+    virtueExplanation: 'Sol ayakla çıkılırken okunur.',
+  ),
+  const DuaItem(
+    id: 'gunluk_5',
+    category: DuaCategory.dailyLife,
+    title: 'Abdestten Sonra Şehadet ve Tevbe',
+    arabicText: 'أَشْهَدُ أَنْ لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، وَأَشْهَدُ أَنَّ مُحَمَّدًا عَبْدُهُ وَرَسُولُهُ، اللَّهُمَّ اجْعَلْنِي مِنَ التَّوَّابِينَ وَاجْعَلْنِي مِنَ الْمُتَطَهِّرِينَ',
+    transliteration: 'Eşhedü en lâ ilâhe illallâhu vahdehû lâ şerîke leh, ve eşhedü enne Muhammeden abdühû ve rasûlüh. Allâhümmec\'alnî mine\'t-tevvâbîne vec\'alnî mine\'l-mütetahhirîn.',
+    turkishMeaning: 'Şahitlik ederim ki Allah\'tan başka ilah yoktur; tektir, ortağı yoktur. Ve şahitlik ederim ki Muhammed O\'nun kulu ve elçisidir. Allah\'ım, beni çok tövbe edenlerden ve tertemiz olanlardan eyle.',
+    reference: 'Sahih-i Müslim (234), Tirmizi (55)',
+    virtueExplanation: 'Bunu abdestin ardından söyleyene cennetin sekiz kapısı açılır, dilediğinden girer.',
+  ),
+  const DuaItem(
+    id: 'gunluk_6',
+    category: DuaCategory.dailyLife,
+    title: 'Aynaya Bakarken Güzellik Duası',
+    arabicText: 'اللَّهُمَّ أَنْتَ حَسَّنْتَ خَلْقِي فَحَسِّنْ خُلُقِي',
+    transliteration: 'Allâhümme ente hassente halkî fe-hassin hulukî.',
+    turkishMeaning: 'Allah\'ım! Yaratılışımı güzel kıldığın gibi ahlakımı da güzelleştir.',
+    reference: 'Müsned-i Ahmed (1/403)',
+    virtueExplanation: 'Aynada kendi sûretini gören müminin ahlak güzelliği talebidir.',
+  ),
 
   // ── 4. YOLCULUK DUALARI ─────────────────────────────────────────────────────
   const DuaItem(
@@ -100,6 +180,26 @@ final List<DuaItem> verifiedDuasList = [
     turkishMeaning: 'Allah\'ım! Bu yolculuğumuzda Senden iyilik, takva ve razı olacağın ameller dileriz.',
     reference: 'Sahih-i Müslim (1342)',
     virtueExplanation: 'Yolculuk meşakkatini hafifleten Peygamberi niyazdır.',
+  ),
+  const DuaItem(
+    id: 'yolculuk_3',
+    category: DuaCategory.travel,
+    title: 'Yolculuktan Eve ve Memlekete Dönüş Duası',
+    arabicText: 'آيِبُونَ، تَائِبُونَ، عَابِدُونَ، لِرَبِّنَا حَامِدُونَ',
+    transliteration: 'Âyibûne, tâibûne, âbidûne, li-Rabbinâ hâmidûn.',
+    turkishMeaning: 'Dönenleriz, tövbe edenleriz, ibadet edenleriz ve Rabbimize hamd edenleriz.',
+    reference: 'Sahih-i Buhari (1797), Müslim (1342)',
+    virtueExplanation: 'Yolculuk tamamlanıp dönüş yoluna girildiğinde ve şehre yaklaşırken söylenir.',
+  ),
+  const DuaItem(
+    id: 'yolculuk_4',
+    category: DuaCategory.travel,
+    title: 'Bir Şehre veya Beldeye Giriş Duası',
+    arabicText: 'اللَّهُمَّ بَارِكْ لَنَا فِيهَا، اللَّهُمَّ ارْزُقْنَا جَنَاهَا، وَحَبِّبْنَا إِلَى أَهْلِهَا',
+    transliteration: 'Allâhümme bârik lenâ fîhâ, Allâhümmerzuknâ cenâhâ, ve habbibnâ ilâ ehlihâ.',
+    turkishMeaning: 'Allah\'ım! Bu beldeyi bize bereketli kıl. Bizi onun nimetleriyle rızıklandır ve halkına bizi sevdir.',
+    reference: 'Taberânî, el-Mu\'cemü\'l-Evsat (5030)',
+    virtueExplanation: 'Yeni bir şehre veya konaklama yerine varıldığında okunur.',
   ),
 
   // ── 5. ŞÜKÜR VE SABIR ───────────────────────────────────────────────────────
@@ -123,6 +223,26 @@ final List<DuaItem> verifiedDuasList = [
     reference: 'Sahih-i Müslim (918)',
     virtueExplanation: 'Herhangi bir zorluk veya kayıp karşısında okuyan kimseye Allah daha hayırlısını lütfeder.',
   ),
+  const DuaItem(
+    id: 'sukur_3',
+    category: DuaCategory.gratitudePatience,
+    title: 'Her Durumda Hamd Etme Zikri',
+    arabicText: 'الْحَمْدُ لِلَّهِ عَلَى كُلِّ حَالٍ',
+    transliteration: 'Elhamdü lillâhi alâ külli hâl.',
+    turkishMeaning: 'Her hâlükârda ve her durumda Allah\'a hamdolsun.',
+    reference: 'Sünen-i İbni Mace (3803)',
+    virtueExplanation: 'Peygamberimiz hoşa gitmeyen bir durumla karşılaştığında bu hamdi söylerdi.',
+  ),
+  const DuaItem(
+    id: 'sukur_4',
+    category: DuaCategory.gratitudePatience,
+    title: 'Allah Bana Yeter (Hasbiyallâh)',
+    arabicText: 'حَسْبِيَ اللَّهُ لَا إِلَهَ إِلَّا هُوَ عَلَيْهِ تَوَكَّلْتُ وَهُوَ رَبُّ الْعَرْشِ الْعَظِيمِ',
+    transliteration: 'Hasbiyallâhu lâ ilâhe illâ hû, aleyhi tevekkeltü ve hüve Rabbü\'l-Arşi\'l-Azîm.',
+    turkishMeaning: 'Allah bana yeter! O\'ndan başka ilah yoktur. Yalnızca O\'na güvendim ve O, büyük Arş\'ın Rabbidir.',
+    reference: 'Tevbe Suresi 129. Ayet / Ebu Davud (5081)',
+    virtueExplanation: 'Sabah ve akşam yedi defa bunu söyleyenin dünya ve ahiret kaygılarına Allah kâfi gelir.',
+  ),
 
   // ── 6. SIKINTI VE FERAHLIK ───────────────────────────────────────────────────
   const DuaItem(
@@ -144,6 +264,26 @@ final List<DuaItem> verifiedDuasList = [
     turkishMeaning: 'Allah\'ım! Kaygı ve kederden Sana sığınırım. Acizlikten ve tembellikten Sana sığınırım. Korkaklıktan ve cimrilikten Sana sığınırım. Borcun belimi bükmesinden ve insanların baskısından Sana sığınırım.',
     reference: 'Sahih-i Buhari (6369)',
     virtueExplanation: 'Günde sabah ve akşam okunması ruhsal ferahlık ve borç hafifliği sağlar.',
+  ),
+  const DuaItem(
+    id: 'sikinti_3',
+    category: DuaCategory.distress,
+    title: 'Göz Açıp Kapayıncaya Kadar Nefse Bırakmama',
+    arabicText: 'اللَّهُمَّ رَحْمَتَكَ أَرْجُو، فَلَا تَكِلْنِي إِلَى نَفْسِي طَرْفَةَ عَيْنٍ، وَأَصْلِحْ لِي شَأْنِي كُلَّهُ، لَا إِلَهَ إِلَّا أَنْتَ',
+    transliteration: 'Allâhümme rahmeteke ercû, felâ tekilnî ilâ nefsî tarfete ayn, ve aslih lî şe\'nî külleh, lâ ilâhe illâ ente.',
+    turkishMeaning: 'Allah\'ım! Senin rahmetini umarım. Beni göz açıp kapayıncaya kadar bile nefsime bırakma. Bütün işlerimi ıslah eyle. Senden başka ilah yoktur.',
+    reference: 'Sünen-i Ebu Davud (5090)',
+    virtueExplanation: 'Zor durumdaki kulun tam teslimiyetle okuyacağı en faziletli yakarışlardandır.',
+  ),
+  const DuaItem(
+    id: 'sikinti_4',
+    category: DuaCategory.distress,
+    title: 'Cennet Hazinesi (Lâ Havle)',
+    arabicText: 'لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ الْعَلِيِّ الْعَظِيمِ',
+    transliteration: 'Lâ havle ve lâ kuvvete illâ billâhi\'l-Aliyyi\'l-Azîm.',
+    turkishMeaning: 'Güç ve kuvvet ancak pek yüce ve pek büyük olan Allah\'ın yardımıyladır.',
+    reference: 'Sahih-i Buhari (6384), Müslim (2704)',
+    virtueExplanation: 'Peygamberimiz: "Bu zikir, cennet hazinelerinden bir hazinedir ve 99 derde devadır" buyurmuştur.',
   ),
 
   // ── 7. UYKU ÖNCESİ VE SONRASI ──────────────────────────────────────────────
@@ -167,6 +307,26 @@ final List<DuaItem> verifiedDuasList = [
     reference: 'Sahih-i Buhari (6312)',
     virtueExplanation: 'Göz açıldığında ilk okunacak şükür cümlesidir.',
   ),
+  const DuaItem(
+    id: 'uyku_3',
+    category: DuaCategory.sleep,
+    title: 'Yatarken Âyetü\'l-Kürsî Okunması',
+    arabicText: 'اللَّهُ لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ۚ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ ۚ لَهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ',
+    transliteration: 'Allâhü lâ ilâhe illâ hüve\'l-Hayyü\'l-Kayyûm, lâ te\'huzühû sinetün ve lâ nevm, lehû mâ fi\'s-semâvâti ve mâ fi\'l-ard.',
+    turkishMeaning: 'Allah, Kendisinden başka hiçbir ilah olmayandır; Hayy\'dır, Kayyûm\'dur. O\'nu ne bir uyuklama tutabilir ne de bir uyku. Göklerde ve yerde olanların hepsi O\'nundur.',
+    reference: 'Bakara Suresi 255. Ayet / Buhari (2311)',
+    virtueExplanation: 'Kim yatağına girdiğinde Âyetü\'l-Kürsî okursa, sabaha kadar Allah\'tan bir koruyucu onunla kalır ve şeytan yaklaşamaz.',
+  ),
+  const DuaItem(
+    id: 'uyku_4',
+    category: DuaCategory.sleep,
+    title: 'İslam Fıtratı Üzere Uyumak (Berâ Duası)',
+    arabicText: 'اللَّهُمَّ أَسْلَمْتُ نَفْسِي إِلَيْكَ، وَفَوَّضْتُ أَمْرِي إِلَيْكَ، وَأَلْجَأْتُ ظَهْرِي إِلَيْكَ، رَغْبَةً وَرَهْبَةً إِلَيْكَ',
+    transliteration: 'Allâhümme eslemtü nefsî ileyke, ve fevveztü emrî ileyke, ve elce\'tü zahrî ileyke, rağbeten ve rahbeten ileyke.',
+    turkishMeaning: 'Allah\'ım! Nefsimi Sana teslim ettim. İşimi Sana bıraktım. Sırtımı Sana dayadım; Senden ümit ederek ve Senden korkarak.',
+    reference: 'Sahih-i Buhari (247), Müslim (2710)',
+    virtueExplanation: 'Kim bunu okuyup o gece vefat ederse, İslam fıtratı üzere vefat etmiş olur.',
+  ),
 
   // ── 8. YEMEK VE NİMET DUALARI ───────────────────────────────────────────────
   const DuaItem(
@@ -188,6 +348,26 @@ final List<DuaItem> verifiedDuasList = [
     turkishMeaning: 'Bizi yediren, bizi içiren ve bizi Müslümanlardan kılan Allah\'a hamdolsun.',
     reference: 'Sünen-i Ebu Davud (3850), Tirmizi (3457)',
     virtueExplanation: 'Yemeğin bereketini artıran ve şükrü eda eden sofra duasıdır.',
+  ),
+  const DuaItem(
+    id: 'yemek_3',
+    category: DuaCategory.food,
+    title: 'İkram Eden Ev Sahibine Edilen Dua',
+    arabicText: 'أَفْطَرَ عِنْدَكُمُ الصَّائِمُونَ، وَأَكَلَ طَعَامَكُمُ الْأَبْرَارُ، وَصَلَّتْ عَلَيْكُمُ الْمَلَائِكَةُ',
+    transliteration: 'Eftara indekümü\'s-sâimûn, ve ekele taâmekümü\'l-ebrâr, ve sallet aleykümü\'l-melâikeh.',
+    turkishMeaning: 'Yanınızda oruçlular iftar etsin, yemeğinizi iyi insanlar yesin ve melekler size dua ve istiğfar etsin.',
+    reference: 'Sünen-i Ebu Davud (3854)',
+    virtueExplanation: 'Misafirlikten veya ikramdan sonra ev sahibine yapılacak en güzel sünnet niyazıdır.',
+  ),
+  const DuaItem(
+    id: 'yemek_4',
+    category: DuaCategory.food,
+    title: 'Süt ve Bereketli İçecek Sonrası',
+    arabicText: 'اللَّهُمَّ بَارِكْ لَنَا فِيهِ وَزِدْنَا مِنْهُ',
+    transliteration: 'Allâhümme bârik lenâ fîhi ve zidnâ minh.',
+    turkishMeaning: 'Allah\'ım! Bunu bize bereketli eyle ve bundan bize daha fazlasını ver.',
+    reference: 'Sünen-i Ebu Davud (3730), Tirmizi (3455)',
+    virtueExplanation: 'Peygamberimiz süt içtiğinde bu şekilde bereket dilerdi.',
   ),
 
   // ── 9. KUR\'AN-I KERİM DUALARI ─────────────────────────────────────────────
@@ -221,6 +401,36 @@ final List<DuaItem> verifiedDuasList = [
     reference: 'İbrâhîm Suresi, 41. Ayet',
     virtueExplanation: 'Namazların son oturuşunda (Kâde-i Ahîre) okunması sünnettir.',
   ),
+  const DuaItem(
+    id: 'kuran_4',
+    category: DuaCategory.quranic,
+    title: 'Huzurlu Eş ve Göz Aydınlığı Nesil',
+    arabicText: 'رَبَّنَا هَبْ لَنَا مِنْ أَزْوَاجِنَا وَذُرِّيَّاتِنَا قُرَّةَ أَعْيُنٍ وَاجْعَلْنَا لِلْمُتَّقِينَ إِمَامًا',
+    transliteration: 'Rabbenâ heb lenâ min ezvâcinâ ve zürriyyâtinâ kurrate a\'yünin vec\'alnâ lil-müttekîne imâmâ.',
+    turkishMeaning: 'Ey Rabbimiz! Eşlerimizi ve çocuklarımızı bize göz aydınlığı kıl ve bizi takva sahiplerine önder eyle.',
+    reference: 'Furkân Suresi, 74. Ayet',
+    virtueExplanation: 'Aile saadeti, salih evlatlar ve toplumda hayra öncülük etmek için Kur\'anî yakarıştır.',
+  ),
+  const DuaItem(
+    id: 'kuran_5',
+    category: DuaCategory.quranic,
+    title: 'Namazı Dosdoğru Kılan Nesil Duası',
+    arabicText: 'رَبِّ اجْعَلْنِي مُقِيمَ الصَّلَاةِ وَمِنْ ذُرِّيَّتِي ۚ رَبَّنَا وَتَقَبَّلْ دُعَاءِ',
+    transliteration: 'Rabbic\'alnî mukîme\'s-salâti ve min zürriyyetî, Rabbenâ ve tekabbel düâ\'.',
+    turkishMeaning: 'Rabbim! Beni ve soyumdan gelenleri namazı dosdoğru kılanlardan eyle. Rabbimiz, duamı kabul buyur.',
+    reference: 'İbrâhîm Suresi, 40. Ayet',
+    virtueExplanation: 'Namaz bilincini nesillere aşılamak için Hz. İbrahim\'in kutlu duasıdır.',
+  ),
+  const DuaItem(
+    id: 'kuran_6',
+    category: DuaCategory.quranic,
+    title: 'İlmin Artırılması Duası',
+    arabicText: 'رَبِّ زِدْنِي عِلْمًا',
+    transliteration: 'Rabbi zidnî ilmâ.',
+    turkishMeaning: 'Rabbim! İlmimi artır.',
+    reference: 'Tâhâ Suresi, 114. Ayet',
+    virtueExplanation: 'Öğrenme, hafıza ve hikmet talebinde bulunurken okunacak en veciz ayettir.',
+  ),
 
   // ── 10. PEYGAMBERLERİN DUALARI ─────────────────────────────────────────────
   const DuaItem(
@@ -252,5 +462,25 @@ final List<DuaItem> verifiedDuasList = [
     turkishMeaning: 'Rabbimiz! Biz kendimize zulmettik. Eğer bizi bağışlamaz ve bize merhamet etmezsen muhakkak hüsrana uğrayanlardan oluruz.',
     reference: 'A\'râf Suresi, 23. Ayet',
     virtueExplanation: 'İnsanlığın ilk tövbesi ve en tesirli istiğfar dualarındandır.',
+  ),
+  const DuaItem(
+    id: 'peygamber_4',
+    category: DuaCategory.prophets,
+    title: 'Hz. Yusuf (a.s.)\'ın Hüsn-i Hâtime (Güzel Son) Duası',
+    arabicText: 'تَوَفَّنِي مُسْلِمًا وَأَلْحِقْنِي بِالصَّالِحِينَ',
+    transliteration: 'Teveffenî müslimen ve elhıknî bi\'s-sâlihîn.',
+    turkishMeaning: 'Benim canımı Müslüman olarak al ve beni salih kulların arasına kat.',
+    reference: 'Yûsuf Suresi, 101. Ayet',
+    virtueExplanation: 'Son nefeste imanla gitmek ve ahirette salihlerle buluşmak için yakarıştır.',
+  ),
+  const DuaItem(
+    id: 'peygamber_5',
+    category: DuaCategory.prophets,
+    title: 'Hz. Zekeriyya (a.s.)\'ın Temiz Nesil Duası',
+    arabicText: 'رَبِّ هَبْ لِي مِنْ لَدُنْكَ ذُرِّيَّةً طَيِّبَةً ۖ إِنَّكَ سَمِيعُ الدُّعَاءِ',
+    transliteration: 'Rabbi heb lî min ledünke zürriyyeten tayyibeten, inneke semîu\'d-düâ\'.',
+    turkishMeaning: 'Rabbim! Bana katından tertemiz bir zürriyet ihsan eyle. Şüphesiz Sen duayı hakkıyla işitensin.',
+    reference: 'Âl-i İmrân Suresi, 38. Ayet',
+    virtueExplanation: 'Evlat ve hayırlı nesil talebinde bulunurken edilen nebevi duadır.',
   ),
 ];

@@ -691,7 +691,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
   }
 
   Widget _buildWorshipTrackerView(bool isDark) {
-    final todayEntry = ref.watch(worshipTrackerProvider.notifier).getToday();
+    final todayEntry = ref.watch(todayWorshipEntryProvider);
     final completedCount = todayEntry.completedCount;
 
     return ListView(

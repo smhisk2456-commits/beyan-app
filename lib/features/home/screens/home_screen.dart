@@ -540,10 +540,11 @@ class _DailyPrayersCardList extends ConsumerWidget {
 // Günün Ayeti Kompakt Lüks Kartı
 // ════════════════════════════════════════════════════════════════
 
-class _DailyVerseCompactCard extends StatelessWidget {
+class _DailyVerseCompactCard extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final strings = ref.watch(appStringsProvider);
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -588,9 +589,9 @@ class _DailyVerseCompactCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              const Text(
-                'Günün Ayet-i Kerimesi',
-                style: TextStyle(
+              Text(
+                strings.dailyVerseTitle,
+                style: const TextStyle(
                   color: Color(0xFFFFDF7A),
                   fontWeight: FontWeight.bold,
                   fontSize: 13,
@@ -644,6 +645,7 @@ class _DailyFeaturedDuaCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dua = ref.watch(dailyFeaturedDuaProvider);
+    final strings = ref.watch(appStringsProvider);
 
     return InkWell(
       borderRadius: BorderRadius.circular(20),
@@ -686,18 +688,18 @@ class _DailyFeaturedDuaCard extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                const Text(
-                  'Günün Niyazı ve Duası',
-                  style: TextStyle(
+                Text(
+                  strings.dailyDuaTitle,
+                  style: const TextStyle(
                     color: Color(0xFFFFDF7A),
                     fontWeight: FontWeight.bold,
                     fontSize: 13,
                   ),
                 ),
                 const Spacer(),
-                const Text(
-                  'Tüm Dualar ➔',
-                  style: TextStyle(color: Colors.white70, fontSize: 11),
+                Text(
+                  strings.allDuasLink,
+                  style: const TextStyle(color: Colors.white70, fontSize: 11),
                 ),
               ],
             ),
@@ -778,7 +780,7 @@ class _QuickActionGrid extends ConsumerWidget {
               _ActionCard(
                 icon: Icons.access_time_filled_rounded,
                 title: strings.tabPrayers,
-                subtitle: '6 Vakit',
+                subtitle: strings.actionPrayersSub,
                 onTap: onOpenPrayers,
                 isDark: isDark,
               ),
@@ -815,31 +817,31 @@ class _QuickActionGrid extends ConsumerWidget {
               _ActionCard(
                 icon: Icons.menu_book_rounded,
                 title: strings.tabQuran,
-                subtitle: '114 Sure',
+                subtitle: strings.actionQuranSub,
                 onTap: onOpenQuran,
                 isDark: isDark,
               ),
               const SizedBox(width: 8),
               _ActionCard(
                 icon: Icons.auto_stories_rounded,
-                title: 'Dualar',
-                subtitle: '10 Kategori',
+                title: strings.actionDuas,
+                subtitle: strings.actionDuasSub,
                 onTap: onOpenDuas,
                 isDark: isDark,
               ),
               const SizedBox(width: 8),
               _ActionCard(
                 icon: Icons.calendar_month_rounded,
-                title: 'Hicri Takvim',
-                subtitle: 'Kandiller',
+                title: strings.actionCalendar,
+                subtitle: strings.actionCalendarSub,
                 onTap: onOpenCalendar,
                 isDark: isDark,
               ),
               const SizedBox(width: 8),
               _ActionCard(
                 icon: Icons.nights_stay_rounded,
-                title: 'Ramazan',
-                subtitle: 'İftar/Sahur',
+                title: strings.actionRamadan,
+                subtitle: strings.actionRamadanSub,
                 onTap: onOpenRamadan,
                 isDark: isDark,
               ),

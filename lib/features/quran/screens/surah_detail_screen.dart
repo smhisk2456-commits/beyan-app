@@ -371,7 +371,9 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
         // ── Ayet Listesi ────────────────────────────────────
         SliverList(
           delegate: SliverChildBuilderDelegate(
-            (context, index) => VerseCard(verse: verses[index]),
+            (context, index) => RepaintBoundary(
+              child: VerseCard(verse: verses[index]),
+            ),
             childCount: verses.length,
           ),
         ),

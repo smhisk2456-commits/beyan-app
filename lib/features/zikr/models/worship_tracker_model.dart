@@ -167,3 +167,10 @@ final worshipTrackerProvider =
     StateNotifierProvider<WorshipTrackerNotifier, Map<String, DailyWorshipEntry>>((ref) {
   return WorshipTrackerNotifier();
 });
+
+/// Bugünün ibadet girdisini reaktif izleyen Provider (Tick anında UI yenilenir)
+final todayWorshipEntryProvider = Provider<DailyWorshipEntry>((ref) {
+  final map = ref.watch(worshipTrackerProvider);
+  final key = WorshipTrackerNotifier.todayKey();
+  return map[key] ?? DailyWorshipEntry(dateKey: key);
+});

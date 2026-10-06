@@ -4,6 +4,7 @@ import 'package:islamic_app/features/quran/providers/quran_reading_providers.dar
 import 'package:islamic_app/features/quran/services/quran_audio_service.dart';
 import 'package:islamic_app/features/prayer_times/models/calculation_settings_model.dart';
 import 'package:islamic_app/features/prayer_times/models/city_model.dart';
+import 'package:islamic_app/features/ramadan/screens/ramadan_dashboard_screen.dart';
 
 void main() {
   group('İbadet Takibi ve Zikir Model Testleri', () {
@@ -78,6 +79,22 @@ void main() {
         expect(city.longitude, inInclusiveRange(-180.0, 180.0));
         expect(city.name.isNotEmpty, isTrue);
       }
+    });
+  });
+
+  group('Ramazan ve Oruç Sayacı Testleri', () {
+    test('FastingTrackerData varsayılan değerleri ve totalDays hesaplaması doğru olmalı', () {
+      const data = FastingTrackerData(loggedDates: {'2026-03-01', '2026-03-02'}, manualExtraDays: 3);
+      expect(data.totalDays, 5);
+      expect(data.isFastingToday('2026-03-01'), isTrue);
+      expect(data.isFastingToday('2026-03-03'), isFalse);
+    });
+
+    test('FastingTrackerData copyWith manualExtraDays doğru güncellenmeli', () {
+      const data = FastingTrackerData(loggedDates: {}, manualExtraDays: 0);
+      final updated = data.copyWith(manualExtraDays: 10);
+      expect(updated.totalDays, 10);
+      expect(updated.manualExtraDays, 10);
     });
   });
 }

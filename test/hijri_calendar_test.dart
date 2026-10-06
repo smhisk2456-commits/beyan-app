@@ -33,12 +33,11 @@ void main() {
       }
     });
 
-    test('getNextReligiousDay geçmiş olmayan ilk dini günü dönmeli', () {
+    test('getNextReligiousDay geçmiş olmayan ilk dini günü dönmeli ve asla null olmamalı', () {
       final next = service.getNextReligiousDay();
-      if (next != null) {
-        expect(next.isPast, isFalse);
-        expect(next.daysRemaining, greaterThanOrEqualTo(0));
-      }
+      expect(next, isNotNull);
+      expect(next!.title.isNotEmpty, isTrue);
+      expect(next.daysRemaining, greaterThanOrEqualTo(0));
     });
   });
 }

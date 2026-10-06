@@ -335,4 +335,41 @@ class AppStrings {
   String minutesShort(int m) => language == AppLanguage.turkish
       ? '$m dk'
       : (language == AppLanguage.english ? '$m min' : '$m د');
+
+  // ── Hızlı Erişim Butonları Ek Çeviriler ────────────────────────
+  String get actionPrayersSub => language == AppLanguage.turkish
+      ? '6 Vakit'
+      : (language == AppLanguage.english ? '6 Prayers' : '٦ مواقيت');
+  String get actionQuranSub => language == AppLanguage.turkish
+      ? '114 Sure'
+      : (language == AppLanguage.english ? '114 Surahs' : '١١٤ سورة');
+  String get actionDuas => language == AppLanguage.turkish
+      ? 'Dualar'
+      : (language == AppLanguage.english ? 'Duas' : 'الأدعية');
+  String get actionDuasSub => language == AppLanguage.turkish
+      ? 'Kütüphane'
+      : (language == AppLanguage.english ? 'Library' : 'المكتبة');
+  String get actionCalendar => language == AppLanguage.turkish
+      ? 'Hicri Takvim'
+      : (language == AppLanguage.english ? 'Hijri Calendar' : 'التقويم الهجري');
+  String get actionCalendarSub => language == AppLanguage.turkish
+      ? 'Kandiller'
+      : (language == AppLanguage.english ? 'Holy Days' : 'المناسبات');
+  String get actionRamadan => language == AppLanguage.turkish
+      ? 'Ramazan'
+      : (language == AppLanguage.english ? 'Ramadan' : 'رمضان');
+  String get actionRamadanSub => language == AppLanguage.turkish
+      ? 'İftar/Sahur'
+      : (language == AppLanguage.english ? 'Iftar/Suhoor' : 'إفطار وسحور');
+
+  // ── Günlük Kartlar ─────────────────────────────────────────────
+  String get dailyVerseTitle => language == AppLanguage.turkish
+      ? 'Günün Ayet-i Kerimesi'
+      : (language == AppLanguage.english ? 'Daily Quran Verse' : 'آية اليوم');
+  String get dailyDuaTitle => language == AppLanguage.turkish
+      ? 'Günün Niyazı ve Duası'
+      : (language == AppLanguage.english ? 'Daily Supplication' : 'دعاء اليوم');
+  String get allDuasLink => language == AppLanguage.turkish
+      ? 'Tüm Dualar ➔'
+      : (language == AppLanguage.english ? 'All Duas ➔' : 'جميع الأدعية ➔');
 }

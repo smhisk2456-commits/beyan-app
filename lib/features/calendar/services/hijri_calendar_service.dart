@@ -251,15 +251,172 @@ class HijriCalendarService {
         gregorianDate: DateTime(2026, 8, 24),
         description: 'Peygamber Efendimiz\'in (s.a.v.) veladeti.',
       ),
+      // ── 2026 Son Çeyrek (1448) ─────────────────────────
+      ReligiousDay(
+        id: '2026_uc_aylar',
+        title: 'Üç Ayların Başlangıcı',
+        hijriDate: '1 Recep 1448',
+        gregorianDate: DateTime(2026, 12, 10),
+        description: 'Mübarek Recep, Şaban ve Ramazan ayları başlangıcı.',
+      ),
+      ReligiousDay(
+        id: '2026_regaib',
+        title: 'Regaib Kandili',
+        hijriDate: '2 Recep 1448',
+        gregorianDate: DateTime(2026, 12, 11),
+        description: 'Rahmet ve lütufların bolca ihsan edildiği gece.',
+      ),
+      // ── 2027 Dini Günler (1448-1449) ───────────────────
+      ReligiousDay(
+        id: '2027_mirac',
+        title: 'Mirac Kandili',
+        hijriDate: '27 Recep 1448',
+        gregorianDate: DateTime(2027, 1, 5),
+        description: 'İlahi huzura yükseliş ve beş vakit namaz müjdesi.',
+      ),
+      ReligiousDay(
+        id: '2027_berat',
+        title: 'Berat Kandili',
+        hijriDate: '15 Şaban 1448',
+        gregorianDate: DateTime(2027, 1, 22),
+        description: 'Bağışlanma, af ve berat gecesi.',
+      ),
+      ReligiousDay(
+        id: '2027_ramazan_start',
+        title: 'Ramazan-ı Şerif Başlangıcı',
+        hijriDate: '1 Ramazan 1448',
+        gregorianDate: DateTime(2027, 2, 7),
+        description: 'On bir ayın sultanı Ramazan ayının ilk orucu.',
+      ),
+      ReligiousDay(
+        id: '2027_kadir',
+        title: 'Kadir Gecesi',
+        hijriDate: '27 Ramazan 1448',
+        gregorianDate: DateTime(2027, 3, 5),
+        description: 'Bin aydan daha hayırlı mübarek Kur\'an gecesi.',
+      ),
+      ReligiousDay(
+        id: '2027_ramazan_bayram',
+        title: 'Ramazan Bayramı (1. Gün)',
+        hijriDate: '1 Şevval 1448',
+        gregorianDate: DateTime(2027, 3, 9),
+        description: 'Mübarek Ramazan Bayramı sevinci.',
+      ),
+      ReligiousDay(
+        id: '2027_kurban_bayram',
+        title: 'Kurban Bayramı (1. Gün)',
+        hijriDate: '10 Zilhicce 1448',
+        gregorianDate: DateTime(2027, 5, 16),
+        description: 'Kurban ibadeti ve hac farizasının ifası.',
+      ),
+      ReligiousDay(
+        id: '2027_hicri_yilbasi',
+        title: 'Hicri Yılbaşı',
+        hijriDate: '1 Muharrem 1449',
+        gregorianDate: DateTime(2027, 6, 6),
+        description: 'Hicri 1449 yılı başlangıcı.',
+      ),
+      ReligiousDay(
+        id: '2027_asure',
+        title: 'Aşure Günü',
+        hijriDate: '10 Muharrem 1449',
+        gregorianDate: DateTime(2027, 6, 15),
+        description: 'Mübarek Muharrem ayı Aşure günü.',
+      ),
+      ReligiousDay(
+        id: '2027_mevlid',
+        title: 'Mevlid Kandili',
+        hijriDate: '12 Rebiülevvel 1449',
+        gregorianDate: DateTime(2027, 8, 14),
+        description: 'Âlemlere rahmet Peygamber Efendimiz\'in (s.a.v.) veladeti.',
+      ),
+      ReligiousDay(
+        id: '2027_regaib',
+        title: 'Regaib Kandili',
+        hijriDate: '2 Recep 1449',
+        gregorianDate: DateTime(2027, 11, 30),
+        description: 'Recep ayının ilk cuma gecesi Regaib Kandili.',
+      ),
+      ReligiousDay(
+        id: '2027_mirac',
+        title: 'Mirac Kandili',
+        hijriDate: '27 Recep 1449',
+        gregorianDate: DateTime(2027, 12, 26),
+        description: 'Mirac gecesi feyz ve bereketi.',
+      ),
+      // ── 2028 Dini Günler (1449-1450) ───────────────────
+      ReligiousDay(
+        id: '2028_berat',
+        title: 'Berat Kandili',
+        hijriDate: '15 Şaban 1449',
+        gregorianDate: DateTime(2028, 1, 12),
+        description: 'Af ve mağfiret gecesi Berat Kandili.',
+      ),
+      ReligiousDay(
+        id: '2028_ramazan_start',
+        title: 'Ramazan-ı Şerif Başlangıcı',
+        hijriDate: '1 Ramazan 1449',
+        gregorianDate: DateTime(2028, 1, 28),
+        description: 'Mübarek Ramazan ayının ilk orucu.',
+      ),
+      ReligiousDay(
+        id: '2028_kadir',
+        title: 'Kadir Gecesi',
+        hijriDate: '27 Ramazan 1449',
+        gregorianDate: DateTime(2028, 2, 23),
+        description: 'Bin aydan daha hayırlı Kadir Gecesi.',
+      ),
+      ReligiousDay(
+        id: '2028_ramazan_bayram',
+        title: 'Ramazan Bayramı (1. Gün)',
+        hijriDate: '1 Şevval 1449',
+        gregorianDate: DateTime(2028, 2, 27),
+        description: 'Ramazan Bayramı sevinç ve muhabbeti.',
+      ),
+      ReligiousDay(
+        id: '2028_kurban_bayram',
+        title: 'Kurban Bayramı (1. Gün)',
+        hijriDate: '10 Zilhicce 1449',
+        gregorianDate: DateTime(2028, 5, 5),
+        description: 'Mübarek Kurban Bayramı başlangıcı.',
+      ),
+      ReligiousDay(
+        id: '2028_hicri_yilbasi',
+        title: 'Hicri Yılbaşı',
+        hijriDate: '1 Muharrem 1450',
+        gregorianDate: DateTime(2028, 5, 25),
+        description: 'Hicri 1450 yılı kutlu başlangıcı.',
+      ),
+      ReligiousDay(
+        id: '2028_asure',
+        title: 'Aşure Günü',
+        hijriDate: '10 Muharrem 1450',
+        gregorianDate: DateTime(2028, 6, 3),
+        description: 'Muharrem ayı Aşure bereketi.',
+      ),
     ];
   }
 
-  /// Sıradaki yaklaşan dini günü getirir
+  /// Sıradaki yaklaşan dini günü getirir (Asla boş alan bırakmaz)
   ReligiousDay? getNextReligiousDay() {
-    final list = getReligiousDays().where((d) => !d.isPast).toList();
-    if (list.isEmpty) return null;
-    list.sort((a, b) => a.daysRemaining.compareTo(b.daysRemaining));
-    return list.first;
+    final all = getReligiousDays();
+    final list = all.where((d) => !d.isPast).toList();
+    if (list.isNotEmpty) {
+      list.sort((a, b) => a.daysRemaining.compareTo(b.daysRemaining));
+      return list.first;
+    }
+    // Güvenli Fallback: Gelecek döngü için son kaydı 354 gün (1 Hicri yıl) öteleyerek sunar
+    if (all.isNotEmpty) {
+      final last = all.last;
+      return ReligiousDay(
+        id: 'upcoming_future_fallback',
+        title: last.title,
+        hijriDate: last.hijriDate,
+        gregorianDate: last.gregorianDate.add(const Duration(days: 354)),
+        description: last.description,
+      );
+    }
+    return null;
   }
 
   /// Ayar: Kullanıcı Hicri gün düzeltmesi (-2 ile +2 gün)
