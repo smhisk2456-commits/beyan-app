@@ -4,6 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/localization/app_strings.dart';
 import '../../../core/localization/language_selector_sheet.dart';
 import '../../widget_service/screens/widget_settings_dialog.dart';
+import '../../monetization/providers/premium_provider.dart';
+import '../../monetization/screens/premium_paywall_sheet.dart';
+import '../../monetization/widgets/banner_ad_widget.dart';
 
 /// Lüks Zikirmatik ve Tesbihat Ekranı.
 class ZikirmatikScreen extends ConsumerStatefulWidget {
@@ -214,6 +217,16 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                 ),
               ),
             ),
+          ),
+          IconButton(
+            icon: Icon(
+              ref.watch(premiumProvider).isPremium
+                  ? Icons.workspace_premium_rounded
+                  : Icons.workspace_premium_outlined,
+              color: const Color(0xFFFFDF7A),
+            ),
+            tooltip: ref.watch(premiumProvider).isPremium ? 'Beyân Premium' : 'Premium & Reklamsız',
+            onPressed: () => PremiumPaywallSheet.show(context),
           ),
           IconButton(
             icon: const Icon(Icons.settings_outlined, color: Colors.white),
@@ -496,6 +509,9 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                   ),
                 ],
               ),
+              const SizedBox(height: 24),
+              // ── Saygılı Alt Banner Reklam (Premium'da otomatik gizlenir) ──
+              const BannerAdWidget(),
             ],
           ),
         ),

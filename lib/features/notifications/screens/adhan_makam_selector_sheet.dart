@@ -5,6 +5,7 @@ import '../../../core/theme/theme_provider.dart';
 import '../models/adhan_makam.dart';
 import '../services/adhan_audio_player_service.dart';
 import '../services/notification_service.dart';
+import '../../monetization/screens/premium_paywall_sheet.dart';
 
 /// Ezan Makamları Seçim ve Önizleme Dinleme Ekranı
 class AdhanMakamSelectorSheet extends ConsumerStatefulWidget {
@@ -129,6 +130,15 @@ class _AdhanMakamSelectorSheetState
                     ),
                   ],
                 ),
+              ),
+              IconButton(
+                icon: Icon(
+                  Icons.workspace_premium_rounded,
+                  color: gold,
+                  size: 26,
+                ),
+                tooltip: 'Beyân Premium',
+                onPressed: () => PremiumPaywallSheet.show(context),
               ),
             ],
           ),

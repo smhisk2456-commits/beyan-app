@@ -16,6 +16,8 @@ import 'features/widget_service/background_task_manager.dart';
 import 'features/widget_service/screens/widget_center_screen.dart';
 import 'features/notifications/services/notification_service.dart';
 import 'features/live_activity/live_activity_service.dart';
+import 'features/monetization/services/ad_service.dart';
+import 'features/monetization/services/premium_service.dart';
 import 'features/splash/screens/splash_screen.dart';
 import 'core/widgets/luxury_floating_dock.dart';
 
@@ -62,6 +64,14 @@ void main() async {
       LiveActivityService.instance.startMonitoring();
     } catch (e) {
       debugPrint('LiveActivityService başlatma hatası: $e');
+    }
+
+    // 5. Premium & Reklam Servisleri
+    try {
+      await PremiumService.instance.initialize();
+      await AdService.instance.initialize();
+    } catch (e) {
+      debugPrint('Monetization servisleri başlatma hatası: $e');
     }
   });
 

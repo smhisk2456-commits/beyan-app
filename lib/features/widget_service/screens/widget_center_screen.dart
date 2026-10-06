@@ -5,6 +5,9 @@ import '../../../core/localization/app_strings.dart';
 import '../../../core/localization/language_selector_sheet.dart';
 import '../../../core/theme/app_theme.dart';
 import '../widget_service.dart';
+import '../../monetization/providers/premium_provider.dart';
+import '../../monetization/screens/premium_paywall_sheet.dart';
+import '../../monetization/widgets/banner_ad_widget.dart';
 
 /// Kilit Ekranı & Widget Yönetim Merkezi
 class WidgetCenterScreen extends ConsumerStatefulWidget {
@@ -81,6 +84,16 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
         title: Text(strings.widgetCenterTitle),
         centerTitle: true,
         actions: [
+          IconButton(
+            icon: Icon(
+              ref.watch(premiumProvider).isPremium
+                  ? Icons.workspace_premium_rounded
+                  : Icons.workspace_premium_outlined,
+              color: const Color(0xFFFFDF7A),
+            ),
+            tooltip: ref.watch(premiumProvider).isPremium ? 'Beyân Premium' : 'Premium & Reklamsız',
+            onPressed: () => PremiumPaywallSheet.show(context),
+          ),
           // Dil Seçici Buton
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
@@ -374,6 +387,9 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                       ],
                     ),
                   ),
+                  const SizedBox(height: 20),
+                  // ── Saygılı Alt Banner Reklam (Premium'da otomatik gizlenir) ──
+                  const BannerAdWidget(),
                 ],
               ),
             ),

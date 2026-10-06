@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../app_theme.dart';
 import '../theme_provider.dart';
+import '../../../features/monetization/providers/premium_provider.dart';
+import '../../../features/monetization/screens/premium_paywall_sheet.dart';
 
 /// Kullanıcının tema modu ve 4 lüks renk paletini seçtiği modern alt sayfa.
 class ThemeSelectionSheet extends ConsumerWidget {
@@ -97,6 +99,17 @@ class ThemeSelectionSheet extends ConsumerWidget {
                     ),
                   ],
                 ),
+              ),
+              IconButton(
+                icon: Icon(
+                  ref.watch(premiumProvider).isPremium
+                      ? Icons.workspace_premium_rounded
+                      : Icons.workspace_premium_outlined,
+                  color: themeState.palette.accentGold,
+                  size: 26,
+                ),
+                tooltip: 'Beyân Premium',
+                onPressed: () => PremiumPaywallSheet.show(context),
               ),
             ],
           ),
@@ -310,7 +323,7 @@ class ThemeSelectionSheet extends ConsumerWidget {
                 ),
               ),
 
-              // Seçili İkonu
+              // Seçili İkonu veya PRO Rozeti
               if (isSelected)
                 Container(
                   padding: const EdgeInsets.all(4),
@@ -322,6 +335,25 @@ class ThemeSelectionSheet extends ConsumerWidget {
                     Icons.check,
                     color: Colors.black,
                     size: 16,
+                  ),
+                )
+              else if (palette != AppThemePalette.emerald)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: palette.accentGold.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color: palette.accentGold.withValues(alpha: 0.5),
+                    ),
+                  ),
+                  child: Text(
+                    'PRO',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: palette.accentGold,
+                    ),
                   ),
                 ),
             ],

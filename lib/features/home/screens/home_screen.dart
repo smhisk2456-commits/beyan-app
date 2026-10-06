@@ -11,6 +11,9 @@ import '../../widget_service/screens/widget_settings_dialog.dart';
 import '../../qibla/screens/qibla_compass_screen.dart';
 import '../../notifications/screens/notification_settings_sheet.dart';
 import '../../../core/theme/screens/theme_selection_sheet.dart';
+import '../../monetization/providers/premium_provider.dart';
+import '../../monetization/screens/premium_paywall_sheet.dart';
+import '../../monetization/widgets/banner_ad_widget.dart';
 import '../widgets/prayer_card_widget.dart';
 
 /// Ana Ekran – Beyân lüks İslami arayüzü (Kur'an listesi menüden kaldırılmış ferah tasarım).
@@ -139,6 +142,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
               child: _DailyVerseCompactCard(),
             ),
+          ),
+
+          // ── Saygılı Alt Banner Reklam (Premium'da otomatik gizlenir) ──
+          const SliverToBoxAdapter(
+            child: BannerAdWidget(),
           ),
 
           // Alt boşluk (Yüzen lüks dock için ferah alan)
@@ -627,6 +635,17 @@ class _IslamicAppBar extends ConsumerWidget {
         ],
       ),
       actions: [
+        // Beyân Premium Üyelik Butonu
+        IconButton(
+          icon: Icon(
+            ref.watch(premiumProvider).isPremium
+                ? Icons.workspace_premium_rounded
+                : Icons.workspace_premium_outlined,
+            color: const Color(0xFFFFDF7A),
+          ),
+          tooltip: ref.watch(premiumProvider).isPremium ? 'Beyân Premium' : 'Premium & Reklamsız',
+          onPressed: () => PremiumPaywallSheet.show(context),
+        ),
         // Tema Seçici Butonu
         IconButton(
           icon: const Icon(Icons.palette_outlined, color: Color(0xFFFFDF7A)),
