@@ -19,7 +19,6 @@ class PrayerTimesScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final prayerAsync = ref.watch(prayerTimesNotifierProvider);
-    final countdownAsync = ref.watch(countdownStringProvider);
     final strings = ref.watch(appStringsProvider);
     final currentLang = ref.watch(appLanguageProvider);
 
@@ -96,7 +95,6 @@ class PrayerTimesScreen extends ConsumerWidget {
         ),
         data: (daily) => _PrayerTimesContent(
           daily: daily,
-          countdownAsync: countdownAsync,
         ),
       ),
     );
@@ -106,16 +104,13 @@ class PrayerTimesScreen extends ConsumerWidget {
 /// Namaz vakitleri içerik widget'ı.
 class _PrayerTimesContent extends ConsumerWidget {
   final DailyPrayerTimes daily;
-  final AsyncValue<String> countdownAsync;
 
   const _PrayerTimesContent({
     required this.daily,
-    required this.countdownAsync,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final progressAsync = ref.watch(prayerProgressProvider);
     final strings = ref.watch(appStringsProvider);
 
     return SingleChildScrollView(
@@ -130,8 +125,6 @@ class _PrayerTimesContent extends ConsumerWidget {
           // ── Sıradaki Vakit Banner ─────────────────────────────
           _NextPrayerBanner(
             daily: daily,
-            countdownAsync: countdownAsync,
-            progressAsync: progressAsync,
             strings: strings,
           ),
           const SizedBox(height: 20),
@@ -218,14 +211,10 @@ class _LocationDateCard extends StatelessWidget {
 /// Sıradaki namaz vakti banner'ı – büyük countdown ile.
 class _NextPrayerBanner extends StatelessWidget {
   final DailyPrayerTimes daily;
-  final AsyncValue<String> countdownAsync;
-  final AsyncValue<double> progressAsync;
   final AppStrings strings;
 
   const _NextPrayerBanner({
     required this.daily,
-    required this.countdownAsync,
-    required this.progressAsync,
     required this.strings,
   });
 
@@ -348,26 +337,34 @@ class _NextPrayerBanner extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  // Gerçek zamanlı countdown
-                  countdownAsync.when(
-                    data: (str) => Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.25),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        '⏱ $str ${strings.remainingTime}',
-                        style: const TextStyle(
-                          color: Color(0xFFFFDF7A),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          fontFeatures: [FontFeature.tabularFigures()],
-                        ),
-                      ),
+                  // Gerçek zamanlı countdown (İzole edilmiş Consumer ve RepaintBoundary)
+                  RepaintBoundary(
+                    child: Consumer(
+                      builder: (context, ref, _) {
+                        final countdownAsync = ref.watch(countdownStringProvider);
+                        final s = ref.watch(appStringsProvider);
+                        return countdownAsync.when(
+                          data: (str) => Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.25),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              '⏱ $str ${s.remainingTime}',
+                              style: const TextStyle(
+                                color: Color(0xFFFFDF7A),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                fontFeatures: [FontFeature.tabularFigures()],
+                              ),
+                            ),
+                          ),
+                          loading: () => const SizedBox.shrink(),
+                          error: (_, __) => const SizedBox.shrink(),
+                        );
+                      },
                     ),
-                    loading: () => const SizedBox.shrink(),
-                    error: (_, __) => const SizedBox.shrink(),
                   ),
                 ],
               ),
@@ -412,39 +409,46 @@ class _NextPrayerBanner extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 16),
-          // İlerleme çubuğu
-          progressAsync.when(
-            data: (progress) => Column(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
-                  child: LinearProgressIndicator(
-                    value: progress,
-                    backgroundColor: Colors.white24,
-                    valueColor: const AlwaysStoppedAnimation<Color>(
-                      Color(0xFFFFDF7A),
-                    ),
-                    minHeight: 6,
+          // İlerleme çubuğu (İzole edilmiş Consumer)
+          RepaintBoundary(
+            child: Consumer(
+              builder: (context, ref, _) {
+                final progressAsync = ref.watch(prayerProgressProvider);
+                return progressAsync.when(
+                  data: (progress) => Column(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: LinearProgressIndicator(
+                          value: progress,
+                          backgroundColor: Colors.white24,
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                            Color(0xFFFFDF7A),
+                          ),
+                          minHeight: 6,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            daily.currentPrayerName,
+                            style: const TextStyle(color: Colors.white54, fontSize: 11),
+                          ),
+                          Text(
+                            next?.name.localizedName(strings.language.code) ?? '',
+                            style: const TextStyle(color: Colors.white54, fontSize: 11),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      daily.currentPrayerName,
-                      style: const TextStyle(color: Colors.white54, fontSize: 11),
-                    ),
-                    Text(
-                      next?.name.localizedName(strings.language.code) ?? '',
-                      style: const TextStyle(color: Colors.white54, fontSize: 11),
-                    ),
-                  ],
-                ),
-              ],
+                  loading: () => const SizedBox.shrink(),
+                  error: (_, __) => const SizedBox.shrink(),
+                );
+              },
             ),
-            loading: () => const SizedBox.shrink(),
-            error: (_, __) => const SizedBox.shrink(),
           ),
         ],
       ),

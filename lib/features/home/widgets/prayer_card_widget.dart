@@ -13,16 +13,12 @@ class PrayerCardWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final prayerAsync = ref.watch(prayerTimesNotifierProvider);
-    final countdownAsync = ref.watch(countdownStringProvider);
-    final progressAsync = ref.watch(prayerProgressProvider);
 
-    return prayerAsync.when(
-      loading: () => _LoadingCard(),
-      error: (e, _) => _ErrorCard(message: e.toString()),
-      data: (daily) => _PrayerCard(
-        daily: daily,
-        countdownAsync: countdownAsync,
-        progressAsync: progressAsync,
+    return RepaintBoundary(
+      child: prayerAsync.when(
+        loading: () => _LoadingCard(),
+        error: (e, _) => _ErrorCard(message: e.toString()),
+        data: (daily) => _PrayerCard(daily: daily),
       ),
     );
   }
@@ -79,13 +75,9 @@ class _ErrorCard extends StatelessWidget {
 /// Ana namaz vakti kartı – zümrüt degrade, 24K altın detaylar, rekat bilgisi.
 class _PrayerCard extends ConsumerWidget {
   final DailyPrayerTimes daily;
-  final AsyncValue<String> countdownAsync;
-  final AsyncValue<double> progressAsync;
 
   const _PrayerCard({
     required this.daily,
-    required this.countdownAsync,
-    required this.progressAsync,
   });
 
   @override
@@ -228,12 +220,18 @@ class _PrayerCard extends ConsumerWidget {
                           ),
                         ),
                         const SizedBox(height: 6),
-                        countdownAsync.when(
-                          data: (s) => _CountdownBadge(
-                            text: '$s ${strings.remainingTime}',
-                          ),
-                          loading: () => const SizedBox.shrink(),
-                          error: (_, __) => const SizedBox.shrink(),
+                        Consumer(
+                          builder: (context, ref, _) {
+                            final countdownAsync = ref.watch(countdownStringProvider);
+                            final strings = ref.watch(appStringsProvider);
+                            return countdownAsync.when(
+                              data: (s) => _CountdownBadge(
+                                text: '$s ${strings.remainingTime}',
+                              ),
+                              loading: () => const SizedBox.shrink(),
+                              error: (_, __) => const SizedBox.shrink(),
+                            );
+                          },
                         ),
                       ],
                     ),
@@ -242,14 +240,19 @@ class _PrayerCard extends ConsumerWidget {
                 const SizedBox(height: 16),
 
                 // İlerleme Çubuğu
-                progressAsync.when(
-                  data: (p) => _ProgressBar(
-                    progress: p,
-                    fromLabel: PrayerName.fromAdhan(daily.currentPrayer).localizedName(langCode),
-                    toLabel: next?.name.localizedName(langCode) ?? '',
-                  ),
-                  loading: () => const SizedBox.shrink(),
-                  error: (_, __) => const SizedBox.shrink(),
+                Consumer(
+                  builder: (context, ref, _) {
+                    final progressAsync = ref.watch(prayerProgressProvider);
+                    return progressAsync.when(
+                      data: (p) => _ProgressBar(
+                        progress: p,
+                        fromLabel: PrayerName.fromAdhan(daily.currentPrayer).localizedName(langCode),
+                        toLabel: next?.name.localizedName(langCode) ?? '',
+                      ),
+                      loading: () => const SizedBox.shrink(),
+                      error: (_, __) => const SizedBox.shrink(),
+                    );
+                  },
                 ),
               ],
             ),

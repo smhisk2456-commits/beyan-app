@@ -12,17 +12,41 @@ class PremiumService {
 
   static const String keyIsPremium = 'beyan_is_premium';
   static const String keyTier = 'beyan_premium_tier';
+  static const String keyWidgetTrialStart = 'beyan_widget_trial_start';
+  static const String keyHasSeenOnboardingPaywall = 'beyan_seen_onboarding_paywall';
 
   final InAppPurchase _iap = InAppPurchase.instance;
   StreamSubscription<List<PurchaseDetails>>? _subscription;
 
   bool _isPremium = false;
   PremiumTier? _activeTier;
+  DateTime? _trialStartDate;
   final _changeController = StreamController<bool>.broadcast();
 
   bool get isPremium => _isPremium;
   PremiumTier? get activeTier => _activeTier;
+  DateTime? get trialStartDate => _trialStartDate;
   Stream<bool> get premiumStatusStream => _changeController.stream;
+
+  /// 3 Günlük Ücretsiz Deneme süresi devam ediyor mu?
+  bool get isTrialActive {
+    if (_isPremium) return true;
+    if (_trialStartDate == null) return true;
+    final diff = DateTime.now().difference(_trialStartDate!);
+    return diff.inDays < 3;
+  }
+
+  /// Deneme süresinden kalan gün sayısı (3, 2, 1 veya 0)
+  int get trialDaysRemaining {
+    if (_isPremium) return 999;
+    if (_trialStartDate == null) return 3;
+    final diff = DateTime.now().difference(_trialStartDate!);
+    final remaining = 3 - diff.inDays;
+    return remaining > 0 ? remaining : 0;
+  }
+
+  /// Kullanıcının Widget özelliğine erişim hakkı var mı?
+  bool get hasWidgetAccess => _isPremium || isTrialActive;
 
   List<ProductDetails> _products = [];
   List<ProductDetails> get products => _products;
@@ -36,6 +60,15 @@ class PremiumService {
       try {
         _activeTier = PremiumTier.values.firstWhere((t) => t.name == tierStr);
       } catch (_) {}
+    }
+
+    final trialStr = prefs.getString(keyWidgetTrialStart);
+    if (trialStr != null) {
+      _trialStartDate = DateTime.tryParse(trialStr);
+    } else {
+      final now = DateTime.now();
+      _trialStartDate = now;
+      await prefs.setString(keyWidgetTrialStart, now.toIso8601String());
     }
 
     // Satın alma akışını dinle
@@ -158,6 +191,29 @@ class PremiumService {
       await prefs.remove(keyTier);
     }
     _changeController.add(premium);
+  }
+
+  /// 3 Günlük Denemeyi kullanıcı onayıyla başlatır
+  Future<void> activateFreeTrial() async {
+    final prefs = await SharedPreferences.getInstance();
+    final now = DateTime.now();
+    _trialStartDate = now;
+    await prefs.setString(keyWidgetTrialStart, now.toIso8601String());
+    await prefs.setBool(keyHasSeenOnboardingPaywall, true);
+    _changeController.add(true);
+  }
+
+  /// Açılış paywall'unun gösterilip gösterilmeyeceğini kontrol eder
+  Future<bool> shouldShowLaunchPaywall() async {
+    if (_isPremium) return false;
+    final prefs = await SharedPreferences.getInstance();
+    final hasSeen = prefs.getBool(keyHasSeenOnboardingPaywall) ?? false;
+    return !hasSeen;
+  }
+
+  Future<void> markLaunchPaywallSeen() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(keyHasSeenOnboardingPaywall, true);
   }
 
   /// Geliştirici ve test modu için Premium'u açıp kapatma (Testflight / Emülatör testi)

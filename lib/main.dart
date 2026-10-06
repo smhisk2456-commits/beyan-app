@@ -19,6 +19,7 @@ import 'features/live_activity/live_activity_service.dart';
 import 'features/monetization/services/ad_service.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'features/monetization/services/premium_service.dart';
+import 'features/monetization/screens/onboarding_trial_paywall_screen.dart';
 import 'features/splash/screens/splash_screen.dart';
 import 'core/widgets/luxury_floating_dock.dart';
 
@@ -136,9 +137,14 @@ class IslamicApp extends ConsumerWidget {
 
 final selectedTabProvider = StateProvider<int>((ref) => 0);
 
-class MainNavigation extends ConsumerWidget {
+class MainNavigation extends ConsumerStatefulWidget {
   const MainNavigation({super.key});
 
+  @override
+  ConsumerState<MainNavigation> createState() => _MainNavigationState();
+}
+
+class _MainNavigationState extends ConsumerState<MainNavigation> {
   static const _screens = [
     HomeScreen(),
     PrayerTimesScreen(),
@@ -148,18 +154,38 @@ class MainNavigation extends ConsumerWidget {
   ];
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkLaunchPaywall();
+    });
+  }
+
+  Future<void> _checkLaunchPaywall() async {
+    if (!mounted) return;
+    final shouldShow = await PremiumService.instance.shouldShowLaunchPaywall();
+    if (shouldShow && mounted) {
+      await OnboardingTrialPaywallScreen.show(context);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final selectedTab = ref.watch(selectedTabProvider);
 
     return Scaffold(
       extendBody: true,
-      body: IndexedStack(
-        index: selectedTab,
-        children: _screens,
+      body: RepaintBoundary(
+        child: IndexedStack(
+          index: selectedTab,
+          children: _screens,
+        ),
       ),
-      bottomNavigationBar: LuxuryFloatingDock(
-        currentIndex: selectedTab,
-        onTap: (i) => ref.read(selectedTabProvider.notifier).state = i,
+      bottomNavigationBar: RepaintBoundary(
+        child: LuxuryFloatingDock(
+          currentIndex: selectedTab,
+          onTap: (i) => ref.read(selectedTabProvider.notifier).state = i,
+        ),
       ),
     );
   }

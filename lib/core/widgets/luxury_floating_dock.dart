@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -30,24 +29,22 @@ class LuxuryFloatingDock extends ConsumerWidget {
               // ── Ana Yüzen Bar Gövdesi ──────────────────────────────
               ClipRRect(
                 borderRadius: BorderRadius.circular(36),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-                  child: Container(
-                    height: 66,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [
-                          Color(0xF0012E2B),
-                          Color(0xF8021B17),
-                        ],
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                      ),
-                      borderRadius: BorderRadius.circular(36),
-                      border: Border.all(
-                        color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
-                        width: 1.2,
-                      ),
+                child: Container(
+                  height: 66,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [
+                        Color(0xFF012E2B),
+                        Color(0xFF021B17),
+                      ],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
+                    borderRadius: BorderRadius.circular(36),
+                    border: Border.all(
+                      color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+                      width: 1.2,
+                    ),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withValues(alpha: 0.45),
@@ -105,7 +102,6 @@ class LuxuryFloatingDock extends ConsumerWidget {
                     ),
                   ),
                 ),
-              ),
 
               // ── Merkez Yükseltilmiş Kur'an Mührü (Index 2) ──────
               Positioned(

@@ -17,6 +17,7 @@ class BannerAdWidget extends ConsumerStatefulWidget {
 class _BannerAdWidgetState extends ConsumerState<BannerAdWidget> {
   BannerAd? _bannerAd;
   bool _isLoaded = false;
+  bool _attemptedTestFallback = false;
 
   @override
   void initState() {
@@ -24,11 +25,14 @@ class _BannerAdWidgetState extends ConsumerState<BannerAdWidget> {
     _loadAd();
   }
 
-  void _loadAd() {
+  void _loadAd({bool isFallback = false}) {
     final isPremium = ref.read(premiumProvider).isPremium;
     if (isPremium) return;
 
-    final unitId = AdService.instance.bannerAdUnitId;
+    final unitId = isFallback
+        ? AdService.instance.testBannerAdUnitId
+        : AdService.instance.bannerAdUnitId;
+
     if (unitId.isEmpty) return;
 
     _bannerAd = BannerAd(
@@ -42,9 +46,18 @@ class _BannerAdWidgetState extends ConsumerState<BannerAdWidget> {
           }
         },
         onAdFailedToLoad: (ad, error) {
-          debugPrint('Banner reklam yüklenemedi: $error');
+          debugPrint('Banner reklam yüklenemedi (fallback: $isFallback): $error');
           ad.dispose();
           if (mounted) {
+            // Eğer canlı reklam henüz onaylanmadıysa veya no-fill (kod 3) verdiyse,
+            // uygulamanın test edilmesi için resmi test banner'ına geri düş
+            if (!isFallback && !_attemptedTestFallback) {
+              _attemptedTestFallback = true;
+              debugPrint('AdMob: Canlı reklam doluluk/onay beklemesinde. Test reklam birimine geçiliyor...');
+              _loadAd(isFallback: true);
+              return;
+            }
+
             setState(() {
               _bannerAd = null;
               _isLoaded = false;

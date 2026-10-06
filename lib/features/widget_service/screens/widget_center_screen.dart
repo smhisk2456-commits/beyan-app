@@ -1,15 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../core/localization/app_strings.dart';
-import '../../../core/localization/language_selector_sheet.dart';
-import '../../../core/theme/app_theme.dart';
 import '../widget_service.dart';
 import '../../monetization/providers/premium_provider.dart';
-import '../../monetization/screens/premium_paywall_sheet.dart';
+import '../../monetization/screens/onboarding_trial_paywall_screen.dart';
 import '../../monetization/widgets/banner_ad_widget.dart';
 
-/// Kilit Ekranı & Widget Yönetim Merkezi
+/// Kilit Ekranı Widget Kategorileri
+enum WidgetCategoryType {
+  quotes, // İslami Sözler, Dua ve Ayet
+  dailyVerse, // Günün Ayeti
+  prayerTimes, // Namaz Vakitleri
+  countdown, // Namaz Geri Sayımı
+  hijri, // Hicri Takvim
+  sunTimes, // Güneş & Vakit
+}
+
+/// Kilit Ekranı & Widget Yönetim ve Özelleştirme Merkezi
 class WidgetCenterScreen extends ConsumerStatefulWidget {
   const WidgetCenterScreen({super.key});
 
@@ -18,377 +26,198 @@ class WidgetCenterScreen extends ConsumerStatefulWidget {
 }
 
 class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
-  int _selectedInterval = 5;
-  bool _isLoading = true;
-  bool _isUpdating = false;
+  WidgetCategoryType _selectedCategory = WidgetCategoryType.quotes;
 
-  final List<int> _intervals = [3, 5, 10, 15];
+  // Özelleştirme ayarları
+  String _selectedQuoteCategory = 'Tümü';
+  String _verseViewMode = 'Yalnızca Meal';
+  String _refreshInterval = 'Her saat';
+  String _textSize = 'Standart';
+  String _fontFamily = 'Standart';
+
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadSavedInterval();
+    _loadSavedPreferences();
   }
 
-  Future<void> _loadSavedInterval() async {
+  Future<void> _loadSavedPreferences() async {
     final prefs = await SharedPreferences.getInstance();
-    final saved = prefs.getInt('widget_update_interval') ?? 5;
     setState(() {
-      _selectedInterval = saved.clamp(3, 15);
+      _selectedQuoteCategory = prefs.getString('widget_quote_category') ?? 'Tümü';
+      _verseViewMode = prefs.getString('widget_verse_view') ?? 'Yalnızca Meal';
+      _refreshInterval = prefs.getString('widget_refresh_interval') ?? 'Her saat';
+      _textSize = prefs.getString('widget_text_size') ?? 'Standart';
+      _fontFamily = prefs.getString('widget_font_family') ?? 'Standart';
       _isLoading = false;
     });
   }
 
-  Future<void> _saveInterval(int minutes) async {
-    setState(() => _selectedInterval = minutes);
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('widget_update_interval', minutes);
-    await WidgetService().updateAllWidgets();
-    if (mounted) {
-      final strings = ref.read(appStringsProvider);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${strings.widgetIntervalTitle}: ${strings.minutesSuffix(minutes)}'),
-          backgroundColor: AppColors.teal,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+  Future<void> _savePreference(String key, String value, Function(String) updater) async {
+    final premiumState = ref.read(premiumProvider);
+
+    // 3 Günlük deneme bitti ve kullanıcı Premium değilse Paywall göster
+    if (!premiumState.hasWidgetAccess) {
+      OnboardingTrialPaywallScreen.show(context);
+      return;
     }
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(key, value);
+    setState(() => updater(value));
+    HapticFeedback.lightImpact();
+
+    // Widget verilerini arka planda güncelle
+    await WidgetService().updateAllWidgets();
   }
 
-  Future<void> _triggerManualRefresh() async {
-    setState(() => _isUpdating = true);
-    await WidgetService().updateAllWidgets();
-    await Future.delayed(const Duration(milliseconds: 600));
-    if (mounted) {
-      setState(() => _isUpdating = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('🌙 Ayet güncellendi / Verse refreshed!'),
-          backgroundColor: AppColors.gold,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+  void _showOptionSheet<T>({
+    required String title,
+    required List<String> options,
+    required String currentValue,
+    required Function(String) onSelected,
+  }) {
+    final premiumState = ref.read(premiumProvider);
+    if (!premiumState.hasWidgetAccess) {
+      OnboardingTrialPaywallScreen.show(context);
+      return;
     }
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: isDark ? const Color(0xFF07211C) : Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade400,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              ...options.map((opt) {
+                final isSelected = opt == currentValue;
+                return ListTile(
+                  title: Text(
+                    opt,
+                    style: TextStyle(
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      color: isSelected
+                          ? const Color(0xFFD4AF37)
+                          : (isDark ? Colors.white : Colors.black87),
+                    ),
+                  ),
+                  trailing: isSelected
+                      ? const Icon(Icons.check_rounded, color: Color(0xFFD4AF37))
+                      : null,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    onSelected(opt);
+                  },
+                );
+              }),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final strings = ref.watch(appStringsProvider);
-    final currentLang = ref.watch(appLanguageProvider);
+    final premiumState = ref.watch(premiumProvider);
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: const Color(0xFF051C17),
       appBar: AppBar(
-        title: Text(strings.widgetCenterTitle),
+        backgroundColor: const Color(0xFF051C17),
+        elevation: 0,
+        title: const Text(
+          'Kilit Ekranı Widget\'ları',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            letterSpacing: -0.2,
+          ),
+        ),
         centerTitle: true,
-        actions: [
-          IconButton(
-            icon: Icon(
-              ref.watch(premiumProvider).isPremium
-                  ? Icons.workspace_premium_rounded
-                  : Icons.workspace_premium_outlined,
-              color: const Color(0xFFFFDF7A),
-            ),
-            tooltip: ref.watch(premiumProvider).isPremium ? 'Beyân Premium' : 'Premium & Reklamsız',
-            onPressed: () => PremiumPaywallSheet.show(context),
-          ),
-          // Dil Seçici Buton
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(12),
-              onTap: () => showLanguageSelectorSheet(context),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: const Color(0xFFD4AF37).withValues(alpha: 0.5),
-                    width: 1,
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(currentLang.flag, style: const TextStyle(fontSize: 13)),
-                    const SizedBox(width: 4),
-                    Text(
-                      currentLang.shortCode,
-                      style: const TextStyle(
-                        color: Color(0xFFFFDF7A),
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator(color: Color(0xFFD4AF37)))
           : SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 120),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
               physics: const BouncingScrollPhysics(),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // ── Kilit Ekranı Önizleme Kartı ──────────────────────────
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [
-                          Color(0xFF012E2B),
-                          Color(0xFF02443C),
-                          Color(0xFF033E35),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(
-                        color: const Color(0xFFD4AF37).withValues(alpha: 0.35),
-                        width: 1.2,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFF01201D).withValues(alpha: 0.5),
-                          blurRadius: 20,
-                          offset: const Offset(0, 8),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Colors.white12,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: const Icon(Icons.phone_iphone_rounded, color: Colors.white, size: 20),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                strings.widgetPreviewTitle,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: AppColors.gold.withValues(alpha: 0.2),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: AppColors.gold.withValues(alpha: 0.4)),
-                              ),
-                              child: Text(
-                                strings.minutesShort(_selectedInterval),
-                                style: const TextStyle(
-                                  color: AppColors.gold,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 18),
+                  // ── 3 Günlük Deneme / Premium Durum Şeridi ────────────────
+                  _buildTrialStatusBanner(premiumState),
 
-                        // Simüle Edilmiş Kilit Ekranı Dikdörtgen Widget'ı
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(14),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.35),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: Colors.white24),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    'An-Nahl 114',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 13,
-                                    ),
-                                  ),
-                                  Text('🌙', style: TextStyle(fontSize: 14)),
-                                ],
-                              ),
-                              const SizedBox(height: 6),
-                              const Text(
-                                'Allah\'ın nimetlerini saymaya kalksanız sayamazsınız...',
-                                style: TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 12,
-                                  height: 1.4,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  Container(
-                                    width: 6,
-                                    height: 6,
-                                    decoration: const BoxDecoration(
-                                      color: AppColors.gold,
-                                      shape: BoxShape.circle,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    '${strings.prayerNameDhuhr} 13:00  •  02:15 ${strings.remainingTime}',
-                                    style: const TextStyle(
-                                      color: AppColors.tealLight,
-                                      fontSize: 11,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  const SizedBox(height: 16),
+
+                  // ── Yatay Kategori İkon Seçici (6 İkon) ───────────────────
+                  _buildCategoryIconsBar(),
 
                   const SizedBox(height: 24),
 
-                  // ── Zamanlayıcı Ayarı Başlığı ─────────────────────────────
-                  Text(
-                    strings.widgetIntervalTitle,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: isDark ? Colors.white : AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    strings.widgetIntervalDesc,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: isDark ? Colors.white60 : AppColors.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-
-                  // Dakika Seçim Butonları
-                  Wrap(
-                    spacing: 10,
-                    runSpacing: 10,
-                    children: _intervals.map((minutes) {
-                      final isSelected = _selectedInterval == minutes;
-                      return ChoiceChip(
-                        label: Text(strings.minutesSuffix(minutes)),
-                        selected: isSelected,
-                        onSelected: (_) => _saveInterval(minutes),
-                        selectedColor: AppColors.teal,
-                        labelStyle: TextStyle(
-                          color: isSelected ? Colors.white : (isDark ? Colors.white70 : AppColors.textPrimary),
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                        ),
-                        backgroundColor: isDark ? AppColors.darkCard : Colors.grey.shade100,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          side: BorderSide(
-                            color: isSelected ? AppColors.teal : Colors.transparent,
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
+                  // ── Gerçekçi Kilit Ekranı Canlı Önizlemesi (9:41) ──────────
+                  _buildLockScreenPhoneMockup(),
 
                   const SizedBox(height: 24),
 
-                  // Manuel Yenileme Butonu
-                  ElevatedButton.icon(
-                    onPressed: _isUpdating ? null : _triggerManualRefresh,
-                    icon: _isUpdating
-                        ? const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                          )
-                        : const Icon(Icons.refresh_rounded),
-                    label: Text(_isUpdating ? '...' : strings.refreshVerseNow),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.teal,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      elevation: 2,
-                    ),
-                  ),
+                  // ── Başlık ve Açıklama ───────────────────────────────────
+                  _buildWidgetTitleAndDescription(),
 
-                  const SizedBox(height: 28),
-
-                  // ── Nasıl Kullanılır Rehberi ──────────────────────────────
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: isDark ? AppColors.darkCard : Colors.grey.shade50,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: isDark ? Colors.white10 : Colors.grey.shade200,
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            const Icon(Icons.help_outline_rounded, color: AppColors.gold, size: 20),
-                            const SizedBox(width: 8),
-                            Text(
-                              strings.howToAdd,
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                                color: isDark ? Colors.white : AppColors.textPrimary,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        _guideStep(
-                          '1',
-                          strings.iphoneGuideTitle,
-                          strings.iphoneGuideDesc,
-                        ),
-                        const SizedBox(height: 8),
-                        _guideStep(
-                          '2',
-                          strings.androidGuideTitle,
-                          strings.androidGuideDesc,
-                        ),
-                      ],
-                    ),
-                  ),
                   const SizedBox(height: 20),
-                  // ── Saygılı Alt Banner Reklam (Premium'da otomatik gizlenir) ──
+
+                  // ── Özelleştirilebilir Seçenekler Listesi ─────────────────
+                  _buildCustomizationOptionsCard(),
+
+                  const SizedBox(height: 24),
+
+                  // ── Özellikler (Yeşil Onay İşaretleri) ────────────────────
+                  _buildFeaturesCard(),
+
+                  const SizedBox(height: 24),
+
+                  // ── Nasıl Eklenir Adımları ────────────────────────────────
+                  _buildHowToAddGuide(),
+
+                  const SizedBox(height: 20),
+
+                  // Alt banner reklam
                   const BannerAdWidget(),
                 ],
               ),
@@ -396,32 +225,737 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
     );
   }
 
-  Widget _guideStep(String num, String title, String desc) {
-    return Row(
+  // ── 3 Günlük Deneme Durum Şeridi ───────────────────────────────────────────
+  Widget _buildTrialStatusBanner(PremiumState premiumState) {
+    if (premiumState.isPremium) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+          ),
+        ),
+        child: const Row(
+          children: [
+            Icon(Icons.workspace_premium_rounded, color: Color(0xFFFFDF7A), size: 18),
+            SizedBox(width: 8),
+            Text(
+              '★ Beyân Premium: Sınırsız Widget Erişimi',
+              style: TextStyle(
+                color: Color(0xFFFFDF7A),
+                fontWeight: FontWeight.bold,
+                fontSize: 12.5,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (premiumState.isTrialActive) {
+      return InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: () => OnboardingTrialPaywallScreen.show(context),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            color: const Color(0xFF0F3E33),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: const Color(0xFF2DD4BF).withValues(alpha: 0.5),
+            ),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.timer_outlined, color: Color(0xFF2DD4BF), size: 18),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  '3 Günlük Ücretsiz Deneme Aktif (${premiumState.trialDaysRemaining} Gün Kaldı)',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+              const Text(
+                'Yükselt >',
+                style: TextStyle(
+                  color: Color(0xFF2DD4BF),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Deneme süresi doldu
+    return InkWell(
+      borderRadius: BorderRadius.circular(14),
+      onTap: () => OnboardingTrialPaywallScreen.show(context),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: Colors.amber.shade900.withValues(alpha: 0.2),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: Colors.amber.shade600,
+          ),
+        ),
+        child: const Row(
+          children: [
+            Icon(Icons.lock_clock_rounded, color: Colors.amber, size: 18),
+            SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                '3 Günlük Deneme Süresi Doldu • Widget için Premium\'a Geçin',
+                style: TextStyle(
+                  color: Colors.amber,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 11.5,
+                ),
+              ),
+            ),
+            Icon(Icons.arrow_forward_ios_rounded, color: Colors.amber, size: 12),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── 6 İkonlu Yatay Kategori Çubuğu (Screenshots 2-5 üst kısmı) ─────────────
+  Widget _buildCategoryIconsBar() {
+    final categories = [
+      (WidgetCategoryType.quotes, Icons.format_quote_rounded),
+      (WidgetCategoryType.dailyVerse, Icons.menu_book_rounded),
+      (WidgetCategoryType.prayerTimes, Icons.access_time_rounded),
+      (WidgetCategoryType.countdown, Icons.timer_outlined),
+      (WidgetCategoryType.hijri, Icons.nightlight_round),
+      (WidgetCategoryType.sunTimes, Icons.wb_sunny_outlined),
+    ];
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: categories.map((item) {
+          final isSelected = _selectedCategory == item.$1;
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 5),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(24),
+              onTap: () {
+                HapticFeedback.selectionClick();
+                setState(() => _selectedCategory = item.$1);
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isSelected
+                      ? const Color(0xFF10B981)
+                      : const Color(0xFF0E2C24),
+                  border: Border.all(
+                    color: isSelected
+                        ? const Color(0xFF34D399)
+                        : Colors.white.withValues(alpha: 0.1),
+                    width: 1.2,
+                  ),
+                ),
+                child: Icon(
+                  item.$2,
+                  color: isSelected ? Colors.white : Colors.white60,
+                  size: 22,
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  // ── Gerçekçi iPhone Kilit Ekranı Önizlemesi ────────────────────────────────
+  Widget _buildLockScreenPhoneMockup() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 36),
+      decoration: BoxDecoration(
+        color: const Color(0xFF041713),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.12),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.4),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // ── Kilit Ekranı Tarihi veya Kompakt Satır Widget'ı ───────────────
+          if (_selectedCategory == WidgetCategoryType.countdown) ...[
+            // Screenshot 5: "Pazartesi, 6 Haziran | ⏱️ İkindi: 2:15:30"
+            const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Pazartesi, 6 Haziran',
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                SizedBox(width: 6),
+                Text(
+                  '|',
+                  style: TextStyle(color: Colors.white38),
+                ),
+                SizedBox(width: 6),
+                Icon(Icons.timer_outlined, color: Colors.white, size: 14),
+                SizedBox(width: 4),
+                Text(
+                  'İkindi: 2:15:30',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ] else ...[
+            const Text(
+              'Pazartesi, 6 Haziran',
+              style: TextStyle(
+                color: Colors.white70,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+
+          const SizedBox(height: 6),
+
+          // ── Büyük Saat: "9:41" ───────────────────────────────────────────
+          const Text(
+            '9:41',
+            style: TextStyle(
+              fontSize: 76,
+              fontWeight: FontWeight.w300,
+              color: Colors.white,
+              letterSpacing: -2,
+              height: 1.0,
+            ),
+          ),
+
+          const SizedBox(height: 14),
+
+          // ── Kilit Ekranı Saat Altı Widget Alanı ───────────────────────────
+          _buildActiveWidgetPreviewContent(),
+        ],
+      ),
+    );
+  }
+
+  // Aktif Kategoriye Göre Widget Önizleme İçeriği
+  Widget _buildActiveWidgetPreviewContent() {
+    switch (_selectedCategory) {
+      case WidgetCategoryType.quotes:
+        // Screenshot 2: "Bakara 2:152 / Beni anın ki, ben de sizi anayım."
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          child: Column(
+            children: [
+              const Text(
+                'Bakara 2:152',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                'Beni anın ki,\nben de sizi anayım.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.9),
+                  fontSize: 12,
+                  height: 1.25,
+                ),
+              ),
+            ],
+          ),
+        );
+
+      case WidgetCategoryType.dailyVerse:
+        // Screenshot 3: "İnşirah 94:6 / Şüphesiz her güçlükle bir kolaylık vardır."
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          child: Column(
+            children: [
+              const Text(
+                'İnşirah 94:6',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                'Şüphesiz her güçlükle\nbir kolaylık vardır.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.9),
+                  fontSize: 12,
+                  height: 1.25,
+                ),
+              ),
+            ],
+          ),
+        );
+
+      case WidgetCategoryType.prayerTimes:
+        // Screenshot 4: "Öğle 12:30 PM • İkindi 3:45 PM / 2:15:30"
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          child: const Column(
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.wb_sunny_rounded, color: Colors.white70, size: 13),
+                  SizedBox(width: 4),
+                  Text('Öğle 12:30 PM', style: TextStyle(color: Colors.white70, fontSize: 11)),
+                  SizedBox(width: 8),
+                  Icon(Icons.wb_twilight_rounded, color: Colors.white70, size: 13),
+                  SizedBox(width: 4),
+                  Text('İkindi 3:45 PM', style: TextStyle(color: Colors.white70, fontSize: 11)),
+                ],
+              ),
+              SizedBox(height: 4),
+              Text(
+                '2:15:30',
+                style: TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  letterSpacing: 1.2,
+                ),
+              ),
+            ],
+          ),
+        );
+
+      case WidgetCategoryType.countdown:
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          child: const Text(
+            'İkindi vaktine 2 saat 15 dk kaldı',
+            style: TextStyle(color: Colors.white70, fontSize: 12),
+          ),
+        );
+
+      case WidgetCategoryType.hijri:
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          child: const Column(
+            children: [
+              Text(
+                '🌙 18 Ramazan 1447',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+              ),
+              SizedBox(height: 2),
+              Text(
+                'Kadir Gecesine 9 Gün Kaldı',
+                style: TextStyle(color: Colors.white70, fontSize: 11.5),
+              ),
+            ],
+          ),
+        );
+
+      case WidgetCategoryType.sunTimes:
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          child: const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.wb_sunny_outlined, color: Colors.amber, size: 16),
+              SizedBox(width: 6),
+              Text(
+                'Güneş: 05:42  •  İşrak: 06:27',
+                style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
+        );
+    }
+  }
+
+  // ── Başlık & Açıklama Metni ───────────────────────────────────────────────
+  Widget _buildWidgetTitleAndDescription() {
+    String title;
+    String desc;
+
+    switch (_selectedCategory) {
+      case WidgetCategoryType.quotes:
+        title = 'İslami Sözler, Dua ve Ayet';
+        desc =
+            'Telefonunuzun kilidini açmadan Kilit Ekranınızda Kur\'an ayetlerini ve İslami alıntıları görüntüleyin.';
+        break;
+      case WidgetCategoryType.dailyVerse:
+        title = 'Günün Ayeti';
+        desc = 'Her gün otomatik olarak yeni bir ilham verici Kur\'an ayeti alın.';
+        break;
+      case WidgetCategoryType.prayerTimes:
+        title = 'Namaz Vakitleri';
+        desc =
+            'Canlı geri sayım sayacıyla mevcut ve yaklaşan namaz vakitlerini görün.';
+        break;
+      case WidgetCategoryType.countdown:
+        title = 'Namaz Geri Sayımı';
+        desc =
+            'Bir sonraki namazı canlı geri sayımla gösteren kompakt satır içi widget. Kilit Ekranınızda tarihin üzerinde görünür.';
+        break;
+      case WidgetCategoryType.hijri:
+        title = 'Hicri Takvim & Kandiller';
+        desc =
+            'Hicri tarih, mübarek kandiller ve dini bayramları kilit ekranınızdan anlık takip edin.';
+        break;
+      case WidgetCategoryType.sunTimes:
+        title = 'Güneş & Kerahat Vakti';
+        desc =
+            'Güneş doğuşunu, kerahat çıkışını ve işrak vaktini kilit ekranınızda izleyin.';
+        break;
+    }
+
+    return Column(
+      children: [
+        Text(
+          title,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            letterSpacing: -0.2,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Text(
+            desc,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 13.5,
+              color: Colors.white.withValues(alpha: 0.7),
+              height: 1.4,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ── Özelleştirilebilir Seçenekler Kartı (Screenshots 2-3) ───────────────────
+  Widget _buildCustomizationOptionsCard() {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFF0A241F),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.1),
+        ),
+      ),
+      child: Column(
+        children: [
+          // 1. Görüntülenecek Kategoriler (Yalnızca Quotes için)
+          if (_selectedCategory == WidgetCategoryType.quotes) ...[
+            _buildOptionTile(
+              title: 'Görüntülenecek Kategoriler',
+              value: _selectedQuoteCategory,
+              onTap: () => _showOptionSheet(
+                title: 'Kategori Seçin',
+                options: const ['Tümü', 'Sabır ve Şükür', 'Dualar', 'İman ve Tevekkül', 'Ahlak'],
+                currentValue: _selectedQuoteCategory,
+                onSelected: (val) => _savePreference('widget_quote_category', val, (v) => _selectedQuoteCategory = v),
+              ),
+            ),
+            _buildDivider(),
+          ],
+
+          // 2. Ayet Görünümü
+          if (_selectedCategory == WidgetCategoryType.quotes ||
+              _selectedCategory == WidgetCategoryType.dailyVerse) ...[
+            _buildOptionTile(
+              title: 'Ayet Görünümü',
+              value: _verseViewMode,
+              onTap: () => _showOptionSheet(
+                title: 'Ayet Görünümü',
+                options: const ['Yalnızca Meal', 'Arapça + Meal', 'Yalnızca Arapça'],
+                currentValue: _verseViewMode,
+                onSelected: (val) => _savePreference('widget_verse_view', val, (v) => _verseViewMode = v),
+              ),
+            ),
+            _buildDivider(),
+          ],
+
+          // 3. Alıntı Yenileme Sıklığı
+          _buildOptionTile(
+            title: 'Alıntı Yenileme Sıklığı',
+            value: _refreshInterval,
+            onTap: () => _showOptionSheet(
+              title: 'Yenileme Sıklığı',
+              options: const ['15 Dakika', '30 Dakika', 'Her saat', 'Her gün'],
+              currentValue: _refreshInterval,
+              onSelected: (val) => _savePreference('widget_refresh_interval', val, (v) => _refreshInterval = v),
+            ),
+          ),
+          _buildDivider(),
+
+          // 4. Metin Boyutu
+          _buildOptionTile(
+            title: 'Metin Boyutu',
+            value: _textSize,
+            onTap: () => _showOptionSheet(
+              title: 'Metin Boyutu',
+              options: const ['Küçük', 'Standart', 'Büyük'],
+              currentValue: _textSize,
+              onSelected: (val) => _savePreference('widget_text_size', val, (v) => _textSize = v),
+            ),
+          ),
+          _buildDivider(),
+
+          // 5. Yazı Tipi
+          _buildOptionTile(
+            title: 'Yazı Tipi',
+            value: _fontFamily,
+            onTap: () => _showOptionSheet(
+              title: 'Yazı Tipi',
+              options: const ['Standart', 'Zarif (Lato)', 'Klasik (Amiri)'],
+              currentValue: _fontFamily,
+              onSelected: (val) => _savePreference('widget_font_family', val, (v) => _fontFamily = v),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOptionTile({
+    required String title,
+    required String value,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      dense: true,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+      title: Text(
+        title,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            value,
+            style: const TextStyle(
+              color: Colors.white70,
+              fontSize: 13,
+            ),
+          ),
+          const SizedBox(width: 4),
+          const Icon(
+            Icons.arrow_forward_ios_rounded,
+            color: Colors.white38,
+            size: 13,
+          ),
+        ],
+      ),
+      onTap: onTap,
+    );
+  }
+
+  Widget _buildDivider() {
+    return Divider(
+      height: 1,
+      thickness: 0.8,
+      color: Colors.white.withValues(alpha: 0.08),
+      indent: 16,
+      endIndent: 16,
+    );
+  }
+
+  // ── Özellikler Listesi (Screenshots 3-4) ──────────────────────────────────
+  Widget _buildFeaturesCard() {
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          width: 20,
-          height: 20,
-          alignment: Alignment.center,
-          decoration: const BoxDecoration(
-            color: AppColors.teal,
-            shape: BoxShape.circle,
+        const Text(
+          'Özellikler',
+          style: TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
-          child: Text(
-            num,
-            style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: const Color(0xFF0A241F),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.08),
+            ),
+          ),
+          child: Column(
+            children: [
+              _buildFeatureItem('Sonraki namaza canlı geri sayım'),
+              const SizedBox(height: 12),
+              _buildFeatureItem('Mevcut ve yaklaşan namazları gösterir'),
+              const SizedBox(height: 12),
+              _buildFeatureItem('Her namaz vaktinde otomatik güncellenir'),
+              const SizedBox(height: 12),
+              _buildFeatureItem('100% Çevrimdışı ve pil tasarruflu'),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFeatureItem(String text) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(2),
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            color: Color(0xFF10B981),
+          ),
+          child: const Icon(
+            Icons.check_rounded,
+            size: 14,
+            color: Color(0xFF032620),
           ),
         ),
         const SizedBox(width: 10),
         Expanded(
+          child: Text(
+            text,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ── Nasıl Eklenir Adımları (Screenshots 4-5) ──────────────────────────────
+  Widget _buildHowToAddGuide() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Nasıl Eklenir',
+          style: TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: const Color(0xFF0A241F),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.08),
+            ),
+          ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-              const SizedBox(height: 2),
-              Text(desc, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+              _buildStepItem(
+                number: '1',
+                text:
+                    'Uygulamadan çıkın ve kilit ekranınıza gidin (telefonunuzu kilitleyin, ardından kilidini açmadan ekranı uyandırın).',
+              ),
+              const SizedBox(height: 14),
+              _buildStepItem(
+                number: '2',
+                text:
+                    'Kilit ekranına basılı tutun ve alttaki \'Özelleştir\' butonuna dokunun.',
+              ),
+              const SizedBox(height: 14),
+              _buildStepItem(
+                number: '3',
+                text:
+                    'Saat alanına veya altına dokunarak \'Beyân\' widget\'ını seçip kilit ekranınıza ekleyin.',
+              ),
             ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStepItem({required String number, required String text}) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 22,
+          height: 22,
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            color: Color(0xFF10B981),
+          ),
+          child: Center(
+            child: Text(
+              number,
+              style: const TextStyle(
+                color: Color(0xFF032620),
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            text,
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.85),
+              fontSize: 12.5,
+              height: 1.35,
+            ),
           ),
         ),
       ],

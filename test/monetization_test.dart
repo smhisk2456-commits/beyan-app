@@ -53,5 +53,38 @@ void main() {
       expect(service.isPremium, isFalse);
       expect(service.activeTier, isNull);
     });
+
+    test('3 Günlük Ücretsiz Deneme ve Widget Erişim Mantığı doğru çalışmalı', () async {
+      // 1. Durum: İlk kurulum -> 3 günlük deneme otomatik başlar
+      SharedPreferences.setMockInitialValues({});
+      final service = PremiumService.instance;
+      await service.initialize();
+
+      expect(service.isTrialActive, isTrue);
+      expect(service.trialDaysRemaining, inInclusiveRange(2, 3));
+      expect(service.hasWidgetAccess, isTrue);
+      expect(await service.shouldShowLaunchPaywall(), isTrue);
+
+      // Kullanıcı açılış paywall'unu gördü ve kapattı
+      await service.markLaunchPaywallSeen();
+      expect(await service.shouldShowLaunchPaywall(), isFalse);
+
+      // 2. Durum: 4 gün sonra (deneme süresi doldu)
+      final fourDaysAgo = DateTime.now().subtract(const Duration(days: 4));
+      SharedPreferences.setMockInitialValues({
+        PremiumService.keyWidgetTrialStart: fourDaysAgo.toIso8601String(),
+        PremiumService.keyHasSeenOnboardingPaywall: true,
+      });
+      await service.initialize();
+
+      expect(service.isTrialActive, isFalse);
+      expect(service.trialDaysRemaining, 0);
+      expect(service.hasWidgetAccess, isFalse);
+
+      // 3. Durum: Premium satın alındığında her zaman widget erişimi var
+      await service.toggleDevPremium();
+      expect(service.isPremium, isTrue);
+      expect(service.hasWidgetAccess, isTrue);
+    });
   });
 }
