@@ -30,22 +30,39 @@ void main() async {
   await initializeDateFormatting('en_US', null);
   await initializeDateFormatting('ar_SA', null);
 
-  // Native servisleri arka planda (non-blocking) başlat:
+  // Native servisleri arka planda (non-blocking ve izole) başlat:
   Future.microtask(() async {
+    // 1. Widget Servisi
     try {
       await WidgetService.initialize();
+      WidgetService().updateAllWidgets();
+    } catch (e) {
+      debugPrint('WidgetService başlatma hatası: $e');
+    }
+
+    // 2. Arka Plan Görevleri (Android WorkManager)
+    try {
       final taskManager = BackgroundTaskManager();
       await taskManager.initialize();
       await taskManager.scheduleWidgetUpdate();
-      WidgetService().updateAllWidgets();
+    } catch (e) {
+      debugPrint('BackgroundTaskManager başlatma hatası (iOS veya kısıtlı ortam): $e');
+    }
 
-      // Ezan ve Vakit Bildirim Servisi
+    // 3. Ezan ve Vakit Bildirim Servisi
+    try {
       await NotificationService.instance.initialize();
       await NotificationService.instance.scheduleUpcomingPrayers();
+    } catch (e) {
+      debugPrint('NotificationService başlatma hatası: $e');
+    }
 
-      // iOS Canlı Etkinlikler & Dinamik Ada Servisi
+    // 4. iOS Canlı Etkinlikler & Dinamik Ada Servisi
+    try {
       LiveActivityService.instance.startMonitoring();
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('LiveActivityService başlatma hatası: $e');
+    }
   });
 
   runApp(const ProviderScope(child: IslamicApp()));

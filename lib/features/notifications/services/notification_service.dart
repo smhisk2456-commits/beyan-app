@@ -276,7 +276,7 @@ class NotificationService {
                   presentList: true,
                   presentBadge: true,
                   presentSound: !isSilent,
-                  sound: soundResource != null ? '$soundResource.caf' : null,
+                  sound: soundResource != null ? '$soundResource.mp3' : null,
                   interruptionLevel: InterruptionLevel.timeSensitive,
                 ),
               ),
@@ -337,11 +337,11 @@ class NotificationService {
 
   /// Anında test bildirimi gönderir (Kullanıcı testi için).
   Future<void> sendTestNotification() async {
-    try {
-      final currentMakam = await getSelectedMakam();
-      final isSilent = currentMakam == AdhanMakam.silent;
-      final soundResource = currentMakam.soundResourceName;
+    final currentMakam = await getSelectedMakam();
+    final isSilent = currentMakam == AdhanMakam.silent;
+    final soundResource = currentMakam.soundResourceName;
 
+    try {
       await _notifications.show(
         id: 999,
         title: 'Beyân Ezan Bildirimi Testi 🔔',
@@ -365,13 +365,42 @@ class NotificationService {
             presentList: true,
             presentBadge: true,
             presentSound: !isSilent,
-            sound: soundResource != null ? '$soundResource.caf' : null,
+            sound: soundResource != null ? '$soundResource.mp3' : null,
             interruptionLevel: InterruptionLevel.timeSensitive,
           ),
         ),
       );
     } catch (e) {
-      debugPrint('Test bildirimi hatası: $e');
+      debugPrint('Özel sesli test bildirimi hatası, varsayılan sistem sesiyle deneniyor: $e');
+      try {
+        await _notifications.show(
+          id: 999,
+          title: 'Beyân Ezan Bildirimi Testi 🔔',
+          body: 'Bildirim sistemi sorunsuz çalışıyor! (Standart bildirim sesi).',
+          notificationDetails: const NotificationDetails(
+            android: AndroidNotificationDetails(
+              channelId,
+              channelName,
+              channelDescription: channelDesc,
+              importance: Importance.high,
+              priority: Priority.high,
+              playSound: true,
+              enableVibration: true,
+            ),
+            iOS: DarwinNotificationDetails(
+              presentAlert: true,
+              presentBanner: true,
+              presentList: true,
+              presentBadge: true,
+              presentSound: true,
+              interruptionLevel: InterruptionLevel.timeSensitive,
+            ),
+          ),
+        );
+      } catch (fallbackError) {
+        debugPrint('Yedek test bildirimi hatası: $fallbackError');
+        rethrow;
+      }
     }
   }
 }

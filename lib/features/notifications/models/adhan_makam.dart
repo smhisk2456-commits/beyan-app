@@ -75,7 +75,7 @@ extension AdhanMakamExtension on AdhanMakam {
     }
   }
 
-  /// Yerel bildirimlerde çalınacak ses kaynak adı
+  /// Yerel bildirimlerde çalınacak ses kaynak adı (uzantısız)
   String? get soundResourceName {
     switch (this) {
       case AdhanMakam.istanbul:
@@ -92,20 +92,23 @@ extension AdhanMakamExtension on AdhanMakam {
     }
   }
 
-  /// Önizleme için ses dosyası veya çevrimdışı fallback URL
-  String get previewAudioUrl {
+  /// Çevrimdışı yerel ses dosyası yolu (assets/audio/)
+  String get assetPath {
     switch (this) {
       case AdhanMakam.istanbul:
-        return 'https://media.sd.ma/assabile/adhan/azan3.mp3';
+        return 'audio/adhan_istanbul.mp3';
       case AdhanMakam.mecca:
-        return 'https://media.sd.ma/assabile/adhan/azan2.mp3';
+        return 'audio/adhan_mecca.mp3';
       case AdhanMakam.medina:
-        return 'https://media.sd.ma/assabile/adhan/azan1.mp3';
+        return 'audio/adhan_medina.mp3';
       case AdhanMakam.tekbir:
-        return 'https://media.sd.ma/assabile/adhan/azan4.mp3';
+        return 'audio/adhan_tekbir.mp3';
       case AdhanMakam.bell:
       case AdhanMakam.silent:
         return '';
     }
   }
+
+  /// Önizleme için ses dosyası yolu (Çevrimdışı yerel asset)
+  String get previewAudioUrl => assetPath;
 }

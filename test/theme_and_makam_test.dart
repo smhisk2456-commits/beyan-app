@@ -79,5 +79,13 @@ void main() {
       expect(AdhanMakam.medina.previewAudioUrl.isNotEmpty, isTrue);
       expect(AdhanMakam.silent.previewAudioUrl.isEmpty, isTrue);
     });
+
+    test('Yerel asset yolları doğru formatta olmalı', () {
+      expect(AdhanMakam.istanbul.assetPath, 'audio/adhan_istanbul.mp3');
+      expect(AdhanMakam.mecca.assetPath, 'audio/adhan_mecca.mp3');
+      expect(AdhanMakam.medina.assetPath, 'audio/adhan_medina.mp3');
+      expect(AdhanMakam.tekbir.assetPath, 'audio/adhan_tekbir.mp3');
+      expect(AdhanMakam.silent.assetPath, isEmpty);
+    });
   });
 }

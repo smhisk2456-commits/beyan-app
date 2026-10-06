@@ -148,26 +148,38 @@ class _NotificationSettingsSheetState extends State<NotificationSettingsSheet>
       return;
     }
 
-    await _service.sendTestNotification();
+    try {
+      await _service.sendTestNotification();
 
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Row(
-            children: [
-              Icon(Icons.check_circle, color: Color(0xFFFFDF7A), size: 20),
-              SizedBox(width: 10),
-              Expanded(
-                child: Text('Test bildirimi cihazınıza gönderildi!'),
-              ),
-            ],
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Row(
+              children: [
+                Icon(Icons.check_circle, color: Color(0xFFFFDF7A), size: 20),
+                SizedBox(width: 10),
+                Expanded(
+                  child: Text('Test bildirimi cihazınıza gönderildi!'),
+                ),
+              ],
+            ),
+            backgroundColor: const Color(0xFF033E35),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            duration: const Duration(seconds: 3),
           ),
-          backgroundColor: const Color(0xFF033E35),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          duration: const Duration(seconds: 3),
-        ),
-      );
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Bildirim gönderilemedi: $e'),
+            backgroundColor: Colors.red.shade900,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     }
   }
 

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import '../models/adhan_makam.dart';
 
 /// Ezan Makamları Önizleme Ses Çalar Servisi
@@ -41,11 +42,17 @@ class AdhanAudioPlayerService {
       _currentlyPlaying = makam;
       _stateController.add(makam);
 
-      final url = makam.previewAudioUrl;
-      if (url.isNotEmpty) {
-        await _player.play(UrlSource(url));
+      if (makam == AdhanMakam.bell) {
+        await SystemSound.play(SystemSoundType.alert);
+        await Future.delayed(const Duration(milliseconds: 600));
+        await stop();
+        return;
+      }
+
+      final asset = makam.assetPath;
+      if (asset.isNotEmpty) {
+        await _player.play(AssetSource(asset));
       } else {
-        // Bell tonu veya ses yoksa 1 saniye sonra durdur
         await Future.delayed(const Duration(seconds: 1));
         await stop();
       }

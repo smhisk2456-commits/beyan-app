@@ -8,13 +8,23 @@ TARGET_NAME  = 'BeyanWidgetExtension'
 
 project = Xcodeproj::Project.open(PROJECT_PATH)
 
-if project.targets.any? { |t| t.name == TARGET_NAME }
-  puts "#{TARGET_NAME} zaten mevcut, atlanıyor."
-  exit 0
-end
-
 app_target = project.targets.find { |t| t.name == 'Runner' } or abort('Runner target bulunamadı')
 app_bundle_id = app_target.build_configurations.first.build_settings['PRODUCT_BUNDLE_IDENTIFIER']
+
+# Ses dosyalarını Runner target'ının Resources build phase'ine ekle:
+runner_group = project.main_group.find_subpath('Runner', true)
+%w[adhan_istanbul.mp3 adhan_mecca.mp3 adhan_medina.mp3 adhan_tekbir.mp3].each do |audio_file|
+  unless runner_group.files.any? { |f| f.path == audio_file }
+    file_ref = runner_group.new_reference(audio_file)
+    app_target.resources_build_phase.add_file_reference(file_ref)
+  end
+end
+
+if project.targets.any? { |t| t.name == TARGET_NAME }
+  project.save
+  puts "#{TARGET_NAME} zaten mevcut, ses dosyaları kontrol edildi."
+  exit 0
+end
 
 widget = project.new_target(:app_extension, TARGET_NAME, :ios, '16.0')
 
