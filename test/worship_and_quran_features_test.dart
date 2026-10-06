@@ -95,7 +95,34 @@ void main() {
       };
       expect(notifier.calculateCurrentStreak(), 2);
     });
+
+    test('DailyCompletionVerse pool 31 zengin ve doğrulanmış ayet içermeli ve tarihe göre farklı ayet dönmeli', () {
+      expect(DailyCompletionVerse.pool.length, 31);
+
+      // Her ayetin alanları dolu ve geçerli olmalı
+      for (final v in DailyCompletionVerse.pool) {
+        expect(v.surahName.isNotEmpty, isTrue);
+        expect(v.verseReference.isNotEmpty, isTrue);
+        expect(v.arabicText.isNotEmpty, isTrue);
+        expect(v.turkishMeaning.isNotEmpty, isTrue);
+        expect(v.spiritualNote.isNotEmpty, isTrue);
+      }
+
+      // Farklı günlerde farklı ayetler dönmeli
+      final day1 = DateTime(2026, 6, 1);
+      final day2 = DateTime(2026, 6, 2);
+      final verseDay1 = DailyCompletionVerse.getForDate(day1);
+      final verseDay2 = DailyCompletionVerse.getForDate(day2);
+
+      expect(verseDay1.verseReference != verseDay2.verseReference, isTrue);
+
+      // Index bazlı erişim ve döngü çalışmalı
+      final v0 = DailyCompletionVerse.getByIndex(0);
+      final v31 = DailyCompletionVerse.getByIndex(31);
+      expect(v0.verseReference, v31.verseReference);
+    });
   });
+
 
   group('Kur\'an Tilavet ve Okuma Özellikleri Testleri', () {
     test('LastReadPosition serialization doğru çalışmalı', () {

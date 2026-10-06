@@ -24,6 +24,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
   int _target = 33;
   int _selectedDhikrIndex = 0;
   int _completedLaps = 0;
+  int _verseShuffleOffset = 0;
 
   final ScrollController _chipScrollController = ScrollController();
   late final AnimationController _pulseController;
@@ -703,58 +704,13 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
         _buildStreakCard(streakData, isDark),
         const SizedBox(height: 14),
 
-        // ── 2. Günlük İlerleme Özeti (Tamamlanan / 7) ─────────────────
-        Container(
-          padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF012E2B), Color(0xFF034A3E)],
-            ),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0xFFD4AF37).withValues(alpha: 0.4)),
-          ),
-          child: Row(
-            children: [
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  SizedBox(
-                    width: 60,
-                    height: 60,
-                    child: CircularProgressIndicator(
-                      value: todayEntry.completionRatio,
-                      strokeWidth: 6,
-                      backgroundColor: Colors.white12,
-                      valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFD4AF37)),
-                    ),
-                  ),
-                  Text(
-                    '$completedCount/7',
-                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
-                  ),
-                ],
-              ),
-              const SizedBox(width: 16),
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Bugünkü İbadet İlerlemeniz',
-                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFFFFDF7A)),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      '5 Vakit Namaz, Kur\'an-ı Kerim tilaveti ve günlük zikrinizi buradan takip edebilirsiniz.',
-                      style: TextStyle(fontSize: 12, color: Colors.white70),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
+        // ── 2. Günlük İlerleme & 7/7 Tamamlanma Kutlama Kartı ─────────
+        if (todayEntry.isFullyCompleted)
+          _buildCompletionCelebrationCard(streakData, todayEntry, isDark)
+        else
+          _buildProgressCard(completedCount, todayEntry, isDark),
         const SizedBox(height: 18),
+
 
         // ── 3. 5 Vakit Namaz Kontrol Listesi ─────────────────────────
         _buildHabitItem('Sabah Namazı', 'fajr', todayEntry.fajr, Icons.wb_twilight_rounded, isDark),
@@ -956,6 +912,265 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                       color: Color(0xFFFFDF7A), size: 18),
                 ],
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Tüm ibadetler (7/7) bittiğinde gösterilen lüks tebrik kartı & her gün farklı Kur'an ayeti
+  Widget _buildCompletionCelebrationCard(WorshipStreakData streakData, DailyWorshipEntry todayEntry, bool isDark) {
+    final now = DateTime.now();
+    final dayOfYear = now.difference(DateTime(now.year, 1, 1)).inDays;
+    final verse = DailyCompletionVerse.getByIndex(dayOfYear + _verseShuffleOffset);
+    final streakDay = streakData.currentStreak > 0 ? streakData.currentStreak : 1;
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: isDark
+              ? [const Color(0xFF042F26), const Color(0xFF02231C)]
+              : [const Color(0xFF063F34), const Color(0xFF022A23)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: const Color(0xFFD4AF37),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFD4AF37).withValues(alpha: 0.25),
+            blurRadius: 20,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // ── Üst Satır: 7/7 Başarı Rozeti + "X. Gün Görevi Tamamlandı!" ──
+          Row(
+            children: [
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFD4AF37), Color(0xFFFFDF7A)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.check_rounded,
+                    color: Color(0xFF012E2B),
+                    size: 34,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '$streakDay. Gün Görevi Tamamlandı! 🌟',
+                      style: const TextStyle(
+                        fontSize: 16.5,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFFFFDF7A),
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    const Text(
+                      'Elhamdülillah! Bugünün 7 ibadet vazifesini eksiksiz ikmâl ettiniz.',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.white,
+                        height: 1.3,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 16),
+
+          // ── Günün Tebrik Âyeti Kartı (Her gün farklı ayet) ──
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.35),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(
+                color: const Color(0xFFD4AF37).withValues(alpha: 0.35),
+                width: 1,
+              ),
+            ),
+            child: Column(
+              children: [
+                // Başlık & Başka Âyet Butonu
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.auto_awesome, color: Color(0xFFFFDF7A), size: 15),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Günün Tebrik Âyeti • ${verse.verseReference}',
+                          style: const TextStyle(
+                            color: Color(0xFFFFDF7A),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                    InkWell(
+                      borderRadius: BorderRadius.circular(10),
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        setState(() {
+                          _verseShuffleOffset++;
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.refresh_rounded, color: Colors.white70, size: 13),
+                            SizedBox(width: 4),
+                            Text(
+                              'Başka Âyet',
+                              style: TextStyle(color: Colors.white70, fontSize: 11),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 10),
+
+                // Arapça Âyet Metni (Amiri Fontu)
+                Text(
+                  verse.arabicText,
+                  style: const TextStyle(
+                    fontFamily: 'Amiri',
+                    fontSize: 18,
+                    height: 1.6,
+                    color: Color(0xFFFFDF7A),
+                  ),
+                  textAlign: TextAlign.center,
+                  textDirection: TextDirection.rtl,
+                ),
+
+                const SizedBox(height: 8),
+
+                // Türkçe Meal
+                Text(
+                  verse.turkishMeaning,
+                  style: const TextStyle(
+                    fontSize: 12.5,
+                    color: Colors.white,
+                    fontStyle: FontStyle.italic,
+                    height: 1.4,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+
+                const SizedBox(height: 8),
+
+                // Manevi Not
+                Text(
+                  '🤲 ${verse.spiritualNote}',
+                  style: const TextStyle(
+                    color: Color(0xFF85E3B3),
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 7/7 tamamlanmadan önce gösterilen standart ilerleme kartı
+  Widget _buildProgressCard(int completedCount, DailyWorshipEntry todayEntry, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF012E2B), Color(0xFF034A3E)],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFD4AF37).withValues(alpha: 0.4)),
+      ),
+      child: Row(
+        children: [
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              SizedBox(
+                width: 60,
+                height: 60,
+                child: CircularProgressIndicator(
+                  value: todayEntry.completionRatio,
+                  strokeWidth: 6,
+                  backgroundColor: Colors.white12,
+                  valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFD4AF37)),
+                ),
+              ),
+              Text(
+                '$completedCount/7',
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+              ),
+            ],
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Bugünkü İbadet İlerlemeniz',
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFFFFDF7A)),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  completedCount == 0
+                      ? '5 Vakit Namaz, Kur\'an-ı Kerim tilaveti ve günlük zikrinizi buradan takip edin.'
+                      : 'Bugün için ${7 - completedCount} vazife kaldı. Haydi gayret, günün ayetini açın!',
+                  style: const TextStyle(fontSize: 12, color: Colors.white70),
+                ),
+              ],
             ),
           ),
         ],

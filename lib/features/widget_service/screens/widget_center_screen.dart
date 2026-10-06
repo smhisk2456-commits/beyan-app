@@ -17,6 +17,107 @@ enum WidgetCategoryType {
   sunTimes, // Güneş & Vakit
 }
 
+/// Kilit Ekranı Widget Önizleme Söz Modeli
+class WidgetPreviewQuote {
+  final String reference;
+  final String arabic;
+  final String meaning;
+
+  const WidgetPreviewQuote({
+    required this.reference,
+    required this.arabic,
+    required this.meaning,
+  });
+}
+
+const Map<String, List<WidgetPreviewQuote>> _categoryQuotes = {
+  'Tümü': [
+    WidgetPreviewQuote(
+      reference: 'Bakara 2:152',
+      arabic: 'فَاذْكُرُونِي أَذْكُرْكُمْ وَاشْكُرُوا لِي وَلَا تَكْفُرُونِ',
+      meaning: 'Beni anın ki, ben de sizi anayım.\nBana şükredin, nankörlük etmeyin.',
+    ),
+    WidgetPreviewQuote(
+      reference: 'İnşirah 94:6',
+      arabic: 'إِنَّ مَعَ الْعُسْرِ يُسْرًا',
+      meaning: 'Şüphesiz her güçlükle beraber\nbir kolaylık vardır.',
+    ),
+    WidgetPreviewQuote(
+      reference: 'Bakara 2:277',
+      arabic: 'إِنَّ الَّذِينَ آمَنُوا وَعَمِلُوا الصَّالِحَاتِ وَأَقَامُوا الصَّلَاةَ',
+      meaning: 'İman edip iyi işler yapan ve\nnamazı dosdoğru kılanların mükâfatı vardır.',
+    ),
+  ],
+  'Sabır ve Şükür': [
+    WidgetPreviewQuote(
+      reference: 'Bakara 2:153',
+      arabic: 'يَا أَيُّهَا الَّذِينَ آمَنُوا اسْتَعِينُوا بِالصَّبْرِ وَالصَّلَاةِ ۚ إِنَّ اللَّهَ مَعَ الصَّابِرِينَ',
+      meaning: 'Ey iman edenler! Sabır ve namaz ile Allah\'tan yardım dileyin. Şüphesiz Allah sabredenlerle beraberdir.',
+    ),
+    WidgetPreviewQuote(
+      reference: 'İbrâhîm 14:7',
+      arabic: 'لَئِن شَكَرْتُمْ لَأَزِيدَنَّكُمْ',
+      meaning: 'Andolsun, eğer şükrederseniz\nelbette size nimetimi artırırım.',
+    ),
+    WidgetPreviewQuote(
+      reference: 'Zümer 39:10',
+      arabic: 'إِنَّمَا يُوَفَّى الصَّابِرُونَ أَجْرَهُم بِغَيْرِ حِسَابٍ',
+      meaning: 'Yalnızca sabredenlere mükâfatları\nhesapsız olarak tastamam verilecektir.',
+    ),
+  ],
+  'Dualar': [
+    WidgetPreviewQuote(
+      reference: 'Bakara 2:201',
+      arabic: 'رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ',
+      meaning: 'Rabbimiz! Bize dünyada da iyilik ver, ahirette de iyilik ver ve bizi ateş azabından koru.',
+    ),
+    WidgetPreviewQuote(
+      reference: 'Mü\'min 40:60',
+      arabic: 'وَقَالَ رَبُّكُمُ ادْعُونِي أَسْتَجِبْ لَكُمْ',
+      meaning: 'Rabbiniz buyurdu ki:\nBana dua edin, size icabet edeyim.',
+    ),
+    WidgetPreviewQuote(
+      reference: 'İbrâhîm 14:40',
+      arabic: 'رَبِّ اجْعَلْنِي مُقِيمَ الصَّلَاةِ وَمِن ذُرِّيَّتِي ۚ رَبَّنَا وَتَقَبَّلْ دُعَاءِ',
+      meaning: 'Rabbim! Beni ve neslimi namazı dosdoğru kılanlardan eyle. Duamı kabul buyur.',
+    ),
+  ],
+  'İman ve Tevekkül': [
+    WidgetPreviewQuote(
+      reference: 'Talâk 6:3',
+      arabic: 'وَمَن يَتَوَكَّلْ عَلَى اللَّهِ فَهُوَ حَسْبُهُ',
+      meaning: 'Kim Allah\'a tevekkül ederse,\nO kendisine yeter.',
+    ),
+    WidgetPreviewQuote(
+      reference: 'Tevbe 9:129',
+      arabic: 'حَسْبِيَ اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ ۖ عَلَيْهِ تَوَكَّلْتُ',
+      meaning: 'Bana Allah yeter. O\'ndan başka ilah yoktur. Ben yalnız O\'na güvendim.',
+    ),
+    WidgetPreviewQuote(
+      reference: 'Enfâl 8:2',
+      arabic: 'وَعَلَىٰ رَبِّهِمْ يَتَوَكَّلُونَ',
+      meaning: 'Müminler ancak o kimselerdir ki,\nyalnızca Rablerine tevekkül ederler.',
+    ),
+  ],
+  'Ahlak': [
+    WidgetPreviewQuote(
+      reference: 'Fussilet 41:34',
+      arabic: 'ادْفَعْ بِالَّتِي هِيَ أَحْسَنُ فَإِذَا الَّذِي بَيْنَكَ وَبَيْنَهُ عَدَاوَةٌ كَأَنَّهُ وَلِيٌّ حَمِيمٌ',
+      meaning: 'Kötülüğü en güzel olanla sav. Bir de bakarsın ki seninle arasında düşmanlık bulunan kimse sımsıcak bir dost oluvermiş.',
+    ),
+    WidgetPreviewQuote(
+      reference: 'Hucurât 49:10',
+      arabic: 'إِنَّمَا الْمُؤْمِنُونَ إِخْوَةٌ',
+      meaning: 'Şüphesiz müminler ancak kardeştirler.\nÖyleyse kardeşlerinizin arasını düzeltin.',
+    ),
+    WidgetPreviewQuote(
+      reference: 'Kalem 68:4',
+      arabic: 'وَإِنَّكَ لَعَلَىٰ خُلُقٍ عَظِيمٍ',
+      meaning: 'Ve şüphesiz sen pek yüce bir ahlak üzerindesin.',
+    ),
+  ],
+};
+
 /// Kilit Ekranı & Widget Yönetim ve Özelleştirme Merkezi
 class WidgetCenterScreen extends ConsumerStatefulWidget {
   const WidgetCenterScreen({super.key});
@@ -24,6 +125,7 @@ class WidgetCenterScreen extends ConsumerStatefulWidget {
   @override
   ConsumerState<WidgetCenterScreen> createState() => _WidgetCenterScreenState();
 }
+
 
 class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
   WidgetCategoryType _selectedCategory = WidgetCategoryType.quotes;
@@ -35,6 +137,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
   String _textSize = 'Standart';
   String _fontFamily = 'Standart';
 
+  int _quoteIndex = 0;
   bool _isLoading = true;
 
   @override
@@ -56,21 +159,16 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
   }
 
   Future<void> _savePreference(String key, String value, Function(String) updater) async {
-    final premiumState = ref.read(premiumProvider);
-
-    // 3 Günlük deneme bitti ve kullanıcı Premium değilse Paywall göster
-    if (!premiumState.hasWidgetAccess) {
-      OnboardingTrialPaywallScreen.show(context);
-      return;
-    }
-
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(key, value);
     setState(() => updater(value));
     HapticFeedback.lightImpact();
 
-    // Widget verilerini arka planda güncelle
-    await WidgetService().updateAllWidgets();
+    // Widget verilerini arka planda güncelle (kullanıcının erişimi varsa)
+    final premiumState = ref.read(premiumProvider);
+    if (premiumState.hasWidgetAccess) {
+      await WidgetService().updateAllWidgets();
+    }
   }
 
   void _showOptionSheet<T>({
@@ -79,12 +177,6 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
     required String currentValue,
     required Function(String) onSelected,
   }) {
-    final premiumState = ref.read(premiumProvider);
-    if (!premiumState.hasWidgetAccess) {
-      OnboardingTrialPaywallScreen.show(context);
-      return;
-    }
-
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     showModalBottomSheet(
@@ -467,6 +559,166 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
 
           // ── Kilit Ekranı Saat Altı Widget Alanı ───────────────────────────
           _buildActiveWidgetPreviewContent(),
+
+          // ── Önizlemede Farklı Âyet Gösterme Butonu ───────────────────────
+          if (_selectedCategory == WidgetCategoryType.quotes ||
+              _selectedCategory == WidgetCategoryType.dailyVerse) ...[
+            const SizedBox(height: 12),
+            InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () {
+                HapticFeedback.selectionClick();
+                setState(() => _quoteIndex++);
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.15),
+                  ),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.shuffle_rounded, color: Color(0xFFFFDF7A), size: 13),
+                    SizedBox(width: 4),
+                    Text(
+                      'Farklı Âyet Önizle',
+                      style: TextStyle(
+                        color: Color(0xFFFFDF7A),
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  // ── Font Boyutu Hesaplayıcıları (_textSize) ───────────────────────────────
+  double get _previewTitleFontSize {
+    switch (_textSize) {
+      case 'Küçük':
+        return 11.0;
+      case 'Büyük':
+        return 15.0;
+      case 'Standart':
+      default:
+        return 13.0;
+    }
+  }
+
+  double get _previewBodyFontSize {
+    switch (_textSize) {
+      case 'Küçük':
+        return 11.0;
+      case 'Büyük':
+        return 15.0;
+      case 'Standart':
+      default:
+        return 12.5;
+    }
+  }
+
+  double get _previewArabicFontSize {
+    switch (_textSize) {
+      case 'Küçük':
+        return 14.5;
+      case 'Büyük':
+        return 21.0;
+      case 'Standart':
+      default:
+        return 17.5;
+    }
+  }
+
+  String? get _previewFontFamily {
+    switch (_fontFamily) {
+      case 'Klasik (Amiri)':
+        return 'Amiri';
+      case 'Zarif (Lato)':
+        return 'Lato';
+      default:
+        return null;
+    }
+  }
+
+  // Kategori bazlı aktif ayet verisi
+  WidgetPreviewQuote _getCurrentQuote() {
+    final list = _categoryQuotes[_selectedQuoteCategory] ?? _categoryQuotes['Tümü']!;
+    return list[_quoteIndex % list.length];
+  }
+
+  Widget _buildQuotePreviewWidget({
+    required String reference,
+    required String arabic,
+    required String meaning,
+  }) {
+    final showArabic = _verseViewMode == 'Arapça + Meal' || _verseViewMode == 'Yalnızca Arapça';
+    final showMeal = _verseViewMode == 'Yalnızca Meal' || _verseViewMode == 'Arapça + Meal';
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeOut,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Sûre Referansı
+          Text(
+            reference,
+            style: TextStyle(
+              color: const Color(0xFFFFDF7A),
+              fontWeight: FontWeight.bold,
+              fontSize: _previewTitleFontSize,
+              fontFamily: _previewFontFamily,
+              letterSpacing: 0.2,
+            ),
+          ),
+          const SizedBox(height: 4),
+
+          // Arapça Metin (Varsa)
+          if (showArabic) ...[
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              child: Text(
+                arabic,
+                textAlign: TextAlign.center,
+                textDirection: TextDirection.rtl,
+                style: TextStyle(
+                  fontFamily: 'Amiri',
+                  fontSize: _previewArabicFontSize,
+                  height: 1.45,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            if (showMeal) const SizedBox(height: 4),
+          ],
+
+          // Türkçe Meal (Varsa)
+          if (showMeal)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              child: Text(
+                meaning,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.95),
+                  fontSize: _previewBodyFontSize,
+                  fontFamily: _previewFontFamily,
+                  height: 1.3,
+                  fontStyle: _verseViewMode == 'Arapça + Meal' ? FontStyle.italic : FontStyle.normal,
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -476,87 +728,47 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
   Widget _buildActiveWidgetPreviewContent() {
     switch (_selectedCategory) {
       case WidgetCategoryType.quotes:
-        // Screenshot 2: "Bakara 2:152 / Beni anın ki, ben de sizi anayım."
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          child: Column(
-            children: [
-              const Text(
-                'Bakara 2:152',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                'Beni anın ki,\nben de sizi anayım.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.9),
-                  fontSize: 12,
-                  height: 1.25,
-                ),
-              ),
-            ],
-          ),
+        final quote = _getCurrentQuote();
+        return _buildQuotePreviewWidget(
+          reference: quote.reference,
+          arabic: quote.arabic,
+          meaning: quote.meaning,
         );
 
       case WidgetCategoryType.dailyVerse:
-        // Screenshot 3: "İnşirah 94:6 / Şüphesiz her güçlükle bir kolaylık vardır."
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          child: Column(
-            children: [
-              const Text(
-                'İnşirah 94:6',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                'Şüphesiz her güçlükle\nbir kolaylık vardır.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.9),
-                  fontSize: 12,
-                  height: 1.25,
-                ),
-              ),
-            ],
-          ),
+        return _buildQuotePreviewWidget(
+          reference: 'İnşirah 94:6',
+          arabic: 'إِنَّ مَعَ الْعُسْرِ يُسْرًا',
+          meaning: 'Şüphesiz her güçlükle beraber\nbir kolaylık vardır.',
         );
 
       case WidgetCategoryType.prayerTimes:
-        // Screenshot 4: "Öğle 12:30 PM • İkindi 3:45 PM / 2:15:30"
+        final timeScale = _textSize == 'Küçük' ? 0.85 : (_textSize == 'Büyük' ? 1.25 : 1.0);
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          child: const Column(
+          child: Column(
             children: [
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.wb_sunny_rounded, color: Colors.white70, size: 13),
-                  SizedBox(width: 4),
-                  Text('Öğle 12:30 PM', style: TextStyle(color: Colors.white70, fontSize: 11)),
-                  SizedBox(width: 8),
-                  Icon(Icons.wb_twilight_rounded, color: Colors.white70, size: 13),
-                  SizedBox(width: 4),
-                  Text('İkindi 3:45 PM', style: TextStyle(color: Colors.white70, fontSize: 11)),
+                  Icon(Icons.wb_sunny_rounded, color: Colors.white70, size: 13 * timeScale),
+                  const SizedBox(width: 4),
+                  Text('Öğle 12:30 PM', style: TextStyle(color: Colors.white70, fontSize: 11 * timeScale, fontFamily: _previewFontFamily)),
+                  const SizedBox(width: 8),
+                  Icon(Icons.wb_twilight_rounded, color: Colors.white70, size: 13 * timeScale),
+                  const SizedBox(width: 4),
+                  Text('İkindi 3:45 PM', style: TextStyle(color: Colors.white70, fontSize: 11 * timeScale, fontFamily: _previewFontFamily)),
                 ],
               ),
-              SizedBox(height: 4),
+              const SizedBox(height: 4),
               Text(
                 '2:15:30',
                 style: TextStyle(
-                  fontSize: 26,
+                  fontSize: 26 * timeScale,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                   letterSpacing: 1.2,
+                  fontFamily: _previewFontFamily,
                 ),
               ),
             ],
@@ -564,49 +776,53 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
         );
 
       case WidgetCategoryType.countdown:
+        final timeScale = _textSize == 'Küçük' ? 0.9 : (_textSize == 'Büyük' ? 1.25 : 1.0);
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-          child: const Text(
+          child: Text(
             'İkindi vaktine 2 saat 15 dk kaldı',
-            style: TextStyle(color: Colors.white70, fontSize: 12),
+            style: TextStyle(color: Colors.white70, fontSize: 12 * timeScale, fontFamily: _previewFontFamily),
           ),
         );
 
       case WidgetCategoryType.hijri:
+        final timeScale = _textSize == 'Küçük' ? 0.9 : (_textSize == 'Büyük' ? 1.25 : 1.0);
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-          child: const Column(
+          child: Column(
             children: [
               Text(
                 '🌙 18 Ramazan 1447',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13 * timeScale, fontFamily: _previewFontFamily),
               ),
-              SizedBox(height: 2),
+              const SizedBox(height: 2),
               Text(
                 'Kadir Gecesine 9 Gün Kaldı',
-                style: TextStyle(color: Colors.white70, fontSize: 11.5),
+                style: TextStyle(color: Colors.white70, fontSize: 11.5 * timeScale, fontFamily: _previewFontFamily),
               ),
             ],
           ),
         );
 
       case WidgetCategoryType.sunTimes:
+        final timeScale = _textSize == 'Küçük' ? 0.9 : (_textSize == 'Büyük' ? 1.25 : 1.0);
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-          child: const Row(
+          child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.wb_sunny_outlined, color: Colors.amber, size: 16),
-              SizedBox(width: 6),
+              Icon(Icons.wb_sunny_outlined, color: Colors.amber, size: 16 * timeScale),
+              const SizedBox(width: 6),
               Text(
                 'Güneş: 05:42  •  İşrak: 06:27',
-                style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
+                style: TextStyle(color: Colors.white, fontSize: 12 * timeScale, fontWeight: FontWeight.w600, fontFamily: _previewFontFamily),
               ),
             ],
           ),
         );
     }
   }
+
 
   // ── Başlık & Açıklama Metni ───────────────────────────────────────────────
   Widget _buildWidgetTitleAndDescription() {

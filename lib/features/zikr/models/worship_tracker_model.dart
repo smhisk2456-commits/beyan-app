@@ -418,3 +418,255 @@ final worshipStreakProvider = Provider<WorshipStreakData>((ref) {
     unlockedMilestones: unlocked,
   );
 });
+
+/// Tüm görevler (7/7) tamamlandığında ekranda her gün farklı gösterilen ilham verici Kur'an-ı Kerim ayetleri modeli
+class DailyCompletionVerse {
+  final String surahName;
+  final String verseReference;
+  final String arabicText;
+  final String turkishMeaning;
+  final String spiritualNote;
+
+  const DailyCompletionVerse({
+    required this.surahName,
+    required this.verseReference,
+    required this.arabicText,
+    required this.turkishMeaning,
+    required this.spiritualNote,
+  });
+
+  /// Her gün için farklı bir ayet döner (Yılın gününe göre otomatik döner)
+  static DailyCompletionVerse getForDate([DateTime? date]) {
+    final target = date ?? DateTime.now();
+    final dayOfYear = target.difference(DateTime(target.year, 1, 1)).inDays;
+    final index = (dayOfYear.abs()) % pool.length;
+    return pool[index];
+  }
+
+  /// Belirli bir indexteki ayeti döner (kullanıcı değiştirmek isterse)
+  static DailyCompletionVerse getByIndex(int index) {
+    return pool[index.abs() % pool.length];
+  }
+
+  /// 31 Günlük Zengin ve Doğrulanmış Kur'an-ı Kerim Âyet Havuzu
+  static const List<DailyCompletionVerse> pool = [
+    DailyCompletionVerse(
+      surahName: 'Bakara Suresi',
+      verseReference: 'Bakara 2:277',
+      arabicText: 'إِنَّ الَّذِينَ آمَنُوا وَعَمِلُوا الصَّالِحَاتِ وَأَقَامُوا الصَّلَاةَ وَآتَوُا الزَّكَاةَ لَهُمْ أَجْرُهُمْ عِندَ رَبِّهِمْ وَلَا خَوْفٌ عَلَيْهِمْ وَلَا هُمْ يَحْزَنُونَ',
+      turkishMeaning: 'İman edip iyi ameller işleyen, namazı dosdoğru kılan ve zekâtı verenlerin Rableri katında mükâfatları vardır. Onlara korku yoktur ve mahzun da olmayacaklardır.',
+      spiritualNote: 'Namazını dosdoğru kılıp salih ameller işleyenlere hem dünyada hem ukbada ebedi emniyet müjdelenmiştir.',
+    ),
+    DailyCompletionVerse(
+      surahName: 'Ankebût Suresi',
+      verseReference: 'Ankebût 29:45',
+      arabicText: 'اتْلُ مَا أُوحِيَ إِلَيْكَ مِنَ الْكِتَابِ وَأَقِمِ الصَّلَاةَ ۖ إِنَّ الصَّلَاةَ تَنْهَىٰ عَنِ الْفَحْشَاءِ وَالْمُنكَرِ ۗ وَلَذِكْرُ اللَّهِ أَكْبَرُ',
+      turkishMeaning: 'Sana vahyedilen Kitabı oku ve namazı dosdoğru kıl. Çünkü namaz insanı her türlü kötülükten ve hayasızlıktan alıkor. Allah\'ı zikretmek ise elbette en büyüktür.',
+      spiritualNote: 'Günün 5 vaktini ve Kur\'an tilavetini tamamlayarak kalbini kötülüklerden koruyan bir manevi kalkan kazandın.',
+    ),
+    DailyCompletionVerse(
+      surahName: 'Ra\'d Suresi',
+      verseReference: 'Ra\'d 13:28',
+      arabicText: 'الَّذِينَ آمَنُوا وَتَطْمَئِنُّ قُلُوبُهُم بِذِكْرِ اللَّهِ ۗ أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ',
+      turkishMeaning: 'Onlar, inanan ve kalpleri Allah\'ı anmakla huzura kavuşan kimselerdir. İyi bilin ki, kalpler ancak Allah\'ın zikriyle mutmain olur (huzur bulur).',
+      spiritualNote: 'Bugünkü zikir ve ibadetlerinle ruhunu ilahi sekinete ve gerçek huzura kavuşturdun.',
+    ),
+    DailyCompletionVerse(
+      surahName: 'Tâ-Hâ Suresi',
+      verseReference: 'Tâ-Hâ 20:130',
+      arabicText: 'فَاصْبِرْ عَلَىٰ مَا يَقُولُونَ وَسَبِّحْ بِحَمْدِ رَبِّكَ قَبْلَ طُلُوعِ الشَّمْسِ وَقَبْلَ غُرُوبِهَا ۖ وَمِنْ آنَاءِ اللَّيْلِ فَسَبِّحْ وَأَطْرَافَ النَّهَارِ لَعَلَّكَ تَرْضَىٰ',
+      turkishMeaning: 'Güneşin doğmasından önce de batmasından önce de Rabbini hamd ile tesbih et. Gecenin bir kısım vakitlerinde ve gündüzün etrafında da tesbih et ki rızaya eresin.',
+      spiritualNote: 'Günün sabahından yatsısına kadar vakitleri ibadetle süsleyenler ilahi rızanın engin ikramına mazhar olur.',
+    ),
+    DailyCompletionVerse(
+      surahName: 'Mü\'minûn Suresi',
+      verseReference: 'Mü\'minûn 23:1-2',
+      arabicText: 'قَدْ أَفْلَحَ الْمُؤْمِنُونَ ﴿١﴾ الَّذِينَ هُمْ فِي صَلَاتِهِمْ خَاشِعُونَ',
+      turkishMeaning: 'Müminler kesinlikle kurtuluşa ermişlerdir; Onlar ki, namazlarında huşû ve derin bir saygı içindedirler.',
+      spiritualNote: 'Namazında huşûyu muhafaza eden mümin, iki cihanın da asıl kurtuluşuna ermiştir.',
+    ),
+    DailyCompletionVerse(
+      surahName: 'İsrâ Suresi',
+      verseReference: 'İsrâ 17:78',
+      arabicText: 'أَقِمِ الصَّلَاةَ لِدُلُوكِ الشَّمْسِ إِلَىٰ غَسَقِ اللَّيْلِ وَقُرْآنَ الْفَجْرِ ۖ إِنَّ قُرْآنَ الْفَجْرِ كَانَ مَشْهُودًا',
+      turkishMeaning: 'Güneşin batıya kaymasından gecenin karanlığına kadar namazı kıl; bir de sabah Kur\'an tilavetini... Zira sabah Kur\'an\'ı şahitlidir (melekler hazır bulunur).',
+      spiritualNote: 'Sabahın bereketli vaktinde meleklerin şahit olduğu bir kulluk defteri açtın ve gününü kemale erdirdin.',
+    ),
+    DailyCompletionVerse(
+      surahName: 'Bakara Suresi',
+      verseReference: 'Bakara 2:152-153',
+      arabicText: 'فَاذْكُرُونِي أَذْكُرْكُمْ وَاشْكُرُوا لِي وَلَا تَكْفُرُونِ ﴿١٥٢﴾ يَا أَيُّهَا الَّذِينَ آمَنُوا اسْتَعِينُوا بِالصَّبْرِ وَالصَّلَاةِ ۚ إِنَّ اللَّهَ مَعَ الصَّابِرِينَ',
+      turkishMeaning: 'Beni anın ki, ben de sizi anayım. Bana şükredin ve nankörlük etmeyin. Ey iman edenler! Sabır ve namaz ile Allah\'tan yardım dileyin. Şüphesiz Allah sabredenlerle beraberdir.',
+      spiritualNote: 'Rabbin seni andı; çünkü sen gün boyu O\'nu zikretmeyi ve namazla O\'na sığınmayı seçtin.',
+    ),
+    DailyCompletionVerse(
+      surahName: 'Fâtır Suresi',
+      verseReference: 'Fâtır 35:29-30',
+      arabicText: 'إِنَّ الَّذِينَ يَتْلُونَ كِتَابَ اللَّهِ وَأَقَامُوا الصَّلَاةَ وَأَنفَقُوا مِمَّا رَزَقْنَاهُمْ سِرًّا وَعَلَانِيَةً يَرْجُونَ تِجَارَةً لَّن تَبُورَ',
+      turkishMeaning: 'Allah\'ın Kitabı\'nı okuyanlar, namazı dosdoğru kılanlar ve kendilerine rızık olarak verdiklerimizden infak edenler, asla batmayacak bir kazanç umarlar.',
+      spiritualNote: 'Kur\'an tilaveti ve namazla geçirilen her gün, ebedi ahiret pazarında tükenmez bir kâr vesilesidir.',
+    ),
+    DailyCompletionVerse(
+      surahName: 'Kâf Suresi',
+      verseReference: 'Kâf 50:39-40',
+      arabicText: 'فَاصْبِرْ عَلَىٰ مَا يَقُولُونَ وَسَبِّحْ بِحَمْدِ رَبِّكَ قَبْلَ طُلُوعِ الشَّمْسِ وَقَبْلَ الْغُرُوبِ ﴿٣٩﴾ وَمِنَ اللَّيْلِ فَسَبِّحْهُ وَأَدْبَارَ السُّجُودِ',
+      turkishMeaning: 'Güneşin doğuşundan önce de batışından önce de Rabbini hamd ile tesbih et. Gecenin bir vaktinde ve secdelerin ardından da O\'nu tesbih etmeye devam et.',
+      spiritualNote: 'Secdelerin ardından yükselen dualar ve tesbihler, kul ile Rabbi arasındaki perdeleri aralar.',
+    ),
+    DailyCompletionVerse(
+      surahName: 'Âl-i İmrân Suresi',
+      verseReference: 'Âl-i İmrân 3:191',
+      arabicText: 'الَّذِينَ يَذْكُرُونَ اللَّهَ قِيَامًا وَقُعُودًا وَعَلَىٰ جُنُوبِهِمْ وَيَتَفَكَّرُونَ فِي خَلْقِ السَّمَاوَاتِ وَالْأَرْضِ رَبَّنَا مَا خَلَقْتَ هَٰذَا بَاطِلًا',
+      turkishMeaning: 'Onlar ayaktayken, otururken ve yanları üzerinde yatarken Allah\'ı anarlar; göklerin ve yerin yaratılışını derin derin tefekkür ederler: "Rabbimiz! Sen bunu boşuna yaratmadın."',
+      spiritualNote: 'Zikir ve tefekkürle yoğrulan bir ibadet günü, aklın ve kalbin en yüce olgunluk meyvesidir.',
+    ),
+    DailyCompletionVerse(
+      surahName: 'Rûm Suresi',
+      verseReference: 'Rûm 30:17-18',
+      arabicText: 'فَسُبْحَانَ اللَّهِ حِينَ تُمْسُونَ وَحِينَ تُصْبِحُونَ ﴿١٧﴾ وَلَهُ الْحَمْدُ فِي السَّمَاوَاتِ وَالْأَرْضِ وَعَشِيًّا وَحِينَ تُظْهِرُونَ',
+      turkishMeaning: 'Akşama erdiğinizde ve sabaha kavuştuğunuzda Allah\'ı tesbih edin. Göklerde ve yerde, ikindide ve öğle vaktinde de hamd yalnız O\'na aittir.',
+      spiritualNote: 'Günün dönüm noktalarında kılınan namazlar, kâinatın zikir korosuna kulun en samimi iştirakidir.',
+    ),
+    DailyCompletionVerse(
+      surahName: 'Nûr Suresi',
+      verseReference: 'Nûr 24:36-37',
+      arabicText: 'رِجَالٌ لَّا تُلْهِيهِمْ تِجَارَةٌ وَلَا بَيْعٌ عَن ذِكْرِ اللَّهِ وَإِقَامِ الصَّلَاةِ وَإِيتَاءِ الزَّكَاةِ ۙ يَخَافُونَ يَوْمًا تَتَقَلَّبُ فِيهِ الْقُلُوبُ وَالْأَبْصَارُ',
+      turkishMeaning: 'Öyle erler vardır ki, ne ticaret ne de alışveriş onları Allah\'ı anmaktan, namazı kılmaktan ve zekâtı vermekten alıkoyamaz.',
+      spiritualNote: 'Dünya meşgalesinin ortasında namazını ve zikrini aksatmayan erlerden olmak ne kutlu bir devlettir.',
+    ),
+    DailyCompletionVerse(
+      surahName: 'Zümer Suresi',
+      verseReference: 'Zümer 39:9',
+      arabicText: 'أَمَّنْ هُوَ قَانِتٌ آنَاءَ اللَّيْلِ سَاجِدًا وَقَائِمًا يَحْذَرُ الْآخِرَةَ وَيَرْجُو رَحْمَةَ رَبِّهِ ۗ قُلْ هَلْ يَسْتَوِي الَّذِينَ يَعْلَمُونَ وَالَّذِينَ لَا يَعْلَمُونَ',
+      turkishMeaning: 'Yoksa o, gece saatlerinde secde ederek ve kıyamda durarak boyun büken, ahiretten çekinip Rabbinin rahmetini uman gibi midir? De ki: Hiç bilenlerle bilmeyenler bir olur mu?',
+      spiritualNote: 'İbadet ve secde bilinci, mümini cehalet karanlığından hakiki marifet ve ilim nuruna taşır.',
+    ),
+    DailyCompletionVerse(
+      surahName: 'Hacc Suresi',
+      verseReference: 'Hacc 22:77',
+      arabicText: 'يَا أَيُّهَا الَّذِينَ آمَنُوا ارْكَعُوا وَاسْجُدُوا وَاعْبُدُوا رَبَّكُمْ وَافْعَلُوا الْخَيْرَ لَعَلَّكُمْ تُفْلِحُونَ',
+      turkishMeaning: 'Ey iman edenler! Rükû edin, secdeye kapanın, Rabbinize ibadet edin ve hayır işleyin ki felaha (ebedi kurtuluşa) eresiniz.',
+      spiritualNote: 'Rükû ve secdeyle tamamlanan her gün, felah kapısını biraz daha ardına kadar aralar.',
+    ),
+    DailyCompletionVerse(
+      surahName: 'Furkân Suresi',
+      verseReference: 'Furkân 25:63-64',
+      arabicText: 'وَعِبَادُ الرَّحْمَٰنِ الَّذِينَ يَمْشُونَ عَلَى الْأَرْضِ هَوْنًا... وَالَّذِينَ يَبِيتُونَ لِرَبِّهِمْ سُجَّدًا وَقِيَامًا',
+      turkishMeaning: 'Rahmân\'ın has kulları yeryüzünde tevazuyla yürürler... Ve onlar, gecelerini Rablerine secde ederek ve kıyamda durarak geçirirler.',
+      spiritualNote: 'Tevazu ve secdelerle süslenen bir gün, kulunu "Rahmân\'ın seçkin kulu" mertebesine yükseltir.',
+    ),
+    DailyCompletionVerse(
+      surahName: 'Zâriyât Suresi',
+      verseReference: 'Zâriyât 51:56',
+      arabicText: 'وَمَا خَلَقْتُ الْجِنَّ وَالْإِنسَ إِلَّا لِيَعْبُدُونِ',
+      turkishMeaning: 'Ben cinleri ve insanları ancak bana kulluk ve ibadet etsinler diye yarattım.',
+      spiritualNote: 'Bugün var oluş gayene sadık kaldın ve kâinatın en asil gayesini fiilen yerine getirdin.',
+    ),
+    DailyCompletionVerse(
+      surahName: 'Ahzâb Suresi',
+      verseReference: 'Ahzâb 33:41-42',
+      arabicText: 'يَا أَيُّهَا الَّذِينَ آمَنُوا اذْكُرُوا اللَّهَ ذِكْرًا كَثِيرًا ﴿٤١﴾ وَسَبِّحُوهُ بُكْرَةً وَأَصِيلًا',
+      turkishMeaning: 'Ey iman edenler! Allah\'ı çokça zikredin ve O\'nu sabah akşam tesbih edip yüceltin.',
+      spiritualNote: 'Dillerde ve kalplerde çokça zikredilen Allah, o kalbi sevgisiyle doldurur.',
+    ),
+    DailyCompletionVerse(
+      surahName: 'Bakara Suresi',
+      verseReference: 'Bakara 2:238',
+      arabicText: 'حَافِظُوا عَلَى الصَّلَوَاتِ وَالصَّلَاةِ الْوُسْطَىٰ وَقُومُوا لِلَّهِ قَانِتِينَ',
+      turkishMeaning: 'Namazlara ve orta namaza (ikindiye) devam edin; tam bir saygı ve huşû ile Allah\'ın huzurunda durun.',
+      spiritualNote: 'Vakitleri muhafaza eden mümini Allah Teâlâ dünyevi ve uhrevi tehlikelerden muhafaza eder.',
+    ),
+    DailyCompletionVerse(
+      surahName: 'Meryem Suresi',
+      verseReference: 'Meryem 19:31',
+      arabicText: 'وَجَعَلَنِي مُبَارَكًا أَيْنَ مَا كُنتُ وَأَوْصَانِي بِالصَّلَاةِ وَالزَّكَاةِ مَا دُمْتُ حَيًّا',
+      turkishMeaning: 'Nerede olursam olayım beni mübarek kıldı ve yaşadığım sürece bana namazı ve zekâtı emretti.',
+      spiritualNote: 'Namaz hayatın can damarıdır; ona sımsıkı sarılan ömür bereket ve feyizle taçlanır.',
+    ),
+    DailyCompletionVerse(
+      surahName: 'Lokmân Suresi',
+      verseReference: 'Lokmân 31:17',
+      arabicText: 'يَا بُنَيَّ أَقِمِ الصَّلَاةَ وَأْمُرْ بِالْمَعْرُوفِ وَانْهَ عَنِ الْمُنكَرِ وَاصْبِرْ عَلَىٰ مَا أَصَابَكَ ۖ إِنَّ ذَٰلِكَ مِنْ عَزْمِ الْأُمُورِ',
+      turkishMeaning: 'Yavrucuğum! Namazı dosdoğru kıl, iyiliği emret, kötülükten sakındır ve başına gelene sabret. Şüphesiz bunlar azmedilmeye değer işlerdendir.',
+      spiritualNote: 'Namaz insanı metanetli, sabırlı ve hayra öncülük eden yüce bir ahlak sahibi yapar.',
+    ),
+    DailyCompletionVerse(
+      surahName: 'Nisâ Suresi',
+      verseReference: 'Nisâ 4:103',
+      arabicText: 'إِنَّ الصَّلَاةَ كَانَتْ عَلَى الْمُؤْمِنِينَ كِتَابًا مَّوْقُوتًا',
+      turkishMeaning: 'Şüphesiz namaz, müminler üzerine vakitleri belirlenmiş bir farz kılınmıştır.',
+      spiritualNote: 'Vakti vaktine kılınan namaz, kulun Allah katındaki sadakat ve nizam nişanesidir.',
+    ),
+    DailyCompletionVerse(
+      surahName: 'Necm Suresi',
+      verseReference: 'Necm 53:62',
+      arabicText: 'فَاسْجُدُوا لِلَّهِ وَاعْبُدُوا ۩',
+      turkishMeaning: 'Haydi artık yalnızca Allah\'a secde edin ve yalnız O\'na kulluk edin!',
+      spiritualNote: 'Kulun Rabbine en yakın olduğu an secde anıdır; secdelerle geçen bir gün paha biçilemezdir.',
+    ),
+    DailyCompletionVerse(
+      surahName: 'A\'lâ Suresi',
+      verseReference: 'A\'lâ 87:14-15',
+      arabicText: 'قَدْ أَفْلَحَ مَن تَزَكَّىٰ ﴿١٤﴾ وَذَكَرَ اسْمَ رَبِّهِ فَصَلَّىٰ',
+      turkishMeaning: 'Nefsini günahlardan arındıran, Rabbinin adını anıp namaz kılan kesinlikle kurtuluşa ermiştir.',
+      spiritualNote: 'Arınmanın ve manevi temizliğin en nurlu yolu, Allah\'ı anıp divana durmaktır.',
+    ),
+    DailyCompletionVerse(
+      surahName: 'En\'âm Suresi',
+      verseReference: 'En\'âm 6:162',
+      arabicText: 'قُلْ إِنَّ صَلَاتِي وَنُسُكِي وَمَحْيَايَ وَمَمَاتِي لِلَّهِ رَبِّ الْعَالَمِينَ',
+      turkishMeaning: 'De ki: Şüphesiz benim namazım, kurbanım, hayatım ve ölümüm âlemlerin Rabbi olan Allah içindir.',
+      spiritualNote: 'Bütün bir günü Allah rızası için ibadetle donatmak, hayatı ibadete dönüştürmektir.',
+    ),
+    DailyCompletionVerse(
+      surahName: 'İbrâhîm Suresi',
+      verseReference: 'İbrâhîm 14:40',
+      arabicText: 'رَبِّ اجْعَلْنِي مُقِيمَ الصَّلَاةِ وَمِن ذُرِّيَّتِي ۚ رَبَّنَا وَتَقَبَّلْ دُعَاءِ',
+      turkishMeaning: 'Rabbim! Beni ve neslimi namazı dosdoğru kılanlardan eyle. Rabbimiz! Duamı kabul buyur.',
+      spiritualNote: 'Hz. İbrahim\'in kutlu duasına ortak olarak namaz muhafızlığını sürdürdün.',
+    ),
+    DailyCompletionVerse(
+      surahName: 'Enbiyâ Suresi',
+      verseReference: 'Enbiyâ 21:73',
+      arabicText: 'وَأَوْحَيْنَا إِلَيْهِمْ فِعْلَ الْخَيْرَاتِ وَإِقَامَ الصَّلَاةِ وَإِيتَاءَ الزَّكَاةِ ۖ وَكَانُوا لَنَا عَابِدِينَ',
+      turkishMeaning: 'Biz onlara hayır işlemeyi, namaz kılmayı ve zekât vermeyi vahyettik. Onlar yalnızca bize kulluk eden kimselerdi.',
+      spiritualNote: 'Peygamberler yolunun izinde bir gün daha hayırla ve namazla tamamlandı.',
+    ),
+    DailyCompletionVerse(
+      surahName: 'Secde Suresi',
+      verseReference: 'Secde 32:15-16',
+      arabicText: 'إِنَّمَا يُؤْمِنُ بِآيَاتِنَا الَّذِينَ إِذَا ذُكِّرُوا بِهَا خَرُّوا سُجَّدًا وَسَبِّحُوا بِحَمْدِ رَبِّهِمْ... تَتَجَافَىٰ جُنُوبُهُمْ عَنِ الْمَضَاجِعِ',
+      turkishMeaning: 'Ayetlerimize ancak öyle kimseler iman eder ki, kendilerine hatırlatıldığında secdeye kapanırlar ve Rablerini hamd ile tesbih ederler.',
+      spiritualNote: 'Rabbinin ayetlerine saygıyla secde eden mümin, meleklerin gıpta ettiği bir mertebededir.',
+    ),
+    DailyCompletionVerse(
+      surahName: 'Hûd Suresi',
+      verseReference: 'Hûd 11:114',
+      arabicText: 'وَأَقِمِ الصَّلَاةَ طَرَفَيِ النَّهَارِ وَزُلَفًا مِّنَ اللَّيْلِ ۚ إِنَّ الْحَسَنَاتِ يُذْهِبْنَ السَّيِّئَاتِ ۚ ذَٰلِكَ ذِكْرَىٰ لِلذَّاكِرِينَ',
+      turkishMeaning: 'Gündüzün iki tarafında ve gecenin gündüze yakın saatlerinde namaz kıl. Muhakkak ki iyilikler kötülükleri silip süpürür.',
+      spiritualNote: 'Bugün kıldığın namazlar ve döktüğün dualar, geçmiş hatalara en güzel kefarettir.',
+    ),
+    DailyCompletionVerse(
+      surahName: 'İnsân Suresi',
+      verseReference: 'İnsân 76:25-26',
+      arabicText: 'وَاذْكُرِ اسْمَ رَبِّكَ بُكْرَةً وَأَصِيلًا ﴿٢٥﴾ وَمِنَ اللَّيْلِ فَاسْجُدْ لَهُ وَسَبِّحْهُ لَيْلًا طَوِيلًا',
+      turkishMeaning: 'Sabah akşam Rabbinin adını an. Gecenin bir kısmında O\'na secde et ve geceleyin uzun uzadıya O\'nu tesbih et.',
+      spiritualNote: 'Gece ve gündüz tesbihleriyle yoğrulan gönül, karanlıklardan selamete çıkar.',
+    ),
+    DailyCompletionVerse(
+      surahName: 'İnşirâh Suresi',
+      verseReference: 'İnşirâh 94:7-8',
+      arabicText: 'فَإِذَا فَرَغْتَ فَانصَبْ ﴿٧﴾ وَإِلَىٰ رَبِّكَ فَارْغَب',
+      turkishMeaning: 'Öyleyse bir işi bitirince hemen diğerine koyul (ibadete yönel) ve yalnız Rabbine rağbet et.',
+      spiritualNote: 'Bir ibadeti tamamlayan kul daima bir sonrakine yönelir; kalp daima Mevlâ\'sına müteveccihtir.',
+    ),
+    DailyCompletionVerse(
+      surahName: 'Fecr Suresi',
+      verseReference: 'Fecr 89:27-30',
+      arabicText: 'يَا أَيَّتُهَا النَّفْسُ الْمُطْمَئِنَّةُ ﴿٢٧﴾ ارْجِعِي إِلَىٰ رَبِّكِ رَاضِيَةً مَرْضِيَّةً ﴿٢٨﴾ فَادْخُلِي فِي عِبَادِي ﴿٢٩﴾ وَادْخُلِي جَنَّتِي',
+      turkishMeaning: 'Ey huzura ermiş mutmain nefis! Sen O\'ndan razı, O da senden razı olarak Rabbine dön! Salih kullarımın arasına katıl ve cennetime gir!',
+      spiritualNote: 'Günün tüm ibadetlerini ikmâl eden kalp, mutmain nefsin huzur veren meltemini hisseder.',
+    ),
+  ];
+}
+
