@@ -176,9 +176,9 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
 
   Future<void> _sendTestVerse() async {
     HapticFeedback.mediumImpact();
-    await _service.sendTestVerseNotification();
+    final strings = ref.read(appStringsProvider);
+    await _service.sendTestVerseNotification(langCode: strings.language.code);
     if (mounted) {
-      final strings = ref.read(appStringsProvider);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Row(
@@ -257,7 +257,7 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
     }
 
     try {
-      await _service.sendTestNotification();
+      await _service.sendTestNotification(langCode: strings.language.code);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

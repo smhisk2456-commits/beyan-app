@@ -1,8 +1,5 @@
-/// Beyân İslami Yaşam Uygulaması - Dua Kütüphanesi Modeli
-///
-/// 10 Kapsamlı ve Doğrulanmış İslami Dua Kategorisi:
-/// Sabah, Akşam, Günlük Yaşam, Yolculuk, Şükür & Sabır,
-/// Sıkıntı & Ferahlık, Uyku, Yemek & Nimet, Kur'an Duaları, Peygamber Duaları.
+import '../data/dua_translations.dart';
+
 enum DuaCategory {
   morning('Sabah Duaları', 'Morning', 'أذكار الصباح'),
   evening('Akşam Duaları', 'Evening', 'أذكار المساء'),
@@ -86,6 +83,70 @@ class DuaItem {
     'virtue_explanation': virtueExplanation,
     'is_favorite': isFavorite ? 1 : 0,
   };
+
+  String localizedTitle(String langCode) {
+    final entry = kDuaTranslations[id];
+    if (entry != null) {
+      if (langCode == 'en' && entry.titleEn.isNotEmpty) return entry.titleEn;
+      if (langCode == 'ar' && entry.titleAr.isNotEmpty) return entry.titleAr;
+    }
+    return title;
+  }
+
+  String localizedMeaning(String langCode) {
+    final entry = kDuaTranslations[id];
+    if (entry != null) {
+      if (langCode == 'en' && entry.meaningEn.isNotEmpty) return entry.meaningEn;
+      if (langCode == 'ar' && entry.meaningAr.isNotEmpty) return entry.meaningAr;
+    }
+    return turkishMeaning;
+  }
+
+  String localizedReference(String langCode) {
+    final entry = kDuaTranslations[id];
+    if (entry != null) {
+      if (langCode == 'en' && entry.referenceEn.isNotEmpty) return entry.referenceEn;
+      if (langCode == 'ar' && entry.referenceAr.isNotEmpty) return entry.referenceAr;
+    }
+    if (langCode == 'en') {
+      return _translateReferenceToEn(reference);
+    } else if (langCode == 'ar') {
+      return _translateReferenceToAr(reference);
+    }
+    return reference;
+  }
+
+  static String _translateReferenceToEn(String ref) {
+    return ref
+        .replaceAll('Sahih-i Müslim', 'Sahih Muslim')
+        .replaceAll('Sahih-i Buhari', 'Sahih al-Bukhari')
+        .replaceAll('Sünen-i Tirmizi', 'Jami` at-Tirmidhi')
+        .replaceAll('Tirmizi', 'Jami` at-Tirmidhi')
+        .replaceAll('Sünen-i Ebu Davud', 'Sunan Abi Dawud')
+        .replaceAll('Ebu Davud', 'Sunan Abi Dawud')
+        .replaceAll('Sünen-i İbni Mace', 'Sunan Ibn Majah')
+        .replaceAll('İbni Mace', 'Sunan Ibn Majah')
+        .replaceAll('Müsned-i Ahmed', 'Musnad Ahmad')
+        .replaceAll('Ayetler', 'Verses')
+        .replaceAll('Ayet', 'Verse')
+        .replaceAll('Suresi', 'Surah');
+  }
+
+  static String _translateReferenceToAr(String ref) {
+    return ref
+        .replaceAll('Sahih-i Müslim', 'صحيح مسلم')
+        .replaceAll('Sahih-i Buhari', 'صحيح البخاري')
+        .replaceAll('Sünen-i Tirmizi', 'جامع الترمذي')
+        .replaceAll('Tirmizi', 'جامع الترمذي')
+        .replaceAll('Sünen-i Ebu Davud', 'سنن أبي داود')
+        .replaceAll('Ebu Davud', 'سنن أبي داود')
+        .replaceAll('Sünen-i İbni Mace', 'سنن ابن ماجه')
+        .replaceAll('İbni Mace', 'سنن ابن ماجه')
+        .replaceAll('Müsned-i Ahmed', 'مسند أحمد')
+        .replaceAll('Ayetler', 'الآيات')
+        .replaceAll('Ayet', 'آية')
+        .replaceAll('Suresi', 'سورة');
+  }
 
   factory DuaItem.fromMap(Map<String, dynamic> map) {
     final catName = map['category'] as String?;

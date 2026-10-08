@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../features/notifications/services/notification_service.dart';
 
 /// Desteklenen diller
 enum AppLanguage {
@@ -54,6 +55,8 @@ class LanguageNotifier extends StateNotifier<AppLanguage> {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_prefKey, language.code);
+      // Yeni dilde ayet bildirimlerini anında yeniden planla
+      await NotificationService.instance.scheduleDailyVerseNotifications();
     } catch (_) {}
   }
 }
@@ -163,6 +166,9 @@ class AppStrings {
   String get nextPrayerLabel => language == AppLanguage.turkish
       ? 'Sıradaki'
       : (language == AppLanguage.english ? 'Next' : 'القادمة');
+  String prayerTimesLoadError(Object error) => language == AppLanguage.turkish
+      ? 'Vakitler yüklenemedi: $error'
+      : (language == AppLanguage.english ? 'Could not load prayer times: $error' : 'تعذر تحميل أوقات الصلاة: $error');
 
   // Namaz İsimleri
   String get prayerNameFajr => language == AppLanguage.turkish
@@ -183,6 +189,14 @@ class AppStrings {
   String get prayerNameIsha => language == AppLanguage.turkish
       ? 'Yatsı'
       : (language == AppLanguage.english ? 'Isha' : 'العشاء');
+
+  // Kısa namaz ismi kısayolları
+  String get fajr => prayerNameFajr;
+  String get sunrise => prayerNameSunrise;
+  String get dhuhr => prayerNameDhuhr;
+  String get asr => prayerNameAsr;
+  String get maghrib => prayerNameMaghrib;
+  String get isha => prayerNameIsha;
 
   // Rekat Detayları
   String get rakatFajr => language == AppLanguage.turkish

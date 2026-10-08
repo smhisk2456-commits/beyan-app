@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Kısa, Öz ve İlham Verici Âyet Bildirim Modeli (TR, EN, AR)
@@ -30,28 +29,42 @@ class ShortVerseNotification {
     return textTr;
   }
 
+  /// Seçili dile göre sûre ve âyet referansını döner (örn: Ash-Sharh 94:5-6)
+  String localizedReference(String langCode) {
+    final parts = verseReference.split(' ');
+    final nums = parts.length > 1 ? parts.sublist(1).join(' ') : '';
+    if (langCode == 'en') {
+      final cleanSurah = surahNameEn.replaceAll('Surah ', '');
+      return nums.isNotEmpty ? '$cleanSurah $nums' : surahNameEn;
+    }
+    if (langCode == 'ar') {
+      final cleanSurah = surahNameAr.replaceAll('سورة ', '');
+      return nums.isNotEmpty ? '$cleanSurah $nums' : surahNameAr;
+    }
+    return verseReference;
+  }
+
   /// Seçili dile göre bildirim başlığını döner
   String localizedTitle(String langCode, {bool isEvening = false}) {
+    final ref = localizedReference(langCode);
     if (isEvening) {
-      if (langCode == 'en') return 'Evening Reflection 🌙 $verseReference';
-      if (langCode == 'ar') return 'تأمل المساء 🌙 $verseReference';
-      return 'Akşam Tefekkürü 🌙 $verseReference';
+      if (langCode == 'en') return 'Evening Reflection 🌙 $ref';
+      if (langCode == 'ar') return 'تأمل المساء 🌙 $ref';
+      return 'Akşam Tefekkürü 🌙 $ref';
     }
-    if (langCode == 'en') return 'Verse of the Day 📖 $verseReference';
-    if (langCode == 'ar') return 'آية اليوم 📖 $verseReference';
-    return 'Günün Âyeti 📖 $verseReference';
+    if (langCode == 'en') return 'Verse of the Day 📖 $ref';
+    if (langCode == 'ar') return 'آية اليوم 📖 $ref';
+    return 'Günün Âyeti 📖 $ref';
   }
 
   static int _rotationCounter = 0;
 
-  /// Test veya anlık gönderimlerde her tıklamada kesinlikle FARKLI bir ayet seçer.
+  /// Test veya anlık gönderimlerde her tıklamada sırayla ve KESİNLİKLE FARKLI bir ayet seçer.
   static Future<ShortVerseNotification> getNextRotatingVerse() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      int lastIndex = prefs.getInt('beyan_last_verse_notif_idx') ?? Random().nextInt(pool.length);
-      // Farklı bir indexe geç (en az 1, en fazla 5 atlayarak rastgele çeşitlendir)
-      final step = 1 + Random().nextInt(4);
-      final nextIndex = (lastIndex + step) % pool.length;
+      int lastIndex = prefs.getInt('beyan_last_verse_notif_idx') ?? 0;
+      final nextIndex = (lastIndex + 1) % pool.length;
       await prefs.setInt('beyan_last_verse_notif_idx', nextIndex);
       return pool[nextIndex];
     } catch (_) {

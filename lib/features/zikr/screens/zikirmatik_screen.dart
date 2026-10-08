@@ -41,38 +41,66 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
       'en': 'SubhanAllah',
       'ar': 'سُبْحَانَ اللَّهِ',
       'meaning': 'Allah her türlü eksiklikten uzaktır',
+      'meaning_tr': 'Allah her türlü eksiklikten uzaktır',
+      'meaning_en': 'Glory be to Allah, free of all imperfections',
+      'meaning_ar': 'تنزيه الله عن كل نقص وعيب',
     },
     {
       'tr': 'Elhamdülillâh',
       'en': 'Alhamdulillah',
       'ar': 'الْحَمْدُ لِلَّهِ',
       'meaning': 'Hamd ve övgü yalnızca Allah\'adır',
+      'meaning_tr': 'Hamd ve övgü yalnızca Allah\'adır',
+      'meaning_en': 'All praise and gratitude is due to Allah alone',
+      'meaning_ar': 'الثناء والشكر لله وحده على كل نعمه',
     },
     {
       'tr': 'Allâhu Ekber',
       'en': 'Allahu Akbar',
       'ar': 'اللَّهُ أَكْبَرُ',
       'meaning': 'Allah en büyüktür',
+      'meaning_tr': 'Allah en büyüktür',
+      'meaning_en': 'Allah is the Greatest above all things',
+      'meaning_ar': 'الله أكبر وأعظم من كل شيء',
     },
     {
       'tr': 'Lâ ilâhe illallâh',
       'en': 'La ilaha illallah',
       'ar': 'لَا إِلَهَ إِلَّا اللَّهُ',
       'meaning': 'Allah\'tan başka ilah yoktur',
+      'meaning_tr': 'Allah\'tan başka ilah yoktur',
+      'meaning_en': 'There is no deity worthy of worship except Allah',
+      'meaning_ar': 'لا معبود بحق إلا الله وحده لا شريك له',
     },
     {
       'tr': 'Estağfirullâh',
       'en': 'Astaghfirullah',
       'ar': 'أَسْتَغْفِرُ اللَّهَ',
       'meaning': 'Allah\'tan bağışlanma dilerim',
+      'meaning_tr': 'Allah\'tan bağışlanma dilerim',
+      'meaning_en': 'I seek the forgiveness of Allah',
+      'meaning_ar': 'أطلب المغفرة والستر من الله تعالى',
     },
     {
       'tr': 'Salavât-ı Şerîfe',
       'en': 'Salawat',
       'ar': 'اللَّهُمَّ صَلِّ عَلَى سَيِّدِنَا مُحَمَّدٍ',
       'meaning': 'Allah\'ım Efendimiz Muhammed\'e salat eyle',
+      'meaning_tr': 'Allah\'ım Efendimiz Muhammed\'e salat eyle',
+      'meaning_en': 'O Allah, bestow blessings upon our Master Muhammad',
+      'meaning_ar': 'اللهم صل وسلم وبارك على سيدنا محمد',
     },
   ];
+
+  String _getDhikrMeaning(Map<String, String> dhikr, AppLanguage lang) {
+    if (lang == AppLanguage.english) {
+      return dhikr['meaning_en'] ?? dhikr['meaning_tr'] ?? dhikr['meaning'] ?? '';
+    }
+    if (lang == AppLanguage.arabic) {
+      return dhikr['meaning_ar'] ?? dhikr['meaning_tr'] ?? dhikr['meaning'] ?? '';
+    }
+    return dhikr['meaning_tr'] ?? dhikr['meaning'] ?? '';
+  }
 
   @override
   void initState() {
@@ -291,11 +319,19 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
               final title = titleController.text.trim();
               if (title.isNotEmpty) {
                 setState(() {
+                  final customMeaning = meaningController.text.trim().isNotEmpty
+                      ? meaningController.text.trim()
+                      : (strings.language == AppLanguage.english
+                          ? 'Custom Dhikr'
+                          : (strings.language == AppLanguage.arabic ? 'ذكر مخصص' : 'Özel zikir'));
                   _dhikrList.add({
                     'tr': title,
                     'en': title,
                     'ar': title,
-                    'meaning': meaningController.text.trim().isNotEmpty ? meaningController.text.trim() : 'Özel zikir',
+                    'meaning': customMeaning,
+                    'meaning_tr': customMeaning,
+                    'meaning_en': customMeaning,
+                    'meaning_ar': customMeaning,
                   });
                   _selectedDhikrIndex = _dhikrList.length - 1;
                   _count = 0;
@@ -564,7 +600,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  activeDhikr['meaning']!,
+                  _getDhikrMeaning(activeDhikr, currentLang),
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.white.withValues(alpha: 0.65),

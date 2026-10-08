@@ -164,7 +164,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 child: Text(
-                  'Vakitler yüklenemedi: $e',
+                  strings.prayerTimesLoadError(e),
                   style: const TextStyle(color: Colors.redAccent),
                 ),
               ),
@@ -607,7 +607,7 @@ class _DailyVerseCompactCard extends ConsumerWidget {
               ),
               const Spacer(),
               Text(
-                verse.verseReference,
+                verse.localizedReference(strings.language.code),
                 style: const TextStyle(
                   color: Colors.white70,
                   fontSize: 12,
@@ -724,7 +724,7 @@ class _DailyFeaturedDuaCard extends ConsumerWidget {
             ),
             const SizedBox(height: 6),
             Text(
-              dua.turkishMeaning,
+              dua.localizedMeaning(strings.language.code),
               style: TextStyle(
                 fontSize: 12,
                 height: 1.4,
@@ -734,7 +734,7 @@ class _DailyFeaturedDuaCard extends ConsumerWidget {
             ),
             const SizedBox(height: 6),
             Text(
-              dua.reference,
+              dua.localizedReference(strings.language.code),
               style: const TextStyle(
                 color: Color(0xFFD4AF37),
                 fontSize: 11,

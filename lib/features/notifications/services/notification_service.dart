@@ -387,16 +387,27 @@ class NotificationService {
   }
 
   /// Anında test bildirimi gönderir (Kullanıcı testi için).
-  Future<void> sendTestNotification() async {
+  Future<void> sendTestNotification({String? langCode}) async {
     final currentMakam = await getSelectedMakam();
     final isSilent = currentMakam == AdhanMakam.silent;
     final soundResource = currentMakam.soundResourceName;
+    final prefs = await SharedPreferences.getInstance();
+    final effectiveLang = langCode ?? prefs.getString('selected_app_language') ?? 'tr';
+
+    final testTitle = effectiveLang == 'en'
+        ? 'Beyân Adhan Alert Test 🔔'
+        : (effectiveLang == 'ar' ? 'اختبار تنبيه أذان بيان 🔔' : 'Beyân Ezan Bildirimi Testi 🔔');
+    final testBody = effectiveLang == 'en'
+        ? 'Notification system is working properly! (${currentMakam.localizedTitle(effectiveLang)} selected).'
+        : (effectiveLang == 'ar'
+            ? 'نظام الإشعارات يعمل بنجاح! (${currentMakam.localizedTitle(effectiveLang)} محدد).'
+            : 'Bildirim sistemi sorunsuz çalışıyor! (${currentMakam.title} seçili).');
 
     try {
       await _notifications.show(
         id: 999,
-        title: 'Beyân Ezan Bildirimi Testi 🔔',
-        body: 'Bildirim sistemi sorunsuz çalışıyor! (${currentMakam.title} seçili).',
+        title: testTitle,
+        body: testBody,
         notificationDetails: NotificationDetails(
           android: AndroidNotificationDetails(
             channelId,
@@ -426,8 +437,12 @@ class NotificationService {
       try {
         await _notifications.show(
           id: 999,
-          title: 'Beyân Ezan Bildirimi Testi 🔔',
-          body: 'Bildirim sistemi sorunsuz çalışıyor! (Standart bildirim sesi).',
+          title: testTitle,
+          body: effectiveLang == 'en'
+              ? 'Notification system is working properly! (Default alert sound).'
+              : (effectiveLang == 'ar'
+                  ? 'نظام الإشعارات يعمل بنجاح! (صوت التنبيه الافتراضي).'
+                  : 'Bildirim sistemi sorunsuz çalışıyor! (Standart bildirim sesi).'),
           notificationDetails: const NotificationDetails(
             android: AndroidNotificationDetails(
               channelId,
@@ -554,6 +569,7 @@ class NotificationService {
                   presentList: true,
                   presentBadge: true,
                   presentSound: true,
+                  interruptionLevel: InterruptionLevel.timeSensitive,
                 ),
               ),
               androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
@@ -602,6 +618,7 @@ class NotificationService {
                   presentList: true,
                   presentBadge: true,
                   presentSound: true,
+                  interruptionLevel: InterruptionLevel.timeSensitive,
                 ),
               ),
               androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
@@ -713,16 +730,20 @@ class NotificationService {
     }
   }
 
-  /// Kullanıcının ayet bildirimini test etmesi için anında gönderir (Her seferinde farklı ve kısa ayet döner!).
-  Future<void> sendTestVerseNotification() async {
+  static int _testVerseCounter = 0;
+
+  /// Kullanıcının ayet bildirimini test etmesi için anında gönderir (Her tıklamada sırayla ve farklı kısa ayet).
+  Future<void> sendTestVerseNotification({String? langCode}) async {
     final prefs = await SharedPreferences.getInstance();
-    final langCode = prefs.getString('selected_app_language') ?? 'tr';
+    final effectiveLang = langCode ?? prefs.getString('selected_app_language') ?? 'tr';
     final verse = await ShortVerseNotification.getNextRotatingVerse();
+    final notifId = 5900 + (_testVerseCounter++ % 80);
     try {
+      await _notifications.cancel(id: notifId);
       await _notifications.show(
-        id: 5999,
-        title: verse.localizedTitle(langCode),
-        body: verse.localizedText(langCode),
+        id: notifId,
+        title: verse.localizedTitle(effectiveLang),
+        body: verse.localizedText(effectiveLang),
         notificationDetails: const NotificationDetails(
           android: AndroidNotificationDetails(
             verseChannelId,
@@ -739,6 +760,7 @@ class NotificationService {
             presentList: true,
             presentBadge: true,
             presentSound: true,
+            interruptionLevel: InterruptionLevel.timeSensitive,
           ),
         ),
       );

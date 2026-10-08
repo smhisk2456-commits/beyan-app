@@ -7,6 +7,7 @@ import '../widget_service.dart';
 import '../../monetization/providers/premium_provider.dart';
 import '../../monetization/screens/onboarding_trial_paywall_screen.dart';
 import '../../monetization/widgets/banner_ad_widget.dart';
+import '../../notifications/models/short_verse_notification.dart';
 
 /// Kilit Ekranı Widget Kategorileri
 enum WidgetCategoryType {
@@ -20,101 +21,181 @@ enum WidgetCategoryType {
 
 /// Kilit Ekranı Widget Önizleme Söz Modeli
 class WidgetPreviewQuote {
-  final String reference;
+  final String referenceTr;
+  final String referenceEn;
+  final String referenceAr;
   final String arabic;
-  final String meaning;
+  final String meaningTr;
+  final String meaningEn;
+  final String meaningAr;
 
   const WidgetPreviewQuote({
-    required this.reference,
+    required this.referenceTr,
+    required this.referenceEn,
+    required this.referenceAr,
     required this.arabic,
-    required this.meaning,
+    required this.meaningTr,
+    required this.meaningEn,
+    required this.meaningAr,
   });
+
+  String localizedReference(String langCode) {
+    if (langCode == 'en') return referenceEn;
+    if (langCode == 'ar') return referenceAr;
+    return referenceTr;
+  }
+
+  String localizedMeaning(String langCode) {
+    if (langCode == 'en') return meaningEn;
+    if (langCode == 'ar') return meaningAr;
+    return meaningTr;
+  }
 }
 
 const Map<String, List<WidgetPreviewQuote>> _categoryQuotes = {
-  'Tümü': [
+  'all': [
     WidgetPreviewQuote(
-      reference: 'Bakara 2:152',
+      referenceTr: 'Bakara 2:152',
+      referenceEn: 'Al-Baqarah 2:152',
+      referenceAr: 'البقرة ٢:١٥٢',
       arabic: 'فَاذْكُرُونِي أَذْكُرْكُمْ وَاشْكُرُوا لِي وَلَا تَكْفُرُونِ',
-      meaning: 'Beni anın ki, ben de sizi anayım.\nBana şükredin, nankörlük etmeyin.',
+      meaningTr: 'Beni anın ki, ben de sizi anayım.\nBana şükredin, nankörlük etmeyin.',
+      meaningEn: 'Remember Me; I will remember you.\nBe grateful to Me and do not deny Me.',
+      meaningAr: 'فاذكروني أذكركم واشكروا لي ولا تكفرون',
     ),
     WidgetPreviewQuote(
-      reference: 'İnşirah 94:6',
+      referenceTr: 'İnşirâh 94:6',
+      referenceEn: 'Ash-Sharh 94:6',
+      referenceAr: 'الشرح ٩٤:٦',
       arabic: 'إِنَّ مَعَ الْعُسْرِ يُسْرًا',
-      meaning: 'Şüphesiz her güçlükle beraber\nbir kolaylık vardır.',
+      meaningTr: 'Şüphesiz her güçlükle beraber\nbir kolaylık vardır.',
+      meaningEn: 'Indeed, with hardship comes ease.',
+      meaningAr: 'إن مع العسر يسراً',
     ),
     WidgetPreviewQuote(
-      reference: 'Bakara 2:277',
+      referenceTr: 'Bakara 2:277',
+      referenceEn: 'Al-Baqarah 2:277',
+      referenceAr: 'البقرة ٢:٢٧٧',
       arabic: 'إِنَّ الَّذِينَ آمَنُوا وَعَمِلُوا الصَّالِحَاتِ وَأَقَامُوا الصَّلَاةَ',
-      meaning: 'İman edip iyi işler yapan ve\nnamazı dosdoğru kılanların mükâfatı vardır.',
+      meaningTr: 'İman edip iyi işler yapan ve\nnamazı dosdoğru kılanların mükâfatı vardır.',
+      meaningEn: 'Those who believe, do righteous deeds and establish prayer will have their reward.',
+      meaningAr: 'إن الذين آمنوا وعملوا الصالحات وأقاموا الصلاة لهم أجرهم',
     ),
   ],
-  'Sabır ve Şükür': [
+  'sabr': [
     WidgetPreviewQuote(
-      reference: 'Bakara 2:153',
+      referenceTr: 'Bakara 2:153',
+      referenceEn: 'Al-Baqarah 2:153',
+      referenceAr: 'البقرة ٢:١٥٣',
       arabic: 'يَا أَيُّهَا الَّذِينَ آمَنُوا اسْتَعِينُوا بِالصَّبْرِ وَالصَّلَاةِ ۚ إِنَّ اللَّهَ مَعَ الصَّابِرِينَ',
-      meaning: 'Ey iman edenler! Sabır ve namaz ile Allah\'tan yardım dileyin. Şüphesiz Allah sabredenlerle beraberdir.',
+      meaningTr: 'Ey iman edenler! Sabır ve namaz ile Allah\'tan yardım dileyin. Şüphesiz Allah sabredenlerle beraberdir.',
+      meaningEn: 'O you who believe! Seek help through patience and prayer. Indeed, Allah is with the patient.',
+      meaningAr: 'يا أيها الذين آمنوا استعينوا بالصبر والصلاة إن الله مع الصابرين',
     ),
     WidgetPreviewQuote(
-      reference: 'İbrâhîm 14:7',
+      referenceTr: 'İbrâhîm 14:7',
+      referenceEn: 'Ibrahim 14:7',
+      referenceAr: 'إبراهيم ١٤:٧',
       arabic: 'لَئِن شَكَرْتُمْ لَأَزِيدَنَّكُمْ',
-      meaning: 'Andolsun, eğer şükrederseniz\nelbette size nimetimi artırırım.',
+      meaningTr: 'Andolsun, eğer şükrederseniz\nelbette size nimetimi artırırım.',
+      meaningEn: 'If you are grateful, I will surely increase you in favor.',
+      meaningAr: 'لئن شكرتم لأزيدنكم',
     ),
     WidgetPreviewQuote(
-      reference: 'Zümer 39:10',
+      referenceTr: 'Zümer 39:10',
+      referenceEn: 'Az-Zumar 39:10',
+      referenceAr: 'الزمر ٣٩:١٠',
       arabic: 'إِنَّمَا يُوَفَّى الصَّابِرُونَ أَجْرَهُم بِغَيْرِ حِسَابٍ',
-      meaning: 'Yalnızca sabredenlere mükâfatları\nhesapsız olarak tastamam verilecektir.',
+      meaningTr: 'Yalnızca sabredenlere mükâfatları\nhesapsız olarak tastamam verilecektir.',
+      meaningEn: 'Indeed, the patient will be given their reward without measure.',
+      meaningAr: 'إنما يوفى الصابرون أجرهم بغير حساب',
     ),
   ],
-  'Dualar': [
+  'dua': [
     WidgetPreviewQuote(
-      reference: 'Bakara 2:201',
+      referenceTr: 'Bakara 2:201',
+      referenceEn: 'Al-Baqarah 2:201',
+      referenceAr: 'البقرة ٢:٢٠١',
       arabic: 'رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ',
-      meaning: 'Rabbimiz! Bize dünyada da iyilik ver, ahirette de iyilik ver ve bizi ateş azabından koru.',
+      meaningTr: 'Rabbimiz! Bize dünyada da iyilik ver, ahirette de iyilik ver ve bizi ateş azabından koru.',
+      meaningEn: 'Our Lord, give us in this world good and in the Hereafter good and protect us from the Fire.',
+      meaningAr: 'ربنا آتنا في الدنيا حسنة وفي الآخرة حسنة وقنا عذاب النار',
     ),
     WidgetPreviewQuote(
-      reference: 'Mü\'min 40:60',
+      referenceTr: 'Mü\'min 40:60',
+      referenceEn: 'Ghafir 40:60',
+      referenceAr: 'غافر ٤٠:٦٠',
       arabic: 'وَقَالَ رَبُّكُمُ ادْعُونِي أَسْتَجِبْ لَكُمْ',
-      meaning: 'Rabbiniz buyurdu ki:\nBana dua edin, size icabet edeyim.',
+      meaningTr: 'Rabbiniz buyurdu ki:\nBana dua edin, size icabet edeyim.',
+      meaningEn: 'And your Lord says:\nCall upon Me; I will respond to you.',
+      meaningAr: 'وقال ربكم ادعوني أستجب لكم',
     ),
     WidgetPreviewQuote(
-      reference: 'İbrâhîm 14:40',
+      referenceTr: 'İbrâhîm 14:40',
+      referenceEn: 'Ibrahim 14:40',
+      referenceAr: 'إبراهيم ١٤:٤٠',
       arabic: 'رَبِّ اجْعَلْنِي مُقِيمَ الصَّلَاةِ وَمِن ذُرِّيَّتِي ۚ رَبَّنَا وَتَقَبَّلْ دُعَاءِ',
-      meaning: 'Rabbim! Beni ve neslimi namazı dosdoğru kılanlardan eyle. Duamı kabul buyur.',
+      meaningTr: 'Rabbim! Beni ve neslimi namazı dosdoğru kılanlardan eyle. Duamı kabul buyur.',
+      meaningEn: 'My Lord, make me an establisher of prayer, and from my descendants. Our Lord, accept my prayer.',
+      meaningAr: 'رب اجعلني مقيم الصلاة ومن ذريتي ربنا وتقبل دعاء',
     ),
   ],
-  'İman ve Tevekkül': [
+  'tawakkul': [
     WidgetPreviewQuote(
-      reference: 'Talâk 6:3',
+      referenceTr: 'Talâk 65:3',
+      referenceEn: 'At-Talaq 65:3',
+      referenceAr: 'الطلاق ٦٥:٣',
       arabic: 'وَمَن يَتَوَكَّلْ عَلَى اللَّهِ فَهُوَ حَسْبُهُ',
-      meaning: 'Kim Allah\'a tevekkül ederse,\nO kendisine yeter.',
+      meaningTr: 'Kim Allah\'a tevekkül ederse,\nO kendisine yeter.',
+      meaningEn: 'And whoever relies upon Allah – then He is sufficient for him.',
+      meaningAr: 'ومن يتوكل على الله فهو حسبه',
     ),
     WidgetPreviewQuote(
-      reference: 'Tevbe 9:129',
+      referenceTr: 'Tevbe 9:129',
+      referenceEn: 'At-Tawbah 9:129',
+      referenceAr: 'التوبة ٩:١٢٩',
       arabic: 'حَسْبِيَ اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ ۖ عَلَيْهِ تَوَكَّلْتُ',
-      meaning: 'Bana Allah yeter. O\'ndan başka ilah yoktur. Ben yalnız O\'na güvendim.',
+      meaningTr: 'Bana Allah yeter. O\'ndan başka ilah yoktur. Ben yalnız O\'na güvendim.',
+      meaningEn: 'Sufficient for me is Allah; there is no deity except Him. On Him I have relied.',
+      meaningAr: 'حسبي الله لا إله إلا هو عليه توكلت',
     ),
     WidgetPreviewQuote(
-      reference: 'Enfâl 8:2',
+      referenceTr: 'Enfâl 8:2',
+      referenceEn: 'Al-Anfal 8:2',
+      referenceAr: 'الأنفال ٨:٢',
       arabic: 'وَعَلَىٰ رَبِّهِمْ يَتَوَكَّلُونَ',
-      meaning: 'Müminler ancak o kimselerdir ki,\nyalnızca Rablerine tevekkül ederler.',
+      meaningTr: 'Müminler ancak o kimselerdir ki,\nyalnızca Rablerine tevekkül ederler.',
+      meaningEn: 'The true believers are those who put their trust solely in their Lord.',
+      meaningAr: 'وعلى ربهم يتوكلون',
     ),
   ],
-  'Ahlak': [
+  'akhlaq': [
     WidgetPreviewQuote(
-      reference: 'Fussilet 41:34',
+      referenceTr: 'Fussilet 41:34',
+      referenceEn: 'Fussilat 41:34',
+      referenceAr: 'فصلت ٤١:٣٤',
       arabic: 'ادْفَعْ بِالَّتِي هِيَ أَحْسَنُ فَإِذَا الَّذِي بَيْنَكَ وَبَيْنَهُ عَدَاوَةٌ كَأَنَّهُ وَلِيٌّ حَمِيمٌ',
-      meaning: 'Kötülüğü en güzel olanla sav. Bir de bakarsın ki seninle arasında düşmanlık bulunan kimse sımsıcak bir dost oluvermiş.',
+      meaningTr: 'Kötülüğü en güzel olanla sav. Bir de bakarsın ki seninle arasında düşmanlık bulunan kimse sımsıcak bir dost oluvermiş.',
+      meaningEn: 'Repel evil by that which is better; and thereupon the one whom between you and him was enmity will become as a close friend.',
+      meaningAr: 'ادفع بالتي هي أحسن فإذا الذي بينك وبينه عداوة كأنه ولي حميم',
     ),
     WidgetPreviewQuote(
-      reference: 'Hucurât 49:10',
+      referenceTr: 'Hucurât 49:10',
+      referenceEn: 'Al-Hujurat 49:10',
+      referenceAr: 'الحجرات ٤٩:١٠',
       arabic: 'إِنَّمَا الْمُؤْمِنُونَ إِخْوَةٌ',
-      meaning: 'Şüphesiz müminler ancak kardeştirler.\nÖyleyse kardeşlerinizin arasını düzeltin.',
+      meaningTr: 'Şüphesiz müminler ancak kardeştirler.\nÖyleyse kardeşlerinizin arasını düzeltin.',
+      meaningEn: 'The believers are but brothers, so make peace between your brothers.',
+      meaningAr: 'إنما المؤمنون إخوة فأصلحوا بين أخويكم',
     ),
     WidgetPreviewQuote(
-      reference: 'Kalem 68:4',
+      referenceTr: 'Kalem 68:4',
+      referenceEn: 'Al-Qalam 68:4',
+      referenceAr: 'القلم ٦٨:٤',
       arabic: 'وَإِنَّكَ لَعَلَىٰ خُلُقٍ عَظِيمٍ',
-      meaning: 'Ve şüphesiz sen pek yüce bir ahlak üzerindesin.',
+      meaningTr: 'Ve şüphesiz sen pek yüce bir ahlak üzerindesin.',
+      meaningEn: 'And indeed, you are of a great moral character.',
+      meaningAr: 'وإنك لعلى خلق عظيم',
     ),
   ],
 };
@@ -131,12 +212,12 @@ class WidgetCenterScreen extends ConsumerStatefulWidget {
 class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
   WidgetCategoryType _selectedCategory = WidgetCategoryType.quotes;
 
-  // Özelleştirme ayarları
-  String _selectedQuoteCategory = 'Tümü';
-  String _verseViewMode = 'Yalnızca Meal';
-  String _refreshInterval = 'Her saat';
-  String _textSize = 'Standart';
-  String _fontFamily = 'Standart';
+  // Özelleştirme ayarları (Artık standart kodlarla saklanır)
+  String _selectedQuoteCategory = 'all';
+  String _verseViewMode = 'meal_only';
+  String _refreshInterval = '1h';
+  String _textSize = 'standard';
+  String _fontFamily = 'standard';
 
   int _quoteIndex = 0;
   bool _isLoading = true;
@@ -150,11 +231,36 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
   Future<void> _loadSavedPreferences() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      _selectedQuoteCategory = prefs.getString('widget_quote_category') ?? 'Tümü';
-      _verseViewMode = prefs.getString('widget_verse_view') ?? 'Yalnızca Meal';
-      _refreshInterval = prefs.getString('widget_refresh_interval') ?? 'Her saat';
-      _textSize = prefs.getString('widget_text_size') ?? 'Standart';
-      _fontFamily = prefs.getString('widget_font_family') ?? 'Standart';
+      _selectedQuoteCategory = prefs.getString('widget_quote_category') ?? 'all';
+      _verseViewMode = prefs.getString('widget_verse_view') ?? 'meal_only';
+      _refreshInterval = prefs.getString('widget_refresh_interval') ?? '1h';
+      _textSize = prefs.getString('widget_text_size') ?? 'standard';
+      _fontFamily = prefs.getString('widget_font_family') ?? 'standard';
+
+      // Eski Türkçe ayar değerlerini yeni standart kodlara dönüştür
+      if (_selectedQuoteCategory == 'Tümü') _selectedQuoteCategory = 'all';
+      if (_selectedQuoteCategory == 'Sabır ve Şükür') _selectedQuoteCategory = 'sabr';
+      if (_selectedQuoteCategory == 'Dualar') _selectedQuoteCategory = 'dua';
+      if (_selectedQuoteCategory == 'İman ve Tevekkül') _selectedQuoteCategory = 'tawakkul';
+      if (_selectedQuoteCategory == 'Ahlak') _selectedQuoteCategory = 'akhlaq';
+
+      if (_verseViewMode == 'Yalnızca Meal') _verseViewMode = 'meal_only';
+      if (_verseViewMode == 'Arapça + Meal') _verseViewMode = 'arabic_meal';
+      if (_verseViewMode == 'Yalnızca Arapça') _verseViewMode = 'arabic_only';
+
+      if (_refreshInterval == '15 Dakika') _refreshInterval = '15m';
+      if (_refreshInterval == '30 Dakika') _refreshInterval = '30m';
+      if (_refreshInterval == 'Her saat') _refreshInterval = '1h';
+      if (_refreshInterval == 'Her gün') _refreshInterval = '1d';
+
+      if (_textSize == 'Küçük') _textSize = 'small';
+      if (_textSize == 'Standart') _textSize = 'standard';
+      if (_textSize == 'Büyük') _textSize = 'large';
+
+      if (_fontFamily == 'Standart') _fontFamily = 'standard';
+      if (_fontFamily == 'Zarif (Lato)') _fontFamily = 'lato';
+      if (_fontFamily == 'Klasik (Amiri)') _fontFamily = 'amiri';
+
       _isLoading = false;
     });
   }
@@ -172,10 +278,85 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
     }
   }
 
+  String _getLocalizedVerseView(String mode, AppLanguage lang) {
+    if (mode == 'meal_only' || mode == 'Yalnızca Meal') {
+      return lang == AppLanguage.english ? 'Translation Only' : (lang == AppLanguage.arabic ? 'الترجمة فقط' : 'Yalnızca Meal');
+    }
+    if (mode == 'arabic_meal' || mode == 'Arapça + Meal') {
+      return lang == AppLanguage.english ? 'Arabic + Translation' : (lang == AppLanguage.arabic ? 'العربية + الترجمة' : 'Arapça + Meal');
+    }
+    if (mode == 'arabic_only' || mode == 'Yalnızca Arapça') {
+      return lang == AppLanguage.english ? 'Arabic Only' : (lang == AppLanguage.arabic ? 'العربية فقط' : 'Yalnızca Arapça');
+    }
+    return mode;
+  }
+
+  String _getLocalizedRefreshInterval(String interval, AppLanguage lang) {
+    if (interval == '15m' || interval == '15 Dakika') {
+      return lang == AppLanguage.english ? '15 Minutes' : (lang == AppLanguage.arabic ? '١٥ دقيقة' : '15 Dakika');
+    }
+    if (interval == '30m' || interval == '30 Dakika') {
+      return lang == AppLanguage.english ? '30 Minutes' : (lang == AppLanguage.arabic ? '٣٠ دقيقة' : '30 Dakika');
+    }
+    if (interval == '1h' || interval == 'Her saat') {
+      return lang == AppLanguage.english ? 'Every Hour' : (lang == AppLanguage.arabic ? 'كل ساعة' : 'Her saat');
+    }
+    if (interval == '1d' || interval == 'Her gün') {
+      return lang == AppLanguage.english ? 'Daily' : (lang == AppLanguage.arabic ? 'يومياً' : 'Her gün');
+    }
+    return interval;
+  }
+
+  String _getLocalizedCategory(String cat, AppLanguage lang) {
+    if (cat == 'all' || cat == 'Tümü') {
+      return lang == AppLanguage.english ? 'All' : (lang == AppLanguage.arabic ? 'الكل' : 'Tümü');
+    }
+    if (cat == 'sabr' || cat == 'Sabır ve Şükür') {
+      return lang == AppLanguage.english ? 'Patience & Gratitude' : (lang == AppLanguage.arabic ? 'الصبر والشكر' : 'Sabır ve Şükür');
+    }
+    if (cat == 'dua' || cat == 'Dualar') {
+      return lang == AppLanguage.english ? 'Supplications' : (lang == AppLanguage.arabic ? 'الأدعية' : 'Dualar');
+    }
+    if (cat == 'tawakkul' || cat == 'İman ve Tevekkül') {
+      return lang == AppLanguage.english ? 'Faith & Trust' : (lang == AppLanguage.arabic ? 'الإيمان والتوكل' : 'İman ve Tevekkül');
+    }
+    if (cat == 'akhlaq' || cat == 'Ahlak') {
+      return lang == AppLanguage.english ? 'Morals & Ethics' : (lang == AppLanguage.arabic ? 'الأخلاق' : 'Ahlak');
+    }
+    return cat;
+  }
+
+  String _getLocalizedTextSize(String size, AppLanguage lang) {
+    if (size == 'small' || size == 'Küçük') {
+      return lang == AppLanguage.english ? 'Small' : (lang == AppLanguage.arabic ? 'صغير' : 'Küçük');
+    }
+    if (size == 'standard' || size == 'Standart') {
+      return lang == AppLanguage.english ? 'Standard' : (lang == AppLanguage.arabic ? 'قياسي' : 'Standart');
+    }
+    if (size == 'large' || size == 'Büyük') {
+      return lang == AppLanguage.english ? 'Large' : (lang == AppLanguage.arabic ? 'كبير' : 'Büyük');
+    }
+    return size;
+  }
+
+  String _getLocalizedFontFamily(String font, AppLanguage lang) {
+    if (font == 'standard' || font == 'Standart') {
+      return lang == AppLanguage.english ? 'Standard' : (lang == AppLanguage.arabic ? 'قياسي' : 'Standart');
+    }
+    if (font == 'lato' || font == 'Zarif (Lato)') {
+      return lang == AppLanguage.english ? 'Elegant (Lato)' : (lang == AppLanguage.arabic ? 'أنيق (لاتو)' : 'Zarif (Lato)');
+    }
+    if (font == 'amiri' || font == 'Klasik (Amiri)') {
+      return lang == AppLanguage.english ? 'Classical (Amiri)' : (lang == AppLanguage.arabic ? 'كلاسيكي (أميري)' : 'Klasik (Amiri)');
+    }
+    return font;
+  }
+
   void _showOptionSheet<T>({
     required String title,
     required List<String> options,
     required String currentValue,
+    String Function(String)? labelBuilder,
     required Function(String) onSelected,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -217,10 +398,11 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
               ),
               const SizedBox(height: 12),
               ...options.map((opt) {
-                final isSelected = opt == currentValue;
+                final displayLabel = labelBuilder != null ? labelBuilder(opt) : opt;
+                final isSelected = opt == currentValue || (labelBuilder != null && (labelBuilder(opt) == currentValue || opt == currentValue));
                 return ListTile(
                   title: Text(
-                    opt,
+                    displayLabel,
                     style: TextStyle(
                       fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                       color: isSelected
@@ -658,7 +840,9 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
 
   // Kategori bazlı aktif ayet verisi
   WidgetPreviewQuote _getCurrentQuote() {
-    final list = _categoryQuotes[_selectedQuoteCategory] ?? _categoryQuotes['Tümü']!;
+    final list = _categoryQuotes[_selectedQuoteCategory] ??
+        _categoryQuotes['all'] ??
+        _categoryQuotes.values.first;
     return list[_quoteIndex % list.length];
   }
 
@@ -667,8 +851,14 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
     required String arabic,
     required String meaning,
   }) {
-    final showArabic = _verseViewMode == 'Arapça + Meal' || _verseViewMode == 'Yalnızca Arapça';
-    final showMeal = _verseViewMode == 'Yalnızca Meal' || _verseViewMode == 'Arapça + Meal';
+    final showArabic = _verseViewMode == 'arabic_meal' ||
+        _verseViewMode == 'arabic_only' ||
+        _verseViewMode == 'Arapça + Meal' ||
+        _verseViewMode == 'Yalnızca Arapça';
+    final showMeal = _verseViewMode == 'meal_only' ||
+        _verseViewMode == 'arabic_meal' ||
+        _verseViewMode == 'Yalnızca Meal' ||
+        _verseViewMode == 'Arapça + Meal';
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 250),
@@ -709,7 +899,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
             if (showMeal) const SizedBox(height: 4),
           ],
 
-          // Türkçe Meal (Varsa)
+          // Meal (Varsa)
           if (showMeal)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 6),
@@ -721,7 +911,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                   fontSize: _previewBodyFontSize,
                   fontFamily: _previewFontFamily,
                   height: 1.3,
-                  fontStyle: _verseViewMode == 'Arapça + Meal' ? FontStyle.italic : FontStyle.normal,
+                  fontStyle: (_verseViewMode == 'arabic_meal' || _verseViewMode == 'Arapça + Meal') ? FontStyle.italic : FontStyle.normal,
                 ),
               ),
             ),
@@ -732,24 +922,28 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
 
   // Aktif Kategoriye Göre Widget Önizleme İçeriği
   Widget _buildActiveWidgetPreviewContent() {
+    final strings = ref.watch(appStringsProvider);
+    final langCode = strings.language.code;
+
     switch (_selectedCategory) {
       case WidgetCategoryType.quotes:
         final quote = _getCurrentQuote();
         return _buildQuotePreviewWidget(
-          reference: quote.reference,
+          reference: quote.localizedReference(langCode),
           arabic: quote.arabic,
-          meaning: quote.meaning,
+          meaning: quote.localizedMeaning(langCode),
         );
 
       case WidgetCategoryType.dailyVerse:
+        final verse = ShortVerseNotification.pool[0];
         return _buildQuotePreviewWidget(
-          reference: 'İnşirah 94:6',
-          arabic: 'إِنَّ مَعَ الْعُسْرِ يُسْرًا',
-          meaning: 'Şüphesiz her güçlükle beraber\nbir kolaylık vardır.',
+          reference: verse.localizedReference(langCode),
+          arabic: verse.arabicText,
+          meaning: verse.localizedText(langCode),
         );
 
       case WidgetCategoryType.prayerTimes:
-        final timeScale = _textSize == 'Küçük' ? 0.85 : (_textSize == 'Büyük' ? 1.25 : 1.0);
+        final timeScale = (_textSize == 'small' || _textSize == 'Küçük') ? 0.85 : ((_textSize == 'large' || _textSize == 'Büyük') ? 1.25 : 1.0);
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           child: Column(
@@ -759,11 +953,11 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                 children: [
                   Icon(Icons.wb_sunny_rounded, color: Colors.white70, size: 13 * timeScale),
                   const SizedBox(width: 4),
-                  Text('Öğle 12:30 PM', style: TextStyle(color: Colors.white70, fontSize: 11 * timeScale, fontFamily: _previewFontFamily)),
+                  Text('${strings.dhuhr} 12:30 PM', style: TextStyle(color: Colors.white70, fontSize: 11 * timeScale, fontFamily: _previewFontFamily)),
                   const SizedBox(width: 8),
                   Icon(Icons.wb_twilight_rounded, color: Colors.white70, size: 13 * timeScale),
                   const SizedBox(width: 4),
-                  Text('İkindi 3:45 PM', style: TextStyle(color: Colors.white70, fontSize: 11 * timeScale, fontFamily: _previewFontFamily)),
+                  Text('${strings.asr} 3:45 PM', style: TextStyle(color: Colors.white70, fontSize: 11 * timeScale, fontFamily: _previewFontFamily)),
                 ],
               ),
               const SizedBox(height: 4),
@@ -782,28 +976,40 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
         );
 
       case WidgetCategoryType.countdown:
-        final timeScale = _textSize == 'Küçük' ? 0.9 : (_textSize == 'Büyük' ? 1.25 : 1.0);
+        final timeScale = (_textSize == 'small' || _textSize == 'Küçük') ? 0.9 : ((_textSize == 'large' || _textSize == 'Büyük') ? 1.25 : 1.0);
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
           child: Text(
-            'İkindi vaktine 2 saat 15 dk kaldı',
+            strings.language == AppLanguage.english
+                ? '2 hrs 15 mins until Asr prayer'
+                : (strings.language == AppLanguage.arabic
+                    ? 'ساعتان و١٥ دقيقة حتى صلاة العصر'
+                    : 'İkindi vaktine 2 saat 15 dk kaldı'),
             style: TextStyle(color: Colors.white70, fontSize: 12 * timeScale, fontFamily: _previewFontFamily),
           ),
         );
 
       case WidgetCategoryType.hijri:
-        final timeScale = _textSize == 'Küçük' ? 0.9 : (_textSize == 'Büyük' ? 1.25 : 1.0);
+        final timeScale = (_textSize == 'small' || _textSize == 'Küçük') ? 0.9 : ((_textSize == 'large' || _textSize == 'Büyük') ? 1.25 : 1.0);
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
           child: Column(
             children: [
               Text(
-                '🌙 18 Ramazan 1447',
+                strings.language == AppLanguage.english
+                    ? '🌙 18 Ramadan 1447'
+                    : (strings.language == AppLanguage.arabic
+                        ? '🌙 ١٨ رمضان ١٤٤٧'
+                        : '🌙 18 Ramazan 1447'),
                 style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13 * timeScale, fontFamily: _previewFontFamily),
               ),
               const SizedBox(height: 2),
               Text(
-                'Kadir Gecesine 9 Gün Kaldı',
+                strings.language == AppLanguage.english
+                    ? '9 Days to Laylat al-Qadr'
+                    : (strings.language == AppLanguage.arabic
+                        ? '٩ أيام حتى ليلة القدر'
+                        : 'Kadir Gecesine 9 Gün Kaldı'),
                 style: TextStyle(color: Colors.white70, fontSize: 11.5 * timeScale, fontFamily: _previewFontFamily),
               ),
             ],
@@ -811,7 +1017,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
         );
 
       case WidgetCategoryType.sunTimes:
-        final timeScale = _textSize == 'Küçük' ? 0.9 : (_textSize == 'Büyük' ? 1.25 : 1.0);
+        final timeScale = (_textSize == 'small' || _textSize == 'Küçük') ? 0.9 : ((_textSize == 'large' || _textSize == 'Büyük') ? 1.25 : 1.0);
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
           child: Row(
@@ -820,7 +1026,11 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
               Icon(Icons.wb_sunny_outlined, color: Colors.amber, size: 16 * timeScale),
               const SizedBox(width: 6),
               Text(
-                'Güneş: 05:42  •  İşrak: 06:27',
+                strings.language == AppLanguage.english
+                    ? 'Sunrise: 05:42 • Ishraq: 06:27'
+                    : (strings.language == AppLanguage.arabic
+                        ? 'الشروق: ٠٥:٤٢ • الإشراق: ٠٦:٢٧'
+                        : 'Güneş: 05:42 • İşrak: 06:27'),
                 style: TextStyle(color: Colors.white, fontSize: 12 * timeScale, fontWeight: FontWeight.w600, fontFamily: _previewFontFamily),
               ),
             ],
@@ -937,11 +1147,12 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
           if (_selectedCategory == WidgetCategoryType.quotes) ...[
             _buildOptionTile(
               title: strings.displayCategories,
-              value: _selectedQuoteCategory == 'Tümü' ? strings.allCategories : _selectedQuoteCategory,
+              value: _getLocalizedCategory(_selectedQuoteCategory, strings.language),
               onTap: () => _showOptionSheet(
                 title: strings.displayCategories,
-                options: const ['Tümü', 'Sabır ve Şükür', 'Dualar', 'İman ve Tevekkül', 'Ahlak'],
+                options: const ['all', 'sabr', 'dua', 'tawakkul', 'akhlaq'],
                 currentValue: _selectedQuoteCategory,
+                labelBuilder: (c) => _getLocalizedCategory(c, strings.language),
                 onSelected: (val) => _savePreference('widget_quote_category', val, (v) => _selectedQuoteCategory = v),
               ),
             ),
@@ -953,11 +1164,12 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
               _selectedCategory == WidgetCategoryType.dailyVerse) ...[
             _buildOptionTile(
               title: strings.language == AppLanguage.english ? 'Verse View' : (strings.language == AppLanguage.arabic ? 'عرض الآية' : 'Ayet Görünümü'),
-              value: _verseViewMode,
+              value: _getLocalizedVerseView(_verseViewMode, strings.language),
               onTap: () => _showOptionSheet(
                 title: strings.language == AppLanguage.english ? 'Verse View' : (strings.language == AppLanguage.arabic ? 'عرض الآية' : 'Ayet Görünümü'),
-                options: const ['Yalnızca Meal', 'Arapça + Meal', 'Yalnızca Arapça'],
+                options: const ['meal_only', 'arabic_meal', 'arabic_only'],
                 currentValue: _verseViewMode,
+                labelBuilder: (v) => _getLocalizedVerseView(v, strings.language),
                 onSelected: (val) => _savePreference('widget_verse_view', val, (v) => _verseViewMode = v),
               ),
             ),
@@ -967,11 +1179,12 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
           // 3. Alıntı Yenileme Sıklığı
           _buildOptionTile(
             title: strings.quoteRefreshInterval,
-            value: _refreshInterval,
+            value: _getLocalizedRefreshInterval(_refreshInterval, strings.language),
             onTap: () => _showOptionSheet(
               title: strings.quoteRefreshInterval,
-              options: const ['15 Dakika', '30 Dakika', 'Her saat', 'Her gün'],
+              options: const ['15m', '30m', '1h', '1d'],
               currentValue: _refreshInterval,
+              labelBuilder: (i) => _getLocalizedRefreshInterval(i, strings.language),
               onSelected: (val) => _savePreference('widget_refresh_interval', val, (v) => _refreshInterval = v),
             ),
           ),
@@ -980,11 +1193,12 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
           // 4. Metin Boyutu
           _buildOptionTile(
             title: strings.textSize,
-            value: _textSize == 'Standart' ? strings.standard : _textSize,
+            value: _getLocalizedTextSize(_textSize, strings.language),
             onTap: () => _showOptionSheet(
               title: strings.textSize,
-              options: const ['Küçük', 'Standart', 'Büyük'],
+              options: const ['small', 'standard', 'large'],
               currentValue: _textSize,
+              labelBuilder: (s) => _getLocalizedTextSize(s, strings.language),
               onSelected: (val) => _savePreference('widget_text_size', val, (v) => _textSize = v),
             ),
           ),
@@ -993,11 +1207,12 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
           // 5. Yazı Tipi
           _buildOptionTile(
             title: strings.fontFamily,
-            value: _fontFamily == 'Standart' ? strings.standard : _fontFamily,
+            value: _getLocalizedFontFamily(_fontFamily, strings.language),
             onTap: () => _showOptionSheet(
               title: strings.fontFamily,
-              options: const ['Standart', 'Zarif (Lato)', 'Klasik (Amiri)'],
+              options: const ['standard', 'lato', 'amiri'],
               currentValue: _fontFamily,
+              labelBuilder: (f) => _getLocalizedFontFamily(f, strings.language),
               onSelected: (val) => _savePreference('widget_font_family', val, (v) => _fontFamily = v),
             ),
           ),

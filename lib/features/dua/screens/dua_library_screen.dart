@@ -247,11 +247,11 @@ class _DuaCardItem extends ConsumerWidget {
 
   void _copyDua(BuildContext context, AppStrings strings) {
     HapticFeedback.mediumImpact();
-    final text = '${dua.title}\n\n'
+    final text = '${dua.localizedTitle(strings.language.code)}\n\n'
         '${dua.arabicText}\n\n'
         '${strings.transliterationLabel}: ${dua.transliteration}\n\n'
-        '${strings.meaningLabel}: ${dua.turkishMeaning}\n\n'
-        '${strings.referenceLabel}: ${dua.reference}\n\n'
+        '${strings.meaningLabel}: ${dua.localizedMeaning(strings.language.code)}\n\n'
+        '${strings.referenceLabel}: ${dua.localizedReference(strings.language.code)}\n\n'
         '${strings.appSignature}';
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
@@ -377,7 +377,7 @@ class _DuaCardItem extends ConsumerWidget {
 
             // Başlık
             Text(
-              dua.title,
+              dua.localizedTitle(strings.language.code),
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -430,7 +430,7 @@ class _DuaCardItem extends ConsumerWidget {
 
             // Anlamı
             Text(
-              dua.turkishMeaning,
+              dua.localizedMeaning(strings.language.code),
               style: TextStyle(
                 fontSize: 13.5,
                 height: 1.5,
@@ -485,7 +485,7 @@ class _DuaCardItem extends ConsumerWidget {
                 const SizedBox(width: 5),
                 Expanded(
                   child: Text(
-                    dua.reference,
+                    dua.localizedReference(strings.language.code),
                     style: const TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
