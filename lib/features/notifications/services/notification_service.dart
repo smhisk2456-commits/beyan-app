@@ -12,6 +12,7 @@ import '../../prayer_times/services/prayer_time_service.dart';
 import '../models/adhan_makam.dart';
 import '../models/short_verse_notification.dart';
 import '../../monetization/services/premium_service.dart';
+import 'adhan_audio_player_service.dart';
 
 /// Ezan, Vakit ve Günün Âyeti Yerel Bildirim Servisi
 class NotificationService {
@@ -87,18 +88,77 @@ class NotificationService {
 
       await _notifications.initialize(
         settings: initSettings,
-        onDidReceiveNotificationResponse: (response) {
+        onDidReceiveNotificationResponse: (response) async {
           debugPrint('Bildirime tıklandı: ${response.payload}');
+          final payload = response.payload;
+          if (payload != null && (payload.startsWith('prayer_') || payload == 'test_adhan')) {
+            final makam = await getSelectedMakam();
+            if (makam != AdhanMakam.silent) {
+              await AdhanAudioPlayerService.instance.togglePlayPreview(makam);
+            }
+          }
         },
       );
 
-      // Android için Bildirim Kanalı oluştur
+      // Android için Bildirim Kanalları oluştur (Her makam için özel sesli kanal)
       final androidImplementation = _notifications
           .resolvePlatformSpecificImplementation<
               AndroidFlutterLocalNotificationsPlugin>();
 
       if (androidImplementation != null) {
-        await androidImplementation.createNotificationChannel(
+        final channels = [
+          const AndroidNotificationChannel(
+            'beyan_prayer_channel_istanbul',
+            'Ezan - İstanbul (Hicaz)',
+            description: 'İstanbul makamında okunan ezan bildirimleri.',
+            importance: Importance.high,
+            playSound: true,
+            sound: RawResourceAndroidNotificationSound('adhan_istanbul'),
+            enableVibration: true,
+          ),
+          const AndroidNotificationChannel(
+            'beyan_prayer_channel_mecca',
+            'Ezan - Mekke-i Mükerreme',
+            description: 'Kâbe-i Muazzama makamında okunan ezan bildirimleri.',
+            importance: Importance.high,
+            playSound: true,
+            sound: RawResourceAndroidNotificationSound('adhan_mecca'),
+            enableVibration: true,
+          ),
+          const AndroidNotificationChannel(
+            'beyan_prayer_channel_medina',
+            'Ezan - Medine-i Münevvere',
+            description: 'Mescid-i Nebevî makamında okunan ezan bildirimleri.',
+            importance: Importance.high,
+            playSound: true,
+            sound: RawResourceAndroidNotificationSound('adhan_medina'),
+            enableVibration: true,
+          ),
+          const AndroidNotificationChannel(
+            'beyan_prayer_channel_tekbir',
+            'Ezan - Kısa Sade Tekbir',
+            description: 'Kısa ve nezaketli tekbir bildirimi.',
+            importance: Importance.high,
+            playSound: true,
+            sound: RawResourceAndroidNotificationSound('adhan_tekbir'),
+            enableVibration: true,
+          ),
+          const AndroidNotificationChannel(
+            'beyan_prayer_channel_bell',
+            'Ezan - Standart Zil',
+            description: 'Standart bildirim zili tonu.',
+            importance: Importance.high,
+            playSound: true,
+            enableVibration: true,
+          ),
+          const AndroidNotificationChannel(
+            'beyan_prayer_channel_silent',
+            'Ezan - Sessiz',
+            description: 'Yalnızca ekran bildirimi ve titreşim.',
+            importance: Importance.low,
+            playSound: false,
+            enableVibration: true,
+          ),
           const AndroidNotificationChannel(
             channelId,
             channelName,
@@ -107,8 +167,6 @@ class NotificationService {
             playSound: true,
             enableVibration: true,
           ),
-        );
-        await androidImplementation.createNotificationChannel(
           const AndroidNotificationChannel(
             verseChannelId,
             verseChannelName,
@@ -117,7 +175,11 @@ class NotificationService {
             playSound: true,
             enableVibration: true,
           ),
-        );
+        ];
+
+        for (final ch in channels) {
+          await androidImplementation.createNotificationChannel(ch);
+        }
       }
 
       _isInitialized = true;
@@ -277,6 +339,13 @@ class NotificationService {
 
   // ── Planlama (Scheduling) ──────────────────────────────────
 
+  String _getAndroidChannelIdForMakam(AdhanMakam makam) {
+    if (makam == AdhanMakam.silent) return 'beyan_prayer_channel_silent';
+    final sound = makam.soundResourceName;
+    if (sound != null) return 'beyan_prayer_channel_$sound';
+    return 'beyan_prayer_channel_bell';
+  }
+
   /// Önümüzdeki 7 günün namaz vakitlerini planlar.
   Future<void> scheduleUpcomingPrayers() async {
     final master = await isMasterEnabled();
@@ -312,15 +381,17 @@ class NotificationService {
             // Makam ses detayı
             final isSilent = currentMakam == AdhanMakam.silent;
             final soundResource = currentMakam.soundResourceName;
+            final targetChannelId = _getAndroidChannelIdForMakam(currentMakam);
 
             await _notifications.zonedSchedule(
               id: notifId,
               title: 'Vakit Girdi: ${p.name.turkish}',
               body: '${p.name.turkish} namazı vakti girdi ($timeStr). Haydin namaza!',
               scheduledDate: scheduledTz,
+              payload: 'prayer_${p.name.name}',
               notificationDetails: NotificationDetails(
                 android: AndroidNotificationDetails(
-                  channelId,
+                  targetChannelId,
                   channelName,
                   channelDescription: channelDesc,
                   importance: isSilent ? Importance.low : Importance.high,
@@ -358,6 +429,7 @@ class NotificationService {
                 title: 'Vakit Yaklaşıyor: ${p.name.turkish}',
                 body: '${p.name.turkish} vaktine 15 dakika kaldı ($timeStr).',
                 scheduledDate: reminderTz,
+                payload: 'early_${p.name.name}',
                 notificationDetails: const NotificationDetails(
                   android: AndroidNotificationDetails(
                     channelId,
@@ -414,13 +486,15 @@ class NotificationService {
             : 'Bildirim sistemi sorunsuz çalışıyor! (${currentMakam.title} seçili).');
 
     try {
+      final targetChannelId = _getAndroidChannelIdForMakam(currentMakam);
       await _notifications.show(
         id: 999,
         title: testTitle,
         body: testBody,
+        payload: 'test_adhan',
         notificationDetails: NotificationDetails(
           android: AndroidNotificationDetails(
-            channelId,
+            targetChannelId,
             channelName,
             channelDescription: channelDesc,
             importance: isSilent ? Importance.low : Importance.high,
