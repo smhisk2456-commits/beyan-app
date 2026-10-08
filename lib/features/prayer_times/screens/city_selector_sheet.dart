@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/localization/app_strings.dart';
 import '../models/city_model.dart';
 import '../providers/prayer_time_providers.dart';
 import '../services/prayer_time_service.dart';
@@ -36,6 +37,7 @@ class _CitySelectorSheetState extends State<CitySelectorSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = widget.ref.watch(appStringsProvider);
     final filtered = predefinedCitiesList.where((c) {
       if (_searchQuery.isEmpty) return true;
       final q = _searchQuery.toLowerCase();
@@ -61,9 +63,9 @@ class _CitySelectorSheetState extends State<CitySelectorSheet> {
             ),
           ),
           const SizedBox(height: 16),
-          const Text(
-            'Şehir ve Konum Seçimi',
-            style: TextStyle(
+          Text(
+            strings.cityLocationTitle,
+            style: const TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.bold,
               color: Color(0xFFFFDF7A),
@@ -83,13 +85,13 @@ class _CitySelectorSheetState extends State<CitySelectorSheet> {
                 ),
                 child: const Icon(Icons.my_location_rounded, color: Colors.black87, size: 20),
               ),
-              title: const Text(
-                'Otomatik GPS Konumu',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14.5),
+              title: Text(
+                strings.autoGpsTitle,
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14.5),
               ),
-              subtitle: const Text(
-                'Cihazınızın anlık konumunu otomatik kullanır',
-                style: TextStyle(color: Colors.white60, fontSize: 11.5),
+              subtitle: Text(
+                strings.autoGpsDesc,
+                style: const TextStyle(color: Colors.white60, fontSize: 11.5),
               ),
               tileColor: Colors.white.withValues(alpha: 0.05),
               shape: RoundedRectangleBorder(
@@ -113,7 +115,7 @@ class _CitySelectorSheetState extends State<CitySelectorSheet> {
               controller: _searchCtrl,
               style: const TextStyle(color: Colors.white, fontSize: 14),
               decoration: InputDecoration(
-                hintText: 'Şehir veya ülke ara...',
+                hintText: strings.searchCityHint,
                 hintStyle: const TextStyle(color: Colors.white38, fontSize: 13),
                 prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFFD4AF37), size: 20),
                 filled: true,

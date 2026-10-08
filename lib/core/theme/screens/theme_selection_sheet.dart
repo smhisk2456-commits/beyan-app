@@ -4,6 +4,7 @@ import '../app_theme.dart';
 import '../theme_provider.dart';
 import '../../../features/monetization/providers/premium_provider.dart';
 import '../../../features/monetization/screens/premium_paywall_sheet.dart';
+import '../../localization/app_strings.dart';
 
 /// Kullanıcının tema modu ve 4 lüks renk paletini seçtiği modern alt sayfa.
 class ThemeSelectionSheet extends ConsumerWidget {
@@ -22,6 +23,7 @@ class ThemeSelectionSheet extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeState = ref.watch(themeProvider);
     final themeNotifier = ref.read(themeProvider.notifier);
+    final strings = ref.watch(appStringsProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final sheetBg = isDark
@@ -82,7 +84,7 @@ class ThemeSelectionSheet extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Görünüm & Tema',
+                      strings.appearanceAndTheme,
                       style: TextStyle(
                         fontFamily: 'Amiri',
                         fontSize: 22,
@@ -91,7 +93,7 @@ class ThemeSelectionSheet extends ConsumerWidget {
                       ),
                     ),
                     Text(
-                      'Uygulamanın renk ve karanlık mod tercihlerini özelleştirin',
+                      strings.appearanceDesc,
                       style: TextStyle(
                         fontSize: 12,
                         color: subtitleColor,
@@ -117,7 +119,7 @@ class ThemeSelectionSheet extends ConsumerWidget {
 
           // Bölüm 1: Karanlık Mod Seçici
           Text(
-            'GÖRÜNÜM MODU',
+            strings.appearanceModeSection,
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.bold,
@@ -130,7 +132,7 @@ class ThemeSelectionSheet extends ConsumerWidget {
             children: [
               _buildModeOption(
                 context: context,
-                title: 'Açık',
+                title: strings.modeLight,
                 icon: Icons.wb_sunny_rounded,
                 selected: themeState.mode == ThemeMode.light,
                 onTap: () => themeNotifier.setThemeMode(ThemeMode.light),
@@ -140,7 +142,7 @@ class ThemeSelectionSheet extends ConsumerWidget {
               const SizedBox(width: 8),
               _buildModeOption(
                 context: context,
-                title: 'Koyu',
+                title: strings.modeDark,
                 icon: Icons.nightlight_round,
                 selected: themeState.mode == ThemeMode.dark,
                 onTap: () => themeNotifier.setThemeMode(ThemeMode.dark),
@@ -150,7 +152,7 @@ class ThemeSelectionSheet extends ConsumerWidget {
               const SizedBox(width: 8),
               _buildModeOption(
                 context: context,
-                title: 'Sistem',
+                title: strings.modeSystem,
                 icon: Icons.settings_suggest_rounded,
                 selected: themeState.mode == ThemeMode.system,
                 onTap: () => themeNotifier.setThemeMode(ThemeMode.system),
@@ -163,7 +165,7 @@ class ThemeSelectionSheet extends ConsumerWidget {
 
           // Bölüm 2: Lüks Renk Paletleri
           Text(
-            'RENK PALETİ',
+            strings.colorPaletteSection,
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.bold,
@@ -181,6 +183,7 @@ class ThemeSelectionSheet extends ConsumerWidget {
               isSelected: isSelected,
               onTap: () => themeNotifier.setPalette(palette),
               isDark: isDark,
+              langCode: strings.language.code,
             );
           }),
         ],
@@ -246,6 +249,7 @@ class ThemeSelectionSheet extends ConsumerWidget {
     required bool isSelected,
     required VoidCallback onTap,
     required bool isDark,
+    required String langCode,
   }) {
     final borderColor = isSelected
         ? palette.accentGold
@@ -304,7 +308,7 @@ class ThemeSelectionSheet extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      palette.title,
+                      palette.localizedTitle(langCode),
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
@@ -313,7 +317,7 @@ class ThemeSelectionSheet extends ConsumerWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      palette.description,
+                      palette.localizedDescription(langCode),
                       style: TextStyle(
                         fontSize: 11,
                         color: isDark ? Colors.white60 : AppColors.textSecondary,

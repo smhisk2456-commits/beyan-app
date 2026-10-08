@@ -37,9 +37,9 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text(
-          'Dua Kütüphanesi',
-          style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 0.3),
+        title: Text(
+          strings.duaLibraryTitle,
+          style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 0.3),
         ),
         centerTitle: true,
         actions: [
@@ -48,7 +48,7 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
               selectedCategory == null ? Icons.filter_alt_outlined : Icons.filter_alt,
               color: const Color(0xFFFFDF7A),
             ),
-            tooltip: 'Kategori Filtresi',
+            tooltip: strings.duaFilterTooltip,
             onPressed: () {
               if (selectedCategory != null) {
                 ref.read(selectedDuaCategoryProvider.notifier).state = null;
@@ -87,7 +87,7 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
                       fontSize: 14.5,
                     ),
                     decoration: InputDecoration(
-                      hintText: 'Dua, anlam veya kaynak ara...',
+                      hintText: strings.duaSearchHint,
                       hintStyle: TextStyle(
                         color: isDark ? Colors.white38 : AppColors.textSecondary,
                         fontSize: 14,
@@ -127,7 +127,7 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
                   physics: const BouncingScrollPhysics(),
                   children: [
                     _buildCategoryChip(
-                      label: 'Tümü (${duas.length})',
+                      label: strings.allDuasWithCount(duas.length),
                       isSelected: selectedCategory == null,
                       onTap: () => ref.read(selectedDuaCategoryProvider.notifier).state = null,
                       isDark: isDark,
@@ -159,7 +159,7 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
                             ),
                             const SizedBox(height: 12),
                             Text(
-                              'Aramanıza uygun dua bulunamadı',
+                              strings.noDuaFound,
                               style: TextStyle(
                                 fontSize: 15,
                                 color: isDark ? Colors.white70 : Colors.black54,
@@ -245,22 +245,22 @@ class _DuaCardItem extends ConsumerWidget {
 
   const _DuaCardItem({required this.dua, required this.isDark});
 
-  void _copyDua(BuildContext context) {
+  void _copyDua(BuildContext context, AppStrings strings) {
     HapticFeedback.mediumImpact();
     final text = '${dua.title}\n\n'
         '${dua.arabicText}\n\n'
-        'Okunuşu: ${dua.transliteration}\n\n'
-        'Anlamı: ${dua.turkishMeaning}\n\n'
-        'Kaynak: ${dua.reference}\n\n'
-        '— Beyân İslami Yaşam Uygulaması';
+        '${strings.transliterationLabel}: ${dua.transliteration}\n\n'
+        '${strings.meaningLabel}: ${dua.turkishMeaning}\n\n'
+        '${strings.referenceLabel}: ${dua.reference}\n\n'
+        '${strings.appSignature}';
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Row(
+        content: Row(
           children: [
-            Icon(Icons.check_circle_rounded, color: Color(0xFFFFDF7A), size: 20),
-            SizedBox(width: 8),
-            Text('Dua panoya kopyalandı'),
+            const Icon(Icons.check_circle_rounded, color: Color(0xFFFFDF7A), size: 20),
+            const SizedBox(width: 8),
+            Text(strings.duaCopied),
           ],
         ),
         backgroundColor: const Color(0xFF012E2B),
@@ -273,6 +273,7 @@ class _DuaCardItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final strings = ref.watch(appStringsProvider);
     final linked = _getLinkedSurah(dua);
 
     return Container(
@@ -311,7 +312,7 @@ class _DuaCardItem extends ConsumerWidget {
                     ),
                   ),
                   child: Text(
-                    dua.category.trName,
+                    dua.category.localizedName(strings.language.code),
                     style: const TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
@@ -327,7 +328,7 @@ class _DuaCardItem extends ConsumerWidget {
                     color: dua.isFavorite ? Colors.redAccent : (isDark ? Colors.white60 : Colors.black45),
                     size: 22,
                   ),
-                  tooltip: dua.isFavorite ? 'Favorilerden Çıkar' : 'Favorilere Ekle',
+                  tooltip: dua.isFavorite ? strings.removeFromFavorites : strings.addToFavorites,
                   onPressed: () {
                     HapticFeedback.lightImpact();
                     ref.read(favoriteDuasProvider.notifier).toggleFavorite(dua.id);
@@ -347,8 +348,8 @@ class _DuaCardItem extends ConsumerWidget {
                           size: 24,
                         ),
                         tooltip: isPlaying
-                            ? 'Tilaveti Duraklat'
-                            : '${linked.nameTurkish} Tilavetini Dinle',
+                            ? strings.pauseRecitation
+                            : strings.listenSurahRecitation(linked.nameTurkish),
                         onPressed: () {
                           HapticFeedback.mediumImpact();
                           if (isPlaying) {
@@ -367,8 +368,8 @@ class _DuaCardItem extends ConsumerWidget {
                     color: Color(0xFFD4AF37),
                     size: 20,
                   ),
-                  tooltip: 'Kopyala & Paylaş',
-                  onPressed: () => _copyDua(context),
+                  tooltip: strings.copyAndShare,
+                  onPressed: () => _copyDua(context, strings),
                 ),
               ],
             ),

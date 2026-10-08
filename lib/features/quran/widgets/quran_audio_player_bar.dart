@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/localization/app_strings.dart';
 import '../services/quran_audio_service.dart';
 
 /// Kur'an-ı Kerim Dinleme Mini Oynatıcı Çubuğu
@@ -16,6 +17,7 @@ class QuranAudioPlayerBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final audioState = ref.watch(quranAudioProvider);
+    final strings = ref.watch(appStringsProvider);
     if (audioState.currentSurahId == null) return const SizedBox.shrink();
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -60,7 +62,7 @@ class QuranAudioPlayerBar extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '${audioState.currentSurahName ?? "Sure"} Tilaveti',
+                      strings.recitationOfSurah(audioState.currentSurahName ?? 'Surah'),
                       style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
@@ -84,7 +86,7 @@ class QuranAudioPlayerBar extends ConsumerWidget {
               // 10 sn geri
               IconButton(
                 icon: const Icon(Icons.replay_10_rounded, color: Colors.white70, size: 22),
-                tooltip: '10 Saniye Geri',
+                tooltip: strings.seekBackward10s,
                 onPressed: () => ref.read(quranAudioProvider.notifier).seekRelative(-10),
               ),
               // Oynat / Duraklat
@@ -108,13 +110,13 @@ class QuranAudioPlayerBar extends ConsumerWidget {
               // 10 sn ileri
               IconButton(
                 icon: const Icon(Icons.forward_10_rounded, color: Colors.white70, size: 22),
-                tooltip: '10 Saniye İleri',
+                tooltip: strings.seekForward10s,
                 onPressed: () => ref.read(quranAudioProvider.notifier).seekRelative(10),
               ),
               // Kapat
               IconButton(
                 icon: const Icon(Icons.close_rounded, color: Colors.white54, size: 18),
-                tooltip: 'Kapat',
+                tooltip: strings.closeBtn,
                 onPressed: () => ref.read(quranAudioProvider.notifier).stop(),
               ),
             ],

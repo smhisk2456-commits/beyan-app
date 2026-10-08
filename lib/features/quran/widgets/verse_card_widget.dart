@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/localization/app_strings.dart';
 import '../../quran/models/verse.dart';
 import '../../quran/widgets/arabic_text_widget.dart';
 import '../providers/quran_reading_providers.dart';
@@ -18,7 +19,7 @@ class VerseCard extends ConsumerWidget {
     this.onTap,
   });
 
-  void _shareVerse(BuildContext context) {
+  void _shareVerse(BuildContext context, AppStrings strings) {
     HapticFeedback.lightImpact();
     final text = 'Sure No: ${verse.surahId}, Ayet: ${verse.verseNumber}\n\n'
         '${verse.arabicText}\n\n'
@@ -31,7 +32,7 @@ class VerseCard extends ConsumerWidget {
           children: [
             const Icon(Icons.check_circle_rounded, color: Color(0xFFFFDF7A), size: 18),
             const SizedBox(width: 8),
-            Text('${verse.reference}. Ayet kopyalandı'),
+            Text(strings.verseCopied(verse.reference)),
           ],
         ),
         backgroundColor: const Color(0xFF012E2B),
@@ -44,6 +45,7 @@ class VerseCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final strings = ref.watch(appStringsProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final arabicFontSize = ref.watch(arabicFontSizeProvider);
     final isBookmarked = ref.watch(bookmarkedVersesProvider).contains('${verse.surahId}:${verse.verseNumber}');
@@ -108,9 +110,9 @@ class VerseCard extends ConsumerWidget {
                         color: const Color(0xFFD4AF37),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Text(
-                        'KALDIĞIM YER',
-                        style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.bold, color: Colors.black),
+                      child: Text(
+                        strings.lastReadBadge,
+                        style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.bold, color: Colors.black),
                       ),
                     ),
 
@@ -140,12 +142,12 @@ class VerseCard extends ConsumerWidget {
                       size: 20,
                       color: isLastRead ? const Color(0xFFFFDF7A) : (isDark ? Colors.white60 : Colors.black45),
                     ),
-                    tooltip: 'Kaldığım Yer Olarak Kaydet',
+                    tooltip: strings.saveAsLastRead,
                     onPressed: () {
                       HapticFeedback.lightImpact();
                       ref.read(lastReadProvider.notifier).savePosition(
                             surahId: verse.surahId,
-                            surahName: '${verse.surahId}. Sure',
+                            surahName: strings.surahNumberBadge(verse.surahId),
                             verseNumber: verse.verseNumber,
                           );
                     },
@@ -158,7 +160,7 @@ class VerseCard extends ConsumerWidget {
                       size: 20,
                       color: isBookmarked ? const Color(0xFFFFDF7A) : (isDark ? Colors.white60 : Colors.black45),
                     ),
-                    tooltip: isBookmarked ? 'Yer İmini Kaldır' : 'Yer İmine Ekle',
+                    tooltip: isBookmarked ? strings.removeBookmark : strings.addBookmark,
                     onPressed: () {
                       HapticFeedback.lightImpact();
                       ref.read(bookmarkedVersesProvider.notifier).toggleBookmark(verse.surahId, verse.verseNumber);
@@ -168,8 +170,8 @@ class VerseCard extends ConsumerWidget {
                   // Paylaş & Kopyala
                   IconButton(
                     icon: const Icon(Icons.share_outlined, size: 19, color: Color(0xFFD4AF37)),
-                    tooltip: 'Ayeti Paylaş',
-                    onPressed: () => _shareVerse(context),
+                    tooltip: strings.shareVerse,
+                    onPressed: () => _shareVerse(context, strings),
                   ),
                 ],
               ),

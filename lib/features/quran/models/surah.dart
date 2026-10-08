@@ -73,6 +73,24 @@ class Surah {
   /// Ayet sayısını Türkçe metin olarak döner
   String get verseCountLabel => '$verseCount ayet';
 
+  String localizedName(String langCode) {
+    if (langCode == 'ar') return nameArabic;
+    if (langCode == 'en') return nameEnglish;
+    return nameTurkish;
+  }
+
+  String localizedRevelation(String langCode) {
+    if (langCode == 'en') return isMeccan ? 'Meccan' : 'Medinan';
+    if (langCode == 'ar') return isMeccan ? 'مكية' : 'مدنية';
+    return isMeccan ? 'Mekki' : 'Medeni';
+  }
+
+  String localizedVerseCount(String langCode) {
+    if (langCode == 'en') return '$verseCount verses';
+    if (langCode == 'ar') return '$verseCount آية';
+    return '$verseCount ayet';
+  }
+
   // ── Eşitlik ────────────────────────────────────────────────
 
   @override

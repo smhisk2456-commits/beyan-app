@@ -195,9 +195,9 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
-                                  'Kaldığım Yerden Devam Et',
-                                  style: TextStyle(
+                                Text(
+                                  strings.resumeReading,
+                                  style: const TextStyle(
                                     fontSize: 12.5,
                                     fontWeight: FontWeight.bold,
                                     color: Color(0xFFFFDF7A),
@@ -220,11 +220,11 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
               // ── Sure Listesi ──────────────────────────────────────
               Expanded(
                 child: surahsAsync.when(
-                  loading: () => const app_widgets.LoadingWidget(
-                    message: 'Sureler yükleniyor...',
+                  loading: () => app_widgets.LoadingWidget(
+                    message: strings.versesLoading,
                   ),
                   error: (e, _) => app_widgets.AppErrorWidget(
-                    message: 'Yüklenemedi: $e',
+                    message: strings.versesLoadError,
                     onRetry: () => ref.invalidate(filteredSurahsProvider),
                   ),
                   data: (surahs) {
@@ -237,7 +237,7 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
                                 size: 48, color: AppColors.textHint),
                             const SizedBox(height: 12),
                             Text(
-                              'Sure bulunamadı',
+                              strings.noSurahFound,
                               style: Theme.of(context).textTheme.bodyLarge,
                             ),
                           ],

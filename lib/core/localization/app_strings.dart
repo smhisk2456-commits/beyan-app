@@ -786,7 +786,456 @@ class AppStrings {
   String get termsOfUse => language == AppLanguage.turkish
       ? 'Kullanım Şartları (EULA)'
       : (language == AppLanguage.english ? 'Terms of Use (EULA)' : 'شروط الاستخدام');
+
+  // ── Hicri Takvim & Dini Günler ─────────────────────────────────
+  String get hijriCalendarTitle => language == AppLanguage.turkish
+      ? 'Hicri Takvim & Dini Günler'
+      : (language == AppLanguage.english
+          ? 'Hijri Calendar & Sacred Days'
+          : 'التقويم الهجري والأيام الدينية');
+  String get hijriAdjustmentTooltip => language == AppLanguage.turkish
+      ? 'Hicri Gün Düzeltmesi'
+      : (language == AppLanguage.english ? 'Hijri Day Adjustment' : 'تعديل اليوم الهجري');
+  String get diyanetTakvimi => language == AppLanguage.turkish
+      ? 'Diyanet Takvimi'
+      : (language == AppLanguage.english ? 'Presidency of Religious Affairs' : 'تقويم الشؤون الدينية');
+  String adjustmentDaysLabel(int days) => language == AppLanguage.turkish
+      ? 'Düzeltme: ${days > 0 ? "+$days" : days} gün'
+      : (language == AppLanguage.english
+          ? 'Adjustment: ${days > 0 ? "+$days" : days} days'
+          : 'التعديل: $days يوم');
+  String get gregorianPrefix => language == AppLanguage.turkish
+      ? 'Miladi'
+      : (language == AppLanguage.english ? 'Gregorian' : 'الميلادي');
+  String get upcomingSacredDays => language == AppLanguage.turkish
+      ? 'Yaklaşan Kandiller ve Dini Günler'
+      : (language == AppLanguage.english
+          ? 'Upcoming Holy Nights & Days'
+          : 'المناسبات والأيام الدينية القادمة');
+  String get hijriAdjustmentTitle => language == AppLanguage.turkish
+      ? 'Hicri Takvim Düzeltmesi'
+      : (language == AppLanguage.english ? 'Hijri Calendar Adjustment' : 'تعديل التقويم الهجري');
+  String get hijriAdjustmentDesc => language == AppLanguage.turkish
+      ? 'Hilalin yerel gözlemine göre Hicri tarihi +/- 1 veya 2 gün ileri/geri alabilirsiniz.'
+      : (language == AppLanguage.english
+          ? 'You can adjust the Hijri date by +/- 1 or 2 days according to local moon sighting.'
+          : 'يمكنك تعديل التاريخ الهجري بـ +/- يوم أو يومين حسب رؤية الهلال المحلية.');
+  String get standardLabel => language == AppLanguage.turkish
+      ? 'Standart'
+      : (language == AppLanguage.english ? 'Standard' : 'قياسي');
+  String get daysRemainingUnit => language == AppLanguage.turkish
+      ? 'GÜN'
+      : (language == AppLanguage.english ? 'DAYS' : 'يوم');
+  String get todayBadge => language == AppLanguage.turkish
+      ? 'BUGÜN'
+      : (language == AppLanguage.english ? 'TODAY' : 'اليوم');
+
+  // ── Dua Kütüphanesi ────────────────────────────────────────────
+  String get duaLibraryTitle => language == AppLanguage.turkish
+      ? 'Dua Kütüphanesi'
+      : (language == AppLanguage.english ? 'Dua Library' : 'مكتبة الأدعية');
+  String get duaFilterTooltip => language == AppLanguage.turkish
+      ? 'Kategori Filtresi'
+      : (language == AppLanguage.english ? 'Category Filter' : 'تصفية الفئات');
+  String get duaSearchHint => language == AppLanguage.turkish
+      ? 'Dua, anlam veya kaynak ara...'
+      : (language == AppLanguage.english
+          ? 'Search dua, meaning or reference...'
+          : 'ابحث عن دعاء أو معنى أو مصدر...');
+  String allDuasWithCount(int count) => language == AppLanguage.turkish
+      ? 'Tümü ($count)'
+      : (language == AppLanguage.english ? 'All ($count)' : 'الكل ($count)');
+  String get noDuaFound => language == AppLanguage.turkish
+      ? 'Aramanıza uygun dua bulunamadı'
+      : (language == AppLanguage.english ? 'No dua found matching your search' : 'لم يتم العثور على دعاء مطابق');
+  String get addToFavorites => language == AppLanguage.turkish
+      ? 'Favorilere Ekle'
+      : (language == AppLanguage.english ? 'Add to Favorites' : 'إضافة إلى المفضلة');
+  String get removeFromFavorites => language == AppLanguage.turkish
+      ? 'Favorilerden Çıkar'
+      : (language == AppLanguage.english ? 'Remove from Favorites' : 'إزالة من المفضلة');
+  String get copyAndShare => language == AppLanguage.turkish
+      ? 'Kopyala & Paylaş'
+      : (language == AppLanguage.english ? 'Copy & Share' : 'نسخ ومشاركة');
+  String get duaCopied => language == AppLanguage.turkish
+      ? 'Dua panoya kopyalandı'
+      : (language == AppLanguage.english ? 'Dua copied to clipboard' : 'تم نسخ الدعاء إلى الحافظة');
+  String get transliterationLabel => language == AppLanguage.turkish
+      ? 'Okunuşu'
+      : (language == AppLanguage.english ? 'Pronunciation' : 'النطق');
+  String get meaningLabel => language == AppLanguage.turkish
+      ? 'Anlamı'
+      : (language == AppLanguage.english ? 'Meaning' : 'المعنى');
+  String get referenceLabel => language == AppLanguage.turkish
+      ? 'Kaynak'
+      : (language == AppLanguage.english ? 'Reference' : 'المصدر');
+  String get appSignature => language == AppLanguage.turkish
+      ? '— Beyân İslami Yaşam Uygulaması'
+      : (language == AppLanguage.english ? '— Beyan Islamic Life App' : '— تطبيق بيان للحياة الإسلامية');
+  String listenSurahRecitation(String surah) => language == AppLanguage.turkish
+      ? '$surah Tilavetini Dinle'
+      : (language == AppLanguage.english ? 'Listen to $surah' : 'استمع لتلاوة $surah');
+  String get pauseRecitation => language == AppLanguage.turkish
+      ? 'Tilaveti Duraklat'
+      : (language == AppLanguage.english ? 'Pause Recitation' : 'إيقاف التلاوة مؤقتاً');
+
+  // ── Kıble Pusulası ─────────────────────────────────────────────
+  String get qiblaCompassTitle => language == AppLanguage.turkish
+      ? 'Kıble Pusulası'
+      : (language == AppLanguage.english ? 'Qibla Compass' : 'بوصلة القبلة');
+  String kaabaDistance(int km) => language == AppLanguage.turkish
+      ? 'Kâbe: $km km'
+      : (language == AppLanguage.english ? 'Kaaba: $km km' : 'الكعبة: $km كم');
+  String get compassSensorNotFound => language == AppLanguage.turkish
+      ? 'Cihazınızda pusula sensörü (manyetometre) algılanamadı. Kıble açısı referans olarak gösterilmektedir.'
+      : (language == AppLanguage.english
+          ? 'Compass sensor (magnetometer) not detected on your device. Qibla angle is shown as reference.'
+          : 'لم يتم اكتشاف مستشعر البوصلة في جهازك. تظهر زاوية القبلة كمرجع.');
+  String get facingQibla => language == AppLanguage.turkish
+      ? 'Kıbleye Yöneldiniz! 🕋'
+      : (language == AppLanguage.english ? 'You are facing the Qibla! 🕋' : 'أنت باتجاه القبلة! 🕋');
+  String turnRightDeg(int deg) => language == AppLanguage.turkish
+      ? 'Sağa $deg° dönün'
+      : (language == AppLanguage.english ? 'Turn right $deg°' : 'استدر يميناً $deg°');
+  String turnLeftDeg(int deg) => language == AppLanguage.turkish
+      ? 'Sola $deg° dönün'
+      : (language == AppLanguage.english ? 'Turn left $deg°' : 'استدر يساراً $deg°');
+  String get qiblaAngleTitle => language == AppLanguage.turkish
+      ? 'Kıble Açısı'
+      : (language == AppLanguage.english ? 'Qibla Angle' : 'زاوية القبلة');
+  String get clockwiseFromNorth => language == AppLanguage.turkish
+      ? 'Kuzeyden saat yönünde'
+      : (language == AppLanguage.english ? 'Clockwise from North' : 'باتجاه عقارب الساعة من الشمال');
+  String get deviceHeadingTitle => language == AppLanguage.turkish
+      ? 'Cihaz Yönü'
+      : (language == AppLanguage.english ? 'Device Heading' : 'اتجاه الجهاز');
+  String get compassHoldFlatTip => language == AppLanguage.turkish
+      ? 'Cihazınızı düz bir zeminde veya yatay tutarak kullanınız. Manyetik kılıflar pusulayı etkileyebilir.'
+      : (language == AppLanguage.english
+          ? 'Hold your device flat. Magnetic cases may affect the compass.'
+          : 'أمسك جهازك بشكل مستوٍ. قد تؤثر الأغطية المغناطيسية على البوصلة.');
+  String get compassCalibrationTitle => language == AppLanguage.turkish
+      ? 'Pusula Kalibrasyonu'
+      : (language == AppLanguage.english ? 'Compass Calibration' : 'معايرة البوصلة');
+  String get compassCalibrationDesc => language == AppLanguage.turkish
+      ? 'Telefon pusulasının doğru çalışması için:\n\n1. Cihazınızı havada yatay tutarak "8" şekli çizecek şekilde birkaç kez sallayınız.\n2. Metal veya mıknatıslı kılıflardan uzak tutunuz.\n3. Elektronik cihazların yanında manyetik sapma oluşabilir.'
+      : (language == AppLanguage.english
+          ? 'For accurate compass orientation:\n\n1. Wave your phone in a figure-8 motion.\n2. Keep away from magnetic or metal cases.\n3. Avoid electronic devices causing interference.'
+          : 'لدقة البوصلة:\n\n١. حرّك هاتفك على شكل رقم ٨ في الهواء عدة مرات.\n٢. ابتعد عن الأغطية المعدنية أو المغناطيسية.\n٣. تجنب الأجهزة الإلكترونية المسببة للتداخل.');
+  String get iUnderstand => language == AppLanguage.turkish
+      ? 'Anladım'
+      : (language == AppLanguage.english ? 'Got it' : 'فهمت');
+  String get compassNorth => language == AppLanguage.turkish
+      ? 'Kuzey (N)'
+      : (language == AppLanguage.english ? 'North (N)' : 'الشمال (N)');
+  String get compassNorthEast => language == AppLanguage.turkish
+      ? 'Kuzeydoğu (NE)'
+      : (language == AppLanguage.english ? 'Northeast (NE)' : 'الشمال الشرقي (NE)');
+  String get compassEast => language == AppLanguage.turkish
+      ? 'Doğu (E)'
+      : (language == AppLanguage.english ? 'East (E)' : 'الشرق (E)');
+  String get compassSouthEast => language == AppLanguage.turkish
+      ? 'Güneydoğu (SE)'
+      : (language == AppLanguage.english ? 'Southeast (SE)' : 'الجنوب الشرقي (SE)');
+  String get compassSouth => language == AppLanguage.turkish
+      ? 'Güney (S)'
+      : (language == AppLanguage.english ? 'South (S)' : 'الجنوب (S)');
+  String get compassSouthWest => language == AppLanguage.turkish
+      ? 'Güneybatı (SW)'
+      : (language == AppLanguage.english ? 'Southwest (SW)' : 'الجنوب الغربي (SW)');
+  String get compassWest => language == AppLanguage.turkish
+      ? 'Batı (W)'
+      : (language == AppLanguage.english ? 'West (W)' : 'الغرب (W)');
+  String get compassNorthWest => language == AppLanguage.turkish
+      ? 'Kuzeybatı (NW)'
+      : (language == AppLanguage.english ? 'Northwest (NW)' : 'الشمال الغربي (NW)');
+
+  // ── Ramazan Dashboard ──────────────────────────────────────────
+  String get holyRamadan => language == AppLanguage.turkish
+      ? 'Ramazan-ı Şerif'
+      : (language == AppLanguage.english ? 'Holy Ramadan' : 'رمضان المبارك');
+  String get todayFastingStatus => language == AppLanguage.turkish
+      ? 'Bugünkü Oruç Durumu'
+      : (language == AppLanguage.english ? 'Today\'s Fasting Status' : 'حالة صيام اليوم');
+  String get fastingActiveMsg => language == AppLanguage.turkish
+      ? 'Bugün oruçlusunuz (Allah kabul etsin)'
+      : (language == AppLanguage.english
+          ? 'You are fasting today (May Allah accept)'
+          : 'أنت صائم اليوم (تقبل الله)');
+  String get fastingInactiveMsg => language == AppLanguage.turkish
+      ? 'Oruç tutulmadı olarak işaretli'
+      : (language == AppLanguage.english ? 'Marked as not fasting' : 'غير محدد كصائم');
+  String get totalFastingStatus => language == AppLanguage.turkish
+      ? 'Toplam Oruç Durumu'
+      : (language == AppLanguage.english ? 'Total Fasting Days' : 'إجمالي أيام الصيام');
+  String get totalFastingDesc => language == AppLanguage.turkish
+      ? 'Ramazan, Kaza ve Nafile günleri'
+      : (language == AppLanguage.english
+          ? 'Ramadan, missed & voluntary fasts'
+          : 'أيام رمضان والقضاء والتطوع');
+  String get decrementDayTooltip => language == AppLanguage.turkish
+      ? '1 Gün Eksilt'
+      : (language == AppLanguage.english ? 'Decrease 1 Day' : 'إنقاص يوم');
+  String get incrementDayTooltip => language == AppLanguage.turkish
+      ? '1 Gün Ekle'
+      : (language == AppLanguage.english ? 'Increase 1 Day' : 'إضافة يوم');
+  String fastingDaysCount(int count) => language == AppLanguage.turkish
+      ? '$count gün'
+      : (language == AppLanguage.english ? '$count days' : '$count يوم');
+  String get sunnahRamadanDuas => language == AppLanguage.turkish
+      ? 'Sünnet İftar & Sahur Duaları'
+      : (language == AppLanguage.english ? 'Sunnah Iftar & Suhoor Duas' : 'أدعية الإفطار والسحور المأثورة');
+  String get remainingUntilIftar => language == AppLanguage.turkish
+      ? 'İftar Vaktine Kalan Süre'
+      : (language == AppLanguage.english ? 'Time Remaining Until Iftar' : 'الوقت المتبقي حتى الإفطار');
+  String get remainingUntilSuhoor => language == AppLanguage.turkish
+      ? 'Sahur / İmsak Vaktine Kalan'
+      : (language == AppLanguage.english ? 'Time Remaining Until Suhoor' : 'الوقت المتبقي حتى السحور');
+  String get remainingUntilTomorrowSuhoor => language == AppLanguage.turkish
+      ? 'Yarınki Sahura Kalan'
+      : (language == AppLanguage.english ? 'Remaining Until Tomorrow\'s Suhoor' : 'المتبقي حتى سحور الغد');
+  String get hoursUnit => language == AppLanguage.turkish
+      ? 'SAAT'
+      : (language == AppLanguage.english ? 'HOURS' : 'ساعة');
+  String get minsUnit => language == AppLanguage.turkish
+      ? 'DAKİKA'
+      : (language == AppLanguage.english ? 'MINUTES' : 'دقيقة');
+  String get secsUnit => language == AppLanguage.turkish
+      ? 'SANİYE'
+      : (language == AppLanguage.english ? 'SECONDS' : 'ثانية');
+  String get imsakSuhoorLabel => language == AppLanguage.turkish
+      ? 'İmsak (Sahur)'
+      : (language == AppLanguage.english ? 'Imsak (Suhoor)' : 'الإمساك (السحور)');
+  String get maghribIftarLabel => language == AppLanguage.turkish
+      ? 'Akşam (İftar)'
+      : (language == AppLanguage.english ? 'Maghrib (Iftar)' : 'المغرب (الإفطار)');
+
+  // ── Tema ve Görünüm ────────────────────────────────────────────
+  String get appearanceAndTheme => language == AppLanguage.turkish
+      ? 'Görünüm & Tema'
+      : (language == AppLanguage.english ? 'Appearance & Theme' : 'المظهر والسمة');
+  String get appearanceDesc => language == AppLanguage.turkish
+      ? 'Uygulamanın renk ve karanlık mod tercihlerini özelleştirin'
+      : (language == AppLanguage.english
+          ? 'Customize color palettes and dark mode preferences'
+          : 'خصص خيارات الألوان والوضع الليلي للتطبيق');
+  String get appearanceModeSection => language == AppLanguage.turkish
+      ? 'GÖRÜNÜM MODU'
+      : (language == AppLanguage.english ? 'APPEARANCE MODE' : 'وضع المظهر');
+  String get modeLight => language == AppLanguage.turkish
+      ? 'Açık'
+      : (language == AppLanguage.english ? 'Light' : 'فاتح');
+  String get modeDark => language == AppLanguage.turkish
+      ? 'Koyu'
+      : (language == AppLanguage.english ? 'Dark' : 'داكن');
+  String get modeSystem => language == AppLanguage.turkish
+      ? 'Sistem'
+      : (language == AppLanguage.english ? 'System' : 'تلقائي');
+  String get colorPaletteSection => language == AppLanguage.turkish
+      ? 'RENK PALETİ'
+      : (language == AppLanguage.english ? 'COLOR PALETTE' : 'لوحة الألوان');
+
+  // ── Bildirim Ayarları ──────────────────────────────────────────
+  String get adhanSettingsTitle => language == AppLanguage.turkish
+      ? 'Ezan & Vakit Bildirimleri'
+      : (language == AppLanguage.english ? 'Adhan & Prayer Alerts' : 'تنبيهات الأذان والصلوات');
+  String get adhanSettingsDesc => language == AppLanguage.turkish
+      ? 'Namaz vakitlerinde ezan ve uyarı bildirimleri'
+      : (language == AppLanguage.english
+          ? 'Adhan and notifications at prayer times'
+          : 'الأذان والإشعارات في أوقات الصلاة');
+  String get permRequiredTitle => language == AppLanguage.turkish
+      ? 'Cihaz Bildirim İzni Kapalı'
+      : (language == AppLanguage.english ? 'Device Notifications Disabled' : 'إشعارات الجهاز معطلة');
+  String get permRequiredDesc => language == AppLanguage.turkish
+      ? 'Ezan vaktinde bildirim alabilmek için sistem ayarlarından izin vermelisiniz.'
+      : (language == AppLanguage.english
+          ? 'Enable notifications in system settings to receive adhan alerts.'
+          : 'يجب تفعيل الإشعارات في إعدادات النظام لتلقي تنبيهات الأذان.');
+  String get grantPermissionBtn => language == AppLanguage.turkish
+      ? 'İzin Ver'
+      : (language == AppLanguage.english ? 'Grant Permission' : 'منح الإذن');
+  String get allNotifications => language == AppLanguage.turkish
+      ? 'Tüm Bildirimler'
+      : (language == AppLanguage.english ? 'All Notifications' : 'جميع الإشعارات');
+  String get enableAllNotificationsDesc => language == AppLanguage.turkish
+      ? 'Ezan ve namaz bildirimlerini etkinleştir'
+      : (language == AppLanguage.english
+          ? 'Enable prayer and adhan notifications'
+          : 'تفعيل إشعارات الأذان والصلاة');
+  String get earlyReminderTitle => language == AppLanguage.turkish
+      ? '15 Dakika Önce Hatırlat'
+      : (language == AppLanguage.english ? 'Remind 15 Mins Before' : 'تنبيه قبل ١٥ دقيقة');
+  String get earlyReminderDesc => language == AppLanguage.turkish
+      ? 'Vakit girmeden önce erken uyarı bildirimi'
+      : (language == AppLanguage.english
+          ? 'Early notification before prayer time begins'
+          : 'تنبيه مبكر قبل دخول وقت الصلاة');
+  String get adhanMakamToneTitle => language == AppLanguage.turkish
+      ? 'Ezan Makamı & Ses Tonu'
+      : (language == AppLanguage.english ? 'Adhan Makam & Tone' : 'مقام الأذان والنغمة');
+  String get changeBtn => language == AppLanguage.turkish
+      ? 'Değiştir'
+      : (language == AppLanguage.english ? 'Change' : 'تغيير');
+  String get sectionPrayerAlerts => language == AppLanguage.turkish
+      ? 'VAKİT BİLDİRİMLERİ'
+      : (language == AppLanguage.english ? 'PRAYER ALERTS' : 'تنبيهات الصلوات');
+  String get sectionVerseAlerts => language == AppLanguage.turkish
+      ? 'GÜNÜN ÂYETİ VE SURE BİLDİRİMLERİ'
+      : (language == AppLanguage.english ? 'VERSE & SURAH ALERTS' : 'تنبيهات آيات اليوم وسوره');
+  String get verseReminderTitle => language == AppLanguage.turkish
+      ? 'Âyet & Sure Hatırlatıcı'
+      : (language == AppLanguage.english ? 'Verse & Surah Reminder' : 'مذكر الآيات والسور');
+  String get verseReminderDesc => language == AppLanguage.turkish
+      ? 'Her gün tefekkür ve manevi uyanış bildirimi'
+      : (language == AppLanguage.english
+          ? 'Daily reflection and spiritual inspiration notification'
+          : 'إشعار يومي للتأمل والاستلهام الإيماني');
+  String get notificationScheduleTitle => language == AppLanguage.turkish
+      ? 'Bildirim Saati / Zamanı'
+      : (language == AppLanguage.english ? 'Notification Schedule' : 'جدول الإشعارات');
+  String get testVerseBtn => language == AppLanguage.turkish
+      ? 'Âyet Bildirimini Şimdi Test Et'
+      : (language == AppLanguage.english ? 'Test Verse Alert Now' : 'اختبار إشعار الآية الآن');
+  String get testAdhanBtn => language == AppLanguage.turkish
+      ? 'Ezan Test Bildirimi Gönder'
+      : (language == AppLanguage.english ? 'Send Test Adhan Alert' : 'إرسال إشعار أذان تجريبي');
+  String get testVerseSuccessMsg => language == AppLanguage.turkish
+      ? 'Günün Âyeti test bildirimi cihazınıza gönderildi!'
+      : (language == AppLanguage.english
+          ? 'Test verse notification sent to your device!'
+          : 'تم إرسال إشعار آية تجريبي إلى جهازك!');
+  String get testAdhanSuccessMsg => language == AppLanguage.turkish
+      ? 'Test bildirimi cihazınıza gönderildi!'
+      : (language == AppLanguage.english
+          ? 'Test notification sent to your device!'
+          : 'تم إرسال الإشعار التجريبي إلى جهازك!');
+  String get permWarningMsg => language == AppLanguage.turkish
+      ? 'Cihaz bildirim izni kapalı! Lütfen ayarlardan izin verin.'
+      : (language == AppLanguage.english
+          ? 'Device notifications disabled! Please allow from settings.'
+          : 'إشعارات الجهاز معطلة! يرجى السماح بها من الإعدادات.');
+  String get fajrDesc => language == AppLanguage.turkish
+      ? 'İmsak vakti girdiğinde ezan bildirimi'
+      : (language == AppLanguage.english
+          ? 'Adhan alert when Fajr begins'
+          : 'إشعار الأذان عند دخول وقت الفجر');
+  String get sunriseDesc => language == AppLanguage.turkish
+      ? 'Güneş doğuş vakti uyarısı'
+      : (language == AppLanguage.english ? 'Sunrise time reminder' : 'تنبيه وقت شروق الشمس');
+  String get dhuhrDesc => language == AppLanguage.turkish
+      ? 'Öğle ezanı bildirimi'
+      : (language == AppLanguage.english ? 'Dhuhr adhan notification' : 'إشعار أذان الظهر');
+  String get asrDesc => language == AppLanguage.turkish
+      ? 'İkindi ezanı bildirimi'
+      : (language == AppLanguage.english ? 'Asr adhan notification' : 'إشعار أذان العصر');
+  String get maghribDesc => language == AppLanguage.turkish
+      ? 'Akşam ezanı bildirimi'
+      : (language == AppLanguage.english ? 'Maghrib adhan notification' : 'إشعار أذان المغرب');
+  String get ishaDesc => language == AppLanguage.turkish
+      ? 'Yatsı ezanı bildirimi'
+      : (language == AppLanguage.english ? 'Isha adhan notification' : 'إشعار أذان العشاء');
+
+  // ── Ezan Makamları Sayfası ────────────────────────────────────
+  String get adhanMakamsAndAudio => language == AppLanguage.turkish
+      ? 'Ezan Makamları & Ses Tonu'
+      : (language == AppLanguage.english ? 'Adhan Makams & Tones' : 'مقامات الأذان والأصوات');
+  String get adhanMakamsDesc => language == AppLanguage.turkish
+      ? 'Namaz vaktinde çalınacak ezan sesini seçin ve dinleyin'
+      : (language == AppLanguage.english
+          ? 'Select and preview adhan tones for prayer times'
+          : 'اختر واستمع لصوت الأذان عند دخول الصلاة');
+  String get stopAudio => language == AppLanguage.turkish
+      ? 'Durdur'
+      : (language == AppLanguage.english ? 'Stop' : 'إيقاف');
+  String get listenAudio => language == AppLanguage.turkish
+      ? 'Dinle'
+      : (language == AppLanguage.english ? 'Listen' : 'استماع');
+
+  // ── Hesaplama Yöntemi & Şehir Seçici ──────────────────────────
+  String get calculationMethodTitle => language == AppLanguage.turkish
+      ? 'Hesaplama Yöntemi'
+      : (language == AppLanguage.english ? 'Calculation Method' : 'طريقة الحساب');
+  String get calculationMethodDesc => language == AppLanguage.turkish
+      ? 'Vakit hesaplarında yetkili kurum ve fetva meclisleri'
+      : (language == AppLanguage.english
+          ? 'Authorized institutions for prayer time calculation'
+          : 'الهيئات والمجالس الإفتائية المعتمدة لمواقيت الصلاة');
+  String get cityLocationTitle => language == AppLanguage.turkish
+      ? 'Şehir ve Konum Seçimi'
+      : (language == AppLanguage.english ? 'Select City & Location' : 'اختيار المدينة والموقع');
+  String get autoGpsTitle => language == AppLanguage.turkish
+      ? 'Otomatik GPS Konumu'
+      : (language == AppLanguage.english ? 'Automatic GPS Location' : 'الموقع التلقائي عبر GPS');
+  String get autoGpsDesc => language == AppLanguage.turkish
+      ? 'Cihazınızın anlık konumunu otomatik kullanır'
+      : (language == AppLanguage.english
+          ? 'Automatically uses your current location'
+          : 'يستخدم موقع جهازك الحالي تلقائياً');
+  String get searchCityHint => language == AppLanguage.turkish
+      ? 'Şehir veya ülke ara...'
+      : (language == AppLanguage.english ? 'Search city or country...' : 'ابحث عن مدينة أو دولة...');
+
+  // ── Kur'an & Okuma ─────────────────────────────────────────────
+  String get resumeReading => language == AppLanguage.turkish
+      ? 'Kaldığım Yerden Devam Et'
+      : (language == AppLanguage.english ? 'Continue Reading' : 'متابعة القراءة من حيث توقفت');
+  String get arabicFontSizeTitle => language == AppLanguage.turkish
+      ? 'Arapça Yazı Boyutu'
+      : (language == AppLanguage.english ? 'Arabic Font Size' : 'حجم الخط العربي');
+  String get reciterSelectionTitle => language == AppLanguage.turkish
+      ? 'Kâri (Tilavet Okuyucusu) Seçimi'
+      : (language == AppLanguage.english ? 'Select Reciter (Qari)' : 'اختيار القارئ');
+  String get reciterSelectionTooltip => language == AppLanguage.turkish
+      ? 'Kâri Seçimi'
+      : (language == AppLanguage.english ? 'Select Reciter' : 'اختيار القارئ');
+  String get fontSizeTooltip => language == AppLanguage.turkish
+      ? 'Yazı Boyutu'
+      : (language == AppLanguage.english ? 'Font Size' : 'حجم الخط');
+  String get listenSurahTooltip => language == AppLanguage.turkish
+      ? 'Sureyi Dinle'
+      : (language == AppLanguage.english ? 'Listen to Surah' : 'استمع للسورة');
+  String get versesLoading => language == AppLanguage.turkish
+      ? 'Ayetler yükleniyor...'
+      : (language == AppLanguage.english ? 'Loading verses...' : 'جاري تحميل الآيات...');
+  String get versesLoadError => language == AppLanguage.turkish
+      ? 'Ayetler yüklenemedi.'
+      : (language == AppLanguage.english ? 'Could not load verses.' : 'تعذر تحميل الآيات.');
+  String surahNumberBadge(int id) => language == AppLanguage.turkish
+      ? '$id. Sure'
+      : (language == AppLanguage.english ? 'Surah $id' : 'سورة $id');
+  String get lastReadBadge => language == AppLanguage.turkish
+      ? 'KALDIĞIM YER'
+      : (language == AppLanguage.english ? 'LAST READ' : 'حيث توقفت');
+  String get saveAsLastRead => language == AppLanguage.turkish
+      ? 'Kaldığım Yer Olarak Kaydet'
+      : (language == AppLanguage.english ? 'Save as Last Read' : 'حفظ كموضع توقف');
+  String get addBookmark => language == AppLanguage.turkish
+      ? 'Yer İmine Ekle'
+      : (language == AppLanguage.english ? 'Add to Bookmarks' : 'إضافة للإشارات');
+  String get removeBookmark => language == AppLanguage.turkish
+      ? 'Yer İmini Kaldır'
+      : (language == AppLanguage.english ? 'Remove Bookmark' : 'إزالة الإشارة');
+  String get shareVerse => language == AppLanguage.turkish
+      ? 'Ayeti Paylaş'
+      : (language == AppLanguage.english ? 'Share Verse' : 'مشاركة الآية');
+  String verseCopied(String ref) => language == AppLanguage.turkish
+      ? '$ref. Ayet kopyalandı'
+      : (language == AppLanguage.english ? 'Verse $ref copied' : 'تم نسخ الآية $ref');
+  String get seekBackward10s => language == AppLanguage.turkish
+      ? '10 Saniye Geri'
+      : (language == AppLanguage.english ? 'Rewind 10 Seconds' : 'رجوع ١٠ ثوانٍ');
+  String get seekForward10s => language == AppLanguage.turkish
+      ? '10 Saniye İleri'
+      : (language == AppLanguage.english ? 'Forward 10 Seconds' : 'تقديم ١٠ ثوانٍ');
+  String recitationOfSurah(String surah) => language == AppLanguage.turkish
+      ? '$surah Tilaveti'
+      : (language == AppLanguage.english ? 'Recitation of $surah' : 'تلاوة $surah');
+  String get closeBtn => language == AppLanguage.turkish
+      ? 'Kapat'
+      : (language == AppLanguage.english ? 'Close' : 'إغلاق');
 }
+
 
 
 

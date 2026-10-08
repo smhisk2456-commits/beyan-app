@@ -178,14 +178,15 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
     HapticFeedback.mediumImpact();
     await _service.sendTestVerseNotification();
     if (mounted) {
+      final strings = ref.read(appStringsProvider);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Row(
+          content: Row(
             children: [
-              Icon(Icons.check_circle_rounded, color: Color(0xFFFFDF7A), size: 20),
-              SizedBox(width: 10),
+              const Icon(Icons.check_circle_rounded, color: Color(0xFFFFDF7A), size: 20),
+              const SizedBox(width: 10),
               Expanded(
-                child: Text('Günün Âyeti test bildirimi cihazınıza gönderildi!'),
+                child: Text(strings.testVerseSuccessMsg),
               ),
             ],
           ),
@@ -221,33 +222,34 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
 
   Future<void> _sendTest() async {
     HapticFeedback.mediumImpact();
+    final strings = ref.read(appStringsProvider);
     final granted = await _service.requestPermissions();
     await _checkPermission();
 
     if (!granted && !_hasPermission) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Row(
               children: [
-                Icon(Icons.warning_amber_rounded, color: Colors.orangeAccent, size: 20),
-                SizedBox(width: 10),
+                const Icon(Icons.warning_amber_rounded, color: Colors.orangeAccent, size: 20),
+                const SizedBox(width: 10),
                 Expanded(
-                  child: Text('Cihaz bildirim izni kapalı! Lütfen ayarlardan izin verin.'),
+                  child: Text(strings.permWarningMsg),
                 ),
               ],
             ),
-            backgroundColor: Color(0xFF3E1203),
+            backgroundColor: const Color(0xFF3E1203),
             action: SnackBarAction(
-              label: 'Ayarlar',
-              textColor: Color(0xFFFFDF7A),
+              label: strings.grantPermissionBtn,
+              textColor: const Color(0xFFFFDF7A),
               onPressed: openAppSettings,
             ),
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
+            shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(12)),
             ),
-            duration: Duration(seconds: 4),
+            duration: const Duration(seconds: 4),
           ),
         );
       }
@@ -260,12 +262,12 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Row(
+            content: Row(
               children: [
-                Icon(Icons.check_circle, color: Color(0xFFFFDF7A), size: 20),
-                SizedBox(width: 10),
+                const Icon(Icons.check_circle, color: Color(0xFFFFDF7A), size: 20),
+                const SizedBox(width: 10),
                 Expanded(
-                  child: Text('Test bildirimi cihazınıza gönderildi!'),
+                  child: Text(strings.testAdhanSuccessMsg),
                 ),
               ],
             ),
@@ -357,7 +359,7 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Ezan & Vakit Bildirimleri',
+                              strings.adhanSettingsTitle,
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -366,7 +368,7 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              'Namaz vakitlerinde ezan ve uyarı bildirimleri',
+                              strings.adhanSettingsDesc,
                               style: TextStyle(
                                 fontSize: 12,
                                 color: isDark ? Colors.white60 : AppColors.textSecondary,
@@ -413,9 +415,9 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
-                                  'Cihaz Bildirim İzni Kapalı',
-                                  style: TextStyle(
+                                Text(
+                                  strings.permRequiredTitle,
+                                  style: const TextStyle(
                                     color: Colors.amber,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 13,
@@ -423,7 +425,7 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  'Ezan vaktinde bildirim alabilmek için sistem ayarlarından izin vermelisiniz.',
+                                  strings.permRequiredDesc,
                                   style: TextStyle(
                                     color: isDark ? Colors.white70 : Colors.black87,
                                     fontSize: 11,
@@ -447,9 +449,9 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                                 borderRadius: BorderRadius.circular(10),
                               ),
                             ),
-                            child: const Text(
-                              'İzin Ver',
-                              style: TextStyle(
+                            child: Text(
+                              strings.grantPermissionBtn,
+                              style: const TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -484,21 +486,21 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                           size: 22,
                         ),
                         const SizedBox(width: 12),
-                        const Expanded(
+                        Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Tüm Bildirimler',
-                                style: TextStyle(
+                                strings.allNotifications,
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 15,
                                 ),
                               ),
                               Text(
-                                'Ezan ve namaz bildirimlerini etkinleştir',
-                                style: TextStyle(
+                                strings.enableAllNotificationsDesc,
+                                style: const TextStyle(
                                   color: Colors.white70,
                                   fontSize: 11,
                                 ),
@@ -544,7 +546,7 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  '15 Dakika Önce Hatırlat',
+                                  strings.earlyReminderTitle,
                                   style: TextStyle(
                                     fontWeight: FontWeight.w600,
                                     fontSize: 13,
@@ -552,7 +554,7 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                                   ),
                                 ),
                                 Text(
-                                  'Vakit girmeden önce erken uyarı bildirimi',
+                                  strings.earlyReminderDesc,
                                   style: TextStyle(
                                     fontSize: 11,
                                     color: isDark ? Colors.white54 : AppColors.textSecondary,
@@ -618,7 +620,7 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Ezan Makamı & Ses Tonu',
+                                    strings.adhanMakamToneTitle,
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 13,
@@ -626,7 +628,7 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                                     ),
                                   ),
                                   Text(
-                                    _currentMakam.title,
+                                    _currentMakam.localizedTitle(strings.language.code),
                                     style: const TextStyle(
                                       fontSize: 11,
                                       color: Color(0xFFFFDF7A),
@@ -642,19 +644,19 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                                 color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(10),
                               ),
-                              child: const Row(
+                              child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
-                                    'Değiştir',
-                                    style: TextStyle(
+                                    strings.changeBtn,
+                                    style: const TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.bold,
                                       color: Color(0xFFFFDF7A),
                                     ),
                                   ),
-                                  SizedBox(width: 4),
-                                  Icon(
+                                  const SizedBox(width: 4),
+                                  const Icon(
                                     Icons.arrow_forward_ios_rounded,
                                     size: 10,
                                     color: Color(0xFFFFDF7A),
@@ -671,9 +673,9 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                   const SizedBox(height: 20),
 
                   // ── Vakit Bazlı Ayarlar ──────────────────────────
-                  const Text(
-                    'VAKİT BİLDİRİMLERİ',
-                    style: TextStyle(
+                  Text(
+                    strings.sectionPrayerAlerts,
+                    style: const TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1.1,
@@ -727,7 +729,7 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                                   ),
                                 ),
                                 title: Text(
-                                  p.turkish,
+                                  p.localizedName(strings.language.code),
                                   style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
@@ -735,7 +737,7 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                                   ),
                                 ),
                                 subtitle: Text(
-                                  _getPrayerDesc(p),
+                                  _getPrayerDesc(p, strings),
                                   style: TextStyle(
                                     fontSize: 11,
                                     color: isDark ? Colors.white54 : AppColors.textSecondary,
@@ -760,9 +762,9 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                   const SizedBox(height: 24),
 
                   // ── Günün Âyeti ve Sure Bildirimleri ───────────
-                  const Text(
-                    'GÜNÜN ÂYETİ VE SURE BİLDİRİMLERİ',
-                    style: TextStyle(
+                  Text(
+                    strings.sectionVerseAlerts,
+                    style: const TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1.1,
@@ -806,7 +808,7 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Âyet & Sure Hatırlatıcı',
+                                    strings.verseReminderTitle,
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 14,
@@ -815,7 +817,7 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
-                                    'Her gün tefekkür ve manevi uyanış bildirimi',
+                                    strings.verseReminderDesc,
                                     style: TextStyle(
                                       fontSize: 11,
                                       color: isDark ? Colors.white54 : AppColors.textSecondary,
@@ -867,7 +869,7 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          strings.language == AppLanguage.english ? 'Notification Schedule' : 'Bildirim Saati / Zamanı',
+                                          strings.notificationScheduleTitle,
                                           style: TextStyle(
                                             fontSize: 12,
                                             fontWeight: FontWeight.w600,
@@ -878,14 +880,20 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                                           _verseFrequency == 'hourly_2'
                                               ? (strings.language == AppLanguage.english
                                                   ? 'Delivered every 30 mins between 09:00 - 22:00'
-                                                  : '09:00 - 22:00 arasında her 30 dakikada bir iletilir')
+                                                  : (strings.language == AppLanguage.arabic
+                                                      ? 'يصل كل ٣٠ دقيقة بين ٠٩:٠٠ - ٢٢:٠٠'
+                                                      : '09:00 - 22:00 arasında her 30 dakikada bir iletilir'))
                                               : (_verseFrequency == 'hourly_1'
                                                   ? (strings.language == AppLanguage.english
                                                       ? 'Delivered hourly between 09:00 - 22:00'
-                                                      : '09:00 - 22:00 arasında her saat başında iletilir')
+                                                      : (strings.language == AppLanguage.arabic
+                                                          ? 'يصل كل ساعة بين ٠٩:٠٠ - ٢٢:٠٠'
+                                                          : '09:00 - 22:00 arasında her saat başında iletilir'))
                                                   : (strings.language == AppLanguage.english
                                                       ? 'Daily verse arrives at this time (tap to change)'
-                                                      : 'Günün ayeti bu saatte iletilir (dokunup değiştir)')),
+                                                      : (strings.language == AppLanguage.arabic
+                                                          ? 'تصل آية اليوم في هذا الوقت (المس للتعديل)'
+                                                          : 'Günün ayeti bu saatte iletilir (dokunup değiştir)'))),
                                           style: TextStyle(
                                             fontSize: 10.5,
                                             color: isDark ? Colors.white38 : AppColors.textSecondary,
@@ -903,9 +911,9 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                                     ),
                                     child: Text(
                                       _verseFrequency == 'hourly_2'
-                                          ? (strings.language == AppLanguage.english ? '30 min' : '30 dk')
+                                          ? (strings.language == AppLanguage.english ? '30 min' : (strings.language == AppLanguage.arabic ? '٣٠ د' : '30 dk'))
                                           : (_verseFrequency == 'hourly_1'
-                                              ? (strings.language == AppLanguage.english ? '1 hour' : '1 saat')
+                                              ? (strings.language == AppLanguage.english ? '1 hour' : (strings.language == AppLanguage.arabic ? 'ساعة' : '1 saat'))
                                               : '${_verseHour.toString().padLeft(2, '0')}:${_verseMinute.toString().padLeft(2, '0')}'),
                                       style: const TextStyle(
                                         color: Color(0xFFFFDF7A),
@@ -1037,9 +1045,9 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                                 padding: const EdgeInsets.symmetric(vertical: 8),
                               ),
                               icon: const Icon(Icons.auto_awesome_rounded, size: 16),
-                              label: const Text(
-                                'Âyet Bildirimini Şimdi Test Et',
-                                style: TextStyle(
+                              label: Text(
+                                strings.testVerseBtn,
+                                style: const TextStyle(
                                   fontSize: 12.5,
                                   fontWeight: FontWeight.w600,
                                   decoration: TextDecoration.underline,
@@ -1067,9 +1075,9 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                         ),
                       ),
                       icon: const Icon(Icons.notifications_active, color: Color(0xFFD4AF37), size: 18),
-                      label: const Text(
-                        'Ezan Test Bildirimi Gönder',
-                        style: TextStyle(
+                      label: Text(
+                        strings.testAdhanBtn,
+                        style: const TextStyle(
                           color: Color(0xFFD4AF37),
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
@@ -1100,20 +1108,20 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
     }
   }
 
-  String _getPrayerDesc(PrayerName p) {
+  String _getPrayerDesc(PrayerName p, AppStrings strings) {
     switch (p) {
       case PrayerName.fajr:
-        return 'İmsak vakti girdiğinde ezan bildirimi';
+        return strings.fajrDesc;
       case PrayerName.sunrise:
-        return 'Güneş doğuş vakti uyarısı';
+        return strings.sunriseDesc;
       case PrayerName.dhuhr:
-        return 'Öğle ezanı bildirimi';
+        return strings.dhuhrDesc;
       case PrayerName.asr:
-        return 'İkindi ezanı bildirimi';
+        return strings.asrDesc;
       case PrayerName.maghrib:
-        return 'Akşam ezanı bildirimi';
+        return strings.maghribDesc;
       case PrayerName.isha:
-        return 'Yatsı ezanı bildirimi';
+        return strings.ishaDesc;
     }
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/localization/app_strings.dart';
 import '../models/religious_day_model.dart';
 import '../services/hijri_calendar_service.dart';
 
@@ -28,6 +29,7 @@ class HijriCalendarScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final strings = ref.watch(appStringsProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final adjustment = ref.watch(hijriAdjustmentProvider);
     final now = DateTime.now();
@@ -39,13 +41,13 @@ class HijriCalendarScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('Hicri Takvim & Dini Günler'),
+        title: Text(strings.hijriCalendarTitle),
         centerTitle: true,
         actions: [
           IconButton(
             icon: const Icon(Icons.tune_rounded, color: Color(0xFFFFDF7A)),
-            tooltip: 'Hicri Gün Düzeltmesi',
-            onPressed: () => _showAdjustmentDialog(context, ref, adjustment),
+            tooltip: strings.hijriAdjustmentTooltip,
+            onPressed: () => _showAdjustmentDialog(context, ref, adjustment, strings),
           ),
         ],
       ),
@@ -90,9 +92,9 @@ class HijriCalendarScreen extends ConsumerWidget {
                         color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Text(
-                        'Diyanet Takvimi',
-                        style: TextStyle(
+                      child: Text(
+                        strings.diyanetTakvimi,
+                        style: const TextStyle(
                           color: Color(0xFFFFDF7A),
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
@@ -101,7 +103,7 @@ class HijriCalendarScreen extends ConsumerWidget {
                     ),
                     if (adjustment != 0)
                       Text(
-                        'Düzeltme: ${adjustment > 0 ? "+$adjustment" : adjustment} gün',
+                        strings.adjustmentDaysLabel(adjustment),
                         style: const TextStyle(
                           color: Colors.white70,
                           fontSize: 11,
@@ -123,7 +125,9 @@ class HijriCalendarScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  hijriDate.formatTr(),
+                  strings.language == AppLanguage.arabic
+                      ? hijriDate.formatAr()
+                      : (strings.language == AppLanguage.english ? hijriDate.formatEn() : hijriDate.formatTr()),
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
@@ -133,7 +137,7 @@ class HijriCalendarScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Miladi: ${now.day}.${now.month.toString().padLeft(2, '0')}.${now.year}',
+                  '${strings.gregorianPrefix}: ${now.day}.${now.month.toString().padLeft(2, '0')}.${now.year}',
                   style: TextStyle(
                     fontSize: 13,
                     color: Colors.white.withValues(alpha: 0.7),
@@ -156,9 +160,9 @@ class HijriCalendarScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              const Text(
-                'Yaklaşan Kandiller ve Dini Günler',
-                style: TextStyle(
+              Text(
+                strings.upcomingSacredDays,
+                style: const TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 0.2,
@@ -177,7 +181,7 @@ class HijriCalendarScreen extends ConsumerWidget {
     );
   }
 
-  void _showAdjustmentDialog(BuildContext context, WidgetRef ref, int current) {
+  void _showAdjustmentDialog(BuildContext context, WidgetRef ref, int current, AppStrings strings) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -186,24 +190,25 @@ class HijriCalendarScreen extends ConsumerWidget {
           borderRadius: BorderRadius.circular(20),
           side: const BorderSide(color: Color(0xFFD4AF37), width: 1),
         ),
-        title: const Text(
-          'Hicri Takvim Düzeltmesi',
-          style: TextStyle(color: Color(0xFFFFDF7A), fontSize: 17),
+        title: Text(
+          strings.hijriAdjustmentTitle,
+          style: const TextStyle(color: Color(0xFFFFDF7A), fontSize: 17),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              'Hilalin yerel gözlemine göre Hicri tarihi +/- 1 veya 2 gün ileri/geri alabilirsiniz.',
-              style: TextStyle(color: Colors.white70, fontSize: 13),
+            Text(
+              strings.hijriAdjustmentDesc,
+              style: const TextStyle(color: Colors.white70, fontSize: 13),
             ),
             const SizedBox(height: 16),
             Wrap(
               spacing: 8,
               children: [-2, -1, 0, 1, 2].map((d) {
                 final isSel = current == d;
+                final chipLabel = d == 0 ? '0 (${strings.standardLabel})' : strings.adjustmentDaysLabel(d);
                 return ChoiceChip(
-                  label: Text(d == 0 ? '0 (Standart)' : (d > 0 ? '+$d gün' : '$d gün')),
+                  label: Text(chipLabel),
                   selected: isSel,
                   selectedColor: const Color(0xFFD4AF37),
                   onSelected: (_) {
@@ -218,7 +223,7 @@ class HijriCalendarScreen extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Kapat', style: TextStyle(color: Colors.white)),
+            child: Text(strings.close, style: const TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -226,14 +231,15 @@ class HijriCalendarScreen extends ConsumerWidget {
   }
 }
 
-class _ReligiousDayCard extends StatelessWidget {
+class _ReligiousDayCard extends ConsumerWidget {
   final ReligiousDay item;
   final bool isDark;
 
   const _ReligiousDayCard({required this.item, required this.isDark});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final strings = ref.watch(appStringsProvider);
     final days = item.daysRemaining;
     final isToday = item.isToday;
 
@@ -288,9 +294,9 @@ class _ReligiousDayCard extends StatelessWidget {
                             color: Color(0xFFD4AF37),
                           ),
                         ),
-                        const Text(
-                          'GÜN',
-                          style: TextStyle(
+                        Text(
+                          strings.daysRemainingUnit,
+                          style: const TextStyle(
                             fontSize: 9,
                             fontWeight: FontWeight.w700,
                             color: Color(0xFFD4AF37),
@@ -311,7 +317,7 @@ class _ReligiousDayCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        item.title,
+                        item.localizedTitle(strings.language.code),
                         style: TextStyle(
                           fontSize: 15.5,
                           fontWeight: FontWeight.bold,
@@ -326,9 +332,9 @@ class _ReligiousDayCard extends StatelessWidget {
                           color: const Color(0xFFD4AF37),
                           borderRadius: BorderRadius.circular(6),
                         ),
-                        child: const Text(
-                          'BUGÜN',
-                          style: TextStyle(
+                        child: Text(
+                          strings.todayBadge,
+                          style: const TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
                             color: Colors.black,
@@ -348,7 +354,7 @@ class _ReligiousDayCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  item.description,
+                  item.localizedDescription(strings.language.code),
                   style: TextStyle(
                     fontSize: 12,
                     color: isDark ? Colors.white70 : Colors.black87,
@@ -363,3 +369,4 @@ class _ReligiousDayCard extends StatelessWidget {
     );
   }
 }
+

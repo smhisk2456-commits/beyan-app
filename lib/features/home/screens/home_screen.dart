@@ -23,6 +23,7 @@ import '../../quran/providers/quran_reading_providers.dart';
 import '../../quran/providers/quran_providers.dart';
 import '../../quran/screens/surah_detail_screen.dart';
 import '../../quran/models/surah.dart';
+import '../../notifications/models/short_verse_notification.dart';
 import '../widgets/prayer_card_widget.dart';
 
 /// Ana Ekran – Beyân lüks İslami kontrol merkezi.
@@ -549,6 +550,9 @@ class _DailyVerseCompactCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final strings = ref.watch(appStringsProvider);
+    final now = DateTime.now();
+    final todayVerseIndex = (now.year * 365 + now.day) % ShortVerseNotification.pool.length;
+    final verse = ShortVerseNotification.pool[todayVerseIndex];
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -602,9 +606,9 @@ class _DailyVerseCompactCard extends ConsumerWidget {
                 ),
               ),
               const Spacer(),
-              const Text(
-                'İsrâ 78',
-                style: TextStyle(
+              Text(
+                verse.verseReference,
+                style: const TextStyle(
                   color: Colors.white70,
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
@@ -613,9 +617,9 @@ class _DailyVerseCompactCard extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 10),
-          const Text(
-            'أَقِمِ ٱلصَّلَوٰةَ لِدُلُوكِ ٱلشَّمْسِ إِلَىٰ غَسَقِ ٱلَّيْلِ وَقُرْءَانَ ٱلْفَجْرِ',
-            style: TextStyle(
+          Text(
+            verse.arabicText,
+            style: const TextStyle(
               fontFamily: 'Amiri',
               fontSize: 17,
               height: 1.6,
@@ -625,7 +629,7 @@ class _DailyVerseCompactCard extends ConsumerWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            'Güneşin batıya kaymasından gecenin kararmasına kadar namazı kıl; bir de sabah namazını. Çünkü sabah namazı şahitlidir.',
+            verse.localizedText(strings.language.code),
             style: TextStyle(
               fontSize: 12,
               height: 1.45,
@@ -1011,13 +1015,19 @@ class _IslamicAppBar extends ConsumerWidget {
                 : Icons.workspace_premium_outlined,
             color: const Color(0xFFFFDF7A),
           ),
-          tooltip: ref.watch(premiumProvider).isPremium ? 'Beyân Premium' : 'Premium & Reklamsız',
+          tooltip: ref.watch(premiumProvider).isPremium
+              ? 'Beyân Premium'
+              : (strings.language == AppLanguage.english
+                  ? 'Premium & Ad-Free'
+                  : (strings.language == AppLanguage.arabic
+                      ? 'بريميوم وبدون إعلانات'
+                      : 'Premium & Reklamsız')),
           onPressed: () => PremiumPaywallSheet.show(context),
         ),
         // Tema Seçici Butonu
         IconButton(
           icon: const Icon(Icons.palette_outlined, color: Color(0xFFFFDF7A)),
-          tooltip: 'Görünüm & Tema',
+          tooltip: strings.appearanceAndTheme,
           onPressed: () => ThemeSelectionSheet.show(context),
         ),
         // Dil Seçici Buton
@@ -1057,7 +1067,7 @@ class _IslamicAppBar extends ConsumerWidget {
         // Ezan Bildirim Ayarları Butonu
         IconButton(
           icon: const Icon(Icons.notifications_active_outlined, color: Color(0xFFFFDF7A)),
-          tooltip: 'Ezan Bildirimleri',
+          tooltip: strings.adhanSettingsTitle,
           onPressed: () => NotificationSettingsSheet.show(context),
         ),
         IconButton(

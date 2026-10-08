@@ -57,6 +57,36 @@ class ReligiousDay {
     return title;
   }
 
+  /// Dile göre açıklama döner
+  String localizedDescription(String langCode) {
+    if (langCode == 'en') {
+      if (title.contains('Üç Ayların Başlangıcı')) return 'The beginning of the blessed months of Rajab, Shaban, and Ramadan.';
+      if (title.contains('Regaib')) return 'The first Friday night of Rajab; a night of divine gifts and prayers.';
+      if (title.contains('Mirac')) return 'The ascension of the Prophet Muhammad (pbuh) into the heavens; the gift of 5 daily prayers.';
+      if (title.contains('Berat')) return 'The 15th night of Shaban; night of forgiveness and divine decrees.';
+      if (title.contains('Ramazan')) return 'The first day of the holy month of fasting, reflection, and the Quran.';
+      if (title.contains('Kadir')) return 'The night better than a thousand months; revelation of the Holy Quran.';
+      if (title.contains('Ramazan Bayramı')) return 'The blessed celebration completing the month of fasting and charity.';
+      if (title.contains('Kurban Bayramı')) return 'Feast of the Sacrifice and the pinnacle of the Hajj pilgrimage.';
+      if (title.contains('Hicri Yılbaşı')) return 'Commemoration of the Hijrah from Mecca to Medina; 1st of Muharram.';
+      if (title.contains('Aşure')) return '10th of Muharram; day of deliverance of Prophet Moses and historical miracles.';
+      if (title.contains('Mevlid')) return 'The blessed birth of Prophet Muhammad (peace and blessings be upon him).';
+    } else if (langCode == 'ar') {
+      if (title.contains('Üç Ayların Başlangıcı')) return 'بداية الأشهر المباركة: رجب، شعبان، ورمضان.';
+      if (title.contains('Regaib')) return 'أول ليلة جمعة من شهر رجب؛ ليلة النفحات والتقرب إلى الله.';
+      if (title.contains('Mirac')) return 'ذكرى إسراء ومعراج النبي ﷺ وفرض الصلوات الخمس.';
+      if (title.contains('Berat')) return 'ليلة النصف من شعبان؛ ليلة المغفرة والرحمة الإلهية.';
+      if (title.contains('Ramazan')) return 'أول أيام شهر الصيام والقيام ونزول القرآن الكريم.';
+      if (title.contains('Kadir')) return 'ليلة خير من ألف شهر نزل فيها القرآن الكريم.';
+      if (title.contains('Ramazan Bayramı')) return 'عيد الفطر المبارك؛ فرحة إتمام الصيام وشكر النعم.';
+      if (title.contains('Kurban Bayramı')) return 'عيد الأضحى المبارك وشعائر الحج وذبح الأضاحي.';
+      if (title.contains('Hicri Yılbaşı')) return 'ذكرى الهجرة النبوية الشريفة وأول شهر محرم.';
+      if (title.contains('Aşure')) return 'اليوم العاشر من محرم؛ يوم نجاة نبي الله موسى عليه السلام.';
+      if (title.contains('Mevlid')) return 'ذكرى المولد النبوي الشريف لسيد الخلق محمد ﷺ.';
+    }
+    return description;
+  }
+
   /// Kalan gün sayısı
   int get daysRemaining {
     final now = DateTime.now();

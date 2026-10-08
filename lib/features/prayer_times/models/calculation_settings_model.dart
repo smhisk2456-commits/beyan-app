@@ -14,6 +14,12 @@ enum PrayerCalculationMethod {
 
   const PrayerCalculationMethod(this.trName, this.enName, this.arName);
 
+  String localizedName(String langCode) {
+    if (langCode == 'en') return enName;
+    if (langCode == 'ar') return arName;
+    return trName;
+  }
+
   CalculationParameters getAdhanParameters() {
     switch (this) {
       case PrayerCalculationMethod.diyanet:

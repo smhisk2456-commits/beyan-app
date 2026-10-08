@@ -24,36 +24,64 @@ enum AdhanMakam {
 extension AdhanMakamExtension on AdhanMakam {
   String get id => name;
 
-  String get title {
+  String get title => localizedTitle('tr');
+
+  String localizedTitle(String langCode) {
     switch (this) {
       case AdhanMakam.istanbul:
+        if (langCode == 'en') return 'Istanbul (Hijaz)';
+        if (langCode == 'ar') return 'إسطنبول (الحجاز)';
         return 'İstanbul (Hicaz)';
       case AdhanMakam.mecca:
+        if (langCode == 'en') return 'Mecca Al-Mukarramah';
+        if (langCode == 'ar') return 'مكة المكرمة';
         return 'Mekke-i Mükerreme';
       case AdhanMakam.medina:
+        if (langCode == 'en') return 'Medina Al-Munawwarah';
+        if (langCode == 'ar') return 'المدينة المنورة';
         return 'Medine-i Münevvere';
       case AdhanMakam.tekbir:
+        if (langCode == 'en') return 'Simple Short Takbeer';
+        if (langCode == 'ar') return 'تكبير قصير ولطيف';
         return 'Sade Kısa Tekbir';
       case AdhanMakam.bell:
+        if (langCode == 'en') return 'Standard Tone';
+        if (langCode == 'ar') return 'نغمة تنبيه قياسية';
         return 'Sade Bildirim Zili';
       case AdhanMakam.silent:
+        if (langCode == 'en') return 'Silent';
+        if (langCode == 'ar') return 'صامت';
         return 'Sessiz';
     }
   }
 
-  String get description {
+  String get description => localizedDescription('tr');
+
+  String localizedDescription(String langCode) {
     switch (this) {
       case AdhanMakam.istanbul:
+        if (langCode == 'en') return 'Traditional dignified Turkish adhan makam';
+        if (langCode == 'ar') return 'مقام الأذان التركي الوقور الأصيل';
         return 'Geleneksel vakarlı Türk ezanı makamı';
       case AdhanMakam.mecca:
+        if (langCode == 'en') return 'Adhan of the Grand Mosque of Mecca';
+        if (langCode == 'ar') return 'أذان المسجد الحرام بمكة المكرمة';
         return 'Kâbe-i Muazzama Harem-i Şerif ezanı';
       case AdhanMakam.medina:
+        if (langCode == 'en') return 'Serene adhan of the Prophet\'s Mosque';
+        if (langCode == 'ar') return 'أذان المسجد النبوي الشريف الخاشع';
         return 'Mescid-i Nebevî huzur veren makamı';
       case AdhanMakam.tekbir:
+        if (langCode == 'en') return 'Gentle and brief Allahu Akbar call';
+        if (langCode == 'ar') return 'نداء الله أكبر، موجز وخفيف';
         return 'Allahu Ekber nidası, kısa ve nezaketli';
       case AdhanMakam.bell:
+        if (langCode == 'en') return 'Short gentle chime notification';
+        if (langCode == 'ar') return 'نغمة تنبيه هادئة وقصيرة';
         return 'Kısa standart bildirim melodi tonu';
       case AdhanMakam.silent:
+        if (langCode == 'en') return 'Vibration and screen alert only';
+        if (langCode == 'ar') return 'اهتزاز وإشعار على الشاشة فقط';
         return 'Sadece titreşim ve ekran bildirimi';
     }
   }

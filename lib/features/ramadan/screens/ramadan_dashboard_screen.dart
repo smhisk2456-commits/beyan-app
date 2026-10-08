@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/localization/app_strings.dart';
 import '../../monetization/widgets/banner_ad_widget.dart';
 import '../../prayer_times/providers/prayer_time_providers.dart';
 
@@ -117,6 +118,7 @@ class RamadanDashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final prayerData = ref.watch(prayerTimesNotifierProvider).valueOrNull;
+    final strings = ref.watch(appStringsProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final fastingData = ref.watch(fastingTrackerProvider);
     final isFasting = fastingData.isFastingToday(FastingTrackerNotifier.todayKey());
@@ -132,7 +134,7 @@ class RamadanDashboardScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('Ramazan-ı Şerif'),
+        title: Text(strings.holyRamadan),
         centerTitle: true,
       ),
       body: ListView(
@@ -189,7 +191,7 @@ class RamadanDashboardScreen extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Bugünkü Oruç Durumu',
+                            strings.todayFastingStatus,
                             style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.bold,
@@ -198,7 +200,7 @@ class RamadanDashboardScreen extends ConsumerWidget {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            isFasting ? 'Bugün oruçlusunuz (Allah kabul etsin)' : 'Oruç tutulmadı olarak işaretli',
+                            isFasting ? strings.fastingActiveMsg : strings.fastingInactiveMsg,
                             style: TextStyle(
                               fontSize: 12,
                               color: isFasting
@@ -248,7 +250,7 @@ class RamadanDashboardScreen extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Toplam Oruç Durumu',
+                            strings.totalFastingStatus,
                             style: TextStyle(
                               fontSize: 14.5,
                               fontWeight: FontWeight.bold,
@@ -257,7 +259,7 @@ class RamadanDashboardScreen extends ConsumerWidget {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'Ramazan, Kaza ve Nafile günleri',
+                            strings.totalFastingDesc,
                             style: TextStyle(
                               fontSize: 11.5,
                               color: isDark ? Colors.white60 : Colors.black54,
@@ -287,7 +289,7 @@ class RamadanDashboardScreen extends ConsumerWidget {
                             color: totalFastingDays > 0
                                 ? const Color(0xFFD4AF37)
                                 : Colors.grey.shade400,
-                            tooltip: '1 Gün Eksilt',
+                            tooltip: strings.decrementDayTooltip,
                             onPressed: totalFastingDays > 0
                                 ? () {
                                     HapticFeedback.lightImpact();
@@ -299,7 +301,7 @@ class RamadanDashboardScreen extends ConsumerWidget {
                             constraints: const BoxConstraints(minWidth: 44),
                             alignment: Alignment.center,
                             child: Text(
-                              '$totalFastingDays gün',
+                              strings.fastingDaysCount(totalFastingDays),
                               style: const TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
@@ -311,7 +313,7 @@ class RamadanDashboardScreen extends ConsumerWidget {
                             icon: const Icon(Icons.add_rounded),
                             iconSize: 20,
                             color: const Color(0xFFD4AF37),
-                            tooltip: '1 Gün Ekle',
+                            tooltip: strings.incrementDayTooltip,
                             onPressed: () {
                               HapticFeedback.lightImpact();
                               ref.read(fastingTrackerProvider.notifier).incrementManualDays();
@@ -339,9 +341,9 @@ class RamadanDashboardScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              const Text(
-                'Sünnet İftar & Sahur Duaları',
-                style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, letterSpacing: 0.2),
+              Text(
+                strings.sunnahRamadanDuas,
+                style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold, letterSpacing: 0.2),
               ),
             ],
           ),
@@ -457,7 +459,7 @@ class RamadanDashboardScreen extends ConsumerWidget {
 }
 
 /// Yalnızca saniyeleri tikleyen bağımsız geri sayım bileşeni (60 FPS için izole)
-class _LiveIftarCountdown extends StatefulWidget {
+class _LiveIftarCountdown extends ConsumerStatefulWidget {
   final DateTime? imsakTime;
   final DateTime? iftarTime;
 
@@ -467,10 +469,10 @@ class _LiveIftarCountdown extends StatefulWidget {
   });
 
   @override
-  State<_LiveIftarCountdown> createState() => _LiveIftarCountdownState();
+  ConsumerState<_LiveIftarCountdown> createState() => _LiveIftarCountdownState();
 }
 
-class _LiveIftarCountdownState extends State<_LiveIftarCountdown> {
+class _LiveIftarCountdownState extends ConsumerState<_LiveIftarCountdown> {
   Timer? _ticker;
 
   @override
@@ -489,10 +491,11 @@ class _LiveIftarCountdownState extends State<_LiveIftarCountdown> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = ref.watch(appStringsProvider);
     final now = DateTime.now();
     bool isWaitingForIftar = false;
     Duration countdown = Duration.zero;
-    String countdownTitle = 'İftara Kalan Süre';
+    String countdownTitle = strings.remainingUntilIftar;
 
     final imsakTime = widget.imsakTime;
     final iftarTime = widget.iftarTime;
@@ -500,16 +503,16 @@ class _LiveIftarCountdownState extends State<_LiveIftarCountdown> {
     if (imsakTime != null && iftarTime != null) {
       if (now.isBefore(imsakTime)) {
         isWaitingForIftar = false;
-        countdownTitle = 'Sahur / İmsak Vaktine Kalan';
+        countdownTitle = strings.remainingUntilSuhoor;
         countdown = imsakTime.difference(now);
       } else if (now.isBefore(iftarTime)) {
         isWaitingForIftar = true;
-        countdownTitle = 'İftar Vaktine Kalan Süre';
+        countdownTitle = strings.remainingUntilIftar;
         countdown = iftarTime.difference(now);
       } else {
         final tomorrowImsak = imsakTime.add(const Duration(days: 1));
         isWaitingForIftar = false;
-        countdownTitle = 'Yarınki Sahura Kalan';
+        countdownTitle = strings.remainingUntilTomorrowSuhoor;
         countdown = tomorrowImsak.difference(now);
       }
     }
@@ -570,17 +573,17 @@ class _LiveIftarCountdownState extends State<_LiveIftarCountdown> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _buildTimeUnit(hours, 'SAAT'),
+              _buildTimeUnit(hours, strings.hoursUnit),
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 6),
                 child: Text(':', style: TextStyle(color: Color(0xFFFFDF7A), fontSize: 32, fontWeight: FontWeight.bold)),
               ),
-              _buildTimeUnit(minutes, 'DAKİKA'),
+              _buildTimeUnit(minutes, strings.minsUnit),
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 6),
                 child: Text(':', style: TextStyle(color: Color(0xFFFFDF7A), fontSize: 32, fontWeight: FontWeight.bold)),
               ),
-              _buildTimeUnit(seconds, 'SANİYE'),
+              _buildTimeUnit(seconds, strings.secsUnit),
             ],
           ),
           const SizedBox(height: 18),
@@ -597,7 +600,7 @@ class _LiveIftarCountdownState extends State<_LiveIftarCountdown> {
               children: [
                 Column(
                   children: [
-                    const Text('İmsak (Sahur)', style: TextStyle(color: Colors.white70, fontSize: 11)),
+                    Text(strings.imsakSuhoorLabel, style: const TextStyle(color: Colors.white70, fontSize: 11)),
                     const SizedBox(height: 2),
                     Text(
                       imsakTime != null
@@ -610,7 +613,7 @@ class _LiveIftarCountdownState extends State<_LiveIftarCountdown> {
                 Container(width: 1, height: 26, color: Colors.white24),
                 Column(
                   children: [
-                    const Text('Akşam (İftar)', style: TextStyle(color: Colors.white70, fontSize: 11)),
+                    Text(strings.maghribIftarLabel, style: const TextStyle(color: Colors.white70, fontSize: 11)),
                     const SizedBox(height: 2),
                     Text(
                       iftarTime != null

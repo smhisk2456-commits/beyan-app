@@ -17,28 +17,48 @@ enum AppThemePalette {
 }
 
 extension AppThemePaletteExtension on AppThemePalette {
-  String get title {
+  String get title => localizedTitle('tr');
+
+  String localizedTitle(String langCode) {
     switch (this) {
       case AppThemePalette.emerald:
+        if (langCode == 'en') return 'Emerald & Gold';
+        if (langCode == 'ar') return 'الزمرد والذهب';
         return 'Zümrüt & Altın';
       case AppThemePalette.oledBlack:
+        if (langCode == 'en') return 'Midnight Black (OLED)';
+        if (langCode == 'ar') return 'الأسود الليلي (OLED)';
         return 'Gece Siyahı (OLED)';
       case AppThemePalette.kaabaSlate:
+        if (langCode == 'en') return 'Kaaba Slate Grey';
+        if (langCode == 'ar') return 'رمادي رخام الكعبة';
         return 'Kâbe Taş Grisi';
       case AppThemePalette.deepSapphire:
+        if (langCode == 'en') return 'Deep Sapphire Navy';
+        if (langCode == 'ar') return 'الياقوت الكحلي';
         return 'Derin Lacivert';
     }
   }
 
-  String get description {
+  String get description => localizedDescription('tr');
+
+  String localizedDescription(String langCode) {
     switch (this) {
       case AppThemePalette.emerald:
+        if (langCode == 'en') return 'Traditional dignified emerald green and noble gold';
+        if (langCode == 'ar') return 'الأخضر الزمردي الوقور والذهب الأصيل';
         return 'Geleneksel vakarlı zümrüt yeşili ve asil altın';
       case AppThemePalette.oledBlack:
+        if (langCode == 'en') return 'Pure deep black and warm amber, OLED-friendly';
+        if (langCode == 'ar') return 'سواد نقي عميق وعنبر دافئ لشاشات أوليد';
         return 'Saf zifiri siyah ve sıcak kehribar, OLED dostu';
       case AppThemePalette.kaabaSlate:
+        if (langCode == 'en') return 'Kaaba marble tones, noble slate and gold';
+        if (langCode == 'ar') return 'ظلال رخام الكعبة والرمادي الأنيق مع الذهب';
         return 'Kâbe mermeri tonları, asil füme ve altın';
       case AppThemePalette.deepSapphire:
+        if (langCode == 'en') return 'Night sky sapphire and champagne gold shimmer';
+        if (langCode == 'ar') return 'سماء الليل الكحلية وبريق الذهب الشامباني';
         return 'Gece göğü safiri ve şampanya altın ışıltısı';
     }
   }

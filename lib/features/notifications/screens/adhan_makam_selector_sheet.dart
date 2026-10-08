@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/localization/app_strings.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../models/adhan_makam.dart';
@@ -62,6 +63,7 @@ class _AdhanMakamSelectorSheetState
   @override
   Widget build(BuildContext context) {
     final themeState = ref.watch(themeProvider);
+    final strings = ref.watch(appStringsProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final gold = themeState.palette.accentGold;
     final bg = isDark ? themeState.palette.darkSurface : Colors.white;
@@ -113,7 +115,7 @@ class _AdhanMakamSelectorSheetState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Ezan Makamları & Ses Tonu',
+                      strings.adhanMakamsAndAudio,
                       style: TextStyle(
                         fontFamily: 'Amiri',
                         fontSize: 22,
@@ -122,7 +124,7 @@ class _AdhanMakamSelectorSheetState
                       ),
                     ),
                     Text(
-                      'Namaz vaktinde çalınacak ezan sesini seçin ve dinleyin',
+                      strings.adhanMakamsDesc,
                       style: TextStyle(
                         fontSize: 12,
                         color: isDark ? Colors.white70 : AppColors.textSecondary,
@@ -166,6 +168,7 @@ class _AdhanMakamSelectorSheetState
                     isPlaying: isPlaying,
                     gold: gold,
                     isDark: isDark,
+                    strings: strings,
                   );
                 }).toList(),
               ),
@@ -181,6 +184,7 @@ class _AdhanMakamSelectorSheetState
     required bool isPlaying,
     required Color gold,
     required bool isDark,
+    required AppStrings strings,
   }) {
     final borderColor = isSelected
         ? gold
@@ -232,7 +236,7 @@ class _AdhanMakamSelectorSheetState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      makam.title,
+                      makam.localizedTitle(strings.language.code),
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
@@ -241,7 +245,7 @@ class _AdhanMakamSelectorSheetState
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      makam.description,
+                      makam.localizedDescription(strings.language.code),
                       style: TextStyle(
                         fontSize: 11,
                         color: isDark ? Colors.white60 : AppColors.textSecondary,
@@ -254,7 +258,7 @@ class _AdhanMakamSelectorSheetState
               // Dinle / Önizleme Butonu (Sessiz hariç)
               if (makam != AdhanMakam.silent)
                 IconButton(
-                  tooltip: isPlaying ? 'Durdur' : 'Dinle',
+                  tooltip: isPlaying ? strings.stopAudio : strings.listenAudio,
                   icon: AnimatedSwitcher(
                     duration: const Duration(milliseconds: 200),
                     child: Icon(

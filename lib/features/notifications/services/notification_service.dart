@@ -10,7 +10,7 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../prayer_times/models/prayer_time_model.dart';
 import '../../prayer_times/services/prayer_time_service.dart';
 import '../models/adhan_makam.dart';
-import '../../zikr/models/worship_tracker_model.dart';
+import '../models/short_verse_notification.dart';
 
 /// Ezan, Vakit ve Günün Âyeti Yerel Bildirim Servisi
 class NotificationService {
@@ -515,6 +515,9 @@ class NotificationService {
     final minute = await getVerseNotifMinute();
     final freq = await getVerseNotifFrequency();
     final now = DateTime.now();
+    final prefs = await SharedPreferences.getInstance();
+    final langCode = prefs.getString('selected_app_language') ?? 'tr';
+    final seedOffset = (DateTime.now().millisecondsSinceEpoch ~/ 1000) % ShortVerseNotification.pool.length;
 
     // ── Saatte 2 Kez (30 dakikada bir, 09:00 - 22:00 arası) ─────────────────
     if (freq == 'hourly_2') {
@@ -527,13 +530,13 @@ class NotificationService {
         if (pointer.hour >= 9 && pointer.hour <= 22) {
           if (pointer.isAfter(now)) {
             final notifId = 5000 + notifCount;
-            final verse = DailyCompletionVerse.getByIndex(notifCount);
+            final verse = ShortVerseNotification.getByIndex(seedOffset + notifCount);
             final scheduledTz = tz.TZDateTime.from(pointer, tz.local);
 
             await _notifications.zonedSchedule(
               id: notifId,
-              title: 'Âyet & Hikmet 📖 ${verse.verseReference}',
-              body: '${verse.turkishMeaning}\n🤲 ${verse.spiritualNote}',
+              title: verse.localizedTitle(langCode),
+              body: verse.localizedText(langCode),
               scheduledDate: scheduledTz,
               notificationDetails: const NotificationDetails(
                 android: AndroidNotificationDetails(
@@ -575,13 +578,13 @@ class NotificationService {
         if (pointer.hour >= 9 && pointer.hour <= 22) {
           if (pointer.isAfter(now)) {
             final notifId = 5000 + notifCount;
-            final verse = DailyCompletionVerse.getByIndex(notifCount);
+            final verse = ShortVerseNotification.getByIndex(seedOffset + notifCount);
             final scheduledTz = tz.TZDateTime.from(pointer, tz.local);
 
             await _notifications.zonedSchedule(
               id: notifId,
-              title: 'Günün Âyeti 📖 ${verse.verseReference}',
-              body: '${verse.turkishMeaning}\n🤲 ${verse.spiritualNote}',
+              title: verse.localizedTitle(langCode),
+              body: verse.localizedText(langCode),
               scheduledDate: scheduledTz,
               notificationDetails: const NotificationDetails(
                 android: AndroidNotificationDetails(
@@ -615,7 +618,7 @@ class NotificationService {
     // ── Günlük veya Sabah & Akşam Planlaması ─────────────────────────────────
     for (int dayOffset = 0; dayOffset < 14; dayOffset++) {
       final targetDate = now.add(Duration(days: dayOffset));
-      final verse = DailyCompletionVerse.getForDate(targetDate);
+      final verse = ShortVerseNotification.getByIndex(seedOffset + dayOffset * 2);
 
       // Ana bildirim vakti
       final scheduledTime = DateTime(
@@ -632,8 +635,8 @@ class NotificationService {
 
         await _notifications.zonedSchedule(
           id: notifId,
-          title: 'Günün Âyeti 📖 ${verse.verseReference}',
-          body: '${verse.turkishMeaning}\n🤲 ${verse.spiritualNote}',
+          title: verse.localizedTitle(langCode),
+          body: verse.localizedText(langCode),
           scheduledDate: scheduledTz,
           notificationDetails: const NotificationDetails(
             android: AndroidNotificationDetails(
@@ -668,13 +671,13 @@ class NotificationService {
         );
         if (eveningTime.isAfter(now)) {
           final notifId = 5100 + dayOffset;
-          final eveningVerse = DailyCompletionVerse.getByIndex(dayOffset + 15);
+          final eveningVerse = ShortVerseNotification.getByIndex(seedOffset + dayOffset * 2 + 1);
           final scheduledTz = tz.TZDateTime.from(eveningTime, tz.local);
 
           await _notifications.zonedSchedule(
             id: notifId,
-            title: 'Akşam Tefekkürü 🌙 ${eveningVerse.verseReference}',
-            body: eveningVerse.turkishMeaning,
+            title: eveningVerse.localizedTitle(langCode, isEvening: true),
+            body: eveningVerse.localizedText(langCode),
             scheduledDate: scheduledTz,
             notificationDetails: const NotificationDetails(
               android: AndroidNotificationDetails(
@@ -710,14 +713,16 @@ class NotificationService {
     }
   }
 
-  /// Kullanıcının ayet bildirimini test etmesi için anında gönderir.
+  /// Kullanıcının ayet bildirimini test etmesi için anında gönderir (Her seferinde farklı ve kısa ayet döner!).
   Future<void> sendTestVerseNotification() async {
-    final verse = DailyCompletionVerse.getForDate();
+    final prefs = await SharedPreferences.getInstance();
+    final langCode = prefs.getString('selected_app_language') ?? 'tr';
+    final verse = await ShortVerseNotification.getNextRotatingVerse();
     try {
       await _notifications.show(
         id: 5999,
-        title: 'Günün Âyeti 📖 ${verse.verseReference}',
-        body: '${verse.turkishMeaning}\n🤲 ${verse.spiritualNote}',
+        title: verse.localizedTitle(langCode),
+        body: verse.localizedText(langCode),
         notificationDetails: const NotificationDetails(
           android: AndroidNotificationDetails(
             verseChannelId,

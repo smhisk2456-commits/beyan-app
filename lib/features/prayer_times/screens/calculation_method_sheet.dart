@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/localization/app_strings.dart';
 import '../models/calculation_settings_model.dart';
 import '../providers/prayer_time_providers.dart';
 import '../services/prayer_time_service.dart';
@@ -40,6 +41,8 @@ class _CalculationMethodSheetState extends State<CalculationMethodSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = widget.ref.watch(appStringsProvider);
+
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16),
       decoration: const BoxDecoration(
@@ -60,18 +63,18 @@ class _CalculationMethodSheetState extends State<CalculationMethodSheet> {
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Hesaplama Yöntemi',
-              style: TextStyle(
+            Text(
+              strings.calculationMethodTitle,
+              style: const TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.bold,
                 color: Color(0xFFFFDF7A),
               ),
             ),
             const SizedBox(height: 6),
-            const Text(
-              'Vakit hesaplarında yetkili kurum ve fetva meclisleri',
-              style: TextStyle(color: Colors.white60, fontSize: 12),
+            Text(
+              strings.calculationMethodDesc,
+              style: const TextStyle(color: Colors.white60, fontSize: 12),
             ),
             const SizedBox(height: 14),
             ...PrayerCalculationMethod.values.map((method) {
@@ -82,7 +85,7 @@ class _CalculationMethodSheetState extends State<CalculationMethodSheet> {
                   color: const Color(0xFFD4AF37),
                 ),
                 title: Text(
-                  method.trName,
+                  method.localizedName(strings.language.code),
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
@@ -90,7 +93,7 @@ class _CalculationMethodSheetState extends State<CalculationMethodSheet> {
                   ),
                 ),
                 subtitle: Text(
-                  method.enName,
+                  strings.language == AppLanguage.turkish ? method.enName : method.trName,
                   style: const TextStyle(color: Colors.white54, fontSize: 11.5),
                 ),
                 onTap: () async {

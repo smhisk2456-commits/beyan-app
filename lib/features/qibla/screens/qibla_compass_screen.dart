@@ -4,19 +4,21 @@ import 'package:adhan/adhan.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_compass/flutter_compass.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
+import '../../../core/localization/app_strings.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../prayer_times/services/prayer_time_service.dart';
 
 /// Lüks & Canlı Sensörlü Kıble Pusulası Ekranı
-class QiblaCompassScreen extends StatefulWidget {
+class QiblaCompassScreen extends ConsumerStatefulWidget {
   const QiblaCompassScreen({super.key});
 
   @override
-  State<QiblaCompassScreen> createState() => _QiblaCompassScreenState();
+  ConsumerState<QiblaCompassScreen> createState() => _QiblaCompassScreenState();
 }
 
-class _QiblaCompassScreenState extends State<QiblaCompassScreen>
+class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
     with SingleTickerProviderStateMixin {
   StreamSubscription<CompassEvent>? _compassSub;
 
@@ -105,6 +107,7 @@ class _QiblaCompassScreenState extends State<QiblaCompassScreen>
 
   @override
   Widget build(BuildContext context) {
+    final strings = ref.watch(appStringsProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final currentHeading = _heading ?? 0.0;
@@ -122,9 +125,9 @@ class _QiblaCompassScreenState extends State<QiblaCompassScreen>
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFFD4AF37)),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Kıble Pusulası',
-          style: TextStyle(
+        title: Text(
+          strings.qiblaCompassTitle,
+          style: const TextStyle(
             color: Color(0xFFD4AF37),
             fontWeight: FontWeight.bold,
             fontSize: 20,
@@ -133,7 +136,7 @@ class _QiblaCompassScreenState extends State<QiblaCompassScreen>
         actions: [
           IconButton(
             icon: const Icon(Icons.info_outline_rounded, color: Color(0xFFD4AF37)),
-            onPressed: _showCalibrationInfo,
+            onPressed: () => _showCalibrationInfo(strings),
           ),
         ],
       ),
@@ -190,7 +193,7 @@ class _QiblaCompassScreenState extends State<QiblaCompassScreen>
                           ),
                           const SizedBox(width: 10),
                           Text(
-                            'Kâbe: ${_distanceKm.toStringAsFixed(0)} km',
+                            strings.kaabaDistance(_distanceKm.round()),
                             style: TextStyle(
                               fontSize: 12,
                               color: isDark ? Colors.white70 : AppColors.textSecondary,
@@ -211,14 +214,14 @@ class _QiblaCompassScreenState extends State<QiblaCompassScreen>
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(color: Colors.amber.shade700),
                         ),
-                        child: const Row(
+                        child: Row(
                           children: [
-                            Icon(Icons.warning_amber_rounded, color: Colors.amber, size: 20),
-                            SizedBox(width: 10),
+                            const Icon(Icons.warning_amber_rounded, color: Colors.amber, size: 20),
+                            const SizedBox(width: 10),
                             Expanded(
                               child: Text(
-                                'Cihazınızda pusula sensörü (manyetometre) algılanamadı. Kıble açısı referans olarak gösterilmektedir.',
-                                style: TextStyle(fontSize: 11, color: Colors.amber),
+                                strings.compassSensorNotFound,
+                                style: const TextStyle(fontSize: 11, color: Colors.amber),
                               ),
                             ),
                           ],
@@ -262,10 +265,10 @@ class _QiblaCompassScreenState extends State<QiblaCompassScreen>
                           const SizedBox(width: 10),
                           Text(
                             isAligned
-                                ? 'Kıbleye Yöneldiniz! 🕋'
+                                ? strings.facingQibla
                                 : (diff > 0
-                                    ? 'Sağa ${diff.round()}° dönün'
-                                    : 'Sola ${(-diff).round()}° dönün'),
+                                    ? strings.turnRightDeg(diff.round())
+                                    : strings.turnLeftDeg((-diff).round())),
                             style: TextStyle(
                               color: isAligned ? Colors.white : (isDark ? Colors.white : Colors.black87),
                               fontWeight: FontWeight.bold,
@@ -323,7 +326,10 @@ class _QiblaCompassScreenState extends State<QiblaCompassScreen>
                             angle: -currentHeading * (math.pi / 180),
                             child: CustomPaint(
                               size: const Size(280, 280),
-                              painter: _CompassDialPainter(isDark: isDark),
+                              painter: _CompassDialPainter(
+                                isDark: isDark,
+                                isTurkish: strings.language == AppLanguage.turkish,
+                              ),
                             ),
                           ),
 
@@ -424,17 +430,17 @@ class _QiblaCompassScreenState extends State<QiblaCompassScreen>
                     Row(
                       children: [
                         _buildInfoCard(
-                          title: 'Kıble Açısı',
+                          title: strings.qiblaAngleTitle,
                           value: '${_qiblaAngle.round()}°',
-                          subtitle: 'Kuzeyden saat yönünde',
+                          subtitle: strings.clockwiseFromNorth,
                           icon: Icons.explore_rounded,
                           isDark: isDark,
                         ),
                         const SizedBox(width: 12),
                         _buildInfoCard(
-                          title: 'Cihaz Yönü',
+                          title: strings.deviceHeadingTitle,
                           value: '${currentHeading.round()}°',
-                          subtitle: _getCompassDirection(currentHeading),
+                          subtitle: _getCompassDirection(currentHeading, strings),
                           icon: Icons.navigation_rounded,
                           isDark: isDark,
                         ),
@@ -459,7 +465,7 @@ class _QiblaCompassScreenState extends State<QiblaCompassScreen>
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
-                              'Cihazınızı düz bir zeminde veya yatay tutarak kullanınız. Manyetik kılıflar pusulayı etkileyebilir.',
+                              strings.compassHoldFlatTip,
                               style: TextStyle(
                                 fontSize: 11,
                                 color: isDark ? Colors.white60 : AppColors.textSecondary,
@@ -538,41 +544,38 @@ class _QiblaCompassScreenState extends State<QiblaCompassScreen>
     );
   }
 
-  String _getCompassDirection(double deg) {
-    if (deg >= 337.5 || deg < 22.5) return 'Kuzey (N)';
-    if (deg >= 22.5 && deg < 67.5) return 'Kuzeydoğu (NE)';
-    if (deg >= 67.5 && deg < 112.5) return 'Doğu (E)';
-    if (deg >= 112.5 && deg < 157.5) return 'Güneydoğu (SE)';
-    if (deg >= 157.5 && deg < 202.5) return 'Güney (S)';
-    if (deg >= 202.5 && deg < 247.5) return 'Güneybatı (SW)';
-    if (deg >= 247.5 && deg < 292.5) return 'Batı (W)';
-    return 'Kuzeybatı (NW)';
+  String _getCompassDirection(double deg, AppStrings strings) {
+    if (deg >= 337.5 || deg < 22.5) return strings.compassNorth;
+    if (deg >= 22.5 && deg < 67.5) return strings.compassNorthEast;
+    if (deg >= 67.5 && deg < 112.5) return strings.compassEast;
+    if (deg >= 112.5 && deg < 157.5) return strings.compassSouthEast;
+    if (deg >= 157.5 && deg < 202.5) return strings.compassSouth;
+    if (deg >= 202.5 && deg < 247.5) return strings.compassSouthWest;
+    if (deg >= 247.5 && deg < 292.5) return strings.compassWest;
+    return strings.compassNorthWest;
   }
 
-  void _showCalibrationInfo() {
+  void _showCalibrationInfo(AppStrings strings) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         backgroundColor: const Color(0xFF071F1B),
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.compass_calibration_rounded, color: Color(0xFFD4AF37)),
-            SizedBox(width: 10),
-            Text('Pusula Kalibrasyonu', style: TextStyle(color: Colors.white, fontSize: 16)),
+            const Icon(Icons.compass_calibration_rounded, color: Color(0xFFD4AF37)),
+            const SizedBox(width: 10),
+            Text(strings.compassCalibrationTitle, style: const TextStyle(color: Colors.white, fontSize: 16)),
           ],
         ),
-        content: const Text(
-          'Telefon pusulasının doğru çalışması için:\n\n'
-          '1. Cihazınızı havada yatay tutarak "8" şekli çizecek şekilde birkaç kez sallayınız.\n'
-          '2. Metal veya mıknatıslı kılıflardan uzak tutunuz.\n'
-          '3. Elektronik cihazların (laptop, mikrodalga vb.) yanında manyetik sapma oluşabilir.',
-          style: TextStyle(color: Colors.white70, fontSize: 13, height: 1.4),
+        content: Text(
+          strings.compassCalibrationDesc,
+          style: const TextStyle(color: Colors.white70, fontSize: 13, height: 1.4),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Anladım', style: TextStyle(color: Color(0xFFD4AF37))),
+            child: Text(strings.iUnderstand, style: const TextStyle(color: Color(0xFFD4AF37))),
           ),
         ],
       ),
@@ -583,7 +586,8 @@ class _QiblaCompassScreenState extends State<QiblaCompassScreen>
 /// Dönen pusula kadranı çizicisi (Dereceler, N, E, S, W ve çizgiler)
 class _CompassDialPainter extends CustomPainter {
   final bool isDark;
-  _CompassDialPainter({required this.isDark});
+  final bool isTurkish;
+  _CompassDialPainter({required this.isDark, required this.isTurkish});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -617,8 +621,11 @@ class _CompassDialPainter extends CustomPainter {
       canvas.drawLine(p1, p2, isMajor ? majorTickPaint : tickPaint);
     }
 
-    // Ana Yön Yazıları (N, E, S, W)
-    final directions = {'K': 0, 'D': 90, 'G': 180, 'B': 270};
+    // Ana Yön Yazıları (N, E, S, W veya K, D, G, B)
+    final directions = isTurkish
+        ? {'K': 0, 'D': 90, 'G': 180, 'B': 270}
+        : {'N': 0, 'E': 90, 'S': 180, 'W': 270};
+
     for (final entry in directions.entries) {
       final angle = entry.value * (math.pi / 180);
       final offset = Offset(
@@ -626,7 +633,7 @@ class _CompassDialPainter extends CustomPainter {
         center.dy - (radius - 36) * math.cos(angle),
       );
 
-      final isNorth = entry.key == 'K';
+      final isNorth = entry.key == 'K' || entry.key == 'N';
       final textSpan = TextSpan(
         text: entry.key,
         style: TextStyle(
@@ -647,5 +654,6 @@ class _CompassDialPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _CompassDialPainter oldDelegate) =>
-      oldDelegate.isDark != isDark;
+      oldDelegate.isDark != isDark || oldDelegate.isTurkish != isTurkish;
 }
+

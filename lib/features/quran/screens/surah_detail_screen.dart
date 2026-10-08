@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/localization/app_strings.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/common_widgets.dart' as app_widgets;
 import '../models/surah.dart';
@@ -74,7 +75,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
     );
   }
 
-  void _showFontSizeSheet(BuildContext context) {
+  void _showFontSizeSheet(BuildContext context, AppStrings strings) {
     showModalBottomSheet(
       context: context,
       backgroundColor: const Color(0xFF032B25),
@@ -100,9 +101,9 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                       ),
                     ),
                     const SizedBox(height: 14),
-                    const Text(
-                      'Arapça Yazı Boyutu',
-                      style: TextStyle(
+                    Text(
+                      strings.arabicFontSizeTitle,
+                      style: const TextStyle(
                         color: Color(0xFFFFDF7A),
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -154,7 +155,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
     );
   }
 
-  void _showReciterSheet(BuildContext context) {
+  void _showReciterSheet(BuildContext context, AppStrings strings) {
     showModalBottomSheet(
       context: context,
       backgroundColor: const Color(0xFF032B25),
@@ -171,9 +172,9 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text(
-                      'Kâri (Tilavet Okuyucusu) Seçimi',
-                      style: TextStyle(
+                    Text(
+                      strings.reciterSelectionTitle,
+                      style: const TextStyle(
                         color: Color(0xFFFFDF7A),
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -217,6 +218,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final versesAsync = ref.watch(versesBySurahProvider(widget.surah.id));
+    final strings = ref.watch(appStringsProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final audioState = ref.watch(quranAudioProvider);
     final isThisSurahPlaying = audioState.currentSurahId == widget.surah.id && audioState.isPlaying;
@@ -226,9 +228,9 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
       body: Stack(
         children: [
           versesAsync.when(
-            loading: () => _buildLoadingScaffold(context),
-            error: (e, _) => _buildErrorScaffold(context, e.toString()),
-            data: (verses) => _buildContent(context, verses, isDark, isThisSurahPlaying),
+            loading: () => _buildLoadingScaffold(context, strings),
+            error: (e, _) => _buildErrorScaffold(context, e.toString(), strings),
+            data: (verses) => _buildContent(context, verses, isDark, isThisSurahPlaying, strings),
           ),
           // Alt Mini Tilavet Oynatıcısı
           const Positioned(
@@ -253,18 +255,18 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
     );
   }
 
-  Widget _buildLoadingScaffold(BuildContext context) {
+  Widget _buildLoadingScaffold(BuildContext context, AppStrings strings) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.surah.nameTurkish)),
-      body: const app_widgets.LoadingWidget(message: 'Ayetler yükleniyor...'),
+      appBar: AppBar(title: Text(widget.surah.localizedName(strings.language.code))),
+      body: app_widgets.LoadingWidget(message: strings.versesLoading),
     );
   }
 
-  Widget _buildErrorScaffold(BuildContext context, String error) {
+  Widget _buildErrorScaffold(BuildContext context, String error, AppStrings strings) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.surah.nameTurkish)),
+      appBar: AppBar(title: Text(widget.surah.localizedName(strings.language.code))),
       body: app_widgets.AppErrorWidget(
-        message: 'Ayetler yüklenemedi.\n$error',
+        message: '${strings.versesLoadError}\n$error',
         onRetry: () => ref.invalidate(versesBySurahProvider(widget.surah.id)),
       ),
     );
@@ -275,6 +277,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
     List<Verse> verses,
     bool isDark,
     bool isThisSurahPlaying,
+    AppStrings strings,
   ) {
     return CustomScrollView(
       controller: _scrollController,
@@ -289,8 +292,8 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
             // Kâri Seçimi Butonu
             IconButton(
               icon: const Icon(Icons.person_outline_rounded, color: Color(0xFFFFDF7A)),
-              tooltip: 'Kâri Seçimi',
-              onPressed: () => _showReciterSheet(context),
+              tooltip: strings.reciterSelectionTooltip,
+              onPressed: () => _showReciterSheet(context, strings),
             ),
             // Tilavet Dinle Butonu
             IconButton(
@@ -299,21 +302,25 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                 color: const Color(0xFFFFDF7A),
                 size: 28,
               ),
-              tooltip: isThisSurahPlaying ? 'Tilaveti Duraklat' : 'Sureyi Dinle',
+              tooltip: isThisSurahPlaying
+                  ? (strings.language == AppLanguage.english
+                      ? 'Pause Recitation'
+                      : (strings.language == AppLanguage.arabic ? 'إيقاف مؤقت' : 'Tilaveti Duraklat'))
+                  : strings.listenSurahTooltip,
               onPressed: () {
                 HapticFeedback.mediumImpact();
                 if (isThisSurahPlaying) {
                   ref.read(quranAudioProvider.notifier).togglePlayPause();
                 } else {
-                  ref.read(quranAudioProvider.notifier).playSurah(widget.surah.id, widget.surah.nameTurkish);
+                  ref.read(quranAudioProvider.notifier).playSurah(widget.surah.id, widget.surah.localizedName(strings.language.code));
                 }
               },
             ),
             // Yazı Boyutu Butonu
             IconButton(
               icon: const Icon(Icons.format_size_rounded, color: Colors.white),
-              tooltip: 'Yazı Boyutu',
-              onPressed: () => _showFontSizeSheet(context),
+              tooltip: strings.fontSizeTooltip,
+              onPressed: () => _showFontSizeSheet(context, strings),
             ),
           ],
           flexibleSpace: FlexibleSpaceBar(
@@ -341,18 +348,18 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      '${widget.surah.nameTurkish}  ·  ${widget.surah.nameEnglish}',
+                      '${widget.surah.localizedName(strings.language.code)}  ·  ${strings.language == AppLanguage.english ? widget.surah.nameArabic : widget.surah.nameEnglish}',
                       style: const TextStyle(color: Colors.white70, fontSize: 15, letterSpacing: 0.3),
                     ),
                     const SizedBox(height: 12),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        _StatBadge(icon: Icons.format_list_numbered_rounded, label: '${widget.surah.id}. Sure'),
+                        _StatBadge(icon: Icons.format_list_numbered_rounded, label: strings.surahNumberBadge(widget.surah.id)),
                         const SizedBox(width: 8),
-                        _StatBadge(icon: Icons.text_fields_rounded, label: widget.surah.verseCountLabel),
+                        _StatBadge(icon: Icons.text_fields_rounded, label: widget.surah.localizedVerseCount(strings.language.code)),
                         const SizedBox(width: 8),
-                        _StatBadge(icon: Icons.place_rounded, label: widget.surah.revelationLabel),
+                        _StatBadge(icon: Icons.place_rounded, label: widget.surah.localizedRevelation(strings.language.code)),
                       ],
                     ),
                   ],
