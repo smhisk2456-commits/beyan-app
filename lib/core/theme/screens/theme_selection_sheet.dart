@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../app_theme.dart';
 import '../theme_provider.dart';
@@ -32,6 +33,8 @@ class ThemeSelectionSheet extends ConsumerWidget {
 
     final titleColor = isDark ? Colors.white : AppColors.textPrimary;
     final subtitleColor = isDark ? Colors.white70 : AppColors.textSecondary;
+
+    final isPremium = ref.watch(premiumProvider).isPremium;
 
     return Container(
       decoration: BoxDecoration(
@@ -104,7 +107,7 @@ class ThemeSelectionSheet extends ConsumerWidget {
               ),
               IconButton(
                 icon: Icon(
-                  ref.watch(premiumProvider).isPremium
+                  isPremium
                       ? Icons.workspace_premium_rounded
                       : Icons.workspace_premium_outlined,
                   color: themeState.palette.accentGold,
@@ -177,11 +180,21 @@ class ThemeSelectionSheet extends ConsumerWidget {
 
           ...AppThemePalette.values.map((palette) {
             final isSelected = themeState.palette == palette;
+            final isLocked = !isPremium && palette != AppThemePalette.emerald;
             return _buildPaletteTile(
               context: context,
               palette: palette,
               isSelected: isSelected,
-              onTap: () => themeNotifier.setPalette(palette),
+              isLocked: isLocked,
+              onTap: () {
+                if (isLocked) {
+                  HapticFeedback.lightImpact();
+                  PremiumPaywallSheet.show(context);
+                  return;
+                }
+                HapticFeedback.selectionClick();
+                themeNotifier.setPalette(palette);
+              },
               isDark: isDark,
               langCode: strings.language.code,
             );
@@ -247,6 +260,7 @@ class ThemeSelectionSheet extends ConsumerWidget {
     required BuildContext context,
     required AppThemePalette palette,
     required bool isSelected,
+    required bool isLocked,
     required VoidCallback onTap,
     required bool isDark,
     required String langCode,
@@ -327,7 +341,7 @@ class ThemeSelectionSheet extends ConsumerWidget {
                 ),
               ),
 
-              // Seçili İkonu veya PRO Rozeti
+              // Seçili İkonu veya PRO / Kilit Rozeti
               if (isSelected)
                 Container(
                   padding: const EdgeInsets.all(4),
@@ -341,20 +355,52 @@ class ThemeSelectionSheet extends ConsumerWidget {
                     size: 16,
                   ),
                 )
+              else if (isLocked)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: palette.accentGold.withValues(alpha: 0.18),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: palette.accentGold.withValues(alpha: 0.6),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.lock_rounded,
+                        size: 11,
+                        color: palette.accentGold,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'PRO',
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.bold,
+                          color: palette.accentGold,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
               else if (palette != AppThemePalette.emerald)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: palette.accentGold.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(6),
+                    color: palette.accentGold.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: palette.accentGold.withValues(alpha: 0.5),
+                      color: palette.accentGold.withValues(alpha: 0.4),
                     ),
                   ),
                   child: Text(
                     'PRO',
                     style: TextStyle(
-                      fontSize: 10,
+                      fontSize: 10.5,
                       fontWeight: FontWeight.bold,
                       color: palette.accentGold,
                     ),

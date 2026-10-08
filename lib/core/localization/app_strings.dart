@@ -892,6 +892,12 @@ class AppStrings {
   String get pauseRecitation => language == AppLanguage.turkish
       ? 'Tilaveti Duraklat'
       : (language == AppLanguage.english ? 'Pause Recitation' : 'إيقاف التلاوة مؤقتاً');
+  String get resumeRecitation => language == AppLanguage.turkish
+      ? 'Tilaveti Devam Ettir'
+      : (language == AppLanguage.english ? 'Resume Recitation' : 'استئناف التلاوة');
+  String get stopRecitation => language == AppLanguage.turkish
+      ? 'Tilaveti Kapat'
+      : (language == AppLanguage.english ? 'Close Recitation' : 'إغلاق التلاوة');
 
   // ── Kıble Pusulası ─────────────────────────────────────────────
   String get qiblaCompassTitle => language == AppLanguage.turkish

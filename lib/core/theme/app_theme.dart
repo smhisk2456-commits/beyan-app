@@ -127,6 +127,23 @@ extension AppThemePaletteExtension on AppThemePalette {
         return const Color(0xFF162947);
     }
   }
+
+  Color get lightBackground {
+    switch (this) {
+      case AppThemePalette.emerald:
+        return const Color(0xFFF4F7F5);
+      case AppThemePalette.oledBlack:
+        return const Color(0xFFF5F6F8);
+      case AppThemePalette.kaabaSlate:
+        return const Color(0xFFF6F5F2);
+      case AppThemePalette.deepSapphire:
+        return const Color(0xFFF2F5FA);
+    }
+  }
+
+  Color get lightSurface => const Color(0xFFFFFFFF);
+
+  Color get lightCard => const Color(0xFFFFFFFF);
 }
 
 /// Statik geri uyumluluk renkleri.
@@ -240,11 +257,19 @@ abstract class AppTheme {
         primary: primary,
         secondary: primary,
         tertiary: gold,
-        surface: AppColors.surface,
+        surface: palette.lightSurface,
         error: const Color(0xFFD32F2F),
         brightness: Brightness.light,
       ),
-      scaffoldBackgroundColor: AppColors.background,
+      scaffoldBackgroundColor: palette.lightBackground,
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: palette.lightSurface,
+        surfaceTintColor: Colors.transparent,
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: palette.lightSurface,
+        surfaceTintColor: Colors.transparent,
+      ),
       appBarTheme: AppBarTheme(
         backgroundColor: primary,
         foregroundColor: Colors.white,
@@ -258,11 +283,15 @@ abstract class AppTheme {
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       cardTheme: CardThemeData(
-        color: AppColors.cardColor,
+        color: palette.lightCard,
         elevation: 2,
-        shadowColor: AppColors.shadow,
+        shadowColor: Colors.black.withValues(alpha: 0.06),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(18),
+          side: BorderSide(
+            color: gold.withValues(alpha: 0.18),
+            width: 1,
+          ),
         ),
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       ),
@@ -360,6 +389,14 @@ abstract class AppTheme {
         brightness: Brightness.dark,
       ),
       scaffoldBackgroundColor: bg,
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: surface,
+        surfaceTintColor: Colors.transparent,
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: surface,
+        surfaceTintColor: Colors.transparent,
+      ),
       appBarTheme: AppBarTheme(
         backgroundColor: surface,
         foregroundColor: Colors.white,
@@ -370,14 +407,18 @@ abstract class AppTheme {
           fontWeight: FontWeight.w600,
           color: Colors.white,
         ),
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: gold),
       ),
       cardTheme: CardThemeData(
         color: card,
         elevation: 4,
         shadowColor: Colors.black54,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(18),
+          side: BorderSide(
+            color: gold.withValues(alpha: 0.22),
+            width: 1,
+          ),
         ),
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       ),

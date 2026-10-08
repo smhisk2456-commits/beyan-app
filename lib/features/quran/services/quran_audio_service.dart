@@ -65,12 +65,13 @@ class QuranAudioState {
     QuranReciter? selectedReciter,
     Duration? position,
     Duration? duration,
+    bool clearCurrentSurah = false,
   }) {
     return QuranAudioState(
       isPlaying: isPlaying ?? this.isPlaying,
       isLoading: isLoading ?? this.isLoading,
-      currentSurahId: currentSurahId ?? this.currentSurahId,
-      currentSurahName: currentSurahName ?? this.currentSurahName,
+      currentSurahId: clearCurrentSurah ? null : (currentSurahId ?? this.currentSurahId),
+      currentSurahName: clearCurrentSurah ? null : (currentSurahName ?? this.currentSurahName),
       selectedReciter: selectedReciter ?? this.selectedReciter,
       position: position ?? this.position,
       duration: duration ?? this.duration,
@@ -178,8 +179,16 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
   }
 
   Future<void> stop() async {
-    await _player.stop();
-    state = state.copyWith(isPlaying: false, currentSurahId: null, currentSurahName: null);
+    try {
+      await _player.stop();
+    } catch (_) {}
+    state = state.copyWith(
+      isPlaying: false,
+      isLoading: false,
+      clearCurrentSurah: true,
+      position: Duration.zero,
+      duration: Duration.zero,
+    );
   }
 
   @override

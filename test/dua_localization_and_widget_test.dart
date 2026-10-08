@@ -44,9 +44,9 @@ void main() {
     });
 
     test('AppStrings namaz vakti kısayolları ve hata mesajları doğru dillerde çalışmalı', () {
-      final stringsTr = AppStrings(AppLanguage.turkish);
-      final stringsEn = AppStrings(AppLanguage.english);
-      final stringsAr = AppStrings(AppLanguage.arabic);
+      const stringsTr = AppStrings(AppLanguage.turkish);
+      const stringsEn = AppStrings(AppLanguage.english);
+      const stringsAr = AppStrings(AppLanguage.arabic);
 
       expect(stringsTr.dhuhr, 'Öğle');
       expect(stringsEn.dhuhr, 'Dhuhr');

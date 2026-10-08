@@ -170,7 +170,12 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
                       )
                     : ListView.builder(
                         physics: const BouncingScrollPhysics(),
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                        padding: EdgeInsets.fromLTRB(
+                          16,
+                          8,
+                          16,
+                          ref.watch(quranAudioProvider).currentSurahId != null ? 100 : 24,
+                        ),
                         itemCount: duas.length,
                         itemBuilder: (context, index) {
                           final dua = duas[index];
@@ -179,8 +184,9 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
                       ),
               ),
 
-              // Alt banner reklam
-              const BannerAdWidget(),
+              // Alt banner reklam (Tilavet çubuğu açık değilken görünür)
+              if (ref.watch(quranAudioProvider).currentSurahId == null)
+                const BannerAdWidget(),
             ],
           ),
 
@@ -338,26 +344,49 @@ class _DuaCardItem extends ConsumerWidget {
                   Consumer(
                     builder: (context, ref, _) {
                       final audioState = ref.watch(quranAudioProvider);
-                      final isPlaying = audioState.isPlaying && audioState.currentSurahId == linked.id;
-                      return IconButton(
-                        icon: Icon(
-                          isPlaying
-                              ? Icons.pause_circle_filled_rounded
-                              : Icons.play_circle_fill_rounded,
-                          color: const Color(0xFFFFDF7A),
-                          size: 24,
-                        ),
-                        tooltip: isPlaying
-                            ? strings.pauseRecitation
-                            : strings.listenSurahRecitation(linked.nameTurkish),
-                        onPressed: () {
-                          HapticFeedback.mediumImpact();
-                          if (isPlaying) {
-                            ref.read(quranAudioProvider.notifier).togglePlayPause();
-                          } else {
-                            ref.read(quranAudioProvider.notifier).playSurah(linked.id, linked.nameTurkish);
-                          }
-                        },
+                      final isCurrent = audioState.currentSurahId == linked.id;
+                      final isPlaying = isCurrent && audioState.isPlaying;
+                      return Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: Icon(
+                              isPlaying
+                                  ? Icons.pause_circle_filled_rounded
+                                  : (isCurrent
+                                      ? Icons.play_circle_filled_rounded
+                                      : Icons.play_circle_outline_rounded),
+                              color: isCurrent ? const Color(0xFFFFDF7A) : const Color(0xFFD4AF37),
+                              size: 24,
+                            ),
+                            tooltip: isPlaying
+                                ? strings.pauseRecitation
+                                : (isCurrent
+                                    ? strings.resumeRecitation
+                                    : strings.listenSurahRecitation(linked.nameTurkish)),
+                            onPressed: () {
+                              HapticFeedback.mediumImpact();
+                              if (isCurrent) {
+                                ref.read(quranAudioProvider.notifier).togglePlayPause();
+                              } else {
+                                ref.read(quranAudioProvider.notifier).playSurah(linked.id, linked.nameTurkish);
+                              }
+                            },
+                          ),
+                          if (isCurrent)
+                            IconButton(
+                              icon: const Icon(
+                                Icons.stop_circle_outlined,
+                                color: Color(0xFFFF6B6B),
+                                size: 22,
+                              ),
+                              tooltip: strings.stopRecitation,
+                              onPressed: () {
+                                HapticFeedback.lightImpact();
+                                ref.read(quranAudioProvider.notifier).stop();
+                              },
+                            ),
+                        ],
                       );
                     },
                   ),

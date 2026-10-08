@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:islamic_app/core/theme/app_theme.dart';
 import 'package:islamic_app/core/theme/theme_provider.dart';
 import 'package:islamic_app/features/notifications/models/adhan_makam.dart';
+import 'package:islamic_app/features/quran/services/quran_audio_service.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -86,6 +87,20 @@ void main() {
       expect(AdhanMakam.medina.assetPath, 'audio/adhan_medina.mp3');
       expect(AdhanMakam.tekbir.assetPath, 'audio/adhan_tekbir.mp3');
       expect(AdhanMakam.silent.assetPath, isEmpty);
+    });
+
+    test('QuranAudioState copyWith clearCurrentSurah surah ID ve ismini temizlemelidir', () {
+      final state = QuranAudioState(
+        isPlaying: true,
+        currentSurahId: 1,
+        currentSurahName: 'Fatiha',
+        selectedReciter: quranRecitersList.first,
+      );
+
+      final cleared = state.copyWith(clearCurrentSurah: true, isPlaying: false);
+      expect(cleared.currentSurahId, isNull);
+      expect(cleared.currentSurahName, isNull);
+      expect(cleared.isPlaying, isFalse);
     });
   });
 }

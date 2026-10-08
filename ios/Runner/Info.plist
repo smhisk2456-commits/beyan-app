@@ -27,9 +27,11 @@
     <key>CFBundleVersion</key>
     <string>$(FLUTTER_BUILD_NUMBER)</string>
 
-    <!-- Konum İzni (Yalnızca Uygulama Açıkken) ───────────────── -->
+    <!-- Konum İzni (Yalnızca Uygulama Açıkken ve Arka Plan Widget/Vakit) ───────────────── -->
     <key>NSLocationWhenInUseUsageDescription</key>
     <string>Namaz vakitlerini ve kıble pusulasını doğru hesaplamak için konumunuza ihtiyaç duyulmaktadır.</string>
+    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+    <string>Kilit ekranı widget'ları ve namaz vakti güncellemeleri için konumunuza ihtiyaç duyulmaktadır.</string>
 
     <!-- Arka Plan Modları (Ses Tilaveti & Arka Plan Bildirim Güncellemesi) ── -->
     <key>UIBackgroundModes</key>
