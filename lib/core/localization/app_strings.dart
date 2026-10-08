@@ -1171,6 +1171,31 @@ class AppStrings {
   String get listenAudio => language == AppLanguage.turkish
       ? 'Dinle'
       : (language == AppLanguage.english ? 'Listen' : 'استماع');
+  String get specialAdhanMakamsPro => language == AppLanguage.turkish
+      ? 'Özel Ezan Makamları & Müezzinler'
+      : (language == AppLanguage.english
+          ? 'Special Adhan Makams & Muezzins'
+          : 'مقامات الأذان الخاصة والمؤذنون');
+  String get specialAdhanMakamsProDesc => language == AppLanguage.turkish
+      ? 'Mekke, Medine ve İstanbul ezan makamları'
+      : (language == AppLanguage.english
+          ? 'Mecca, Medina, and Istanbul adhan tones'
+          : 'أذان مكة المكرمة والمدينة المنورة وإسطنبول');
+  String get proMakamExclusiveNotice => language == AppLanguage.turkish
+      ? 'ezan makamı Beyân Premium ayrıcalığıdır.'
+      : (language == AppLanguage.english
+          ? 'adhan tone is a Beyân Premium exclusive.'
+          : 'متاح حصرياً لمشتركي بيان بريميوم.');
+  String get makamProBannerHint => language == AppLanguage.turkish
+      ? 'Mekke & Medine makamlarını dinleyin; aktif ezan tonu yapmak için Premium\'a geçin.'
+      : (language == AppLanguage.english
+          ? 'Preview Mecca & Medina adhans; upgrade to Premium to set as your adhan tone.'
+          : 'استمع لأذان مكة والمدينة؛ اشترك في بريميوم لتعيينهما كنغمة للأذان.');
+  String get unlockMakamWithPremium => language == AppLanguage.turkish
+      ? 'Premium ile Kilidi Aç'
+      : (language == AppLanguage.english
+          ? 'Unlock with Premium'
+          : 'فتح القفل مع بريميوم');
 
   // ── Hesaplama Yöntemi & Şehir Seçici ──────────────────────────
   String get calculationMethodTitle => language == AppLanguage.turkish

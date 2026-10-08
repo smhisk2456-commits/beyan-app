@@ -89,6 +89,26 @@ void main() {
       expect(AdhanMakam.silent.assetPath, isEmpty);
     });
 
+    test('Mecca ve Medina PRO makam olmalı, diğerleri ücretsiz olmalı', () {
+      expect(AdhanMakam.mecca.isPro, isTrue);
+      expect(AdhanMakam.medina.isPro, isTrue);
+      expect(AdhanMakam.istanbul.isPro, isFalse);
+      expect(AdhanMakam.tekbir.isPro, isFalse);
+      expect(AdhanMakam.bell.isPro, isFalse);
+      expect(AdhanMakam.silent.isPro, isFalse);
+    });
+
+    test('Makamların 3 dildeki başlık ve açıklamaları doğru olmalı', () {
+      for (final makam in AdhanMakam.values) {
+        expect(makam.localizedTitle('tr').isNotEmpty, isTrue);
+        expect(makam.localizedTitle('en').isNotEmpty, isTrue);
+        expect(makam.localizedTitle('ar').isNotEmpty, isTrue);
+        expect(makam.localizedDescription('tr').isNotEmpty, isTrue);
+        expect(makam.localizedDescription('en').isNotEmpty, isTrue);
+        expect(makam.localizedDescription('ar').isNotEmpty, isTrue);
+      }
+    });
+
     test('QuranAudioState copyWith clearCurrentSurah surah ID ve ismini temizlemelidir', () {
       final state = QuranAudioState(
         isPlaying: true,

@@ -24,6 +24,9 @@ enum AdhanMakam {
 extension AdhanMakamExtension on AdhanMakam {
   String get id => name;
 
+  /// Kâbe (Mekke) ve Ravza-i Mutahhara (Medine) makamları Beyân Premium ayrıcalığıdır.
+  bool get isPro => this == AdhanMakam.mecca || this == AdhanMakam.medina;
+
   String get title => localizedTitle('tr');
 
   String localizedTitle(String langCode) {

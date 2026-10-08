@@ -619,16 +619,36 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    strings.adhanMakamToneTitle,
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 13,
-                                      color: isDark ? Colors.white : Colors.black87,
-                                    ),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        strings.adhanMakamToneTitle,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13,
+                                          color: isDark ? Colors.white : Colors.black87,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFD4AF37),
+                                          borderRadius: BorderRadius.circular(5),
+                                        ),
+                                        child: const Text(
+                                          'PRO',
+                                          style: TextStyle(
+                                            fontSize: 8.5,
+                                            fontWeight: FontWeight.w900,
+                                            color: Color(0xFF071F1B),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                   Text(
-                                    _currentMakam.localizedTitle(strings.language.code),
+                                    '${_currentMakam.localizedTitle(strings.language.code)} • ${strings.specialAdhanMakamsProDesc}',
                                     style: const TextStyle(
                                       fontSize: 11,
                                       color: Color(0xFFFFDF7A),

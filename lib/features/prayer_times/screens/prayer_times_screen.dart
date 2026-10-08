@@ -10,6 +10,7 @@ import '../../../core/widgets/common_widgets.dart' as app_widgets;
 import 'city_selector_sheet.dart';
 import 'calculation_method_sheet.dart';
 import '../../monetization/widgets/banner_ad_widget.dart';
+import '../../notifications/screens/adhan_makam_selector_sheet.dart';
 import '../../notifications/screens/notification_settings_sheet.dart';
 
 /// Tüm günlük namaz vakitlerini listeleyen tam ekran.
@@ -81,6 +82,12 @@ class PrayerTimesScreen extends ConsumerWidget {
             onPressed: () {
               ref.read(prayerTimesNotifierProvider.notifier).refresh();
             },
+          ),
+          // Ezan Makamları & Meşhur Müezzinler butonu
+          IconButton(
+            icon: const Icon(Icons.music_note_rounded, color: Color(0xFFFFDF7A)),
+            tooltip: strings.specialAdhanMakamsPro,
+            onPressed: () => AdhanMakamSelectorSheet.show(context),
           ),
           // Ezan ve Âyet Bildirimleri butonu
           IconButton(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/localization/app_strings.dart';
 import '../../../core/theme/app_theme.dart';
@@ -6,6 +7,7 @@ import '../../../core/theme/theme_provider.dart';
 import '../models/adhan_makam.dart';
 import '../services/adhan_audio_player_service.dart';
 import '../services/notification_service.dart';
+import '../../monetization/providers/premium_provider.dart';
 import '../../monetization/screens/premium_paywall_sheet.dart';
 
 /// Ezan Makamları Seçim ve Önizleme Dinleme Ekranı
@@ -46,6 +48,17 @@ class _AdhanMakamSelectorSheetState
 
   Future<void> _loadSelectedMakam() async {
     final makam = await NotificationService.instance.getSelectedMakam();
+    final isPremium = ref.read(premiumProvider).isPremium;
+    if (makam.isPro && !isPremium) {
+      await NotificationService.instance.setSelectedMakam(AdhanMakam.istanbul);
+      if (mounted) {
+        setState(() {
+          _selectedMakam = AdhanMakam.istanbul;
+          _isLoading = false;
+        });
+      }
+      return;
+    }
     if (mounted) {
       setState(() {
         _selectedMakam = makam;
@@ -64,6 +77,7 @@ class _AdhanMakamSelectorSheetState
   Widget build(BuildContext context) {
     final themeState = ref.watch(themeProvider);
     final strings = ref.watch(appStringsProvider);
+    final isPremium = ref.watch(premiumProvider).isPremium;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final gold = themeState.palette.accentGold;
     final bg = isDark ? themeState.palette.darkSurface : Colors.white;
@@ -144,7 +158,36 @@ class _AdhanMakamSelectorSheetState
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 14),
+
+          // PRO Bilgilendirme Bannerı (Eğer Premium değilse)
+          if (!isPremium) ...[
+            Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: gold.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: gold.withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.stars_rounded, color: gold, size: 20),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      strings.makamProBannerHint,
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        color: isDark ? Colors.white70 : AppColors.textPrimary,
+                        height: 1.3,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
 
           if (_isLoading)
             const Center(
@@ -166,6 +209,7 @@ class _AdhanMakamSelectorSheetState
                     makam: makam,
                     isSelected: isSelected,
                     isPlaying: isPlaying,
+                    isPremium: isPremium,
                     gold: gold,
                     isDark: isDark,
                     strings: strings,
@@ -182,10 +226,12 @@ class _AdhanMakamSelectorSheetState
     required AdhanMakam makam,
     required bool isSelected,
     required bool isPlaying,
+    required bool isPremium,
     required Color gold,
     required bool isDark,
     required AppStrings strings,
   }) {
+    final isLocked = makam.isPro && !isPremium;
     final borderColor = isSelected
         ? gold
         : (isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.08));
@@ -198,6 +244,30 @@ class _AdhanMakamSelectorSheetState
       padding: const EdgeInsets.only(bottom: 10),
       child: InkWell(
         onTap: () async {
+          if (isLocked) {
+            HapticFeedback.lightImpact();
+            PremiumPaywallSheet.show(context);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Row(
+                  children: [
+                    const Icon(Icons.workspace_premium_rounded, color: Color(0xFFFFDF7A), size: 20),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        '${makam.localizedTitle(strings.language.code)} ${strings.proMakamExclusiveNotice}',
+                        style: const TextStyle(fontSize: 12.5),
+                      ),
+                    ),
+                  ],
+                ),
+                backgroundColor: const Color(0xFF033E35),
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+            return;
+          }
+          HapticFeedback.selectionClick();
           setState(() => _selectedMakam = makam);
           await NotificationService.instance.setSelectedMakam(makam);
         },
@@ -235,13 +305,47 @@ class _AdhanMakamSelectorSheetState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      makam.localizedTitle(strings.language.code),
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : AppColors.textPrimary,
-                      ),
+                    Row(
+                      children: [
+                        Text(
+                          makam.localizedTitle(strings.language.code),
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.white : AppColors.textPrimary,
+                          ),
+                        ),
+                        if (makam.isPro) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFFFFDF7A), Color(0xFFD4AF37)],
+                              ),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (isLocked) ...[
+                                  const Icon(Icons.lock_rounded, size: 10, color: Color(0xFF071F1B)),
+                                  const SizedBox(width: 3),
+                                ],
+                                const Text(
+                                  'PRO',
+                                  style: TextStyle(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.w900,
+                                    color: Color(0xFF071F1B),
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                     const SizedBox(height: 2),
                     Text(
@@ -255,7 +359,7 @@ class _AdhanMakamSelectorSheetState
                 ),
               ),
 
-              // Dinle / Önizleme Butonu (Sessiz hariç)
+              // Dinle / Önizleme Butonu (Sessiz hariç - PRO dahil herkes dinleyebilir)
               if (makam != AdhanMakam.silent)
                 IconButton(
                   tooltip: isPlaying ? strings.stopAudio : strings.listenAudio,

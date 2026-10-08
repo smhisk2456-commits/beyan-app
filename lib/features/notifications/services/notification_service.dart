@@ -11,6 +11,7 @@ import '../../prayer_times/models/prayer_time_model.dart';
 import '../../prayer_times/services/prayer_time_service.dart';
 import '../models/adhan_makam.dart';
 import '../models/short_verse_notification.dart';
+import '../../monetization/services/premium_service.dart';
 
 /// Ezan, Vakit ve Günün Âyeti Yerel Bildirim Servisi
 class NotificationService {
@@ -246,14 +247,19 @@ class NotificationService {
   }
 
   /// Seçili Ezan Makamını getirir (Varsayılan: İstanbul)
+  /// Eğer PRO makam (Mekke/Medine) seçilmişse ve kullanıcı Premium değilse güvenle İstanbul'a döner.
   Future<AdhanMakam> getSelectedMakam() async {
     final prefs = await SharedPreferences.getInstance();
     final makamStr = prefs.getString(keyAdhanMakam);
     if (makamStr != null) {
-      return AdhanMakam.values.firstWhere(
+      final makam = AdhanMakam.values.firstWhere(
         (m) => m.name == makamStr,
         orElse: () => AdhanMakam.istanbul,
       );
+      if (makam.isPro && !PremiumService.instance.isPremium) {
+        return AdhanMakam.istanbul;
+      }
+      return makam;
     }
     return AdhanMakam.istanbul;
   }
@@ -261,7 +267,11 @@ class NotificationService {
   /// Ezan Makamını değiştirir ve bildirimleri yeniden planlar.
   Future<void> setSelectedMakam(AdhanMakam makam) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(keyAdhanMakam, makam.name);
+    if (makam.isPro && !PremiumService.instance.isPremium) {
+      await prefs.setString(keyAdhanMakam, AdhanMakam.istanbul.name);
+    } else {
+      await prefs.setString(keyAdhanMakam, makam.name);
+    }
     await scheduleUpcomingPrayers();
   }
 
