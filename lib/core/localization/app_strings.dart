@@ -372,4 +372,173 @@ class AppStrings {
   String get allDuasLink => language == AppLanguage.turkish
       ? 'Tüm Dualar ➔'
       : (language == AppLanguage.english ? 'All Duas ➔' : 'جميع الأدعية ➔');
+
+  // ── Günün Âyeti Bildirimleri ────────────────────────────────────
+  String get verseNotifTitle => language == AppLanguage.turkish
+      ? 'Günün Âyeti & Sure Bildirimleri'
+      : (language == AppLanguage.english
+          ? 'Daily Verse & Surah Reminders'
+          : 'تنبيهات آيات وسور اليوم');
+  String get verseNotifDesc => language == AppLanguage.turkish
+      ? 'Her gün belirlenen saatte ilham veren bir âyet ve tefekkür bildirimi alın'
+      : (language == AppLanguage.english
+          ? 'Receive inspiring Quranic verses and spiritual reminders daily'
+          : 'احصل يوميًا على آيات قرآنية ملهمة وتأملات إيمانية');
+  String get verseNotifTime => language == AppLanguage.turkish
+      ? 'Bildirim Saati'
+      : (language == AppLanguage.english ? 'Reminder Time' : 'وقت التنبيه');
+  String get verseNotifFrequency => language == AppLanguage.turkish
+      ? 'Gönderim Sıklığı'
+      : (language == AppLanguage.english ? 'Frequency' : 'تكرار التنبيه');
+  String get verseNotifFreqDaily => language == AppLanguage.turkish
+      ? 'Günde 1 Kez'
+      : (language == AppLanguage.english ? 'Once Daily' : 'مرة واحدة يومياً');
+  String get verseNotifFreqMorningEvening => language == AppLanguage.turkish
+      ? 'Sabah & Akşam'
+      : (language == AppLanguage.english ? 'Morning & Evening' : 'صباحاً ومساءً');
+  String get verseNotifTestBtn => language == AppLanguage.turkish
+      ? 'Âyet Bildirimini Test Et'
+      : (language == AppLanguage.english ? 'Test Verse Reminder' : 'اختبار إشعار الآية');
+  String get verseNotifTestSuccess => language == AppLanguage.turkish
+      ? 'Test âyet bildirimi cihazınıza gönderildi!'
+      : (language == AppLanguage.english
+          ? 'Test verse notification sent to your device!'
+          : 'تم إرسال إشعار الآية التجريبي إلى جهازك!');
+
+  // ── Ana Sayfa Ek Çeviriler ─────────────────────────────────────
+  String get continueReadingQuran => language == AppLanguage.turkish
+      ? 'Kur\'an-ı Kerim Okumaya Devam Et'
+      : (language == AppLanguage.english
+          ? 'Continue Reading Quran'
+          : 'متابعة تلاوة القرآن الكريم');
+  String surahVerseLabel(String surahName, int verseNumber) =>
+      language == AppLanguage.turkish
+          ? '$surahName Suresi • $verseNumber. Âyet'
+          : (language == AppLanguage.english
+              ? 'Surah $surahName • Verse $verseNumber'
+              : 'سورة $surahName • آية $verseNumber');
+  String get today => language == AppLanguage.turkish
+      ? 'Bugün!'
+      : (language == AppLanguage.english ? 'Today!' : 'اليوم!');
+  String daysRemainingText(int days) => language == AppLanguage.turkish
+      ? '$days gün kaldı'
+      : (language == AppLanguage.english
+          ? '$days days left'
+          : '$days أيام متبقية');
+  String get calendarArrow => language == AppLanguage.turkish
+      ? 'Takvim ➔'
+      : (language == AppLanguage.english ? 'Calendar ➔' : 'التقويم ➔');
+
+  // ── Zikirmatik & İbadet Takibi Ek Çeviriler ──────────────────
+  String get tapToCount => language == AppLanguage.turkish
+      ? 'DOKUN'
+      : (language == AppLanguage.english ? 'TAP' : 'اضغط');
+  String get undo => language == AppLanguage.turkish
+      ? 'Geri Al'
+      : (language == AppLanguage.english ? 'Undo' : 'تراجع');
+  String get reset => language == AppLanguage.turkish
+      ? 'Sıfırla'
+      : (language == AppLanguage.english ? 'Reset' : 'إعادة ضبط');
+  String get resetConfirmTitle => language == AppLanguage.turkish
+      ? 'Zikri Sıfırla'
+      : (language == AppLanguage.english ? 'Reset Dhikr' : 'إعادة ضبط الذكر');
+  String get resetConfirmDesc => language == AppLanguage.turkish
+      ? 'Mevcut sayımı ve tur sayısını sıfırlamak istiyor musunuz?'
+      : (language == AppLanguage.english
+          ? 'Do you want to reset current count and completed laps?'
+          : 'هل ترغب في إعادة ضبط العداد الحالي والدورات المكتملة؟');
+  String lapsText(int laps) => language == AppLanguage.turkish
+      ? '$laps Tur'
+      : (language == AppLanguage.english ? '$laps Laps' : '$laps دورات');
+  String get worshipTrackerTab => language == AppLanguage.turkish
+      ? 'İbadet Takibi'
+      : (language == AppLanguage.english ? 'Worship Tracker' : 'متابعة العبادات');
+  String get addCustomDhikr => language == AppLanguage.turkish
+      ? 'Özel Zikir Ekle'
+      : (language == AppLanguage.english ? 'Add Custom Dhikr' : 'إضافة ذكر مخصص');
+  String get customDhikrTitleHint => language == AppLanguage.turkish
+      ? 'Zikir Başlığı (Örn: Lâ Havle...)'
+      : (language == AppLanguage.english
+          ? 'Dhikr Title (e.g., La Hawla...)'
+          : 'عنوان الذكر (مثل: لا حول ولا قوة...)');
+  String get customDhikrMeaningHint => language == AppLanguage.turkish
+      ? 'Anlamı veya Niyeti'
+      : (language == AppLanguage.english
+          ? 'Meaning or Intention'
+          : 'المعنى أو النية');
+  String get add => language == AppLanguage.turkish
+      ? 'Ekle'
+      : (language == AppLanguage.english ? 'Add' : 'إضافة');
+
+  // Dokunma Hissi (Haptic Feedback)
+  String get hapticTitle => language == AppLanguage.turkish
+      ? 'Titreşim / Dokunuş Hissi'
+      : (language == AppLanguage.english ? 'Haptic Feedback' : 'الاهتزاز اللمسي');
+  String get hapticLight => language == AppLanguage.turkish
+      ? 'Hafif'
+      : (language == AppLanguage.english ? 'Light' : 'خفيف');
+  String get hapticMedium => language == AppLanguage.turkish
+      ? 'Orta'
+      : (language == AppLanguage.english ? 'Medium' : 'متوسط');
+  String get hapticHeavy => language == AppLanguage.turkish
+      ? 'Güçlü'
+      : (language == AppLanguage.english ? 'Heavy' : 'قوي');
+  String get hapticOff => language == AppLanguage.turkish
+      ? 'Kapalı'
+      : (language == AppLanguage.english ? 'Off' : 'إيقاف');
+
+  // Seri ve İbadet Alışkanlıkları
+  String streakDaysTitle(int days) => language == AppLanguage.turkish
+      ? '$days. Gün Serisi'
+      : (language == AppLanguage.english
+          ? '$days Days Streak'
+          : 'سلسلة $days أيام');
+  String get startStreak => language == AppLanguage.turkish
+      ? 'Günlük Seri Başlat'
+      : (language == AppLanguage.english ? 'Start Daily Streak' : 'ابدأ السلسلة اليومية');
+  String get todayAllTasksDone => language == AppLanguage.turkish
+      ? '✨ Bugünkü görevler tamamlandı!'
+      : (language == AppLanguage.english
+          ? '✨ All tasks completed for today!'
+          : '✨ اكتملت جميع مهام اليوم!');
+  String remainingTasksText(int count) => language == AppLanguage.turkish
+      ? 'Bugün için $count görev kaldı'
+      : (language == AppLanguage.english
+          ? '$count tasks remaining today'
+          : 'متبقي اليوم $count مهام');
+  String bestStreakLabel(int count) => language == AppLanguage.turkish
+      ? 'En İyi: $count'
+      : (language == AppLanguage.english ? 'Best: $count' : 'الأفضل: $count');
+  String targetMilestoneLabel(String name) => language == AppLanguage.turkish
+      ? 'Hedef: $name'
+      : (language == AppLanguage.english ? 'Target: $name' : 'الهدف: $name');
+  String get spiritualRewardsBtn => language == AppLanguage.turkish
+      ? 'Motive Edici Sureler & Ödüller'
+      : (language == AppLanguage.english
+          ? 'Spiritual Surahs & Rewards'
+          : 'سور التحفيز والجوائز الروحانية');
+
+  // İbadet Başlıkları
+  String get habitFajr => language == AppLanguage.turkish
+      ? 'Sabah Namazı'
+      : (language == AppLanguage.english ? 'Fajr Prayer' : 'صلاة الفجر');
+  String get habitDhuhr => language == AppLanguage.turkish
+      ? 'Öğle Namazı'
+      : (language == AppLanguage.english ? 'Dhuhr Prayer' : 'صلاة الظهر');
+  String get habitAsr => language == AppLanguage.turkish
+      ? 'İkindi Namazı'
+      : (language == AppLanguage.english ? 'Asr Prayer' : 'صلاة العصر');
+  String get habitMaghrib => language == AppLanguage.turkish
+      ? 'Akşam Namazı'
+      : (language == AppLanguage.english ? 'Maghrib Prayer' : 'صلاة المغرب');
+  String get habitIsha => language == AppLanguage.turkish
+      ? 'Yatsı Namazı'
+      : (language == AppLanguage.english ? 'Isha Prayer' : 'صلاة العشاء');
+  String get habitQuran => language == AppLanguage.turkish
+      ? 'Günlük Kur\'an Tilaveti'
+      : (language == AppLanguage.english ? 'Daily Quran Recitation' : 'تلاوة القرآن اليومية');
+  String get habitZikr => language == AppLanguage.turkish
+      ? 'Günlük Zikir & Tesbihat'
+      : (language == AppLanguage.english ? 'Daily Dhikr & Tasbih' : 'الذكر والتسبيح اليومي');
 }
+

@@ -206,15 +206,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 // Yaklaşan Mübarek Gün / Kandil Şeridi
 // ════════════════════════════════════════════════════════════════
 
-class _UpcomingReligiousDayBanner extends StatelessWidget {
+class _UpcomingReligiousDayBanner extends ConsumerWidget {
   final dynamic day; // ReligiousDay
 
   const _UpcomingReligiousDayBanner({required this.day});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final strings = ref.watch(appStringsProvider);
     final days = day.daysRemaining as int;
     final isToday = day.isToday as bool;
+    final statusText = isToday ? strings.today : strings.daysRemainingText(days);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
@@ -252,7 +254,7 @@ class _UpcomingReligiousDayBanner extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  '${day.title} • ${isToday ? "Bugün!" : "$days gün kaldı"}',
+                  '${day.title} • $statusText',
                   style: const TextStyle(
                     color: Color(0xFFFFDF7A),
                     fontSize: 12.5,
@@ -260,9 +262,9 @@ class _UpcomingReligiousDayBanner extends StatelessWidget {
                   ),
                 ),
               ),
-              const Text(
-                'Takvim ➔',
-                style: TextStyle(color: Colors.white70, fontSize: 11),
+              Text(
+                strings.calendarArrow,
+                style: const TextStyle(color: Colors.white70, fontSize: 11),
               ),
             ],
           ),
@@ -276,14 +278,16 @@ class _UpcomingReligiousDayBanner extends StatelessWidget {
 // Son Okunan Kur'an'a Devam Etme Kartı
 // ════════════════════════════════════════════════════════════════
 
-class _LastReadQuranCard extends StatelessWidget {
+class _LastReadQuranCard extends ConsumerWidget {
   final LastReadPosition lastRead;
   final List<Surah> allSurahs;
 
   const _LastReadQuranCard({required this.lastRead, required this.allSurahs});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final strings = ref.watch(appStringsProvider);
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
       child: InkWell(
@@ -345,9 +349,9 @@ class _LastReadQuranCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Kur\'an-ı Kerim Okumaya Devam Et',
-                      style: TextStyle(
+                    Text(
+                      strings.continueReadingQuran,
+                      style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
                         color: Color(0xFFFFDF7A),
@@ -355,7 +359,7 @@ class _LastReadQuranCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '${lastRead.surahName} Suresi • ${lastRead.verseNumber}. Ayet',
+                      strings.surahVerseLabel(lastRead.surahName, lastRead.verseNumber),
                       style: const TextStyle(fontSize: 12, color: Colors.white70),
                     ),
                   ],

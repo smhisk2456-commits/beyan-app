@@ -10,8 +10,9 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../prayer_times/models/prayer_time_model.dart';
 import '../../prayer_times/services/prayer_time_service.dart';
 import '../models/adhan_makam.dart';
+import '../../zikr/models/worship_tracker_model.dart';
 
-/// Ezan ve Namaz Vakti Yerel Bildirim Servisi
+/// Ezan, Vakit ve Günün Âyeti Yerel Bildirim Servisi
 class NotificationService {
   static final NotificationService instance = NotificationService._internal();
   factory NotificationService() => instance;
@@ -22,18 +23,29 @@ class NotificationService {
 
   bool _isInitialized = false;
 
-  // SharedPreferences Keys
+  // SharedPreferences Keys (Ezan & Vakit)
   static const String keyMasterEnabled = 'beyan_notif_master';
   static const String keyEarlyReminder = 'beyan_notif_early_15';
   static const String keySoundEnabled = 'beyan_notif_sound';
   static const String keyAdhanMakam = 'beyan_adhan_makam';
   static const String _keyPrefixPrayer = 'beyan_notif_prayer_';
 
-  // Android Channel
+  // SharedPreferences Keys (Günün Âyeti & Sure Bildirimi)
+  static const String keyVerseNotifEnabled = 'beyan_notif_verse_enabled';
+  static const String keyVerseNotifHour = 'beyan_notif_verse_hour';
+  static const String keyVerseNotifMinute = 'beyan_notif_verse_minute';
+  static const String keyVerseNotifFrequency = 'beyan_notif_verse_frequency';
+
+  // Android Channels
   static const String channelId = 'beyan_prayer_channel';
   static const String channelName = 'Ezan ve Namaz Vakitleri';
   static const String channelDesc =
       'Namaz vakitlerinde ve vakit yaklaşırken gönderilen bildirimler.';
+
+  static const String verseChannelId = 'beyan_verse_channel';
+  static const String verseChannelName = 'Günün Âyeti ve Sure Bildirimleri';
+  static const String verseChannelDesc =
+      'Her gün ilham verici Kur\'an-ı Kerim ayetleri ve manevi hatırlatmalar.';
 
   /// Servisi başlatır ve saat dilimini ayarlar.
   Future<void> initialize() async {
@@ -95,16 +107,30 @@ class NotificationService {
             enableVibration: true,
           ),
         );
+        await androidImplementation.createNotificationChannel(
+          const AndroidNotificationChannel(
+            verseChannelId,
+            verseChannelName,
+            description: verseChannelDesc,
+            importance: Importance.high,
+            playSound: true,
+            enableVibration: true,
+          ),
+        );
       }
 
       _isInitialized = true;
 
       // Uygulama açılışında izinleri kontrol et ve gerekirse iste
       await requestPermissions();
+
+      // Günün ayeti bildirimlerini arka planda kontrol et/planla
+      await scheduleDailyVerseNotifications();
     } catch (e) {
       debugPrint('NotificationService başlatma hatası: $e');
     }
   }
+
 
   /// Cihaz bildirim izninin aktif olup olmadığını kontrol eder.
   Future<bool> hasPermission() async {
@@ -428,4 +454,195 @@ class NotificationService {
       }
     }
   }
+
+  // ══════════════════════════════════════════════════════════════
+  // GÜNÜN ÂYETİ VE SURE BİLDİRİMLERİ (Preferences & Scheduling)
+  // ══════════════════════════════════════════════════════════════
+
+  Future<bool> isVerseNotifEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(keyVerseNotifEnabled) ?? true;
+  }
+
+  Future<void> setVerseNotifEnabled(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(keyVerseNotifEnabled, enabled);
+    if (!enabled) {
+      await cancelAllVerseNotifications();
+    } else {
+      await scheduleDailyVerseNotifications();
+    }
+  }
+
+  Future<int> getVerseNotifHour() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(keyVerseNotifHour) ?? 9; // Varsayılan 09:00
+  }
+
+  Future<int> getVerseNotifMinute() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(keyVerseNotifMinute) ?? 0;
+  }
+
+  Future<void> setVerseNotifTime(int hour, int minute) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(keyVerseNotifHour, hour);
+    await prefs.setInt(keyVerseNotifMinute, minute);
+    await scheduleDailyVerseNotifications();
+  }
+
+  Future<String> getVerseNotifFrequency() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(keyVerseNotifFrequency) ?? 'daily';
+  }
+
+  Future<void> setVerseNotifFrequency(String frequency) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(keyVerseNotifFrequency, frequency);
+    await scheduleDailyVerseNotifications();
+  }
+
+  /// Önümüzdeki 14 günün günlük âyet bildirimlerini planlar.
+  Future<void> scheduleDailyVerseNotifications() async {
+    final enabled = await isVerseNotifEnabled();
+    if (!enabled) {
+      await cancelAllVerseNotifications();
+      return;
+    }
+
+    await cancelAllVerseNotifications();
+    final hour = await getVerseNotifHour();
+    final minute = await getVerseNotifMinute();
+    final freq = await getVerseNotifFrequency();
+    final now = DateTime.now();
+
+    for (int dayOffset = 0; dayOffset < 14; dayOffset++) {
+      final targetDate = now.add(Duration(days: dayOffset));
+      final verse = DailyCompletionVerse.getForDate(targetDate);
+
+      // Ana bildirim vakti
+      final scheduledTime = DateTime(
+        targetDate.year,
+        targetDate.month,
+        targetDate.day,
+        hour,
+        minute,
+      );
+
+      if (scheduledTime.isAfter(now)) {
+        final notifId = 5000 + dayOffset;
+        final scheduledTz = tz.TZDateTime.from(scheduledTime, tz.local);
+
+        await _notifications.zonedSchedule(
+          id: notifId,
+          title: 'Günün Âyeti 📖 ${verse.verseReference}',
+          body: '${verse.turkishMeaning}\n🤲 ${verse.spiritualNote}',
+          scheduledDate: scheduledTz,
+          notificationDetails: const NotificationDetails(
+            android: AndroidNotificationDetails(
+              verseChannelId,
+              verseChannelName,
+              channelDescription: verseChannelDesc,
+              importance: Importance.high,
+              priority: Priority.high,
+              playSound: true,
+              enableVibration: true,
+            ),
+            iOS: DarwinNotificationDetails(
+              presentAlert: true,
+              presentBanner: true,
+              presentList: true,
+              presentBadge: true,
+              presentSound: true,
+            ),
+          ),
+          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        );
+      }
+
+      // Sabah & Akşam seçeneği (19:30 akşam tefekkürü)
+      if (freq == 'morning_evening') {
+        final eveningTime = DateTime(
+          targetDate.year,
+          targetDate.month,
+          targetDate.day,
+          19,
+          30,
+        );
+        if (eveningTime.isAfter(now)) {
+          final notifId = 5100 + dayOffset;
+          final eveningVerse = DailyCompletionVerse.getByIndex(dayOffset + 15);
+          final scheduledTz = tz.TZDateTime.from(eveningTime, tz.local);
+
+          await _notifications.zonedSchedule(
+            id: notifId,
+            title: 'Akşam Tefekkürü 🌙 ${eveningVerse.verseReference}',
+            body: eveningVerse.turkishMeaning,
+            scheduledDate: scheduledTz,
+            notificationDetails: const NotificationDetails(
+              android: AndroidNotificationDetails(
+                verseChannelId,
+                verseChannelName,
+                channelDescription: verseChannelDesc,
+                importance: Importance.high,
+                priority: Priority.high,
+                playSound: true,
+                enableVibration: true,
+              ),
+              iOS: DarwinNotificationDetails(
+                presentAlert: true,
+                presentBanner: true,
+                presentList: true,
+                presentBadge: true,
+                presentSound: true,
+              ),
+            ),
+            androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+          );
+        }
+      }
+    }
+  }
+
+  /// Yalnızca zamanlanmış ayet bildirimlerini iptal eder.
+  Future<void> cancelAllVerseNotifications() async {
+    for (int id = 5000; id <= 5250; id++) {
+      try {
+        await _notifications.cancel(id: id);
+      } catch (_) {}
+    }
+  }
+
+  /// Kullanıcının ayet bildirimini test etmesi için anında gönderir.
+  Future<void> sendTestVerseNotification() async {
+    final verse = DailyCompletionVerse.getForDate();
+    try {
+      await _notifications.show(
+        id: 5999,
+        title: 'Günün Âyeti 📖 ${verse.verseReference}',
+        body: '${verse.turkishMeaning}\n🤲 ${verse.spiritualNote}',
+        notificationDetails: const NotificationDetails(
+          android: AndroidNotificationDetails(
+            verseChannelId,
+            verseChannelName,
+            channelDescription: verseChannelDesc,
+            importance: Importance.high,
+            priority: Priority.high,
+            playSound: true,
+            enableVibration: true,
+          ),
+          iOS: DarwinNotificationDetails(
+            presentAlert: true,
+            presentBanner: true,
+            presentList: true,
+            presentBadge: true,
+            presentSound: true,
+          ),
+        ),
+      );
+    } catch (e) {
+      debugPrint('Ayet test bildirimi hatası: $e');
+    }
+  }
 }
+

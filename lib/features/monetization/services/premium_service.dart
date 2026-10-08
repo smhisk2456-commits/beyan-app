@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,6 +15,8 @@ class PremiumService {
   static const String keyTier = 'beyan_premium_tier';
   static const String keyWidgetTrialStart = 'beyan_widget_trial_start';
   static const String keyHasSeenOnboardingPaywall = 'beyan_seen_onboarding_paywall';
+  static const String keyIntegrityHash = 'beyan_premium_integrity_token';
+  static const String _integritySalt = 'B3y4n_Pr3m1um_S3cur1ty_S4lt_2026';
 
   final InAppPurchase _iap = InAppPurchase.instance;
   StreamSubscription<List<PurchaseDetails>>? _subscription;
@@ -54,12 +57,31 @@ class PremiumService {
   /// Servisi başlatır, yerel SharedPreferences durumunu ve mağaza bağlantısını yükler.
   Future<void> initialize() async {
     final prefs = await SharedPreferences.getInstance();
-    _isPremium = prefs.getBool(keyIsPremium) ?? false;
+    final savedPremium = prefs.getBool(keyIsPremium) ?? false;
     final tierStr = prefs.getString(keyTier);
-    if (tierStr != null) {
-      try {
-        _activeTier = PremiumTier.values.firstWhere((t) => t.name == tierStr);
-      } catch (_) {}
+    final savedHash = prefs.getString(keyIntegrityHash);
+
+    // Güvenlik doğrulaması: Yerel veri tahrifatı (tampering / jailbreak plist edit) kontrolü
+    if (savedPremium) {
+      final expectedHash = _computeIntegrityHash(true, tierStr ?? '');
+      if (savedHash == expectedHash) {
+        _isPremium = true;
+        if (tierStr != null) {
+          try {
+            _activeTier = PremiumTier.values.firstWhere((t) => t.name == tierStr);
+          } catch (_) {}
+        }
+      } else {
+        // Tahrifat tespit edildi; manipüle edilmiş yetkiyi temizle
+        debugPrint('[Güvenlik] Premium doğrulama imzası uyuşmadı! Değişiklik sıfırlandı.');
+        _isPremium = false;
+        _activeTier = null;
+        await prefs.setBool(keyIsPremium, false);
+        await prefs.remove(keyTier);
+        await prefs.remove(keyIntegrityHash);
+      }
+    } else {
+      _isPremium = false;
     }
 
     final trialStr = prefs.getString(keyWidgetTrialStart);
@@ -82,6 +104,18 @@ class PremiumService {
 
     // Mağazadaki ürünleri sorgula (çevrimiçi ise)
     await loadProducts();
+  }
+
+  /// Güvenlik: Satın alma durumu için tahrif edilemez yerel imza üretir
+  static String _computeIntegrityHash(bool isPremium, String tierName) {
+    if (!isPremium) return '';
+    final raw = '$_integritySalt:$tierName:$isPremium:beyan_verified_secure';
+    int hash = 0x811c9dc5;
+    for (int i = 0; i < raw.length; i++) {
+      hash ^= raw.codeUnitAt(i);
+      hash = (hash * 0x01000193) & 0xFFFFFFFF;
+    }
+    return base64Encode(utf8.encode('$hash:${raw.length ^ 0x5A}'));
   }
 
   /// Mağazadaki ürün listesini getirir.
@@ -187,8 +221,10 @@ class PremiumService {
     await prefs.setBool(keyIsPremium, premium);
     if (tier != null) {
       await prefs.setString(keyTier, tier.name);
+      await prefs.setString(keyIntegrityHash, _computeIntegrityHash(true, tier.name));
     } else {
       await prefs.remove(keyTier);
+      await prefs.remove(keyIntegrityHash);
     }
     _changeController.add(premium);
   }
@@ -216,8 +252,12 @@ class PremiumService {
     await prefs.setBool(keyHasSeenOnboardingPaywall, true);
   }
 
-  /// Geliştirici ve test modu için Premium'u açıp kapatma (Testflight / Emülatör testi)
+  /// Geliştirici ve test modu için Premium'u açıp kapatma (Yalnızca kDebugMode!)
   Future<void> toggleDevPremium() async {
+    if (!kDebugMode) {
+      debugPrint('[Güvenlik Engeli] toggleDevPremium yalnızca Debug modunda çalıştırılabilir.');
+      return;
+    }
     final next = !_isPremium;
     await _setPremium(next, tier: next ? PremiumTier.lifetime : null);
   }

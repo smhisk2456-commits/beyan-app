@@ -18,17 +18,22 @@ class ZikirmatikScreen extends ConsumerStatefulWidget {
 }
 
 class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   int _activeTab = 0; // 0: Zikirmatik, 1: İbadet Takibi
   int _count = 0;
   int _target = 33;
   int _selectedDhikrIndex = 0;
   int _completedLaps = 0;
   int _verseShuffleOffset = 0;
+  int _hapticMode = 1; // 0: Off, 1: Light, 2: Medium, 3: Heavy
 
   final ScrollController _chipScrollController = ScrollController();
   late final AnimationController _pulseController;
   late final Animation<double> _scaleAnimation;
+
+  late final AnimationController _plusOneController;
+  late final Animation<double> _plusOneOpacity;
+  late final Animation<Offset> _plusOneOffset;
 
   final List<Map<String, String>> _dhikrList = [
     {
@@ -83,18 +88,46 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
       parent: _pulseController,
       curve: Curves.easeInOut,
     );
+
+    _plusOneController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 450),
+    );
+    _plusOneOpacity = Tween<double>(begin: 1.0, end: 0.0).animate(
+      CurvedAnimation(
+        parent: _plusOneController,
+        curve: const Interval(0.4, 1.0, curve: Curves.easeOut),
+      ),
+    );
+    _plusOneOffset = Tween<Offset>(
+      begin: const Offset(0, 0),
+      end: const Offset(0, -32),
+    ).animate(
+      CurvedAnimation(
+        parent: _plusOneController,
+        curve: Curves.easeOutCubic,
+      ),
+    );
   }
 
   @override
   void dispose() {
     _chipScrollController.dispose();
     _pulseController.dispose();
+    _plusOneController.dispose();
     super.dispose();
   }
 
   void _increment() {
-    HapticFeedback.lightImpact();
+    if (_hapticMode == 1) {
+      HapticFeedback.lightImpact();
+    } else if (_hapticMode == 2) {
+      HapticFeedback.mediumImpact();
+    } else if (_hapticMode == 3) {
+      HapticFeedback.heavyImpact();
+    }
     _pulseController.reverse().then((_) => _pulseController.forward());
+    _plusOneController.forward(from: 0.0);
 
     setState(() {
       _count++;
@@ -170,6 +203,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
   }
 
   void _confirmReset() {
+    final strings = ref.read(appStringsProvider);
     HapticFeedback.mediumImpact();
     showDialog(
       context: context,
@@ -179,15 +213,15 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
           borderRadius: BorderRadius.circular(20),
           side: const BorderSide(color: Color(0xFFD4AF37), width: 1),
         ),
-        title: const Text('Zikri Sıfırla', style: TextStyle(color: Color(0xFFFFDF7A))),
-        content: const Text(
-          'Mevcut sayımı ve tur sayısını sıfırlamak istiyor musunuz?',
-          style: TextStyle(color: Colors.white70),
+        title: Text(strings.resetConfirmTitle, style: const TextStyle(color: Color(0xFFFFDF7A))),
+        content: Text(
+          strings.resetConfirmDesc,
+          style: const TextStyle(color: Colors.white70),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Vazgeç', style: TextStyle(color: Colors.white60)),
+            child: Text(strings.cancel, style: const TextStyle(color: Colors.white60)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -201,7 +235,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
               });
               Navigator.pop(ctx);
             },
-            child: const Text('Sıfırla'),
+            child: Text(strings.reset),
           ),
         ],
       ),
@@ -209,6 +243,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
   }
 
   void _showAddCustomDhikrDialog() {
+    final strings = ref.read(appStringsProvider);
     final titleController = TextEditingController();
     final meaningController = TextEditingController();
 
@@ -220,27 +255,27 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
           borderRadius: BorderRadius.circular(20),
           side: const BorderSide(color: Color(0xFFD4AF37), width: 1),
         ),
-        title: const Text('Özel Zikir Ekle', style: TextStyle(color: Color(0xFFFFDF7A))),
+        title: Text(strings.addCustomDhikr, style: const TextStyle(color: Color(0xFFFFDF7A))),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: titleController,
               style: const TextStyle(color: Colors.white),
-              decoration: const InputDecoration(
-                labelText: 'Zikir Başlığı (Örn: Lâ Havle...)',
-                labelStyle: TextStyle(color: Colors.white70),
-                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFD4AF37))),
+              decoration: InputDecoration(
+                labelText: strings.customDhikrTitleHint,
+                labelStyle: const TextStyle(color: Colors.white70),
+                enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFD4AF37))),
               ),
             ),
             const SizedBox(height: 10),
             TextField(
               controller: meaningController,
               style: const TextStyle(color: Colors.white),
-              decoration: const InputDecoration(
-                labelText: 'Anlamı veya Niyeti',
-                labelStyle: TextStyle(color: Colors.white70),
-                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24)),
+              decoration: InputDecoration(
+                labelText: strings.customDhikrMeaningHint,
+                labelStyle: const TextStyle(color: Colors.white70),
+                enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24)),
               ),
             ),
           ],
@@ -248,7 +283,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('İptal', style: TextStyle(color: Colors.white60)),
+            child: Text(strings.cancel, style: const TextStyle(color: Colors.white60)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFD4AF37), foregroundColor: Colors.black),
@@ -269,7 +304,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
               }
               Navigator.pop(ctx);
             },
-            child: const Text('Ekle'),
+            child: Text(strings.add),
           ),
         ],
       ),
@@ -428,6 +463,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
   }
 
   Widget _buildZikirmatikView(bool isDark, AppLanguage currentLang) {
+    final strings = ref.watch(appStringsProvider);
     final activeDhikr = _dhikrList[_selectedDhikrIndex];
     final progress = _target > 0 ? (_count % _target) / _target : 0.0;
 
@@ -563,7 +599,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                     border: Border.all(color: const Color(0xFFD4AF37).withValues(alpha: 0.5)),
                   ),
                   child: Text(
-                    '$_completedLaps Tur',
+                    strings.lapsText(_completedLaps),
                     style: const TextStyle(color: Color(0xFFFFDF7A), fontSize: 12, fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -572,7 +608,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
 
           const SizedBox(height: 24),
 
-          // ── Dev Sayaç Dokunma Alanı ─────────────────────────────
+          // ── Lüks Sayaç Dokunma Alanı (Yükselme Animasyonu & Parçacık) ─
           ScaleTransition(
             scale: _scaleAnimation,
             child: GestureDetector(
@@ -580,38 +616,41 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
               child: Stack(
                 alignment: Alignment.center,
                 children: [
+                  // Dış Altın Halkalı İlerleme Göstergesi
                   SizedBox(
-                    width: 220,
-                    height: 220,
+                    width: 228,
+                    height: 228,
                     child: CircularProgressIndicator(
                       value: _target > 0 ? progress : 1.0,
-                      strokeWidth: 7,
+                      strokeWidth: 8,
                       backgroundColor: isDark ? Colors.white12 : Colors.grey.shade200,
                       valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFD4AF37)),
                     ),
                   ),
+
+                  // Lüks İç Sayaç Küresi
                   Container(
-                    width: 196,
-                    height: 196,
+                    width: 202,
+                    height: 202,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: const RadialGradient(
-                        colors: [Color(0xFF034A40), Color(0xFF012E2B), Color(0xFF011C19)],
-                        stops: [0.0, 0.7, 1.0],
+                        colors: [Color(0xFF04584C), Color(0xFF012E2B), Color(0xFF011512)],
+                        stops: [0.0, 0.65, 1.0],
                       ),
                       border: Border.all(
-                        color: const Color(0xFFD4AF37).withValues(alpha: 0.6),
-                        width: 2,
+                        color: const Color(0xFFD4AF37).withValues(alpha: 0.7),
+                        width: 2.2,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
-                          blurRadius: 28,
+                          color: const Color(0xFFD4AF37).withValues(alpha: 0.25),
+                          blurRadius: 30,
                           spreadRadius: 2,
                         ),
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.4),
-                          blurRadius: 16,
+                          color: Colors.black.withValues(alpha: 0.5),
+                          blurRadius: 18,
                           offset: const Offset(0, 8),
                         ),
                       ],
@@ -619,32 +658,103 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
-                          '$_count',
-                          style: const TextStyle(
-                            fontSize: 52,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            letterSpacing: 1.5,
+                        // Yüzen +1 Parçacık Animasyonu
+                        SizedBox(
+                          height: 22,
+                          child: AnimatedBuilder(
+                            animation: _plusOneController,
+                            builder: (context, _) {
+                              if (_plusOneController.value == 0.0 || _plusOneController.value == 1.0) {
+                                return const SizedBox.shrink();
+                              }
+                              return Transform.translate(
+                                offset: _plusOneOffset.value,
+                                child: Opacity(
+                                  opacity: _plusOneOpacity.value,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFD4AF37).withValues(alpha: 0.35),
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                        color: const Color(0xFFFFDF7A),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: const Text(
+                                      '+1',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w900,
+                                        color: Color(0xFFFFDF7A),
+                                        shadows: [
+                                          Shadow(color: Color(0xFFD4AF37), blurRadius: 6),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                         ),
-                        if (_target > 0)
-                          Text(
-                            '/ $_target',
+
+                        // Sayı Yükselme Animasyonu (Slide + Scale Pop)
+                        AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 180),
+                          transitionBuilder: (Widget child, Animation<double> animation) {
+                            return ScaleTransition(
+                              scale: Tween<double>(begin: 0.78, end: 1.0).animate(
+                                CurvedAnimation(parent: animation, curve: Curves.easeOutBack),
+                              ),
+                              child: FadeTransition(
+                                opacity: animation,
+                                child: SlideTransition(
+                                  position: Tween<Offset>(
+                                    begin: const Offset(0.0, 0.28),
+                                    end: Offset.zero,
+                                  ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic)),
+                                  child: child,
+                                ),
+                              ),
+                            );
+                          },
+                          child: Text(
+                            '$_count',
+                            key: ValueKey<int>(_count),
                             style: const TextStyle(
-                              fontSize: 14,
-                              color: Color(0xFFFFDF7A),
-                              fontWeight: FontWeight.w600,
+                              fontSize: 54,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              letterSpacing: 1.5,
+                              shadows: [
+                                Shadow(color: Color(0xFFD4AF37), blurRadius: 14),
+                              ],
                             ),
                           ),
+                        ),
+
+                        if (_target > 0)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 2),
+                            child: Text(
+                              '/ $_target',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Color(0xFFFFDF7A),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+
                         const SizedBox(height: 6),
-                        const Text(
-                          'DOKUN',
-                          style: TextStyle(
+                        Text(
+                          strings.tapToCount,
+                          style: const TextStyle(
                             fontSize: 11,
                             color: Colors.white54,
-                            letterSpacing: 2.0,
-                            fontWeight: FontWeight.w600,
+                            letterSpacing: 2.2,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],
@@ -655,7 +765,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
             ),
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 22),
 
           // ── Geri Al ve Sıfırla Butonları ─────────────────────────
           Row(
@@ -664,7 +774,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
               OutlinedButton.icon(
                 onPressed: _undo,
                 icon: const Icon(Icons.undo_rounded, size: 18),
-                label: const Text('Geri Al'),
+                label: Text(strings.undo),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: Colors.white70,
                   side: const BorderSide(color: Colors.white24),
@@ -676,7 +786,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
               OutlinedButton.icon(
                 onPressed: _confirmReset,
                 icon: const Icon(Icons.refresh_rounded, size: 18),
-                label: const Text('Sıfırla'),
+                label: Text(strings.reset),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: const Color(0xFFD4AF37),
                   side: BorderSide(color: const Color(0xFFD4AF37).withValues(alpha: 0.5)),
@@ -686,12 +796,80 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
               ),
             ],
           ),
+
+          const SizedBox(height: 18),
+
+          // ── Titreşim / Dokunuş Hissi Seçici ──────────────────────
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF04201B) : Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: const Color(0xFFD4AF37).withValues(alpha: 0.2)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  _hapticMode == 0 ? Icons.vibration_outlined : Icons.vibration_rounded,
+                  size: 16,
+                  color: const Color(0xFFFFDF7A),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  strings.hapticTitle,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: isDark ? Colors.white70 : Colors.black87,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                _hapticChip(1, strings.hapticLight, isDark),
+                const SizedBox(width: 4),
+                _hapticChip(2, strings.hapticMedium, isDark),
+                const SizedBox(width: 4),
+                _hapticChip(3, strings.hapticHeavy, isDark),
+                const SizedBox(width: 4),
+                _hapticChip(0, strings.hapticOff, isDark),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 
+  Widget _hapticChip(int mode, String label, bool isDark) {
+    final isSelected = _hapticMode == mode;
+    return InkWell(
+      onTap: () {
+        setState(() => _hapticMode = mode);
+        if (mode == 1) HapticFeedback.lightImpact();
+        if (mode == 2) HapticFeedback.mediumImpact();
+        if (mode == 3) HapticFeedback.heavyImpact();
+      },
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFFD4AF37) : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 10.5,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+            color: isSelected ? Colors.black : (isDark ? Colors.white60 : Colors.black54),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildWorshipTrackerView(bool isDark) {
+    final strings = ref.watch(appStringsProvider);
     final todayEntry = ref.watch(todayWorshipEntryProvider);
     final streakData = ref.watch(worshipStreakProvider);
     final completedCount = todayEntry.completedCount;
@@ -711,24 +889,24 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
           _buildProgressCard(completedCount, todayEntry, isDark),
         const SizedBox(height: 18),
 
-
         // ── 3. 5 Vakit Namaz Kontrol Listesi ─────────────────────────
-        _buildHabitItem('Sabah Namazı', 'fajr', todayEntry.fajr, Icons.wb_twilight_rounded, isDark),
-        _buildHabitItem('Öğle Namazı', 'dhuhr', todayEntry.dhuhr, Icons.wb_sunny_rounded, isDark),
-        _buildHabitItem('İkindi Namazı', 'asr', todayEntry.asr, Icons.wb_sunny_outlined, isDark),
-        _buildHabitItem('Akşam Namazı', 'maghrib', todayEntry.maghrib, Icons.nights_stay_outlined, isDark),
-        _buildHabitItem('Yatsı Namazı', 'isha', todayEntry.isha, Icons.nightlight_round, isDark),
+        _buildHabitItem(strings.habitFajr, 'fajr', todayEntry.fajr, Icons.wb_twilight_rounded, isDark),
+        _buildHabitItem(strings.habitDhuhr, 'dhuhr', todayEntry.dhuhr, Icons.wb_sunny_rounded, isDark),
+        _buildHabitItem(strings.habitAsr, 'asr', todayEntry.asr, Icons.wb_sunny_outlined, isDark),
+        _buildHabitItem(strings.habitMaghrib, 'maghrib', todayEntry.maghrib, Icons.nights_stay_outlined, isDark),
+        _buildHabitItem(strings.habitIsha, 'isha', todayEntry.isha, Icons.nightlight_round, isDark),
         const SizedBox(height: 10),
 
         // ── 4. Kur'an & Zikir Takibi ────────────────────────────────
-        _buildHabitItem('Günlük Kur\'an Tilaveti', 'quran', todayEntry.quran, Icons.menu_book_rounded, isDark),
-        _buildHabitItem('Günlük Zikir & Tesbihat', 'zikr', todayEntry.zikr, Icons.fingerprint_rounded, isDark),
+        _buildHabitItem(strings.habitQuran, 'quran', todayEntry.quran, Icons.menu_book_rounded, isDark),
+        _buildHabitItem(strings.habitZikr, 'zikr', todayEntry.zikr, Icons.fingerprint_rounded, isDark),
       ],
     );
   }
 
   /// Günlük Seri & Motivasyon Kartı
   Widget _buildStreakCard(WorshipStreakData streak, bool isDark) {
+    final strings = ref.watch(appStringsProvider);
     final hasStreak = streak.currentStreak > 0;
     final nextMilestone = streak.nextMilestone;
 
@@ -778,8 +956,8 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                     children: [
                       Text(
                         hasStreak
-                            ? '${streak.currentStreak}. Gün Serisi'
-                            : 'Günlük Seri Başlat',
+                            ? strings.streakDaysTitle(streak.currentStreak)
+                            : strings.startStreak,
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -788,8 +966,8 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                       ),
                       Text(
                         streak.isTodayCompleted
-                            ? '✨ Bugünkü görevler tamamlandı!'
-                            : 'Bugün için ${7 - streak.todayCompletedCount} görev kaldı',
+                            ? strings.todayAllTasksDone
+                            : strings.remainingTasksText(7 - streak.todayCompletedCount),
                         style: TextStyle(
                           fontSize: 12,
                           color: streak.isTodayCompleted
@@ -821,7 +999,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                         color: Color(0xFFFFDF7A), size: 14),
                     const SizedBox(width: 4),
                     Text(
-                      'En İyi: ${streak.bestStreak}',
+                      strings.bestStreakLabel(streak.bestStreak),
                       style: const TextStyle(
                         fontSize: 11.5,
                         fontWeight: FontWeight.bold,
@@ -847,7 +1025,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                         style: const TextStyle(fontSize: 14)),
                     const SizedBox(width: 6),
                     Text(
-                      'Hedef: ${nextMilestone.badgeName}',
+                      strings.targetMilestoneLabel(nextMilestone.badgeName),
                       style: const TextStyle(
                         fontSize: 12.5,
                         fontWeight: FontWeight.w600,
@@ -857,7 +1035,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                   ],
                 ),
                 Text(
-                  '${streak.daysToNextMilestone} gün kaldı',
+                  strings.daysRemainingText(streak.daysToNextMilestone),
                   style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
@@ -893,22 +1071,22 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                   width: 1,
                 ),
               ),
-              child: const Row(
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.workspace_premium_rounded,
+                  const Icon(Icons.workspace_premium_rounded,
                       color: Color(0xFFFFDF7A), size: 18),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                   Text(
-                    'Motive Edici Sureler & Ödüller (10-400 Gün)',
-                    style: TextStyle(
+                    '${strings.spiritualRewardsBtn} (10-400 Gün)',
+                    style: const TextStyle(
                       fontSize: 12.5,
                       fontWeight: FontWeight.bold,
                       color: Color(0xFFFFDF7A),
                     ),
                   ),
-                  SizedBox(width: 4),
-                  Icon(Icons.chevron_right_rounded,
+                  const SizedBox(width: 4),
+                  const Icon(Icons.chevron_right_rounded,
                       color: Color(0xFFFFDF7A), size: 18),
                 ],
               ),

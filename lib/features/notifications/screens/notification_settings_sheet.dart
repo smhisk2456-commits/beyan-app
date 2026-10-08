@@ -37,6 +37,12 @@ class _NotificationSettingsSheetState extends State<NotificationSettingsSheet>
   AdhanMakam _currentMakam = AdhanMakam.istanbul;
   final Map<PrayerName, bool> _prayerStates = {};
 
+  // Günün Âyeti & Sure Bildirimleri Durumu
+  bool _verseEnabled = true;
+  int _verseHour = 9;
+  int _verseMinute = 0;
+  String _verseFrequency = 'daily'; // 'daily' veya 'morning_evening'
+
   @override
   void initState() {
     super.initState();
@@ -73,6 +79,10 @@ class _NotificationSettingsSheetState extends State<NotificationSettingsSheet>
     final early = await _service.isEarlyReminderEnabled();
     final makam = await _service.getSelectedMakam();
     final hasPerm = await _service.hasPermission();
+    final verseEnabled = await _service.isVerseNotifEnabled();
+    final verseHour = await _service.getVerseNotifHour();
+    final verseMinute = await _service.getVerseNotifMinute();
+    final verseFreq = await _service.getVerseNotifFrequency();
 
     for (final p in PrayerName.values) {
       _prayerStates[p] = await _service.isPrayerEnabled(p);
@@ -84,6 +94,10 @@ class _NotificationSettingsSheetState extends State<NotificationSettingsSheet>
         _masterEnabled = master;
         _earlyReminder = early;
         _currentMakam = makam;
+        _verseEnabled = verseEnabled;
+        _verseHour = verseHour;
+        _verseMinute = verseMinute;
+        _verseFrequency = verseFreq;
         _loading = false;
       });
     }
@@ -97,6 +111,71 @@ class _NotificationSettingsSheetState extends State<NotificationSettingsSheet>
     await _checkPermission();
     if (_hasPermission) {
       await _service.scheduleUpcomingPrayers();
+    }
+  }
+
+  Future<void> _toggleVerse(bool val) async {
+    HapticFeedback.lightImpact();
+    setState(() => _verseEnabled = val);
+    await _service.setVerseNotifEnabled(val);
+  }
+
+  Future<void> _pickVerseTime() async {
+    HapticFeedback.lightImpact();
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(hour: _verseHour, minute: _verseMinute),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.dark(
+              primary: Color(0xFFD4AF37),
+              onPrimary: Colors.black,
+              surface: Color(0xFF032B25),
+              onSurface: Colors.white,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      setState(() {
+        _verseHour = picked.hour;
+        _verseMinute = picked.minute;
+      });
+      await _service.setVerseNotifTime(picked.hour, picked.minute);
+    }
+  }
+
+  Future<void> _changeVerseFreq(String freq) async {
+    HapticFeedback.selectionClick();
+    setState(() => _verseFrequency = freq);
+    await _service.setVerseNotifFrequency(freq);
+  }
+
+  Future<void> _sendTestVerse() async {
+    HapticFeedback.mediumImpact();
+    await _service.sendTestVerseNotification();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Row(
+            children: [
+              Icon(Icons.check_circle_rounded, color: Color(0xFFFFDF7A), size: 20),
+              SizedBox(width: 10),
+              Expanded(
+                child: Text('Günün Âyeti test bildirimi cihazınıza gönderildi!'),
+              ),
+            ],
+          ),
+          backgroundColor: const Color(0xFF033E35),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          duration: const Duration(seconds: 3),
+        ),
+      );
     }
   }
 
@@ -660,6 +739,246 @@ class _NotificationSettingsSheetState extends State<NotificationSettingsSheet>
 
                   const SizedBox(height: 24),
 
+                  // ── Günün Âyeti ve Sure Bildirimleri ───────────
+                  const Text(
+                    'GÜNÜN ÂYETİ VE SURE BİLDİRİMLERİ',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.1,
+                      color: Color(0xFFD4AF37),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+
+                  Container(
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF0D2823) : Colors.white,
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(
+                        color: isDark
+                            ? const Color(0xFF133B34)
+                            : const Color(0xFFD4AF37).withValues(alpha: 0.35),
+                      ),
+                    ),
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Ana Başlık & Açma-Kapama Switch'i
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.menu_book_rounded,
+                                color: Color(0xFFFFDF7A),
+                                size: 20,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Âyet & Sure Hatırlatıcı',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                      color: isDark ? Colors.white : Colors.black87,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'Her gün tefekkür ve manevi uyanış bildirimi',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: isDark ? Colors.white54 : AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Switch.adaptive(
+                              value: _verseEnabled,
+                              activeThumbColor: const Color(0xFFFFDF7A),
+                              activeTrackColor: const Color(0xFFD4AF37),
+                              onChanged: _toggleVerse,
+                            ),
+                          ],
+                        ),
+
+                        if (_verseEnabled) ...[
+                          const SizedBox(height: 14),
+                          Divider(
+                            color: isDark ? Colors.white10 : Colors.grey.shade200,
+                            height: 1,
+                          ),
+                          const SizedBox(height: 14),
+
+                          // Bildirim Saati Seçimi
+                          InkWell(
+                            onTap: _pickVerseTime,
+                            borderRadius: BorderRadius.circular(12),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                              decoration: BoxDecoration(
+                                color: isDark ? const Color(0xFF071F1B) : Colors.grey.shade50,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: const Color(0xFFD4AF37).withValues(alpha: 0.3),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.access_time_rounded,
+                                    color: Color(0xFFD4AF37),
+                                    size: 18,
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Bildirim Saati',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                            color: isDark ? Colors.white70 : Colors.black87,
+                                          ),
+                                        ),
+                                        Text(
+                                          'Günün ayeti bu saatte iletilir',
+                                          style: TextStyle(
+                                            fontSize: 10.5,
+                                            color: isDark ? Colors.white38 : AppColors.textSecondary,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(color: const Color(0xFFD4AF37)),
+                                    ),
+                                    child: Text(
+                                      '${_verseHour.toString().padLeft(2, '0')}:${_verseMinute.toString().padLeft(2, '0')}',
+                                      style: const TextStyle(
+                                        color: Color(0xFFFFDF7A),
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 12),
+
+                          // Gönderim Sıklığı (Günde 1 vs Sabah & Akşam)
+                          Row(
+                            children: [
+                              Expanded(
+                                child: ChoiceChip(
+                                  label: const Center(
+                                    child: Text(
+                                      'Günde 1 Vakit',
+                                      style: TextStyle(fontSize: 12),
+                                    ),
+                                  ),
+                                  selected: _verseFrequency == 'daily',
+                                  onSelected: (_) => _changeVerseFreq('daily'),
+                                  selectedColor: const Color(0xFFD4AF37),
+                                  backgroundColor: isDark ? const Color(0xFF071F1B) : Colors.grey.shade100,
+                                  labelStyle: TextStyle(
+                                    fontWeight: _verseFrequency == 'daily' ? FontWeight.bold : FontWeight.w500,
+                                    color: _verseFrequency == 'daily'
+                                        ? Colors.black
+                                        : (isDark ? Colors.white70 : Colors.black87),
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    side: BorderSide(
+                                      color: _verseFrequency == 'daily'
+                                          ? const Color(0xFFD4AF37)
+                                          : Colors.transparent,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: ChoiceChip(
+                                  label: const Center(
+                                    child: Text(
+                                      'Sabah & Akşam',
+                                      style: TextStyle(fontSize: 12),
+                                    ),
+                                  ),
+                                  selected: _verseFrequency == 'morning_evening',
+                                  onSelected: (_) => _changeVerseFreq('morning_evening'),
+                                  selectedColor: const Color(0xFFD4AF37),
+                                  backgroundColor: isDark ? const Color(0xFF071F1B) : Colors.grey.shade100,
+                                  labelStyle: TextStyle(
+                                    fontWeight: _verseFrequency == 'morning_evening' ? FontWeight.bold : FontWeight.w500,
+                                    color: _verseFrequency == 'morning_evening'
+                                        ? Colors.black
+                                        : (isDark ? Colors.white70 : Colors.black87),
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    side: BorderSide(
+                                      color: _verseFrequency == 'morning_evening'
+                                          ? const Color(0xFFD4AF37)
+                                          : Colors.transparent,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 12),
+
+                          // Âyet Bildirimini Anında Test Et Butonu
+                          SizedBox(
+                            width: double.infinity,
+                            child: TextButton.icon(
+                              onPressed: _sendTestVerse,
+                              style: TextButton.styleFrom(
+                                foregroundColor: const Color(0xFFFFDF7A),
+                                padding: const EdgeInsets.symmetric(vertical: 8),
+                              ),
+                              icon: const Icon(Icons.auto_awesome_rounded, size: 16),
+                              label: const Text(
+                                'Âyet Bildirimini Şimdi Test Et',
+                                style: TextStyle(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w600,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
                   // ── Test Bildirimi Butonu ───────────────────────
                   SizedBox(
                     width: double.infinity,
@@ -674,7 +993,7 @@ class _NotificationSettingsSheetState extends State<NotificationSettingsSheet>
                       ),
                       icon: const Icon(Icons.notifications_active, color: Color(0xFFD4AF37), size: 18),
                       label: const Text(
-                        'Test Bildirimi Gönder',
+                        'Ezan Test Bildirimi Gönder',
                         style: TextStyle(
                           color: Color(0xFFD4AF37),
                           fontWeight: FontWeight.bold,
