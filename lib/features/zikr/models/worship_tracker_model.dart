@@ -112,6 +112,31 @@ class WorshipStreakMilestone {
     required this.spiritualVirtue,
   });
 
+  String localizedBadgeName(String langCode) {
+    if (langCode == 'en') {
+      switch (days) {
+        case 10: return '10-Day Steadfastness Certificate';
+        case 30: return '30-Day Perseverance Certificate';
+        case 50: return '50-Day Devotion & Patience Medal';
+        case 100: return '100-Day Prayer Guardian Badge';
+        case 200: return '200-Day Serenity & Victory Crown';
+        case 400: return '400-Day Ridwan & Content Soul Badge';
+        default: return '$days-Day Worship Streak Certificate';
+      }
+    } else if (langCode == 'ar') {
+      switch (days) {
+        case 10: return 'شهادة الاستقامة لـ ١٠ أيام';
+        case 30: return 'شهادة الثبات لـ ٣٠ يوماً';
+        case 50: return 'وسام الخشوع والصبر لـ ٥٠ يوماً';
+        case 100: return 'وسام حارس الصلاة لـ ١٠٠ يوم';
+        case 200: return 'تاج السكينة والفتح لـ ٢٠٠ يوم';
+        case 400: return 'وسام الرضوان والنفس المطمئنة لـ ٤٠٠ يوم';
+        default: return 'شهادة استمرار العبادة لـ $days يوماً';
+      }
+    }
+    return badgeName;
+  }
+
   static const List<WorshipStreakMilestone> allMilestones = [
     WorshipStreakMilestone(
       days: 10,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/localization/app_strings.dart';
 import '../widget_service.dart';
 import '../../monetization/providers/premium_provider.dart';
 import '../../monetization/screens/onboarding_trial_paywall_screen.dart';
@@ -249,15 +250,16 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
   @override
   Widget build(BuildContext context) {
     final premiumState = ref.watch(premiumProvider);
+    final strings = ref.watch(appStringsProvider);
 
     return Scaffold(
       backgroundColor: const Color(0xFF051C17),
       appBar: AppBar(
         backgroundColor: const Color(0xFF051C17),
         elevation: 0,
-        title: const Text(
-          'Kilit Ekranı Widget\'ları',
-          style: TextStyle(
+        title: Text(
+          strings.lockScreenWidgetsTitle,
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -275,7 +277,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // ── 3 Günlük Deneme / Premium Durum Şeridi ────────────────
-                  _buildTrialStatusBanner(premiumState),
+                  _buildTrialStatusBanner(premiumState, strings),
 
                   const SizedBox(height: 16),
 
@@ -285,27 +287,27 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                   const SizedBox(height: 24),
 
                   // ── Gerçekçi Kilit Ekranı Canlı Önizlemesi (9:41) ──────────
-                  _buildLockScreenPhoneMockup(),
+                  _buildLockScreenPhoneMockup(strings),
 
                   const SizedBox(height: 24),
 
                   // ── Başlık ve Açıklama ───────────────────────────────────
-                  _buildWidgetTitleAndDescription(),
+                  _buildWidgetTitleAndDescription(strings),
 
                   const SizedBox(height: 20),
 
                   // ── Özelleştirilebilir Seçenekler Listesi ─────────────────
-                  _buildCustomizationOptionsCard(),
+                  _buildCustomizationOptionsCard(strings),
 
                   const SizedBox(height: 24),
 
                   // ── Özellikler (Yeşil Onay İşaretleri) ────────────────────
-                  _buildFeaturesCard(),
+                  _buildFeaturesCard(strings),
 
                   const SizedBox(height: 24),
 
                   // ── Nasıl Eklenir Adımları ────────────────────────────────
-                  _buildHowToAddGuide(),
+                  _buildHowToAddGuide(strings),
 
                   const SizedBox(height: 20),
 
@@ -318,7 +320,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
   }
 
   // ── 3 Günlük Deneme Durum Şeridi ───────────────────────────────────────────
-  Widget _buildTrialStatusBanner(PremiumState premiumState) {
+  Widget _buildTrialStatusBanner(PremiumState premiumState, AppStrings strings) {
     if (premiumState.isPremium) {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -365,7 +367,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  '3 Günlük Ücretsiz Deneme Aktif (${premiumState.trialDaysRemaining} Gün Kaldı)',
+                  strings.trialActiveBanner(premiumState.trialDaysRemaining),
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
@@ -373,9 +375,9 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                   ),
                 ),
               ),
-              const Text(
-                'Yükselt >',
-                style: TextStyle(
+              Text(
+                strings.upgrade,
+                style: const TextStyle(
                   color: Color(0xFF2DD4BF),
                   fontWeight: FontWeight.bold,
                   fontSize: 12,
@@ -477,7 +479,11 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
   }
 
   // ── Gerçekçi iPhone Kilit Ekranı Önizlemesi ────────────────────────────────
-  Widget _buildLockScreenPhoneMockup() {
+  Widget _buildLockScreenPhoneMockup(AppStrings strings) {
+    final asrLabel = strings.language == AppLanguage.english
+        ? 'Asr: 2:15:30'
+        : (strings.language == AppLanguage.arabic ? 'العصر: 2:15:30' : 'İkindi: 2:15:30');
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 36),
       decoration: BoxDecoration(
@@ -501,28 +507,28 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
           // ── Kilit Ekranı Tarihi veya Kompakt Satır Widget'ı ───────────────
           if (_selectedCategory == WidgetCategoryType.countdown) ...[
             // Screenshot 5: "Pazartesi, 6 Haziran | ⏱️ İkindi: 2:15:30"
-            const Row(
+            Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'Pazartesi, 6 Haziran',
-                  style: TextStyle(
+                  strings.mockupDate,
+                  style: const TextStyle(
                     color: Colors.white70,
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                SizedBox(width: 6),
-                Text(
+                const SizedBox(width: 6),
+                const Text(
                   '|',
                   style: TextStyle(color: Colors.white38),
                 ),
-                SizedBox(width: 6),
-                Icon(Icons.timer_outlined, color: Colors.white, size: 14),
-                SizedBox(width: 4),
+                const SizedBox(width: 6),
+                const Icon(Icons.timer_outlined, color: Colors.white, size: 14),
+                const SizedBox(width: 4),
                 Text(
-                  'İkindi: 2:15:30',
-                  style: TextStyle(
+                  asrLabel,
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
@@ -531,9 +537,9 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
               ],
             ),
           ] else ...[
-            const Text(
-              'Pazartesi, 6 Haziran',
-              style: TextStyle(
+            Text(
+              strings.mockupDate,
+              style: const TextStyle(
                 color: Colors.white70,
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
@@ -579,14 +585,14 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                     color: Colors.white.withValues(alpha: 0.15),
                   ),
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.shuffle_rounded, color: Color(0xFFFFDF7A), size: 13),
-                    SizedBox(width: 4),
+                    const Icon(Icons.shuffle_rounded, color: Color(0xFFFFDF7A), size: 13),
+                    const SizedBox(width: 4),
                     Text(
-                      'Farklı Âyet Önizle',
-                      style: TextStyle(
+                      strings.previewAnotherVerse,
+                      style: const TextStyle(
                         color: Color(0xFFFFDF7A),
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
@@ -825,39 +831,64 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
 
 
   // ── Başlık & Açıklama Metni ───────────────────────────────────────────────
-  Widget _buildWidgetTitleAndDescription() {
+  Widget _buildWidgetTitleAndDescription(AppStrings strings) {
     String title;
     String desc;
 
     switch (_selectedCategory) {
       case WidgetCategoryType.quotes:
-        title = 'İslami Sözler, Dua ve Ayet';
-        desc =
-            'Telefonunuzun kilidini açmadan Kilit Ekranınızda Kur\'an ayetlerini ve İslami alıntıları görüntüleyin.';
+        title = strings.widgetFeatureTitle;
+        desc = strings.widgetFeatureDesc;
         break;
       case WidgetCategoryType.dailyVerse:
-        title = 'Günün Ayeti';
-        desc = 'Her gün otomatik olarak yeni bir ilham verici Kur\'an ayeti alın.';
+        title = strings.language == AppLanguage.english
+            ? 'Daily Verse'
+            : (strings.language == AppLanguage.arabic ? 'آية اليوم' : 'Günün Ayeti');
+        desc = strings.language == AppLanguage.english
+            ? 'Receive a new inspiring Quran verse automatically every day.'
+            : (strings.language == AppLanguage.arabic
+                ? 'احصل على آية قرآنية ملهمة جديدة تلقائياً كل يوم.'
+                : 'Her gün otomatik olarak yeni bir ilham verici Kur\'an ayeti alın.');
         break;
       case WidgetCategoryType.prayerTimes:
-        title = 'Namaz Vakitleri';
-        desc =
-            'Canlı geri sayım sayacıyla mevcut ve yaklaşan namaz vakitlerini görün.';
+        title = strings.language == AppLanguage.english
+            ? 'Prayer Times'
+            : (strings.language == AppLanguage.arabic ? 'مواقيت الصلاة' : 'Namaz Vakitleri');
+        desc = strings.language == AppLanguage.english
+            ? 'View current and upcoming prayer times with a live countdown timer.'
+            : (strings.language == AppLanguage.arabic
+                ? 'عرض مواقيت الصلاة الحالية والقادمة مع عداد تنازلي مباشر.'
+                : 'Canlı geri sayım sayacıyla mevcut ve yaklaşan namaz vakitlerini görün.');
         break;
       case WidgetCategoryType.countdown:
-        title = 'Namaz Geri Sayımı';
-        desc =
-            'Bir sonraki namazı canlı geri sayımla gösteren kompakt satır içi widget. Kilit Ekranınızda tarihin üzerinde görünür.';
+        title = strings.language == AppLanguage.english
+            ? 'Prayer Countdown'
+            : (strings.language == AppLanguage.arabic ? 'العد التنازلي للصلاة' : 'Namaz Geri Sayımı');
+        desc = strings.language == AppLanguage.english
+            ? 'Compact inline widget showing live countdown to the next prayer. Appears right on your lock screen.'
+            : (strings.language == AppLanguage.arabic
+                ? 'مصغر مضمن يعرض العد التنازلي للصلاة القادمة على شاشة القفل.'
+                : 'Bir sonraki namazı canlı geri sayımla gösteren kompakt satır içi widget. Kilit Ekranınızda tarihin üzerinde görünür.');
         break;
       case WidgetCategoryType.hijri:
-        title = 'Hicri Takvim & Kandiller';
-        desc =
-            'Hicri tarih, mübarek kandiller ve dini bayramları kilit ekranınızdan anlık takip edin.';
+        title = strings.language == AppLanguage.english
+            ? 'Hijri Calendar & Holy Days'
+            : (strings.language == AppLanguage.arabic ? 'التقويم الهجري والمناسبات' : 'Hicri Takvim & Kandiller');
+        desc = strings.language == AppLanguage.english
+            ? 'Track Hijri date, blessed nights, and Islamic holidays instantly on your lock screen.'
+            : (strings.language == AppLanguage.arabic
+                ? 'تابع التاريخ الهجري والمناسبات الإسلامية فوراً من شاشة القفل.'
+                : 'Hicri tarih, mübarek kandiller ve dini bayramları kilit ekranınızdan anlık takip edin.');
         break;
       case WidgetCategoryType.sunTimes:
-        title = 'Güneş & Kerahat Vakti';
-        desc =
-            'Güneş doğuşunu, kerahat çıkışını ve işrak vaktini kilit ekranınızda izleyin.';
+        title = strings.language == AppLanguage.english
+            ? 'Sunrise & Ishraq'
+            : (strings.language == AppLanguage.arabic ? 'الشروق والإشراق' : 'Güneş & Kerahat Vakti');
+        desc = strings.language == AppLanguage.english
+            ? 'Monitor sunrise and Ishraq prayer times directly on your lock screen.'
+            : (strings.language == AppLanguage.arabic
+                ? 'راقب وقت شروق الشمس والإشراق مباشرة على شاشة قفلك.'
+                : 'Güneş doğuşunu, kerahat çıkışını ve işrak vaktini kilit ekranınızda izleyin.');
         break;
     }
 
@@ -891,7 +922,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
   }
 
   // ── Özelleştirilebilir Seçenekler Kartı (Screenshots 2-3) ───────────────────
-  Widget _buildCustomizationOptionsCard() {
+  Widget _buildCustomizationOptionsCard(AppStrings strings) {
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFF0A241F),
@@ -905,10 +936,10 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
           // 1. Görüntülenecek Kategoriler (Yalnızca Quotes için)
           if (_selectedCategory == WidgetCategoryType.quotes) ...[
             _buildOptionTile(
-              title: 'Görüntülenecek Kategoriler',
-              value: _selectedQuoteCategory,
+              title: strings.displayCategories,
+              value: _selectedQuoteCategory == 'Tümü' ? strings.allCategories : _selectedQuoteCategory,
               onTap: () => _showOptionSheet(
-                title: 'Kategori Seçin',
+                title: strings.displayCategories,
                 options: const ['Tümü', 'Sabır ve Şükür', 'Dualar', 'İman ve Tevekkül', 'Ahlak'],
                 currentValue: _selectedQuoteCategory,
                 onSelected: (val) => _savePreference('widget_quote_category', val, (v) => _selectedQuoteCategory = v),
@@ -921,10 +952,10 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
           if (_selectedCategory == WidgetCategoryType.quotes ||
               _selectedCategory == WidgetCategoryType.dailyVerse) ...[
             _buildOptionTile(
-              title: 'Ayet Görünümü',
+              title: strings.language == AppLanguage.english ? 'Verse View' : (strings.language == AppLanguage.arabic ? 'عرض الآية' : 'Ayet Görünümü'),
               value: _verseViewMode,
               onTap: () => _showOptionSheet(
-                title: 'Ayet Görünümü',
+                title: strings.language == AppLanguage.english ? 'Verse View' : (strings.language == AppLanguage.arabic ? 'عرض الآية' : 'Ayet Görünümü'),
                 options: const ['Yalnızca Meal', 'Arapça + Meal', 'Yalnızca Arapça'],
                 currentValue: _verseViewMode,
                 onSelected: (val) => _savePreference('widget_verse_view', val, (v) => _verseViewMode = v),
@@ -935,10 +966,10 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
 
           // 3. Alıntı Yenileme Sıklığı
           _buildOptionTile(
-            title: 'Alıntı Yenileme Sıklığı',
+            title: strings.quoteRefreshInterval,
             value: _refreshInterval,
             onTap: () => _showOptionSheet(
-              title: 'Yenileme Sıklığı',
+              title: strings.quoteRefreshInterval,
               options: const ['15 Dakika', '30 Dakika', 'Her saat', 'Her gün'],
               currentValue: _refreshInterval,
               onSelected: (val) => _savePreference('widget_refresh_interval', val, (v) => _refreshInterval = v),
@@ -948,10 +979,10 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
 
           // 4. Metin Boyutu
           _buildOptionTile(
-            title: 'Metin Boyutu',
-            value: _textSize,
+            title: strings.textSize,
+            value: _textSize == 'Standart' ? strings.standard : _textSize,
             onTap: () => _showOptionSheet(
-              title: 'Metin Boyutu',
+              title: strings.textSize,
               options: const ['Küçük', 'Standart', 'Büyük'],
               currentValue: _textSize,
               onSelected: (val) => _savePreference('widget_text_size', val, (v) => _textSize = v),
@@ -961,10 +992,10 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
 
           // 5. Yazı Tipi
           _buildOptionTile(
-            title: 'Yazı Tipi',
-            value: _fontFamily,
+            title: strings.fontFamily,
+            value: _fontFamily == 'Standart' ? strings.standard : _fontFamily,
             onTap: () => _showOptionSheet(
-              title: 'Yazı Tipi',
+              title: strings.fontFamily,
               options: const ['Standart', 'Zarif (Lato)', 'Klasik (Amiri)'],
               currentValue: _fontFamily,
               onSelected: (val) => _savePreference('widget_font_family', val, (v) => _fontFamily = v),
@@ -1024,13 +1055,13 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
   }
 
   // ── Özellikler Listesi (Screenshots 3-4) ──────────────────────────────────
-  Widget _buildFeaturesCard() {
+  Widget _buildFeaturesCard(AppStrings strings) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Özellikler',
-          style: TextStyle(
+        Text(
+          strings.features,
+          style: const TextStyle(
             fontSize: 17,
             fontWeight: FontWeight.bold,
             color: Colors.white,
@@ -1048,13 +1079,13 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
           ),
           child: Column(
             children: [
-              _buildFeatureItem('Sonraki namaza canlı geri sayım'),
+              _buildFeatureItem(strings.featCountdown),
               const SizedBox(height: 12),
-              _buildFeatureItem('Mevcut ve yaklaşan namazları gösterir'),
+              _buildFeatureItem(strings.featCurrentPrayers),
               const SizedBox(height: 12),
-              _buildFeatureItem('Her namaz vaktinde otomatik güncellenir'),
+              _buildFeatureItem(strings.featAutoUpdate),
               const SizedBox(height: 12),
-              _buildFeatureItem('100% Çevrimdışı ve pil tasarruflu'),
+              _buildFeatureItem(strings.featBatterySave),
             ],
           ),
         ),
@@ -1093,13 +1124,13 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
   }
 
   // ── Nasıl Eklenir Adımları (Screenshots 4-5) ──────────────────────────────
-  Widget _buildHowToAddGuide() {
+  Widget _buildHowToAddGuide(AppStrings strings) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Nasıl Eklenir',
-          style: TextStyle(
+        Text(
+          strings.howToAdd,
+          style: const TextStyle(
             fontSize: 17,
             fontWeight: FontWeight.bold,
             color: Colors.white,
@@ -1119,20 +1150,17 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
             children: [
               _buildStepItem(
                 number: '1',
-                text:
-                    'Uygulamadan çıkın ve kilit ekranınıza gidin (telefonunuzu kilitleyin, ardından kilidini açmadan ekranı uyandırın).',
+                text: strings.howToAddStep1,
               ),
               const SizedBox(height: 14),
               _buildStepItem(
                 number: '2',
-                text:
-                    'Kilit ekranına basılı tutun ve alttaki \'Özelleştir\' butonuna dokunun.',
+                text: strings.howToAddStep2,
               ),
               const SizedBox(height: 14),
               _buildStepItem(
                 number: '3',
-                text:
-                    'Saat alanına veya altına dokunarak \'Beyân\' widget\'ını seçip kilit ekranınıza ekleyin.',
+                text: strings.howToAddStep3,
               ),
             ],
           ),

@@ -10,6 +10,7 @@ import '../../../core/widgets/common_widgets.dart' as app_widgets;
 import 'city_selector_sheet.dart';
 import 'calculation_method_sheet.dart';
 import '../../monetization/widgets/banner_ad_widget.dart';
+import '../../notifications/screens/notification_settings_sheet.dart';
 
 /// Tüm günlük namaz vakitlerini listeleyen tam ekran.
 /// Ana ekranın alt kısmında veya ayrı bir sekme olarak kullanılır.
@@ -80,6 +81,12 @@ class PrayerTimesScreen extends ConsumerWidget {
             onPressed: () {
               ref.read(prayerTimesNotifierProvider.notifier).refresh();
             },
+          ),
+          // Ezan ve Âyet Bildirimleri butonu
+          IconButton(
+            icon: const Icon(Icons.notifications_active_outlined, color: Color(0xFFFFDF7A)),
+            tooltip: strings.notificationSettings,
+            onPressed: () => NotificationSettingsSheet.show(context),
           ),
         ],
       ),
@@ -170,7 +177,9 @@ class _LocationDateCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    daily.locationName,
+                    daily.locationName == 'Mevcut Konum'
+                        ? strings.currentLocation
+                        : daily.locationName,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   Text(
@@ -281,7 +290,7 @@ class _NextPrayerBanner extends StatelessWidget {
                     ),
                   ),
                   child: Text(
-                    '${next.name.rakatTotal} Rekat',
+                    strings.rakatsCount(next.name.rakatTotal),
                     style: const TextStyle(
                       color: Color(0xFFFFDF7A),
                       fontSize: 10.5,
@@ -433,7 +442,7 @@ class _NextPrayerBanner extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            daily.currentPrayerName,
+                            daily.localizedCurrentPrayerName(strings.language.code),
                             style: const TextStyle(color: Colors.white54, fontSize: 11),
                           ),
                           Text(

@@ -254,7 +254,7 @@ class _UpcomingReligiousDayBanner extends ConsumerWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  '${day.title} • $statusText',
+                  '${day.localizedTitle(strings.language.code)} • $statusText',
                   style: const TextStyle(
                     color: Color(0xFFFFDF7A),
                     fontSize: 12.5,

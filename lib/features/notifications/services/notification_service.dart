@@ -516,6 +516,103 @@ class NotificationService {
     final freq = await getVerseNotifFrequency();
     final now = DateTime.now();
 
+    // ── Saatte 2 Kez (30 dakikada bir, 09:00 - 22:00 arası) ─────────────────
+    if (freq == 'hourly_2') {
+      int notifCount = 0;
+      const int maxNotifs = 32; // iOS 64 limitine takılmamak için güvenli kota
+      DateTime pointer = DateTime(now.year, now.month, now.day, now.hour, (now.minute >= 30 ? 30 : 0))
+          .add(const Duration(minutes: 30));
+
+      while (notifCount < maxNotifs) {
+        if (pointer.hour >= 9 && pointer.hour <= 22) {
+          if (pointer.isAfter(now)) {
+            final notifId = 5000 + notifCount;
+            final verse = DailyCompletionVerse.getByIndex(notifCount);
+            final scheduledTz = tz.TZDateTime.from(pointer, tz.local);
+
+            await _notifications.zonedSchedule(
+              id: notifId,
+              title: 'Âyet & Hikmet 📖 ${verse.verseReference}',
+              body: '${verse.turkishMeaning}\n🤲 ${verse.spiritualNote}',
+              scheduledDate: scheduledTz,
+              notificationDetails: const NotificationDetails(
+                android: AndroidNotificationDetails(
+                  verseChannelId,
+                  verseChannelName,
+                  channelDescription: verseChannelDesc,
+                  importance: Importance.high,
+                  priority: Priority.high,
+                  playSound: true,
+                  enableVibration: true,
+                ),
+                iOS: DarwinNotificationDetails(
+                  presentAlert: true,
+                  presentBanner: true,
+                  presentList: true,
+                  presentBadge: true,
+                  presentSound: true,
+                ),
+              ),
+              androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+            );
+            notifCount++;
+          }
+        }
+        pointer = pointer.add(const Duration(minutes: 30));
+        if (pointer.difference(now).inDays > 5) break;
+      }
+      return;
+    }
+
+    // ── Her Saat Başı (09:00 - 22:00 arası) ──────────────────────────────────
+    if (freq == 'hourly_1') {
+      int notifCount = 0;
+      const int maxNotifs = 28;
+      DateTime pointer = DateTime(now.year, now.month, now.day, now.hour, 0)
+          .add(const Duration(hours: 1));
+
+      while (notifCount < maxNotifs) {
+        if (pointer.hour >= 9 && pointer.hour <= 22) {
+          if (pointer.isAfter(now)) {
+            final notifId = 5000 + notifCount;
+            final verse = DailyCompletionVerse.getByIndex(notifCount);
+            final scheduledTz = tz.TZDateTime.from(pointer, tz.local);
+
+            await _notifications.zonedSchedule(
+              id: notifId,
+              title: 'Günün Âyeti 📖 ${verse.verseReference}',
+              body: '${verse.turkishMeaning}\n🤲 ${verse.spiritualNote}',
+              scheduledDate: scheduledTz,
+              notificationDetails: const NotificationDetails(
+                android: AndroidNotificationDetails(
+                  verseChannelId,
+                  verseChannelName,
+                  channelDescription: verseChannelDesc,
+                  importance: Importance.high,
+                  priority: Priority.high,
+                  playSound: true,
+                  enableVibration: true,
+                ),
+                iOS: DarwinNotificationDetails(
+                  presentAlert: true,
+                  presentBanner: true,
+                  presentList: true,
+                  presentBadge: true,
+                  presentSound: true,
+                ),
+              ),
+              androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+            );
+            notifCount++;
+          }
+        }
+        pointer = pointer.add(const Duration(hours: 1));
+        if (pointer.difference(now).inDays > 5) break;
+      }
+      return;
+    }
+
+    // ── Günlük veya Sabah & Akşam Planlaması ─────────────────────────────────
     for (int dayOffset = 0; dayOffset < 14; dayOffset++) {
       final targetDate = now.add(Duration(days: dayOffset));
       final verse = DailyCompletionVerse.getForDate(targetDate);

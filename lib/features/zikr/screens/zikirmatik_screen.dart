@@ -320,7 +320,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text(_activeTab == 0 ? strings.actionZikr : 'İbadet Takibi'),
+        title: Text(_activeTab == 0 ? strings.actionZikr : strings.worshipTrackerTab),
         centerTitle: true,
         actions: [
           // Özel zikir ekle butonu
@@ -409,7 +409,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                           ),
                           child: Center(
                             child: Text(
-                              'Zikirmatik',
+                              strings.actionZikr,
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
@@ -432,7 +432,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                           ),
                           child: Center(
                             child: Text(
-                              'İbadet Takibi',
+                              strings.worshipTrackerTab,
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
@@ -1025,7 +1025,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                         style: const TextStyle(fontSize: 14)),
                     const SizedBox(width: 6),
                     Text(
-                      strings.targetMilestoneLabel(nextMilestone.badgeName),
+                      strings.targetMilestoneLabel(nextMilestone.localizedBadgeName(strings.language.code)),
                       style: const TextStyle(
                         fontSize: 12.5,
                         fontWeight: FontWeight.w600,
@@ -1099,6 +1099,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
 
   /// Tüm ibadetler (7/7) bittiğinde gösterilen lüks tebrik kartı & her gün farklı Kur'an ayeti
   Widget _buildCompletionCelebrationCard(WorshipStreakData streakData, DailyWorshipEntry todayEntry, bool isDark) {
+    final strings = ref.watch(appStringsProvider);
     final now = DateTime.now();
     final dayOfYear = now.difference(DateTime(now.year, 1, 1)).inDays;
     final verse = DailyCompletionVerse.getByIndex(dayOfYear + _verseShuffleOffset);
@@ -1165,7 +1166,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '$streakDay. Gün Görevi Tamamlandı! 🌟',
+                      strings.dayTasksCompleted(streakDay),
                       style: const TextStyle(
                         fontSize: 16.5,
                         fontWeight: FontWeight.bold,
@@ -1174,9 +1175,9 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                       ),
                     ),
                     const SizedBox(height: 3),
-                    const Text(
-                      'Elhamdülillah! Bugünün 7 ibadet vazifesini eksiksiz ikmâl ettiniz.',
-                      style: TextStyle(
+                    Text(
+                      strings.allTasksCompletedMessage,
+                      style: const TextStyle(
                         fontSize: 12,
                         color: Colors.white,
                         height: 1.3,
@@ -1212,7 +1213,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                         const Icon(Icons.auto_awesome, color: Color(0xFFFFDF7A), size: 15),
                         const SizedBox(width: 6),
                         Text(
-                          'Günün Tebrik Âyeti • ${verse.verseReference}',
+                          '${strings.dailyCompletionVerseBadge} • ${verse.verseReference}',
                           style: const TextStyle(
                             color: Color(0xFFFFDF7A),
                             fontWeight: FontWeight.bold,
@@ -1235,14 +1236,14 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                           color: Colors.white.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: const Row(
+                        child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.refresh_rounded, color: Colors.white70, size: 13),
-                            SizedBox(width: 4),
+                            const Icon(Icons.refresh_rounded, color: Colors.white70, size: 13),
+                            const SizedBox(width: 4),
                             Text(
-                              'Başka Âyet',
-                              style: TextStyle(color: Colors.white70, fontSize: 11),
+                              strings.anotherVerse,
+                              style: const TextStyle(color: Colors.white70, fontSize: 11),
                             ),
                           ],
                         ),

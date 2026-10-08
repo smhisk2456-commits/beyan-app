@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
+import '../../../core/localization/app_strings.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../prayer_times/models/prayer_time_model.dart';
 import '../models/adhan_makam.dart';
@@ -9,7 +11,7 @@ import '../../monetization/screens/premium_paywall_sheet.dart';
 import 'adhan_makam_selector_sheet.dart';
 
 /// Ezan ve Namaz Bildirimleri Lüks Ayarlar Menüsü
-class NotificationSettingsSheet extends StatefulWidget {
+class NotificationSettingsSheet extends ConsumerStatefulWidget {
   const NotificationSettingsSheet({super.key});
 
   static Future<void> show(BuildContext context) {
@@ -22,11 +24,11 @@ class NotificationSettingsSheet extends StatefulWidget {
   }
 
   @override
-  State<NotificationSettingsSheet> createState() =>
+  ConsumerState<NotificationSettingsSheet> createState() =>
       _NotificationSettingsSheetState();
 }
 
-class _NotificationSettingsSheetState extends State<NotificationSettingsSheet>
+class _NotificationSettingsSheetState extends ConsumerState<NotificationSettingsSheet>
     with WidgetsBindingObserver {
   final _service = NotificationService.instance;
 
@@ -122,6 +124,23 @@ class _NotificationSettingsSheetState extends State<NotificationSettingsSheet>
 
   Future<void> _pickVerseTime() async {
     HapticFeedback.lightImpact();
+    if (_verseFrequency == 'hourly_2' || _verseFrequency == 'hourly_1') {
+      if (mounted) {
+        final strings = ref.read(appStringsProvider);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              strings.language == AppLanguage.english
+                  ? 'In this mode, notifications are delivered automatically throughout the day (09:00 - 22:00).'
+                  : 'Bu modda bildirimler gün boyu (09:00 - 22:00) otomatik aralıklarla iletilir.',
+            ),
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+      return;
+    }
     final picked = await showTimePicker(
       context: context,
       initialTime: TimeOfDay(hour: _verseHour, minute: _verseMinute),
@@ -273,6 +292,7 @@ class _NotificationSettingsSheetState extends State<NotificationSettingsSheet>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final strings = ref.watch(appStringsProvider);
 
     return Container(
       constraints: BoxConstraints(
@@ -847,7 +867,7 @@ class _NotificationSettingsSheetState extends State<NotificationSettingsSheet>
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          'Bildirim Saati',
+                                          strings.language == AppLanguage.english ? 'Notification Schedule' : 'Bildirim Saati / Zamanı',
                                           style: TextStyle(
                                             fontSize: 12,
                                             fontWeight: FontWeight.w600,
@@ -855,7 +875,17 @@ class _NotificationSettingsSheetState extends State<NotificationSettingsSheet>
                                           ),
                                         ),
                                         Text(
-                                          'Günün ayeti bu saatte iletilir',
+                                          _verseFrequency == 'hourly_2'
+                                              ? (strings.language == AppLanguage.english
+                                                  ? 'Delivered every 30 mins between 09:00 - 22:00'
+                                                  : '09:00 - 22:00 arasında her 30 dakikada bir iletilir')
+                                              : (_verseFrequency == 'hourly_1'
+                                                  ? (strings.language == AppLanguage.english
+                                                      ? 'Delivered hourly between 09:00 - 22:00'
+                                                      : '09:00 - 22:00 arasında her saat başında iletilir')
+                                                  : (strings.language == AppLanguage.english
+                                                      ? 'Daily verse arrives at this time (tap to change)'
+                                                      : 'Günün ayeti bu saatte iletilir (dokunup değiştir)')),
                                           style: TextStyle(
                                             fontSize: 10.5,
                                             color: isDark ? Colors.white38 : AppColors.textSecondary,
@@ -872,10 +902,14 @@ class _NotificationSettingsSheetState extends State<NotificationSettingsSheet>
                                       border: Border.all(color: const Color(0xFFD4AF37)),
                                     ),
                                     child: Text(
-                                      '${_verseHour.toString().padLeft(2, '0')}:${_verseMinute.toString().padLeft(2, '0')}',
+                                      _verseFrequency == 'hourly_2'
+                                          ? (strings.language == AppLanguage.english ? '30 min' : '30 dk')
+                                          : (_verseFrequency == 'hourly_1'
+                                              ? (strings.language == AppLanguage.english ? '1 hour' : '1 saat')
+                                              : '${_verseHour.toString().padLeft(2, '0')}:${_verseMinute.toString().padLeft(2, '0')}'),
                                       style: const TextStyle(
                                         color: Color(0xFFFFDF7A),
-                                        fontSize: 14,
+                                        fontSize: 13,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
@@ -887,63 +921,104 @@ class _NotificationSettingsSheetState extends State<NotificationSettingsSheet>
 
                           const SizedBox(height: 12),
 
-                          // Gönderim Sıklığı (Günde 1 vs Sabah & Akşam)
-                          Row(
+                          // Gönderim Sıklığı (Saatte 2 kez, Her saat başı, Günde 1, Sabah & Akşam)
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
                             children: [
-                              Expanded(
-                                child: ChoiceChip(
-                                  label: const Center(
-                                    child: Text(
-                                      'Günde 1 Vakit',
-                                      style: TextStyle(fontSize: 12),
-                                    ),
+                              ChoiceChip(
+                                label: Text(
+                                  strings.verseFreq2PerHour,
+                                  style: TextStyle(
+                                    fontSize: 11.5,
+                                    fontWeight: _verseFrequency == 'hourly_2' ? FontWeight.bold : FontWeight.w500,
+                                    color: _verseFrequency == 'hourly_2'
+                                        ? Colors.black
+                                        : (isDark ? Colors.white70 : Colors.black87),
                                   ),
-                                  selected: _verseFrequency == 'daily',
-                                  onSelected: (_) => _changeVerseFreq('daily'),
-                                  selectedColor: const Color(0xFFD4AF37),
-                                  backgroundColor: isDark ? const Color(0xFF071F1B) : Colors.grey.shade100,
-                                  labelStyle: TextStyle(
+                                ),
+                                selected: _verseFrequency == 'hourly_2',
+                                onSelected: (_) => _changeVerseFreq('hourly_2'),
+                                selectedColor: const Color(0xFFD4AF37),
+                                backgroundColor: isDark ? const Color(0xFF071F1B) : Colors.grey.shade100,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  side: BorderSide(
+                                    color: _verseFrequency == 'hourly_2'
+                                        ? const Color(0xFFD4AF37)
+                                        : Colors.transparent,
+                                  ),
+                                ),
+                              ),
+                              ChoiceChip(
+                                label: Text(
+                                  strings.verseFreqHourly,
+                                  style: TextStyle(
+                                    fontSize: 11.5,
+                                    fontWeight: _verseFrequency == 'hourly_1' ? FontWeight.bold : FontWeight.w500,
+                                    color: _verseFrequency == 'hourly_1'
+                                        ? Colors.black
+                                        : (isDark ? Colors.white70 : Colors.black87),
+                                  ),
+                                ),
+                                selected: _verseFrequency == 'hourly_1',
+                                onSelected: (_) => _changeVerseFreq('hourly_1'),
+                                selectedColor: const Color(0xFFD4AF37),
+                                backgroundColor: isDark ? const Color(0xFF071F1B) : Colors.grey.shade100,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  side: BorderSide(
+                                    color: _verseFrequency == 'hourly_1'
+                                        ? const Color(0xFFD4AF37)
+                                        : Colors.transparent,
+                                  ),
+                                ),
+                              ),
+                              ChoiceChip(
+                                label: Text(
+                                  strings.verseFreqDaily,
+                                  style: TextStyle(
+                                    fontSize: 11.5,
                                     fontWeight: _verseFrequency == 'daily' ? FontWeight.bold : FontWeight.w500,
                                     color: _verseFrequency == 'daily'
                                         ? Colors.black
                                         : (isDark ? Colors.white70 : Colors.black87),
                                   ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    side: BorderSide(
-                                      color: _verseFrequency == 'daily'
-                                          ? const Color(0xFFD4AF37)
-                                          : Colors.transparent,
-                                    ),
+                                ),
+                                selected: _verseFrequency == 'daily',
+                                onSelected: (_) => _changeVerseFreq('daily'),
+                                selectedColor: const Color(0xFFD4AF37),
+                                backgroundColor: isDark ? const Color(0xFF071F1B) : Colors.grey.shade100,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  side: BorderSide(
+                                    color: _verseFrequency == 'daily'
+                                        ? const Color(0xFFD4AF37)
+                                        : Colors.transparent,
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: ChoiceChip(
-                                  label: const Center(
-                                    child: Text(
-                                      'Sabah & Akşam',
-                                      style: TextStyle(fontSize: 12),
-                                    ),
-                                  ),
-                                  selected: _verseFrequency == 'morning_evening',
-                                  onSelected: (_) => _changeVerseFreq('morning_evening'),
-                                  selectedColor: const Color(0xFFD4AF37),
-                                  backgroundColor: isDark ? const Color(0xFF071F1B) : Colors.grey.shade100,
-                                  labelStyle: TextStyle(
+                              ChoiceChip(
+                                label: Text(
+                                  strings.verseFreqMorningEvening,
+                                  style: TextStyle(
+                                    fontSize: 11.5,
                                     fontWeight: _verseFrequency == 'morning_evening' ? FontWeight.bold : FontWeight.w500,
                                     color: _verseFrequency == 'morning_evening'
                                         ? Colors.black
                                         : (isDark ? Colors.white70 : Colors.black87),
                                   ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    side: BorderSide(
-                                      color: _verseFrequency == 'morning_evening'
-                                          ? const Color(0xFFD4AF37)
-                                          : Colors.transparent,
-                                    ),
+                                ),
+                                selected: _verseFrequency == 'morning_evening',
+                                onSelected: (_) => _changeVerseFreq('morning_evening'),
+                                selectedColor: const Color(0xFFD4AF37),
+                                backgroundColor: isDark ? const Color(0xFF071F1B) : Colors.grey.shade100,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  side: BorderSide(
+                                    color: _verseFrequency == 'morning_evening'
+                                        ? const Color(0xFFD4AF37)
+                                        : Colors.transparent,
                                   ),
                                 ),
                               ),

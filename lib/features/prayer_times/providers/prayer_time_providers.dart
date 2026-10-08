@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/localization/app_strings.dart';
 import '../models/prayer_time_model.dart';
 import '../services/prayer_time_service.dart';
 
@@ -89,11 +90,12 @@ final prayerCountdownProvider = StreamProvider<Duration>((ref) {
 /// Countdown'ı formatlanmış string olarak döner (ör: "02:45" veya "1s 30dk").
 final countdownStringProvider = StreamProvider<String>((ref) {
   final service = ref.watch(prayerTimeServiceProvider);
+  final lang = ref.watch(appLanguageProvider);
   return Stream.periodic(const Duration(seconds: 1), (count) => count).asyncMap(
     (_) async {
       final daily = await ref.watch(dailyPrayerTimesProvider.future);
       final remaining = daily.timeUntilNextPrayer;
-      return service.formatCountdown(remaining);
+      return service.formatCountdown(remaining, lang: lang);
     },
   );
 });

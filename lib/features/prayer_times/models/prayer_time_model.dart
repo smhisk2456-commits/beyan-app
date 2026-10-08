@@ -237,6 +237,27 @@ class DailyPrayerTimes {
   }
 
   String get nextPrayerName => nextPrayerEntry?.name.turkish ?? 'İmsak';
+
+  PrayerEntry? get currentPrayerEntry {
+    final now = _nowInTurkey;
+    PrayerEntry? current;
+    for (final p in prayers) {
+      if (p.time.isBefore(now)) {
+        current = p;
+      }
+    }
+    return current;
+  }
+
+  String localizedCurrentPrayerName(String langCode) {
+    return currentPrayerEntry?.name.localizedName(langCode) ??
+        (langCode == 'en' ? 'Isha' : (langCode == 'ar' ? 'العشاء' : 'Yatsı'));
+  }
+
+  String localizedNextPrayerName(String langCode) {
+    return nextPrayerEntry?.name.localizedName(langCode) ??
+        (langCode == 'en' ? 'Fajr' : (langCode == 'ar' ? 'الفجر' : 'İmsak'));
+  }
 }
 
 /// Konum verisi – GPS veya varsayılan İstanbul

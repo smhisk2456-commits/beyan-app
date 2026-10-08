@@ -3,6 +3,7 @@ import 'package:adhan/adhan.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/utils/app_constants.dart';
+import '../../../core/localization/app_strings.dart';
 import '../models/prayer_time_model.dart';
 import '../models/city_model.dart';
 import '../models/calculation_settings_model.dart';
@@ -258,14 +259,21 @@ class PrayerTimeService {
     return '$h:$m';
   }
 
-  String formatCountdown(Duration duration) {
+  String formatCountdown(Duration duration, {AppLanguage? lang}) {
     if (duration == Duration.zero) return '--:--';
     final h = duration.inHours;
     final m = duration.inMinutes.remainder(60);
     final s = duration.inSeconds.remainder(60);
+    final mStr = m.toString().padLeft(2, '0');
+    final sStr = s.toString().padLeft(2, '0');
     if (h > 0) {
-      return '${h}s ${m.toString().padLeft(2, '0')}dk';
+      if (lang == AppLanguage.english) {
+        return '${h}h ${mStr}m';
+      } else if (lang == AppLanguage.arabic) {
+        return '$h س $mStr د';
+      }
+      return '${h}s ${mStr}dk';
     }
-    return '${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
+    return '$mStr:$sStr';
   }
 }

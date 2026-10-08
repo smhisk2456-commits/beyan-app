@@ -7,6 +7,7 @@ class HijriDate {
   final int year;
   final String monthNameTr;
   final String monthNameAr;
+  final String monthNameEn;
 
   const HijriDate({
     required this.day,
@@ -14,10 +15,12 @@ class HijriDate {
     required this.year,
     required this.monthNameTr,
     required this.monthNameAr,
+    required this.monthNameEn,
   });
 
   String formatTr() => '$day $monthNameTr $year';
   String formatAr() => '$day $monthNameAr $year هـ';
+  String formatEn() => '$day $monthNameEn $year AH';
 }
 
 /// Diyanet İşleri Başkanlığı takvimine uyumlu Hicri Takvim Servisi
@@ -56,6 +59,21 @@ class HijriCalendarService {
     'شوال',
     'ذو القعدة',
     'ذو الحجة',
+  ];
+
+  static const List<String> hijriMonthNamesEn = [
+    'Muharram',
+    'Safar',
+    'Rabi\' al-Awwal',
+    'Rabi\' al-Thani',
+    'Jumada al-Awwal',
+    'Jumada al-Thani',
+    'Rajab',
+    'Sha\'ban',
+    'Ramadan',
+    'Shawwal',
+    'Dhu al-Qadah',
+    'Dhu al-Hijjah',
   ];
 
   /// Hicri tarih hesaplama (Umm al-Qura standard algoritması + kullanıcı düzeltme günü)
@@ -102,6 +120,7 @@ class HijriCalendarService {
       year: hYear,
       monthNameTr: hijriMonthNamesTr[hMonth - 1],
       monthNameAr: hijriMonthNamesAr[hMonth - 1],
+      monthNameEn: hijriMonthNamesEn[hMonth - 1],
     );
   }
 

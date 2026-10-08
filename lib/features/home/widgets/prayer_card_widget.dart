@@ -294,14 +294,22 @@ class _LocationRow extends StatelessWidget {
 
     final hijriStr = language == AppLanguage.arabic
         ? hijri.formatAr()
-        : '${hijri.day} ${hijri.monthNameTr}';
+        : (language == AppLanguage.english
+            ? '${hijri.day} ${hijri.monthNameEn}'
+            : '${hijri.day} ${hijri.monthNameTr}');
+
+    final locationName = daily.locationName == 'Mevcut Konum'
+        ? (language == AppLanguage.english
+            ? 'Current Location'
+            : (language == AppLanguage.arabic ? 'الموقع الحالي' : 'Mevcut Konum'))
+        : daily.locationName;
 
     return Row(
       children: [
         const Icon(Icons.location_on_rounded, color: Colors.white60, size: 14),
         const SizedBox(width: 4),
         Text(
-          daily.locationName,
+          locationName,
           style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w500),
         ),
         const Spacer(),

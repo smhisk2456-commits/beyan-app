@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/localization/app_strings.dart';
+import '../../notifications/screens/notification_settings_sheet.dart';
 import '../widget_service.dart';
 
 /// Lüks Ayarlar ve Dil Seçimi Alt Menüsü
@@ -230,6 +231,67 @@ class _WidgetSettingsDialogState extends ConsumerState<WidgetSettingsDialog> {
                 onSelected: (_) => _saveInterval(m),
               );
             }).toList(),
+          ),
+
+          const SizedBox(height: 20),
+          const Divider(color: Colors.white12),
+          const SizedBox(height: 12),
+
+          // ── Ezan & Âyet Bildirimleri Bölümü ──
+          InkWell(
+            borderRadius: BorderRadius.circular(14),
+            onTap: () {
+              Navigator.pop(context);
+              NotificationSettingsSheet.show(context);
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF0D2823) : const Color(0xFFF0F5F3),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(7),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFD4AF37),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.notifications_active_rounded, color: Colors.black, size: 16),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          strings.notificationSettings,
+                          style: TextStyle(
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? const Color(0xFFFFDF7A) : const Color(0xFF033E35),
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          strings.verseNotificationsTitle,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: isDark ? Colors.white60 : Colors.black54,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.arrow_forward_ios_rounded, size: 13, color: Color(0xFFD4AF37)),
+                ],
+              ),
+            ),
           ),
         ],
       ),

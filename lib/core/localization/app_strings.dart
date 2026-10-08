@@ -540,5 +540,151 @@ class AppStrings {
   String get habitZikr => language == AppLanguage.turkish
       ? 'Günlük Zikir & Tesbihat'
       : (language == AppLanguage.english ? 'Daily Dhikr & Tasbih' : 'الذكر والتسبيح اليومي');
+
+  // Konum & Rekat & Zaman
+  String get currentLocation => language == AppLanguage.turkish
+      ? 'Mevcut Konum'
+      : (language == AppLanguage.english ? 'Current Location' : 'الموقع الحالي');
+  String rakatsCount(int count) => language == AppLanguage.turkish
+      ? '$count Rekat'
+      : (language == AppLanguage.english ? '$count Rakats' : '$count ركعات');
+  String get rakatsSuffix => language == AppLanguage.turkish
+      ? 'Rekat'
+      : (language == AppLanguage.english ? 'Rakats' : 'ركعات');
+
+  // 7/7 Görev Kutlama
+  String dayTasksCompleted(int day) => language == AppLanguage.turkish
+      ? '$day. Gün Görevi Tamamlandı! 🌟'
+      : (language == AppLanguage.english
+          ? 'Day $day Tasks Completed! 🌟'
+          : 'اكتملت مهام اليوم $day! 🌟');
+  String get allTasksCompletedMessage => language == AppLanguage.turkish
+      ? 'Elhamdülillah! Bugünün 7 ibadet vazifesini eksiksiz ikmâl ettiniz.'
+      : (language == AppLanguage.english
+          ? 'Alhamdulillah! You have completed all 7 daily worship duties today.'
+          : 'الحمد لله! لقد أتممت مهام العبادة الـ ٧ لليوم على أكمل وجه.');
+  String get dailyCompletionVerseBadge => language == AppLanguage.turkish
+      ? 'Günün Tebrik Âyeti'
+      : (language == AppLanguage.english ? 'Daily Completion Verse' : 'آية الإتمام اليومية');
+  String get anotherVerse => language == AppLanguage.turkish
+      ? 'Başka Âyet'
+      : (language == AppLanguage.english ? 'Another Verse' : 'آية أخرى');
+
+  // Âyet Bildirim Sıklıkları (Saatte 2 kez, Her saat başı vs.)
+  String get verseFreq2PerHour => language == AppLanguage.turkish
+      ? 'Saatte 2 Kez (30 dk\'da bir)'
+      : (language == AppLanguage.english
+          ? '2 times per hour (Every 30 min)'
+          : 'مرتان كل ساعة (كل ٣٠ دقيقة)');
+  String get verseFreqHourly => language == AppLanguage.turkish
+      ? 'Her Saat Başı'
+      : (language == AppLanguage.english ? 'Every Hour' : 'كل ساعة');
+  String get verseFreq2Hours => language == AppLanguage.turkish
+      ? '2 Saatte Bir'
+      : (language == AppLanguage.english ? 'Every 2 Hours' : 'كل ساعتين');
+  String get verseFreqDaily => language == AppLanguage.turkish
+      ? 'Günde 1 Vakit'
+      : (language == AppLanguage.english ? 'Once Daily' : 'مرة واحدة يومياً');
+  String get verseFreqMorningEvening => language == AppLanguage.turkish
+      ? 'Sabah & Akşam'
+      : (language == AppLanguage.english ? 'Morning & Evening' : 'صباحاً ومساءً');
+
+  // Kilit Ekranı Widget Merkezi
+  String get lockScreenWidgetsTitle => language == AppLanguage.turkish
+      ? 'Kilit Ekranı Widget\'ları'
+      : (language == AppLanguage.english
+          ? 'Lock Screen Widgets'
+          : 'مصغرات شاشة القفل');
+  String trialActiveBanner(int days) => language == AppLanguage.turkish
+      ? '3 Günlük Ücretsiz Deneme Aktif ($days Gün Kaldı)'
+      : (language == AppLanguage.english
+          ? '3-Day Free Trial Active ($days Days Left)'
+          : 'الفترة التجريبية مجانية لـ ٣ أيام (متبقي $days أيام)');
+  String get upgrade => language == AppLanguage.turkish
+      ? 'Yükselt >'
+      : (language == AppLanguage.english ? 'Upgrade >' : 'ترقية >');
+  String get mockupDate => language == AppLanguage.turkish
+      ? 'Pazartesi, 6 Haziran'
+      : (language == AppLanguage.english ? 'Monday, June 6' : 'الإثنين، ٦ يونيو');
+  String get previewAnotherVerse => language == AppLanguage.turkish
+      ? 'Farklı Âyet Önizle'
+      : (language == AppLanguage.english ? 'Preview Another Verse' : 'معاينة آية أخرى');
+  String get widgetFeatureTitle => language == AppLanguage.turkish
+      ? 'İslami Sözler, Dua ve Ayet'
+      : (language == AppLanguage.english
+          ? 'Islamic Quotes, Duas & Verses'
+          : 'أقوال إسلامية وأدعية وآيات');
+  String get widgetFeatureDesc => language == AppLanguage.turkish
+      ? 'Telefonunuzun kilidini açmadan Kilit Ekranınızda Kur\'an ayetlerini ve İslami alıntıları görüntüleyin.'
+      : (language == AppLanguage.english
+          ? 'Display Quran verses and Islamic quotes on your Lock Screen without unlocking your phone.'
+          : 'اعرض آيات القرآن والأدعية على شاشة القفل دون فتح قفل هاتفك.');
+  String get displayCategories => language == AppLanguage.turkish
+      ? 'Görüntülenecek Kategoriler'
+      : (language == AppLanguage.english ? 'Display Categories' : 'الفئات المعروضة');
+  String get allCategories => language == AppLanguage.turkish
+      ? 'Tümü'
+      : (language == AppLanguage.english ? 'All' : 'الكل');
+  String get quoteRefreshInterval => language == AppLanguage.turkish
+      ? 'Alıntı Yenileme Sıklığı'
+      : (language == AppLanguage.english ? 'Quote Refresh Frequency' : 'تكرار تحديث الأقوال');
+  String get textSize => language == AppLanguage.turkish
+      ? 'Metin Boyutu'
+      : (language == AppLanguage.english ? 'Text Size' : 'حجم النص');
+  String get fontFamily => language == AppLanguage.turkish
+      ? 'Yazı Tipi'
+      : (language == AppLanguage.english ? 'Font Family' : 'نوع الخط');
+  String get standard => language == AppLanguage.turkish
+      ? 'Standart'
+      : (language == AppLanguage.english ? 'Standard' : 'قياسي');
+  String get features => language == AppLanguage.turkish
+      ? 'Özellikler'
+      : (language == AppLanguage.english ? 'Features' : 'المميزات');
+  String get featCountdown => language == AppLanguage.turkish
+      ? 'Sonraki namaza canlı geri sayım'
+      : (language == AppLanguage.english
+          ? 'Live countdown to next prayer'
+          : 'عد تنازلي مباشر للصلاة القادمة');
+  String get featCurrentPrayers => language == AppLanguage.turkish
+      ? 'Mevcut ve yaklaşan namazları gösterir'
+      : (language == AppLanguage.english
+          ? 'Displays current and upcoming prayers'
+          : 'عرض الصلوات الحالية والقادمة');
+  String get featAutoUpdate => language == AppLanguage.turkish
+      ? 'Her namaz vaktinde otomatik güncellenir'
+      : (language == AppLanguage.english
+          ? 'Updates automatically at every prayer time'
+          : 'تحديث تلقائي مع دخول كل وقت صلاة');
+  String get featBatterySave => language == AppLanguage.turkish
+      ? '100% Çevrimdışı ve pil tasarruflu'
+      : (language == AppLanguage.english
+          ? '100% Offline and battery friendly'
+          : '١٠٠٪ بدون إنترنت وموفر للبطارية');
+  String get howToAddStep1 => language == AppLanguage.turkish
+      ? 'Uygulamadan çıkın ve kilit ekranınıza gidin (telefonunuzu kilitleyin, ardından kilidini açmadan ekranı uyandırın).'
+      : (language == AppLanguage.english
+          ? 'Exit the app and go to your lock screen (lock your phone, then wake the screen without unlocking).'
+          : 'اخرج من التطبيق وتوجه إلى شاشة القفل (اقفل هاتفك ثم أيقظ الشاشة دون إلغاء القفل).');
+  String get howToAddStep2 => language == AppLanguage.turkish
+      ? 'Kilit ekranına basılı tutun ve alttaki \'Özelleştir\' butonuna dokunun.'
+      : (language == AppLanguage.english
+          ? 'Press and hold your lock screen, then tap the \'Customize\' button at the bottom.'
+          : 'اضغط مطولاً على شاشة القفل ثم اضغط زر \'تخصيص\' في الأسفل.');
+  String get howToAddStep3 => language == AppLanguage.turkish
+      ? 'Saat alanına veya altına dokunarak \'Beyân\' widget\'ını seçip kilit ekranınıza ekleyin.'
+      : (language == AppLanguage.english
+          ? 'Tap above or below the clock, select the \'Beyân\' widget, and add it to your lock screen.'
+          : 'اضغط على مساحة الساعة واختر أداة \'بيان\' لإضافتها لشاشة القفل.');
+  String get notificationSettings => language == AppLanguage.turkish
+      ? 'Ezan & Âyet Bildirimleri'
+      : (language == AppLanguage.english
+          ? 'Prayer & Verse Notifications'
+          : 'تنبيهات الأذان والآيات');
+  String get verseNotificationsTitle => language == AppLanguage.turkish
+      ? 'Günün Âyeti ve Sure Bildirimleri'
+      : (language == AppLanguage.english
+          ? 'Daily Verse & Surah Notifications'
+          : 'تنبيهات آيات وسور اليوم');
 }
+
 
