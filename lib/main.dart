@@ -166,7 +166,11 @@ class _MainNavigationState extends ConsumerState<MainNavigation> {
     if (!mounted) return;
     final shouldShow = await PremiumService.instance.shouldShowLaunchPaywall();
     if (shouldShow && mounted) {
-      await OnboardingTrialPaywallScreen.show(context);
+      // Yalnızca ilk yüklemede 1 kez gösterilmesi için hemen işaretle
+      await PremiumService.instance.markLaunchPaywallSeen();
+      if (mounted) {
+        await OnboardingTrialPaywallScreen.show(context);
+      }
     }
   }
 

@@ -685,6 +685,108 @@ class AppStrings {
       : (language == AppLanguage.english
           ? 'Daily Verse & Surah Notifications'
           : 'تنبيهات آيات وسور اليوم');
+
+  // ── Paywall & Monetization Localization ──
+  String get paywallTitle => language == AppLanguage.turkish
+      ? 'Beyân Premium Ayrıcalıkları'
+      : (language == AppLanguage.english
+          ? 'Beyân Premium Privileges'
+          : 'مميزات بيان بريميوم');
+  String get paywallSubtitle => language == AppLanguage.turkish
+      ? 'Kilit ekranı widget\'ları, tarihi ezan makamları ve huşû dolu bir deneyim.'
+      : (language == AppLanguage.english
+          ? 'Lock screen widgets, historical adhan makams, and a serene worship experience.'
+          : 'أدوات شاشة القفل، ومقامات الأذان التاريخية، وتجربة عبادة خاشعة.');
+  String get paywallFeatWidgets => language == AppLanguage.turkish
+      ? 'Kilit Ekranı & Ana Ekran Widget\'ları'
+      : (language == AppLanguage.english
+          ? 'Lock Screen & Home Screen Widgets'
+          : 'أدوات شاشة القفل والشاشة الرئيسية');
+  String get paywallFeatWidgetsDesc => language == AppLanguage.turkish
+      ? 'Canlı geri sayım, sonraki namaz vakti ve günün ayeti daima kilit ekranınızda.'
+      : (language == AppLanguage.english
+          ? 'Live countdown, next prayer time, and verse of the day always on your lock screen.'
+          : 'عد تنازلي مباشر، وقت الصلاة القادمة، وآية اليوم دائماً على شاشة القفل.');
+  String get paywallFeatMakams => language == AppLanguage.turkish
+      ? 'Özel Ezan Makamları & Meşhur Müezzinler'
+      : (language == AppLanguage.english
+          ? 'Exclusive Adhan Makams & Muezzins'
+          : 'مقامات الأذان الحصرية وأشهر المؤذنين');
+  String get paywallFeatMakamsDesc => language == AppLanguage.turkish
+      ? 'Mekke, Medine, Kudüs ve İstanbul (Saba, Hicaz, Rast) makamlarıyla vaktinde huzurlu çağrı.'
+      : (language == AppLanguage.english
+          ? 'Peaceful call to prayer with Mecca, Medina, Jerusalem, and Istanbul makams.'
+          : 'نداء الصلاة الخاشع بمقامات مكة والمدينة والقدس وإسطنبول.');
+  String get paywallFeatAdFree => language == AppLanguage.turkish
+      ? '%100 Reklamsız & Huşû Dolu'
+      : (language == AppLanguage.english
+          ? '100% Ad-Free & Serene'
+          : '١٠٠٪ خالي من الإعلانات وخاشع');
+  String get paywallFeatAdFreeDesc => language == AppLanguage.turkish
+      ? 'İbadetinizi ve zikrinizi bölen hiçbir reklam afişi olmadan kesintisiz tefekkür.'
+      : (language == AppLanguage.english
+          ? 'Uninterrupted reflection without any ads disturbing your worship and dhikr.'
+          : 'تأمل دون انقطاع ودون أي إعلانات تعكر صفو عبادتك وأذكارك.');
+  String get paywallFeatThemes => language == AppLanguage.turkish
+      ? 'Özel Mushaf Hatları & OLED Temalar'
+      : (language == AppLanguage.english
+          ? 'Custom Quran Fonts & OLED Themes'
+          : 'خطوط مصحف حصرية ومظاهر شاشات أوليد');
+  String get paywallFeatThemesDesc => language == AppLanguage.turkish
+      ? 'Gece Siyahı, Kâbe Taş Grisi ve altın varak kaplamalı huzurlu tasarımlar.'
+      : (language == AppLanguage.english
+          ? 'OLED Midnight Black, Kaaba Slate, and luxury gold leaf accents.'
+          : 'الأسود الليلي، رمادي حجر الكعبة، ولمسات ذهبية فاخرة.');
+  String get planYearly => language == AppLanguage.turkish
+      ? 'Yıllık Plan'
+      : (language == AppLanguage.english ? 'Annual Plan' : 'الخطة السنوية');
+  String get planLifetime => language == AppLanguage.turkish
+      ? 'Ömür Boyu Sahip Ol'
+      : (language == AppLanguage.english ? 'Lifetime Access' : 'امتلاك مدى الحياة');
+  String get planMonthly => language == AppLanguage.turkish
+      ? 'Aylık Plan'
+      : (language == AppLanguage.english ? 'Monthly Plan' : 'الخطة الشهرية');
+  String get badgeMostPopular => language == AppLanguage.turkish
+      ? 'EN POPÜLER'
+      : (language == AppLanguage.english ? 'MOST POPULAR' : 'الأكثر طلباً');
+  String get badgeBestValue => language == AppLanguage.turkish
+      ? 'EN AVANTAJLI'
+      : (language == AppLanguage.english ? 'BEST VALUE' : 'أفضل قيمة');
+  String get badgeFreeTrial => language == AppLanguage.turkish
+      ? '3 GÜN ÜCRETSİZ'
+      : (language == AppLanguage.english ? '3 DAYS FREE' : '٣ أيام مجاناً');
+  String get badgeNoSubscription => language == AppLanguage.turkish
+      ? 'ABONELİK YOK'
+      : (language == AppLanguage.english ? 'NO SUBSCRIPTION' : 'بدون اشتراك');
+  String get btnStartTrial => language == AppLanguage.turkish
+      ? '3 Günlük Ücretsiz Denemeyi Başlat'
+      : (language == AppLanguage.english ? 'Start 3-Day Free Trial' : 'ابدأ التجربة المجانية لـ ٣ أيام');
+  String get btnBuyLifetime => language == AppLanguage.turkish
+      ? 'Ömür Boyu Erişimi Satın Al'
+      : (language == AppLanguage.english ? 'Get Lifetime Access' : 'شراء مدى الحياة');
+  String get btnStartMonthly => language == AppLanguage.turkish
+      ? 'Aylık Aboneliği Başlat'
+      : (language == AppLanguage.english ? 'Start Monthly Plan' : 'بدء الاشتراك الشهري');
+  String get noPaymentNow => language == AppLanguage.turkish
+      ? 'Şimdi Ödeme Yok • İstediğin Zaman İptal Et'
+      : (language == AppLanguage.english
+          ? 'No Payment Now • Cancel Anytime'
+          : 'لا تدفع الآن • يمكنك الإلغاء في أي وقت');
+  String get oneTimePaymentDesc => language == AppLanguage.turkish
+      ? 'Tek seferlik ödeme • Sonsuza dek tüm kilitler açık'
+      : (language == AppLanguage.english
+          ? 'One-time payment • All features unlocked forever'
+          : 'دفعة واحدة لمرة واحدة • فتح جميع الميزات إلى الأبد');
+  String get restorePurchases => language == AppLanguage.turkish
+      ? 'Satın Alımları Geri Yükle'
+      : (language == AppLanguage.english ? 'Restore Purchases' : 'استعادة المشتريات');
+  String get privacyPolicy => language == AppLanguage.turkish
+      ? 'Gizlilik Politikası'
+      : (language == AppLanguage.english ? 'Privacy Policy' : 'سياسة الخصوصية');
+  String get termsOfUse => language == AppLanguage.turkish
+      ? 'Kullanım Şartları (EULA)'
+      : (language == AppLanguage.english ? 'Terms of Use (EULA)' : 'شروط الاستخدام');
 }
+
 
 

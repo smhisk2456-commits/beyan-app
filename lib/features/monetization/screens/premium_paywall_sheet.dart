@@ -142,32 +142,32 @@ class _PremiumPaywallSheetState extends ConsumerState<PremiumPaywallSheet> {
             ),
             const SizedBox(height: 24),
 
-            // Avantajlar Kartları
+            // Avantajlar Kartları (Widget ve Makam Öncelikli)
+            _buildFeatureTile(
+              icon: Icons.widgets_rounded,
+              title: 'Kilit Ekranı & Canlı Widget\'lar',
+              subtitle: 'Kilit ekranında ve ana ekranda canlı namaz sayacı, vakitler ve günün âyeti.',
+              gold: gold,
+              isDark: isDark,
+            ),
+            _buildFeatureTile(
+              icon: Icons.volume_up_rounded,
+              title: 'Tüm Ezan Makamları & Meşhur Müezzinler',
+              subtitle: 'Mekke, Medine, Kudüs ve İstanbul (Saba, Rast, Hicaz) makamları sınırsız açılır.',
+              gold: gold,
+              isDark: isDark,
+            ),
             _buildFeatureTile(
               icon: Icons.block_rounded,
-              title: '%100 Reklamsız İbadet',
+              title: '%100 Reklamsız Huşû Dolu İbadet',
               subtitle: 'Uygulama içi tüm reklam afişleri tamamen kaldırılır.',
               gold: gold,
               isDark: isDark,
             ),
             _buildFeatureTile(
-              icon: Icons.palette_outlined,
+              icon: Icons.dark_mode_rounded,
               title: 'Özel Gece & OLED Temaları',
               subtitle: 'Gece Siyahı (OLED), Derin Lacivert ve Kâbe Taş Grisi kilitleri açılır.',
-              gold: gold,
-              isDark: isDark,
-            ),
-            _buildFeatureTile(
-              icon: Icons.music_note_rounded,
-              title: 'Tüm Ezan Makamları',
-              subtitle: 'İstanbul, Mekke, Medine ve Tekbir sesleri sınırsız açılır.',
-              gold: gold,
-              isDark: isDark,
-            ),
-            _buildFeatureTile(
-              icon: Icons.electric_bolt_rounded,
-              title: 'Canlı Etkinlikler & Dinamik Ada',
-              subtitle: 'Kilit ekranında canlı akan 30 dakikalık geri sayım çubuğu.',
               gold: gold,
               isDark: isDark,
             ),
@@ -219,9 +219,13 @@ class _PremiumPaywallSheetState extends ConsumerState<PremiumPaywallSheet> {
               ),
               const SizedBox(height: 16),
             ] else ...[
-              // Paket Seçim Kartları
+              // Paket Seçim Kartları: Yıllık ve Ömür Boyu Öncelikli
               Column(
-                children: PremiumTier.values.map((tier) {
+                children: const [
+                  PremiumTier.yearly,
+                  PremiumTier.lifetime,
+                  PremiumTier.monthly,
+                ].map((tier) {
                   final isSelected = _selectedTier == tier;
                   return GestureDetector(
                     onTap: () {
