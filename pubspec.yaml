@@ -28,7 +28,6 @@ dependencies:
 
   # ── Native Widgets ────────────────────────────────────────────
   home_widget: ^0.6.0
-  workmanager: 0.10.10
 
   # ── Typography & UI ───────────────────────────────────────────
   google_fonts: ^6.2.1
