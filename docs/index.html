@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beyân – Solace Studio Destek & Bilgi Merkezi</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0f14;
+            --card-bg: rgba(22, 29, 39, 0.7);
+            --card-border: rgba(212, 175, 55, 0.2);
+            --accent-gold: #d4af37;
+            --accent-gold-light: #f3e5ab;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --emerald-glow: rgba(16, 185, 129, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.1) 0%, transparent 60%),
+                radial-gradient(circle at 10% 80%, var(--emerald-glow) 0%, transparent 50%);
+        }
+
+        header {
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+        }
+
+        .studio-badge {
+            display: inline-block;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--accent-gold);
+            border: 1px solid var(--card-border);
+            padding: 0.35rem 1rem;
+            border-radius: 999px;
+            margin-bottom: 1rem;
+            background: rgba(212, 175, 55, 0.05);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #ffffff 0%, var(--accent-gold-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        p.subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        main {
+            flex: 1;
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 3rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 1.25rem;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(12px);
+        }
+
+        .card h2 {
+            font-size: 1.4rem;
+            color: var(--accent-gold);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .contact-box {
+            text-align: center;
+            padding: 2.5rem 1.5rem;
+        }
+
+        .btn-email {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, #c5a028 0%, #d4af37 100%);
+            color: #0b0f14;
+            text-decoration: none;
+            padding: 0.9rem 2rem;
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: 1rem;
+            margin-top: 1.25rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+        }
+
+        .btn-email:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.45);
+        }
+
+        .faq-item {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 1.2rem 0;
+        }
+
+        .faq-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .faq-question {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.4rem;
+        }
+
+        .faq-answer {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem 1.5rem;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        footer a {
+            color: var(--accent-gold);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <span class="studio-badge">Solace Studio</span>
+        <h1>Beyân Destek & Yardım</h1>
+        <p class="subtitle">Namaz Vakitleri, Ezan Sesleri, Kıble ve Kur'an-ı Kerim Rehberi</p>
+    </header>
+
+    <main>
+        <!-- İletişim / Destek -->
+        <section class="card contact-box">
+            <h2>Bize Ulaşın</h2>
+            <p style="color: var(--text-secondary); max-width: 500px; margin: 0 auto;">
+                Beyân uygulamasını kullanırken karşılaştığınız sorunlar, hata bildirimleri veya önerileriniz için doğrudan geliştirici ekibimize yazabilirsiniz.
+            </p>
+            <a href="mailto:smhisk2456@gmail.com?subject=Beyan%20App%20Destek" class="btn-email">
+                ✉️ smhisk2456@gmail.com
+            </a>
+        </section>
+
+        <!-- Sıkça Sorulan Sorular -->
+        <section class="card">
+            <h2>Sıkça Sorulan Sorular (SSS)</h2>
+            
+            <div class="faq-item">
+                <div class="faq-question">Namaz vakitleri Diyanet ile uyumlu mu?</div>
+                <div class="faq-answer">Evet, Beyân konumunuza göre en yakın Diyanet hesaplama metodolojisini ve astronomik takvim algoritmalarını kullanarak vakitleri dakikası dakikasına hesaplar.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Ezan bildirim sesi kilit ekranında nasıl çalar?</div>
+                <div class="faq-answer">Ayarlar > Bildirimler menüsünden ilgili vakit için ezan alarmını ve tercih ettiğiniz makamı (İstanbul, Mekke, Medine) seçmeniz yeterlidir. Cihazınızın 'Rahatsız Etme' veya sessiz anahtarının kapalı olduğundan emin olunuz.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Kıble pusulası neden kalibrasyon istiyor?</div>
+                <div class="faq-answer">Manyetik kılıflar veya elektronik cihazlar pusula sensörünü etkileyebilir. Cihazınızı 8 şeklinde havada hareket ettirerek en doğru Kâbe açısını elde edebilirsiniz.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Aboneliğimi nasıl yönetirim veya iptal ederim?</div>
+                <div class="faq-answer">Tüm abonelikler Apple kimliğiniz üzerinden yönetilir. iPhone Ayarları > Adınız > Abonelikler adımından dilediğiniz an yönetebilir veya iptal edebilirsiniz.</div>
+            </div>
+        </section>
+
+        <!-- Gizlilik Politikası Özeti -->
+        <section class="card">
+            <h2>Gizlilik İlkemiz</h2>
+            <p style="color: var(--text-secondary); font-size: 0.95rem;">
+                Beyân, ibadetinizin mahremiyetine ve kişisel verilerinize saygı duyar. Konum bilginiz sadece yerel olarak namaz vakitlerini ve kıble açısını hesaplamak için kullanılır ve hiçbir sunucuya kaydedilmez.
+                <br><br>
+                Detaylı gizlilik sözleşmemiz için: <a href="https://github.com/smhisk2456-commits/beyan-app/blob/main/PRIVACY_POLICY.md" style="color: var(--accent-gold); text-decoration: underline;" target="_blank">Gizlilik Politikası (Privacy Policy)</a>
+            </p>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 <strong>Solace Studio</strong>. Tüm hakları saklıdır.</p>
+    </footer>
+</body>
+</html>
