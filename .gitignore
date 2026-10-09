@@ -55,5 +55,6 @@ app.*.map.json
 *.pem
 *.mobileprovision
 *.p8
+tools/upload*.py
 app_store_screenshots/
 
