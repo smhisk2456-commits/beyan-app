@@ -36,11 +36,11 @@ extension PremiumTierExtension on PremiumTier {
   String get defaultPriceText {
     switch (this) {
       case PremiumTier.monthly:
-        return '29,99 ₺ / ay';
+        return '₺49,99 / ay';
       case PremiumTier.yearly:
-        return '199,99 ₺ / yıl';
+        return '₺249,99 / yıl';
       case PremiumTier.lifetime:
-        return '399,99 ₺ (Tek Seferlik)';
+        return '₺499,99 (Tek Seferlik)';
     }
   }
 
@@ -49,7 +49,7 @@ extension PremiumTierExtension on PremiumTier {
       case PremiumTier.monthly:
         return '';
       case PremiumTier.yearly:
-        return '%45 İNDİRİM';
+        return '%58 İNDİRİM';
       case PremiumTier.lifetime:
         return 'EN DEĞERLİ';
     }
@@ -60,7 +60,7 @@ extension PremiumTierExtension on PremiumTier {
       case PremiumTier.monthly:
         return 'İstediğiniz zaman iptal edebilirsiniz';
       case PremiumTier.yearly:
-        return 'Ayda yalnızca ~16,60 ₺';
+        return 'Ayda yalnızca ~₺20,83 (3 Gün Ücretsiz Deneme)';
       case PremiumTier.lifetime:
         return 'Bir kez ödeyin, sonsuza dek reklamsız kullanın';
     }
