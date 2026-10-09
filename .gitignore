@@ -46,3 +46,14 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# Apple Signing & Certificates
+*.p12
+*.cer
+*.csr
+*.key
+*.pem
+*.mobileprovision
+*.p8
+app_store_screenshots/
+

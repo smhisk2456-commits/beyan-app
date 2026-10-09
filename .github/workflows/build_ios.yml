@@ -1,4 +1,4 @@
-name: Build iOS IPA
+name: Build iOS and Deploy to TestFlight
 
 on:
   push:
@@ -6,9 +6,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    name: Build Unsigned IPA for Sideloadly
-    runs-on: macos-latest
+  build_and_deploy:
+    name: Build & Upload to TestFlight
+    runs-on: macos-14
 
     steps:
       - name: Checkout Repository
@@ -32,30 +32,60 @@ jobs:
       - name: Install Dependencies
         run: flutter pub get
 
-      - name: Add Lock Screen Widget Extension Target
+      - name: Add Lock Screen Widget Target & Configure Code Signing
         run: |
           sudo gem install xcodeproj --no-document
           ruby tools/add_ios_widget_target.rb
 
-      - name: Build iOS Release (No Codesign)
-        run: flutter build ios --release --no-codesign --verbose
-
-      - name: Verify Widget Is Embedded
+      - name: Install Apple Certificate & Provisioning Profiles
+        env:
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
+          WIDGET_PROVISION_PROFILE_BASE64: ${{ secrets.WIDGET_PROVISION_PROFILE_BASE64 }}
+          KEYCHAIN_PASSWORD: "temp_build_keychain_password_2026"
         run: |
-          ls -la build/ios/iphoneos/Runner.app/PlugIns/
-          test -d build/ios/iphoneos/Runner.app/PlugIns/BeyanWidgetExtension.appex
+          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+          PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
+          WIDGET_PP_PATH=$RUNNER_TEMP/widget_pp.mobileprovision
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
 
-      - name: Package into IPA for Sideloadly
+          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+          echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode -o $PP_PATH
+          echo -n "$WIDGET_PROVISION_PROFILE_BASE64" | base64 --decode -o $WIDGET_PP_PATH
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+
+          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles/
+          cp $WIDGET_PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles/
+
+      - name: Build iOS Release IPA
         run: |
-          mkdir -p build/ios/ipa/Payload
-          cp -a build/ios/iphoneos/Runner.app build/ios/ipa/Payload/
-          cd build/ios/ipa
-          zip -qry Beyan.ipa Payload
-          echo "IPA Created Successfully!"
+          flutter build ipa --release --export-options-plist=ios/ExportOptions.plist
 
       - name: Upload IPA Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Beyan-iOS-IPA
-          path: build/ios/ipa/Beyan.ipa
-          retention-days: 7
+          name: Beyan-TestFlight-IPA
+          path: build/ios/ipa/*.ipa
+          retention-days: 14
+
+      - name: Upload to App Store Connect / TestFlight
+        env:
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.appstoreconnect/private_keys
+          echo "$APP_STORE_CONNECT_PRIVATE_KEY" > ~/.appstoreconnect/private_keys/AuthKey_${APP_STORE_CONNECT_KEY_ID}.p8
+
+          IPA_FILE=$(find build/ios/ipa -name "*.ipa" | head -n 1)
+          echo "Uploading $IPA_FILE to TestFlight..."
+          xcrun altool --upload-app -f "$IPA_FILE" -t ios --apiKey "$APP_STORE_CONNECT_KEY_ID" --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID"
