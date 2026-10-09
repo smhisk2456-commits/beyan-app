@@ -94,6 +94,18 @@ class WidgetService {
     await HomeWidget.saveWidgetData<String>('widget_verses_json', versesJson);
     await HomeWidget.saveWidgetData<int>('widget_update_interval', interval);
 
+    // Kilit ekranı özelleştirme tercihleri
+    final prefs = await SharedPreferences.getInstance();
+    final quoteCat = prefs.getString('widget_quote_category') ?? 'all';
+    final verseView = prefs.getString('widget_verse_view') ?? 'meal_only';
+    final textSize = prefs.getString('widget_text_size') ?? 'standard';
+    final activeCat = prefs.getString('widget_active_category') ?? 'quotes';
+
+    await HomeWidget.saveWidgetData<String>('widget_quote_category', quoteCat);
+    await HomeWidget.saveWidgetData<String>('widget_verse_view', verseView);
+    await HomeWidget.saveWidgetData<String>('widget_text_size', textSize);
+    await HomeWidget.saveWidgetData<String>('widget_active_category', activeCat);
+
     // Tüm vakitler
     for (final prayer in allPrayers) {
       await HomeWidget.saveWidgetData<String>('widget_${prayer.name.key}_time', _prayerService.formatTime(prayer.time));

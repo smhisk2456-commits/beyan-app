@@ -442,16 +442,18 @@ struct VerseRectangularView: View {
     let entry: VerseEntry
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 1) {
+        VStack(alignment: .leading, spacing: 2) {
             Text(entry.ref)
-                .font(.system(size: 15, weight: .bold))
+                .font(.system(size: 11, weight: .bold))
+                .foregroundColor(.secondary)
                 .lineLimit(1)
             Text(entry.text)
-                .font(.system(size: 12, weight: .medium))
-                .lineLimit(3)
-                .minimumScaleFactor(0.8)
+                .font(.system(size: 11, weight: .medium))
+                .lineLimit(4)
+                .minimumScaleFactor(0.65)
+                .multilineTextAlignment(.leading)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .widgetAccentable()
     }
 }

@@ -278,6 +278,47 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
     }
   }
 
+  Future<void> _syncAndApplyWidgetSettings() async {
+    HapticFeedback.mediumImpact();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('widget_quote_category', _selectedQuoteCategory);
+    await prefs.setString('widget_verse_view', _verseViewMode);
+    await prefs.setString('widget_refresh_interval', _refreshInterval);
+    await prefs.setString('widget_text_size', _textSize);
+    await prefs.setString('widget_font_family', _fontFamily);
+    await prefs.setString('widget_active_category', _selectedCategory.name);
+
+    final premiumState = ref.read(premiumProvider);
+    if (premiumState.hasWidgetAccess) {
+      await WidgetService().updateAllWidgets();
+    }
+
+    if (mounted) {
+      final strings = ref.read(appStringsProvider);
+      final msg = strings.language == AppLanguage.english
+          ? 'Widget settings applied! Your lock screen will reflect these preferences.'
+          : (strings.language == AppLanguage.arabic
+              ? 'تم تطبيق إعدادات الويدجت! ستنعكس التفضيلات على شاشة القفل.'
+              : 'Widget ayarları başarıyla uygulandı! Kilit ekranı bileşeniniz güncellenecektir.');
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.check_circle, color: Color(0xFFFFDF7A), size: 20),
+              const SizedBox(width: 10),
+              Expanded(child: Text(msg)),
+            ],
+          ),
+          backgroundColor: const Color(0xFF033E35),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
+  }
+
   String _getLocalizedVerseView(String mode, AppLanguage lang) {
     if (mode == 'meal_only' || mode == 'Yalnızca Meal') {
       return lang == AppLanguage.english ? 'Translation Only' : (lang == AppLanguage.arabic ? 'الترجمة فقط' : 'Yalnızca Meal');
@@ -461,7 +502,12 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                   // ── 3 Günlük Deneme / Premium Durum Şeridi ────────────────
                   _buildTrialStatusBanner(premiumState, strings),
 
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 14),
+
+                  // ── iOS Kilit Ekranı Ekleme Bilgilendirme Kartı ───────────
+                  _buildLockScreenGuideBanner(strings),
+
+                  const SizedBox(height: 14),
 
                   // ── Yatay Kategori İkon Seçici (6 İkon) ───────────────────
                   _buildCategoryIconsBar(),
@@ -480,6 +526,11 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
 
                   // ── Özelleştirilebilir Seçenekler Listesi ─────────────────
                   _buildCustomizationOptionsCard(strings),
+
+                  const SizedBox(height: 16),
+
+                  // ── Kilit Ekranı Widget'ına Uygula Butonu ─────────────────
+                  _buildApplyWidgetButton(strings),
 
                   const SizedBox(height: 24),
 
@@ -605,6 +656,40 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
     );
   }
 
+  // ── iOS Kilit Ekranı Ekleme Bilgilendirme Kartı ───────────────────────────
+  Widget _buildLockScreenGuideBanner(AppStrings strings) {
+    final tipText = strings.language == AppLanguage.english
+        ? 'Tip: To add widgets to your iPhone Lock Screen, press and hold the lock screen, tap Customize, select the area below the time, and choose Beyân.'
+        : (strings.language == AppLanguage.arabic
+            ? 'تلميح: لإضافة الويدجت، اضغط مطولاً على شاشة القفل، المس تخصيص، ثم اختر بيان.'
+            : '💡 İpucu: Widget\'ı telefonunuza eklemek için iPhone kilit ekranınıza basılı tutup "Özelleştir"e dokunun ve Beyân\'ı seçin.');
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0C2923),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.35)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.info_outline_rounded, color: Color(0xFF2DD4BF), size: 18),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              tipText,
+              style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 12,
+                height: 1.35,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   // ── 6 İkonlu Yatay Kategori Çubuğu (Screenshots 2-5 üst kısmı) ─────────────
   Widget _buildCategoryIconsBar() {
     final categories = [
@@ -627,9 +712,14 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 5),
             child: InkWell(
               borderRadius: BorderRadius.circular(24),
-              onTap: () {
+              onTap: () async {
                 HapticFeedback.selectionClick();
                 setState(() => _selectedCategory = item.$1);
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setString('widget_active_category', item.$1.name);
+                if (ref.read(premiumProvider).hasWidgetAccess) {
+                  await WidgetService().updateAllWidgets();
+                }
               },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
@@ -1217,6 +1307,37 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  // ── Kilit Ekranı Widget'ına Uygula Butonu ─────────────────────────────────
+  Widget _buildApplyWidgetButton(AppStrings strings) {
+    final btnText = strings.language == AppLanguage.english
+        ? 'Apply to Lock Screen Widget'
+        : (strings.language == AppLanguage.arabic
+            ? 'تطبيق على ويدجت شاشة القفل'
+            : 'Kilit Ekranı Widget\'ına Uygula');
+
+    return ElevatedButton.icon(
+      onPressed: _syncAndApplyWidgetSettings,
+      icon: const Icon(Icons.sync_rounded, color: Color(0xFF071F1B), size: 20),
+      label: Text(
+        btnText,
+        style: const TextStyle(
+          color: Color(0xFF071F1B),
+          fontSize: 15,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFFFFDF7A),
+        foregroundColor: const Color(0xFF071F1B),
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        elevation: 2,
       ),
     );
   }

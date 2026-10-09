@@ -7,6 +7,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../prayer_times/models/prayer_time_model.dart';
 import '../models/adhan_makam.dart';
 import '../services/notification_service.dart';
+import '../services/adhan_audio_player_service.dart';
 import '../../monetization/screens/premium_paywall_sheet.dart';
 import 'adhan_makam_selector_sheet.dart';
 
@@ -260,6 +261,9 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
 
     try {
       await _service.sendTestNotification(langCode: strings.language.code);
+      if (_currentMakam != AdhanMakam.silent) {
+        await AdhanAudioPlayerService.instance.togglePlayPreview(_currentMakam);
+      }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

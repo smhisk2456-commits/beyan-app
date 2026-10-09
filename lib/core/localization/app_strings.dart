@@ -1147,10 +1147,10 @@ class AppStrings {
           ? 'Test verse notification sent to your device!'
           : 'تم إرسال إشعار آية تجريبي إلى جهازك!');
   String get testAdhanSuccessMsg => language == AppLanguage.turkish
-      ? 'Test bildirimi cihazınıza gönderildi!'
+      ? 'Ezan sesi ve bildirim testi iletildi! (Kilit ekranında duymak için telefonunuzun sessiz anahtarının kapalı olduğundan emin olun).'
       : (language == AppLanguage.english
-          ? 'Test notification sent to your device!'
-          : 'تم إرسال الإشعار التجريبي إلى جهازك!');
+          ? 'Adhan sound and test notification sent! (Ensure phone silent switch is off to hear on lock screen).'
+          : 'تم إرسال صوت الأذان والإشعار التجريبي! (تأكد من إيقاف زر الصامت للهاتف للتشغيل).');
   String get permWarningMsg => language == AppLanguage.turkish
       ? 'Cihaz bildirim izni kapalı! Lütfen ayarlardan izin verin.'
       : (language == AppLanguage.english

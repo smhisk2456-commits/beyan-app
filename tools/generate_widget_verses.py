@@ -19,8 +19,8 @@ cands = []
 for sid, vn, text in rows:
     t = re.sub(r'\s+', ' ', (text or '')).strip()
     low = t.lower()
-    # Kilit ekranında 3 satıra sığacak, anlamı tek başına bütün, olumlu kısa ayetler
-    if not (40 <= len(t) <= 125) or not t.endswith(('.', '!')):
+    # Kilit ekranında 3-4 satıra tam sığacak (asla kesilmeyecek), anlamı bütün, olumlu kısa ayetler
+    if not (25 <= len(t) <= 85) or not t.endswith(('.', '!')):
         continue
     if low.startswith(('ve ', 'ancak', 'yahut', 'veya', 'onlar', 'işte', 'sonra', 'eğer', 'vazgeç', 'ölümünüz', 'ey israiloğulları')):
         continue
