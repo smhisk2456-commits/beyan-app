@@ -22,7 +22,7 @@ end
 
 # 2. Ses dosyalarını Runner target'ının Resources build phase'ine ekle:
 runner_group = project.main_group.find_subpath('Runner', true)
-%w[adhan_istanbul.mp3 adhan_mecca.mp3 adhan_medina.mp3 adhan_tekbir.mp3].each do |audio_file|
+%w[adhan_istanbul.caf adhan_mecca.caf adhan_medina.caf adhan_tekbir.caf adhan_istanbul.mp3 adhan_mecca.mp3 adhan_medina.mp3 adhan_tekbir.mp3].each do |audio_file|
   unless runner_group.files.any? { |f| f.path == audio_file }
     file_ref = runner_group.new_reference(audio_file)
     app_target.resources_build_phase.add_file_reference(file_ref)

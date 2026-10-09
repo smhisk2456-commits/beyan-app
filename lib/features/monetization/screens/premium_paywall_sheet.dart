@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/localization/app_strings.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../models/premium_product.dart';
@@ -25,6 +26,7 @@ class _PremiumPaywallSheetState extends ConsumerState<PremiumPaywallSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = ref.watch(appStringsProvider);
     final themeState = ref.watch(themeProvider);
     final premiumState = ref.watch(premiumProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -132,8 +134,8 @@ class _PremiumPaywallSheetState extends ConsumerState<PremiumPaywallSheet> {
             const SizedBox(height: 6),
             Text(
               premiumState.isPremium
-                  ? 'Tüm ayrıcalıklar aktif! Desteğiniz için teşekkür ederiz.'
-                  : 'Huzurlu, reklamsız ve ayrıcalıklı bir ibadet deneyimi.',
+                  ? strings.paywallActiveDesc
+                  : strings.paywallInactiveDesc,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13,
@@ -145,36 +147,36 @@ class _PremiumPaywallSheetState extends ConsumerState<PremiumPaywallSheet> {
             // Avantajlar Kartları (Widget ve Makam Öncelikli)
             _buildFeatureTile(
               icon: Icons.widgets_rounded,
-              title: 'Kilit Ekranı & Canlı Widget\'lar',
-              subtitle: 'Kilit ekranında ve ana ekranda canlı namaz sayacı, vakitler ve günün âyeti.',
+              title: strings.paywallFeatWidgets,
+              subtitle: strings.paywallFeatWidgetsDesc,
               gold: gold,
               isDark: isDark,
             ),
             _buildFeatureTile(
               icon: Icons.volume_up_rounded,
-              title: 'Tüm Ezan Makamları & Meşhur Müezzinler',
-              subtitle: 'Mekke, Medine, Kudüs ve İstanbul (Saba, Rast, Hicaz) makamları sınırsız açılır.',
+              title: strings.paywallFeatMakams,
+              subtitle: strings.paywallFeatMakamsDesc,
               gold: gold,
               isDark: isDark,
             ),
             _buildFeatureTile(
               icon: Icons.block_rounded,
-              title: '%100 Reklamsız Huşû Dolu İbadet',
-              subtitle: 'Uygulama içi tüm reklam afişleri tamamen kaldırılır.',
+              title: strings.paywallFeatAdFree,
+              subtitle: strings.paywallFeatAdFreeDesc,
               gold: gold,
               isDark: isDark,
             ),
             _buildFeatureTile(
               icon: Icons.dark_mode_rounded,
-              title: 'Özel Gece & OLED Temaları',
-              subtitle: 'Gece Siyahı (OLED), Derin Lacivert ve Kâbe Taş Grisi kilitleri açılır.',
+              title: strings.paywallFeatThemes,
+              subtitle: strings.paywallFeatThemesDesc,
               gold: gold,
               isDark: isDark,
             ),
             _buildFeatureTile(
               icon: Icons.volunteer_activism_rounded,
-              title: 'İslami Yazılıma Hâmî Olun',
-              subtitle: 'Bağımsız Türk yazılımcılarına ve vakıf ruhuna doğrudan destek verin.',
+              title: strings.paywallFeatSupport,
+              subtitle: strings.paywallFeatSupportDesc,
               gold: gold,
               isDark: isDark,
             ),

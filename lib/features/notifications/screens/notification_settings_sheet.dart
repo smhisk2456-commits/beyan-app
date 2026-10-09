@@ -132,7 +132,9 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
             content: Text(
               strings.language == AppLanguage.english
                   ? 'In this mode, notifications are delivered automatically throughout the day (09:00 - 22:00).'
-                  : 'Bu modda bildirimler gün boyu (09:00 - 22:00) otomatik aralıklarla iletilir.',
+                  : (strings.language == AppLanguage.arabic
+                      ? 'في هذا الوضع، يتم إرسال الإشعارات تلقائيًا طوال اليوم (09:00 - 22:00).'
+                      : 'Bu modda bildirimler gün boyu (09:00 - 22:00) otomatik aralıklarla iletilir.'),
             ),
             behavior: SnackBarBehavior.floating,
             duration: const Duration(seconds: 2),

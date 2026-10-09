@@ -346,7 +346,43 @@ class NotificationService {
     return 'beyan_prayer_channel_bell';
   }
 
-  /// Önümüzdeki 7 günün namaz vakitlerini planlar.
+  String _getPrayerEnteredTitle(PrayerName prayer, String langCode) {
+    final pName = prayer.localizedName(langCode);
+    if (langCode == 'en') return 'Prayer Time: $pName';
+    if (langCode == 'ar') return 'حان وقت الصلاة: $pName';
+    return 'Vakit Girdi: $pName';
+  }
+
+  String _getPrayerEnteredBody(PrayerName prayer, String timeStr, String langCode) {
+    final pName = prayer.localizedName(langCode);
+    if (langCode == 'en') {
+      return '$pName prayer time has started ($timeStr). Come to prayer!';
+    }
+    if (langCode == 'ar') {
+      return 'حان الآن وقت صلاة $pName ($timeStr). حي على الصلاة!';
+    }
+    return '$pName namazı vakti girdi ($timeStr). Haydin namaza!';
+  }
+
+  String _getPrayerApproachingTitle(PrayerName prayer, String langCode) {
+    final pName = prayer.localizedName(langCode);
+    if (langCode == 'en') return 'Prayer Approaching: $pName';
+    if (langCode == 'ar') return 'اقترب وقت الصلاة: $pName';
+    return 'Vakit Yaklaşıyor: $pName';
+  }
+
+  String _getPrayerApproachingBody(PrayerName prayer, String timeStr, String langCode) {
+    final pName = prayer.localizedName(langCode);
+    if (langCode == 'en') {
+      return '15 minutes left until $pName prayer ($timeStr).';
+    }
+    if (langCode == 'ar') {
+      return 'بقي 15 دقيقة على صلاة $pName ($timeStr).';
+    }
+    return '$pName vaktine 15 dakika kaldı ($timeStr).';
+  }
+
+  /// Önümüzdeki 3 günün namaz vakitlerini planlar (iOS 64 kota sınırına tam uyumlu).
   Future<void> scheduleUpcomingPrayers() async {
     final master = await isMasterEnabled();
     if (!master) {
@@ -358,12 +394,14 @@ class NotificationService {
     final currentMakam = await getSelectedMakam();
     final prayerService = PrayerTimeService();
     final now = DateTime.now();
+    final prefs = await SharedPreferences.getInstance();
+    final langCode = prefs.getString('selected_app_language') ?? 'tr';
 
-    // Önceki zamanlanmış bildirimleri temizle
+    // Yalnızca namaz bildirimlerini temizle (Ayet bildirimlerine dokunma!)
     await cancelAllPrayerNotifications();
 
-    // 7 gün boyunca planla
-    for (int dayOffset = 0; dayOffset < 7; dayOffset++) {
+    // 3 gün boyunca planla (Maksimum 36 bildirim, iOS 64 limitine kesin uyum)
+    for (int dayOffset = 0; dayOffset < 3; dayOffset++) {
       final targetDate = now.add(Duration(days: dayOffset));
       try {
         final daily = await prayerService.calculatePrayerTimes(date: targetDate);
@@ -385,8 +423,8 @@ class NotificationService {
 
             await _notifications.zonedSchedule(
               id: notifId,
-              title: 'Vakit Girdi: ${p.name.turkish}',
-              body: '${p.name.turkish} namazı vakti girdi ($timeStr). Haydin namaza!',
+              title: _getPrayerEnteredTitle(p.name, langCode),
+              body: _getPrayerEnteredBody(p.name, timeStr, langCode),
               scheduledDate: scheduledTz,
               payload: 'prayer_${p.name.name}',
               notificationDetails: NotificationDetails(
@@ -408,7 +446,7 @@ class NotificationService {
                   presentList: true,
                   presentBadge: true,
                   presentSound: !isSilent,
-                  sound: soundResource != null ? '$soundResource.mp3' : null,
+                  sound: soundResource != null ? '$soundResource.caf' : null,
                   interruptionLevel: InterruptionLevel.timeSensitive,
                 ),
               ),
@@ -426,8 +464,8 @@ class NotificationService {
 
               await _notifications.zonedSchedule(
                 id: reminderId,
-                title: 'Vakit Yaklaşıyor: ${p.name.turkish}',
-                body: '${p.name.turkish} vaktine 15 dakika kaldı ($timeStr).',
+                title: _getPrayerApproachingTitle(p.name, langCode),
+                body: _getPrayerApproachingBody(p.name, timeStr, langCode),
                 scheduledDate: reminderTz,
                 payload: 'early_${p.name.name}',
                 notificationDetails: const NotificationDetails(
@@ -459,12 +497,17 @@ class NotificationService {
     }
   }
 
-  /// Tüm namaz ve erken uyarı bildirimlerini iptal eder.
+  /// Yalnızca namaz ve erken uyarı bildirimlerini iptal eder (Ayet bildirimlerini korur).
   Future<void> cancelAllPrayerNotifications() async {
-    try {
-      await _notifications.cancelAll();
-    } catch (e) {
-      debugPrint('Bildirimler iptal edilirken hata: $e');
+    for (int id = 1000; id <= 1999; id++) {
+      try {
+        await _notifications.cancel(id: id);
+      } catch (_) {}
+    }
+    for (int id = 2000; id <= 2999; id++) {
+      try {
+        await _notifications.cancel(id: id);
+      } catch (_) {}
     }
   }
 
@@ -511,7 +554,7 @@ class NotificationService {
             presentList: true,
             presentBadge: true,
             presentSound: !isSilent,
-            sound: soundResource != null ? '$soundResource.mp3' : null,
+            sound: soundResource != null ? '$soundResource.caf' : null,
             interruptionLevel: InterruptionLevel.timeSensitive,
           ),
         ),
@@ -621,7 +664,7 @@ class NotificationService {
     // ── Saatte 2 Kez (30 dakikada bir, 09:00 - 22:00 arası) ─────────────────
     if (freq == 'hourly_2') {
       int notifCount = 0;
-      const int maxNotifs = 32; // iOS 64 limitine takılmamak için güvenli kota
+      const int maxNotifs = 24; // iOS 64 limitine kesin uyum (36 namaz + 24 ayet = 60 <= 64)
       DateTime pointer = DateTime(now.year, now.month, now.day, now.hour, (now.minute >= 30 ? 30 : 0))
           .add(const Duration(minutes: 30));
 
@@ -670,7 +713,7 @@ class NotificationService {
     // ── Her Saat Başı (09:00 - 22:00 arası) ──────────────────────────────────
     if (freq == 'hourly_1') {
       int notifCount = 0;
-      const int maxNotifs = 28;
+      const int maxNotifs = 18;
       DateTime pointer = DateTime(now.year, now.month, now.day, now.hour, 0)
           .add(const Duration(hours: 1));
 
@@ -807,7 +850,7 @@ class NotificationService {
 
   /// Yalnızca zamanlanmış ayet bildirimlerini iptal eder.
   Future<void> cancelAllVerseNotifications() async {
-    for (int id = 5000; id <= 5250; id++) {
+    for (int id = 5000; id <= 5999; id++) {
       try {
         await _notifications.cancel(id: id);
       } catch (_) {}

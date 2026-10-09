@@ -20,6 +20,10 @@
 		B1B100022E40000100000002 /* adhan_mecca.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = A1A100022E40000100000002 /* adhan_mecca.mp3 */; };
 		B1B100032E40000100000003 /* adhan_medina.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = A1A100032E40000100000003 /* adhan_medina.mp3 */; };
 		B1B100042E40000100000004 /* adhan_tekbir.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = A1A100042E40000100000004 /* adhan_tekbir.mp3 */; };
+		B1B100052E40000100000005 /* adhan_istanbul.caf in Resources */ = {isa = PBXBuildFile; fileRef = A1A100052E40000100000005 /* adhan_istanbul.caf */; };
+		B1B100062E40000100000006 /* adhan_mecca.caf in Resources */ = {isa = PBXBuildFile; fileRef = A1A100062E40000100000006 /* adhan_mecca.caf */; };
+		B1B100072E40000100000007 /* adhan_medina.caf in Resources */ = {isa = PBXBuildFile; fileRef = A1A100072E40000100000007 /* adhan_medina.caf */; };
+		B1B100082E40000100000008 /* adhan_tekbir.caf in Resources */ = {isa = PBXBuildFile; fileRef = A1A100082E40000100000008 /* adhan_tekbir.caf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -67,6 +71,10 @@
 		A1A100022E40000100000002 /* adhan_mecca.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = adhan_mecca.mp3; sourceTree = "<group>"; };
 		A1A100032E40000100000003 /* adhan_medina.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = adhan_medina.mp3; sourceTree = "<group>"; };
 		A1A100042E40000100000004 /* adhan_tekbir.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = adhan_tekbir.mp3; sourceTree = "<group>"; };
+		A1A100052E40000100000005 /* adhan_istanbul.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = adhan_istanbul.caf; sourceTree = "<group>"; };
+		A1A100062E40000100000006 /* adhan_mecca.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = adhan_mecca.caf; sourceTree = "<group>"; };
+		A1A100072E40000100000007 /* adhan_medina.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = adhan_medina.caf; sourceTree = "<group>"; };
+		A1A100082E40000100000008 /* adhan_tekbir.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = adhan_tekbir.caf; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -136,6 +144,10 @@
 				A1A100022E40000100000002 /* adhan_mecca.mp3 */,
 				A1A100032E40000100000003 /* adhan_medina.mp3 */,
 				A1A100042E40000100000004 /* adhan_tekbir.mp3 */,
+				A1A100052E40000100000005 /* adhan_istanbul.caf */,
+				A1A100062E40000100000006 /* adhan_mecca.caf */,
+				A1A100072E40000100000007 /* adhan_medina.caf */,
+				A1A100082E40000100000008 /* adhan_tekbir.caf */,
 			);
 			path = Runner;
 			sourceTree = "<group>";
@@ -245,6 +257,10 @@
 				B1B100022E40000100000002 /* adhan_mecca.mp3 in Resources */,
 				B1B100032E40000100000003 /* adhan_medina.mp3 in Resources */,
 				B1B100042E40000100000004 /* adhan_tekbir.mp3 in Resources */,
+				B1B100052E40000100000005 /* adhan_istanbul.caf in Resources */,
+				B1B100062E40000100000006 /* adhan_mecca.caf in Resources */,
+				B1B100072E40000100000007 /* adhan_medina.caf in Resources */,
+				B1B100082E40000100000008 /* adhan_tekbir.caf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

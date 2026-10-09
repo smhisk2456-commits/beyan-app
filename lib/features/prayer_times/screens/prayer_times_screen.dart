@@ -32,13 +32,15 @@ class PrayerTimesScreen extends ConsumerWidget {
           // Şehir / Konum Seçici Buton
           IconButton(
             icon: const Icon(Icons.location_city_rounded, color: Color(0xFFFFDF7A)),
-            tooltip: 'Şehir Değiştir',
+            tooltip: strings.language == AppLanguage.turkish
+                ? 'Şehir Değiştir'
+                : (strings.language == AppLanguage.english ? 'Change City' : 'تغيير المدينة'),
             onPressed: () => CitySelectorSheet.show(context, ref),
           ),
           // Hesaplama Metodu Butonu
           IconButton(
             icon: const Icon(Icons.tune_rounded, color: Color(0xFFFFDF7A)),
-            tooltip: 'Hesaplama Yöntemi',
+            tooltip: strings.calculationMethodTitle,
             onPressed: () => CalculationMethodSheet.show(context, ref),
           ),
           // Dil Seçici Buton

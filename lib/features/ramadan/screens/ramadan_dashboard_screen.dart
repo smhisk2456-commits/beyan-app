@@ -360,20 +360,36 @@ class RamadanDashboardScreen extends ConsumerWidget {
           const SizedBox(height: 12),
 
           _buildDuaTile(
-            title: 'Susuzluk Gidip Damarlar Islandığında',
+            title: strings.language == AppLanguage.turkish
+                ? 'Susuzluk Gidip Damarlar Islandığında'
+                : (strings.language == AppLanguage.english
+                    ? 'Dua for Breaking the Fast'
+                    : 'دعاء الإفطار'),
             arabic: 'ذَهَبَ الظَّمَأُ وَابْتَلَّتِ الْعُرُوقُ، وَثَبَتَ الْأَجْرُ إِنْ شَاءَ اللَّهُ',
             transliteration: 'Zehebe\'z-zama\' vebtelleti\'l-urûk, ve sebete\'l-ecru inşâallâh.',
-            meaning: 'Susuzluk gitti, damarlar ıslandı ve inşallah mükâfat kesinleşti.',
+            meaning: strings.language == AppLanguage.turkish
+                ? 'Susuzluk gitti, damarlar ıslandı ve inşallah mükâfat kesinleşti.'
+                : (strings.language == AppLanguage.english
+                    ? 'The thirst has gone, the veins are moist, and the reward is confirmed, if Allah wills.'
+                    : 'ذهب الظمأ وابتلت العروق وثبت الأجر إن شاء الله.'),
             reference: 'Sünen-i Ebu Davud (2357)',
             isDark: isDark,
           ),
           const SizedBox(height: 12),
 
           _buildDuaTile(
-            title: 'Sahurda Bereket ve Teheccüd Niyazı',
+            title: strings.language == AppLanguage.turkish
+                ? 'Sahurda Bereket ve Teheccüd Niyazı'
+                : (strings.language == AppLanguage.english
+                    ? 'Blessing of Suhur'
+                    : 'بركة السحور'),
             arabic: 'يَرْحَمُ اللَّهُ الْمُتَسَحِّرِينَ',
             transliteration: 'Yerhamullâhu\'l-mütesahhirîn.',
-            meaning: 'Allah sahur yapanlara merhamet eylesin.',
+            meaning: strings.language == AppLanguage.turkish
+                ? 'Allah sahur yapanlara merhamet eylesin.'
+                : (strings.language == AppLanguage.english
+                    ? 'May Allah have mercy on those who eat suhur.'
+                    : 'يرحم الله المتسحرين.'),
             reference: 'Müsned-i Ahmed (3/12)',
             isDark: isDark,
           ),

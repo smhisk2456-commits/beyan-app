@@ -55,7 +55,8 @@ class LanguageNotifier extends StateNotifier<AppLanguage> {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_prefKey, language.code);
-      // Yeni dilde ayet bildirimlerini anında yeniden planla
+      // Yeni dilde hem namaz hem ayet bildirimlerini anında yeniden planla
+      await NotificationService.instance.scheduleUpcomingPrayers();
       await NotificationService.instance.scheduleDailyVerseNotifications();
     } catch (_) {}
   }
@@ -751,6 +752,26 @@ class AppStrings {
       : (language == AppLanguage.english
           ? 'OLED Midnight Black, Kaaba Slate, and luxury gold leaf accents.'
           : 'الأسود الليلي، رمادي حجر الكعبة، ولمسات ذهبية فاخرة.');
+  String get paywallFeatSupport => language == AppLanguage.turkish
+      ? 'İslami Yazılıma Hâmî Olun'
+      : (language == AppLanguage.english
+          ? 'Support Islamic Software Development'
+          : 'دعم تطوير البرمجيات الإسلامية');
+  String get paywallFeatSupportDesc => language == AppLanguage.turkish
+      ? 'Bağımsız Türk yazılımcılarına ve vakıf ruhuna doğrudan destek verin.'
+      : (language == AppLanguage.english
+          ? 'Directly support independent developers building ad-free Islamic tech.'
+          : 'دعم المطورين المستقلين في بناء برمجيات إسلامية نقية.');
+  String get paywallActiveDesc => language == AppLanguage.turkish
+      ? 'Tüm ayrıcalıklar aktif! Desteğiniz için teşekkür ederiz.'
+      : (language == AppLanguage.english
+          ? 'All privileges are active! Thank you for your support.'
+          : 'جميع الميزات مفعلة! شكرًا لدعمكم الكريم.');
+  String get paywallInactiveDesc => language == AppLanguage.turkish
+      ? 'Huzurlu, reklamsız ve ayrıcalıklı bir ibadet deneyimi.'
+      : (language == AppLanguage.english
+          ? 'Peaceful, ad-free and privileged worship experience.'
+          : 'تجربة عبادة هادئة وخالية من الإعلانات ومميزة.');
   String get planYearly => language == AppLanguage.turkish
       ? 'Yıllık Plan'
       : (language == AppLanguage.english ? 'Annual Plan' : 'الخطة السنوية');

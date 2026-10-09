@@ -78,6 +78,7 @@ void main() async {
     try {
       await NotificationService.instance.initialize();
       await NotificationService.instance.scheduleUpcomingPrayers();
+      await NotificationService.instance.scheduleDailyVerseNotifications();
     } catch (e) {
       debugPrint('NotificationService başlatma hatası: $e');
     }
@@ -145,7 +146,8 @@ class MainNavigation extends ConsumerStatefulWidget {
   ConsumerState<MainNavigation> createState() => _MainNavigationState();
 }
 
-class _MainNavigationState extends ConsumerState<MainNavigation> {
+class _MainNavigationState extends ConsumerState<MainNavigation>
+    with WidgetsBindingObserver {
   static const _screens = [
     HomeScreen(),
     PrayerTimesScreen(),
@@ -157,9 +159,25 @@ class _MainNavigationState extends ConsumerState<MainNavigation> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkLaunchPaywall();
     });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      NotificationService.instance.scheduleUpcomingPrayers();
+      NotificationService.instance.scheduleDailyVerseNotifications();
+      WidgetService().updateAllWidgets();
+    }
   }
 
   Future<void> _checkLaunchPaywall() async {

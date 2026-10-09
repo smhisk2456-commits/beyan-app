@@ -363,7 +363,9 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
           if (_activeTab == 0)
             IconButton(
               icon: const Icon(Icons.add_circle_outline_rounded, color: Color(0xFFFFDF7A)),
-              tooltip: 'Özel Zikir Ekle',
+              tooltip: currentLang == AppLanguage.turkish
+                  ? 'Özel Zikir Ekle'
+                  : (currentLang == AppLanguage.english ? 'Add Custom Dhikr' : 'إضافة ذكر مخصص'),
               onPressed: _showAddCustomDhikrDialog,
             ),
           Padding(
@@ -406,7 +408,11 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                   : Icons.workspace_premium_outlined,
               color: const Color(0xFFFFDF7A),
             ),
-            tooltip: ref.watch(premiumProvider).isPremium ? 'Beyân Premium' : 'Premium & Reklamsız',
+            tooltip: ref.watch(premiumProvider).isPremium
+                ? 'Beyân Premium'
+                : (currentLang == AppLanguage.turkish
+                    ? 'Premium & Reklamsız'
+                    : (currentLang == AppLanguage.english ? 'Premium & Ad-Free' : 'نسخة مميزة بدون إعلانات')),
             onPressed: () => PremiumPaywallSheet.show(context),
           ),
           IconButton(
@@ -595,7 +601,11 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  currentLang == AppLanguage.english ? activeDhikr['en']! : activeDhikr['tr']!,
+                  currentLang == AppLanguage.english
+                      ? (activeDhikr['en'] ?? activeDhikr['tr']!)
+                      : (currentLang == AppLanguage.arabic
+                          ? (activeDhikr['ar'] ?? activeDhikr['tr']!)
+                          : activeDhikr['tr']!),
                   style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
                 ),
                 const SizedBox(height: 4),
@@ -1339,6 +1349,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
 
   /// 7/7 tamamlanmadan önce gösterilen standart ilerleme kartı
   Widget _buildProgressCard(int completedCount, DailyWorshipEntry todayEntry, bool isDark) {
+    final strings = ref.watch(appStringsProvider);
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
@@ -1374,15 +1385,23 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Bugünkü İbadet İlerlemeniz',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFFFFDF7A)),
+                Text(
+                  strings.language == AppLanguage.turkish
+                      ? 'Bugünkü İbadet İlerlemeniz'
+                      : (strings.language == AppLanguage.english
+                          ? 'Today\'s Worship Progress'
+                          : 'تقدم عباداتك اليوم'),
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFFFFDF7A)),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   completedCount == 0
-                      ? '5 Vakit Namaz, Kur\'an-ı Kerim tilaveti ve günlük zikrinizi buradan takip edin.'
-                      : 'Bugün için ${7 - completedCount} vazife kaldı. Haydi gayret, günün ayetini açın!',
+                      ? (strings.language == AppLanguage.turkish
+                          ? '5 Vakit Namaz, Kur\'an-ı Kerim tilaveti ve günlük zikrinizi buradan takip edin.'
+                          : (strings.language == AppLanguage.english
+                              ? 'Track your 5 daily prayers, Quran recitation and dhikr here.'
+                              : 'تابع صلواتك الخمس، تلاوة القرآن وأذكارك اليومية هنا.'))
+                      : strings.remainingTasksText(7 - completedCount),
                   style: const TextStyle(fontSize: 12, color: Colors.white70),
                 ),
               ],
@@ -1395,6 +1414,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
 
   /// Dönüm Noktaları, Sureler ve Ödüller Alt Sayfası
   void _showMilestonesSheet(BuildContext context, WorshipStreakData streak, bool isDark) {
+    final strings = ref.read(appStringsProvider);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -1431,9 +1451,13 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
                   children: [
-                    const Text(
-                      'İbadet Serisi Dönüm Noktaları & Beratlar',
-                      style: TextStyle(
+                    Text(
+                      strings.language == AppLanguage.turkish
+                          ? 'İbadet Serisi Dönüm Noktaları & Beratlar'
+                          : (strings.language == AppLanguage.english
+                              ? 'Worship Streak Milestones & Certificates'
+                              : 'محطات ومعالم سلسلة العبادات'),
+                      style: const TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.bold,
                         color: Color(0xFFFFDF7A),
@@ -1442,7 +1466,11 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '5 Vakit namaz, Kur\'an ve zikir ile serinizi koruyun. Her dönüm noktasında (10, 30, 50, 100, 200, 400. gün) motive edici sure ve beratlar kazanın.',
+                      strings.language == AppLanguage.turkish
+                          ? '5 Vakit namaz, Kur\'an ve zikir ile serinizi koruyun. Her dönüm noktasında (10, 30, 50, 100, 200, 400. gün) motive edici sure ve beratlar kazanın.'
+                          : (strings.language == AppLanguage.english
+                              ? 'Maintain your streak with prayers, Quran, and dhikr. Unlock inspiring surahs and certificates at each milestone.'
+                              : 'حافظ على سلسلتك مع الصلوات والقرآن والذكر. وافتح سورًا ملهمة وشهادات عند كل محطة.'),
                       style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.7)),
                       textAlign: TextAlign.center,
                     ),
@@ -1513,7 +1541,11 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                                         ),
                                       ),
                                       Text(
-                                        '${milestone.days}. Gün Hedefi',
+                                        strings.language == AppLanguage.turkish
+                                            ? '${milestone.days}. Gün Hedefi'
+                                            : (strings.language == AppLanguage.english
+                                                ? 'Day ${milestone.days} Goal'
+                                                : 'هدف اليوم ${milestone.days}'),
                                         style: TextStyle(
                                           fontSize: 11,
                                           color: isUnlocked
@@ -1537,8 +1569,12 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                                 ),
                                 child: Text(
                                   isUnlocked
-                                      ? '🏆 KAZANILDI'
-                                      : '🔒 ${milestone.days - streak.currentStreak > 0 ? "${milestone.days - streak.currentStreak} Gün" : "Kilitli"}',
+                                      ? (strings.language == AppLanguage.turkish
+                                        ? '🏆 KAZANILDI'
+                                        : (strings.language == AppLanguage.english
+                                            ? '🏆 UNLOCKED'
+                                            : '🏆 مكتمل'))
+                                      : '🔒 ${milestone.days - streak.currentStreak > 0 ? (strings.language == AppLanguage.turkish ? "${milestone.days - streak.currentStreak} Gün" : (strings.language == AppLanguage.english ? "${milestone.days - streak.currentStreak} Days" : "${milestone.days - streak.currentStreak} يوم")) : (strings.language == AppLanguage.turkish ? "Kilitli" : (strings.language == AppLanguage.english ? "Locked" : "مقفل"))}',
                                   style: TextStyle(
                                     fontSize: 10.5,
                                     fontWeight: FontWeight.bold,
