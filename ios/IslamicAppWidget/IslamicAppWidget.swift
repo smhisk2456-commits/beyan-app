@@ -15,7 +15,7 @@ enum WidgetLocation {
     private static let lngKey = "beyan_widget_lng"
 
     static func coordinate() -> (lat: Double, lng: Double) {
-        let defaults = UserDefaults.standard
+        let defaults = UserDefaults(suiteName: "group.com.smhisk60.beyan") ?? UserDefaults.standard
         if defaults.object(forKey: latKey) != nil {
             let lat = defaults.double(forKey: latKey)
             let lng = defaults.double(forKey: lngKey)
@@ -410,8 +410,21 @@ struct VerseEntry: TimelineEntry {
 
 struct VerseProvider: TimelineProvider {
     private static let slot: TimeInterval = 15 * 60
+    private static let appGroupId = "group.com.smhisk60.beyan"
+
+    private static var userDefaults: UserDefaults {
+        UserDefaults(suiteName: appGroupId) ?? UserDefaults.standard
+    }
 
     private func verse(at date: Date) -> VerseEntry {
+        let defaults = Self.userDefaults
+        if let appliedRef = defaults.string(forKey: "widget_applied_verse_ref"),
+           let appliedText = defaults.string(forKey: "widget_applied_verse_text"),
+           !appliedRef.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+           !appliedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return VerseEntry(date: date, ref: appliedRef, text: appliedText)
+        }
+
         let all = WidgetVerseData.all
         guard !all.isEmpty else {
             return VerseEntry(date: date, ref: "Bakara 2:153",
@@ -429,6 +442,16 @@ struct VerseProvider: TimelineProvider {
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<VerseEntry>) -> Void) {
         let now = Date()
+        let defaults = Self.userDefaults
+        if let appliedRef = defaults.string(forKey: "widget_applied_verse_ref"),
+           let appliedText = defaults.string(forKey: "widget_applied_verse_text"),
+           !appliedRef.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+           !appliedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            let singleEntry = VerseEntry(date: now, ref: appliedRef, text: appliedText)
+            completion(Timeline(entries: [singleEntry], policy: .never))
+            return
+        }
+
         let slotStart = Date(timeIntervalSince1970: floor(now.timeIntervalSince1970 / Self.slot) * Self.slot)
         var entries = [verse(at: now)]
         for i in 1...96 {

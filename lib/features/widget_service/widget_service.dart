@@ -106,6 +106,12 @@ class WidgetService {
     await HomeWidget.saveWidgetData<String>('widget_text_size', textSize);
     await HomeWidget.saveWidgetData<String>('widget_active_category', activeCat);
 
+    // Kilit ekranına sabitlenen özel ayet
+    final appliedRef = prefs.getString('widget_applied_verse_ref') ?? '';
+    final appliedText = prefs.getString('widget_applied_verse_text') ?? '';
+    await HomeWidget.saveWidgetData<String>('widget_applied_verse_ref', appliedRef);
+    await HomeWidget.saveWidgetData<String>('widget_applied_verse_text', appliedText);
+
     // Tüm vakitler
     for (final prayer in allPrayers) {
       await HomeWidget.saveWidgetData<String>('widget_${prayer.name.key}_time', _prayerService.formatTime(prayer.time));
