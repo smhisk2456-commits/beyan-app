@@ -1,6 +1,7 @@
 import WidgetKit
 import SwiftUI
 import ActivityKit
+import Foundation
 private let hhmm: DateFormatter = {
     let f = DateFormatter()
     f.locale = Locale(identifier: "tr_TR")
@@ -548,28 +549,34 @@ struct VerseWidgetView: View {
         var surahStr = ""
         var verseStr = ""
 
-        let defaults = UserDefaults(suiteName: "group.com.smhisk60.beyan") ?? UserDefaults.standard
-        let savedSurah = defaults.integer(forKey: "widget_applied_verse_surah")
-        let savedVerse = defaults.integer(forKey: "widget_applied_verse_number")
+        let arabicToAscii: [Character: Character] = [
+            "٠": "0", "١": "1", "٢": "2", "٣": "3", "٤": "4",
+            "٥": "5", "٦": "6", "٧": "7", "٨": "8", "٩": "9"
+        ]
+        let normalizedRef = String(cleanRef.map { arabicToAscii[$0] ?? $0 })
 
-        if savedSurah > 0 {
-            surahStr = String(savedSurah)
-            verseStr = savedVerse > 0 ? String(savedVerse) : ""
-        } else {
-            let arabicToAscii: [Character: Character] = [
-                "٠": "0", "١": "1", "٢": "2", "٣": "3", "٤": "4",
-                "٥": "5", "٦": "6", "٧": "7", "٨": "8", "٩": "9"
-            ]
-            let normalizedRef = String(cleanRef.map { arabicToAscii[$0] ?? $0 })
-            // Parse numbers like "94:6" or "2:153"
-            if let colonIndex = normalizedRef.firstIndex(of: ":") {
-                let prefix = normalizedRef[..<colonIndex]
-                let suffix = normalizedRef[normalizedRef.index(after: colonIndex)...]
-                let numPattern = prefix.split(separator: " ").last ?? prefix
-                surahStr = String(numPattern)
-                verseStr = String(suffix.split(separator: "-").first ?? suffix)
+        // 1. entry.ref içerisindeki sure ve ayet numarasını kesin regex ile bul (örn: "Bakara 2:153", "İnşirâh 94:6", "Tâhâ 20:25-26", "2:153")
+        if let regex = try? NSRegularExpression(pattern: #"(\d+)\s*[:\.]\s*(\d+)"#) {
+            let nsString = normalizedRef as NSString
+            let results = regex.matches(in: normalizedRef, range: NSRange(location: 0, length: nsString.length))
+            if let match = results.first, match.numberOfRanges >= 3 {
+                surahStr = nsString.substring(with: match.range(at: 1))
+                verseStr = nsString.substring(with: match.range(at: 2))
             }
         }
+
+        // 2. Eğer entry.ref içinde numara bulunamadıysa, kaydedilen özel ayet bu ref ile eşleşiyorsa UserDefaults'a başvur
+        if surahStr.isEmpty {
+            let defaults = UserDefaults(suiteName: "group.com.smhisk60.beyan") ?? UserDefaults.standard
+            let savedRef = defaults.string(forKey: "widget_applied_verse_ref") ?? ""
+            let savedSurah = defaults.integer(forKey: "widget_applied_verse_surah")
+            let savedVerse = defaults.integer(forKey: "widget_applied_verse_number")
+            if savedSurah > 0 && (cleanRef == savedRef || cleanRef.isEmpty) {
+                surahStr = String(savedSurah)
+                verseStr = savedVerse > 0 ? String(savedVerse) : ""
+            }
+        }
+
         let encodedRef = cleanRef.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
         return URL(string: "beyan://verse?homeWidget=true&surah=\(surahStr)&verse=\(verseStr)&ref=\(encodedRef)")
     }

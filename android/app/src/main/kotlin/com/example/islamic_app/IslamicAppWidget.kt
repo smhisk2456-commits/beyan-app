@@ -113,6 +113,32 @@ class IslamicAppWidget : AppWidgetProvider() {
             views.setTextViewText(R.id.widget_ayah, ayahText)
             views.setTextViewText(R.id.widget_prayer_name, "$nextPrayer $nextTime")
             views.setTextViewText(R.id.widget_countdown, "• $countdown")
+
+            // Ayet tıklamasında ilgili ayeti doğrudan açacak deep link
+            val verseUri = android.net.Uri.parse("beyan://verse?homeWidget=true&ref=" + android.net.Uri.encode(ayahRef))
+            val verseIntent = Intent(context, MainActivity::class.java).apply {
+                action = Intent.ACTION_VIEW
+                data = verseUri
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
+            val versePendingIntent = PendingIntent.getActivity(
+                context, 101, verseIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            views.setOnClickPendingIntent(R.id.widget_title, versePendingIntent)
+            views.setOnClickPendingIntent(R.id.widget_ayah, versePendingIntent)
+
+            // Namaz vaktine tıklandığında namaz sekmesini açacak deep link
+            val prayerUri = android.net.Uri.parse("beyan://prayer?homeWidget=true")
+            val prayerIntent = Intent(context, MainActivity::class.java).apply {
+                action = Intent.ACTION_VIEW
+                data = prayerUri
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
+            val prayerPendingIntent = PendingIntent.getActivity(
+                context, 102, prayerIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            views.setOnClickPendingIntent(R.id.widget_prayer_name, prayerPendingIntent)
+            views.setOnClickPendingIntent(R.id.widget_countdown, prayerPendingIntent)
             
             appWidgetManager.updateAppWidget(appWidgetId, views)
         }

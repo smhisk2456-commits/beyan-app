@@ -80,48 +80,14 @@ class DeepLinkService {
 
       // 2. Ayet widget'ı: beyan://verse?surah=2&verse=153&ref=...
       if (uri.host == 'verse' || uri.path.contains('verse')) {
-        int? surahId;
-        int? verseNum;
+        final target = parseVerseTarget(uri);
+        int? surahId = target.surahId;
+        final verseNum = target.verseNum;
 
-        if (uri.queryParameters.containsKey('surah')) {
-          surahId = _parseNumber(uri.queryParameters['surah']);
-        }
-        if (uri.queryParameters.containsKey('verse')) {
-          verseNum = _parseNumber(uri.queryParameters['verse']);
-        }
-
-        final refParam = uri.queryParameters['ref'];
-        if (refParam != null && refParam.isNotEmpty) {
-          final normalizedRef = _normalizeArabicDigits(refParam);
-
-          // 1. Durum: Sayı formatı (örn: "2:153", "Ra'd 13:28", "94:6")
-          final colonMatch = RegExp(r'(\d+)\s*[:\.]\s*(\d+)').firstMatch(normalizedRef);
-          if (colonMatch != null) {
-            surahId ??= int.tryParse(colonMatch.group(1)!);
-            verseNum ??= int.tryParse(colonMatch.group(2)!);
-          } else {
-            // 2. Durum: Sure adı ve ayet numarası (örn: "Bakara 153" veya "İnşirah 6")
-            final nameAndNumMatch = RegExp(r'^([^\d:]+?)\s+(\d+)$').firstMatch(normalizedRef.trim());
-            if (nameAndNumMatch != null) {
-              final sName = nameAndNumMatch.group(1)!.trim();
-              final vNum = int.tryParse(nameAndNumMatch.group(2)!);
-              verseNum ??= vNum;
-              if (surahId == null && sName.isNotEmpty) {
-                final results = await QuranRepository().searchSurahsByName(sName);
-                if (results.isNotEmpty) {
-                  surahId = results.first.id;
-                }
-              }
-            } else if (surahId == null) {
-              // 3. Durum: Sadece sure adı (örn: "Bakara")
-              final cleanName = normalizedRef.split(RegExp(r'[\s0-9:]')).first.trim();
-              if (cleanName.isNotEmpty) {
-                final results = await QuranRepository().searchSurahsByName(cleanName);
-                if (results.isNotEmpty) {
-                  surahId = results.first.id;
-                }
-              }
-            }
+        if (surahId == null && target.surahNameQuery != null && target.surahNameQuery!.isNotEmpty) {
+          final results = await QuranRepository().searchSurahsByName(target.surahNameQuery!);
+          if (results.isNotEmpty) {
+            surahId = results.first.id;
           }
         }
 
@@ -155,8 +121,60 @@ class DeepLinkService {
     }
   }
 
+  /// URI'den Sure ID ve Ayet Numarasını hassas ve öncelikli olarak ayrıştırır.
+  @visibleForTesting
+  static ({int? surahId, int? verseNum, String? surahNameQuery}) parseVerseTarget(Uri uri) {
+    int? surahId;
+    int? verseNum;
+    String? surahNameQuery;
+
+    if (uri.queryParameters.containsKey('surah')) {
+      surahId = parseNumber(uri.queryParameters['surah']);
+    }
+    if (uri.queryParameters.containsKey('verse')) {
+      verseNum = parseNumber(uri.queryParameters['verse']);
+    }
+
+    final refParam = uri.queryParameters['ref'];
+    if (refParam != null && refParam.isNotEmpty) {
+      final normalizedRef = normalizeArabicDigits(refParam);
+
+      // 1. Durum: Sayı formatı (örn: "2:153", "Ra'd 13:28", "94:6", "Tâhâ 20:25-26")
+      final colonMatch = RegExp(r'(\d+)\s*[:\.]\s*(\d+)').firstMatch(normalizedRef);
+      if (colonMatch != null) {
+        final parsedSurah = int.tryParse(colonMatch.group(1)!);
+        final parsedVerse = int.tryParse(colonMatch.group(2)!);
+        if (parsedSurah != null && parsedSurah >= 1 && parsedSurah <= 114) {
+          surahId = parsedSurah;
+        }
+        if (parsedVerse != null && parsedVerse >= 1) {
+          verseNum = parsedVerse;
+        }
+      } else {
+        // 2. Durum: Sure adı ve ayet numarası (örn: "Bakara 153" veya "İnşirah 6")
+        final nameAndNumMatch = RegExp(r'^([^\d:]+?)\s+(\d+)$').firstMatch(normalizedRef.trim());
+        if (nameAndNumMatch != null) {
+          surahNameQuery = nameAndNumMatch.group(1)!.trim();
+          final vNum = int.tryParse(nameAndNumMatch.group(2)!);
+          if (vNum != null && vNum >= 1) {
+            verseNum = vNum;
+          }
+        } else if (surahId == null) {
+          // 3. Durum: Sadece sure adı (örn: "Bakara")
+          final cleanName = normalizedRef.split(RegExp(r'[\s0-9:]')).first.trim();
+          if (cleanName.isNotEmpty) {
+            surahNameQuery = cleanName;
+          }
+        }
+      }
+    }
+
+    return (surahId: surahId, verseNum: verseNum, surahNameQuery: surahNameQuery);
+  }
+
   /// Arapça-Hint rakamlarını (٠١٢٣٤٥٦٧٨٩) standart Latin rakamlarına (0-9) dönüştürür.
-  static String _normalizeArabicDigits(String input) {
+  @visibleForTesting
+  static String normalizeArabicDigits(String input) {
     const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
     var result = input;
     for (int i = 0; i < arabicDigits.length; i++) {
@@ -166,9 +184,10 @@ class DeepLinkService {
   }
 
   /// Hem Latin hem de Arapça rakam içeren metinleri tam sayıya dönüştürür.
-  static int? _parseNumber(String? raw) {
+  @visibleForTesting
+  static int? parseNumber(String? raw) {
     if (raw == null || raw.isEmpty) return null;
-    final normalized = _normalizeArabicDigits(raw);
+    final normalized = normalizeArabicDigits(raw);
     final match = RegExp(r'\d+').firstMatch(normalized);
     if (match != null) {
       return int.tryParse(match.group(0)!);

@@ -30,6 +30,7 @@ class SurahDetailScreen extends ConsumerStatefulWidget {
 
 class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
   final ScrollController _scrollController = ScrollController();
+  final GlobalKey _targetVerseKey = GlobalKey();
   bool _showScrollToTop = false;
   bool _hasScrolledToInitialVerse = false;
 
@@ -39,23 +40,54 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
     _scrollController.addListener(_onScroll);
   }
 
-  void _scrollToInitialVerseIfNeeded() {
+  void _scrollToInitialVerseIfNeeded(List<Verse> verses) {
     if (_hasScrolledToInitialVerse) return;
     final target = widget.initialScrollToVerse;
-    if (target == null || target <= 1) return;
+    if (target == null || target < 1) return;
 
     _hasScrolledToInitialVerse = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      if (_scrollController.hasClients) {
-        final maxScroll = _scrollController.position.maxScrollExtent;
-        final estimatedOffset = ((target - 1) * 210.0 + 80.0).clamp(0.0, maxScroll);
-        _scrollController.animateTo(
-          estimatedOffset,
-          duration: const Duration(milliseconds: 700),
-          curve: Curves.easeOutCubic,
-        );
+      if (!mounted || !_scrollController.hasClients) return;
+
+      final targetIndex = verses.indexWhere((v) => v.verseNumber == target);
+      if (targetIndex < 0) return;
+
+      final maxScroll = _scrollController.position.maxScrollExtent;
+      double estimatedOffset = 210.0; // SliverAppBar yüksekliği
+      if (widget.surah.id != 9 && widget.surah.id != 1) {
+        estimatedOffset += 110.0; // Besmele kartı
       }
+
+      // Her bir ayetin gerçek metin uzunluğuna göre dinamik ve hassas kaydırma hesabı
+      for (int i = 0; i < targetIndex; i++) {
+        final v = verses[i];
+        final arabicLines = (v.arabicText.length / 28.0).ceil().clamp(1, 40);
+        final meaningLines = (v.turkishMeaning.length / 38.0).ceil().clamp(1, 40);
+        estimatedOffset += 90.0 + (arabicLines * 46.0) + (meaningLines * 22.0) + 12.0;
+      }
+
+      // 1. Adım: Hedef ayetin hemen yakınına zıpla (viewport içine girmesini sağlar)
+      _scrollController.jumpTo(estimatedOffset.clamp(0.0, maxScroll));
+
+      // 2. Adım: Viewport'ta render edilen hedef kartı GlobalKey ile hizala
+      void tryEnsureVisible([int attempts = 0]) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          final targetCtx = _targetVerseKey.currentContext;
+          if (targetCtx != null && targetCtx.mounted) {
+            Scrollable.ensureVisible(
+              targetCtx,
+              alignment: 0.15,
+              duration: const Duration(milliseconds: 350),
+              curve: Curves.easeOutCubic,
+            );
+          } else if (attempts < 3) {
+            tryEnsureVisible(attempts + 1);
+          }
+        });
+      }
+
+      tryEnsureVisible();
     });
   }
 
@@ -288,8 +320,8 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
   ) {
     if (!_hasScrolledToInitialVerse &&
         widget.initialScrollToVerse != null &&
-        widget.initialScrollToVerse! > 1) {
-      _scrollToInitialVerseIfNeeded();
+        widget.initialScrollToVerse! >= 1) {
+      _scrollToInitialVerseIfNeeded(verses);
     }
 
     return CustomScrollView(
@@ -396,6 +428,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
               final isTarget = widget.initialScrollToVerse == verse.verseNumber;
               return RepaintBoundary(
                 child: VerseCard(
+                  key: isTarget ? _targetVerseKey : null,
                   verse: verse,
                   isHighlighted: isTarget,
                 ),
