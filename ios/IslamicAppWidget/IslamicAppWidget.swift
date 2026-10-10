@@ -128,14 +128,14 @@ struct PrayerCalculator {
                 sunAngleTime(18, p[0], ccw: true),     // İmsak
                 sunAngleTime(0.833, p[1], ccw: true),  // Güneş
                 midDay(p[2]),                          // Öğle
-                asrTime(2, p[3]),                      // İkindi (Hanefi)
+                asrTime(1, p[3]),                      // İkindi (Diyanet resmi Asr-ı Evvel standardı)
                 sunAngleTime(0.833, p[4], ccw: false), // Akşam
                 sunAngleTime(17, p[5], ccw: false)     // Yatsı
             ]
         }
 
-        // Diyanet temkin düzeltmeleri (dakika)
-        let adjustments: [Double] = [0, -7, 5, 4, 7, 0]
+        // Diyanet resmi takvim temkin düzeltmeleri (dakika)
+        let adjustments: [Double] = [0, -7, 5, 5, 8, 2]
 
         return PrayerKind.allCases.map { kind in
             let i = kind.rawValue

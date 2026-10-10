@@ -24,7 +24,10 @@ enum PrayerCalculationMethod {
     switch (this) {
       case PrayerCalculationMethod.diyanet:
         final p = CalculationMethod.turkey.getParameters();
-        p.madhab = Madhab.hanafi;
+        p.madhab = Madhab.shafi; // Diyanet resmi takvimi cumhur/standart gölge oranını (Asr-ı Evvel) esas alır
+        p.methodAdjustments.asr += 1;     // Diyanet resmi sitesiyle birebir eşleşme (+1 dk temkin)
+        p.methodAdjustments.maghrib += 1; // Diyanet resmi sitesiyle birebir eşleşme (+1 dk temkin)
+        p.methodAdjustments.isha += 2;    // Diyanet resmi sitesiyle birebir eşleşme (+2 dk temkin)
         return p;
       case PrayerCalculationMethod.mwl:
         final p = CalculationMethod.muslim_world_league.getParameters();
