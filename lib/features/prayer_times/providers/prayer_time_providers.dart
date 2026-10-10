@@ -62,10 +62,15 @@ final nextPrayerProvider = FutureProvider<PrayerEntry?>((ref) async {
 
 /// Namaz vakitleri ilerleme oranı (0.0 → 1.0).
 /// Mevcut vakitten sonraki vakite kadar geçen sürenin oranı.
-final prayerProgressProvider = FutureProvider<double>((ref) async {
+/// [StreamProvider] ile saniyede bir dinamik olarak güncellenir.
+final prayerProgressProvider = StreamProvider<double>((ref) {
   final service = ref.watch(prayerTimeServiceProvider);
-  final daily = await ref.watch(dailyPrayerTimesProvider.future);
-  return service.getProgressToNextPrayer(daily);
+  return Stream.periodic(const Duration(seconds: 1), (count) => count).asyncMap(
+    (_) async {
+      final daily = await ref.watch(dailyPrayerTimesProvider.future);
+      return service.getProgressToNextPrayer(daily);
+    },
+  );
 });
 
 // ════════════════════════════════════════════════════════════════

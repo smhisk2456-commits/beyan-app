@@ -243,14 +243,11 @@ class _PrayerCard extends ConsumerWidget {
                 Consumer(
                   builder: (context, ref, _) {
                     final progressAsync = ref.watch(prayerProgressProvider);
-                    return progressAsync.when(
-                      data: (p) => _ProgressBar(
-                        progress: p,
-                        fromLabel: PrayerName.fromAdhan(daily.currentPrayer).localizedName(langCode),
-                        toLabel: next?.name.localizedName(langCode) ?? '',
-                      ),
-                      loading: () => const SizedBox.shrink(),
-                      error: (_, __) => const SizedBox.shrink(),
+                    final progress = progressAsync.valueOrNull ?? 0.0;
+                    return _ProgressBar(
+                      progress: progress,
+                      fromLabel: daily.localizedCurrentPrayerName(langCode),
+                      toLabel: next?.name.localizedName(langCode) ?? '',
                     );
                   },
                 ),

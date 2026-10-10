@@ -432,38 +432,35 @@ class _NextPrayerBanner extends StatelessWidget {
             child: Consumer(
               builder: (context, ref, _) {
                 final progressAsync = ref.watch(prayerProgressProvider);
-                return progressAsync.when(
-                  data: (progress) => Column(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: LinearProgressIndicator(
-                          value: progress,
-                          backgroundColor: Colors.white24,
-                          valueColor: const AlwaysStoppedAnimation<Color>(
-                            Color(0xFFFFDF7A),
-                          ),
-                          minHeight: 6,
+                final progress = progressAsync.valueOrNull ?? 0.0;
+                return Column(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: progress,
+                        backgroundColor: Colors.white24,
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                          Color(0xFFFFDF7A),
                         ),
+                        minHeight: 6,
                       ),
-                      const SizedBox(height: 6),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            daily.localizedCurrentPrayerName(strings.language.code),
-                            style: const TextStyle(color: Colors.white54, fontSize: 11),
-                          ),
-                          Text(
-                            next?.name.localizedName(strings.language.code) ?? '',
-                            style: const TextStyle(color: Colors.white54, fontSize: 11),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  loading: () => const SizedBox.shrink(),
-                  error: (_, __) => const SizedBox.shrink(),
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          daily.localizedCurrentPrayerName(strings.language.code),
+                          style: const TextStyle(color: Colors.white54, fontSize: 11),
+                        ),
+                        Text(
+                          next?.name.localizedName(strings.language.code) ?? '',
+                          style: const TextStyle(color: Colors.white54, fontSize: 11),
+                        ),
+                      ],
+                    ),
+                  ],
                 );
               },
             ),

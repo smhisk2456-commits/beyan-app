@@ -384,6 +384,7 @@ struct PrayerWidgetView: View {
             }
         }
         .beyanWidgetBackground(for: family)
+        .widgetURL(URL(string: "beyan://prayer"))
     }
 }
 
@@ -542,6 +543,11 @@ struct VerseWidgetView: View {
     @Environment(\.widgetFamily) var family
     let entry: VerseEntry
 
+    private var targetUrl: URL? {
+        let encodedRef = entry.ref.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        return URL(string: "beyan://verse?ref=\(encodedRef)")
+    }
+
     var body: some View {
         Group {
             switch family {
@@ -551,6 +557,7 @@ struct VerseWidgetView: View {
             }
         }
         .beyanWidgetBackground(for: family)
+        .widgetURL(targetUrl)
     }
 }
 
@@ -621,6 +628,7 @@ struct PrayerLiveActivityBanner: View {
                 endPoint: .bottomTrailing
             )
         )
+        .widgetURL(URL(string: "beyan://prayer"))
     }
 }
 

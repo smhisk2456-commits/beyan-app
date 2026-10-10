@@ -23,6 +23,7 @@ import 'features/monetization/screens/onboarding_trial_paywall_screen.dart';
 import 'features/splash/screens/splash_screen.dart';
 import 'features/quran/widgets/quran_audio_player_bar.dart';
 import 'core/widgets/luxury_floating_dock.dart';
+import 'core/services/deep_link_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -112,6 +113,7 @@ class IslamicApp extends ConsumerWidget {
     final themeState = ref.watch(themeProvider);
 
     return MaterialApp(
+      navigatorKey: DeepLinkService.navigatorKey,
       title: 'Beyân',
       debugShowCheckedModeBanner: false,
       locale: currentLang.locale,
@@ -162,11 +164,13 @@ class _MainNavigationState extends ConsumerState<MainNavigation>
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkLaunchPaywall();
+      DeepLinkService.instance.init(ref);
     });
   }
 
   @override
   void dispose() {
+    DeepLinkService.instance.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }

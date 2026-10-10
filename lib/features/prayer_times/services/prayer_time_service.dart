@@ -205,22 +205,19 @@ class PrayerTimeService {
     } catch (_) {}
   }
 
-  /// Türkiye kalıcı UTC+3 saat dilimi dönüşümü
-  DateTime _toTurkeyTime(DateTime time) {
-    if (DateTime.now().timeZoneOffset.inHours == 3) {
-      return time.toLocal();
-    }
-    return time.toUtc().add(const Duration(hours: 3));
+  /// Yerel cihaz saat dilimi dönüşümü (adhan kütüphanesinden yerel saate)
+  DateTime _toLocalTime(DateTime time) {
+    return time.toLocal();
   }
 
   List<PrayerEntry> _buildPrayerEntries(PrayerTimes pt) {
     return [
-      PrayerEntry(name: PrayerName.fajr, time: _toTurkeyTime(pt.fajr)),
-      PrayerEntry(name: PrayerName.sunrise, time: _toTurkeyTime(pt.sunrise)),
-      PrayerEntry(name: PrayerName.dhuhr, time: _toTurkeyTime(pt.dhuhr)),
-      PrayerEntry(name: PrayerName.asr, time: _toTurkeyTime(pt.asr)),
-      PrayerEntry(name: PrayerName.maghrib, time: _toTurkeyTime(pt.maghrib)),
-      PrayerEntry(name: PrayerName.isha, time: _toTurkeyTime(pt.isha)),
+      PrayerEntry(name: PrayerName.fajr, time: _toLocalTime(pt.fajr)),
+      PrayerEntry(name: PrayerName.sunrise, time: _toLocalTime(pt.sunrise)),
+      PrayerEntry(name: PrayerName.dhuhr, time: _toLocalTime(pt.dhuhr)),
+      PrayerEntry(name: PrayerName.asr, time: _toLocalTime(pt.asr)),
+      PrayerEntry(name: PrayerName.maghrib, time: _toLocalTime(pt.maghrib)),
+      PrayerEntry(name: PrayerName.isha, time: _toLocalTime(pt.isha)),
     ];
   }
 
@@ -238,17 +235,36 @@ class PrayerTimeService {
     for (int i = 0; i < prayers.length; i++) {
       if (prayers[i].time.isAfter(now)) {
         next = prayers[i];
-        current = i > 0 ? prayers[i - 1] : null;
+        if (i > 0) {
+          current = prayers[i - 1];
+        } else {
+          // İmsak öncesi: bir önceki vaktimiz dünkü Yatsı
+          current = PrayerEntry(
+            name: PrayerName.isha,
+            time: daily.isha.time.subtract(const Duration(days: 1)),
+          );
+        }
         break;
       }
     }
 
-    if (current == null || next == null) return 1.0;
+    // Günün tüm vakitleri geçmişse (Yatsı sonrası):
+    if (next == null) {
+      current = daily.isha;
+      next = PrayerEntry(
+        name: PrayerName.fajr,
+        time: daily.fajr.time.add(const Duration(days: 1)),
+      );
+    }
 
-    final totalDuration = next.time.difference(current.time);
-    final elapsed = now.difference(current.time);
+    final cur = current;
+    final nxt = next;
+    if (cur == null) return 1.0;
 
-    if (totalDuration.inSeconds == 0) return 0.0;
+    final totalDuration = nxt.time.difference(cur.time);
+    final elapsed = now.difference(cur.time);
+
+    if (totalDuration.inSeconds <= 0) return 0.0;
     final progress = elapsed.inSeconds / totalDuration.inSeconds;
     return progress.clamp(0.0, 1.0);
   }

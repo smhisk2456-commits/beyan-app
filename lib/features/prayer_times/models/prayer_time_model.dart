@@ -191,18 +191,10 @@ class DailyPrayerTimes {
   /// Şu anki vakti döner ([adhan] kullanılır).
   Prayer get currentPrayer => prayerTimes.currentPrayer();
 
-  /// Mevcut referans zamanı (Türkiye saati)
-  DateTime get _nowInTurkey {
-    if (DateTime.now().timeZoneOffset.inHours == 3) {
-      return DateTime.now();
-    }
-    return DateTime.now().toUtc().add(const Duration(hours: 3));
-  }
-
   /// Sıradaki namaz vakti [PrayerEntry]'i döner.
   /// Eğer günün tüm vakitleri geçmişse (ör: Yatsı sonrası), yarının İmsak vaktini döner.
   PrayerEntry? get nextPrayerEntry {
-    final now = _nowInTurkey;
+    final now = DateTime.now();
     for (final p in prayers) {
       if (p.time.isAfter(now)) {
         return p;
@@ -217,7 +209,7 @@ class DailyPrayerTimes {
 
   /// Sıradaki vakte kalan süre.
   Duration get timeUntilNextPrayer {
-    final now = _nowInTurkey;
+    final now = DateTime.now();
     final next = nextPrayerEntry;
     if (next == null) return Duration.zero;
     final diff = next.time.difference(now);
@@ -226,7 +218,7 @@ class DailyPrayerTimes {
 
   /// Şimdiki ve sıradaki vaktin Türkçe adları
   String get currentPrayerName {
-    final now = _nowInTurkey;
+    final now = DateTime.now();
     PrayerEntry? current;
     for (final p in prayers) {
       if (p.time.isBefore(now)) {
@@ -239,7 +231,7 @@ class DailyPrayerTimes {
   String get nextPrayerName => nextPrayerEntry?.name.turkish ?? 'İmsak';
 
   PrayerEntry? get currentPrayerEntry {
-    final now = _nowInTurkey;
+    final now = DateTime.now();
     PrayerEntry? current;
     for (final p in prayers) {
       if (p.time.isBefore(now)) {
