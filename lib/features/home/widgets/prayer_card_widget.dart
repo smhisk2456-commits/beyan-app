@@ -5,6 +5,7 @@ import '../../../core/localization/app_strings.dart';
 import '../../prayer_times/models/prayer_time_model.dart';
 import '../../prayer_times/providers/prayer_time_providers.dart';
 import '../../calendar/services/hijri_calendar_service.dart';
+import '../../prayer_times/screens/prayer_guide_sheet.dart';
 
 /// Ana ekranın üst kısmında yer alan lüks zümrüt & altın namaz vakti kartı.
 class PrayerCardWidget extends ConsumerWidget {
@@ -166,39 +167,48 @@ class _PrayerCard extends ConsumerWidget {
                           // ── Rekat Bilgisi Rozeti ─────────────────
                           if (next != null && next.name.rakatTotal > 0) ...[
                             const SizedBox(height: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFD4AF37).withValues(alpha: 0.18),
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(
-                                  color: const Color(0xFFFFDF7A).withValues(alpha: 0.45),
-                                  width: 1,
+                            GestureDetector(
+                              onTap: () => PrayerGuideSheet.show(context, ref, next.name, next.time),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFD4AF37).withValues(alpha: 0.18),
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: const Color(0xFFFFDF7A).withValues(alpha: 0.45),
+                                    width: 1,
+                                  ),
                                 ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(
-                                    Icons.mosque_outlined,
-                                    size: 13,
-                                    color: Color(0xFFFFDF7A),
-                                  ),
-                                  const SizedBox(width: 5),
-                                  Flexible(
-                                    child: Text(
-                                      next.name.localizedRakat(langCode),
-                                      style: const TextStyle(
-                                        color: Color(0xFFFFDF7A),
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w600,
-                                        letterSpacing: 0.2,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.mosque_outlined,
+                                      size: 13,
+                                      color: Color(0xFFFFDF7A),
                                     ),
-                                  ),
-                                ],
+                                    const SizedBox(width: 5),
+                                    Flexible(
+                                      child: Text(
+                                        next.name.localizedRakat(langCode),
+                                        style: const TextStyle(
+                                          color: Color(0xFFFFDF7A),
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600,
+                                          letterSpacing: 0.2,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    const Icon(
+                                      Icons.info_outline_rounded,
+                                      size: 11,
+                                      color: Color(0xFFFFDF7A),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ],
@@ -248,6 +258,11 @@ class _PrayerCard extends ConsumerWidget {
                       progress: progress,
                       fromLabel: daily.localizedCurrentPrayerName(langCode),
                       toLabel: next?.name.localizedName(langCode) ?? '',
+                      onTap: () {
+                        if (next != null) {
+                          PrayerGuideSheet.show(context, ref, next.name, next.time);
+                        }
+                      },
                     );
                   },
                 ),
@@ -362,41 +377,125 @@ class _CountdownBadge extends StatelessWidget {
 }
 
 /// Mevcut → Sıradaki vakit ilerleme çubuğu.
+/// Mevcut → Sıradaki vakit canlı ve aktif ilerleme çubuğu.
 class _ProgressBar extends StatelessWidget {
   final double progress;
   final String fromLabel;
   final String toLabel;
+  final VoidCallback? onTap;
 
   const _ProgressBar({
     required this.progress,
     required this.fromLabel,
     required this.toLabel,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(4),
-          child: LinearProgressIndicator(
-            value: progress,
-            backgroundColor: Colors.white.withValues(alpha: 0.15),
-            valueColor: const AlwaysStoppedAnimation<Color>(
-              Color(0xFFFFDF7A),
-            ),
-            minHeight: 5,
+    final clamped = progress.clamp(0.0, 1.0);
+    final percent = (clamped * 100).toInt();
+
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Column(
+        children: [
+          Stack(
+            alignment: Alignment.centerLeft,
+            children: [
+              Container(
+                height: 7,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+              TweenAnimationBuilder<double>(
+                tween: Tween<double>(begin: 0, end: clamped),
+                duration: const Duration(milliseconds: 500),
+                curve: Curves.easeOutCubic,
+                builder: (context, val, _) {
+                  return FractionallySizedBox(
+                    widthFactor: val.clamp(0.01, 1.0),
+                    child: Container(
+                      height: 7,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFFD4AF37), Color(0xFFFFDF7A), Color(0xFFFFF3B0)],
+                        ),
+                        borderRadius: BorderRadius.circular(4),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFFFFDF7A).withValues(alpha: 0.45),
+                            blurRadius: 6,
+                            spreadRadius: 1,
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
-        ),
-        const SizedBox(height: 6),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(fromLabel, style: const TextStyle(color: Colors.white54, fontSize: 11.5)),
-            Text(toLabel, style: const TextStyle(color: Color(0xFFFFDF7A), fontSize: 11.5, fontWeight: FontWeight.w600)),
-          ],
-        ),
-      ],
+          const SizedBox(height: 7),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 6,
+                    height: 6,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Color(0xFFD4AF37),
+                    ),
+                  ),
+                  const SizedBox(width: 5),
+                  Text(fromLabel, style: const TextStyle(color: Colors.white70, fontSize: 11.5, fontWeight: FontWeight.w500)),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(
+                    color: const Color(0xFFFFDF7A).withValues(alpha: 0.35),
+                    width: 0.8,
+                  ),
+                ),
+                child: Text(
+                  '%$percent',
+                  style: const TextStyle(
+                    color: Color(0xFFFFDF7A),
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(toLabel, style: const TextStyle(color: Color(0xFFFFDF7A), fontSize: 11.5, fontWeight: FontWeight.w600)),
+                  const SizedBox(width: 5),
+                  Container(
+                    width: 6,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: const Color(0xFFFFDF7A).withValues(alpha: 0.5),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
@@ -435,8 +534,8 @@ class _MiniPrayerRow extends StatelessWidget {
   }
 }
 
-/// Mini vakit satırındaki tek vakit hücresi (Rekat sayısı ile birlikte).
-class _MiniPrayerItem extends StatelessWidget {
+/// Mini vakit satırındaki tek vakit hücresi (Dokunulduğunda namaz rehberini açar).
+class _MiniPrayerItem extends ConsumerWidget {
   final PrayerEntry entry;
   final bool isActive;
   final String langCode;
@@ -448,59 +547,63 @@ class _MiniPrayerItem extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final h = entry.time.hour.toString().padLeft(2, '0');
     final m = entry.time.minute.toString().padLeft(2, '0');
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 250),
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-      decoration: BoxDecoration(
-        color: isActive ? const Color(0xFFD4AF37).withValues(alpha: 0.24) : Colors.transparent,
-        borderRadius: BorderRadius.circular(14),
-        border: isActive
-            ? Border.all(color: const Color(0xFFFFDF7A).withValues(alpha: 0.55), width: 1)
-            : null,
-      ),
-      child: Column(
-        children: [
-          Text(
-            entry.name.localizedName(langCode),
-            style: TextStyle(
-              color: isActive ? const Color(0xFFFFDF7A) : Colors.white60,
-              fontSize: 11,
-              fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            '$h:$m',
-            style: TextStyle(
-              color: isActive ? Colors.white : Colors.white70,
-              fontSize: 13,
-              fontWeight: isActive ? FontWeight.bold : FontWeight.w400,
-              fontFeatures: const [FontFeature.tabularFigures()],
-            ),
-          ),
-          const SizedBox(height: 2),
-          // Küçük rekat göstergesi (ör: 4R, 10R, 8R)
-          if (entry.name.rakatTotal > 0)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(6),
+    return GestureDetector(
+      onTap: () => PrayerGuideSheet.show(context, ref, entry.name, entry.time),
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+        decoration: BoxDecoration(
+          color: isActive ? const Color(0xFFD4AF37).withValues(alpha: 0.24) : Colors.transparent,
+          borderRadius: BorderRadius.circular(14),
+          border: isActive
+              ? Border.all(color: const Color(0xFFFFDF7A).withValues(alpha: 0.55), width: 1)
+              : null,
+        ),
+        child: Column(
+          children: [
+            Text(
+              entry.name.localizedName(langCode),
+              style: TextStyle(
+                color: isActive ? const Color(0xFFFFDF7A) : Colors.white60,
+                fontSize: 11,
+                fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
               ),
-              child: Text(
-                '${entry.name.rakatTotal}R',
-                style: TextStyle(
-                  fontSize: 9,
-                  color: isActive ? const Color(0xFFFFDF7A) : Colors.white38,
-                  fontWeight: FontWeight.w600,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              '$h:$m',
+              style: TextStyle(
+                color: isActive ? Colors.white : Colors.white70,
+                fontSize: 13,
+                fontWeight: isActive ? FontWeight.bold : FontWeight.w400,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
+            ),
+            const SizedBox(height: 2),
+            // Küçük rekat göstergesi (ör: 4R, 10R, 8R)
+            if (entry.name.rakatTotal > 0)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  '${entry.name.rakatTotal}R',
+                  style: TextStyle(
+                    fontSize: 9,
+                    color: isActive ? const Color(0xFFFFDF7A) : Colors.white38,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

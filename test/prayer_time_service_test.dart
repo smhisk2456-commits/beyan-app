@@ -163,5 +163,38 @@ void main() {
       expect(params.methodAdjustments.isha, equals(2));
     });
   });
+
+  // ── Namaz Rekat ve Rehber Bilgisi Testleri ───────────────────────
+  group('Namaz Rekatları ve Rehber Bilgisi', () {
+    test('Tüm vakitlerin rekat sayıları İslam fıkhına göre eksiksiz olmalı', () {
+      expect(PrayerName.fajr.rakatTotal, equals(4)); // 2 Sünnet + 2 Farz
+      expect(PrayerName.sunrise.rakatTotal, equals(0)); // Kerâhet vakti
+      expect(PrayerName.dhuhr.rakatTotal, equals(10)); // 4 İlk Sünnet + 4 Farz + 2 Son Sünnet
+      expect(PrayerName.asr.rakatTotal, equals(8)); // 4 Sünnet + 4 Farz
+      expect(PrayerName.maghrib.rakatTotal, equals(5)); // 3 Farz + 2 Sünnet
+      expect(PrayerName.isha.rakatTotal, equals(13)); // 4 İlk Sünnet + 4 Farz + 2 Son Sünnet + 3 Vitir
+    });
+
+    test('Yatsı namazı detaylı rekat açılımı doğru ve kesilmemiş olmalı', () {
+      final tr = PrayerName.isha.localizedRakat('tr');
+      expect(tr, contains('13 Rekat'));
+      expect(tr, contains('4 Sünnet + 4 Farz + 2 Sünnet + 3 Vitir'));
+
+      final en = PrayerName.isha.localizedRakat('en');
+      expect(en, contains('13 Rakats'));
+      expect(en, contains('4 Sunnah + 4 Fard + 2 Sunnah + 3 Witr'));
+
+      final ar = PrayerName.isha.localizedRakat('ar');
+      expect(ar, contains('١٣ ركعة'));
+      expect(ar, contains('وتر'));
+    });
+
+    test('Sabah, Öğle, İkindi ve Akşam rekat detayları Türkçe doğru dönmeli', () {
+      expect(PrayerName.fajr.localizedRakat('tr'), contains('2 Sünnet + 2 Farz'));
+      expect(PrayerName.dhuhr.localizedRakat('tr'), contains('4 Sünnet + 4 Farz + 2 Sünnet'));
+      expect(PrayerName.asr.localizedRakat('tr'), contains('4 Sünnet + 4 Farz'));
+      expect(PrayerName.maghrib.localizedRakat('tr'), contains('3 Farz + 2 Sünnet'));
+    });
+  });
 }
 

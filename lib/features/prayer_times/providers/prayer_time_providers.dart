@@ -65,14 +65,16 @@ final nextPrayerProvider = FutureProvider<PrayerEntry?>((ref) async {
 /// Namaz vakitleri ilerleme oranı (0.0 → 1.0).
 /// Mevcut vakitten sonraki vakite kadar geçen sürenin oranı.
 /// [StreamProvider] ile saniyede bir dinamik olarak güncellenir.
-final prayerProgressProvider = StreamProvider<double>((ref) {
+final prayerProgressProvider = StreamProvider<double>((ref) async* {
+  final daily = await ref.watch(dailyPrayerTimesProvider.future);
   final service = ref.watch(prayerTimeServiceProvider);
-  return Stream.periodic(const Duration(seconds: 1), (count) => count).asyncMap(
-    (_) async {
-      final daily = await ref.watch(dailyPrayerTimesProvider.future);
-      return service.getProgressToNextPrayer(daily);
-    },
-  );
+
+  yield service.getProgressToNextPrayer(daily);
+
+  final timer = Stream.periodic(const Duration(seconds: 1));
+  await for (final _ in timer) {
+    yield service.getProgressToNextPrayer(daily);
+  }
 });
 
 // ════════════════════════════════════════════════════════════════
@@ -80,31 +82,29 @@ final prayerProgressProvider = StreamProvider<double>((ref) {
 // ════════════════════════════════════════════════════════════════
 
 /// Sıradaki namaz vaktine kalan süreyi saniyede bir güncelleyen provider.
-///
-/// [StreamProvider] kullanılır; her saniye yeni bir [Duration] yayar.
-/// Widget, `ref.watch(prayerCountdownProvider)` ile otomatik güncellenir.
-final prayerCountdownProvider = StreamProvider<Duration>((ref) {
-  // Her saniye tetiklenen timer stream'i
-  return Stream.periodic(const Duration(seconds: 1), (count) => count).asyncMap(
-    (_) async {
-      // Namaz vakitlerini al (cache'ten gelir, yeniden hesaplanmaz)
-      final daily = await ref.watch(dailyPrayerTimesProvider.future);
-      return daily.timeUntilNextPrayer;
-    },
-  );
+final prayerCountdownProvider = StreamProvider<Duration>((ref) async* {
+  final daily = await ref.watch(dailyPrayerTimesProvider.future);
+
+  yield daily.timeUntilNextPrayer;
+
+  final timer = Stream.periodic(const Duration(seconds: 1));
+  await for (final _ in timer) {
+    yield daily.timeUntilNextPrayer;
+  }
 });
 
 /// Countdown'ı formatlanmış string olarak döner (ör: "02:45" veya "1s 30dk").
-final countdownStringProvider = StreamProvider<String>((ref) {
+final countdownStringProvider = StreamProvider<String>((ref) async* {
+  final daily = await ref.watch(dailyPrayerTimesProvider.future);
   final service = ref.watch(prayerTimeServiceProvider);
   final lang = ref.watch(appLanguageProvider);
-  return Stream.periodic(const Duration(seconds: 1), (count) => count).asyncMap(
-    (_) async {
-      final daily = await ref.watch(dailyPrayerTimesProvider.future);
-      final remaining = daily.timeUntilNextPrayer;
-      return service.formatCountdown(remaining, lang: lang);
-    },
-  );
+
+  yield service.formatCountdown(daily.timeUntilNextPrayer, lang: lang);
+
+  final timer = Stream.periodic(const Duration(seconds: 1));
+  await for (final _ in timer) {
+    yield service.formatCountdown(daily.timeUntilNextPrayer, lang: lang);
+  }
 });
 
 // ════════════════════════════════════════════════════════════════

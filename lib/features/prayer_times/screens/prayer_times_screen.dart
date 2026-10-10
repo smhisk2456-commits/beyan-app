@@ -12,6 +12,7 @@ import 'calculation_method_sheet.dart';
 import '../../monetization/widgets/banner_ad_widget.dart';
 import '../../notifications/screens/adhan_makam_selector_sheet.dart';
 import '../../notifications/screens/notification_settings_sheet.dart';
+import 'prayer_guide_sheet.dart';
 
 /// Tüm günlük namaz vakitlerini listeleyen tam ekran.
 /// Ana ekranın alt kısmında veya ayrı bir sekme olarak kullanılır.
@@ -227,7 +228,7 @@ class _LocationDateCard extends StatelessWidget {
 }
 
 /// Sıradaki namaz vakti banner'ı – büyük countdown ile.
-class _NextPrayerBanner extends StatelessWidget {
+class _NextPrayerBanner extends ConsumerWidget {
   final DailyPrayerTimes daily;
   final AppStrings strings;
 
@@ -237,7 +238,7 @@ class _NextPrayerBanner extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final next = daily.nextPrayerEntry;
     final service = _PrayerTimeServiceHelper();
 
@@ -388,79 +389,171 @@ class _NextPrayerBanner extends StatelessWidget {
               ),
             ],
           ),
-          // Rekat Ayrıntı Rozeti (Taşmayı önlemek için tam genişlikte zarif satır)
+          // Rekat Ayrıntı Rozeti (Dokunulduğunda namaz rehberini açar)
           if (next != null && next.name.rakatTotal > 0) ...[
             const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
-              decoration: BoxDecoration(
-                color: const Color(0xFFD4AF37).withValues(alpha: 0.18),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: const Color(0xFFFFDF7A).withValues(alpha: 0.4),
-                  width: 1,
+            GestureDetector(
+              onTap: () => PrayerGuideSheet.show(context, ref, next.name, next.time),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFD4AF37).withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: const Color(0xFFFFDF7A).withValues(alpha: 0.4),
+                    width: 1,
+                  ),
                 ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(
-                    Icons.mosque_rounded,
-                    size: 13,
-                    color: Color(0xFFFFDF7A),
-                  ),
-                  const SizedBox(width: 6),
-                  Flexible(
-                    child: Text(
-                      next.name.localizedRakat(strings.language.code),
-                      style: const TextStyle(
-                        color: Color(0xFFFFDF7A),
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.mosque_rounded,
+                      size: 13,
+                      color: Color(0xFFFFDF7A),
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: Text(
+                        next.name.localizedRakat(strings.language.code),
+                        style: const TextStyle(
+                          color: Color(0xFFFFDF7A),
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: 5),
+                    const Icon(
+                      Icons.info_outline_rounded,
+                      size: 12,
+                      color: Color(0xFFFFDF7A),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
           const SizedBox(height: 16),
-          // İlerleme çubuğu (İzole edilmiş Consumer)
+          // Canlı ve Aktif İlerleme Çizelgesi (İzole edilmiş Consumer)
           RepaintBoundary(
             child: Consumer(
               builder: (context, ref, _) {
                 final progressAsync = ref.watch(prayerProgressProvider);
-                final progress = progressAsync.valueOrNull ?? 0.0;
-                return Column(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: LinearProgressIndicator(
-                        value: progress,
-                        backgroundColor: Colors.white24,
-                        valueColor: const AlwaysStoppedAnimation<Color>(
-                          Color(0xFFFFDF7A),
-                        ),
-                        minHeight: 6,
+                final progress = (progressAsync.valueOrNull ?? 0.0).clamp(0.0, 1.0);
+                final percent = (progress * 100).toInt();
+
+                return GestureDetector(
+                  onTap: () {
+                    if (next != null) {
+                      PrayerGuideSheet.show(context, ref, next.name, next.time);
+                    }
+                  },
+                  child: Column(
+                    children: [
+                      Stack(
+                        alignment: Alignment.centerLeft,
+                        children: [
+                          Container(
+                            height: 7,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.14),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
+                          TweenAnimationBuilder<double>(
+                            tween: Tween<double>(begin: 0, end: progress),
+                            duration: const Duration(milliseconds: 500),
+                            curve: Curves.easeOutCubic,
+                            builder: (context, val, _) {
+                              return FractionallySizedBox(
+                                widthFactor: val.clamp(0.01, 1.0),
+                                child: Container(
+                                  height: 7,
+                                  decoration: BoxDecoration(
+                                    gradient: const LinearGradient(
+                                      colors: [Color(0xFFD4AF37), Color(0xFFFFDF7A), Color(0xFFFFF3B0)],
+                                    ),
+                                    borderRadius: BorderRadius.circular(4),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(0xFFFFDF7A).withValues(alpha: 0.45),
+                                        blurRadius: 6,
+                                        spreadRadius: 1,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
                       ),
-                    ),
-                    const SizedBox(height: 6),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          daily.localizedCurrentPrayerName(strings.language.code),
-                          style: const TextStyle(color: Colors.white54, fontSize: 11),
-                        ),
-                        Text(
-                          next?.name.localizedName(strings.language.code) ?? '',
-                          style: const TextStyle(color: Colors.white54, fontSize: 11),
-                        ),
-                      ],
-                    ),
-                  ],
+                      const SizedBox(height: 7),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 6,
+                                height: 6,
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Color(0xFFD4AF37),
+                                ),
+                              ),
+                              const SizedBox(width: 5),
+                              Text(
+                                daily.localizedCurrentPrayerName(strings.language.code),
+                                style: const TextStyle(color: Colors.white70, fontSize: 11.5, fontWeight: FontWeight.w500),
+                              ),
+                            ],
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(
+                                color: const Color(0xFFFFDF7A).withValues(alpha: 0.35),
+                                width: 0.8,
+                              ),
+                            ),
+                            child: Text(
+                              '%$percent',
+                              style: const TextStyle(
+                                color: Color(0xFFFFDF7A),
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                next?.name.localizedName(strings.language.code) ?? '',
+                                style: const TextStyle(color: Color(0xFFFFDF7A), fontSize: 11.5, fontWeight: FontWeight.w600),
+                              ),
+                              const SizedBox(width: 5),
+                              Container(
+                                width: 6,
+                                height: 6,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: const Color(0xFFFFDF7A).withValues(alpha: 0.5),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 );
               },
             ),
@@ -520,131 +613,144 @@ class _PrayerTimeCard extends ConsumerWidget {
               ]
             : null,
       ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          children: [
-            // İkon
-            Container(
-              width: 42,
-              height: 42,
-              decoration: BoxDecoration(
-                color: _iconBgColor(isDark),
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: isNext ? AppColors.teal : (isCurrent ? AppColors.gold : Colors.grey.withValues(alpha: 0.3)),
-                  width: 1,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: () => PrayerGuideSheet.show(context, ref, entry.name, entry.time),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                // İkon
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: _iconBgColor(isDark),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: isNext ? AppColors.teal : (isCurrent ? AppColors.gold : Colors.grey.withValues(alpha: 0.3)),
+                      width: 1,
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      entry.name.arabic,
+                      style: TextStyle(
+                        fontFamily: 'Amiri',
+                        fontSize: 14,
+                        color: _iconTextColor(),
+                        height: 1.6,
+                      ),
+                      textDirection: TextDirection.rtl,
+                    ),
+                  ),
                 ),
-              ),
-              child: Center(
-                child: Text(
-                  entry.name.arabic,
+                const SizedBox(width: 14),
+
+                // Namaz adı ve Rekat Bilgisi
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              entry.name.localizedName(strings.language.code),
+                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                fontWeight: isNext ? FontWeight.bold : FontWeight.w600,
+                                color: isNext ? AppColors.teal : null,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          if (isCurrent)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: AppColors.gold.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                strings.currentPrayer,
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  color: AppColors.gold,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            )
+                          else if (isNext)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: AppColors.teal.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                strings.nextPrayer,
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  color: AppColors.teal,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 3),
+                      // Rekat Bilgisi & Rehber İpucu
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.mosque_rounded,
+                            size: 12,
+                            color: Color(0xFFD4AF37),
+                          ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              entry.name.localizedRakat(strings.language.code),
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                                color: isDark ? const Color(0xFFFFDF7A) : const Color(0xFF8C6D08),
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(
+                            Icons.auto_stories_outlined,
+                            size: 13,
+                            color: const Color(0xFFFFDF7A).withValues(alpha: 0.7),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Saat
+                Text(
+                  helper.fmt(entry.time),
                   style: TextStyle(
-                    fontFamily: 'Amiri',
-                    fontSize: 14,
-                    color: _iconTextColor(),
-                    height: 1.6,
+                    fontSize: 20,
+                    fontWeight: isNext ? FontWeight.bold : FontWeight.w300,
+                    color: isNext
+                        ? AppColors.teal
+                        : Theme.of(context).textTheme.bodyLarge?.color,
+                    fontFeatures: const [FontFeature.tabularFigures()],
                   ),
-                  textDirection: TextDirection.rtl,
                 ),
-              ),
+              ],
             ),
-            const SizedBox(width: 14),
-
-            // Namaz adı ve Rekat Bilgisi
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Flexible(
-                        child: Text(
-                          entry.name.localizedName(strings.language.code),
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: isNext ? FontWeight.bold : FontWeight.w600,
-                            color: isNext ? AppColors.teal : null,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      if (isCurrent)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: AppColors.gold.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            strings.currentPrayer,
-                            style: const TextStyle(
-                              fontSize: 10,
-                              color: AppColors.gold,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        )
-                      else if (isNext)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: AppColors.teal.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            strings.nextPrayer,
-                            style: const TextStyle(
-                              fontSize: 10,
-                              color: AppColors.teal,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 3),
-                  // Rekat Bilgisi
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.mosque_rounded,
-                        size: 12,
-                        color: Color(0xFFD4AF37),
-                      ),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          entry.name.localizedRakat(strings.language.code),
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            color: isDark ? const Color(0xFFFFDF7A) : const Color(0xFF8C6D08),
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            // Saat
-            Text(
-              helper.fmt(entry.time),
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: isNext ? FontWeight.bold : FontWeight.w300,
-                color: isNext
-                    ? AppColors.teal
-                    : Theme.of(context).textTheme.bodyLarge?.color,
-                fontFeatures: const [FontFeature.tabularFigures()],
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
