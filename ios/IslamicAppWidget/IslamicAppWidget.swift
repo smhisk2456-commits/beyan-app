@@ -547,13 +547,28 @@ struct VerseWidgetView: View {
         let cleanRef = entry.ref
         var surahStr = ""
         var verseStr = ""
-        // Parse numbers like "94:6" or "2:153"
-        if let colonIndex = cleanRef.firstIndex(of: ":") {
-            let prefix = cleanRef[..<colonIndex]
-            let suffix = cleanRef[cleanRef.index(after: colonIndex)...]
-            let numPattern = prefix.split(separator: " ").last ?? prefix
-            surahStr = String(numPattern)
-            verseStr = String(suffix.split(separator: "-").first ?? suffix)
+
+        let defaults = UserDefaults(suiteName: "group.com.smhisk60.beyan") ?? UserDefaults.standard
+        let savedSurah = defaults.integer(forKey: "widget_applied_verse_surah")
+        let savedVerse = defaults.integer(forKey: "widget_applied_verse_number")
+
+        if savedSurah > 0 {
+            surahStr = String(savedSurah)
+            verseStr = savedVerse > 0 ? String(savedVerse) : ""
+        } else {
+            let arabicToAscii: [Character: Character] = [
+                "٠": "0", "١": "1", "٢": "2", "٣": "3", "٤": "4",
+                "٥": "5", "٦": "6", "٧": "7", "٨": "8", "٩": "9"
+            ]
+            let normalizedRef = String(cleanRef.map { arabicToAscii[$0] ?? $0 })
+            // Parse numbers like "94:6" or "2:153"
+            if let colonIndex = normalizedRef.firstIndex(of: ":") {
+                let prefix = normalizedRef[..<colonIndex]
+                let suffix = normalizedRef[normalizedRef.index(after: colonIndex)...]
+                let numPattern = prefix.split(separator: " ").last ?? prefix
+                surahStr = String(numPattern)
+                verseStr = String(suffix.split(separator: "-").first ?? suffix)
+            }
         }
         let encodedRef = cleanRef.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
         return URL(string: "beyan://verse?homeWidget=true&surah=\(surahStr)&verse=\(verseStr)&ref=\(encodedRef)")

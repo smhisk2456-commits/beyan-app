@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/localization/app_strings.dart';
 import '../../../core/localization/language_selector_sheet.dart';
 import '../../widget_service/screens/widget_settings_dialog.dart';
@@ -34,6 +35,45 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
   late final AnimationController _plusOneController;
   late final Animation<double> _plusOneOpacity;
   late final Animation<Offset> _plusOneOffset;
+
+  Future<void> _loadSavedDhikrState() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final savedCount = prefs.getInt('zikirmatik_count') ?? 0;
+      final savedTarget = prefs.getInt('zikirmatik_target') ?? 33;
+      final savedDhikrIndex = prefs.getInt('zikirmatik_selected_index') ?? 0;
+      final savedLaps = prefs.getInt('zikirmatik_laps') ?? 0;
+      final savedHaptic = prefs.getInt('zikirmatik_haptic_mode') ?? 1;
+
+      if (mounted) {
+        setState(() {
+          _count = savedCount;
+          _target = savedTarget;
+          _selectedDhikrIndex = savedDhikrIndex.clamp(0, _dhikrList.length - 1);
+          _completedLaps = savedLaps;
+          _hapticMode = savedHaptic;
+        });
+        if (_chipScrollController.hasClients && _selectedDhikrIndex > 0) {
+          _chipScrollController.animateTo(
+            _selectedDhikrIndex * 105.0,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+          );
+        }
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _saveDhikrState() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('zikirmatik_count', _count);
+      await prefs.setInt('zikirmatik_target', _target);
+      await prefs.setInt('zikirmatik_selected_index', _selectedDhikrIndex);
+      await prefs.setInt('zikirmatik_laps', _completedLaps);
+      await prefs.setInt('zikirmatik_haptic_mode', _hapticMode);
+    } catch (_) {}
+  }
 
   final List<Map<String, String>> _dhikrList = [
     {
@@ -105,6 +145,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
   @override
   void initState() {
     super.initState();
+    _loadSavedDhikrState();
     _pulseController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 120),
@@ -221,12 +262,14 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
         );
       }
     });
+    _saveDhikrState();
   }
 
   void _undo() {
     if (_count > 0) {
       HapticFeedback.selectionClick();
       setState(() => _count--);
+      _saveDhikrState();
     }
   }
 
@@ -261,6 +304,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                 _count = 0;
                 _completedLaps = 0;
               });
+              _saveDhikrState();
               Navigator.pop(ctx);
             },
             child: Text(strings.reset),
@@ -541,6 +585,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                       _count = 0;
                       _completedLaps = 0;
                     });
+                    _saveDhikrState();
                   },
                   selectedColor: const Color(0xFFD4AF37),
                   backgroundColor: isDark ? const Color(0xFF07211C) : Colors.grey.shade100,
@@ -891,6 +936,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
     return InkWell(
       onTap: () {
         setState(() => _hapticMode = mode);
+        _saveDhikrState();
         if (mode == 1) HapticFeedback.lightImpact();
         if (mode == 2) HapticFeedback.mediumImpact();
         if (mode == 3) HapticFeedback.heavyImpact();
@@ -1884,6 +1930,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
           _count = 0;
           _completedLaps = 0;
         });
+        _saveDhikrState();
       },
       borderRadius: BorderRadius.circular(12),
       child: Container(

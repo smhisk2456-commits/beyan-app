@@ -122,9 +122,12 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
     });
 
     _stateSub = _player.onPlayerStateChanged.listen((playerState) {
+      final isPlaying = playerState == PlayerState.playing;
+      final isCompleted = playerState == PlayerState.completed;
       state = state.copyWith(
-        isPlaying: playerState == PlayerState.playing,
+        isPlaying: isPlaying,
         isLoading: false,
+        position: isCompleted ? Duration.zero : null,
       );
     });
   }

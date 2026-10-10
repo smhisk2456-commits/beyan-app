@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:adhan/adhan.dart';
+import 'package:islamic_app/features/prayer_times/models/calculation_settings_model.dart';
 import 'package:islamic_app/features/prayer_times/models/prayer_time_model.dart';
 import 'package:islamic_app/features/prayer_times/services/prayer_time_service.dart';
 
@@ -151,4 +152,16 @@ void main() {
       expect(fallback.isFromGPS, isFalse);
     });
   });
+
+  // ── Diyanet Kalibrasyon ve Metot Testleri ───────────────────────
+  group('Diyanet Calculation Settings', () {
+    test('Diyanet yöntemi Türkiye takvimine uygun olarak Asr-ı Evvel (Madhab.shafi) kullanır', () {
+      final params = PrayerCalculationMethod.diyanet.getAdhanParameters();
+      expect(params.madhab, equals(Madhab.shafi));
+      expect(params.methodAdjustments.asr, equals(5));
+      expect(params.methodAdjustments.maghrib, equals(8));
+      expect(params.methodAdjustments.isha, equals(2));
+    });
+  });
 }
+

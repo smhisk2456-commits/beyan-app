@@ -31,25 +31,32 @@ class SurahDetailScreen extends ConsumerStatefulWidget {
 class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
   final ScrollController _scrollController = ScrollController();
   bool _showScrollToTop = false;
+  bool _hasScrolledToInitialVerse = false;
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+  }
 
-    // Otomatik son okunan yere kaydırma
-    if (widget.initialScrollToVerse != null && widget.initialScrollToVerse! > 1) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        final estimatedOffset = (widget.initialScrollToVerse! - 1) * 220.0;
-        if (_scrollController.hasClients) {
-          _scrollController.animateTo(
-            estimatedOffset,
-            duration: const Duration(milliseconds: 700),
-            curve: Curves.easeOutCubic,
-          );
-        }
-      });
-    }
+  void _scrollToInitialVerseIfNeeded() {
+    if (_hasScrolledToInitialVerse) return;
+    final target = widget.initialScrollToVerse;
+    if (target == null || target <= 1) return;
+
+    _hasScrolledToInitialVerse = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (_scrollController.hasClients) {
+        final maxScroll = _scrollController.position.maxScrollExtent;
+        final estimatedOffset = ((target - 1) * 210.0 + 80.0).clamp(0.0, maxScroll);
+        _scrollController.animateTo(
+          estimatedOffset,
+          duration: const Duration(milliseconds: 700),
+          curve: Curves.easeOutCubic,
+        );
+      }
+    });
   }
 
   @override
@@ -279,6 +286,12 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
     bool isThisSurahPlaying,
     AppStrings strings,
   ) {
+    if (!_hasScrolledToInitialVerse &&
+        widget.initialScrollToVerse != null &&
+        widget.initialScrollToVerse! > 1) {
+      _scrollToInitialVerseIfNeeded();
+    }
+
     return CustomScrollView(
       controller: _scrollController,
       physics: const BouncingScrollPhysics(),
@@ -378,9 +391,16 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
         // ── Ayet Listesi ────────────────────────────────────
         SliverList(
           delegate: SliverChildBuilderDelegate(
-            (context, index) => RepaintBoundary(
-              child: VerseCard(verse: verses[index]),
-            ),
+            (context, index) {
+              final verse = verses[index];
+              final isTarget = widget.initialScrollToVerse == verse.verseNumber;
+              return RepaintBoundary(
+                child: VerseCard(
+                  verse: verse,
+                  isHighlighted: isTarget,
+                ),
+              );
+            },
             childCount: verses.length,
           ),
         ),

@@ -109,8 +109,13 @@ class WidgetService {
     // Kilit ekranına sabitlenen özel ayet
     final appliedRef = prefs.getString('widget_applied_verse_ref') ?? '';
     final appliedText = prefs.getString('widget_applied_verse_text') ?? '';
+    final appliedSurah = prefs.getInt('widget_applied_verse_surah') ?? 0;
+    final appliedVerseNum = prefs.getInt('widget_applied_verse_number') ?? 0;
+
     await HomeWidget.saveWidgetData<String>('widget_applied_verse_ref', appliedRef);
     await HomeWidget.saveWidgetData<String>('widget_applied_verse_text', appliedText);
+    await HomeWidget.saveWidgetData<int>('widget_applied_verse_surah', appliedSurah);
+    await HomeWidget.saveWidgetData<int>('widget_applied_verse_number', appliedVerseNum);
 
     // Tüm vakitler
     for (final prayer in allPrayers) {

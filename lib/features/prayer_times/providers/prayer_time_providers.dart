@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/localization/app_strings.dart';
+import '../../notifications/services/notification_service.dart';
+import '../../widget_service/widget_service.dart';
 import '../models/prayer_time_model.dart';
 import '../services/prayer_time_service.dart';
 
@@ -139,6 +141,8 @@ class PrayerTimesNotifier extends AsyncNotifier<DailyPrayerTimes> {
     _midnightTimer = Timer(untilMidnight, () {
       // Gece yarısı geçince yeniden hesapla
       ref.invalidateSelf();
+      NotificationService.instance.scheduleUpcomingPrayers();
+      WidgetService().updateAllWidgets();
       _scheduleMidnightReset(); // Bir sonraki gece için tekrar kur
     });
   }
@@ -149,7 +153,10 @@ class PrayerTimesNotifier extends AsyncNotifier<DailyPrayerTimes> {
     state = await AsyncValue.guard(() async {
       final service = ref.read(prayerTimeServiceProvider);
       final location = await service.getCurrentLocation();
-      return service.calculatePrayerTimes(location: location);
+      final daily = await service.calculatePrayerTimes(location: location);
+      NotificationService.instance.scheduleUpcomingPrayers();
+      WidgetService().updateAllWidgets();
+      return daily;
     });
   }
 }

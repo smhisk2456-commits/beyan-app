@@ -589,6 +589,17 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
     await HomeWidget.saveWidgetData<String>('widget_applied_verse_text', mealText);
     await HomeWidget.saveWidgetData<String>('widget_applied_verse_arabic', currentQuote.arabic);
 
+    // Sure ve Ayet numarasını da kesin yönlendirme için kaydet
+    final refMatch = RegExp(r'(\d+):(\d+)').firstMatch(currentQuote.referenceTr);
+    final surahNum = refMatch != null ? int.tryParse(refMatch.group(1)!) ?? 0 : 0;
+    final verseNum = refMatch != null ? int.tryParse(refMatch.group(2)!) ?? 0 : 0;
+    if (surahNum > 0) {
+      await prefs.setInt('widget_applied_verse_surah', surahNum);
+      await prefs.setInt('widget_applied_verse_number', verseNum);
+      await HomeWidget.saveWidgetData<int>('widget_applied_verse_surah', surahNum);
+      await HomeWidget.saveWidgetData<int>('widget_applied_verse_number', verseNum);
+    }
+
     final premiumState = ref.read(premiumProvider);
     if (premiumState.hasWidgetAccess) {
       await WidgetService().updateAllWidgets();
@@ -633,9 +644,13 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('widget_applied_verse_ref');
     await prefs.remove('widget_applied_verse_text');
+    await prefs.remove('widget_applied_verse_surah');
+    await prefs.remove('widget_applied_verse_number');
 
     await HomeWidget.saveWidgetData<String>('widget_applied_verse_ref', '');
     await HomeWidget.saveWidgetData<String>('widget_applied_verse_text', '');
+    await HomeWidget.saveWidgetData<int>('widget_applied_verse_surah', 0);
+    await HomeWidget.saveWidgetData<int>('widget_applied_verse_number', 0);
 
     final premiumState = ref.read(premiumProvider);
     if (premiumState.hasWidgetAccess) {

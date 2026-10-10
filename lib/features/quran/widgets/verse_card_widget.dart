@@ -10,12 +10,14 @@ import '../providers/quran_reading_providers.dart';
 class VerseCard extends ConsumerWidget {
   final Verse verse;
   final bool showSurahReference;
+  final bool isHighlighted;
   final VoidCallback? onTap;
 
   const VerseCard({
     super.key,
     required this.verse,
     this.showSurahReference = false,
+    this.isHighlighted = false,
     this.onTap,
   });
 
@@ -51,6 +53,7 @@ class VerseCard extends ConsumerWidget {
     final isBookmarked = ref.watch(bookmarkedVersesProvider).contains('${verse.surahId}:${verse.verseNumber}');
     final lastRead = ref.watch(lastReadProvider);
     final isLastRead = lastRead?.surahId == verse.surahId && lastRead?.verseNumber == verse.verseNumber;
+    final shouldHighlight = isLastRead || isHighlighted;
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -58,13 +61,13 @@ class VerseCard extends ConsumerWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(18),
         side: BorderSide(
-          color: isLastRead
+          color: shouldHighlight
               ? const Color(0xFFFFDF7A)
               : (isDark ? const Color(0xFF133B34) : const Color(0xFFE2EBE8)),
-          width: isLastRead ? 1.6 : 1,
+          width: shouldHighlight ? 1.8 : 1,
         ),
       ),
-      color: isLastRead
+      color: shouldHighlight
           ? (isDark ? const Color(0xFF0F362F) : const Color(0xFFF1F8F5))
           : (isDark ? const Color(0xFF0D2823) : Colors.white),
       child: InkWell(
