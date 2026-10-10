@@ -2,15 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/localization/app_strings.dart';
-import '../../../core/localization/language_selector_sheet.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../main.dart';
 import '../../prayer_times/models/prayer_time_model.dart';
 import '../../prayer_times/providers/prayer_time_providers.dart';
-import '../../widget_service/screens/widget_settings_dialog.dart';
 import '../../qibla/screens/qibla_compass_screen.dart';
-import '../../notifications/screens/notification_settings_sheet.dart';
-import '../../../core/theme/screens/theme_selection_sheet.dart';
 import '../../monetization/providers/premium_provider.dart';
 import '../../monetization/screens/premium_paywall_sheet.dart';
 import '../../monetization/widgets/banner_ad_widget.dart';
@@ -25,6 +21,9 @@ import '../../quran/screens/surah_detail_screen.dart';
 import '../../quran/models/surah.dart';
 import '../../notifications/models/short_verse_notification.dart';
 import '../widgets/prayer_card_widget.dart';
+import '../../settings/screens/settings_screen.dart';
+import '../../spiritual_healing/models/mood_verse_model.dart';
+import '../../spiritual_healing/screens/mood_verse_sheet.dart';
 
 /// Ana Ekran – Beyân lüks İslami kontrol merkezi.
 class HomeScreen extends ConsumerStatefulWidget {
@@ -101,6 +100,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 );
               },
             ),
+          ),
+
+          // ── "Bugün Kalbin Nasıl Hissediyor?" (Ruh Haline Göre Âyet & Şifa) ───
+          const SliverToBoxAdapter(
+            child: _SpiritualMoodsSection(),
           ),
 
           // ── Günlük Vakitler & Rekat Bilgileri Başlığı ─────────
@@ -966,7 +970,6 @@ class _IslamicAppBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final strings = ref.watch(appStringsProvider);
-    final currentLang = ref.watch(appLanguageProvider);
 
     return SliverAppBar(
       floating: false,
@@ -1007,7 +1010,7 @@ class _IslamicAppBar extends ConsumerWidget {
         ],
       ),
       actions: [
-        // Beyân Premium Üyelik Butonu
+        // Beyân Premium Rozeti
         IconButton(
           icon: Icon(
             ref.watch(premiumProvider).isPremium
@@ -1015,67 +1018,152 @@ class _IslamicAppBar extends ConsumerWidget {
                 : Icons.workspace_premium_outlined,
             color: const Color(0xFFFFDF7A),
           ),
-          tooltip: ref.watch(premiumProvider).isPremium
-              ? 'Beyân Premium'
-              : (strings.language == AppLanguage.english
-                  ? 'Premium & Ad-Free'
-                  : (strings.language == AppLanguage.arabic
-                      ? 'بريميوم وبدون إعلانات'
-                      : 'Premium & Reklamsız')),
+          tooltip: 'Beyân Premium',
           onPressed: () => PremiumPaywallSheet.show(context),
         ),
-        // Tema Seçici Butonu
-        IconButton(
-          icon: const Icon(Icons.palette_outlined, color: Color(0xFFFFDF7A)),
-          tooltip: strings.appearanceAndTheme,
-          onPressed: () => ThemeSelectionSheet.show(context),
-        ),
-        // Dil Seçici Buton
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 2),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(12),
-            onTap: () => showLanguageSelectorSheet(context),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: const Color(0xFFD4AF37).withValues(alpha: 0.5),
-                  width: 1,
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(currentLang.flag, style: const TextStyle(fontSize: 13)),
-                  const SizedBox(width: 4),
-                  Text(
-                    currentLang.shortCode,
-                    style: const TextStyle(
-                      color: Color(0xFFFFDF7A),
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        // Ezan Bildirim Ayarları Butonu
-        IconButton(
-          icon: const Icon(Icons.notifications_active_outlined, color: Color(0xFFFFDF7A)),
-          tooltip: strings.adhanSettingsTitle,
-          onPressed: () => NotificationSettingsSheet.show(context),
-        ),
+        // Lüks Ayarlar Butonu (Tek & Ferah)
         IconButton(
           icon: const Icon(Icons.settings_outlined, color: Colors.white),
           tooltip: strings.settings,
-          onPressed: () => showWidgetSettings(context),
+          onPressed: () => SettingsScreen.show(context),
         ),
+        const SizedBox(width: 6),
       ],
+    );
+  }
+}
+
+// ════════════════════════════════════════════════════════════════
+// "Bugün Kalbin Nasıl Hissediyor?" Ruh Haline Göre Âyet & Şifa
+// ════════════════════════════════════════════════════════════════
+
+class _SpiritualMoodsSection extends ConsumerWidget {
+  const _SpiritualMoodsSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final strings = ref.watch(appStringsProvider);
+    final lang = strings.language.code;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final title = strings.language == AppLanguage.english
+        ? 'How is your heart feeling today?'
+        : (strings.language == AppLanguage.arabic ? 'كيف يشعر قلبك اليوم؟' : 'Bugün Kalbin Nasıl Hissediyor?');
+
+    final subtitle = strings.language == AppLanguage.english
+        ? 'Tap for Quranic healing, prophetic dua & reflection'
+        : (strings.language == AppLanguage.arabic ? 'آيات وأدعية شافية تناسب مشاعرك' : 'Ruh haline özel âyet-i kerîme, dua ve şifâ');
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF032620) : Colors.white,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(
+            color: const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.3 : 0.2),
+            width: 1.2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.05),
+              blurRadius: 14,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.favorite_rounded,
+                    color: Color(0xFFFFDF7A),
+                    size: 16,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFFFFDF7A),
+                        ),
+                      ),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          color: isDark ? Colors.white70 : Colors.black54,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+
+            // Duygu Çipleri (Pills)
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              child: Row(
+                children: MoodVerseData.list.map((item) {
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(16),
+                      onTap: () => MoodVerseSheet.show(context, item),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? item.accentColor.withValues(alpha: 0.12)
+                              : item.accentColor.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: item.accentColor.withValues(alpha: 0.4),
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(item.emoji, style: const TextStyle(fontSize: 16)),
+                            const SizedBox(width: 6),
+                            Text(
+                              item.localizedTitle(lang),
+                              style: TextStyle(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.bold,
+                                color: isDark ? Colors.white : Colors.black87,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

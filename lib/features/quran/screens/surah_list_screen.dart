@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/localization/app_strings.dart';
-import '../../../core/localization/language_selector_sheet.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/common_widgets.dart' as app_widgets;
 import '../../quran/models/surah.dart';
@@ -11,6 +10,7 @@ import '../../quran/providers/quran_reading_providers.dart';
 import '../../quran/screens/surah_detail_screen.dart';
 import '../../home/widgets/surah_list_item.dart';
 import '../../monetization/widgets/banner_ad_widget.dart';
+import '../../settings/screens/settings_screen.dart';
 
 /// Bağımsız sure listesi ekranı (Kur'an-ı Kerim Menü Sekmesi).
 class SurahListScreen extends ConsumerStatefulWidget {
@@ -34,7 +34,6 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
     final surahsAsync = ref.watch(filteredSurahsProvider);
     final allSurahs = ref.watch(allSurahsProvider).valueOrNull ?? [];
     final strings = ref.watch(appStringsProvider);
-    final currentLang = ref.watch(appLanguageProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final lastRead = ref.watch(lastReadProvider);
 
@@ -44,40 +43,13 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
         title: Text(strings.quranTitle),
         centerTitle: true,
         actions: [
-          // Dil Seçici Buton
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(12),
-              onTap: () => showLanguageSelectorSheet(context),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: const Color(0xFFD4AF37).withValues(alpha: 0.5),
-                    width: 1,
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(currentLang.flag, style: const TextStyle(fontSize: 13)),
-                    const SizedBox(width: 4),
-                    Text(
-                      currentLang.shortCode,
-                      style: const TextStyle(
-                        color: Color(0xFFFFDF7A),
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+          // Lüks Ayarlar Butonu
+          IconButton(
+            icon: const Icon(Icons.settings_outlined, color: Colors.white),
+            tooltip: strings.settings,
+            onPressed: () => SettingsScreen.show(context),
           ),
+          const SizedBox(width: 6),
         ],
       ),
       body: Stack(

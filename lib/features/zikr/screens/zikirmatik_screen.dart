@@ -3,10 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/localization/app_strings.dart';
-import '../../../core/localization/language_selector_sheet.dart';
-import '../../widget_service/screens/widget_settings_dialog.dart';
-import '../../monetization/providers/premium_provider.dart';
-import '../../monetization/screens/premium_paywall_sheet.dart';
+import '../../settings/screens/settings_screen.dart';
 import '../../monetization/widgets/banner_ad_widget.dart';
 import '../models/worship_tracker_model.dart';
 
@@ -403,7 +400,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
         title: Text(_activeTab == 0 ? strings.actionZikr : strings.worshipTrackerTab),
         centerTitle: true,
         actions: [
-          // Özel zikir ekle butonu
+          // Özel zikir ekle butonu (Zikir sekmesinde aktif)
           if (_activeTab == 0)
             IconButton(
               icon: const Icon(Icons.add_circle_outline_rounded, color: Color(0xFFFFDF7A)),
@@ -412,58 +409,13 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                   : (currentLang == AppLanguage.english ? 'Add Custom Dhikr' : 'إضافة ذكر مخصص'),
               onPressed: _showAddCustomDhikrDialog,
             ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(12),
-              onTap: () => showLanguageSelectorSheet(context),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: const Color(0xFFD4AF37).withValues(alpha: 0.5),
-                    width: 1,
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(currentLang.flag, style: const TextStyle(fontSize: 13)),
-                    const SizedBox(width: 4),
-                    Text(
-                      currentLang.shortCode,
-                      style: const TextStyle(
-                        color: Color(0xFFFFDF7A),
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          IconButton(
-            icon: Icon(
-              ref.watch(premiumProvider).isPremium
-                  ? Icons.workspace_premium_rounded
-                  : Icons.workspace_premium_outlined,
-              color: const Color(0xFFFFDF7A),
-            ),
-            tooltip: ref.watch(premiumProvider).isPremium
-                ? 'Beyân Premium'
-                : (currentLang == AppLanguage.turkish
-                    ? 'Premium & Reklamsız'
-                    : (currentLang == AppLanguage.english ? 'Premium & Ad-Free' : 'نسخة مميزة بدون إعلانات')),
-            onPressed: () => PremiumPaywallSheet.show(context),
-          ),
+          // Lüks Ayarlar Butonu
           IconButton(
             icon: const Icon(Icons.settings_outlined, color: Colors.white),
             tooltip: strings.settings,
-            onPressed: () => showWidgetSettings(context),
+            onPressed: () => SettingsScreen.show(context),
           ),
+          const SizedBox(width: 6),
         ],
       ),
       body: SafeArea(

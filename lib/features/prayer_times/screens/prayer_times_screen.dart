@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/localization/app_strings.dart';
-import '../../../core/localization/language_selector_sheet.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/app_constants.dart';
 import '../models/prayer_time_model.dart';
 import '../providers/prayer_time_providers.dart';
 import '../../../core/widgets/common_widgets.dart' as app_widgets;
 import 'city_selector_sheet.dart';
-import 'calculation_method_sheet.dart';
+import '../../settings/screens/settings_screen.dart';
 import '../../monetization/widgets/banner_ad_widget.dart';
-import '../../notifications/screens/adhan_makam_selector_sheet.dart';
-import '../../notifications/screens/notification_settings_sheet.dart';
 import 'prayer_guide_sheet.dart';
 
 /// Tüm günlük namaz vakitlerini listeleyen tam ekran.
@@ -23,7 +20,6 @@ class PrayerTimesScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final prayerAsync = ref.watch(prayerTimesNotifierProvider);
     final strings = ref.watch(appStringsProvider);
-    final currentLang = ref.watch(appLanguageProvider);
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -32,72 +28,19 @@ class PrayerTimesScreen extends ConsumerWidget {
         actions: [
           // Şehir / Konum Seçici Buton
           IconButton(
-            icon: const Icon(Icons.location_city_rounded, color: Color(0xFFFFDF7A)),
+            icon: const Icon(Icons.location_on_rounded, color: Color(0xFFFFDF7A)),
             tooltip: strings.language == AppLanguage.turkish
                 ? 'Şehir Değiştir'
                 : (strings.language == AppLanguage.english ? 'Change City' : 'تغيير المدينة'),
             onPressed: () => CitySelectorSheet.show(context, ref),
           ),
-          // Hesaplama Metodu Butonu
+          // Lüks Ayarlar Butonu (Hesaplama Metodu, Ezan Makamları, Bildirimler, Dil vb.)
           IconButton(
-            icon: const Icon(Icons.tune_rounded, color: Color(0xFFFFDF7A)),
-            tooltip: strings.calculationMethodTitle,
-            onPressed: () => CalculationMethodSheet.show(context, ref),
+            icon: const Icon(Icons.settings_outlined, color: Colors.white),
+            tooltip: strings.settings,
+            onPressed: () => SettingsScreen.show(context),
           ),
-          // Dil Seçici Buton
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(12),
-              onTap: () => showLanguageSelectorSheet(context),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: const Color(0xFFD4AF37).withValues(alpha: 0.5),
-                    width: 1,
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(currentLang.flag, style: const TextStyle(fontSize: 13)),
-                    const SizedBox(width: 4),
-                    Text(
-                      currentLang.shortCode,
-                      style: const TextStyle(
-                        color: Color(0xFFFFDF7A),
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          // Konumu yenile butonu
-          IconButton(
-            icon: const Icon(Icons.my_location_rounded),
-            tooltip: strings.updateLocation,
-            onPressed: () {
-              ref.read(prayerTimesNotifierProvider.notifier).refresh();
-            },
-          ),
-          // Ezan Makamları & Meşhur Müezzinler butonu
-          IconButton(
-            icon: const Icon(Icons.music_note_rounded, color: Color(0xFFFFDF7A)),
-            tooltip: strings.specialAdhanMakamsPro,
-            onPressed: () => AdhanMakamSelectorSheet.show(context),
-          ),
-          // Ezan ve Âyet Bildirimleri butonu
-          IconButton(
-            icon: const Icon(Icons.notifications_active_outlined, color: Color(0xFFFFDF7A)),
-            tooltip: strings.notificationSettings,
-            onPressed: () => NotificationSettingsSheet.show(context),
-          ),
+          const SizedBox(width: 6),
         ],
       ),
       body: prayerAsync.when(
