@@ -414,16 +414,19 @@ struct VerseProvider: TimelineProvider {
     private static let slot: TimeInterval = 15 * 60
     private static let appGroupId = "group.com.smhisk60.beyan"
 
-    private static var userDefaults: UserDefaults {
-        UserDefaults(suiteName: appGroupId) ?? UserDefaults.standard
+    private static func string(forKey key: String) -> String? {
+        if let val = UserDefaults(suiteName: appGroupId)?.string(forKey: key), !val.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return val
+        }
+        if let val = UserDefaults.standard.string(forKey: key), !val.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return val
+        }
+        return nil
     }
 
     private func verse(at date: Date) -> VerseEntry {
-        let defaults = Self.userDefaults
-        if let appliedRef = defaults.string(forKey: "widget_applied_verse_ref"),
-           let appliedText = defaults.string(forKey: "widget_applied_verse_text"),
-           !appliedRef.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
-           !appliedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+        if let appliedRef = Self.string(forKey: "widget_applied_verse_ref"),
+           let appliedText = Self.string(forKey: "widget_applied_verse_text") {
             return VerseEntry(date: date, ref: appliedRef, text: appliedText)
         }
 
@@ -444,11 +447,8 @@ struct VerseProvider: TimelineProvider {
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<VerseEntry>) -> Void) {
         let now = Date()
-        let defaults = Self.userDefaults
-        if let appliedRef = defaults.string(forKey: "widget_applied_verse_ref"),
-           let appliedText = defaults.string(forKey: "widget_applied_verse_text"),
-           !appliedRef.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
-           !appliedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+        if let appliedRef = Self.string(forKey: "widget_applied_verse_ref"),
+           let appliedText = Self.string(forKey: "widget_applied_verse_text") {
             let singleEntry = VerseEntry(date: now, ref: appliedRef, text: appliedText)
             completion(Timeline(entries: [singleEntry], policy: .never))
             return
@@ -467,19 +467,30 @@ struct VerseRectangularView: View {
     let entry: VerseEntry
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: 3) {
+            // Sûre Adı ve Âyet Numarası (Büyük ve kalın, görsel 1 ile birebir uyumlu)
             Text(entry.ref)
-                .font(.system(size: 11, weight: .bold))
-                .foregroundColor(.secondary)
+                .font(.system(size: 13.5, weight: .bold))
+                .foregroundColor(.white)
                 .lineLimit(1)
+            // Âyet Meali
             Text(entry.text)
-                .font(.system(size: 11, weight: .medium))
-                .lineLimit(4)
-                .minimumScaleFactor(0.65)
+                .font(.system(size: 10.5, weight: .medium))
+                .foregroundColor(.white.opacity(0.92))
+                .lineLimit(3)
+                .minimumScaleFactor(0.72)
                 .multilineTextAlignment(.leading)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .widgetAccentable()
+    }
+}
+
+struct VerseInlineView: View {
+    let entry: VerseEntry
+
+    var body: some View {
+        Label("\(entry.ref): \(entry.text)", systemImage: "book.closed.fill")
     }
 }
 
@@ -586,6 +597,7 @@ struct VerseWidgetView: View {
             switch family {
             case .systemSmall: VerseSystemSmallView(entry: entry)
             case .systemMedium: VerseSystemMediumView(entry: entry)
+            case .accessoryInline: VerseInlineView(entry: entry)
             default: VerseRectangularView(entry: entry)
             }
         }
@@ -601,9 +613,9 @@ struct BeyanVerseWidget: Widget {
         StaticConfiguration(kind: kind, provider: VerseProvider()) { entry in
             VerseWidgetView(entry: entry)
         }
-        .configurationDisplayName("Ayet")
-        .description("Her 15 dakikada bir yeni ayet ve meali.")
-        .supportedFamilies([.systemSmall, .systemMedium, .accessoryRectangular])
+        .configurationDisplayName("Ayet & Meal")
+        .description("Kilit ekranınızda ilham verici Kur'an ayeti ve meali.")
+        .supportedFamilies([.systemSmall, .systemMedium, .accessoryRectangular, .accessoryInline])
     }
 }
 
@@ -723,6 +735,347 @@ struct BeyanLiveActivityWidget: Widget {
     }
 }
 
+// MARK: - Namaz Geri Sayımı Widget'ı (Canlı Sayaç)
+
+struct CountdownWidgetView: View {
+    @Environment(\.widgetFamily) var family
+    let entry: PrayerEntry
+
+    var body: some View {
+        Group {
+            switch family {
+            case .accessoryInline:
+                HStack(spacing: 3) {
+                    Image(systemName: "timer")
+                    Text("\(entry.next.kind.name) ")
+                    Text(entry.next.date, style: .timer)
+                }
+            case .accessoryCircular:
+                ZStack {
+                    AccessoryWidgetBackground()
+                    VStack(spacing: 1) {
+                        Image(systemName: entry.next.kind.symbol)
+                            .font(.system(size: 12))
+                        Text(entry.next.date, style: .timer)
+                            .font(.system(size: 11, weight: .bold, design: .rounded))
+                            .monospacedDigit()
+                            .minimumScaleFactor(0.6)
+                            .lineLimit(1)
+                    }
+                    .padding(2)
+                }
+                .widgetAccentable()
+            case .systemSmall:
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text("Geri Sayım")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundColor(Color(red: 1.0, green: 0.85, blue: 0.45))
+                        Spacer()
+                        Image(systemName: "timer")
+                            .font(.system(size: 13))
+                            .foregroundColor(Color(red: 1.0, green: 0.85, blue: 0.45))
+                    }
+                    Spacer()
+                    Text("\(entry.next.kind.name) Vaktine")
+                        .font(.system(size: 12))
+                        .foregroundColor(.white.opacity(0.75))
+                    Text(entry.next.date, style: .timer)
+                        .font(.system(size: 24, weight: .bold, design: .rounded))
+                        .monospacedDigit()
+                        .foregroundColor(.white)
+                    Text("\(entry.next.kind.name) Saati: \(hhmm.string(from: entry.next.date))")
+                        .font(.system(size: 11))
+                        .foregroundColor(Color(red: 1.0, green: 0.85, blue: 0.45))
+                }
+                .padding(12)
+            default: // .accessoryRectangular
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "timer")
+                            .font(.system(size: 11, weight: .semibold))
+                        Text("\(entry.next.kind.name) Vaktine Kalan:")
+                            .font(.system(size: 11.5, weight: .bold))
+                            .lineLimit(1)
+                    }
+                    .foregroundColor(.white.opacity(0.85))
+                    Text(entry.next.date, style: .timer)
+                        .font(.system(size: 25, weight: .bold, design: .rounded))
+                        .monospacedDigit()
+                        .foregroundColor(.white)
+                        .minimumScaleFactor(0.75)
+                        .lineLimit(1)
+                    Text("\(entry.next.kind.name) Saati: \(hhmm.string(from: entry.next.date))")
+                        .font(.system(size: 10.5, weight: .medium))
+                        .foregroundColor(.white.opacity(0.75))
+                        .lineLimit(1)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                .widgetAccentable()
+            }
+        }
+        .beyanWidgetBackground(for: family)
+        .widgetURL(URL(string: "beyan://prayer?countdownWidget=true"))
+    }
+}
+
+struct BeyanCountdownWidget: Widget {
+    let kind = "BeyanCountdownWidget"
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: PrayerProvider()) { entry in
+            CountdownWidgetView(entry: entry)
+        }
+        .configurationDisplayName("Namaz Geri Sayımı")
+        .description("Sıradaki vakte kalan süreyi canlı geri sayımla gösterir.")
+        .supportedFamilies([.accessoryRectangular, .accessoryInline, .accessoryCircular, .systemSmall])
+    }
+}
+
+// MARK: - Hicri Takvim & Kandiller Widget'ı
+
+enum HijriHelper {
+    private static let monthsTr = [
+        "", "Muharrem", "Safer", "Rebîülevvel", "Rebîülâhir",
+        "Cemâziyelevvel", "Cemâziyelâhir", "Recep", "Şâban",
+        "Ramazan", "Şevval", "Zilkade", "Zilhicce"
+    ]
+
+    static func info(for date: Date) -> (day: Int, monthName: String, year: Int, specialNotice: String) {
+        var cal = Calendar(identifier: .islamicUmmAlQura)
+        cal.timeZone = TimeZone.current
+        let day = cal.component(.day, from: date)
+        let month = cal.component(.month, from: date)
+        let year = cal.component(.year, from: date)
+
+        let monthName = (month >= 1 && month <= 12) ? monthsTr[month] : "Ramazan"
+
+        var notice = ""
+        if month == 9 {
+            if day == 27 {
+                notice = "✨ Mübarek Kadir Gecesi"
+            } else if day < 27 {
+                notice = "Kadir Gecesine \(27 - day) gün kaldı"
+            } else {
+                notice = "Ramazan Bayramına \(30 - day + 1) gün kaldı"
+            }
+        } else if month == 10 && day <= 3 {
+            notice = "🎉 Ramazan Bayramı"
+        } else if month == 12 && day >= 10 && day <= 13 {
+            notice = "🐑 Kurban Bayramı"
+        } else if month == 12 && day == 9 {
+            notice = "🤲 Arefe Günü"
+        } else if month == 8 && day == 15 {
+            notice = "✨ Mübarek Berat Kandili"
+        } else if month == 7 && day == 27 {
+            notice = "✨ Mübarek Miraç Kandili"
+        } else if month == 1 && day == 10 {
+            notice = "Aşure Günü"
+        } else if month == 3 && day == 12 {
+            notice = "✨ Mevlid Kandili"
+        } else {
+            notice = "Mübarek Hicri \(year)"
+        }
+
+        return (day, monthName, year, notice)
+    }
+}
+
+struct HijriEntry: TimelineEntry {
+    let date: Date
+    let day: Int
+    let monthName: String
+    let year: Int
+    let notice: String
+}
+
+struct HijriProvider: TimelineProvider {
+    private func entry(at date: Date) -> HijriEntry {
+        let info = HijriHelper.info(for: date)
+        return HijriEntry(date: date, day: info.day, monthName: info.monthName, year: info.year, notice: info.specialNotice)
+    }
+
+    func placeholder(in context: Context) -> HijriEntry { entry(at: Date()) }
+
+    func getSnapshot(in context: Context, completion: @escaping (HijriEntry) -> Void) {
+        completion(entry(at: Date()))
+    }
+
+    func getTimeline(in context: Context, completion: @escaping (Timeline<HijriEntry>) -> Void) {
+        let now = Date()
+        let cur = entry(at: now)
+        let tomorrow = Calendar.current.startOfDay(for: now.addingTimeInterval(24 * 3600))
+        completion(Timeline(entries: [cur], policy: .after(tomorrow)))
+    }
+}
+
+struct HijriWidgetView: View {
+    @Environment(\.widgetFamily) var family
+    let entry: HijriEntry
+
+    var body: some View {
+        Group {
+            switch family {
+            case .accessoryInline:
+                Text("🌙 \(entry.day) \(entry.monthName) \(String(entry.year))")
+            case .accessoryCircular:
+                ZStack {
+                    AccessoryWidgetBackground()
+                    VStack(spacing: 0) {
+                        Text("\(entry.day)")
+                            .font(.system(size: 16, weight: .bold, design: .rounded))
+                        Text(entry.monthName.prefix(4))
+                            .font(.system(size: 9, weight: .semibold))
+                            .lineLimit(1)
+                    }
+                    .padding(2)
+                }
+                .widgetAccentable()
+            case .systemSmall:
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text("Hicri Takvim")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundColor(Color(red: 1.0, green: 0.85, blue: 0.45))
+                        Spacer()
+                        Image(systemName: "moon.fill")
+                            .font(.system(size: 13))
+                            .foregroundColor(Color(red: 1.0, green: 0.85, blue: 0.45))
+                    }
+                    Spacer()
+                    Text("\(entry.day)")
+                        .font(.system(size: 32, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                    Text("\(entry.monthName) \(String(entry.year))")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(Color(red: 1.0, green: 0.85, blue: 0.45))
+                    Text(entry.notice)
+                        .font(.system(size: 11))
+                        .foregroundColor(.white.opacity(0.8))
+                        .lineLimit(1)
+                }
+                .padding(12)
+            default: // .accessoryRectangular
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "moon.fill")
+                            .font(.system(size: 11))
+                            .foregroundColor(Color(red: 1.0, green: 0.85, blue: 0.45))
+                        Text("\(entry.day) \(entry.monthName) \(String(entry.year))")
+                            .font(.system(size: 13, weight: .bold))
+                            .foregroundColor(.white)
+                            .lineLimit(1)
+                    }
+                    Text(entry.notice)
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundColor(.white.opacity(0.88))
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.8)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                .widgetAccentable()
+            }
+        }
+        .beyanWidgetBackground(for: family)
+        .widgetURL(URL(string: "beyan://calendar?hijriWidget=true"))
+    }
+}
+
+struct BeyanHijriWidget: Widget {
+    let kind = "BeyanHijriWidget"
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: HijriProvider()) { entry in
+            HijriWidgetView(entry: entry)
+        }
+        .configurationDisplayName("Hicri Takvim & Kandil")
+        .description("Hicri tarih, mübarek kandiller ve dini günleri takip edin.")
+        .supportedFamilies([.accessoryRectangular, .accessoryInline, .accessoryCircular, .systemSmall])
+    }
+}
+
+// MARK: - Güneş & Kerâhet Vakti Widget'ı
+
+struct SunEntry: TimelineEntry {
+    let date: Date
+    let sunrise: Date
+    let ishraq: Date
+}
+
+struct SunProvider: TimelineProvider {
+    private func entry(at date: Date) -> SunEntry {
+        let loc = WidgetLocation.coordinate()
+        let calc = PrayerCalculator(lat: loc.lat, lng: loc.lng)
+        let list = calc.times(for: date, timeZone: TimeZone.current)
+        let gunes = list.first { $0.kind == .gunes }?.date ?? date
+        let ishraq = gunes.addingTimeInterval(45 * 60)
+        return SunEntry(date: date, sunrise: gunes, ishraq: ishraq)
+    }
+
+    func placeholder(in context: Context) -> SunEntry { entry(at: Date()) }
+
+    func getSnapshot(in context: Context, completion: @escaping (SunEntry) -> Void) {
+        completion(entry(at: Date()))
+    }
+
+    func getTimeline(in context: Context, completion: @escaping (Timeline<SunEntry>) -> Void) {
+        let now = Date()
+        let cur = entry(at: now)
+        let nextDay = Calendar.current.startOfDay(for: now.addingTimeInterval(24 * 3600))
+        completion(Timeline(entries: [cur], policy: .after(nextDay)))
+    }
+}
+
+struct SunWidgetView: View {
+    @Environment(\.widgetFamily) var family
+    let entry: SunEntry
+
+    var body: some View {
+        Group {
+            switch family {
+            case .accessoryInline:
+                Text("☀️ Güneş \(hhmm.string(from: entry.sunrise)) • İşrak \(hhmm.string(from: entry.ishraq))")
+            default: // .accessoryRectangular
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "sunrise.fill")
+                            .font(.system(size: 11))
+                            .foregroundColor(Color(red: 1.0, green: 0.85, blue: 0.45))
+                        Text("Güneş & İşrak Vakti")
+                            .font(.system(size: 12.5, weight: .bold))
+                            .foregroundColor(.white)
+                            .lineLimit(1)
+                    }
+                    Text("Güneş: \(hhmm.string(from: entry.sunrise))  •  İşrak: \(hhmm.string(from: entry.ishraq))")
+                        .font(.system(size: 11.5, weight: .semibold, design: .rounded))
+                        .foregroundColor(.white.opacity(0.95))
+                    Text("Kerâhet çıkışı: \(hhmm.string(from: entry.ishraq)) (Duhâ namazı)")
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundColor(.white.opacity(0.72))
+                        .lineLimit(1)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                .widgetAccentable()
+            }
+        }
+        .beyanWidgetBackground(for: family)
+        .widgetURL(URL(string: "beyan://prayer?sunWidget=true"))
+    }
+}
+
+struct BeyanSunWidget: Widget {
+    let kind = "BeyanSunWidget"
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: SunProvider()) { entry in
+            SunWidgetView(entry: entry)
+        }
+        .configurationDisplayName("Güneş & Kerâhet Vakti")
+        .description("Güneş doğuşu, kerâhet çıkışı ve işrak namazı vaktini gösterir.")
+        .supportedFamilies([.accessoryRectangular, .accessoryInline])
+    }
+}
+
 // MARK: - Bundle
 
 @main
@@ -731,6 +1084,9 @@ struct BeyanWidgetBundle: WidgetBundle {
     var body: some Widget {
         BeyanVerseWidget()
         BeyanPrayerWidget()
+        BeyanCountdownWidget()
+        BeyanHijriWidget()
+        BeyanSunWidget()
         if #available(iOSApplicationExtension 16.1, *) {
             BeyanLiveActivityWidget()
         }

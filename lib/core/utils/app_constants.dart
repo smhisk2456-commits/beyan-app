@@ -27,10 +27,16 @@ abstract class AppConstants {
   static const String widgetDailyAyah = 'widget_daily_ayah';
   static const String widgetDailyAyahRef = 'widget_daily_ayah_ref';
 
+  // ── iOS App Group Identifier ─────────────────────────────────
+  static const String appGroupId = 'group.com.smhisk60.beyan';
+
   // ── Widget Names ─────────────────────────────────────────────
   static const String iOSWidgetName = 'BeyanPrayerWidget';
   static const String iOSPrayerWidgetName = 'BeyanPrayerWidget';
   static const String iOSVerseWidgetName = 'BeyanVerseWidget';
+  static const String iOSCountdownWidgetName = 'BeyanCountdownWidget';
+  static const String iOSHijriWidgetName = 'BeyanHijriWidget';
+  static const String iOSSunWidgetName = 'BeyanSunWidget';
   static const String androidWidgetName = 'IslamicAppWidget';
 
   // ── WorkManager ──────────────────────────────────────────────

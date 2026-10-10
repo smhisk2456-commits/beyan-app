@@ -125,15 +125,21 @@ class WidgetService {
 
   /// iOS ve Android native widget'larını yeniler.
   Future<void> _refreshNativeWidgets() async {
-    // iOS WidgetKit Timeline'ını geçersiz kıl
-    await HomeWidget.updateWidget(
-      name: AppConstants.iOSPrayerWidgetName,
-      iOSName: AppConstants.iOSPrayerWidgetName,
-    );
-    await HomeWidget.updateWidget(
-      name: AppConstants.iOSVerseWidgetName,
-      iOSName: AppConstants.iOSVerseWidgetName,
-    );
+    // iOS WidgetKit Timeline'larını geçersiz kılıp yenile
+    final iosWidgets = [
+      AppConstants.iOSVerseWidgetName,
+      AppConstants.iOSPrayerWidgetName,
+      AppConstants.iOSCountdownWidgetName,
+      AppConstants.iOSHijriWidgetName,
+      AppConstants.iOSSunWidgetName,
+    ];
+
+    for (final widgetName in iosWidgets) {
+      await HomeWidget.updateWidget(
+        name: widgetName,
+        iOSName: widgetName,
+      );
+    }
 
     // Android AppWidget'ı yenile
     await HomeWidget.updateWidget(

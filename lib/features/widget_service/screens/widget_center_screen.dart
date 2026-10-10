@@ -569,6 +569,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
 
   Future<void> _syncAndApplyWidgetSettings() async {
     HapticFeedback.mediumImpact();
+    await HomeWidget.setAppGroupId(AppConstants.appGroupId);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('widget_quote_category', _selectedQuoteCategory);
     await prefs.setString('widget_verse_view', _verseViewMode);
@@ -604,10 +605,16 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
     if (premiumState.hasWidgetAccess) {
       await WidgetService().updateAllWidgets();
     } else {
-      await HomeWidget.updateWidget(
-        name: AppConstants.iOSVerseWidgetName,
-        iOSName: AppConstants.iOSVerseWidgetName,
-      );
+      final iosWidgets = [
+        AppConstants.iOSVerseWidgetName,
+        AppConstants.iOSPrayerWidgetName,
+        AppConstants.iOSCountdownWidgetName,
+        AppConstants.iOSHijriWidgetName,
+        AppConstants.iOSSunWidgetName,
+      ];
+      for (final name in iosWidgets) {
+        await HomeWidget.updateWidget(name: name, iOSName: name);
+      }
     }
 
     setState(() {
