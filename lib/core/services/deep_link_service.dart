@@ -18,6 +18,9 @@ class DeepLinkService {
 
   StreamSubscription<Uri?>? _widgetSubscription;
   bool _isHandling = false;
+  Uri? _pendingUri;
+
+  bool get hasPendingLink => _pendingUri != null;
 
   void init(WidgetRef ref) {
     _widgetSubscription?.cancel();
@@ -40,26 +43,42 @@ class DeepLinkService {
     _widgetSubscription = null;
   }
 
+  /// Bekleyen bir widget deep link'i varsa ana ekran yüklendiğinde işletir.
+  Future<void> processPending(WidgetRef ref) async {
+    final pending = _pendingUri;
+    if (pending != null) {
+      _pendingUri = null;
+      await handleUri(ref, pending);
+    }
+  }
+
   Future<void> handleUri(WidgetRef ref, Uri uri) async {
     if (_isHandling) return;
     _isHandling = true;
 
     try {
       debugPrint('>>> DeepLinkService handleUri: $uri');
-      if (uri.scheme != 'beyan') return;
+      if (uri.scheme != 'beyan') {
+        _isHandling = false;
+        return;
+      }
 
       final context = navigatorKey.currentContext;
+      if (context == null || !context.mounted) {
+        debugPrint('>>> DeepLinkService context not ready, queuing pending uri: $uri');
+        _pendingUri = uri;
+        _isHandling = false;
+        return;
+      }
 
       // 1. Namaz vakitleri widget'ı: beyan://prayer
       if (uri.host == 'prayer' || uri.path.contains('prayer')) {
         ref.read(selectedTabProvider.notifier).state = 1;
-        if (context != null && context.mounted) {
-          Navigator.of(context).popUntil((route) => route.isFirst);
-        }
+        Navigator.of(context).popUntil((route) => route.isFirst);
         return;
       }
 
-      // 2. Ayet widget'ı: beyan://verse?ref=Bakara%202:153 veya surah=2&verse=153
+      // 2. Ayet widget'ı: beyan://verse?surah=2&verse=153&ref=...
       if (uri.host == 'verse' || uri.path.contains('verse')) {
         int? surahId;
         int? verseNum;
@@ -91,7 +110,7 @@ class DeepLinkService {
 
         if (surahId != null && surahId >= 1 && surahId <= 114) {
           final surah = await QuranRepository().getSurahById(surahId);
-          if (surah != null && context != null && context.mounted) {
+          if (surah != null && context.mounted) {
             ref.read(selectedTabProvider.notifier).state = 2; // Kur'an sekmesi
             Navigator.of(context).popUntil((route) => route.isFirst);
             Navigator.of(context).push(
@@ -107,7 +126,7 @@ class DeepLinkService {
         }
 
         // Genel Kur'an sekmesine yönlendir
-        if (context != null && context.mounted) {
+        if (context.mounted) {
           ref.read(selectedTabProvider.notifier).state = 2;
           Navigator.of(context).popUntil((route) => route.isFirst);
         }

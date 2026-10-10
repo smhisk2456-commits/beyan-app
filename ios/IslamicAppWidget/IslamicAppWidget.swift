@@ -384,7 +384,7 @@ struct PrayerWidgetView: View {
             }
         }
         .beyanWidgetBackground(for: family)
-        .widgetURL(URL(string: "beyan://prayer"))
+        .widgetURL(URL(string: "beyan://prayer?homeWidget=true"))
     }
 }
 
@@ -544,8 +544,19 @@ struct VerseWidgetView: View {
     let entry: VerseEntry
 
     private var targetUrl: URL? {
-        let encodedRef = entry.ref.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-        return URL(string: "beyan://verse?ref=\(encodedRef)")
+        let cleanRef = entry.ref
+        var surahStr = ""
+        var verseStr = ""
+        // Parse numbers like "94:6" or "2:153"
+        if let colonIndex = cleanRef.firstIndex(of: ":") {
+            let prefix = cleanRef[..<colonIndex]
+            let suffix = cleanRef[cleanRef.index(after: colonIndex)...]
+            let numPattern = prefix.split(separator: " ").last ?? prefix
+            surahStr = String(numPattern)
+            verseStr = String(suffix.split(separator: "-").first ?? suffix)
+        }
+        let encodedRef = cleanRef.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        return URL(string: "beyan://verse?homeWidget=true&surah=\(surahStr)&verse=\(verseStr)&ref=\(encodedRef)")
     }
 
     var body: some View {
@@ -628,7 +639,7 @@ struct PrayerLiveActivityBanner: View {
                 endPoint: .bottomTrailing
             )
         )
-        .widgetURL(URL(string: "beyan://prayer"))
+        .widgetURL(URL(string: "beyan://prayer?homeWidget=true"))
     }
 }
 

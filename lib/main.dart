@@ -163,8 +163,9 @@ class _MainNavigationState extends ConsumerState<MainNavigation>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkLaunchPaywall();
       DeepLinkService.instance.init(ref);
+      DeepLinkService.instance.processPending(ref);
+      _checkLaunchPaywall();
     });
   }
 
@@ -185,9 +186,9 @@ class _MainNavigationState extends ConsumerState<MainNavigation>
   }
 
   Future<void> _checkLaunchPaywall() async {
-    if (!mounted) return;
+    if (!mounted || DeepLinkService.instance.hasPendingLink) return;
     final shouldShow = await PremiumService.instance.shouldShowLaunchPaywall();
-    if (shouldShow && mounted) {
+    if (shouldShow && mounted && !DeepLinkService.instance.hasPendingLink) {
       // Yalnızca ilk yüklemede 1 kez gösterilmesi için hemen işaretle
       await PremiumService.instance.markLaunchPaywallSeen();
       if (mounted) {

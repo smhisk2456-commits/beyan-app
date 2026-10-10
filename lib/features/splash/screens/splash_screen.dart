@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:home_widget/home_widget.dart';
 import '../../../main.dart';
 
 /// Lüks İslami Animasyonlu Açılış (Splash) Ekranı.
@@ -102,6 +103,16 @@ class _SplashScreenState extends State<SplashScreen>
     // 3.2 saniye sonra ana menüye zarif geçiş yap (veya ekrana dokunulduğunda)
     _navigationTimer = Timer(const Duration(milliseconds: 3200), () {
       _navigateToHome();
+    });
+
+    // Widget'a tıklanarak açılmışsa uzun süre bekletmeden hemen ana menüye geç
+    HomeWidget.initiallyLaunchedFromHomeWidget().then((uri) {
+      if (uri != null && mounted && !_navigated) {
+        _navigationTimer?.cancel();
+        _navigationTimer = Timer(const Duration(milliseconds: 300), () {
+          _navigateToHome();
+        });
+      }
     });
   }
 
