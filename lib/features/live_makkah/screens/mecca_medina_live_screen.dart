@@ -38,10 +38,14 @@ class _MeccaMedinaLiveScreenState extends State<MeccaMedinaLiveScreen>
     _initControllers();
   }
 
+  static const String _iosSafariUserAgent =
+      'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1';
+
   void _initControllers() {
     _makkahController = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(Colors.black)
+      ..setUserAgent(_iosSafariUserAgent)
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageFinished: (_) {
@@ -49,11 +53,15 @@ class _MeccaMedinaLiveScreenState extends State<MeccaMedinaLiveScreen>
           },
         ),
       )
-      ..loadHtmlString(_buildHtmlStreamPlayer(_makkahChannelId));
+      ..loadHtmlString(
+        _buildHtmlStreamPlayer(_makkahChannelId),
+        baseUrl: 'https://www.youtube.com',
+      );
 
     _madinahController = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(Colors.black)
+      ..setUserAgent(_iosSafariUserAgent)
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageFinished: (_) {
@@ -61,7 +69,10 @@ class _MeccaMedinaLiveScreenState extends State<MeccaMedinaLiveScreen>
           },
         ),
       )
-      ..loadHtmlString(_buildHtmlStreamPlayer(_madinahChannelId));
+      ..loadHtmlString(
+        _buildHtmlStreamPlayer(_madinahChannelId),
+        baseUrl: 'https://www.youtube.com',
+      );
   }
 
   String _buildHtmlStreamPlayer(String channelId) {
@@ -96,8 +107,9 @@ class _MeccaMedinaLiveScreenState extends State<MeccaMedinaLiveScreen>
 <body>
   <div class="player-wrapper">
     <iframe 
-      src="https://www.youtube-nocookie.com/embed/live_stream?channel=$channelId&autoplay=1&mute=0&playsinline=1&rel=0&modestbranding=1" 
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+      src="https://www.youtube.com/embed/live_stream?channel=$channelId&autoplay=1&mute=0&playsinline=1&rel=0&modestbranding=1&enablejsapi=1&origin=https://www.youtube.com&widget_referrer=https://www.youtube.com" 
+      referrerpolicy="strict-origin-when-cross-origin"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
       allowfullscreen>
     </iframe>
   </div>
@@ -110,18 +122,46 @@ class _MeccaMedinaLiveScreenState extends State<MeccaMedinaLiveScreen>
     HapticFeedback.lightImpact();
     if (_tabController.index == 0) {
       setState(() => _isMakkahLoading = true);
-      _makkahController.loadHtmlString(_buildHtmlStreamPlayer(_makkahChannelId));
+      _makkahController.loadHtmlString(
+        _buildHtmlStreamPlayer(_makkahChannelId),
+        baseUrl: 'https://www.youtube.com',
+      );
     } else {
       setState(() => _isMadinahLoading = true);
-      _madinahController.loadHtmlString(_buildHtmlStreamPlayer(_madinahChannelId));
+      _madinahController.loadHtmlString(
+        _buildHtmlStreamPlayer(_madinahChannelId),
+        baseUrl: 'https://www.youtube.com',
+      );
+    }
+  }
+
+  void _loadDirectStream() {
+    HapticFeedback.lightImpact();
+    if (_tabController.index == 0) {
+      setState(() => _isMakkahLoading = true);
+      _makkahController.loadRequest(
+        Uri.parse('https://www.youtube.com/embed/live_stream?channel=$_makkahChannelId&autoplay=1&playsinline=1'),
+      );
+    } else {
+      setState(() => _isMadinahLoading = true);
+      _madinahController.loadRequest(
+        Uri.parse('https://www.youtube.com/embed/live_stream?channel=$_madinahChannelId&autoplay=1&playsinline=1'),
+      );
     }
   }
 
   Future<void> _openOfficialLiveChannel(String channelHandle) async {
     HapticFeedback.lightImpact();
-    final uri = Uri.parse('https://www.youtube.com/$channelHandle/live');
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    final appUri = Uri.parse('youtube://www.youtube.com/$channelHandle/live');
+    final webUri = Uri.parse('https://www.youtube.com/$channelHandle/live');
+    try {
+      if (await canLaunchUrl(appUri)) {
+        await launchUrl(appUri, mode: LaunchMode.externalApplication);
+        return;
+      }
+    } catch (_) {}
+    if (await canLaunchUrl(webUri)) {
+      await launchUrl(webUri, mode: LaunchMode.externalApplication);
     }
   }
 
@@ -365,7 +405,7 @@ class _MeccaMedinaLiveScreenState extends State<MeccaMedinaLiveScreen>
                 child: OutlinedButton.icon(
                   onPressed: _reloadCurrentStream,
                   icon: const Icon(Icons.refresh_rounded, size: 18),
-                  label: const Text('Yayını Yenile'),
+                  label: const Text('Yenile'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: const Color(0xFFFFDF7A),
                     side: BorderSide(color: const Color(0xFFFFDF7A).withValues(alpha: 0.5)),
@@ -374,7 +414,19 @@ class _MeccaMedinaLiveScreenState extends State<MeccaMedinaLiveScreen>
                   ),
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 8),
+              OutlinedButton.icon(
+                onPressed: _loadDirectStream,
+                icon: const Icon(Icons.bolt_rounded, size: 18),
+                label: const Text('Doğrudan'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFF2DD4BF),
+                  side: BorderSide(color: const Color(0xFF2DD4BF).withValues(alpha: 0.5)),
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+              ),
+              const SizedBox(width: 8),
               Expanded(
                 child: ElevatedButton.icon(
                   onPressed: () => _openOfficialLiveChannel(handle),

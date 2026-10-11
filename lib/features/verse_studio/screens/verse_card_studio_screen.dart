@@ -6,19 +6,20 @@ import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../models/curated_verse_preset.dart';
-import '../widgets/verse_wallpaper_painters.dart';
 
 enum CardStudioBackground {
-  mistyMosque('Sisli Cami', '🕌'),
-  goldenSunset('Gün Batımı', '🌅'),
-  starryNight('Gece Seması', '🌌'),
-  kaabaHoly('Kâbe-i Muazzama', '🕋'),
-  islamicArch('Mihrap & Tezhip', '💠'),
-  oledBlack('OLED Siyah', '🖤');
+  mistyMosque('Sisli Cami', '🕌', 'assets/images/wallpapers/misty_mosque.jpg'),
+  goldenSunset('Gün Batımı', '🌅', 'assets/images/wallpapers/sunset_mosque.jpg'),
+  kaabaHoly('Kâbe-i Muazzama', '🕋', 'assets/images/wallpapers/kaaba_holy.jpg'),
+  medinaHoly('Mescid-i Nebevi', '🌙', 'assets/images/wallpapers/medina_prophet.jpg'),
+  starryNight('Gece Seması', '🌌', 'assets/images/wallpapers/starry_night.jpg'),
+  islamicArch('Mihrap & Mimari', '💠', 'assets/images/wallpapers/islamic_arch.jpg'),
+  oledBlack('OLED Siyah', '🖤', 'assets/images/wallpapers/oled_black.jpg');
 
   final String label;
   final String emoji;
-  const CardStudioBackground(this.label, this.emoji);
+  final String assetPath;
+  const CardStudioBackground(this.label, this.emoji, this.assetPath);
 }
 
 /// Gelişmiş Estetik Ayet / Hikaye & Duvar Kağıdı Stüdyosu
@@ -482,37 +483,33 @@ class _VerseCardStudioScreenState extends State<VerseCardStudioScreen> {
   // Gerçek Sanat Arka Planı (CustomPainter & Artwork)
   // ════════════════════════════════════════════════════════════════
   Widget _buildArtworkBackground() {
-    switch (_bg) {
-      case CardStudioBackground.mistyMosque:
-        return const CustomPaint(
-          size: Size.infinite,
-          painter: MosqueArtPainter(),
-        );
-      case CardStudioBackground.goldenSunset:
-        return const CustomPaint(
-          size: Size.infinite,
-          painter: SunsetMosquePainter(),
-        );
-      case CardStudioBackground.starryNight:
-        return const CustomPaint(
-          size: Size.infinite,
-          painter: StarryNightPainter(),
-        );
-      case CardStudioBackground.kaabaHoly:
-        return const CustomPaint(
-          size: Size.infinite,
-          painter: KaabaArtPainter(),
-        );
-      case CardStudioBackground.islamicArch:
-        return const CustomPaint(
-          size: Size.infinite,
-          painter: IslamicArchPainter(),
-        );
-      case CardStudioBackground.oledBlack:
-        return Container(
-          color: Colors.black,
-        );
-    }
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        // 1. Gerçek Yüksek Çözünürlüklü Estetik Fotoğraf / Duvar Kağıdı
+        Image.asset(
+          _bg.assetPath,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => Container(color: const Color(0xFF01201D)),
+        ),
+
+        // 2. Sinematik Karartma Katmanı (Ayetin ve Mealin Kristal Netliğinde Okunması İçin)
+        DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.black.withValues(alpha: 0.45),
+                Colors.black.withValues(alpha: 0.28),
+                Colors.black.withValues(alpha: 0.65),
+              ],
+              stops: const [0.0, 0.45, 1.0],
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   // ════════════════════════════════════════════════════════════════

@@ -44,14 +44,21 @@ void main() {
   });
 
   group('Ayet / Hikaye & Duvar Kağıdı Stüdyosu Testleri', () {
-    test('CardStudioBackground tüm 6 estetik temayı barındırmalıdır', () {
-      expect(CardStudioBackground.values.length, equals(6));
+    test('CardStudioBackground tüm 7 estetik temayı barındırmalıdır', () {
+      expect(CardStudioBackground.values.length, equals(7));
       expect(CardStudioBackground.values, contains(CardStudioBackground.mistyMosque));
       expect(CardStudioBackground.values, contains(CardStudioBackground.goldenSunset));
       expect(CardStudioBackground.values, contains(CardStudioBackground.starryNight));
       expect(CardStudioBackground.values, contains(CardStudioBackground.kaabaHoly));
+      expect(CardStudioBackground.values, contains(CardStudioBackground.medinaHoly));
       expect(CardStudioBackground.values, contains(CardStudioBackground.islamicArch));
       expect(CardStudioBackground.values, contains(CardStudioBackground.oledBlack));
+
+      for (final bg in CardStudioBackground.values) {
+        expect(bg.assetPath, isNotEmpty);
+        expect(bg.label, isNotEmpty);
+        expect(bg.emoji, isNotEmpty);
+      }
     });
   });
 }
