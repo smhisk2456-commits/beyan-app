@@ -25,7 +25,6 @@ import '../../settings/screens/settings_screen.dart';
 import '../../spiritual_healing/models/mood_verse_model.dart';
 import '../../spiritual_healing/screens/mood_verse_sheet.dart';
 import '../../mosque_finder/screens/nearby_mosques_screen.dart';
-import '../../widget_service/services/live_activity_service.dart';
 
 /// Ana Ekran – Beyân lüks İslami kontrol merkezi.
 class HomeScreen extends ConsumerStatefulWidget {
@@ -38,23 +37,6 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
-    // Dynamic Island & Live Activity auto-sync
-    ref.listen<AsyncValue<DailyPrayerTimes>>(prayerTimesNotifierProvider, (_, nextState) {
-      nextState.whenData((daily) {
-        final nextPrayer = daily.nextPrayerEntry;
-        if (nextPrayer != null) {
-          final h = nextPrayer.time.hour.toString().padLeft(2, '0');
-          final m = nextPrayer.time.minute.toString().padLeft(2, '0');
-          final progress = ref.read(prayerProgressProvider).valueOrNull ?? 0.0;
-          LiveActivityService.instance.syncWithNextPrayer(
-            prayerName: nextPrayer.name.turkish,
-            prayerTime: '$h:$m',
-            targetDate: nextPrayer.time,
-            progress: progress,
-          );
-        }
-      });
-    });
 
     final strings = ref.watch(appStringsProvider);
     final prayerAsync = ref.watch(prayerTimesNotifierProvider);

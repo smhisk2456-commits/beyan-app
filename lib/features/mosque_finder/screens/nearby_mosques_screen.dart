@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:geolocator/geolocator.dart';
 import '../../../core/utils/app_constants.dart';
 import '../../prayer_times/services/prayer_time_service.dart';
 import '../models/nearby_mosque_model.dart';
@@ -18,12 +19,13 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
   final NearbyMosquesService _service = NearbyMosquesService.instance;
 
   bool _isLoading = true;
+  bool _isGpsActive = false;
   String _userLocationTitle = 'Konum alınıyor...';
   double _userLat = AppConstants.defaultLatitude;
   double _userLng = AppConstants.defaultLongitude;
 
   List<NearbyMosque> _allMosques = [];
-  double? _maxDistanceFilter; // null: Tümü, 500, 1000, 3000, 5000
+  double? _maxDistanceFilter; // null: Tümü, 1000, 2000, 5000, 10000
   String _searchQuery = '';
 
   @override
@@ -41,19 +43,43 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
   Future<void> _loadNearbyMosques() async {
     setState(() => _isLoading = true);
     try {
-      final loc = await PrayerTimeService.instance.getCurrentLocation();
-      _userLat = loc.latitude;
-      _userLng = loc.longitude;
-      if (loc.isFromGPS) {
-        _userLocationTitle = 'Mevcut Konumunuz (${_userLat.toStringAsFixed(2)}, ${_userLng.toStringAsFixed(2)})';
+      Position? position;
+      LocationPermission perm = await Geolocator.checkPermission();
+      if (perm == LocationPermission.denied) {
+        perm = await Geolocator.requestPermission();
+      }
+
+      if (perm == LocationPermission.always || perm == LocationPermission.whileInUse) {
+        try {
+          position = await Geolocator.getLastKnownPosition();
+        } catch (_) {}
+
+        try {
+          final livePos = await Geolocator.getCurrentPosition(
+            desiredAccuracy: LocationAccuracy.high,
+            timeLimit: const Duration(seconds: 6),
+          );
+          position = livePos;
+        } catch (_) {}
+      }
+
+      if (position != null) {
+        _userLat = position.latitude;
+        _userLng = position.longitude;
+        _userLocationTitle = 'Mevcut Canlı Konumunuz (${_userLat.toStringAsFixed(2)}, ${_userLng.toStringAsFixed(2)})';
+        _isGpsActive = true;
       } else {
-        _userLocationTitle = '${loc.cityName} (Varsayılan Konum)';
+        final loc = await PrayerTimeService.instance.getCurrentLocation();
+        _userLat = loc.latitude;
+        _userLng = loc.longitude;
+        _userLocationTitle = '${loc.cityName} (Varsayılan)';
+        _isGpsActive = loc.isFromGPS;
       }
 
       final mosques = await _service.findNearbyMosques(
         userLat: _userLat,
         userLng: _userLng,
-        radiusMeters: 5000,
+        radiusMeters: 10000,
       );
 
       if (mounted) {
@@ -106,7 +132,7 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
           children: [
             // ── 1. Radar Başlık Alanı ─────────────────────────────────
             Container(
-              margin: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+              margin: const EdgeInsets.fromLTRB(16, 8, 16, 6),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
@@ -167,7 +193,94 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
               ),
             ),
 
-            // ── 2. Arama ve Filtre Çubukları ─────────────────────────
+            // ── 2. Canlı Apple/Google Haritalarda Aç Butonu ────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 2, 16, 6),
+              child: InkWell(
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  _service.openAllNearbyMosquesInMaps(userLat: _userLat, userLng: _userLng);
+                },
+                borderRadius: BorderRadius.circular(14),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF0B463E), Color(0xFF042E28)],
+                    ),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: const Color(0xFFFFDF7A).withValues(alpha: 0.5)),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFDF7A).withValues(alpha: 0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.map_rounded, color: Color(0xFFFFDF7A), size: 16),
+                      ),
+                      const SizedBox(width: 10),
+                      const Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Haritada Çevredeki Tüm Camileri Gör',
+                              style: TextStyle(
+                                color: Color(0xFFFFDF7A),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12.5,
+                              ),
+                            ),
+                            Text(
+                              'Apple & Google Haritalar üzerinde canlı navigasyon',
+                              style: TextStyle(color: Colors.white70, fontSize: 10.5),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Icon(Icons.open_in_new_rounded, color: Color(0xFFFFDF7A), size: 16),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            // ── GPS İzin Uyarısı (Gerekiyorsa) ─────────────────────────
+            if (!_isGpsActive && !_isLoading)
+              Container(
+                margin: const EdgeInsets.fromLTRB(16, 0, 16, 6),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.amber.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.location_off_rounded, color: Colors.amber, size: 16),
+                    const SizedBox(width: 8),
+                    const Expanded(
+                      child: Text(
+                        'En yakın camileri canlı görmek için konum izni gereklidir.',
+                        style: TextStyle(color: Colors.white70, fontSize: 11),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () async {
+                        await Geolocator.openAppSettings();
+                        _loadNearbyMosques();
+                      },
+                      style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero),
+                      child: const Text('İzin Ver', style: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold, fontSize: 11.5)),
+                    ),
+                  ],
+                ),
+              ),
+
+            // ── 3. Arama Çubuğu ─────────────────────────────────────
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Container(
@@ -199,9 +312,9 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
 
-            // Mesafe Filtre Çipleri
+            // ── 4. Mesafe Filtre Çipleri ─────────────────────────────
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -209,10 +322,10 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
               child: Row(
                 children: [
                   _buildDistFilterChip('Tümü', null),
-                  _buildDistFilterChip('< 500 m', 500),
                   _buildDistFilterChip('< 1 km', 1000),
-                  _buildDistFilterChip('< 3 km', 3000),
+                  _buildDistFilterChip('< 2 km', 2000),
                   _buildDistFilterChip('< 5 km', 5000),
+                  _buildDistFilterChip('< 10 km', 10000),
                 ],
               ),
             ),
@@ -224,16 +337,59 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
                   ? const Center(child: CircularProgressIndicator(color: Color(0xFFD4AF37)))
                   : filtered.isEmpty
                       ? Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.mosque_outlined, size: 48, color: Colors.white.withValues(alpha: 0.3)),
-                              const SizedBox(height: 12),
-                              Text(
-                                'Bu filtrede cami bulunamadı',
-                                style: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
-                              ),
-                            ],
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 32),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.mosque_outlined, size: 52, color: Colors.white.withValues(alpha: 0.35)),
+                                const SizedBox(height: 12),
+                                const Text(
+                                  'Bu Filtrede Cami Bulunamadı',
+                                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  'Filtreyi genişletebilir veya doğrudan Haritalar üzerinde çevrenizdeki tüm camileri inceleyebilirsiniz.',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(color: Colors.white.withValues(alpha: 0.65), fontSize: 12),
+                                ),
+                                const SizedBox(height: 16),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  alignment: WrapAlignment.center,
+                                  children: [
+                                    OutlinedButton.icon(
+                                      onPressed: () {
+                                        setState(() {
+                                          _maxDistanceFilter = null;
+                                          _searchCtrl.clear();
+                                          _searchQuery = '';
+                                        });
+                                      },
+                                      icon: const Icon(Icons.refresh_rounded, size: 16),
+                                      label: const Text('Filtreyi Sıfırla'),
+                                      style: OutlinedButton.styleFrom(
+                                        foregroundColor: const Color(0xFFFFDF7A),
+                                        side: const BorderSide(color: Color(0xFFFFDF7A)),
+                                      ),
+                                    ),
+                                    ElevatedButton.icon(
+                                      onPressed: () {
+                                        _service.openAllNearbyMosquesInMaps(userLat: _userLat, userLng: _userLng);
+                                      },
+                                      icon: const Icon(Icons.map_rounded, size: 16),
+                                      label: const Text('Haritada Aç'),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: const Color(0xFFD4AF37),
+                                        foregroundColor: Colors.black,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
                         )
                       : RefreshIndicator(

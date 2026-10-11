@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
 import 'package:url_launcher/url_launcher.dart';
 import '../models/nearby_mosque_model.dart';
 
@@ -9,12 +10,22 @@ class NearbyMosquesService {
   factory NearbyMosquesService() => instance;
   NearbyMosquesService._internal();
 
-  /// Verilen koordinatlar etrafındaki camileri bulur (Önce Overpass API, hata halinde yedek zengin veri)
+  /// Verilen koordinatlar etrafındaki camileri bulur (Önce hızlı Nominatim API, sonra Overpass, hata halinde yedek zengin veri)
   Future<List<NearbyMosque>> findNearbyMosques({
     required double userLat,
     required double userLng,
-    double radiusMeters = 5000,
+    double radiusMeters = 8000,
   }) async {
+    // 1. OpenStreetMap Nominatim Arama API (Hızlı, güncel ve kesintisiz)
+    try {
+      final mosques = await _fetchFromNominatim(userLat, userLng, radiusMeters);
+      if (mosques.isNotEmpty) {
+        mosques.sort((a, b) => a.distanceMeters.compareTo(b.distanceMeters));
+        return mosques;
+      }
+    } catch (_) {}
+
+    // 2. OpenStreetMap Overpass API (Alternatif yedek motor)
     try {
       final mosques = await _fetchFromOverpass(userLat, userLng, radiusMeters);
       if (mosques.isNotEmpty) {
@@ -23,10 +34,106 @@ class NearbyMosquesService {
       }
     } catch (_) {}
 
-    // Fallback: Çevredeki bilinen camileri filtrele ve mesafeye göre sırala
+    // 3. Fallback: Çevredeki bilinen camileri filtrele ve mesafeye göre sırala
     final fallbackList = _getCuratedFallbackMosques(userLat, userLng);
     fallbackList.sort((a, b) => a.distanceMeters.compareTo(b.distanceMeters));
     return fallbackList;
+  }
+
+  /// OpenStreetMap Nominatim Arama Sorgusu
+  Future<List<NearbyMosque>> _fetchFromNominatim(double lat, double lng, double radiusMeters) async {
+    final deltaKm = radiusMeters / 1000.0;
+    final deltaLat = deltaKm / 111.0;
+    final cosLat = math.cos(lat * math.pi / 180.0);
+    final deltaLng = deltaKm / (111.0 * (cosLat.abs() < 0.001 ? 1.0 : cosLat.abs()));
+
+    final minLat = lat - deltaLat;
+    final maxLat = lat + deltaLat;
+    final minLng = lng - deltaLng;
+    final maxLng = lng + deltaLng;
+
+    final uri = Uri.parse(
+      'https://nominatim.openstreetmap.org/search?format=json&q=cami&limit=50&viewbox=$minLng,$maxLat,$maxLng,$minLat&bounded=1&addressdetails=1',
+    );
+
+    final client = HttpClient()..connectionTimeout = const Duration(seconds: 7);
+    try {
+      final request = await client.getUrl(uri);
+      request.headers.set('User-Agent', 'BeyanApp/1.0 (smhisk2456@gmail.com)');
+      final response = await request.close().timeout(const Duration(seconds: 8));
+
+      if (response.statusCode != HttpStatus.ok) return [];
+
+      final responseBody = await response.transform(utf8.decoder).join();
+      final list = jsonDecode(responseBody) as List<dynamic>? ?? [];
+
+      final results = <NearbyMosque>[];
+      final seenIds = <String>{};
+
+      for (final el in list) {
+        if (el is! Map<String, dynamic>) continue;
+        final rawLat = el['lat'];
+        final rawLng = el['lon'];
+        if (rawLat == null || rawLng == null) continue;
+
+        final mLat = double.tryParse('$rawLat');
+        final mLng = double.tryParse('$rawLng');
+        if (mLat == null || mLng == null || (mLat == 0.0 && mLng == 0.0)) continue;
+
+        final rawName = (el['name'] as String? ?? '').trim();
+        final displayName = (el['display_name'] as String? ?? '').trim();
+        final name = rawName.isNotEmpty
+            ? rawName
+            : (displayName.split(',').first.trim().isNotEmpty ? displayName.split(',').first.trim() : 'Cami');
+
+        // Detaylı adres ayrıştırma
+        String? address;
+        final addrMap = el['address'] as Map<String, dynamic>?;
+        if (addrMap != null) {
+          final parts = <String>[];
+          if (addrMap['road'] != null) parts.add('${addrMap['road']}');
+          if (addrMap['neighbourhood'] != null) {
+            parts.add('${addrMap['neighbourhood']}');
+          } else if (addrMap['suburb'] != null) {
+            parts.add('${addrMap['suburb']}');
+          }
+          if (addrMap['city_district'] != null) {
+            parts.add('${addrMap['city_district']}');
+          } else if (addrMap['city'] != null) {
+            parts.add('${addrMap['city']}');
+          }
+          if (parts.isNotEmpty) address = parts.join(', ');
+        }
+        if (address == null || address.isEmpty) {
+          final parts = displayName.split(',');
+          if (parts.length > 1) {
+            address = parts.skip(1).take(2).map((s) => s.trim()).join(', ');
+          }
+        }
+
+        final dist = NearbyMosque.calculateDistanceMeters(lat, lng, mLat, mLng);
+        final bearing = NearbyMosque.calculateBearing(lat, lng, mLat, mLng);
+        final id = '${el['place_id'] ?? '${mLat.toStringAsFixed(4)},${mLng.toStringAsFixed(4)}'}';
+
+        if (seenIds.add(id)) {
+          results.add(
+            NearbyMosque(
+              id: id,
+              name: name,
+              latitude: mLat,
+              longitude: mLng,
+              distanceMeters: dist,
+              address: address,
+              bearingDegrees: bearing,
+            ),
+          );
+        }
+      }
+
+      return results;
+    } finally {
+      client.close();
+    }
   }
 
   /// OpenStreetMap Overpass API sorgusu
@@ -41,10 +148,11 @@ out center 35;
 ''';
 
     final uri = Uri.parse('https://overpass-api.de/api/interpreter?data=${Uri.encodeComponent(query)}');
-    final client = HttpClient()..connectionTimeout = const Duration(seconds: 8);
+    final client = HttpClient()..connectionTimeout = const Duration(seconds: 7);
     try {
       final request = await client.getUrl(uri);
-      final response = await request.close().timeout(const Duration(seconds: 9));
+      request.headers.set('User-Agent', 'BeyanApp/1.0 (smhisk2456@gmail.com)');
+      final response = await request.close().timeout(const Duration(seconds: 8));
 
       if (response.statusCode != HttpStatus.ok) {
         return [];
@@ -65,9 +173,13 @@ out center 35;
 
         if (el['lat'] != null && el['lon'] != null) {
           mLat = (el['lat'] as num).toDouble();
-          mLng = (el['lon'] as num).toDouble();
         } else if (el['center'] != null) {
           mLat = (el['center']['lat'] as num).toDouble();
+        }
+
+        if (el['lon'] != null) {
+          mLng = (el['lon'] as num).toDouble();
+        } else if (el['center'] != null) {
           mLng = (el['center']['lon'] as num).toDouble();
         }
 
@@ -98,7 +210,33 @@ out center 35;
     }
   }
 
-  /// Haritalarda Yol Tarifi Açma (Öncelikli Apple Maps yürüme rotası, alternatif Google Maps)
+  /// Apple Haritalar veya Google Haritalar uygulamasında çevredeki tüm camileri arama
+  Future<void> openAllNearbyMosquesInMaps({
+    required double userLat,
+    required double userLng,
+  }) async {
+    // 1. Apple Maps arama (iOS Haritalar doğrudan çevredeki camileri döker)
+    final appleMapsUri = Uri.parse('maps://?q=cami&sll=$userLat,$userLng');
+    if (await canLaunchUrl(appleMapsUri)) {
+      await launchUrl(appleMapsUri, mode: LaunchMode.externalApplication);
+      return;
+    }
+
+    // 2. Google Maps arama
+    final googleMapsUri = Uri.parse('https://www.google.com/maps/search/cami/@$userLat,$userLng,15z');
+    if (await canLaunchUrl(googleMapsUri)) {
+      await launchUrl(googleMapsUri, mode: LaunchMode.externalApplication);
+      return;
+    }
+
+    // 3. Web Apple Maps evrensel bağlantı
+    final webMapsUri = Uri.parse('https://maps.apple.com/?q=cami&sll=$userLat,$userLng');
+    if (await canLaunchUrl(webMapsUri)) {
+      await launchUrl(webMapsUri, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  /// Haritalarda Belli Bir Camiye Yürüme Rotası Açma (Apple Maps / Google Maps)
   Future<void> openWalkingDirections({
     required double lat,
     required double lng,

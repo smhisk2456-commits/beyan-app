@@ -15,7 +15,6 @@ import 'features/widget_service/background_task_manager.dart';
 
 import 'features/widget_service/screens/widget_center_screen.dart';
 import 'features/notifications/services/notification_service.dart';
-import 'features/live_activity/live_activity_service.dart';
 import 'features/monetization/services/ad_service.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'features/monetization/services/premium_service.dart';
@@ -84,14 +83,7 @@ void main() async {
       debugPrint('NotificationService başlatma hatası: $e');
     }
 
-    // 4. iOS Canlı Etkinlikler & Dinamik Ada Servisi
-    try {
-      LiveActivityService.instance.startMonitoring();
-    } catch (e) {
-      debugPrint('LiveActivityService başlatma hatası: $e');
-    }
-
-    // 5. Premium & Reklam Servisleri
+    // 4. Premium & Reklam Servisleri
     try {
       await PremiumService.instance.initialize();
       await AdService.instance.initialize();

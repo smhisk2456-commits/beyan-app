@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:islamic_app/features/mosque_finder/models/nearby_mosque_model.dart';
 import 'package:islamic_app/features/mosque_finder/services/nearby_mosques_service.dart';
-import 'package:islamic_app/features/widget_service/services/live_activity_service.dart';
 
 void main() {
   group('NearbyMosque Model Tests', () {
@@ -124,15 +123,6 @@ void main() {
       for (int i = 0; i < mosques.length - 1; i++) {
         expect(mosques[i].distanceMeters, lessThanOrEqualTo(mosques[i + 1].distanceMeters));
       }
-    });
-  });
-
-  group('LiveActivityService Tests', () {
-    test('LiveActivityService singleton instance is accessible', () {
-      final service1 = LiveActivityService.instance;
-      final service2 = LiveActivityService();
-      expect(identical(service1, service2), isTrue);
-      expect(service1.isSupported, isA<bool>());
     });
   });
 }
