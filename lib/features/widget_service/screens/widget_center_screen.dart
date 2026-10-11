@@ -505,6 +505,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
   String _textSize = 'standard';
   String _fontFamily = 'standard';
   String? _appliedVerseRef;
+  bool _isPinned = false;
 
   int _quoteIndex = 0;
   bool _isLoading = true;
@@ -523,7 +524,8 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
       _refreshInterval = prefs.getString('widget_refresh_interval') ?? '1h';
       _textSize = prefs.getString('widget_text_size') ?? 'standard';
       _fontFamily = prefs.getString('widget_font_family') ?? 'standard';
-      _appliedVerseRef = prefs.getString('widget_applied_verse_ref');
+      _isPinned = prefs.getBool('widget_is_pinned') ?? false;
+      _appliedVerseRef = _isPinned ? prefs.getString('widget_applied_verse_ref') : null;
 
       // Eski Türkçe ayar değerlerini yeni standart kodlara dönüştür
       if (_selectedQuoteCategory == 'Tümü') _selectedQuoteCategory = 'all';
@@ -574,31 +576,23 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
     await prefs.setString('widget_quote_category', _selectedQuoteCategory);
     await prefs.setString('widget_verse_view', _verseViewMode);
     await prefs.setString('widget_refresh_interval', _refreshInterval);
+    await HomeWidget.saveWidgetData<String>('widget_refresh_interval', _refreshInterval);
     await prefs.setString('widget_text_size', _textSize);
     await prefs.setString('widget_font_family', _fontFamily);
     await prefs.setString('widget_active_category', _selectedCategory.name);
 
-    final currentQuote = _getCurrentQuote();
-    final strings = ref.read(appStringsProvider);
-    final refText = currentQuote.getReference(strings.language);
-    final mealText = currentQuote.getMeaning(strings.language);
-
-    // Seçili ayeti doğrudan kilit ekranı widget'ı için kaydet
-    await prefs.setString('widget_applied_verse_ref', refText);
-    await prefs.setString('widget_applied_verse_text', mealText);
-    await HomeWidget.saveWidgetData<String>('widget_applied_verse_ref', refText);
-    await HomeWidget.saveWidgetData<String>('widget_applied_verse_text', mealText);
-    await HomeWidget.saveWidgetData<String>('widget_applied_verse_arabic', currentQuote.arabic);
-
-    // Sure ve Ayet numarasını da kesin yönlendirme için kaydet
-    final refMatch = RegExp(r'(\d+):(\d+)').firstMatch(currentQuote.referenceTr);
-    final surahNum = refMatch != null ? int.tryParse(refMatch.group(1)!) ?? 0 : 0;
-    final verseNum = refMatch != null ? int.tryParse(refMatch.group(2)!) ?? 0 : 0;
-    if (surahNum > 0) {
-      await prefs.setInt('widget_applied_verse_surah', surahNum);
-      await prefs.setInt('widget_applied_verse_number', verseNum);
-      await HomeWidget.saveWidgetData<int>('widget_applied_verse_surah', surahNum);
-      await HomeWidget.saveWidgetData<int>('widget_applied_verse_number', verseNum);
+    // Eğer kullanıcı sabitleme yapmadıysa otomatik döngüyü koru ve temizle
+    if (!_isPinned) {
+      await prefs.setBool('widget_is_pinned', false);
+      await HomeWidget.saveWidgetData<bool>('widget_is_pinned', false);
+      await prefs.remove('widget_applied_verse_ref');
+      await prefs.remove('widget_applied_verse_text');
+      await prefs.remove('widget_applied_verse_surah');
+      await prefs.remove('widget_applied_verse_number');
+      await HomeWidget.saveWidgetData<String>('widget_applied_verse_ref', '');
+      await HomeWidget.saveWidgetData<String>('widget_applied_verse_text', '');
+      await HomeWidget.saveWidgetData<int>('widget_applied_verse_surah', 0);
+      await HomeWidget.saveWidgetData<int>('widget_applied_verse_number', 0);
     }
 
     final premiumState = ref.read(premiumProvider);
@@ -617,16 +611,19 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
       }
     }
 
-    setState(() {
-      _appliedVerseRef = refText;
-    });
-
     if (mounted) {
-      final msg = strings.language == AppLanguage.english
-          ? 'Verse "$refText" applied to your lock screen widget!'
-          : (strings.language == AppLanguage.arabic
-              ? 'تم تطبيق الآية "$refText" على ويدجت شاشة القفل!'
-              : '"$refText" âyeti kilit ekranı widget\'ınıza uygulandı!');
+      final strings = ref.read(appStringsProvider);
+      final msg = _isPinned
+          ? (strings.language == AppLanguage.english
+              ? 'Settings applied! (Pinned verse: $_appliedVerseRef)'
+              : (strings.language == AppLanguage.arabic
+                  ? 'تم تطبيق الإعدادات! (الآية المثبتة: $_appliedVerseRef)'
+                  : 'Ayarlar uygulandı! (Sabit âyet: $_appliedVerseRef)'))
+          : (strings.language == AppLanguage.english
+              ? 'Settings applied! Dynamic verse rotation active.'
+              : (strings.language == AppLanguage.arabic
+                  ? 'تم تطبيق الإعدادات! التدوير التلقائي للآيات نشط.'
+                  : 'Ayarlar uygulandı! Dinamik âyet döngüsü aktif.'));
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -646,9 +643,79 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
     }
   }
 
+  /// Seçili ayeti kilit ekranına sabitler (kullanıcı özellikle isterse)
+  Future<void> _pinCurrentVerse() async {
+    HapticFeedback.mediumImpact();
+    await HomeWidget.setAppGroupId(AppConstants.appGroupId);
+    final prefs = await SharedPreferences.getInstance();
+    final currentQuote = _getCurrentQuote();
+    final strings = ref.read(appStringsProvider);
+    final refText = currentQuote.getReference(strings.language);
+    final mealText = currentQuote.getMeaning(strings.language);
+
+    await prefs.setBool('widget_is_pinned', true);
+    await HomeWidget.saveWidgetData<bool>('widget_is_pinned', true);
+    await prefs.setString('widget_applied_verse_ref', refText);
+    await prefs.setString('widget_applied_verse_text', mealText);
+    await HomeWidget.saveWidgetData<String>('widget_applied_verse_ref', refText);
+    await HomeWidget.saveWidgetData<String>('widget_applied_verse_text', mealText);
+    await HomeWidget.saveWidgetData<String>('widget_applied_verse_arabic', currentQuote.arabic);
+
+    final refMatch = RegExp(r'(\d+):(\d+)').firstMatch(currentQuote.referenceTr);
+    final surahNum = refMatch != null ? int.tryParse(refMatch.group(1)!) ?? 0 : 0;
+    final verseNum = refMatch != null ? int.tryParse(refMatch.group(2)!) ?? 0 : 0;
+    if (surahNum > 0) {
+      await prefs.setInt('widget_applied_verse_surah', surahNum);
+      await prefs.setInt('widget_applied_verse_number', verseNum);
+      await HomeWidget.saveWidgetData<int>('widget_applied_verse_surah', surahNum);
+      await HomeWidget.saveWidgetData<int>('widget_applied_verse_number', verseNum);
+    }
+
+    setState(() {
+      _isPinned = true;
+      _appliedVerseRef = refText;
+    });
+
+    final premiumState = ref.read(premiumProvider);
+    if (premiumState.hasWidgetAccess) {
+      await WidgetService().updateAllWidgets();
+    } else {
+      await HomeWidget.updateWidget(
+        name: AppConstants.iOSVerseWidgetName,
+        iOSName: AppConstants.iOSVerseWidgetName,
+      );
+    }
+
+    if (mounted) {
+      final msg = strings.language == AppLanguage.english
+          ? 'Verse "$refText" pinned to lock screen!'
+          : (strings.language == AppLanguage.arabic
+              ? 'تم تثبيت الآية "$refText" على شاشة القفل!'
+              : '"$refText" âyeti kilit ekranına sabitlendi!');
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.push_pin, color: Color(0xFFFFDF7A), size: 20),
+              const SizedBox(width: 10),
+              Expanded(child: Text(msg)),
+            ],
+          ),
+          backgroundColor: const Color(0xFF033E35),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
+  }
+
   Future<void> _restoreAutomaticVerseRotation() async {
     HapticFeedback.lightImpact();
     final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('widget_is_pinned', false);
+    await HomeWidget.saveWidgetData<bool>('widget_is_pinned', false);
     await prefs.remove('widget_applied_verse_ref');
     await prefs.remove('widget_applied_verse_text');
     await prefs.remove('widget_applied_verse_surah');
@@ -670,6 +737,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
     }
 
     setState(() {
+      _isPinned = false;
       _appliedVerseRef = null;
     });
 
@@ -1697,20 +1765,90 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
   // ── Kilit Ekranı Widget'ına Uygula Butonu ─────────────────────────────────
   Widget _buildApplyWidgetButton(AppStrings strings) {
     final btnText = strings.language == AppLanguage.english
-        ? 'Apply to Lock Screen Widget'
+        ? 'Apply Settings to Widget'
         : (strings.language == AppLanguage.arabic
-            ? 'تطبيق على ويدجت شاشة القفل'
-            : 'Kilit Ekranı Widget\'ına Uygula');
+            ? 'تطبيق الإعدادات على الويدجت'
+            : 'Ayarları Widget\'a Uygula');
+
+    final pinBtnText = strings.language == AppLanguage.english
+        ? 'Pin This Verse to Lock Screen'
+        : (strings.language == AppLanguage.arabic
+            ? 'تثبيت هذه الآية على شاشة القفل'
+            : 'Bu Âyeti Kilit Ekranına Sabitle');
 
     final pinnedNotice = strings.language == AppLanguage.english
         ? 'Currently Pinned:'
         : (strings.language == AppLanguage.arabic
             ? 'الآية المثبتة حالياً:'
-            : 'Şu Anda Kilit Ekranında Sabit:');
+            : 'Kilit Ekranında Sabit:');
+
+    final rotatingNotice = strings.language == AppLanguage.english
+        ? 'Dynamic Verse Rotation Active • Automatically refreshes lock screen verses.'
+        : (strings.language == AppLanguage.arabic
+            ? 'التدوير التلقائي للآيات نشط • يتم تحديث الآيات بانتظام على شاشة القفل.'
+            : 'Dinamik Âyet Döngüsü Aktif • Kilit ekranında âyetler periyodik olarak değişir.');
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        // Döngü veya Sabitleme Durum Kartı
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            color: const Color(0xFF0B2B24),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: _isPinned
+                  ? const Color(0xFFFFDF7A).withValues(alpha: 0.5)
+                  : const Color(0xFF2DD4BF).withValues(alpha: 0.4),
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                _isPinned ? Icons.push_pin : Icons.autorenew,
+                color: _isPinned ? const Color(0xFFFFDF7A) : const Color(0xFF2DD4BF),
+                size: 18,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  _isPinned
+                      ? '$pinnedNotice ${_appliedVerseRef ?? ""}'
+                      : rotatingNotice,
+                  style: TextStyle(
+                    color: _isPinned ? const Color(0xFFFFDF7A) : Colors.white70,
+                    fontSize: 12,
+                    fontWeight: _isPinned ? FontWeight.w600 : FontWeight.normal,
+                  ),
+                ),
+              ),
+              if (_isPinned)
+                TextButton(
+                  onPressed: _restoreAutomaticVerseRotation,
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: Text(
+                    strings.language == AppLanguage.english
+                        ? 'Rotate'
+                        : (strings.language == AppLanguage.arabic ? 'تدوير' : 'Döngüye Al'),
+                    style: const TextStyle(
+                      color: Color(0xFFFFDF7A),
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+
+        // Ana Uygula Butonu
         ElevatedButton.icon(
           onPressed: _syncAndApplyWidgetSettings,
           icon: const Icon(Icons.sync_rounded, color: Color(0xFF071F1B), size: 20),
@@ -1732,51 +1870,28 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
             elevation: 2,
           ),
         ),
-        if (_appliedVerseRef != null && _appliedVerseRef!.isNotEmpty) ...[
-          const SizedBox(height: 10),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: BoxDecoration(
-              color: const Color(0xFF0B2B24),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: const Color(0xFFFFDF7A).withValues(alpha: 0.3)),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.push_pin, color: Color(0xFFFFDF7A), size: 16),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    '$pinnedNotice $_appliedVerseRef',
-                    style: const TextStyle(
-                      color: Color(0xFFFFDF7A),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                TextButton(
-                  onPressed: _restoreAutomaticVerseRotation,
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  child: Text(
-                    strings.language == AppLanguage.english
-                        ? 'Rotate'
-                        : (strings.language == AppLanguage.arabic ? 'تدوير' : 'Döngüye Al'),
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 12,
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
-                ),
-              ],
+
+        // Özel Olarak Sabitlemek İsteyenler İçin Buton
+        const SizedBox(height: 8),
+        OutlinedButton.icon(
+          onPressed: _pinCurrentVerse,
+          icon: const Icon(Icons.push_pin_outlined, color: Color(0xFFFFDF7A), size: 18),
+          label: Text(
+            pinBtnText,
+            style: const TextStyle(
+              color: Color(0xFFFFDF7A),
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
             ),
           ),
-        ],
+          style: OutlinedButton.styleFrom(
+            side: BorderSide(color: const Color(0xFFFFDF7A).withValues(alpha: 0.35)),
+            padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
+          ),
+        ),
       ],
     );
   }

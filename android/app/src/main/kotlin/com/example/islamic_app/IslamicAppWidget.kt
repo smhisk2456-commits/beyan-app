@@ -86,20 +86,29 @@ class IslamicAppWidget : AppWidgetProvider() {
         var ayahText = "Bismillahirrahmanirrahim"
         val versesJsonStr = widgetData.getString(KEY_VERSES_JSON, "[]")
         
-        try {
-            val versesArray = JSONArray(versesJsonStr)
-            if (versesArray.length() > 0) {
-                val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-                val currentIndex = prefs.getInt(PREF_CURRENT_INDEX, 0)
-                // Modulo işlemi ile indeks listeyi aşmasın
-                val safeIndex = currentIndex % versesArray.length()
-                
-                val verseObj = versesArray.getJSONObject(safeIndex)
-                ayahRef = verseObj.getString("ref")
-                ayahText = verseObj.getString("text")
+        val isPinned = widgetData.getBoolean("widget_is_pinned", false)
+        val appliedRef = widgetData.getString("widget_applied_verse_ref", "") ?: ""
+        val appliedText = widgetData.getString("widget_applied_verse_text", "") ?: ""
+
+        if (isPinned && appliedRef.isNotBlank() && appliedText.isNotBlank()) {
+            ayahRef = appliedRef
+            ayahText = appliedText
+        } else {
+            try {
+                val versesArray = JSONArray(versesJsonStr)
+                if (versesArray.length() > 0) {
+                    val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                    val currentIndex = prefs.getInt(PREF_CURRENT_INDEX, 0)
+                    // Modulo işlemi ile indeks listeyi aşmasın
+                    val safeIndex = currentIndex % versesArray.length()
+                    
+                    val verseObj = versesArray.getJSONObject(safeIndex)
+                    ayahRef = verseObj.getString("ref")
+                    ayahText = verseObj.getString("text")
+                }
+            } catch (e: Exception) {
+                // JSON Parse hatası, varsayılan değerleri kullan
             }
-        } catch (e: Exception) {
-            // JSON Parse hatası, varsayılan değerleri kullan
         }
 
         // Görünümü güncelle

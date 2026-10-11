@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -15,10 +18,15 @@ class _MeccaMedinaLiveScreenState extends State<MeccaMedinaLiveScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
 
-  // Saudi Quran TV (Makkah): UCos52azQNBgW63_9uDJoPDA
-  // Saudi Sunnah TV (Madinah): UCROKYPep-UuODNwyipe6JMw
-  static const String _makkahChannelId = 'UCos52azQNBgW63_9uDJoPDA';
-  static const String _madinahChannelId = 'UCROKYPep-UuODNwyipe6JMw';
+  // Saudi Quran TV (Makkah): @SaudiQuranTv
+  // Saudi Sunnah TV (Madinah): @SaudiSunnahTv
+  static const String _makkahDefaultVideoId = 'eC4LfEVxvKg';
+  static const String _madinahDefaultVideoId = 'Rs7St51oDDc';
+  static const String _makkahHandle = '@SaudiQuranTv';
+  static const String _madinahHandle = '@SaudiSunnahTv';
+
+  String _makkahVideoId = _makkahDefaultVideoId;
+  String _madinahVideoId = _madinahDefaultVideoId;
 
   late final WebViewController _makkahController;
   late final WebViewController _madinahController;
@@ -36,102 +44,107 @@ class _MeccaMedinaLiveScreenState extends State<MeccaMedinaLiveScreen>
     });
 
     _initControllers();
+    _fetchLiveVideoIds();
   }
 
-  static const String _iosSafariUserAgent =
+  static const String _browserUserAgent =
       'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1';
 
   void _initControllers() {
     _makkahController = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(Colors.black)
-      ..setUserAgent(_iosSafariUserAgent)
+      ..setUserAgent(_browserUserAgent)
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageFinished: (_) {
             if (mounted) setState(() => _isMakkahLoading = false);
           },
         ),
-      )
-      ..loadHtmlString(
-        _buildHtmlStreamPlayer(_makkahChannelId),
-        baseUrl: 'https://www.youtube.com',
       );
+    _loadStream(_makkahController, _makkahVideoId);
 
     _madinahController = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(Colors.black)
-      ..setUserAgent(_iosSafariUserAgent)
+      ..setUserAgent(_browserUserAgent)
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageFinished: (_) {
             if (mounted) setState(() => _isMadinahLoading = false);
           },
         ),
-      )
-      ..loadHtmlString(
-        _buildHtmlStreamPlayer(_madinahChannelId),
-        baseUrl: 'https://www.youtube.com',
       );
+    _loadStream(_madinahController, _madinahVideoId);
   }
 
-  String _buildHtmlStreamPlayer(String channelId) {
-    return '''
-<!DOCTYPE html>
-<html>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body {
-    width: 100%; height: 100%;
-    background: #000000;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  void _loadStream(WebViewController controller, String videoId) {
+    controller.loadRequest(
+      Uri.parse(
+        'https://www.youtube.com/embed/$videoId?autoplay=1&mute=0&playsinline=1&rel=0&modestbranding=1&enablejsapi=1&fs=1',
+      ),
+      headers: const {
+        'Referer': 'https://www.youtube.com/',
+        'Origin': 'https://www.youtube.com',
+      },
+    );
   }
-  .player-wrapper {
-    position: relative;
-    width: 100%;
-    height: 100%;
-  }
-  iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-    display: block;
-  }
-</style>
-</head>
-<body>
-  <div class="player-wrapper">
-    <iframe 
-      src="https://www.youtube.com/embed/live_stream?channel=$channelId&autoplay=1&mute=0&playsinline=1&rel=0&modestbranding=1&enablejsapi=1&origin=https://www.youtube.com&widget_referrer=https://www.youtube.com" 
-      referrerpolicy="strict-origin-when-cross-origin"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-      allowfullscreen>
-    </iframe>
-  </div>
-</body>
-</html>
-''';
+
+  Future<void> _fetchLiveVideoIds() async {
+    try {
+      final client = HttpClient();
+      client.userAgent = _browserUserAgent;
+
+      // Makkah Canlı Yayın ID Doğrulama
+      try {
+        final req = await client.getUrl(Uri.parse('https://m.youtube.com/$_makkahHandle/live'));
+        req.followRedirects = true;
+        final res = await req.close();
+        final body = await utf8.decoder.bind(res).join();
+        final match = RegExp(r'watch\?v=([a-zA-Z0-9_-]{11})').firstMatch(body) ??
+            RegExp(r'"videoId":"([a-zA-Z0-9_-]{11})"').firstMatch(body);
+        if (match != null && match.group(1) != null) {
+          final newId = match.group(1)!;
+          if (newId != _makkahVideoId) {
+            _makkahVideoId = newId;
+            if (mounted) {
+              _loadStream(_makkahController, _makkahVideoId);
+            }
+          }
+        }
+      } catch (_) {}
+
+      // Medine Canlı Yayın ID Doğrulama
+      try {
+        final req = await client.getUrl(Uri.parse('https://m.youtube.com/$_madinahHandle/live'));
+        req.followRedirects = true;
+        final res = await req.close();
+        final body = await utf8.decoder.bind(res).join();
+        final match = RegExp(r'watch\?v=([a-zA-Z0-9_-]{11})').firstMatch(body) ??
+            RegExp(r'"videoId":"([a-zA-Z0-9_-]{11})"').firstMatch(body);
+        if (match != null && match.group(1) != null) {
+          final newId = match.group(1)!;
+          if (newId != _madinahVideoId) {
+            _madinahVideoId = newId;
+            if (mounted) {
+              _loadStream(_madinahController, _madinahVideoId);
+            }
+          }
+        }
+      } catch (_) {}
+
+      client.close();
+    } catch (_) {}
   }
 
   void _reloadCurrentStream() {
     HapticFeedback.lightImpact();
     if (_tabController.index == 0) {
       setState(() => _isMakkahLoading = true);
-      _makkahController.loadHtmlString(
-        _buildHtmlStreamPlayer(_makkahChannelId),
-        baseUrl: 'https://www.youtube.com',
-      );
+      _loadStream(_makkahController, _makkahVideoId);
     } else {
       setState(() => _isMadinahLoading = true);
-      _madinahController.loadHtmlString(
-        _buildHtmlStreamPlayer(_madinahChannelId),
-        baseUrl: 'https://www.youtube.com',
-      );
+      _loadStream(_madinahController, _madinahVideoId);
     }
   }
 
@@ -140,12 +153,18 @@ class _MeccaMedinaLiveScreenState extends State<MeccaMedinaLiveScreen>
     if (_tabController.index == 0) {
       setState(() => _isMakkahLoading = true);
       _makkahController.loadRequest(
-        Uri.parse('https://www.youtube.com/embed/live_stream?channel=$_makkahChannelId&autoplay=1&playsinline=1'),
+        Uri.parse('https://m.youtube.com/$_makkahHandle/live'),
+        headers: const {
+          'Referer': 'https://www.youtube.com/',
+        },
       );
     } else {
       setState(() => _isMadinahLoading = true);
       _madinahController.loadRequest(
-        Uri.parse('https://www.youtube.com/embed/live_stream?channel=$_madinahChannelId&autoplay=1&playsinline=1'),
+        Uri.parse('https://m.youtube.com/$_madinahHandle/live'),
+        headers: const {
+          'Referer': 'https://www.youtube.com/',
+        },
       );
     }
   }

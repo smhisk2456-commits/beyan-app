@@ -160,5 +160,25 @@ class QuranRepository {
     );
     return rows.map((m) => Verse.fromMap(m)).toList();
   }
+
+  /// Rastgele ayetleri sure adlarıyla birlikte ve widget'a tam sığacak uzunlukta (<= 120 kr.) çeker.
+  Future<List<Map<String, String>>> getRandomWidgetVerses({int limit = 100}) async {
+    try {
+      final rows = await _db.rawQuery('''
+        SELECT v.verse_number, v.surah_id, v.turkish_meaning, s.name_turkish AS surah_name
+        FROM verse v
+        JOIN surah s ON v.surah_id = s.id
+        WHERE LENGTH(v.turkish_meaning) <= 120
+        ORDER BY RANDOM()
+        LIMIT ?
+      ''', [limit]);
+      return rows.map((r) => {
+        'ref': '${r['surah_name']} ${r['surah_id']}:${r['verse_number']}',
+        'text': (r['turkish_meaning'] as String).trim(),
+      }).toList();
+    } catch (_) {
+      return [];
+    }
+  }
 }
 

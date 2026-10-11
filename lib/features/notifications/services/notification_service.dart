@@ -348,38 +348,78 @@ class NotificationService {
 
   String _getPrayerEnteredTitle(PrayerName prayer, String langCode) {
     final pName = prayer.localizedName(langCode);
-    if (langCode == 'en') return 'Prayer Time: $pName';
-    if (langCode == 'ar') return 'حان وقت الصلاة: $pName';
-    return 'Vakit Girdi: $pName';
+    switch (langCode) {
+      case 'en': return 'Prayer Time: $pName';
+      case 'ar': return 'حان وقت الصلاة: $pName';
+      case 'id': return 'Waktu Sholat: $pName';
+      case 'fr': return 'Heure de prière : $pName';
+      case 'ur': return 'وقت نماز: $pName';
+      case 'de': return 'Gebetszeit: $pName';
+      case 'ru': return 'Время намаза: $pName';
+      case 'tr':
+      default: return 'Vakit Girdi: $pName';
+    }
   }
 
   String _getPrayerEnteredBody(PrayerName prayer, String timeStr, String langCode) {
     final pName = prayer.localizedName(langCode);
-    if (langCode == 'en') {
-      return '$pName prayer time has started ($timeStr). Come to prayer!';
+    switch (langCode) {
+      case 'en':
+        return '$pName prayer time has started ($timeStr). Come to prayer!';
+      case 'ar':
+        return 'حان الآن وقت صلاة $pName ($timeStr). حي على الصلاة!';
+      case 'id':
+        return 'Waktu sholat $pName telah masuk ($timeStr). Mari sholat!';
+      case 'fr':
+        return 'L\'heure de la prière de $pName a commencé ($timeStr). Venez à la prière !';
+      case 'ur':
+        return 'نماز $pName کا وقت شروع ہو گیا ہے ($timeStr)۔ چلو نماز کی طرف!';
+      case 'de':
+        return 'Die Gebetszeit für $pName hat begonnen ($timeStr). Eilt zum Gebet!';
+      case 'ru':
+        return 'Наступило время намаза $pName ($timeStr). Спешите на молитву!';
+      case 'tr':
+      default:
+        return '$pName namazı vakti girdi ($timeStr). Haydin namaza!';
     }
-    if (langCode == 'ar') {
-      return 'حان الآن وقت صلاة $pName ($timeStr). حي على الصلاة!';
-    }
-    return '$pName namazı vakti girdi ($timeStr). Haydin namaza!';
   }
 
   String _getPrayerApproachingTitle(PrayerName prayer, String langCode) {
     final pName = prayer.localizedName(langCode);
-    if (langCode == 'en') return 'Prayer Approaching: $pName';
-    if (langCode == 'ar') return 'اقترب وقت الصلاة: $pName';
-    return 'Vakit Yaklaşıyor: $pName';
+    switch (langCode) {
+      case 'en': return 'Prayer Approaching: $pName';
+      case 'ar': return 'اقترب وقت الصلاة: $pName';
+      case 'id': return 'Waktu Sholat Mendekat: $pName';
+      case 'fr': return 'Prière imminente : $pName';
+      case 'ur': return 'نماز کا وقت قریب ہے: $pName';
+      case 'de': return 'Gebetszeit naht: $pName';
+      case 'ru': return 'Скоро намаз: $pName';
+      case 'tr':
+      default: return 'Vakit Yaklaşıyor: $pName';
+    }
   }
 
   String _getPrayerApproachingBody(PrayerName prayer, String timeStr, String langCode) {
     final pName = prayer.localizedName(langCode);
-    if (langCode == 'en') {
-      return '15 minutes left until $pName prayer ($timeStr).';
+    switch (langCode) {
+      case 'en':
+        return '15 minutes left until $pName prayer ($timeStr).';
+      case 'ar':
+        return 'بقي 15 دقيقة على صلاة $pName ($timeStr).';
+      case 'id':
+        return '15 menit lagi menuju waktu sholat $pName ($timeStr).';
+      case 'fr':
+        return 'Il reste 15 minutes avant la prière de $pName ($timeStr).';
+      case 'ur':
+        return 'نماز $pName میں ۱۵ منٹ باقی ہیں ($timeStr)۔';
+      case 'de':
+        return 'Noch 15 Minuten bis zum $pName-Gebet ($timeStr).';
+      case 'ru':
+        return 'До намаза $pName осталось 15 минут ($timeStr).';
+      case 'tr':
+      default:
+        return '$pName vaktine 15 dakika kaldı ($timeStr).';
     }
-    if (langCode == 'ar') {
-      return 'بقي 15 دقيقة على صلاة $pName ($timeStr).';
-    }
-    return '$pName vaktine 15 dakika kaldı ($timeStr).';
   }
 
   /// Önümüzdeki 3 günün namaz vakitlerini planlar (iOS 64 kota sınırına tam uyumlu).
@@ -612,7 +652,7 @@ class NotificationService {
     if (!enabled) {
       await cancelAllVerseNotifications();
     } else {
-      await scheduleDailyVerseNotifications();
+      await scheduleDailyVerseNotifications(force: true);
     }
   }
 
@@ -630,7 +670,7 @@ class NotificationService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(keyVerseNotifHour, hour);
     await prefs.setInt(keyVerseNotifMinute, minute);
-    await scheduleDailyVerseNotifications();
+    await scheduleDailyVerseNotifications(force: true);
   }
 
   Future<String> getVerseNotifFrequency() async {
@@ -641,25 +681,40 @@ class NotificationService {
   Future<void> setVerseNotifFrequency(String frequency) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(keyVerseNotifFrequency, frequency);
-    await scheduleDailyVerseNotifications();
+    await scheduleDailyVerseNotifications(force: true);
   }
 
   /// Önümüzdeki 14 günün günlük âyet bildirimlerini planlar.
-  Future<void> scheduleDailyVerseNotifications() async {
+  Future<void> scheduleDailyVerseNotifications({bool force = false}) async {
     final enabled = await isVerseNotifEnabled();
     if (!enabled) {
       await cancelAllVerseNotifications();
       return;
     }
 
+    final prefs = await SharedPreferences.getInstance();
+    final now = DateTime.now();
+    final lastScheduledEpoch = prefs.getInt('beyan_last_verse_scheduled_epoch') ?? 0;
+    final lastScheduled = DateTime.fromMillisecondsSinceEpoch(lastScheduledEpoch);
+
+    // Son 18 saat içinde zaten planlandıysa ve zorlama (force) yoksa tekrar baştan planlayıp geçmişi tüketme
+    if (!force && lastScheduledEpoch > 0 && now.difference(lastScheduled).inHours < 18) {
+      return;
+    }
+
     await cancelAllVerseNotifications();
+    await prefs.setInt('beyan_last_verse_scheduled_epoch', now.millisecondsSinceEpoch);
+
     final hour = await getVerseNotifHour();
     final minute = await getVerseNotifMinute();
     final freq = await getVerseNotifFrequency();
-    final now = DateTime.now();
-    final prefs = await SharedPreferences.getInstance();
     final langCode = prefs.getString('selected_app_language') ?? 'tr';
-    final seedOffset = (DateTime.now().millisecondsSinceEpoch ~/ 1000) % ShortVerseNotification.pool.length;
+    
+    // Mükerrerliği önleyen ve son 60 bildirimi hafızada tutan eşsiz ayet havuzu
+    final batchSize = freq == 'morning_evening'
+        ? 28
+        : (freq == 'hourly_2' ? 24 : (freq == 'hourly_1' ? 18 : 14));
+    final batch = await ShortVerseNotification.getNonRepeatingBatch(batchSize);
 
     // ── Saatte 2 Kez (30 dakikada bir, 09:00 - 22:00 arası) ─────────────────
     if (freq == 'hourly_2') {
@@ -672,7 +727,7 @@ class NotificationService {
         if (pointer.hour >= 9 && pointer.hour <= 22) {
           if (pointer.isAfter(now)) {
             final notifId = 5000 + notifCount;
-            final verse = ShortVerseNotification.getByIndex(seedOffset + notifCount);
+            final verse = batch[notifCount % batch.length];
             final scheduledTz = tz.TZDateTime.from(pointer, tz.local);
 
             await _notifications.zonedSchedule(
@@ -721,7 +776,7 @@ class NotificationService {
         if (pointer.hour >= 9 && pointer.hour <= 22) {
           if (pointer.isAfter(now)) {
             final notifId = 5000 + notifCount;
-            final verse = ShortVerseNotification.getByIndex(seedOffset + notifCount);
+            final verse = batch[notifCount % batch.length];
             final scheduledTz = tz.TZDateTime.from(pointer, tz.local);
 
             await _notifications.zonedSchedule(
@@ -762,7 +817,8 @@ class NotificationService {
     // ── Günlük veya Sabah & Akşam Planlaması ─────────────────────────────────
     for (int dayOffset = 0; dayOffset < 14; dayOffset++) {
       final targetDate = now.add(Duration(days: dayOffset));
-      final verse = ShortVerseNotification.getByIndex(seedOffset + dayOffset * 2);
+      final verseIndex = (freq == 'morning_evening' ? dayOffset * 2 : dayOffset) % batch.length;
+      final verse = batch[verseIndex];
 
       // Ana bildirim vakti
       final scheduledTime = DateTime(
@@ -815,7 +871,8 @@ class NotificationService {
         );
         if (eveningTime.isAfter(now)) {
           final notifId = 5100 + dayOffset;
-          final eveningVerse = ShortVerseNotification.getByIndex(seedOffset + dayOffset * 2 + 1);
+          final eveningVerseIndex = (dayOffset * 2 + 1) % batch.length;
+          final eveningVerse = batch[eveningVerseIndex];
           final scheduledTz = tz.TZDateTime.from(eveningTime, tz.local);
 
           await _notifications.zonedSchedule(

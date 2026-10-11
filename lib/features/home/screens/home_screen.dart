@@ -562,7 +562,8 @@ class _DailyVerseCompactCard extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final strings = ref.watch(appStringsProvider);
     final now = DateTime.now();
-    final todayVerseIndex = (now.year * 365 + now.day) % ShortVerseNotification.pool.length;
+    final dayOfYear = now.difference(DateTime(now.year, 1, 1)).inDays;
+    final todayVerseIndex = (now.year * 365 + dayOfYear) % ShortVerseNotification.pool.length;
     final verse = ShortVerseNotification.pool[todayVerseIndex];
 
     return Container(

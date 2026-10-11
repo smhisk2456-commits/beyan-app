@@ -6,6 +6,7 @@ import '../../core/utils/app_constants.dart';
 import '../prayer_times/models/prayer_time_model.dart';
 import '../prayer_times/services/prayer_time_service.dart';
 import '../quran/repositories/quran_repository.dart';
+import '../notifications/models/short_verse_notification.dart';
 
 /// Home Widget ve SharedPreferences köprüsü.
 ///
@@ -47,14 +48,15 @@ class WidgetService {
       final next = daily.nextPrayerEntry;
       final countdown = _prayerService.formatCountdown(daily.timeUntilNextPrayer);
 
-      // 2. Çoklu Rastgele Ayet Çekimi (Widget döngüsü için 50 adet)
-      final verses = await _quranRepo.getRandomVerses(50);
-      // Ayetleri JSON'a çevir
-      final versesList = verses.map((v) => {
-        'ref': '${v.surahId}:${v.verseNumber}', // Örn: 16:114
-        'text': v.turkishMeaning,
-      }).toList();
-      final versesJson = jsonEncode(versesList);
+      // 2. Çoklu Rastgele Ayet Çekimi (Widget döngüsü için 100 adet zengin ayet)
+      var widgetVerses = await _quranRepo.getRandomWidgetVerses(limit: 100);
+      if (widgetVerses.isEmpty) {
+        widgetVerses = ShortVerseNotification.pool.map((v) => {
+          'ref': v.verseReference,
+          'text': v.textTr,
+        }).toList();
+      }
+      final versesJson = jsonEncode(widgetVerses);
 
       // Kullanıcının seçtiği güncelleme aralığını al (varsayılan 5 dk, 3-15 dk arası güvenli sınır)
       final prefs = await SharedPreferences.getInstance();
@@ -100,18 +102,22 @@ class WidgetService {
     final verseView = prefs.getString('widget_verse_view') ?? 'meal_only';
     final textSize = prefs.getString('widget_text_size') ?? 'standard';
     final activeCat = prefs.getString('widget_active_category') ?? 'quotes';
+    final refreshInterval = prefs.getString('widget_refresh_interval') ?? '1h';
 
     await HomeWidget.saveWidgetData<String>('widget_quote_category', quoteCat);
     await HomeWidget.saveWidgetData<String>('widget_verse_view', verseView);
     await HomeWidget.saveWidgetData<String>('widget_text_size', textSize);
     await HomeWidget.saveWidgetData<String>('widget_active_category', activeCat);
+    await HomeWidget.saveWidgetData<String>('widget_refresh_interval', refreshInterval);
 
-    // Kilit ekranına sabitlenen özel ayet
-    final appliedRef = prefs.getString('widget_applied_verse_ref') ?? '';
-    final appliedText = prefs.getString('widget_applied_verse_text') ?? '';
-    final appliedSurah = prefs.getInt('widget_applied_verse_surah') ?? 0;
-    final appliedVerseNum = prefs.getInt('widget_applied_verse_number') ?? 0;
+    // Kilit ekranına sabitlenen özel ayet durumu
+    final isPinned = prefs.getBool('widget_is_pinned') ?? false;
+    final appliedRef = isPinned ? (prefs.getString('widget_applied_verse_ref') ?? '') : '';
+    final appliedText = isPinned ? (prefs.getString('widget_applied_verse_text') ?? '') : '';
+    final appliedSurah = isPinned ? (prefs.getInt('widget_applied_verse_surah') ?? 0) : 0;
+    final appliedVerseNum = isPinned ? (prefs.getInt('widget_applied_verse_number') ?? 0) : 0;
 
+    await HomeWidget.saveWidgetData<bool>('widget_is_pinned', isPinned);
     await HomeWidget.saveWidgetData<String>('widget_applied_verse_ref', appliedRef);
     await HomeWidget.saveWidgetData<String>('widget_applied_verse_text', appliedText);
     await HomeWidget.saveWidgetData<int>('widget_applied_verse_surah', appliedSurah);

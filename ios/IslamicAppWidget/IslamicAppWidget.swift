@@ -410,8 +410,12 @@ struct VerseEntry: TimelineEntry {
     let text: String
 }
 
+struct DynamicVerseJsonItem: Codable {
+    let ref: String
+    let text: String
+}
+
 struct VerseProvider: TimelineProvider {
-    private static let slot: TimeInterval = 15 * 60
     private static let appGroupId = "group.com.smhisk60.beyan"
 
     private static func string(forKey key: String) -> String? {
@@ -424,19 +428,68 @@ struct VerseProvider: TimelineProvider {
         return nil
     }
 
+    private static func bool(forKey key: String) -> Bool {
+        if let defaults = UserDefaults(suiteName: appGroupId), defaults.object(forKey: key) != nil {
+            return defaults.bool(forKey: key)
+        }
+        return UserDefaults.standard.bool(forKey: key)
+    }
+
+    private static func slotDuration() -> TimeInterval {
+        let intervalStr = Self.string(forKey: "widget_refresh_interval") ?? "1h"
+        switch intervalStr {
+        case "15m": return 15 * 60
+        case "30m": return 30 * 60
+        case "1h":  return 60 * 60
+        case "1d":  return 24 * 3600
+        default:    return 60 * 60
+        }
+    }
+
+    private static func loadDynamicVerses() -> [(ref: String, text: String)] {
+        if let jsonString = Self.string(forKey: "widget_verses_json"),
+           let data = jsonString.data(using: .utf8),
+           let items = try? JSONDecoder().decode([DynamicVerseJsonItem].self, data),
+           !items.isEmpty {
+            return items.map { ($0.ref, $0.text) }
+        }
+        return []
+    }
+
+    private static func allVerses() -> [(ref: String, text: String)] {
+        let dynamic = loadDynamicVerses()
+        if !dynamic.isEmpty {
+            return dynamic
+        }
+        return WidgetVerseData.all
+    }
+
     private func verse(at date: Date) -> VerseEntry {
-        if let appliedRef = Self.string(forKey: "widget_applied_verse_ref"),
+        let isPinned = Self.bool(forKey: "widget_is_pinned")
+        if isPinned,
+           let appliedRef = Self.string(forKey: "widget_applied_verse_ref"),
            let appliedText = Self.string(forKey: "widget_applied_verse_text") {
             return VerseEntry(date: date, ref: appliedRef, text: appliedText)
         }
 
-        let all = WidgetVerseData.all
-        guard !all.isEmpty else {
+        let pool = Self.allVerses()
+        guard !pool.isEmpty else {
             return VerseEntry(date: date, ref: "Bakara 2:153",
-                              text: "Ey İnananlar! Sabır ve namazla yardım dileyin.")
+                              text: "Ey iman edenler! Sabır ve namazla yardım dileyin.")
         }
-        let index = Int(date.timeIntervalSince1970 / Self.slot) % all.count
-        return VerseEntry(date: date, ref: all[index].ref, text: all[index].text)
+
+        let slot = Self.slotDuration()
+        let calendar = Calendar.current
+        let dayOfYear = calendar.ordinality(of: .day, in: .year, for: date) ?? 1
+        let year = calendar.component(.year, from: date)
+        let startOfDay = calendar.startOfDay(for: date)
+        let slotIndex = Int(date.timeIntervalSince(startOfDay) / slot)
+
+        // Asla aynı sırayla tekrar etmeyen güçlü hash karıştırma algoritması
+        let hash = abs((dayOfYear * 7919) ^ (year * 104729) ^ (slotIndex * 31))
+        let index = hash % pool.count
+        let item = pool[index]
+        return VerseEntry(date: date, ref: item.ref, text: item.text)
     }
 
     func placeholder(in context: Context) -> VerseEntry { verse(at: Date()) }
@@ -447,17 +500,24 @@ struct VerseProvider: TimelineProvider {
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<VerseEntry>) -> Void) {
         let now = Date()
-        if let appliedRef = Self.string(forKey: "widget_applied_verse_ref"),
+        let isPinned = Self.bool(forKey: "widget_is_pinned")
+        if isPinned,
+           let appliedRef = Self.string(forKey: "widget_applied_verse_ref"),
            let appliedText = Self.string(forKey: "widget_applied_verse_text") {
             let singleEntry = VerseEntry(date: now, ref: appliedRef, text: appliedText)
             completion(Timeline(entries: [singleEntry], policy: .never))
             return
         }
 
-        let slotStart = Date(timeIntervalSince1970: floor(now.timeIntervalSince1970 / Self.slot) * Self.slot)
+        let slot = Self.slotDuration()
+        let slotStart = Date(timeIntervalSince1970: floor(now.timeIntervalSince1970 / slot) * slot)
         var entries = [verse(at: now)]
-        for i in 1...96 {
-            entries.append(verse(at: slotStart.addingTimeInterval(Double(i) * Self.slot)))
+
+        // 24 ila 48 aralık üretip widget kit döngüsüne sun
+        let count = min(48, max(24, Int(86400 / slot)))
+        for i in 1...count {
+            let nextDate = slotStart.addingTimeInterval(Double(i) * slot)
+            entries.append(verse(at: nextDate))
         }
         completion(Timeline(entries: entries, policy: .atEnd))
     }

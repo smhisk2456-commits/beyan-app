@@ -86,50 +86,55 @@ class _WidgetSettingsDialogState extends ConsumerState<WidgetSettingsDialog> {
             ),
           ),
           const SizedBox(height: 10),
-          Row(
+          GridView.count(
+            crossAxisCount: 4,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            mainAxisSpacing: 8,
+            crossAxisSpacing: 8,
+            childAspectRatio: 1.05,
             children: AppLanguage.values.map((lang) {
               final isSelected = lang == currentLang;
-              return Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: InkWell(
+              return InkWell(
+                borderRadius: BorderRadius.circular(12),
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  ref.read(appLanguageProvider.notifier).setLanguage(lang);
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? const Color(0xFF033E35).withValues(alpha: isDark ? 0.6 : 0.12)
+                        : (isDark ? const Color(0xFF0D2823) : const Color(0xFFF0F5F3)),
                     borderRadius: BorderRadius.circular(12),
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      ref.read(appLanguageProvider.notifier).setLanguage(lang);
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? const Color(0xFF033E35).withValues(alpha: isDark ? 0.6 : 0.12)
-                            : (isDark ? const Color(0xFF0D2823) : const Color(0xFFF0F5F3)),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
+                    border: Border.all(
+                      color: isSelected
+                          ? const Color(0xFFD4AF37)
+                          : Colors.transparent,
+                      width: 1.5,
+                    ),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(lang.flag, style: const TextStyle(fontSize: 20)),
+                      const SizedBox(height: 3),
+                      Text(
+                        lang.displayName,
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                           color: isSelected
-                              ? const Color(0xFFD4AF37)
-                              : Colors.transparent,
-                          width: 1.5,
+                              ? (isDark ? const Color(0xFFFFDF7A) : const Color(0xFF033E35))
+                              : (isDark ? Colors.white60 : Colors.black87),
                         ),
                       ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(lang.flag, style: const TextStyle(fontSize: 20)),
-                          const SizedBox(height: 4),
-                          Text(
-                            lang.displayName,
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                              color: isSelected
-                                  ? (isDark ? const Color(0xFFFFDF7A) : const Color(0xFF033E35))
-                                  : (isDark ? Colors.white60 : Colors.black87),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    ],
                   ),
                 ),
               );

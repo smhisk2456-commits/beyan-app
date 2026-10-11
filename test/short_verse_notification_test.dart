@@ -7,8 +7,30 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('ShortVerseNotification Testleri', () {
-    test('Havuz en az 30 kısa ve öz ayet içermelidir', () {
-      expect(ShortVerseNotification.pool.length, greaterThanOrEqualTo(30));
+    test('Havuz 120 zengin ve doğrulanmış ayet içermelidir', () {
+      expect(ShortVerseNotification.pool.length, equals(120));
+    });
+
+    test('getNonRepeatingBatch eşsiz ve mükerrer olmayan ayetler üretmelidir', () async {
+      SharedPreferences.setMockInitialValues({});
+
+      final batch1 = await ShortVerseNotification.getNonRepeatingBatch(14);
+      expect(batch1.length, equals(14));
+
+      // Batch 1 içindeki ayetler benzersiz olmalı
+      final refs1 = batch1.map((v) => v.verseReference).toSet();
+      expect(refs1.length, equals(14));
+
+      // İkinci parti çağrıldığında ilk partiyle çakışmayan yeni ayetler dönmeli
+      final batch2 = await ShortVerseNotification.getNonRepeatingBatch(14);
+      expect(batch2.length, equals(14));
+
+      final refs2 = batch2.map((v) => v.verseReference).toSet();
+      expect(refs2.length, equals(14));
+
+      // İki ardışık partideki kesişim boş olmalıdır (deduplication çalışır)
+      final intersection = refs1.intersection(refs2);
+      expect(intersection.isEmpty, isTrue);
     });
 
     test('Tüm ayetlerin referansı ve 3 dildeki çevirileri dolu olmalıdır', () {
