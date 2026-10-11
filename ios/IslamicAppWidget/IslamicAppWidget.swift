@@ -449,7 +449,7 @@ struct VerseProvider: TimelineProvider {
     private static func loadDynamicVerses() -> [(ref: String, text: String)] {
         if let jsonString = Self.string(forKey: "widget_verses_json"),
            let data = jsonString.data(using: .utf8),
-           let items = try? JSONDecoder().decode([DynamicVerseJsonItem].self, data),
+           let items = try? JSONDecoder().decode([DynamicVerseJsonItem].self, from: data),
            !items.isEmpty {
             return items.map { ($0.ref, $0.text) }
         }
