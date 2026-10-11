@@ -24,6 +24,8 @@ import '../widgets/prayer_card_widget.dart';
 import '../../settings/screens/settings_screen.dart';
 import '../../spiritual_healing/models/mood_verse_model.dart';
 import '../../spiritual_healing/screens/mood_verse_sheet.dart';
+import '../../mosque_finder/screens/nearby_mosques_screen.dart';
+import '../../widget_service/services/live_activity_service.dart';
 
 /// Ana Ekran – Beyân lüks İslami kontrol merkezi.
 class HomeScreen extends ConsumerStatefulWidget {
@@ -36,6 +38,24 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
+    // Dynamic Island & Live Activity auto-sync
+    ref.listen<AsyncValue<DailyPrayerTimes>>(prayerTimesNotifierProvider, (_, nextState) {
+      nextState.whenData((daily) {
+        final nextPrayer = daily.nextPrayerEntry;
+        if (nextPrayer != null) {
+          final h = nextPrayer.time.hour.toString().padLeft(2, '0');
+          final m = nextPrayer.time.minute.toString().padLeft(2, '0');
+          final progress = ref.read(prayerProgressProvider).valueOrNull ?? 0.0;
+          LiveActivityService.instance.syncWithNextPrayer(
+            prayerName: nextPrayer.name.turkish,
+            prayerTime: '$h:$m',
+            targetDate: nextPrayer.time,
+            progress: progress,
+          );
+        }
+      });
+    });
+
     final strings = ref.watch(appStringsProvider);
     final prayerAsync = ref.watch(prayerTimesNotifierProvider);
     final lastRead = ref.watch(lastReadProvider);
@@ -105,6 +125,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           // ── "Bugün Kalbin Nasıl Hissediyor?" (Ruh Haline Göre Âyet & Şifa) ───
           const SliverToBoxAdapter(
             child: _SpiritualMoodsSection(),
+          ),
+
+          // ── Yakındaki Camiler & Harita Navigasyonu ───────────
+          const SliverToBoxAdapter(
+            child: _NearbyMosquesCard(),
           ),
 
           // ── Günlük Vakitler & Rekat Bilgileri Başlığı ─────────
@@ -1167,3 +1192,138 @@ class _SpiritualMoodsSection extends ConsumerWidget {
     );
   }
 }
+
+// ════════════════════════════════════════════════════════════════
+// Yakındaki Camiler Hızlı Erişim Kartı
+// ════════════════════════════════════════════════════════════════
+
+class _NearbyMosquesCard extends ConsumerWidget {
+  const _NearbyMosquesCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final strings = ref.watch(appStringsProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 10, 20, 6),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: () {
+            HapticFeedback.lightImpact();
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const NearbyMosquesScreen()),
+            );
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: isDark
+                    ? [const Color(0xFF02322C), const Color(0xFF01201D)]
+                    : [const Color(0xFFF0FDF4), const Color(0xFFDCFCE7)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: const Color(0xFF34D399).withValues(alpha: isDark ? 0.4 : 0.6),
+                width: 1.1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF34D399).withValues(alpha: 0.18),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: const Color(0xFF34D399).withValues(alpha: 0.5),
+                    ),
+                  ),
+                  child: const Center(
+                    child: Icon(
+                      Icons.mosque_rounded,
+                      color: Color(0xFF34D399),
+                      size: 22,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 13),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            strings.language == AppLanguage.english
+                                ? 'Nearby Mosques'
+                                : (strings.language == AppLanguage.arabic ? 'المساجد القريبة' : 'Yakındaki Camiler'),
+                            style: TextStyle(
+                              color: isDark ? Colors.white : const Color(0xFF064E3B),
+                              fontSize: 14.5,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF34D399).withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: const Text(
+                              'GPS & Harita',
+                              style: TextStyle(
+                                color: Color(0xFF059669),
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        strings.language == AppLanguage.english
+                            ? 'Find nearest mosques, walking distance & Apple Maps route'
+                            : (strings.language == AppLanguage.arabic
+                                ? 'ابحث عن أقرب المساجد ووقت المشي والاتجاهات'
+                                : 'En yakın mescidleri gör, yürüme mesafesi ve rota al'),
+                        style: TextStyle(
+                          color: isDark ? Colors.white60 : const Color(0xFF047857),
+                          fontSize: 11.5,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 14,
+                  color: Color(0xFF34D399),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+

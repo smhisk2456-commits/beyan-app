@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/localization/app_strings.dart';
@@ -6,6 +7,7 @@ import '../../prayer_times/models/prayer_time_model.dart';
 import '../../prayer_times/providers/prayer_time_providers.dart';
 import '../../calendar/services/hijri_calendar_service.dart';
 import '../../prayer_times/screens/prayer_guide_sheet.dart';
+import '../../mosque_finder/screens/nearby_mosques_screen.dart';
 
 /// Ana ekranın üst kısmında yer alan lüks zümrüt & altın namaz vakti kartı.
 class PrayerCardWidget extends ConsumerWidget {
@@ -318,11 +320,49 @@ class _LocationRow extends StatelessWidget {
 
     return Row(
       children: [
-        const Icon(Icons.location_on_rounded, color: Colors.white60, size: 14),
-        const SizedBox(width: 4),
-        Text(
-          locationName,
-          style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w500),
+        GestureDetector(
+          onTap: () {
+            HapticFeedback.lightImpact();
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const NearbyMosquesScreen()),
+            );
+          },
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.location_on_rounded, color: Color(0xFFFFDF7A), size: 14),
+              const SizedBox(width: 4),
+              Text(
+                locationName,
+                style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(width: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFD4AF37).withValues(alpha: 0.22),
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: const Color(0xFFFFDF7A).withValues(alpha: 0.35), width: 0.8),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.mosque_rounded, size: 10, color: Color(0xFFFFDF7A)),
+                    SizedBox(width: 3),
+                    Text(
+                      'Camiler',
+                      style: TextStyle(
+                        color: Color(0xFFFFDF7A),
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
         const Spacer(),
         Container(

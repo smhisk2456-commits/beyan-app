@@ -15,6 +15,9 @@ import '../../prayer_times/screens/calculation_method_sheet.dart';
 import '../../prayer_times/screens/city_selector_sheet.dart';
 import '../../verse_studio/screens/verse_card_studio_screen.dart';
 import '../../widget_service/screens/widget_settings_dialog.dart';
+import '../../widget_service/services/live_activity_service.dart';
+import '../../mosque_finder/screens/nearby_mosques_screen.dart';
+import '../../prayer_times/providers/prayer_time_providers.dart';
 
 /// Lüks & Kapsamlı Ayarlar Ekranı (Settings Hub)
 class SettingsScreen extends ConsumerWidget {
@@ -194,6 +197,27 @@ class SettingsScreen extends ConsumerWidget {
                     ),
                   );
                 },
+              ),
+              _buildDivider(),
+              _buildTile(
+                icon: Icons.explore_rounded,
+                iconColor: const Color(0xFF34D399),
+                title: 'Yakındaki Camiler & Harita Navigasyonu',
+                subtitle: 'Yürüme süresi, pusula yönü ve Apple Haritalar rotası',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const NearbyMosquesScreen()),
+                  );
+                },
+              ),
+              _buildDivider(),
+              _buildTile(
+                icon: Icons.smart_display_rounded,
+                iconColor: const Color(0xFFFFB74D),
+                title: 'Dynamic Island & Canlı Etkinlik',
+                subtitle: 'Kilit ekranı ve Dinamik Adacıkta anlık namaz sayacı',
+                onTap: () => _showLiveActivitySheet(context, ref),
               ),
               _buildDivider(),
               _buildTile(
@@ -433,6 +457,183 @@ class SettingsScreen extends ConsumerWidget {
       indent: 58,
       endIndent: 16,
       color: Colors.white.withValues(alpha: 0.06),
+    );
+  }
+
+  void _showLiveActivitySheet(BuildContext context, WidgetRef ref) {
+    HapticFeedback.lightImpact();
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setSheetState) {
+          return FutureBuilder<bool>(
+            future: LiveActivityService.instance.isEnabled(),
+            builder: (context, snapshot) {
+              final isEnabled = snapshot.data ?? true;
+              return Container(
+                padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
+                decoration: const BoxDecoration(
+                  color: Color(0xFF01241F),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 44,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.white24,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFB74D).withValues(alpha: 0.18),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(Icons.smart_display_rounded, color: Color(0xFFFFB74D), size: 24),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Dynamic Island & Canlı Etkinlik',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'Apple iOS 16.1+ ActivityKit',
+                                style: TextStyle(
+                                  color: const Color(0xFFFFDF7A).withValues(alpha: 0.8),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 18),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.25),
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(color: Colors.white12),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              const Expanded(
+                                child: Text(
+                                  'Canlı Etkinliği Etkinleştir',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                              Switch.adaptive(
+                                value: isEnabled,
+                                activeTrackColor: const Color(0xFFD4AF37),
+                                onChanged: (val) async {
+                                  HapticFeedback.selectionClick();
+                                  await LiveActivityService.instance.setEnabled(val);
+                                  setSheetState(() {});
+                                },
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Kilit ekranınızda ve Dynamic Island (Dinamik Ada) alanında sıradaki namaz vaktine kalan süreyi canlı sayaç ve ilerleme çubuğu ile takip edin.',
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.72),
+                              fontSize: 12.5,
+                              height: 1.4,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        icon: const Icon(Icons.sync_rounded, color: Colors.black),
+                        label: const Text(
+                          'Şimdi Senkronize Et & Başlat',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFFFDF7A),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        ),
+                        onPressed: () async {
+                          HapticFeedback.mediumImpact();
+                          final daily = ref.read(prayerTimesNotifierProvider).valueOrNull;
+                          final nextPrayer = daily?.nextPrayerEntry;
+                          if (nextPrayer != null) {
+                            final h = nextPrayer.time.hour.toString().padLeft(2, '0');
+                            final m = nextPrayer.time.minute.toString().padLeft(2, '0');
+                            final progress = ref.read(prayerProgressProvider).valueOrNull ?? 0.0;
+                            await LiveActivityService.instance.syncWithNextPrayer(
+                              prayerName: nextPrayer.name.turkish,
+                              prayerTime: '$h:$m',
+                              targetDate: nextPrayer.time,
+                              progress: progress,
+                            );
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Dynamic Island & Canlı Etkinlik güncellendi.'),
+                                  backgroundColor: Color(0xFF033E35),
+                                ),
+                              );
+                              Navigator.pop(context);
+                            }
+                          } else {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Namaz vakitleri henüz hesaplanmadı.'),
+                                  backgroundColor: Colors.redAccent,
+                                ),
+                              );
+                            }
+                          }
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }
