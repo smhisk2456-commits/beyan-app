@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:geolocator/geolocator.dart';
 import '../../../core/utils/app_constants.dart';
+import '../../prayer_times/services/prayer_time_service.dart';
 import '../models/nearby_mosque_model.dart';
 import '../services/nearby_mosques_service.dart';
 
@@ -41,21 +41,13 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
   Future<void> _loadNearbyMosques() async {
     setState(() => _isLoading = true);
     try {
-      Position? position;
-      final perm = await Geolocator.checkPermission();
-      if (perm == LocationPermission.always || perm == LocationPermission.whileInUse) {
-        position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.medium,
-          timeLimit: const Duration(seconds: 5),
-        );
-      }
-
-      if (position != null) {
-        _userLat = position.latitude;
-        _userLng = position.longitude;
+      final loc = await PrayerTimeService.instance.getCurrentLocation();
+      _userLat = loc.latitude;
+      _userLng = loc.longitude;
+      if (loc.isFromGPS) {
         _userLocationTitle = 'Mevcut Konumunuz (${_userLat.toStringAsFixed(2)}, ${_userLng.toStringAsFixed(2)})';
       } else {
-        _userLocationTitle = 'İstanbul (Varsayılan Konum)';
+        _userLocationTitle = '${loc.cityName} (Varsayılan Konum)';
       }
 
       final mosques = await _service.findNearbyMosques(

@@ -42,58 +42,60 @@ out center 35;
 
     final uri = Uri.parse('https://overpass-api.de/api/interpreter?data=${Uri.encodeComponent(query)}');
     final client = HttpClient()..connectionTimeout = const Duration(seconds: 8);
-    final request = await client.getUrl(uri);
-    final response = await request.close().timeout(const Duration(seconds: 9));
+    try {
+      final request = await client.getUrl(uri);
+      final response = await request.close().timeout(const Duration(seconds: 9));
 
-    if (response.statusCode != HttpStatus.ok) {
-      client.close();
-      return [];
-    }
-
-    final responseBody = await response.transform(utf8.decoder).join();
-    client.close();
-    final data = jsonDecode(responseBody);
-    final elements = data['elements'] as List<dynamic>? ?? [];
-
-    final result = <NearbyMosque>[];
-
-    for (final el in elements) {
-      final tags = el['tags'] as Map<String, dynamic>? ?? {};
-      final name = tags['name'] as String? ?? tags['name:tr'] as String? ?? 'Cami / Mescid';
-
-      double mLat = 0.0;
-      double mLng = 0.0;
-
-      if (el['lat'] != null && el['lon'] != null) {
-        mLat = (el['lat'] as num).toDouble();
-        mLng = (el['lon'] as num).toDouble();
-      } else if (el['center'] != null) {
-        mLat = (el['center']['lat'] as num).toDouble();
-        mLng = (el['center']['lon'] as num).toDouble();
+      if (response.statusCode != HttpStatus.ok) {
+        return [];
       }
 
-      if (mLat == 0.0 || mLng == 0.0) continue;
+      final responseBody = await response.transform(utf8.decoder).join();
+      final data = jsonDecode(responseBody);
+      final elements = data['elements'] as List<dynamic>? ?? [];
 
-      final dist = NearbyMosque.calculateDistanceMeters(lat, lng, mLat, mLng);
-      final bearing = NearbyMosque.calculateBearing(lat, lng, mLat, mLng);
-      final street = tags['addr:street'] as String?;
-      final district = tags['addr:district'] as String? ?? tags['addr:city'] as String?;
-      final address = street != null ? '$street ${district ?? ''}'.trim() : district;
+      final result = <NearbyMosque>[];
 
-      result.add(
-        NearbyMosque(
-          id: '${el['id']}',
-          name: name,
-          latitude: mLat,
-          longitude: mLng,
-          distanceMeters: dist,
-          address: address,
-          bearingDegrees: bearing,
-        ),
-      );
+      for (final el in elements) {
+        final tags = el['tags'] as Map<String, dynamic>? ?? {};
+        final name = tags['name'] as String? ?? tags['name:tr'] as String? ?? 'Cami / Mescid';
+
+        double mLat = 0.0;
+        double mLng = 0.0;
+
+        if (el['lat'] != null && el['lon'] != null) {
+          mLat = (el['lat'] as num).toDouble();
+          mLng = (el['lon'] as num).toDouble();
+        } else if (el['center'] != null) {
+          mLat = (el['center']['lat'] as num).toDouble();
+          mLng = (el['center']['lon'] as num).toDouble();
+        }
+
+        if (mLat == 0.0 || mLng == 0.0) continue;
+
+        final dist = NearbyMosque.calculateDistanceMeters(lat, lng, mLat, mLng);
+        final bearing = NearbyMosque.calculateBearing(lat, lng, mLat, mLng);
+        final street = tags['addr:street'] as String?;
+        final district = tags['addr:district'] as String? ?? tags['addr:city'] as String?;
+        final address = street != null ? '$street ${district ?? ''}'.trim() : district;
+
+        result.add(
+          NearbyMosque(
+            id: '${el['id']}',
+            name: name,
+            latitude: mLat,
+            longitude: mLng,
+            distanceMeters: dist,
+            address: address,
+            bearingDegrees: bearing,
+          ),
+        );
+      }
+
+      return result;
+    } finally {
+      client.close();
     }
-
-    return result;
   }
 
   /// Haritalarda Yol Tarifi Açma (Öncelikli Apple Maps yürüme rotası, alternatif Google Maps)
