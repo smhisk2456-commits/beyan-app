@@ -199,13 +199,13 @@ class MoodVerseSheet extends ConsumerWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Row(
+                          Row(
                             children: [
-                              Icon(Icons.auto_awesome, color: Color(0xFF2DD4BF), size: 16),
-                              SizedBox(width: 8),
+                              const Icon(Icons.auto_awesome, color: Color(0xFF2DD4BF), size: 16),
+                              const SizedBox(width: 8),
                               Text(
-                                'Şifâ Duası (Hadis-i Şerif)',
-                                style: TextStyle(
+                                strings.healingDuaHadithBadge,
+                                style: const TextStyle(
                                   color: Color(0xFF2DD4BF),
                                   fontSize: 13,
                                   fontWeight: FontWeight.bold,
@@ -215,7 +215,7 @@ class MoodVerseSheet extends ConsumerWidget {
                           ),
                           const SizedBox(height: 10),
                           Text(
-                            data.propheticDua,
+                            data.localizedPropheticDua(lang),
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 13.5,
@@ -242,13 +242,13 @@ class MoodVerseSheet extends ConsumerWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Row(
+                          Row(
                             children: [
-                              Icon(Icons.favorite_rounded, color: Color(0xFFFFDF7A), size: 16),
-                              SizedBox(width: 8),
+                              const Icon(Icons.favorite_rounded, color: Color(0xFFFFDF7A), size: 16),
+                              const SizedBox(width: 8),
                               Text(
-                                'Kalbe Ferahlık',
-                                style: TextStyle(
+                                strings.heartComfortTitle,
+                                style: const TextStyle(
                                   color: Color(0xFFFFDF7A),
                                   fontSize: 13,
                                   fontWeight: FontWeight.bold,
@@ -291,9 +291,9 @@ class MoodVerseSheet extends ConsumerWidget {
                               );
                             },
                             icon: const Icon(Icons.style_rounded, size: 18),
-                            label: const Text(
-                              'Hikaye / Duvar Kağıdı',
-                              style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                            label: Text(
+                              strings.storyWallpaperButton,
+                              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
                             ),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFFD4AF37),
@@ -335,7 +335,7 @@ class MoodVerseSheet extends ConsumerWidget {
                               side: BorderSide(color: const Color(0xFF2DD4BF).withValues(alpha: 0.4)),
                             ),
                           ),
-                          tooltip: 'Kur\'an\'da Oku',
+                          tooltip: strings.readInQuranTooltip,
                         ),
                         const SizedBox(width: 6),
 
@@ -344,7 +344,7 @@ class MoodVerseSheet extends ConsumerWidget {
                           onPressed: () {
                             SharePlus.instance.share(
                               ShareParams(
-                                text: '${data.arabicText}\n\n"${data.localizedTranslation(lang)}"\n\n— ${data.surahRef}\n\nBeyân Uygulaması',
+                                text: '${data.arabicText}\n\n"${data.localizedTranslation(lang)}"\n\n— ${data.surahRef}\n\nBeyân',
                               ),
                             );
                           },
@@ -356,7 +356,7 @@ class MoodVerseSheet extends ConsumerWidget {
                               borderRadius: BorderRadius.circular(14),
                             ),
                           ),
-                          tooltip: 'Paylaş',
+                          tooltip: strings.shareTooltip,
                         ),
                       ],
                     ),

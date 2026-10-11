@@ -3,8 +3,10 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
+import '../../../core/localization/app_strings.dart';
 import '../models/curated_verse_preset.dart';
 
 enum CardStudioBackground {
@@ -20,10 +22,50 @@ enum CardStudioBackground {
   final String emoji;
   final String assetPath;
   const CardStudioBackground(this.label, this.emoji, this.assetPath);
+
+  String localizedLabel(String langCode) {
+    switch (this) {
+      case CardStudioBackground.mistyMosque:
+        if (langCode == 'tr') return 'Sisli Cami';
+        if (langCode == 'id') return 'Masjid Berkabut';
+        if (langCode == 'ar') return 'مسجد ضبابي';
+        return 'Misty Mosque';
+      case CardStudioBackground.goldenSunset:
+        if (langCode == 'tr') return 'Gün Batımı';
+        if (langCode == 'id') return 'Matahari Terbenam';
+        if (langCode == 'ar') return 'غروب الشمس';
+        return 'Golden Sunset';
+      case CardStudioBackground.kaabaHoly:
+        if (langCode == 'tr') return 'Kâbe-i Muazzama';
+        if (langCode == 'id') return 'Ka\'bah Suci';
+        if (langCode == 'ar') return 'الكعبة المشرفة';
+        return 'Holy Kaaba';
+      case CardStudioBackground.medinaHoly:
+        if (langCode == 'tr') return 'Mescid-i Nebevi';
+        if (langCode == 'id') return 'Masjid Nabawi';
+        if (langCode == 'ar') return 'المسجد النبوي';
+        return 'Prophet\'s Mosque';
+      case CardStudioBackground.starryNight:
+        if (langCode == 'tr') return 'Gece Seması';
+        if (langCode == 'id') return 'Langit Malam';
+        if (langCode == 'ar') return 'سماء الليل';
+        return 'Starry Night';
+      case CardStudioBackground.islamicArch:
+        if (langCode == 'tr') return 'Mihrap & Mimari';
+        if (langCode == 'id') return 'Mihrab & Arsitektur';
+        if (langCode == 'ar') return 'المحراب والعمارة';
+        return 'Islamic Arch';
+      case CardStudioBackground.oledBlack:
+        if (langCode == 'tr') return 'OLED Siyah';
+        if (langCode == 'id') return 'OLED Hitam';
+        if (langCode == 'ar') return 'أسود OLED';
+        return 'OLED Black';
+    }
+  }
 }
 
 /// Gelişmiş Estetik Ayet / Hikaye & Duvar Kağıdı Stüdyosu
-class VerseCardStudioScreen extends StatefulWidget {
+class VerseCardStudioScreen extends ConsumerStatefulWidget {
   final String initialReference;
   final String initialArabic;
   final String initialMeaning;
@@ -36,10 +78,10 @@ class VerseCardStudioScreen extends StatefulWidget {
   });
 
   @override
-  State<VerseCardStudioScreen> createState() => _VerseCardStudioScreenState();
+  ConsumerState<VerseCardStudioScreen> createState() => _VerseCardStudioScreenState();
 }
 
-class _VerseCardStudioScreenState extends State<VerseCardStudioScreen> {
+class _VerseCardStudioScreenState extends ConsumerState<VerseCardStudioScreen> {
   final GlobalKey _repaintBoundaryKey = GlobalKey();
 
   late String _reference;
@@ -66,18 +108,21 @@ class _VerseCardStudioScreenState extends State<VerseCardStudioScreen> {
 
   void _randomizeVerse() {
     HapticFeedback.lightImpact();
+    final strings = ref.read(appStringsProvider);
     final presets = List<CuratedVersePreset>.from(CuratedVersePreset.presets);
     presets.shuffle();
     final randomPreset = presets.first;
     setState(() {
-      _reference = randomPreset.reference;
+      _reference = randomPreset.localizedReference(strings.language.code);
       _arabic = randomPreset.arabic;
-      _meaning = randomPreset.meaning;
+      _meaning = randomPreset.localizedMeaning(strings.language.code);
     });
   }
 
   void _showVerseSelectorSheet() {
     HapticFeedback.lightImpact();
+    final strings = ref.read(appStringsProvider);
+    final langCode = strings.language.code;
     showModalBottomSheet(
       context: context,
       backgroundColor: const Color(0xFF032620),
@@ -88,7 +133,7 @@ class _VerseCardStudioScreenState extends State<VerseCardStudioScreen> {
       builder: (ctx) {
         final categories = <String, List<CuratedVersePreset>>{};
         for (final item in CuratedVersePreset.presets) {
-          categories.putIfAbsent(item.category, () => []).add(item);
+          categories.putIfAbsent(item.localizedCategory(langCode), () => []).add(item);
         }
 
         return DraggableScrollableSheet(
@@ -115,9 +160,9 @@ class _VerseCardStudioScreenState extends State<VerseCardStudioScreen> {
                     children: [
                       const Icon(Icons.auto_stories_rounded, color: Color(0xFFFFDF7A)),
                       const SizedBox(width: 10),
-                      const Text(
-                        'Âyet & Dua Kütüphanesi',
-                        style: TextStyle(
+                      Text(
+                        strings.verseAndDuaLibrary,
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -130,7 +175,7 @@ class _VerseCardStudioScreenState extends State<VerseCardStudioScreen> {
                           _showCustomTextInputDialog();
                         },
                         icon: const Icon(Icons.edit_note_rounded, size: 18, color: Color(0xFFFFDF7A)),
-                        label: const Text('Kendin Yaz', style: TextStyle(color: Color(0xFFFFDF7A))),
+                        label: Text(strings.writeCustomVerse, style: const TextStyle(color: Color(0xFFFFDF7A))),
                       ),
                     ],
                   ),
@@ -157,7 +202,9 @@ class _VerseCardStudioScreenState extends State<VerseCardStudioScreen> {
                             ),
                           ),
                           ...entry.value.map((preset) {
-                            final isSelected = _reference == preset.reference;
+                            final refText = preset.localizedReference(langCode);
+                            final meanText = preset.localizedMeaning(langCode);
+                            final isSelected = _reference == refText;
                             return Container(
                               margin: const EdgeInsets.only(bottom: 8),
                               decoration: BoxDecoration(
@@ -177,7 +224,7 @@ class _VerseCardStudioScreenState extends State<VerseCardStudioScreen> {
                                 title: Row(
                                   children: [
                                     Text(
-                                      preset.reference,
+                                      refText,
                                       style: TextStyle(
                                         color: isSelected ? const Color(0xFFFFDF7A) : Colors.white,
                                         fontSize: 13.5,
@@ -206,7 +253,7 @@ class _VerseCardStudioScreenState extends State<VerseCardStudioScreen> {
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
-                                      preset.meaning,
+                                      meanText,
                                       style: TextStyle(
                                         fontSize: 12,
                                         color: Colors.white.withValues(alpha: 0.8),
@@ -220,9 +267,9 @@ class _VerseCardStudioScreenState extends State<VerseCardStudioScreen> {
                                 onTap: () {
                                   HapticFeedback.selectionClick();
                                   setState(() {
-                                    _reference = preset.reference;
+                                    _reference = refText;
                                     _arabic = preset.arabic;
-                                    _meaning = preset.meaning;
+                                    _meaning = meanText;
                                   });
                                   Navigator.pop(ctx);
                                 },
@@ -243,6 +290,7 @@ class _VerseCardStudioScreenState extends State<VerseCardStudioScreen> {
   }
 
   void _showCustomTextInputDialog() {
+    final strings = ref.read(appStringsProvider);
     final refCtrl = TextEditingController(text: _reference);
     final arCtrl = TextEditingController(text: _arabic);
     final meanCtrl = TextEditingController(text: _meaning);
@@ -252,9 +300,9 @@ class _VerseCardStudioScreenState extends State<VerseCardStudioScreen> {
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF04241F),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
-        title: const Text(
-          'Kendi Âyetini / Metnini Yaz',
-          style: TextStyle(color: Color(0xFFFFDF7A), fontSize: 17, fontWeight: FontWeight.bold),
+        title: Text(
+          strings.writeYourOwnVerseTitle,
+          style: const TextStyle(color: Color(0xFFFFDF7A), fontSize: 17, fontWeight: FontWeight.bold),
         ),
         content: SingleChildScrollView(
           child: Column(
@@ -263,9 +311,9 @@ class _VerseCardStudioScreenState extends State<VerseCardStudioScreen> {
               TextField(
                 controller: refCtrl,
                 style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(
-                  labelText: 'Kaynak / Sure (Örn: İnşirâh 94:6)',
-                  labelStyle: TextStyle(color: Colors.white70),
+                decoration: InputDecoration(
+                  labelText: strings.verseSourceHint,
+                  labelStyle: const TextStyle(color: Colors.white70),
                 ),
               ),
               const SizedBox(height: 10),
@@ -273,9 +321,9 @@ class _VerseCardStudioScreenState extends State<VerseCardStudioScreen> {
                 controller: arCtrl,
                 textDirection: TextDirection.rtl,
                 style: const TextStyle(color: Colors.white, fontFamily: 'Amiri'),
-                decoration: const InputDecoration(
-                  labelText: 'Arapça Metin (İsteğe Bağlı)',
-                  labelStyle: TextStyle(color: Colors.white70),
+                decoration: InputDecoration(
+                  labelText: strings.verseArabicTextHint,
+                  labelStyle: const TextStyle(color: Colors.white70),
                 ),
               ),
               const SizedBox(height: 10),
@@ -283,9 +331,9 @@ class _VerseCardStudioScreenState extends State<VerseCardStudioScreen> {
                 controller: meanCtrl,
                 maxLines: 3,
                 style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(
-                  labelText: 'Türkçe Meâl / Anlam',
-                  labelStyle: TextStyle(color: Colors.white70),
+                decoration: InputDecoration(
+                  labelText: strings.verseMeaningHint,
+                  labelStyle: const TextStyle(color: Colors.white70),
                 ),
               ),
             ],
@@ -294,7 +342,7 @@ class _VerseCardStudioScreenState extends State<VerseCardStudioScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Vazgeç', style: TextStyle(color: Colors.white54)),
+            child: Text(strings.cancel, style: const TextStyle(color: Colors.white54)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -311,7 +359,7 @@ class _VerseCardStudioScreenState extends State<VerseCardStudioScreen> {
               backgroundColor: const Color(0xFFD4AF37),
               foregroundColor: Colors.black,
             ),
-            child: const Text('Uygula'),
+            child: Text(strings.applyAction),
           ),
         ],
       ),
@@ -320,6 +368,7 @@ class _VerseCardStudioScreenState extends State<VerseCardStudioScreen> {
 
   Future<void> _captureAndShare() async {
     HapticFeedback.mediumImpact();
+    final strings = ref.read(appStringsProvider);
     setState(() => _isSaving = true);
     try {
       final boundary = _repaintBoundaryKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
@@ -345,7 +394,7 @@ class _VerseCardStudioScreenState extends State<VerseCardStudioScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Paylaşım hatası: $e')),
+          SnackBar(content: Text('${strings.shareError}: $e')),
         );
       }
     } finally {
@@ -355,27 +404,28 @@ class _VerseCardStudioScreenState extends State<VerseCardStudioScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = ref.watch(appStringsProvider);
     return Scaffold(
       backgroundColor: const Color(0xFF011815),
       appBar: _isPreviewMode
           ? null
           : AppBar(
-              title: const Text(
-                'Ayet & Duvar Kağıdı Stüdyosu',
-                style: TextStyle(fontWeight: FontWeight.bold),
+              title: Text(
+                strings.verseStudioTitle,
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               centerTitle: true,
               actions: [
                 // Rastgele Âyet Düğmesi
                 IconButton(
                   icon: const Icon(Icons.casino_rounded, color: Color(0xFFFFDF7A)),
-                  tooltip: 'Rastgele Âyet',
+                  tooltip: strings.randomVerseTooltip,
                   onPressed: _randomizeVerse,
                 ),
                 // Paylaş
                 IconButton(
                   icon: const Icon(Icons.share_rounded, color: Color(0xFFFFDF7A)),
-                  tooltip: 'Paylaş',
+                  tooltip: strings.shareTooltip,
                   onPressed: _isSaving ? null : _captureAndShare,
                 ),
               ],
@@ -394,7 +444,7 @@ class _VerseCardStudioScreenState extends State<VerseCardStudioScreen> {
                         onPressed: _showVerseSelectorSheet,
                         icon: const Icon(Icons.menu_book_rounded, size: 18),
                         label: Text(
-                          'Âyet Seç: $_reference',
+                          '${strings.selectVerseAction}: $_reference',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
@@ -418,7 +468,7 @@ class _VerseCardStudioScreenState extends State<VerseCardStudioScreen> {
                       style: IconButton.styleFrom(
                         backgroundColor: const Color(0xFFFFDF7A),
                       ),
-                      tooltip: 'Tam Ekran Önizle',
+                      tooltip: strings.fullscreenPreviewTooltip,
                     ),
                   ],
                 ),
@@ -622,6 +672,8 @@ class _VerseCardStudioScreenState extends State<VerseCardStudioScreen> {
   // Alt Kontrol Paneli (Arka Plan Seçimi, Boyut, Font, Paylaş)
   // ════════════════════════════════════════════════════════════════
   Widget _buildBottomControls() {
+    final strings = ref.watch(appStringsProvider);
+    final langCode = strings.language.code;
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
       decoration: const BoxDecoration(
@@ -646,7 +698,7 @@ class _VerseCardStudioScreenState extends State<VerseCardStudioScreen> {
                   padding: const EdgeInsets.only(right: 8),
                   child: ChoiceChip(
                     avatar: Text(bg.emoji, style: const TextStyle(fontSize: 14)),
-                    label: Text(bg.label),
+                    label: Text(bg.localizedLabel(langCode)),
                     selected: isSelected,
                     onSelected: (_) => setState(() => _bg = bg),
                     selectedColor: const Color(0xFFD4AF37),
@@ -670,7 +722,7 @@ class _VerseCardStudioScreenState extends State<VerseCardStudioScreen> {
               children: [
                 // Oran (9:16 vs 1:1)
                 ChoiceChip(
-                  label: Text(_isStoryRatio ? '9:16 Duvar Kağıdı' : '1:1 Kare'),
+                  label: Text(_isStoryRatio ? strings.wallpaperRatioStory : strings.squareRatioPost),
                   selected: true,
                   onSelected: (_) => setState(() => _isStoryRatio = !_isStoryRatio),
                   selectedColor: const Color(0xFFD4AF37),
@@ -682,7 +734,7 @@ class _VerseCardStudioScreenState extends State<VerseCardStudioScreen> {
                 ActionChip(
                   avatar: const Icon(Icons.font_download_rounded, size: 14, color: Color(0xFFFFDF7A)),
                   label: Text(
-                    _fontStyle == 0 ? 'Zarif Serif' : (_fontStyle == 1 ? 'Klasik Nesih' : 'Modern'),
+                    _fontStyle == 0 ? strings.fontSerifElegant : (_fontStyle == 1 ? strings.fontNaskhClassic : strings.fontModern),
                     style: const TextStyle(fontSize: 11.5, color: Color(0xFFFFDF7A)),
                   ),
                   backgroundColor: Colors.white.withValues(alpha: 0.08),
@@ -700,7 +752,7 @@ class _VerseCardStudioScreenState extends State<VerseCardStudioScreen> {
                       setState(() => _fontSizeMultiplier -= 0.1);
                     }
                   },
-                  tooltip: 'Küçült',
+                  tooltip: strings.decreaseTextSize,
                 ),
                 IconButton.filledTonal(
                   icon: const Icon(Icons.text_increase_rounded, size: 16),
@@ -709,13 +761,13 @@ class _VerseCardStudioScreenState extends State<VerseCardStudioScreen> {
                       setState(() => _fontSizeMultiplier += 0.1);
                     }
                   },
-                  tooltip: 'Büyüt',
+                  tooltip: strings.increaseTextSize,
                 ),
                 const SizedBox(width: 6),
 
                 // Arapça Toggle
                 FilterChip(
-                  label: const Text('Arapça'),
+                  label: Text(strings.arabicTextToggle),
                   selected: _showArabic,
                   onSelected: (val) => setState(() => _showArabic = val),
                   selectedColor: const Color(0xFF2DD4BF).withValues(alpha: 0.3),
@@ -725,7 +777,7 @@ class _VerseCardStudioScreenState extends State<VerseCardStudioScreen> {
 
                 // Meâl Toggle
                 FilterChip(
-                  label: const Text('Meâl'),
+                  label: Text(strings.meaningToggle),
                   selected: _showMeaning,
                   onSelected: (val) => setState(() => _showMeaning = val),
                   selectedColor: const Color(0xFF2DD4BF).withValues(alpha: 0.3),
@@ -735,7 +787,7 @@ class _VerseCardStudioScreenState extends State<VerseCardStudioScreen> {
 
                 // Logo Toggle
                 FilterChip(
-                  label: const Text('Logo'),
+                  label: Text(strings.logoToggle),
                   selected: _showWatermark,
                   onSelected: (val) => setState(() => _showWatermark = val),
                   selectedColor: const Color(0xFF2DD4BF).withValues(alpha: 0.3),
@@ -759,7 +811,7 @@ class _VerseCardStudioScreenState extends State<VerseCardStudioScreen> {
                     )
                   : const Icon(Icons.download_rounded),
               label: Text(
-                _isSaving ? 'Görsel Hazırlanıyor...' : 'Duvar Kağıdı / Hikaye Olarak Paylaş',
+                _isSaving ? strings.preparingImage : strings.shareAsWallpaperStory,
                 style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
               ),
               style: ElevatedButton.styleFrom(

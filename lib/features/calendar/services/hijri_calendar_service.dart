@@ -21,6 +21,27 @@ class HijriDate {
   String formatTr() => '$day $monthNameTr $year';
   String formatAr() => '$day $monthNameAr $year هـ';
   String formatEn() => '$day $monthNameEn $year AH';
+
+  String localizedMonthName(String langCode) {
+    if (langCode == 'ar') return monthNameAr;
+    if (langCode == 'id') {
+      const idMonths = [
+        '', 'Muharram', 'Safar', 'Rabiul Awal', 'Rabiul Akhir',
+        'Jumadil Awal', 'Jumadil Akhir', 'Rajab', 'Sya\'ban',
+        'Ramadhan', 'Syawal', 'Dzulkaidah', 'Dzulhijjah'
+      ];
+      return (month >= 1 && month <= 12) ? idMonths[month] : monthNameEn;
+    }
+    if (langCode != 'tr') return monthNameEn;
+    return monthNameTr;
+  }
+
+  String localizedFormat(String langCode) {
+    if (langCode == 'ar') return formatAr();
+    if (langCode == 'id') return '$day ${localizedMonthName('id')} $year H';
+    if (langCode != 'tr') return '$day $monthNameEn $year AH';
+    return formatTr();
+  }
 }
 
 /// Diyanet İşleri Başkanlığı takvimine uyumlu Hicri Takvim Servisi

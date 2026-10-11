@@ -205,9 +205,7 @@ class PrayerGuideSheet extends ConsumerWidget {
                   // ── 1. Rekat Dağılımı ve Kılınış Düzeni ─────────────
                   _buildSectionHeader(
                     icon: Icons.format_list_numbered_rounded,
-                    title: lang == AppLanguage.english
-                        ? 'Rakats & Order of Prayer'
-                        : (lang == AppLanguage.arabic ? 'ترتيب الركعات وكيفية الصلاة' : 'Rekat Düzeni & Kılınış Sırası'),
+                    title: strings.rakatsAndOrderTitle,
                   ),
                   const SizedBox(height: 8),
                   ...steps.map((step) => _buildStepCard(step, isDark)),
@@ -218,10 +216,8 @@ class PrayerGuideSheet extends ConsumerWidget {
                   if (featuredSurahs.isNotEmpty) ...[
                     _buildSectionHeader(
                       icon: Icons.stars_rounded,
-                      title: lang == AppLanguage.english
-                          ? 'Special Recommended Surahs & Verses'
-                          : (lang == AppLanguage.arabic ? 'سور وآيات مستحبة لهذا الوقت' : 'Bu Vakte Özel Faziletli Sûre ve Âyetler'),
-                      badge: lang == AppLanguage.english ? 'Tap to Read' : (lang == AppLanguage.arabic ? 'اضغط للقراءة' : 'Dokununca Açılır'),
+                      title: strings.recommendedSurahsTitle,
+                      badge: strings.tapToReadBadge,
                     ),
                     const SizedBox(height: 8),
                     ...featuredSurahs.map((item) => _buildSurahCard(context, ref, item, isFeatured: true)),
@@ -231,18 +227,12 @@ class PrayerGuideSheet extends ConsumerWidget {
                   // ── 3. Namaz Sûreleri (Zamm-ı Sûreler) ───────────────
                   _buildSectionHeader(
                     icon: Icons.menu_book_rounded,
-                    title: lang == AppLanguage.english
-                        ? 'Surahs Recited in Prayer (Zamm-i Surah)'
-                        : (lang == AppLanguage.arabic ? 'قصار السور التي تقرأ في الصلاة' : 'Namazda Okunan Zamm-ı Sûreler'),
-                    badge: lang == AppLanguage.english ? '10 Short Surahs' : (lang == AppLanguage.arabic ? '١٠ سور قصيرة' : '10 Namaz Sûresi'),
+                    title: strings.surahsRecitedInPrayerTitle,
+                    badge: strings.tenShortSurahsBadge,
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    lang == AppLanguage.english
-                        ? 'Tap any surah to open its full recitation and meaning directly in the Holy Quran tab.'
-                        : (lang == AppLanguage.arabic
-                            ? 'اضغط على أي سورة لفتحها مباشرة في مصحف التطبيق مع التلاوة والتفسير.'
-                            : 'Fâtiha\'dan sonra okunan bu sûrelerden birine dokunarak Kur\'an-ı Kerim sayfasında anında açabilirsiniz.'),
+                    strings.prayerSurahTapHint,
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.65),
                       fontSize: 11.5,
@@ -569,108 +559,122 @@ class PrayerGuideSheet extends ConsumerWidget {
 
   String _headerSubtitle(PrayerName p, AppLanguage lang) {
     if (p == PrayerName.sunrise) {
-      return lang == AppLanguage.english
-          ? 'Sunrise (Restricted Time) • Duha/Ishraq Prayer'
-          : (lang == AppLanguage.arabic ? 'وقت الكراهة • صلاة الضحى والإشراق' : 'Kerâhet Vakti • Kuşluk / İşrak Namazı');
+      if (lang == AppLanguage.turkish) {
+        return 'Kerâhet Vakti • Kuşluk / İşrak Namazı';
+      }
+      if (lang == AppLanguage.arabic) {
+        return 'وقت الكراهة • صلاة الضحى والإشراق';
+      }
+      if (lang == AppLanguage.indonesian) {
+        return 'Waktu Terlarang Shalat • Shalat Dhuha / Isyraq';
+      }
+      return 'Sunrise (Restricted Time) • Duha/Ishraq Prayer';
     }
     return p.localizedRakat(lang.code);
   }
 
   List<PrayerRakatStep> _getSteps(PrayerName p, AppLanguage lang) {
+    if (lang == AppLanguage.turkish) {
+      return _getStepsTr(p);
+    } else if (lang == AppLanguage.indonesian) {
+      return _getStepsId(p);
+    } else if (lang == AppLanguage.arabic) {
+      return _getStepsAr(p);
+    } else {
+      return _getStepsEn(p);
+    }
+  }
+
+  List<PrayerRakatStep> _getStepsTr(PrayerName p) {
     switch (p) {
       case PrayerName.fajr:
-        return [
-          const PrayerRakatStep(
+        return const [
+          PrayerRakatStep(
             title: '2 Rekat Sünnet',
             type: 'Müekkede Sünnet',
             detail: 'Peygamber Efendimiz (s.a.v.)\'in en çok önem verdiği sünnettir. 1. rekatta Kâfirûn, 2. rekatta İhlâs sûreleri tavsiye edilir.',
           ),
-          const PrayerRakatStep(
+          PrayerRakatStep(
             title: '2 Rekat Farz',
             type: 'Farz-ı Ayn',
             detail: 'Kıraati cehrî (açıktan) okunan farz namazdır. Cemaatle veya münferit kılınır.',
           ),
         ];
-
       case PrayerName.sunrise:
-        return [
-          const PrayerRakatStep(
+        return const [
+          PrayerRakatStep(
             title: 'Kerâhet Vakti (Namaz Kılınmaz)',
             type: 'Mekruh Vakit',
             detail: 'Güneş doğarken ve doğduktan sonraki ilk 40-45 dakika içinde farz veya nafile namaz kılmak mekruhtur.',
           ),
-          const PrayerRakatStep(
+          PrayerRakatStep(
             title: 'İşrak & Kuşluk (Duhâ) Namazı',
             type: 'Nafile (2 - 8 Rekat)',
             detail: 'Güneş bir mızrak boyu yükseldikten (doğuşundan ~45 dk sonra) zeval vaktine kadar kılınan çok faziletli nafile namazdır.',
           ),
         ];
-
       case PrayerName.dhuhr:
-        return [
-          const PrayerRakatStep(
+        return const [
+          PrayerRakatStep(
             title: '4 Rekat İlk Sünnet',
             type: 'Müekkede Sünnet',
             detail: '1. oturuşta sadece Ettehiyyâtü okunup 3. rekata kalkılır. 3. ve 4. rekatlarda Fâtiha ve zamm-ı sûre okunur.',
           ),
-          const PrayerRakatStep(
+          PrayerRakatStep(
             title: '4 Rekat Farz',
             type: 'Farz-ı Ayn',
             detail: 'Farzın 3. ve 4. rekatlarında sadece Fâtiha sûresi okunur, zamm-ı sûre eklenmez.',
           ),
-          const PrayerRakatStep(
+          PrayerRakatStep(
             title: '2 Rekat Son Sünnet',
             type: 'Müekkede Sünnet',
             detail: 'Sabah namazının sünneti gibi kılınan iki rekatlık müekked sünnettir.',
           ),
         ];
-
       case PrayerName.asr:
-        return [
-          const PrayerRakatStep(
+        return const [
+          PrayerRakatStep(
             title: '4 Rekat Sünnet',
             type: 'Gayr-i Müekkede',
             detail: '1. oturuşta Ettehiyyâtü ile birlikte Salli ve Bârik duaları da okunur. 3. rekata kalkınca Sübhaneke ve Eûzü-Besmele ile başlanır.',
           ),
-          const PrayerRakatStep(
+          PrayerRakatStep(
             title: '4 Rekat Farz',
             type: 'Farz-ı Ayn',
             detail: '3. ve 4. rekatlarında sadece Fâtiha okunur. Vaktin fazileti ikindi vaktinin korunmasındadır (Salât-ı Vüstâ).',
           ),
         ];
-
       case PrayerName.maghrib:
-        return [
-          const PrayerRakatStep(
+        return const [
+          PrayerRakatStep(
             title: '3 Rekat Farz',
             type: 'Farz-ı Ayn (Önce Kılınır)',
             detail: 'Akşam namazında önce farz kılınır. 1. ve 2. rekatta Fâtiha ve zamm-ı sûre; 3. rekatta sadece Fâtiha okunur.',
           ),
-          const PrayerRakatStep(
+          PrayerRakatStep(
             title: '2 Rekat Sünnet',
             type: 'Müekkede Sünnet',
             detail: 'Farzdan hemen sonra kılınır. Kâfirûn ve İhlâs sûreleri tavsiye edilir.',
           ),
         ];
-
       case PrayerName.isha:
-        return [
-          const PrayerRakatStep(
+        return const [
+          PrayerRakatStep(
             title: '4 Rekat İlk Sünnet',
             type: 'Gayr-i Müekkede Sünnet',
             detail: 'İkindi sünneti gibidir; 1. oturuşta Salli-Bârik okunur, 3. rekata kalkınca Sübhaneke ile başlanır.',
           ),
-          const PrayerRakatStep(
+          PrayerRakatStep(
             title: '4 Rekat Farz',
             type: 'Farz-ı Ayn',
             detail: '3. ve 4. rekatlarında sadece Fâtiha okunur.',
           ),
-          const PrayerRakatStep(
+          PrayerRakatStep(
             title: '2 Rekat Son Sünnet',
             type: 'Müekkede Sünnet',
             detail: 'Farzın ardından kılınan iki rekatlık sünnettir.',
           ),
-          const PrayerRakatStep(
+          PrayerRakatStep(
             title: '3 Rekat Vitir Namazı',
             type: 'Vacip Namaz (Kunût ile)',
             detail: '3. rekatta Fâtiha ve zamm-ı sûre okunduktan sonra eller kulaklara kaldırılıp tekbir alınır ve Kunût duaları okunur.',
@@ -679,7 +683,313 @@ class PrayerGuideSheet extends ConsumerWidget {
     }
   }
 
+  List<PrayerRakatStep> _getStepsId(PrayerName p) {
+    switch (p) {
+      case PrayerName.fajr:
+        return const [
+          PrayerRakatStep(
+            title: '2 Rakaat Sunnah Subuh',
+            type: 'Sunnah Muakkadah',
+            detail: 'Sunnah yang sangat ditekankan oleh Rasulullah ﷺ. Dianjurkan membaca surat Al-Kafirun pada rakaat pertama dan Al-Ikhlas pada rakaat kedua.',
+          ),
+          PrayerRakatStep(
+            title: '2 Rakaat Fardhu Subuh',
+            type: 'Fardhu Ain',
+            detail: 'Shalat fardhu dengan bacaan keras (jahri). Dikerjakan berjamaah atau sendiri.',
+          ),
+        ];
+      case PrayerName.sunrise:
+        return const [
+          PrayerRakatStep(
+            title: 'Waktu Terlarang (Dilarang Shalat)',
+            type: 'Waktu Makruh',
+            detail: 'Makruh melakukan shalat fardhu atau sunnah saat matahari terbit hingga 40-45 menit pertama.',
+          ),
+          PrayerRakatStep(
+            title: 'Shalat Isyraq & Dhuha',
+            type: 'Sunnah (2 - 8 Rakaat)',
+            detail: 'Shalat sunnah yang sangat utama dikerjakan setelah matahari naik setinggi tombak hingga sebelum waktu zawal.',
+          ),
+        ];
+      case PrayerName.dhuhr:
+        return const [
+          PrayerRakatStep(
+            title: '4 Rakaat Sunnah Qabliyah',
+            type: 'Sunnah Muakkadah',
+            detail: 'Pada tasyahud awal hanya membaca At-Tahiyyat lalu berdiri ke rakaat ketiga. Membaca Al-Fatihah dan surat pada setiap rakaat.',
+          ),
+          PrayerRakatStep(
+            title: '4 Rakaat Fardhu Dzuhur',
+            type: 'Fardhu Ain',
+            detail: 'Pada rakaat ke-3 dan ke-4 hanya membaca surat Al-Fatihah.',
+          ),
+          PrayerRakatStep(
+            title: '2 Rakaat Sunnah Ba\'diyah',
+            type: 'Sunnah Muakkadah',
+            detail: 'Dua rakaat sunnah muakkadah yang dikerjakan setelah shalat fardhu Dzuhur.',
+          ),
+        ];
+      case PrayerName.asr:
+        return const [
+          PrayerRakatStep(
+            title: '4 Rakaat Sunnah Qabliyah',
+            type: 'Sunnah Ghairu Muakkadah',
+            detail: 'Dianjurkan dikerjakan sebelum shalat fardhu Ashar.',
+          ),
+          PrayerRakatStep(
+            title: '4 Rakaat Fardhu Ashar',
+            type: 'Fardhu Ain',
+            detail: 'Hanya membaca Al-Fatihah pada rakaat ke-3 dan ke-4. Merupakan Shalat Wustha.',
+          ),
+        ];
+      case PrayerName.maghrib:
+        return const [
+          PrayerRakatStep(
+            title: '3 Rakaat Fardhu Maghrib',
+            type: 'Fardhu Ain (Didahulukan)',
+            detail: 'Dikerjakan terlebih dahulu. Rakaat 1 & 2 membaca Al-Fatihah dan surat; rakaat 3 hanya Al-Fatihah.',
+          ),
+          PrayerRakatStep(
+            title: '2 Rakaat Sunnah Ba\'diyah',
+            type: 'Sunnah Muakkadah',
+            detail: 'Dikerjakan setelah shalat fardhu. Dianjurkan membaca surat Al-Kafirun dan Al-Ikhlas.',
+          ),
+        ];
+      case PrayerName.isha:
+        return const [
+          PrayerRakatStep(
+            title: '4 Rakaat Sunnah Qabliyah',
+            type: 'Sunnah Ghairu Muakkadah',
+            detail: 'Sunnah sebelum fardhu Isya.',
+          ),
+          PrayerRakatStep(
+            title: '4 Rakaat Fardhu Isya',
+            type: 'Fardhu Ain',
+            detail: 'Hanya membaca Al-Fatihah pada rakaat ke-3 dan ke-4.',
+          ),
+          PrayerRakatStep(
+            title: '2 Rakaat Sunnah Ba\'diyah',
+            type: 'Sunnah Muakkadah',
+            detail: 'Dua rakaat sunnah muakkadah setelah shalat fardhu Isya.',
+          ),
+          PrayerRakatStep(
+            title: '3 Rakaat Shalat Witir',
+            type: 'Sunnah Muakkadah / Wajib',
+            detail: 'Shalat penutup malam dengan membaca doa Qunut pada rakaat terakhir.',
+          ),
+        ];
+    }
+  }
+
+  List<PrayerRakatStep> _getStepsEn(PrayerName p) {
+    switch (p) {
+      case PrayerName.fajr:
+        return const [
+          PrayerRakatStep(
+            title: '2 Sunnah Rakats',
+            type: 'Emphasized Sunnah (Mu\'akkadah)',
+            detail: 'The most emphasized sunnah by the Prophet (pbuh). Reciting Al-Kafirun in 1st rakat and Al-Ikhlas in 2nd rakat is recommended.',
+          ),
+          PrayerRakatStep(
+            title: '2 Fard Rakats',
+            type: 'Obligatory (Fard Ayn)',
+            detail: 'Recited aloud (Jahri). Prayed in congregation or individually.',
+          ),
+        ];
+      case PrayerName.sunrise:
+        return const [
+          PrayerRakatStep(
+            title: 'Restricted Time (No Prayer)',
+            type: 'Disliked (Makruh) Time',
+            detail: 'It is disliked to pray fard or nafl prayers during sunrise and for ~40-45 minutes after.',
+          ),
+          PrayerRakatStep(
+            title: 'Ishraq & Duha Prayer',
+            type: 'Voluntary (2 - 8 Rakats)',
+            detail: 'Highly virtuous prayer performed from ~45 min after sunrise until before zenith (zawal).',
+          ),
+        ];
+      case PrayerName.dhuhr:
+        return const [
+          PrayerRakatStep(
+            title: '4 Initial Sunnah Rakats',
+            type: 'Emphasized Sunnah',
+            detail: 'In the first sitting only Tashahhud is recited before standing for the 3rd rakat.',
+          ),
+          PrayerRakatStep(
+            title: '4 Fard Rakats',
+            type: 'Obligatory (Fard Ayn)',
+            detail: 'Only Surah Al-Fatiha is recited in the 3rd and 4th rakats.',
+          ),
+          PrayerRakatStep(
+            title: '2 Final Sunnah Rakats',
+            type: 'Emphasized Sunnah',
+            detail: 'Two emphasized sunnah rakats prayed after the obligatory prayer.',
+          ),
+        ];
+      case PrayerName.asr:
+        return const [
+          PrayerRakatStep(
+            title: '4 Sunnah Rakats',
+            type: 'Non-Emphasized Sunnah',
+            detail: 'Recommended voluntary prayer before the obligatory Asr prayer.',
+          ),
+          PrayerRakatStep(
+            title: '4 Fard Rakats',
+            type: 'Obligatory (Fard Ayn)',
+            detail: 'Only Surah Al-Fatiha is recited in the 3rd and 4th rakats (Salat al-Wusta).',
+          ),
+        ];
+      case PrayerName.maghrib:
+        return const [
+          PrayerRakatStep(
+            title: '3 Fard Rakats',
+            type: 'Obligatory (Prayed First)',
+            detail: 'Obligatory prayer is prayed first. Surah recitation in rakats 1 & 2; only Fatiha in rakat 3.',
+          ),
+          PrayerRakatStep(
+            title: '2 Sunnah Rakats',
+            type: 'Emphasized Sunnah',
+            detail: 'Prayed immediately after Fard. Surahs Al-Kafirun and Al-Ikhlas are recommended.',
+          ),
+        ];
+      case PrayerName.isha:
+        return const [
+          PrayerRakatStep(
+            title: '4 Initial Sunnah Rakats',
+            type: 'Non-Emphasized Sunnah',
+            detail: 'Voluntary prayer before the obligatory Isha prayer.',
+          ),
+          PrayerRakatStep(
+            title: '4 Fard Rakats',
+            type: 'Obligatory (Fard Ayn)',
+            detail: 'Only Surah Al-Fatiha is recited in the 3rd and 4th rakats.',
+          ),
+          PrayerRakatStep(
+            title: '2 Final Sunnah Rakats',
+            type: 'Emphasized Sunnah',
+            detail: 'Two emphasized sunnah rakats prayed after Fard.',
+          ),
+          PrayerRakatStep(
+            title: '3 Witr Rakats',
+            type: 'Wajib / Emphasized Night Prayer',
+            detail: 'Night prayer concluded with Qunut supplication in the third rakat.',
+          ),
+        ];
+    }
+  }
+
+  List<PrayerRakatStep> _getStepsAr(PrayerName p) {
+    switch (p) {
+      case PrayerName.fajr:
+        return const [
+          PrayerRakatStep(
+            title: 'ركعتان سنة الفجر',
+            type: 'سنة مؤكدة',
+            detail: 'أكد السنن النبوية، يستحب قراءة سورة الكافرون في الأولى والإخلاص في الثانية.',
+          ),
+          PrayerRakatStep(
+            title: 'ركعتان فرض الفجر',
+            type: 'فرض عين',
+            detail: 'صلاة جهرية تقام جماعة أو منفرداً.',
+          ),
+        ];
+      case PrayerName.sunrise:
+        return const [
+          PrayerRakatStep(
+            title: 'وقت الكراهة (تنهى الصلاة فيه)',
+            type: 'وقت مكروه',
+            detail: 'يكره أداء الصلاة عند شروق الشمس ولمدة ٤٠-٤٥ دقيقة بعده.',
+          ),
+          PrayerRakatStep(
+            title: 'صلاة الإشراق والضحى',
+            type: 'نافلة (٢ - ٨ ركعات)',
+            detail: 'صلاة مباركة تؤدى بعد ارتفاع الشمس قيد رمح حتى قبل الزوال.',
+          ),
+        ];
+      case PrayerName.dhuhr:
+        return const [
+          PrayerRakatStep(
+            title: '٤ ركعات سنة قبلية',
+            type: 'سنة مؤكدة',
+            detail: 'في التشهد الأول يقرأ التحيات فقط ثم يقوم للركعة الثالثة.',
+          ),
+          PrayerRakatStep(
+            title: '٤ ركعات فرض الظهر',
+            type: 'فرض عين',
+            detail: 'تقرأ الفاتحة فقط في الركعتين الثالثة والرابعة.',
+          ),
+          PrayerRakatStep(
+            title: 'ركعتان سنة بعدية',
+            type: 'سنة مؤكدة',
+            detail: 'ركعتان مباركتان تؤديان بعد فرض الظهر.',
+          ),
+        ];
+      case PrayerName.asr:
+        return const [
+          PrayerRakatStep(
+            title: '٤ ركعات سنة قبلية',
+            type: 'سنة غير مؤكدة',
+            detail: 'سنة مستحبة قبل صلاة العصر.',
+          ),
+          PrayerRakatStep(
+            title: '٤ ركعات فرض العصر',
+            type: 'فرض عين',
+            detail: 'تقرأ الفاتحة فقط في الركعتين الثالثة والرابعة (الصلاة الوسطى).',
+          ),
+        ];
+      case PrayerName.maghrib:
+        return const [
+          PrayerRakatStep(
+            title: '٣ ركعات فرض المغرب',
+            type: 'فرض عين (يقدم أولاً)',
+            detail: 'يقدم الفرض أولاً، الفاتحة وسورة في الأولى والثانية، وفاتحة فقط في الثالثة.',
+          ),
+          PrayerRakatStep(
+            title: 'ركعتان سنة بعدية',
+            type: 'سنة مؤكدة',
+            detail: 'تؤدى بعد الفرض مباشرة، يستحب الكافرون والإخلاص.',
+          ),
+        ];
+      case PrayerName.isha:
+        return const [
+          PrayerRakatStep(
+            title: '٤ ركعات سنة قبلية',
+            type: 'سنة غير مؤكدة',
+            detail: 'تؤدى قبل فرض العشاء.',
+          ),
+          PrayerRakatStep(
+            title: '٤ ركعات فرض العشاء',
+            type: 'فرض عين',
+            detail: 'تقرأ الفاتحة فقط في الركعتين الثالثة والرابعة.',
+          ),
+          PrayerRakatStep(
+            title: 'ركعتان سنة بعدية',
+            type: 'سنة مؤكدة',
+            detail: 'ركعتان بعد الفرض.',
+          ),
+          PrayerRakatStep(
+            title: '٣ ركعات صلاة الوتر',
+            type: 'سنة مؤكدة / واجب مع القنوت',
+            detail: 'ختام صلاة الليل مع دعاء القنوت في الركعة الثالثة.',
+          ),
+        ];
+    }
+  }
+
   List<PrayerRecommendedSurah> _getFeaturedSurahs(PrayerName p, AppLanguage lang) {
+    if (lang == AppLanguage.turkish) {
+      return _getFeaturedSurahsTr(p);
+    } else if (lang == AppLanguage.indonesian) {
+      return _getFeaturedSurahsId(p);
+    } else if (lang == AppLanguage.arabic) {
+      return _getFeaturedSurahsAr(p);
+    } else {
+      return _getFeaturedSurahsEn(p);
+    }
+  }
+
+  List<PrayerRecommendedSurah> _getFeaturedSurahsTr(PrayerName p) {
     switch (p) {
       case PrayerName.fajr:
         return const [
@@ -700,7 +1010,6 @@ class PrayerGuideSheet extends ConsumerWidget {
             isFeatured: true,
           ),
         ];
-
       case PrayerName.sunrise:
         return const [
           PrayerRecommendedSurah(
@@ -720,7 +1029,6 @@ class PrayerGuideSheet extends ConsumerWidget {
             isFeatured: true,
           ),
         ];
-
       case PrayerName.dhuhr:
         return const [
           PrayerRecommendedSurah(
@@ -740,7 +1048,6 @@ class PrayerGuideSheet extends ConsumerWidget {
             isFeatured: true,
           ),
         ];
-
       case PrayerName.asr:
         return const [
           PrayerRecommendedSurah(
@@ -760,7 +1067,6 @@ class PrayerGuideSheet extends ConsumerWidget {
             isFeatured: true,
           ),
         ];
-
       case PrayerName.maghrib:
         return const [
           PrayerRecommendedSurah(
@@ -780,7 +1086,6 @@ class PrayerGuideSheet extends ConsumerWidget {
             isFeatured: true,
           ),
         ];
-
       case PrayerName.isha:
         return const [
           PrayerRecommendedSurah(
@@ -811,7 +1116,400 @@ class PrayerGuideSheet extends ConsumerWidget {
     }
   }
 
+  List<PrayerRecommendedSurah> _getFeaturedSurahsId(PrayerName p) {
+    switch (p) {
+      case PrayerName.fajr:
+        return const [
+          PrayerRecommendedSurah(
+            surahId: 59,
+            verseNumber: 22,
+            name: 'Surat Al-Hasyr (Ayat 22-24)',
+            arabicName: 'الحشر',
+            note: 'Dianjurkan dibaca setelah shalat Subuh; 70.000 malaikat mendoakan pembacanya.',
+            isFeatured: true,
+          ),
+          PrayerRecommendedSurah(
+            surahId: 36,
+            verseNumber: 1,
+            name: 'Surat Yasin',
+            arabicName: 'يس',
+            note: 'Jantung Al-Qur\'an; sangat dianjurkan dibaca di waktu pagi.',
+            isFeatured: true,
+          ),
+        ];
+      case PrayerName.sunrise:
+        return const [
+          PrayerRecommendedSurah(
+            surahId: 93,
+            verseNumber: 1,
+            name: 'Surat Ad-Duha',
+            arabicName: 'الضحى',
+            note: 'Sangat utama dibaca di waktu Dhuha; membawa ketenteraman dan kelapangan.',
+            isFeatured: true,
+          ),
+          PrayerRecommendedSurah(
+            surahId: 91,
+            verseNumber: 1,
+            name: 'Surat Asy-Syams',
+            arabicName: 'الشمس',
+            note: 'Mengingatkan cahaya matahari dan kesucian jiwa.',
+            isFeatured: true,
+          ),
+        ];
+      case PrayerName.dhuhr:
+        return const [
+          PrayerRecommendedSurah(
+            surahId: 48,
+            verseNumber: 27,
+            name: 'Surat Al-Fath',
+            arabicName: 'الفتح',
+            note: 'Dianjurkan dibaca setelah shalat Dzuhur.',
+            isFeatured: true,
+          ),
+          PrayerRecommendedSurah(
+            surahId: 108,
+            verseNumber: 1,
+            name: 'Surat Al-Kausar',
+            arabicName: 'الكوثر',
+            note: 'Surat keberkahan yang sering dibaca dalam shalat sunnah.',
+            isFeatured: true,
+          ),
+        ];
+      case PrayerName.asr:
+        return const [
+          PrayerRecommendedSurah(
+            surahId: 78,
+            verseNumber: 1,
+            name: 'Surat An-Naba',
+            arabicName: 'النبأ',
+            note: 'Dianjurkan dibaca setiap hari setelah shalat Ashar.',
+            isFeatured: true,
+          ),
+          PrayerRecommendedSurah(
+            surahId: 103,
+            verseNumber: 1,
+            name: 'Surat Al-Asr',
+            arabicName: 'العصر',
+            note: 'Mengingatkan pentingnya waktu Ashar dan nilai umur manusia.',
+            isFeatured: true,
+          ),
+        ];
+      case PrayerName.maghrib:
+        return const [
+          PrayerRecommendedSurah(
+            surahId: 56,
+            verseNumber: 1,
+            name: 'Surat Al-Waqi\'ah',
+            arabicName: 'الواقعة',
+            note: 'Barang siapa membacanya setelah Maghrib, dijauhkan dari kefakiran.',
+            isFeatured: true,
+          ),
+          PrayerRecommendedSurah(
+            surahId: 94,
+            verseNumber: 1,
+            name: 'Surat Al-Insyirah',
+            arabicName: 'الشرح',
+            note: 'Melapangkan dada dan menjanjikan kemudahan bersama kesulitan.',
+            isFeatured: true,
+          ),
+        ];
+      case PrayerName.isha:
+        return const [
+          PrayerRecommendedSurah(
+            surahId: 2,
+            verseNumber: 285,
+            name: 'Al-Baqarah (Ayat 285-286)',
+            arabicName: 'البقرة',
+            note: 'Membacanya di malam hari setelah Isya mencukupi dari segala keburukan.',
+            isFeatured: true,
+          ),
+          PrayerRecommendedSurah(
+            surahId: 67,
+            verseNumber: 1,
+            name: 'Surat Al-Mulk',
+            arabicName: 'الملك',
+            note: 'Melindungi dari siksa kubur; sunnah dibaca setiap malam setelah Isya.',
+            isFeatured: true,
+          ),
+          PrayerRecommendedSurah(
+            surahId: 32,
+            verseNumber: 1,
+            name: 'Surat As-Sajdah',
+            arabicName: 'السجدة',
+            note: 'Surat yang senantiasa dibaca Rasulullah ﷺ sebelum tidur.',
+            isFeatured: true,
+          ),
+        ];
+    }
+  }
+
+  List<PrayerRecommendedSurah> _getFeaturedSurahsEn(PrayerName p) {
+    switch (p) {
+      case PrayerName.fajr:
+        return const [
+          PrayerRecommendedSurah(
+            surahId: 59,
+            verseNumber: 22,
+            name: 'Al-Hashr (Verses 22-24)',
+            arabicName: 'الحشر',
+            note: 'Recited after Fajr; 70,000 angels pray for the reciter (Hadith).',
+            isFeatured: true,
+          ),
+          PrayerRecommendedSurah(
+            surahId: 36,
+            verseNumber: 1,
+            name: 'Surah Ya-Sin',
+            arabicName: 'يس',
+            note: 'Heart of the Quran; recommended to recite in the morning.',
+            isFeatured: true,
+          ),
+        ];
+      case PrayerName.sunrise:
+        return const [
+          PrayerRecommendedSurah(
+            surahId: 93,
+            verseNumber: 1,
+            name: 'Surah Ad-Duha',
+            arabicName: 'الضحى',
+            note: 'Virtuous at Duha time; glad tidings of peace and relief.',
+            isFeatured: true,
+          ),
+          PrayerRecommendedSurah(
+            surahId: 91,
+            verseNumber: 1,
+            name: 'Surah Ash-Shams',
+            arabicName: 'الشمس',
+            note: 'Reflects the light of the sun and purification of the soul.',
+            isFeatured: true,
+          ),
+        ];
+      case PrayerName.dhuhr:
+        return const [
+          PrayerRecommendedSurah(
+            surahId: 48,
+            verseNumber: 27,
+            name: 'Surah Al-Fath',
+            arabicName: 'الفتح',
+            note: 'Recommended recitation after Dhuhr prayer.',
+            isFeatured: true,
+          ),
+          PrayerRecommendedSurah(
+            surahId: 108,
+            verseNumber: 1,
+            name: 'Surah Al-Kawthar',
+            arabicName: 'الكوثر',
+            note: 'Abundant blessing frequently recited in sunnah prayers.',
+            isFeatured: true,
+          ),
+        ];
+      case PrayerName.asr:
+        return const [
+          PrayerRecommendedSurah(
+            surahId: 78,
+            verseNumber: 1,
+            name: 'Surah An-Naba',
+            arabicName: 'النبأ',
+            note: 'Virtuous sunnah to recite daily after Asr prayer.',
+            isFeatured: true,
+          ),
+          PrayerRecommendedSurah(
+            surahId: 103,
+            verseNumber: 1,
+            name: 'Surah Al-Asr',
+            arabicName: 'العصر',
+            note: 'Emphasizes the sanctity of time and value of life.',
+            isFeatured: true,
+          ),
+        ];
+      case PrayerName.maghrib:
+        return const [
+          PrayerRecommendedSurah(
+            surahId: 56,
+            verseNumber: 1,
+            name: 'Surah Al-Waqi\'ah',
+            arabicName: 'الواقعة',
+            note: 'Reciting after Maghrib protects against poverty (Hadith).',
+            isFeatured: true,
+          ),
+          PrayerRecommendedSurah(
+            surahId: 94,
+            verseNumber: 1,
+            name: 'Surah Al-Inshirah',
+            arabicName: 'الشرح',
+            note: 'Brings solace to the heart and ease with hardship.',
+            isFeatured: true,
+          ),
+        ];
+      case PrayerName.isha:
+        return const [
+          PrayerRecommendedSurah(
+            surahId: 2,
+            verseNumber: 285,
+            name: 'Al-Baqarah (285-286)',
+            arabicName: 'البقرة',
+            note: 'Sufficient protection when recited at night after Isha.',
+            isFeatured: true,
+          ),
+          PrayerRecommendedSurah(
+            surahId: 67,
+            verseNumber: 1,
+            name: 'Surah Al-Mulk',
+            arabicName: 'الملك',
+            note: 'Protects from the punishment of the grave; recited each night.',
+            isFeatured: true,
+          ),
+          PrayerRecommendedSurah(
+            surahId: 32,
+            verseNumber: 1,
+            name: 'Surah As-Sajdah',
+            arabicName: 'السجدة',
+            note: 'The Prophet (pbuh) would not sleep without reciting it.',
+            isFeatured: true,
+          ),
+        ];
+    }
+  }
+
+  List<PrayerRecommendedSurah> _getFeaturedSurahsAr(PrayerName p) {
+    switch (p) {
+      case PrayerName.fajr:
+        return const [
+          PrayerRecommendedSurah(
+            surahId: 59,
+            verseNumber: 22,
+            name: 'سورة الحشر (أواخر السورة)',
+            arabicName: 'الحشر',
+            note: 'يستحب قراءتها بعد صلاة الفجر، تصلي عليه سبعون ألف ملك.',
+            isFeatured: true,
+          ),
+          PrayerRecommendedSurah(
+            surahId: 36,
+            verseNumber: 1,
+            name: 'سورة يس',
+            arabicName: 'يس',
+            note: 'قلب القرآن، يستحب تلاوتها في الصباح الباكر.',
+            isFeatured: true,
+          ),
+        ];
+      case PrayerName.sunrise:
+        return const [
+          PrayerRecommendedSurah(
+            surahId: 93,
+            verseNumber: 1,
+            name: 'سورة الضحى',
+            arabicName: 'الضحى',
+            note: 'مستحبة في وقت الضحى، بشارة باليسر والطمأنينة.',
+            isFeatured: true,
+          ),
+          PrayerRecommendedSurah(
+            surahId: 91,
+            verseNumber: 1,
+            name: 'سورة الشمس',
+            arabicName: 'الشمس',
+            note: 'تذكير بضياء الشمس وتزكية النفس.',
+            isFeatured: true,
+          ),
+        ];
+      case PrayerName.dhuhr:
+        return const [
+          PrayerRecommendedSurah(
+            surahId: 48,
+            verseNumber: 27,
+            name: 'سورة الفتح',
+            arabicName: 'الفتح',
+            note: 'يستحب قراءتها بعد صلاة الظهر.',
+            isFeatured: true,
+          ),
+          PrayerRecommendedSurah(
+            surahId: 108,
+            verseNumber: 1,
+            name: 'سورة الكوثر',
+            arabicName: 'الكوثر',
+            note: 'سورة البركة وكثرة الخير، تقرأ في السنن.',
+            isFeatured: true,
+          ),
+        ];
+      case PrayerName.asr:
+        return const [
+          PrayerRecommendedSurah(
+            surahId: 78,
+            verseNumber: 1,
+            name: 'سورة النبأ',
+            arabicName: 'النبأ',
+            note: 'سنة مباركة ومستحبة بعد صلاة العصر.',
+            isFeatured: true,
+          ),
+          PrayerRecommendedSurah(
+            surahId: 103,
+            verseNumber: 1,
+            name: 'سورة العصر',
+            arabicName: 'العصر',
+            note: 'تذكير بقيمة الوقت وحفظ الأوقات.',
+            isFeatured: true,
+          ),
+        ];
+      case PrayerName.maghrib:
+        return const [
+          PrayerRecommendedSurah(
+            surahId: 56,
+            verseNumber: 1,
+            name: 'سورة الواقعة',
+            arabicName: 'الواقعة',
+            note: 'من قرأها بعد المغرب لم تصبه فاقة أبداً.',
+            isFeatured: true,
+          ),
+          PrayerRecommendedSurah(
+            surahId: 94,
+            verseNumber: 1,
+            name: 'سورة الشرح',
+            arabicName: 'الشرح',
+            note: 'شرح للصدور وتيسير لكل عسير.',
+            isFeatured: true,
+          ),
+        ];
+      case PrayerName.isha:
+        return const [
+          PrayerRecommendedSurah(
+            surahId: 2,
+            verseNumber: 285,
+            name: 'آمن الرسول (البقرة ٢٨٥-٢٨٦)',
+            arabicName: 'البقرة',
+            note: 'من قرأهما في ليلة كفتاه من كل شر.',
+            isFeatured: true,
+          ),
+          PrayerRecommendedSurah(
+            surahId: 67,
+            verseNumber: 1,
+            name: 'سورة الملك (التبارك)',
+            arabicName: 'الملك',
+            note: 'تنجي من عذاب القبر، سنة كل ليلة بعد العشاء.',
+            isFeatured: true,
+          ),
+          PrayerRecommendedSurah(
+            surahId: 32,
+            verseNumber: 1,
+            name: 'سورة السجدة',
+            arabicName: 'السجدة',
+            note: 'كان النبي ﷺ لا ينام حتى يقرأها.',
+            isFeatured: true,
+          ),
+        ];
+    }
+  }
+
   List<PrayerRecommendedSurah> _getGeneralPrayerSurahs(AppLanguage lang) {
+    if (lang == AppLanguage.turkish) {
+      return _getGeneralPrayerSurahsTr();
+    } else if (lang == AppLanguage.indonesian) {
+      return _getGeneralPrayerSurahsId();
+    } else if (lang == AppLanguage.arabic) {
+      return _getGeneralPrayerSurahsAr();
+    } else {
+      return _getGeneralPrayerSurahsEn();
+    }
+  }
+
+  List<PrayerRecommendedSurah> _getGeneralPrayerSurahsTr() {
     return const [
       PrayerRecommendedSurah(
         surahId: 1,
@@ -889,6 +1587,252 @@ class PrayerGuideSheet extends ConsumerWidget {
         name: 'Nâs Sûresi',
         arabicName: 'الناس',
         note: 'İnsanların Rabbine vesveselerden sığınma sûresi.',
+      ),
+    ];
+  }
+
+  List<PrayerRecommendedSurah> _getGeneralPrayerSurahsId() {
+    return const [
+      PrayerRecommendedSurah(
+        surahId: 1,
+        verseNumber: 1,
+        name: 'Surat Al-Fatihah',
+        arabicName: 'الفاتحة',
+        note: 'Wajib dibaca pada setiap rakaat shalat (Ummul Kitab).',
+      ),
+      PrayerRecommendedSurah(
+        surahId: 105,
+        verseNumber: 1,
+        name: 'Surat Al-Fil',
+        arabicName: 'الفيل',
+        note: 'Mengingatkan kekuasaan ilahi yang melindungi Ka\'bah.',
+      ),
+      PrayerRecommendedSurah(
+        surahId: 106,
+        verseNumber: 1,
+        name: 'Surat Quraisy',
+        arabicName: 'قريش',
+        note: 'Surat ketenteraman, rezeki, dan rasa syukur.',
+      ),
+      PrayerRecommendedSurah(
+        surahId: 107,
+        verseNumber: 1,
+        name: 'Surat Al-Ma\'un',
+        arabicName: 'الماعون',
+        note: 'Keikhlasan dalam beribadah dan kepedulian sosial.',
+      ),
+      PrayerRecommendedSurah(
+        surahId: 108,
+        verseNumber: 1,
+        name: 'Surat Al-Kausar',
+        arabicName: 'الكوثر',
+        note: 'Surat terpendek; kebaikan melimpah dan ajakan shalat.',
+      ),
+      PrayerRecommendedSurah(
+        surahId: 109,
+        verseNumber: 1,
+        name: 'Surat Al-Kafirun',
+        arabicName: 'الكافرون',
+        note: 'Manifestasi tauhid; sering dibaca dalam shalat sunnah.',
+      ),
+      PrayerRecommendedSurah(
+        surahId: 110,
+        verseNumber: 1,
+        name: 'Surat An-Nasr',
+        arabicName: 'النصر',
+        note: 'Pertolongan Allah, kemenangan besar, dan istighfar.',
+      ),
+      PrayerRecommendedSurah(
+        surahId: 111,
+        verseNumber: 1,
+        name: 'Surat Al-Lahab',
+        arabicName: 'المسد',
+        note: 'Kerugian bagi orang-orang yang menentang kebenaran.',
+      ),
+      PrayerRecommendedSurah(
+        surahId: 112,
+        verseNumber: 1,
+        name: 'Surat Al-Ikhlas',
+        arabicName: 'الإخلاص',
+        note: 'Kemurnian tauhid; sebanding sepertiga Al-Qur\'an.',
+      ),
+      PrayerRecommendedSurah(
+        surahId: 113,
+        verseNumber: 1,
+        name: 'Surat Al-Falaq',
+        arabicName: 'الفلق',
+        note: 'Memohon perlindungan dari kejahatan waktu subuh.',
+      ),
+      PrayerRecommendedSurah(
+        surahId: 114,
+        verseNumber: 1,
+        name: 'Surat An-Nas',
+        arabicName: 'الناس',
+        note: 'Perlindungan kepada Pemelihara manusia dari bisikan jahat.',
+      ),
+    ];
+  }
+
+  List<PrayerRecommendedSurah> _getGeneralPrayerSurahsEn() {
+    return const [
+      PrayerRecommendedSurah(
+        surahId: 1,
+        verseNumber: 1,
+        name: 'Surah Al-Fatiha',
+        arabicName: 'الفاتحة',
+        note: 'Obligatory recitation in every rakat (The Mother of the Book).',
+      ),
+      PrayerRecommendedSurah(
+        surahId: 105,
+        verseNumber: 1,
+        name: 'Surah Al-Fil',
+        arabicName: 'الفيل',
+        note: 'Reminder of divine protection over the Holy Kaaba.',
+      ),
+      PrayerRecommendedSurah(
+        surahId: 106,
+        verseNumber: 1,
+        name: 'Surah Quraysh',
+        arabicName: 'قريش',
+        note: 'Surah of peace, sustenance, and gratitude.',
+      ),
+      PrayerRecommendedSurah(
+        surahId: 107,
+        verseNumber: 1,
+        name: 'Surah Al-Ma\'un',
+        arabicName: 'الماعون',
+        note: 'Sincerity in worship and helping those in need.',
+      ),
+      PrayerRecommendedSurah(
+        surahId: 108,
+        verseNumber: 1,
+        name: 'Surah Al-Kawthar',
+        arabicName: 'الكوثر',
+        note: 'The shortest surah; abundant good and call to prayer.',
+      ),
+      PrayerRecommendedSurah(
+        surahId: 109,
+        verseNumber: 1,
+        name: 'Surah Al-Kafirun',
+        arabicName: 'الكافرون',
+        note: 'Declaration of monotheism; frequently read in sunnah.',
+      ),
+      PrayerRecommendedSurah(
+        surahId: 110,
+        verseNumber: 1,
+        name: 'Surah An-Nasr',
+        arabicName: 'النصر',
+        note: 'Divine victory, help, and glorification.',
+      ),
+      PrayerRecommendedSurah(
+        surahId: 111,
+        verseNumber: 1,
+        name: 'Surah Al-Masad',
+        arabicName: 'المسد',
+        note: 'The loss of those who oppose the truth.',
+      ),
+      PrayerRecommendedSurah(
+        surahId: 112,
+        verseNumber: 1,
+        name: 'Surah Al-Ikhlas',
+        arabicName: 'الإخلاص',
+        note: 'Purity of faith; equals one third of the Quran.',
+      ),
+      PrayerRecommendedSurah(
+        surahId: 113,
+        verseNumber: 1,
+        name: 'Surah Al-Falaq',
+        arabicName: 'الفلق',
+        note: 'Seeking refuge in the Lord of dawn from all evil.',
+      ),
+      PrayerRecommendedSurah(
+        surahId: 114,
+        verseNumber: 1,
+        name: 'Surah An-Nas',
+        arabicName: 'الناس',
+        note: 'Seeking refuge in the Lord of mankind from whisperers.',
+      ),
+    ];
+  }
+
+  List<PrayerRecommendedSurah> _getGeneralPrayerSurahsAr() {
+    return const [
+      PrayerRecommendedSurah(
+        surahId: 1,
+        verseNumber: 1,
+        name: 'سورة الفاتحة',
+        arabicName: 'الفاتحة',
+        note: 'واجبة القراءة في كل ركعة (أم الكتاب).',
+      ),
+      PrayerRecommendedSurah(
+        surahId: 105,
+        verseNumber: 1,
+        name: 'سورة الفيل',
+        arabicName: 'الفيل',
+        note: 'تذكير بقدرة الله في حماية الكعبة المشرفة.',
+      ),
+      PrayerRecommendedSurah(
+        surahId: 106,
+        verseNumber: 1,
+        name: 'سورة قريش',
+        arabicName: 'قريش',
+        note: 'سورة الأمان والرزق والشكر.',
+      ),
+      PrayerRecommendedSurah(
+        surahId: 107,
+        verseNumber: 1,
+        name: 'سورة الماعون',
+        arabicName: 'الماعون',
+        note: 'الإخلاص في العبادة والتكافل الاجتماعي.',
+      ),
+      PrayerRecommendedSurah(
+        surahId: 108,
+        verseNumber: 1,
+        name: 'سورة الكوثر',
+        arabicName: 'الكوثر',
+        note: 'أقصر سور القرآن؛ الخير الكثير والدعوة للصلاة.',
+      ),
+      PrayerRecommendedSurah(
+        surahId: 109,
+        verseNumber: 1,
+        name: 'سورة الكافرون',
+        arabicName: 'الكافرون',
+        note: 'إعلان التوحيد؛ تقرأ كثيراً في السنن.',
+      ),
+      PrayerRecommendedSurah(
+        surahId: 110,
+        verseNumber: 1,
+        name: 'سورة النصر',
+        arabicName: 'النصر',
+        note: 'نصر الله والفتح والاستغفار.',
+      ),
+      PrayerRecommendedSurah(
+        surahId: 111,
+        verseNumber: 1,
+        name: 'سورة المسد',
+        arabicName: 'المسد',
+        note: 'خسران من عاند الحق وكذب به.',
+      ),
+      PrayerRecommendedSurah(
+        surahId: 112,
+        verseNumber: 1,
+        name: 'سورة الإخلاص',
+        arabicName: 'الإخلاص',
+        note: 'إخلاص التوحيد؛ تعدل ثلث القرآن الكريم.',
+      ),
+      PrayerRecommendedSurah(
+        surahId: 113,
+        verseNumber: 1,
+        name: 'سورة الفلق',
+        arabicName: 'الفلق',
+        note: 'الاستعاذة برب الفلق من شرور المخلوقات.',
+      ),
+      PrayerRecommendedSurah(
+        surahId: 114,
+        verseNumber: 1,
+        name: 'سورة الناس',
+        arabicName: 'الناس',
+        note: 'الاستعاذة برب الناس من الوسواس الخناس.',
       ),
     ];
   }

@@ -75,20 +75,50 @@ class Surah {
 
   String localizedName(String langCode) {
     if (langCode == 'ar') return nameArabic;
-    if (langCode == 'en') return nameEnglish;
-    return nameTurkish;
+    if (langCode == 'tr') return nameTurkish;
+    return nameEnglish;
   }
 
   String localizedRevelation(String langCode) {
-    if (langCode == 'en') return isMeccan ? 'Meccan' : 'Medinan';
-    if (langCode == 'ar') return isMeccan ? 'مكية' : 'مدنية';
-    return isMeccan ? 'Mekki' : 'Medeni';
+    switch (langCode) {
+      case 'ar':
+        return isMeccan ? 'مكية' : 'مدنية';
+      case 'id':
+        return isMeccan ? 'Makkiyah' : 'Madaniyah';
+      case 'fr':
+        return isMeccan ? 'Mecquoise' : 'Médinoise';
+      case 'ur':
+        return isMeccan ? 'مکی' : 'مدنی';
+      case 'de':
+        return isMeccan ? 'Mekkanisch' : 'Medinensisch';
+      case 'ru':
+        return isMeccan ? 'Мекканская' : 'Мединская';
+      case 'en':
+        return isMeccan ? 'Meccan' : 'Medinan';
+      default:
+        return isMeccan ? 'Mekki' : 'Medeni';
+    }
   }
 
   String localizedVerseCount(String langCode) {
-    if (langCode == 'en') return '$verseCount verses';
-    if (langCode == 'ar') return '$verseCount آية';
-    return '$verseCount ayet';
+    switch (langCode) {
+      case 'ar':
+        return '$verseCount آية';
+      case 'id':
+        return '$verseCount ayat';
+      case 'fr':
+        return '$verseCount versets';
+      case 'ur':
+        return '$verseCount آیات';
+      case 'de':
+        return '$verseCount Verse';
+      case 'ru':
+        return '$verseCount аятов';
+      case 'en':
+        return '$verseCount verses';
+      default:
+        return '$verseCount ayet';
+    }
   }
 
   // ── Eşitlik ────────────────────────────────────────────────

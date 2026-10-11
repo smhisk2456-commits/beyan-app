@@ -3,18 +3,21 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
+import '../../../core/localization/app_strings.dart';
+
 /// 24/7 Mekke & Medine Uygulama İçi Canlı Yayın Ekranı (In-App Live Stream Player)
-class MeccaMedinaLiveScreen extends StatefulWidget {
+class MeccaMedinaLiveScreen extends ConsumerStatefulWidget {
   const MeccaMedinaLiveScreen({super.key});
 
   @override
-  State<MeccaMedinaLiveScreen> createState() => _MeccaMedinaLiveScreenState();
+  ConsumerState<MeccaMedinaLiveScreen> createState() => _MeccaMedinaLiveScreenState();
 }
 
-class _MeccaMedinaLiveScreenState extends State<MeccaMedinaLiveScreen>
+class _MeccaMedinaLiveScreenState extends ConsumerState<MeccaMedinaLiveScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
 
@@ -60,6 +63,10 @@ class _MeccaMedinaLiveScreenState extends State<MeccaMedinaLiveScreen>
           onPageFinished: (_) {
             if (mounted) setState(() => _isMakkahLoading = false);
           },
+          onWebResourceError: (error) {
+            debugPrint('Makkah stream error: ${error.description}');
+            if (mounted) setState(() => _isMakkahLoading = false);
+          },
         ),
       );
     _loadStream(_makkahController, _makkahVideoId);
@@ -73,21 +80,40 @@ class _MeccaMedinaLiveScreenState extends State<MeccaMedinaLiveScreen>
           onPageFinished: (_) {
             if (mounted) setState(() => _isMadinahLoading = false);
           },
+          onWebResourceError: (error) {
+            debugPrint('Madinah stream error: ${error.description}');
+            if (mounted) setState(() => _isMadinahLoading = false);
+          },
         ),
       );
     _loadStream(_madinahController, _madinahVideoId);
   }
 
   void _loadStream(WebViewController controller, String videoId) {
-    controller.loadRequest(
-      Uri.parse(
-        'https://www.youtube.com/embed/$videoId?autoplay=1&mute=0&playsinline=1&rel=0&modestbranding=1&enablejsapi=1&fs=1',
-      ),
-      headers: const {
-        'Referer': 'https://www.youtube.com/',
-        'Origin': 'https://www.youtube.com',
-      },
-    );
+    final html = '''
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; background-color: #000; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
+    .video-container { position: relative; width: 100%; height: 100%; }
+    iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+  </style>
+</head>
+<body>
+  <div class="video-container">
+    <iframe
+      src="https://www.youtube-nocookie.com/embed/$videoId?autoplay=1&mute=0&playsinline=1&rel=0&modestbranding=1&enablejsapi=1&fs=1"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowfullscreen>
+    </iframe>
+  </div>
+</body>
+</html>
+''';
+    controller.loadHtmlString(html, baseUrl: 'https://www.youtube.com');
   }
 
   Future<void> _fetchLiveVideoIds() async {
@@ -192,6 +218,8 @@ class _MeccaMedinaLiveScreenState extends State<MeccaMedinaLiveScreen>
 
   @override
   Widget build(BuildContext context) {
+    final strings = ref.watch(appStringsProvider);
+
     if (_isFullScreen) {
       return Scaffold(
         backgroundColor: Colors.black,
@@ -223,15 +251,15 @@ class _MeccaMedinaLiveScreenState extends State<MeccaMedinaLiveScreen>
     return Scaffold(
       backgroundColor: const Color(0xFF011815),
       appBar: AppBar(
-        title: const Text(
-          'Mekke & Medine Canlı Yayın',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          strings.liveBroadcastTitle,
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh_rounded, color: Color(0xFFFFDF7A)),
-            tooltip: 'Yayını Yenile',
+            tooltip: strings.refreshStream,
             onPressed: _reloadCurrentStream,
           ),
         ],
@@ -241,14 +269,14 @@ class _MeccaMedinaLiveScreenState extends State<MeccaMedinaLiveScreen>
           indicatorWeight: 3,
           labelColor: const Color(0xFFFFDF7A),
           unselectedLabelColor: Colors.white60,
-          tabs: const [
+          tabs: [
             Tab(
-              icon: Icon(Icons.mosque_rounded),
-              text: 'Kâbe-i Muazzama (Mekke)',
+              icon: const Icon(Icons.mosque_rounded),
+              text: strings.makkahLiveTitle,
             ),
             Tab(
-              icon: Icon(Icons.nightlight_round),
-              text: 'Mescid-i Nebevi (Medine)',
+              icon: const Icon(Icons.nightlight_round),
+              text: strings.madinahLiveTitle,
             ),
           ],
         ),
@@ -259,26 +287,26 @@ class _MeccaMedinaLiveScreenState extends State<MeccaMedinaLiveScreen>
           _buildLiveTab(
             controller: _makkahController,
             isLoading: _isMakkahLoading,
-            title: 'Kâbe-i Muazzama Canlı Yayın',
-            subtitle: 'Suudi Arabistan Resmi Kur\'an TV 24/7 Canlı Yayın',
-            badge: 'CANLI • MEKKE',
+            title: strings.makkahLiveTitle,
+            subtitle: strings.makkahLiveSubtitle,
+            badge: strings.liveBadgeMakkah,
             accentColor: const Color(0xFFD4AF37),
-            handle: '@SaudiQuranTv',
-            description:
-                'Beytullah\'ın etrafındaki tavafı ve Mescid-i Haram\'da kılınan vakit namazlarını 24 saat kesintisiz uygulama içinden canlı izleyin.',
-            hadith: '«Yeryüzünde insanlar için kurulan ilk mabet, âlemlere bereket ve hidayet kaynağı olan Mekke\'deki Kâbe\'dir.» (Âl-i İmrân 96)',
+            handle: _makkahHandle,
+            description: strings.makkahLiveDesc,
+            hadith: strings.makkahLiveHadith,
+            strings: strings,
           ),
           _buildLiveTab(
             controller: _madinahController,
             isLoading: _isMadinahLoading,
-            title: 'Mescid-i Nebevi Canlı Yayın',
-            subtitle: 'Suudi Arabistan Resmi Sünnet TV 24/7 Canlı Yayın',
-            badge: 'CANLI • MEDİNE',
+            title: strings.madinahLiveTitle,
+            subtitle: strings.madinahLiveSubtitle,
+            badge: strings.liveBadgeMadinah,
             accentColor: const Color(0xFF2DD4BF),
-            handle: '@SaudiSunnahTv',
-            description:
-                'Peygamber Efendimiz\'in (s.a.v.) kabr-i şerifinin bulunduğu Mescid-i Nebevi Ravza-i Mutahhara atmosferini 24 saat kesintisiz canlı izleyin.',
-            hadith: '«Evimle minberimin arası, cennet bahçelerinden bir bahçedir.» (Buhârî, Mescid-i Mekke 5)',
+            handle: _madinahHandle,
+            description: strings.madinahLiveDesc,
+            hadith: strings.madinahLiveHadith,
+            strings: strings,
           ),
         ],
       ),
@@ -295,6 +323,7 @@ class _MeccaMedinaLiveScreenState extends State<MeccaMedinaLiveScreen>
     required String handle,
     required String description,
     required String hadith,
+    required AppStrings strings,
   }) {
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
@@ -340,7 +369,7 @@ class _MeccaMedinaLiveScreenState extends State<MeccaMedinaLiveScreen>
                               CircularProgressIndicator(color: accentColor),
                               const SizedBox(height: 12),
                               Text(
-                                '$badge Bağlanıyor...',
+                                '$badge ${strings.connectingLive}',
                                 style: TextStyle(
                                   color: accentColor,
                                   fontSize: 12.5,
@@ -362,7 +391,7 @@ class _MeccaMedinaLiveScreenState extends State<MeccaMedinaLiveScreen>
                       style: IconButton.styleFrom(
                         backgroundColor: Colors.black.withValues(alpha: 0.6),
                       ),
-                      tooltip: 'Tam Ekran İzle',
+                      tooltip: strings.fullscreenTooltip,
                       onPressed: () {
                         HapticFeedback.lightImpact();
                         setState(() => _isFullScreen = true);
@@ -424,7 +453,7 @@ class _MeccaMedinaLiveScreenState extends State<MeccaMedinaLiveScreen>
                 child: OutlinedButton.icon(
                   onPressed: _reloadCurrentStream,
                   icon: const Icon(Icons.refresh_rounded, size: 18),
-                  label: const Text('Yenile'),
+                  label: Text(strings.refreshStream),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: const Color(0xFFFFDF7A),
                     side: BorderSide(color: const Color(0xFFFFDF7A).withValues(alpha: 0.5)),
@@ -437,7 +466,7 @@ class _MeccaMedinaLiveScreenState extends State<MeccaMedinaLiveScreen>
               OutlinedButton.icon(
                 onPressed: _loadDirectStream,
                 icon: const Icon(Icons.bolt_rounded, size: 18),
-                label: const Text('Doğrudan'),
+                label: Text(strings.directStream),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: const Color(0xFF2DD4BF),
                   side: BorderSide(color: const Color(0xFF2DD4BF).withValues(alpha: 0.5)),
@@ -450,7 +479,7 @@ class _MeccaMedinaLiveScreenState extends State<MeccaMedinaLiveScreen>
                 child: ElevatedButton.icon(
                   onPressed: () => _openOfficialLiveChannel(handle),
                   icon: const Icon(Icons.open_in_new_rounded, size: 18),
-                  label: const Text('YouTube\'da Aç'),
+                  label: Text(strings.openInYouTube),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: accentColor,
                     foregroundColor: Colors.black,

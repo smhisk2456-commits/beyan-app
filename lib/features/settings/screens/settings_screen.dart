@@ -13,6 +13,7 @@ import '../../notifications/screens/notification_settings_sheet.dart';
 import '../../notifications/screens/adhan_makam_selector_sheet.dart';
 import '../../prayer_times/screens/calculation_method_sheet.dart';
 import '../../prayer_times/screens/city_selector_sheet.dart';
+import '../../notifications/models/short_verse_notification.dart';
 import '../../verse_studio/screens/verse_card_studio_screen.dart';
 import '../../widget_service/screens/widget_settings_dialog.dart';
 import '../../mosque_finder/screens/nearby_mosques_screen.dart';
@@ -54,11 +55,7 @@ class SettingsScreen extends ConsumerWidget {
           const SizedBox(height: 18),
 
           // ── 2. Görünüm & Dil Bölümü ─────────────────────────────
-          _buildSectionHeader(
-            strings.language == AppLanguage.english
-                ? 'Appearance & Language'
-                : (strings.language == AppLanguage.arabic ? 'المظهر واللغة' : 'Görünüm & Dil'),
-          ),
+          _buildSectionHeader(strings.appearanceSection),
           _buildCard(
             context,
             isDark,
@@ -75,7 +72,7 @@ class SettingsScreen extends ConsumerWidget {
                 icon: Icons.palette_outlined,
                 iconColor: const Color(0xFFBA68C8),
                 title: strings.appearanceAndTheme,
-                subtitle: 'Zümrüt Yeşili, Gece Safiri, OLED Siyah...',
+                subtitle: strings.themeSubtitle,
                 onTap: () => ThemeSelectionSheet.show(context),
               ),
             ],
@@ -83,11 +80,7 @@ class SettingsScreen extends ConsumerWidget {
           const SizedBox(height: 18),
 
           // ── 3. Ezan, Makamlar & Bildirimler ─────────────────────
-          _buildSectionHeader(
-            strings.language == AppLanguage.english
-                ? 'Adhan & Notifications'
-                : (strings.language == AppLanguage.arabic ? 'الأذان والإشعارات' : 'Ezan & Bildirimler'),
-          ),
+          _buildSectionHeader(strings.adhanSection),
           _buildCard(
             context,
             isDark,
@@ -96,7 +89,7 @@ class SettingsScreen extends ConsumerWidget {
                 icon: Icons.music_note_rounded,
                 iconColor: const Color(0xFFFFDF7A),
                 title: strings.specialAdhanMakamsPro,
-                subtitle: 'İstanbul, Mekke, Medine ve Tekbir Makamları',
+                subtitle: strings.specialAdhanSubtitle,
                 onTap: () => AdhanMakamSelectorSheet.show(context),
               ),
               _buildDivider(),
@@ -104,7 +97,7 @@ class SettingsScreen extends ConsumerWidget {
                 icon: Icons.notifications_active_outlined,
                 iconColor: const Color(0xFF4DB6AC),
                 title: strings.notificationSettings,
-                subtitle: 'Vakit ezanları, hatırlatıcılar ve günlük âyetler',
+                subtitle: strings.notificationSettingsSubtitle,
                 onTap: () => NotificationSettingsSheet.show(context),
               ),
             ],
@@ -112,11 +105,7 @@ class SettingsScreen extends ConsumerWidget {
           const SizedBox(height: 18),
 
           // ── 4. Namaz Vakti & Konum Hesaplaması ───────────────────
-          _buildSectionHeader(
-            strings.language == AppLanguage.english
-                ? 'Prayer Times & Calculation'
-                : (strings.language == AppLanguage.arabic ? 'المواقيت والحساب' : 'Namaz Vakti & Konum'),
-          ),
+          _buildSectionHeader(strings.prayerCalculationSection),
           _buildCard(
             context,
             isDark,
@@ -124,10 +113,8 @@ class SettingsScreen extends ConsumerWidget {
               _buildTile(
                 icon: Icons.location_city_rounded,
                 iconColor: const Color(0xFFFF8A65),
-                title: strings.language == AppLanguage.turkish
-                    ? 'Şehir Değiştir'
-                    : (strings.language == AppLanguage.english ? 'Change City' : 'تغيير المدينة'),
-                subtitle: 'Türkiye (Diyanet) ve dünya şehirleri',
+                title: strings.changeCity,
+                subtitle: strings.changeCitySubtitle,
                 onTap: () => CitySelectorSheet.show(context, ref),
               ),
               _buildDivider(),
@@ -135,7 +122,7 @@ class SettingsScreen extends ConsumerWidget {
                 icon: Icons.tune_rounded,
                 iconColor: const Color(0xFF81C784),
                 title: strings.calculationMethodTitle,
-                subtitle: 'Diyanet İşleri Başkanlığı takvimi',
+                subtitle: strings.calculationMethodSubtitle,
                 onTap: () => CalculationMethodSheet.show(context, ref),
               ),
             ],
@@ -143,11 +130,7 @@ class SettingsScreen extends ConsumerWidget {
           const SizedBox(height: 18),
 
           // ── 5. Lüks Özellikler & Stüdyo ─────────────────────────
-          _buildSectionHeader(
-            strings.language == AppLanguage.english
-                ? 'Special Features'
-                : (strings.language == AppLanguage.arabic ? 'ميزات خاصة' : 'Lüks Deneyimler'),
-          ),
+          _buildSectionHeader(strings.specialFeaturesSection),
           _buildCard(
             context,
             isDark,
@@ -155,8 +138,8 @@ class SettingsScreen extends ConsumerWidget {
               _buildTile(
                 icon: Icons.mosque_rounded,
                 iconColor: const Color(0xFFD4AF37),
-                title: 'Mekke & Medine 24/7 Canlı Yayın',
-                subtitle: 'Kâbe-i Muazzama ve Mescid-i Nebevi resmi yayını',
+                title: strings.liveBroadcastTitle,
+                subtitle: strings.liveBroadcastSubtitle,
                 onTap: () {
                   Navigator.push(
                     context,
@@ -168,8 +151,8 @@ class SettingsScreen extends ConsumerWidget {
               _buildTile(
                 icon: Icons.bedtime_rounded,
                 iconColor: const Color(0xFFFFD54F),
-                title: 'iOS StandBy (Gece Masası Saati)',
-                subtitle: 'Loş OLED dijital saat ve sahur/imsak sayacı',
+                title: strings.bedsideClockTitle,
+                subtitle: strings.bedsideClockSubtitle,
                 onTap: () {
                   Navigator.push(
                     context,
@@ -181,16 +164,17 @@ class SettingsScreen extends ConsumerWidget {
               _buildTile(
                 icon: Icons.style_rounded,
                 iconColor: const Color(0xFFF48FB1),
-                title: 'Ayet & Hikaye Stüdyosu',
-                subtitle: 'Instagram Hikaye ve estetik duvar kağıdı oluşturucu',
+                title: strings.verseStudioTitle,
+                subtitle: strings.verseStudioSubtitle,
                 onTap: () {
+                  final initial = ShortVerseNotification.pool.first;
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => const VerseCardStudioScreen(
-                        initialReference: 'İnşirâh 94:6',
-                        initialArabic: 'إِنَّ مَعَ الْعُسْرِ يُسْرًا',
-                        initialMeaning: 'Şüphesiz her güçlükle beraber bir kolaylık vardır.',
+                      builder: (_) => VerseCardStudioScreen(
+                        initialReference: initial.localizedReference(strings.language.code),
+                        initialArabic: initial.arabicText,
+                        initialMeaning: initial.localizedText(strings.language.code),
                       ),
                     ),
                   );
@@ -200,8 +184,8 @@ class SettingsScreen extends ConsumerWidget {
               _buildTile(
                 icon: Icons.explore_rounded,
                 iconColor: const Color(0xFF34D399),
-                title: 'Yakındaki Camiler & Harita Navigasyonu',
-                subtitle: 'Yürüme süresi, pusula yönü ve Apple Haritalar rotası',
+                title: strings.nearbyMosquesTitle,
+                subtitle: strings.nearbyMosquesSubtitle,
                 onTap: () {
                   Navigator.push(
                     context,
@@ -213,10 +197,8 @@ class SettingsScreen extends ConsumerWidget {
               _buildTile(
                 icon: Icons.widgets_outlined,
                 iconColor: const Color(0xFF2DD4BF),
-                title: strings.language == AppLanguage.english
-                    ? 'Lock Screen & Widgets'
-                    : (strings.language == AppLanguage.arabic ? 'شاشة القفل والويدجت' : 'Kilit Ekranı & Widget Tercihleri'),
-                subtitle: 'Yenileme sıklığı ve widget görünüm ayarları',
+                title: strings.lockscreenWidgetsTitle,
+                subtitle: strings.lockscreenWidgetsSubtitle,
                 onTap: () => showWidgetSettings(context),
               ),
             ],
@@ -224,11 +206,7 @@ class SettingsScreen extends ConsumerWidget {
           const SizedBox(height: 18),
 
           // ── 6. Paylaş & Hakkında ────────────────────────────────
-          _buildSectionHeader(
-            strings.language == AppLanguage.english
-                ? 'About & Share'
-                : (strings.language == AppLanguage.arabic ? 'حول التطبيق' : 'Hakkında & Paylaş'),
-          ),
+          _buildSectionHeader(strings.aboutAndShareSection),
           _buildCard(
             context,
             isDark,
@@ -236,14 +214,12 @@ class SettingsScreen extends ConsumerWidget {
               _buildTile(
                 icon: Icons.share_rounded,
                 iconColor: const Color(0xFF64B5F6),
-                title: strings.language == AppLanguage.english
-                    ? 'Share Beyân'
-                    : (strings.language == AppLanguage.arabic ? 'شارك بيان' : 'Beyân\'ı Sevdiklerinle Paylaş'),
-                subtitle: 'Sadaka-i cariye niyetiyle hayra vesile ol',
+                title: strings.shareBeyanTitle,
+                subtitle: strings.shareBeyanSubtitle,
                 onTap: () {
                   SharePlus.instance.share(
                     ShareParams(
-                      text: 'Namaz vakitleri, kilit ekranı ayet widget\'ları ve tarihi ezan makamları içeren Beyân uygulamasını keşfedin: https://testflight.apple.com/join/Q3UDfndV',
+                      text: strings.shareAppMessage,
                     ),
                   );
                 },
@@ -327,9 +303,9 @@ class SettingsScreen extends ConsumerWidget {
                           color: const Color(0xFFD4AF37),
                           borderRadius: BorderRadius.circular(6),
                         ),
-                        child: const Text(
-                          'AKTİF',
-                          style: TextStyle(
+                        child: Text(
+                          strings.activeStatus,
+                          style: const TextStyle(
                             color: Colors.black,
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
@@ -341,8 +317,8 @@ class SettingsScreen extends ConsumerWidget {
                 const SizedBox(height: 3),
                 Text(
                   isPremium
-                      ? 'Tüm tarihi ezan makamları ve lüks özellikler açık'
-                      : 'Mekke & Medine makamları, reklamsız huzur ve sınırsız widget',
+                      ? strings.premiumActiveSubtitle
+                      : strings.premiumPromoSubtitle,
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 12,
@@ -362,7 +338,7 @@ class SettingsScreen extends ConsumerWidget {
               elevation: 0,
             ),
             child: Text(
-              isPremium ? 'Yönet' : 'Yükselt',
+              isPremium ? strings.manageAction : strings.upgradeAction,
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5),
             ),
           ),

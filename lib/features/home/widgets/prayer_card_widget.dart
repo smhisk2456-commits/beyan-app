@@ -298,24 +298,43 @@ class _LocationRow extends StatelessWidget {
     final hijri = HijriCalendarService.instance.getHijriDate(now);
     String dateStr;
     try {
-      final localeTag = language == AppLanguage.english
-          ? 'en_US'
-          : (language == AppLanguage.arabic ? 'ar_SA' : 'tr_TR');
+      String localeTag;
+      switch (language) {
+        case AppLanguage.indonesian:
+          localeTag = 'id_ID';
+          break;
+        case AppLanguage.english:
+          localeTag = 'en_US';
+          break;
+        case AppLanguage.arabic:
+          localeTag = 'ar_SA';
+          break;
+        case AppLanguage.french:
+          localeTag = 'fr_FR';
+          break;
+        case AppLanguage.urdu:
+          localeTag = 'ur_PK';
+          break;
+        case AppLanguage.german:
+          localeTag = 'de_DE';
+          break;
+        case AppLanguage.russian:
+          localeTag = 'ru_RU';
+          break;
+        case AppLanguage.turkish:
+          localeTag = 'tr_TR';
+          break;
+      }
       dateStr = DateFormat('d MMM', localeTag).format(now);
     } catch (_) {
       dateStr = '${now.day}.${now.month}';
     }
 
-    final hijriStr = language == AppLanguage.arabic
-        ? hijri.formatAr()
-        : (language == AppLanguage.english
-            ? '${hijri.day} ${hijri.monthNameEn}'
-            : '${hijri.day} ${hijri.monthNameTr}');
+    final hijriStr = '${hijri.day} ${hijri.localizedMonthName(language.code)}';
 
+    final strings = AppStrings(language);
     final locationName = daily.locationName == 'Mevcut Konum'
-        ? (language == AppLanguage.english
-            ? 'Current Location'
-            : (language == AppLanguage.arabic ? 'الموقع الحالي' : 'Mevcut Konum'))
+        ? strings.currentLocation
         : daily.locationName;
 
     return Row(
@@ -345,14 +364,14 @@ class _LocationRow extends StatelessWidget {
                   borderRadius: BorderRadius.circular(6),
                   border: Border.all(color: const Color(0xFFFFDF7A).withValues(alpha: 0.35), width: 0.8),
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.mosque_rounded, size: 10, color: Color(0xFFFFDF7A)),
-                    SizedBox(width: 3),
+                    const Icon(Icons.mosque_rounded, size: 10, color: Color(0xFFFFDF7A)),
+                    const SizedBox(width: 3),
                     Text(
-                      'Camiler',
-                      style: TextStyle(
+                      strings.mosquesPill,
+                      style: const TextStyle(
                         color: Color(0xFFFFDF7A),
                         fontSize: 9.5,
                         fontWeight: FontWeight.bold,

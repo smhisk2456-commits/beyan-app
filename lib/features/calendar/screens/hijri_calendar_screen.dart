@@ -125,9 +125,7 @@ class HijriCalendarScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  strings.language == AppLanguage.arabic
-                      ? hijriDate.formatAr()
-                      : (strings.language == AppLanguage.english ? hijriDate.formatEn() : hijriDate.formatTr()),
+                  hijriDate.localizedFormat(strings.language.code),
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,

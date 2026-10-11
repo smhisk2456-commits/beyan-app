@@ -8,6 +8,8 @@ import '../prayer_times/services/prayer_time_service.dart';
 import '../quran/repositories/quran_repository.dart';
 import '../notifications/models/short_verse_notification.dart';
 
+import '../../core/localization/app_strings.dart';
+
 /// Home Widget ve SharedPreferences köprüsü.
 ///
 /// Sorumlulukları:
@@ -42,29 +44,42 @@ class WidgetService {
   /// Widget verilerini hesaplar ve platforma yazar.
   Future<void> updateAllWidgets() async {
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final langCode = prefs.getString('selected_app_language') ?? 'tr';
+      final lang = AppLanguage.fromCode(langCode);
+
       // 1. Namaz Vakitleri
       final location = await _prayerService.getCurrentLocation();
       final daily = await _prayerService.calculatePrayerTimes(location: location);
       final next = daily.nextPrayerEntry;
-      final countdown = _prayerService.formatCountdown(daily.timeUntilNextPrayer);
+      final countdown = _prayerService.formatCountdown(daily.timeUntilNextPrayer, lang: lang);
+      final nextPrayerName = next?.name.localizedName(langCode) ?? '--';
 
-      // 2. Çoklu Rastgele Ayet Çekimi (Widget döngüsü için 100 adet zengin ayet)
-      var widgetVerses = await _quranRepo.getRandomWidgetVerses(limit: 100);
-      if (widgetVerses.isEmpty) {
+      // 2. Çoklu Rastgele Ayet Çekimi (Seçili dile göre!)
+      List<Map<String, String>> widgetVerses;
+      if (langCode == 'tr') {
+        widgetVerses = await _quranRepo.getRandomWidgetVerses(limit: 100);
+        if (widgetVerses.isEmpty) {
+          widgetVerses = ShortVerseNotification.pool.map((v) => {
+            'ref': v.verseReference,
+            'text': v.textTr,
+          }).toList();
+        }
+      } else {
         widgetVerses = ShortVerseNotification.pool.map((v) => {
-          'ref': v.verseReference,
-          'text': v.textTr,
+          'ref': v.localizedReference(langCode),
+          'text': v.localizedText(langCode),
         }).toList();
       }
       final versesJson = jsonEncode(widgetVerses);
 
       // Kullanıcının seçtiği güncelleme aralığını al (varsayılan 5 dk, 3-15 dk arası güvenli sınır)
-      final prefs = await SharedPreferences.getInstance();
       final interval = (prefs.getInt('widget_update_interval') ?? 5).clamp(3, 15);
 
       // 3. home_widget ortak alanına yaz
       await _writeToHomeWidget(
-        nextPrayerName: next?.name.turkish ?? '--',
+        langCode: langCode,
+        nextPrayerName: nextPrayerName,
         nextPrayerTime: next != null ? _prayerService.formatTime(next.time) : '--:--',
         countdown: countdown,
         allPrayers: daily.prayers,
@@ -81,6 +96,7 @@ class WidgetService {
 
   /// Verileri home_widget ortak deposuna yazar.
   Future<void> _writeToHomeWidget({
+    required String langCode,
     required String nextPrayerName,
     required String nextPrayerTime,
     required String countdown,
@@ -88,6 +104,7 @@ class WidgetService {
     required String versesJson,
     required int interval,
   }) async {
+    await HomeWidget.saveWidgetData<String>('widget_app_language', langCode);
     await HomeWidget.saveWidgetData<String>(AppConstants.widgetNextPrayer, nextPrayerName);
     await HomeWidget.saveWidgetData<String>(AppConstants.widgetNextPrayerTime, nextPrayerTime);
     await HomeWidget.saveWidgetData<String>(AppConstants.widgetCountdown, countdown);
@@ -112,10 +129,21 @@ class WidgetService {
 
     // Kilit ekranına sabitlenen özel ayet durumu
     final isPinned = prefs.getBool('widget_is_pinned') ?? false;
-    final appliedRef = isPinned ? (prefs.getString('widget_applied_verse_ref') ?? '') : '';
-    final appliedText = isPinned ? (prefs.getString('widget_applied_verse_text') ?? '') : '';
+    var appliedRef = isPinned ? (prefs.getString('widget_applied_verse_ref') ?? '') : '';
+    var appliedText = isPinned ? (prefs.getString('widget_applied_verse_text') ?? '') : '';
     final appliedSurah = isPinned ? (prefs.getInt('widget_applied_verse_surah') ?? 0) : 0;
     final appliedVerseNum = isPinned ? (prefs.getInt('widget_applied_verse_number') ?? 0) : 0;
+
+    if (isPinned && langCode != 'tr' && appliedSurah > 0 && appliedVerseNum > 0) {
+      final needle = '$appliedSurah:$appliedVerseNum';
+      for (final v in ShortVerseNotification.pool) {
+        if (v.verseReference.contains(needle)) {
+          appliedRef = v.localizedReference(langCode);
+          appliedText = v.localizedText(langCode);
+          break;
+        }
+      }
+    }
 
     await HomeWidget.saveWidgetData<bool>('widget_is_pinned', isPinned);
     await HomeWidget.saveWidgetData<String>('widget_applied_verse_ref', appliedRef);

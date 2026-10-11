@@ -9,6 +9,7 @@ import '../widget_service.dart';
 import '../../monetization/providers/premium_provider.dart';
 import '../../monetization/screens/onboarding_trial_paywall_screen.dart';
 import '../../monetization/widgets/banner_ad_widget.dart';
+import '../../notifications/models/id_verse_translations.dart';
 import '../../notifications/models/short_verse_notification.dart';
 
 /// Kilit Ekranı Widget Kategorileri
@@ -42,27 +43,33 @@ class WidgetPreviewQuote {
   });
 
   String localizedReference(String langCode) {
-    if (langCode == 'en') return referenceEn;
     if (langCode == 'ar') return referenceAr;
+    if (langCode != 'tr') return referenceEn;
     return referenceTr;
   }
 
   String localizedMeaning(String langCode) {
-    if (langCode == 'en') return meaningEn;
     if (langCode == 'ar') return meaningAr;
+    if (langCode == 'id') {
+      return kIndonesianShortVerses[referenceTr] ?? meaningEn;
+    }
+    if (langCode != 'tr') return meaningEn;
     return meaningTr;
   }
 
   String getReference(AppLanguage lang) {
-    if (lang == AppLanguage.english) return referenceEn;
+    if (lang == AppLanguage.turkish) return referenceTr;
     if (lang == AppLanguage.arabic) return referenceAr;
-    return referenceTr;
+    return referenceEn;
   }
 
   String getMeaning(AppLanguage lang) {
-    if (lang == AppLanguage.english) return meaningEn;
+    if (lang == AppLanguage.turkish) return meaningTr;
     if (lang == AppLanguage.arabic) return meaningAr;
-    return meaningTr;
+    if (lang == AppLanguage.indonesian) {
+      return kIndonesianShortVerses[referenceTr] ?? meaningEn;
+    }
+    return meaningEn;
   }
 }
 
@@ -614,16 +621,14 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
     if (mounted) {
       final strings = ref.read(appStringsProvider);
       final msg = _isPinned
-          ? (strings.language == AppLanguage.english
-              ? 'Settings applied! (Pinned verse: $_appliedVerseRef)'
+          ? (strings.language == AppLanguage.turkish
+              ? 'Ayarlar uygulandı! (Sabit âyet: $_appliedVerseRef)'
               : (strings.language == AppLanguage.arabic
                   ? 'تم تطبيق الإعدادات! (الآية المثبتة: $_appliedVerseRef)'
-                  : 'Ayarlar uygulandı! (Sabit âyet: $_appliedVerseRef)'))
-          : (strings.language == AppLanguage.english
-              ? 'Settings applied! Dynamic verse rotation active.'
-              : (strings.language == AppLanguage.arabic
-                  ? 'تم تطبيق الإعدادات! التدوير التلقائي للآيات نشط.'
-                  : 'Ayarlar uygulandı! Dinamik âyet döngüsü aktif.'));
+                  : (strings.language == AppLanguage.indonesian
+                      ? 'Pengaturan diterapkan! (Ayat disematkan: $_appliedVerseRef)'
+                      : 'Settings applied! (Pinned verse: $_appliedVerseRef)')))
+          : strings.settingsAppliedSnackBar;
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -687,11 +692,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
     }
 
     if (mounted) {
-      final msg = strings.language == AppLanguage.english
-          ? 'Verse "$refText" pinned to lock screen!'
-          : (strings.language == AppLanguage.arabic
-              ? 'تم تثبيت الآية "$refText" على شاشة القفل!'
-              : '"$refText" âyeti kilit ekranına sabitlendi!');
+      final msg = strings.versePinnedSnackBar(refText);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -743,11 +744,13 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
 
     if (mounted) {
       final strings = ref.read(appStringsProvider);
-      final msg = strings.language == AppLanguage.english
-          ? 'Lock screen widget restored to automatic rotation!'
+      final msg = strings.language == AppLanguage.turkish
+          ? 'Kilit ekranı widget\'ı otomatik âyet döngüsüne geri döndü!'
           : (strings.language == AppLanguage.arabic
               ? 'تمت استعادة التدوير التلقائي للآيات على ويدجت شاشة القفل!'
-              : 'Kilit ekranı widget\'ı otomatik âyet döngüsüne geri döndü!');
+              : (strings.language == AppLanguage.indonesian
+                  ? 'Widget layar kunci dikembalikan ke siklus otomatis ayat!'
+                  : 'Lock screen widget restored to automatic rotation!'));
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -768,78 +771,83 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
   }
 
   String _getLocalizedVerseView(String mode, AppLanguage lang) {
+    final strings = ref.read(appStringsProvider);
     if (mode == 'meal_only' || mode == 'Yalnızca Meal') {
-      return lang == AppLanguage.english ? 'Translation Only' : (lang == AppLanguage.arabic ? 'الترجمة فقط' : 'Yalnızca Meal');
+      return strings.translationOnly;
     }
     if (mode == 'arabic_meal' || mode == 'Arapça + Meal') {
-      return lang == AppLanguage.english ? 'Arabic + Translation' : (lang == AppLanguage.arabic ? 'العربية + الترجمة' : 'Arapça + Meal');
+      return strings.arabicPlusTranslation;
     }
     if (mode == 'arabic_only' || mode == 'Yalnızca Arapça') {
-      return lang == AppLanguage.english ? 'Arabic Only' : (lang == AppLanguage.arabic ? 'العربية فقط' : 'Yalnızca Arapça');
+      return strings.arabicOnly;
     }
     return mode;
   }
 
   String _getLocalizedRefreshInterval(String interval, AppLanguage lang) {
+    final strings = ref.read(appStringsProvider);
     if (interval == '15m' || interval == '15 Dakika') {
-      return lang == AppLanguage.english ? '15 Minutes' : (lang == AppLanguage.arabic ? '١٥ دقيقة' : '15 Dakika');
+      return strings.interval15m;
     }
     if (interval == '30m' || interval == '30 Dakika') {
-      return lang == AppLanguage.english ? '30 Minutes' : (lang == AppLanguage.arabic ? '٣٠ دقيقة' : '30 Dakika');
+      return strings.interval30m;
     }
     if (interval == '1h' || interval == 'Her saat') {
-      return lang == AppLanguage.english ? 'Every Hour' : (lang == AppLanguage.arabic ? 'كل ساعة' : 'Her saat');
+      return strings.interval1h;
     }
     if (interval == '1d' || interval == 'Her gün') {
-      return lang == AppLanguage.english ? 'Daily' : (lang == AppLanguage.arabic ? 'يومياً' : 'Her gün');
+      return strings.interval1d;
     }
     return interval;
   }
 
   String _getLocalizedCategory(String cat, AppLanguage lang) {
+    final strings = ref.read(appStringsProvider);
     if (cat == 'all' || cat == 'Tümü') {
-      return lang == AppLanguage.english ? 'All' : (lang == AppLanguage.arabic ? 'الكل' : 'Tümü');
+      return strings.allCategories;
     }
     if (cat == 'comfort' || cat == 'Kalbe Huzur & Teselli') {
-      return lang == AppLanguage.english ? 'Peace & Solace' : (lang == AppLanguage.arabic ? 'سكينة وطمأنينة' : 'Kalbe Huzur & Teselli');
+      return strings.comfortAndSolace;
     }
     if (cat == 'sabr' || cat == 'Sabır ve Şükür') {
-      return lang == AppLanguage.english ? 'Patience & Gratitude' : (lang == AppLanguage.arabic ? 'الصبر والشكر' : 'Sabır ve Şükür');
+      return strings.patienceAndGratitude;
     }
     if (cat == 'dua' || cat == 'Dualar') {
-      return lang == AppLanguage.english ? 'Supplications' : (lang == AppLanguage.arabic ? 'الأدعية' : 'Dualar');
+      return strings.supplications;
     }
     if (cat == 'tawakkul' || cat == 'İman ve Tevekkül') {
-      return lang == AppLanguage.english ? 'Faith & Trust' : (lang == AppLanguage.arabic ? 'الإيمان والتوكل' : 'İman ve Tevekkül');
+      return strings.faithAndTrust;
     }
     if (cat == 'akhlaq' || cat == 'Ahlak') {
-      return lang == AppLanguage.english ? 'Morals & Ethics' : (lang == AppLanguage.arabic ? 'الأخلاق' : 'Ahlak');
+      return strings.moralsAndEthics;
     }
     return cat;
   }
 
   String _getLocalizedTextSize(String size, AppLanguage lang) {
+    final strings = ref.read(appStringsProvider);
     if (size == 'small' || size == 'Küçük') {
-      return lang == AppLanguage.english ? 'Small' : (lang == AppLanguage.arabic ? 'صغير' : 'Küçük');
+      return strings.textSizeSmall;
     }
     if (size == 'standard' || size == 'Standart') {
-      return lang == AppLanguage.english ? 'Standard' : (lang == AppLanguage.arabic ? 'قياسي' : 'Standart');
+      return strings.textSizeStandard;
     }
     if (size == 'large' || size == 'Büyük') {
-      return lang == AppLanguage.english ? 'Large' : (lang == AppLanguage.arabic ? 'كبير' : 'Büyük');
+      return strings.textSizeLarge;
     }
     return size;
   }
 
   String _getLocalizedFontFamily(String font, AppLanguage lang) {
+    final strings = ref.read(appStringsProvider);
     if (font == 'standard' || font == 'Standart') {
-      return lang == AppLanguage.english ? 'Standard' : (lang == AppLanguage.arabic ? 'قياسي' : 'Standart');
+      return strings.fontStandard;
     }
     if (font == 'lato' || font == 'Zarif (Lato)') {
-      return lang == AppLanguage.english ? 'Elegant (Lato)' : (lang == AppLanguage.arabic ? 'أنيق (لاتو)' : 'Zarif (Lato)');
+      return strings.fontLato;
     }
     if (font == 'amiri' || font == 'Klasik (Amiri)') {
-      return lang == AppLanguage.english ? 'Classical (Amiri)' : (lang == AppLanguage.arabic ? 'كلاسيكي (أميري)' : 'Klasik (Amiri)');
+      return strings.fontAmiri;
     }
     return font;
   }
@@ -1086,21 +1094,21 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
             color: Colors.amber.shade600,
           ),
         ),
-        child: const Row(
+        child: Row(
           children: [
-            Icon(Icons.lock_clock_rounded, color: Colors.amber, size: 18),
-            SizedBox(width: 8),
+            const Icon(Icons.lock_clock_rounded, color: Colors.amber, size: 18),
+            const SizedBox(width: 8),
             Expanded(
               child: Text(
-                '3 Günlük Deneme Süresi Doldu • Widget için Premium\'a Geçin',
-                style: TextStyle(
+                strings.trialEndedWidgetNotice,
+                style: const TextStyle(
                   color: Colors.amber,
                   fontWeight: FontWeight.bold,
                   fontSize: 11.5,
                 ),
               ),
             ),
-            Icon(Icons.arrow_forward_ios_rounded, color: Colors.amber, size: 12),
+            const Icon(Icons.arrow_forward_ios_rounded, color: Colors.amber, size: 12),
           ],
         ),
       ),
@@ -1109,11 +1117,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
 
   // ── iOS Kilit Ekranı Ekleme Bilgilendirme Kartı ───────────────────────────
   Widget _buildLockScreenGuideBanner(AppStrings strings) {
-    final tipText = strings.language == AppLanguage.english
-        ? 'Tip: To add widgets to your iPhone Lock Screen, press and hold the lock screen, tap Customize, select the area below the time, and choose Beyân.'
-        : (strings.language == AppLanguage.arabic
-            ? 'تلميح: لإضافة الويدجت، اضغط مطولاً على شاشة القفل، المس تخصيص، ثم اختر بيان.'
-            : '💡 İpucu: Widget\'ı telefonunuza eklemek için iPhone kilit ekranınıza basılı tutup "Özelleştir"e dokunun ve Beyân\'ı seçin.');
+    final tipText = strings.widgetTip;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
@@ -1203,9 +1207,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
 
   // ── Gerçekçi iPhone Kilit Ekranı Önizlemesi ────────────────────────────────
   Widget _buildLockScreenPhoneMockup(AppStrings strings) {
-    final asrLabel = strings.language == AppLanguage.english
-        ? 'Asr: 2:15:30'
-        : (strings.language == AppLanguage.arabic ? 'العصر: 2:15:30' : 'İkindi: 2:15:30');
+    final asrLabel = '${strings.asr}: 2:15:30';
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 36),
@@ -1521,11 +1523,13 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
           child: Text(
-            strings.language == AppLanguage.english
-                ? '2 hrs 15 mins until Asr prayer'
+            strings.language == AppLanguage.turkish
+                ? 'İkindi vaktine 2 saat 15 dk kaldı'
                 : (strings.language == AppLanguage.arabic
                     ? 'ساعتان و١٥ دقيقة حتى صلاة العصر'
-                    : 'İkindi vaktine 2 saat 15 dk kaldı'),
+                    : (strings.language == AppLanguage.indonesian
+                        ? '2 jam 15 mnt menuju waktu Ashar'
+                        : '2 hrs 15 mins until Asr prayer')),
             style: TextStyle(color: Colors.white70, fontSize: 12 * timeScale, fontFamily: _previewFontFamily),
           ),
         );
@@ -1537,20 +1541,22 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
           child: Column(
             children: [
               Text(
-                strings.language == AppLanguage.english
-                    ? '🌙 18 Ramadan 1447'
+                strings.language == AppLanguage.turkish
+                    ? '🌙 18 Ramazan 1447'
                     : (strings.language == AppLanguage.arabic
                         ? '🌙 ١٨ رمضان ١٤٤٧'
-                        : '🌙 18 Ramazan 1447'),
+                        : '🌙 18 Ramadan 1447'),
                 style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13 * timeScale, fontFamily: _previewFontFamily),
               ),
               const SizedBox(height: 2),
               Text(
-                strings.language == AppLanguage.english
-                    ? '9 Days to Laylat al-Qadr'
+                strings.language == AppLanguage.turkish
+                    ? 'Kadir Gecesine 9 Gün Kaldı'
                     : (strings.language == AppLanguage.arabic
                         ? '٩ أيام حتى ليلة القدر'
-                        : 'Kadir Gecesine 9 Gün Kaldı'),
+                        : (strings.language == AppLanguage.indonesian
+                            ? '9 Hari menuju Malam Lailatul Qadr'
+                            : '9 Days to Laylat al-Qadr')),
                 style: TextStyle(color: Colors.white70, fontSize: 11.5 * timeScale, fontFamily: _previewFontFamily),
               ),
             ],
@@ -1567,11 +1573,13 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
               Icon(Icons.wb_sunny_outlined, color: Colors.amber, size: 16 * timeScale),
               const SizedBox(width: 6),
               Text(
-                strings.language == AppLanguage.english
-                    ? 'Sunrise: 05:42 • Ishraq: 06:27'
+                strings.language == AppLanguage.turkish
+                    ? 'Güneş: 05:42 • İşrak: 06:27'
                     : (strings.language == AppLanguage.arabic
                         ? 'الشروق: ٠٥:٤٢ • الإشراق: ٠٦:٢٧'
-                        : 'Güneş: 05:42 • İşrak: 06:27'),
+                        : (strings.language == AppLanguage.indonesian
+                            ? 'Terbit: 05:42 • Isyraq: 06:27'
+                            : 'Sunrise: 05:42 • Ishraq: 06:27')),
                 style: TextStyle(color: Colors.white, fontSize: 12 * timeScale, fontWeight: FontWeight.w600, fontFamily: _previewFontFamily),
               ),
             ],
@@ -1592,54 +1600,24 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
         desc = strings.widgetFeatureDesc;
         break;
       case WidgetCategoryType.dailyVerse:
-        title = strings.language == AppLanguage.english
-            ? 'Daily Verse'
-            : (strings.language == AppLanguage.arabic ? 'آية اليوم' : 'Günün Ayeti');
-        desc = strings.language == AppLanguage.english
-            ? 'Receive a new inspiring Quran verse automatically every day.'
-            : (strings.language == AppLanguage.arabic
-                ? 'احصل على آية قرآنية ملهمة جديدة تلقائياً كل يوم.'
-                : 'Her gün otomatik olarak yeni bir ilham verici Kur\'an ayeti alın.');
+        title = strings.dailyVerseWidgetTitle;
+        desc = strings.dailyVerseDesc;
         break;
       case WidgetCategoryType.prayerTimes:
-        title = strings.language == AppLanguage.english
-            ? 'Prayer Times'
-            : (strings.language == AppLanguage.arabic ? 'مواقيت الصلاة' : 'Namaz Vakitleri');
-        desc = strings.language == AppLanguage.english
-            ? 'View current and upcoming prayer times with a live countdown timer.'
-            : (strings.language == AppLanguage.arabic
-                ? 'عرض مواقيت الصلاة الحالية والقادمة مع عداد تنازلي مباشر.'
-                : 'Canlı geri sayım sayacıyla mevcut ve yaklaşan namaz vakitlerini görün.');
+        title = strings.prayerTimesWidgetTitle;
+        desc = strings.prayerTimesWidgetDesc;
         break;
       case WidgetCategoryType.countdown:
-        title = strings.language == AppLanguage.english
-            ? 'Prayer Countdown'
-            : (strings.language == AppLanguage.arabic ? 'العد التنازلي للصلاة' : 'Namaz Geri Sayımı');
-        desc = strings.language == AppLanguage.english
-            ? 'Compact inline widget showing live countdown to the next prayer. Appears right on your lock screen.'
-            : (strings.language == AppLanguage.arabic
-                ? 'مصغر مضمن يعرض العد التنازلي للصلاة القادمة على شاشة القفل.'
-                : 'Bir sonraki namazı canlı geri sayımla gösteren kompakt satır içi widget. Kilit Ekranınızda tarihin üzerinde görünür.');
+        title = strings.countdownWidgetTitle;
+        desc = strings.prayerCountdownDesc;
         break;
       case WidgetCategoryType.hijri:
-        title = strings.language == AppLanguage.english
-            ? 'Hijri Calendar & Holy Days'
-            : (strings.language == AppLanguage.arabic ? 'التقويم الهجري والمناسبات' : 'Hicri Takvim & Kandiller');
-        desc = strings.language == AppLanguage.english
-            ? 'Track Hijri date, blessed nights, and Islamic holidays instantly on your lock screen.'
-            : (strings.language == AppLanguage.arabic
-                ? 'تابع التاريخ الهجري والمناسبات الإسلامية فوراً من شاشة القفل.'
-                : 'Hicri tarih, mübarek kandiller ve dini bayramları kilit ekranınızdan anlık takip edin.');
+        title = strings.hijriCalendarWidgetTitle;
+        desc = strings.hijriCalendarDesc;
         break;
       case WidgetCategoryType.sunTimes:
-        title = strings.language == AppLanguage.english
-            ? 'Sunrise & Ishraq'
-            : (strings.language == AppLanguage.arabic ? 'الشروق والإشراق' : 'Güneş & Kerahat Vakti');
-        desc = strings.language == AppLanguage.english
-            ? 'Monitor sunrise and Ishraq prayer times directly on your lock screen.'
-            : (strings.language == AppLanguage.arabic
-                ? 'راقب وقت شروق الشمس والإشراق مباشرة على شاشة قفلك.'
-                : 'Güneş doğuşunu, kerahat çıkışını ve işrak vaktini kilit ekranınızda izleyin.');
+        title = strings.sunIshraqWidgetTitle;
+        desc = strings.sunTimesWidgetDesc;
         break;
     }
 
@@ -1704,10 +1682,10 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
           if (_selectedCategory == WidgetCategoryType.quotes ||
               _selectedCategory == WidgetCategoryType.dailyVerse) ...[
             _buildOptionTile(
-              title: strings.language == AppLanguage.english ? 'Verse View' : (strings.language == AppLanguage.arabic ? 'عرض الآية' : 'Ayet Görünümü'),
+              title: strings.verseView,
               value: _getLocalizedVerseView(_verseViewMode, strings.language),
               onTap: () => _showOptionSheet(
-                title: strings.language == AppLanguage.english ? 'Verse View' : (strings.language == AppLanguage.arabic ? 'عرض الآية' : 'Ayet Görünümü'),
+                title: strings.verseView,
                 options: const ['meal_only', 'arabic_meal', 'arabic_only'],
                 currentValue: _verseViewMode,
                 labelBuilder: (v) => _getLocalizedVerseView(v, strings.language),
@@ -1764,29 +1742,10 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
 
   // ── Kilit Ekranı Widget'ına Uygula Butonu ─────────────────────────────────
   Widget _buildApplyWidgetButton(AppStrings strings) {
-    final btnText = strings.language == AppLanguage.english
-        ? 'Apply Settings to Widget'
-        : (strings.language == AppLanguage.arabic
-            ? 'تطبيق الإعدادات على الويدجت'
-            : 'Ayarları Widget\'a Uygula');
-
-    final pinBtnText = strings.language == AppLanguage.english
-        ? 'Pin This Verse to Lock Screen'
-        : (strings.language == AppLanguage.arabic
-            ? 'تثبيت هذه الآية على شاشة القفل'
-            : 'Bu Âyeti Kilit Ekranına Sabitle');
-
-    final pinnedNotice = strings.language == AppLanguage.english
-        ? 'Currently Pinned:'
-        : (strings.language == AppLanguage.arabic
-            ? 'الآية المثبتة حالياً:'
-            : 'Kilit Ekranında Sabit:');
-
-    final rotatingNotice = strings.language == AppLanguage.english
-        ? 'Dynamic Verse Rotation Active • Automatically refreshes lock screen verses.'
-        : (strings.language == AppLanguage.arabic
-            ? 'التدوير التلقائي للآيات نشط • يتم تحديث الآيات بانتظام على شاشة القفل.'
-            : 'Dinamik Âyet Döngüsü Aktif • Kilit ekranında âyetler periyodik olarak değişir.');
+    final btnText = strings.applySettingsToWidget;
+    final pinBtnText = strings.pinVerseToLockscreen;
+    final pinnedNotice = strings.currentlyPinnedLabel;
+    final rotatingNotice = strings.dynamicVerseCycleActive;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1832,9 +1791,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
                   child: Text(
-                    strings.language == AppLanguage.english
-                        ? 'Rotate'
-                        : (strings.language == AppLanguage.arabic ? 'تدوير' : 'Döngüye Al'),
+                    strings.rotateAction,
                     style: const TextStyle(
                       color: Color(0xFFFFDF7A),
                       fontSize: 12,

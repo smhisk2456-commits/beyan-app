@@ -52,21 +52,137 @@ class MoodVerseData {
   });
 
   String localizedTitle(String langCode) {
-    if (langCode == 'en') return titleEn;
+    if (langCode == 'id') {
+      switch (mood) {
+        case SpiritualMood.huzunlu: return 'Sedih';
+        case SpiritualMood.yalniz: return 'Kesepian';
+        case SpiritualMood.endiseli: return 'Cemas';
+        case SpiritualMood.sukurlu: return 'Bersyukur';
+        case SpiritualMood.ofkeli: return 'Marah';
+        case SpiritualMood.kararsiz: return 'Bingung';
+        case SpiritualMood.umutsuz: return 'Putus Asa';
+        case SpiritualMood.huzur: return 'Mencari Ketenangan';
+      }
+    }
     if (langCode == 'ar') return titleAr;
+    if (langCode != 'tr') return titleEn;
     return titleTr;
   }
 
   String localizedTranslation(String langCode) {
-    if (langCode == 'en') return translationEn;
+    if (langCode == 'id') {
+      switch (mood) {
+        case SpiritualMood.huzunlu:
+          return 'Maka sesungguhnya bersama kesulitan ada kemudahan, sesungguhnya bersama kesulitan ada kemudahan.';
+        case SpiritualMood.yalniz:
+          return 'Dan Kami lebih dekat kepadanya daripada urat lehernya.';
+        case SpiritualMood.endiseli:
+          return 'Ingatlah, hanya dengan mengingat Allah hati menjadi tenteram.';
+        case SpiritualMood.sukurlu:
+          return 'Sesungguhnya jika kamu bersyukur, niscaya Aku akan menambah (nikmat) kepadamu.';
+        case SpiritualMood.ofkeli:
+          return 'Dan orang-orang yang menahan amarahnya dan memaafkan (kesalahan) orang lain. Dan Allah mencintai orang yang berbuat kebaikan.';
+        case SpiritualMood.kararsiz:
+          return 'Dan barangsiapa bertawakal kepada Allah, niscaya Allah akan mencukupkannya. Sesungguhnya Allah melaksanakan urusan-Nya.';
+        case SpiritualMood.umutsuz:
+          return 'Janganlah kamu berputus asa dari rahmat Allah. Sesungguhnya Allah mengampuni dosa-dosa semuanya.';
+        case SpiritualMood.huzur:
+          return 'Wahai jiwa yang tenang! Kembalilah kepada Tuhanmu dengan hati yang ridha lagi diridhai-Nya.';
+      }
+    }
     if (langCode == 'ar') return translationAr;
+    if (langCode != 'tr') return translationEn;
     return translationTr;
   }
 
   String localizedReflection(String langCode) {
-    if (langCode == 'en') return reflectionEn;
+    if (langCode == 'id') {
+      switch (mood) {
+        case SpiritualMood.huzunlu:
+          return 'Malam yang paling gelap adalah saat menjelang fajar. Allah berjanji kemudahan menyertai setiap kesulitan. Kesedihan ini sementara, rahmat-Nya abadi.';
+        case SpiritualMood.yalniz:
+          return 'Bahkan jika seluruh dunia menjauh, Tuhan yang menciptakanmu tidak pernah meninggalkanmu. Bisikkan doamu kepada-Nya, karena Dia sangat dekat.';
+        case SpiritualMood.endiseli:
+          return 'Masa depan belum tiba, dan masa lalu telah berlalu. Serahkan beban hatimu kepada kasih sayang dan penjagaan Allah Yang Maha Kuasa.';
+        case SpiritualMood.sukurlu:
+          return 'Rasa syukur melipatgandakan setiap nikmat. Saat lisanmu mengucap Alhamdulillah, biarkan jiwamu meresapi keindahan anugerah-Nya.';
+        case SpiritualMood.ofkeli:
+          return 'Amarah adalah api yang dipadamkan dengan wudhu, diam, dan sabar. Memaafkan orang lain membebaskan hatimu sendiri dari beban batin.';
+        case SpiritualMood.kararsiz:
+          return 'Saat jalan terasa buntu, berserahlah dengan Istikharah dan Doa. Allah mampu membukakan pintu kebaikan dari arah yang tak terduga.';
+        case SpiritualMood.umutsuz:
+          return 'Meski semua pintu dunia tertutup, pintu Rahmat Ilahi tidak pernah terkunci. Bertaubatlah dan mulailah kembali dengan penuh harapan.';
+        case SpiritualMood.huzur:
+          return 'Ketenangan sejati bukan ditemukan di dunia luar, melainkan dalam sujud. Jadikan Al-Qur\'an tempat perlindungan terindah jiwamu.';
+      }
+    }
     if (langCode == 'ar') return reflectionAr;
+    if (langCode != 'tr') return reflectionEn;
     return reflectionTr;
+  }
+
+  String localizedPropheticDua(String langCode) {
+    if (langCode == 'id') {
+      switch (mood) {
+        case SpiritualMood.huzunlu:
+          return 'اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْهَمِّ وَالْحَزَنِ\n(Ya Allah, aku berlindung kepada-Mu dari rasa gundah dan sedih.)';
+        case SpiritualMood.yalniz:
+          return 'حَسْبُنَا اللَّهُ وَنِعْمَ الْوَكِيلُ\n(Cukuplah Allah menjadi Penolong kami dan sebaik-baik Pelindung.)';
+        case SpiritualMood.endiseli:
+          return 'يَا حَيُّ يَا قَيُّومُ بِرَحْمَتِكَ أَسْتَغِيثُ\n(Wahai Yang Maha Hidup, wahai Yang Berdiri Sendiri, dengan rahmat-Mu aku memohon pertolongan.)';
+        case SpiritualMood.sukurlu:
+          return 'الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ عَلَى كُلِّ حَالٍ\n(Segala puji bagi Allah, Tuhan semesta alam, dalam setiap keadaan.)';
+        case SpiritualMood.ofkeli:
+          return 'أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ\n(Aku berlindung kepada Allah dari godaan setan yang terkutuk.)';
+        case SpiritualMood.kararsiz:
+          return 'اللَّهُمَّ خِرْ لِي وَاخْتَرْ لِي\n(Ya Allah, pilihlah untukku dan tentukan yang terbaik bagiku.)';
+        case SpiritualMood.umutsuz:
+          return 'لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ الْعَلِيِّ الْعَظِيمِ\n(Tiada daya dan kekuatan melainkan dengan pertolongan Allah Yang Maha Tinggi lagi Maha Agung.)';
+        case SpiritualMood.huzur:
+          return 'اللَّهُمَّ أَنْتَ السَّلَامُ وَمِنْكَ السَّلَامُ تَبَارَكْتَ يَا ذَا الْجَلَالِ وَالْإِكْرَامِ\n(Ya Allah, Engkaulah Kedamaian dan dari-Mu datangnya keselamatan.)';
+      }
+    }
+    if (langCode == 'ar') {
+      switch (mood) {
+        case SpiritualMood.huzunlu:
+          return 'اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْهَمِّ وَالْحَزَنِ';
+        case SpiritualMood.yalniz:
+          return 'حَسْبُنَا اللَّهُ وَنِعْمَ الْوَكِيلُ';
+        case SpiritualMood.endiseli:
+          return 'يَا حَيُّ يَا قَيُّومُ بِرَحْمَتِكَ أَسْتَغِيثُ';
+        case SpiritualMood.sukurlu:
+          return 'الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ عَلَى كُلِّ حَالٍ';
+        case SpiritualMood.ofkeli:
+          return 'أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ';
+        case SpiritualMood.kararsiz:
+          return 'اللَّهُمَّ خِرْ لِي وَاخْتَرْ لِي';
+        case SpiritualMood.umutsuz:
+          return 'لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ الْعَلِيِّ الْعَظِيمِ';
+        case SpiritualMood.huzur:
+          return 'اللَّهُمَّ أَنْتَ السَّلَامُ وَمِنْكَ السَّلَامُ تَبَارَكْتَ يَا ذَا الْجَلَالِ وَالْإِكْرَامِ';
+      }
+    }
+    if (langCode != 'tr') {
+      switch (mood) {
+        case SpiritualMood.huzunlu:
+          return 'اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْهَمِّ وَالْحَزَنِ\n(O Allah, I seek refuge in You from grief and sadness.)';
+        case SpiritualMood.yalniz:
+          return 'حَسْبُنَا اللَّهُ وَنِعْمَ الْوَكِيلُ\n(Sufficient for us is Allah, and He is the best Disposer of affairs.)';
+        case SpiritualMood.endiseli:
+          return 'يَا حَيُّ يَا قَيُّومُ بِرَحْمَتِكَ أَسْتَغِيثُ\n(O Ever-Living, O Sustainer, by Your mercy I seek assistance.)';
+        case SpiritualMood.sukurlu:
+          return 'الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ عَلَى كُلِّ حَالٍ\n(All praise is due to Allah, Lord of the worlds, in all circumstances.)';
+        case SpiritualMood.ofkeli:
+          return 'أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ\n(I seek refuge in Allah from Satan the outcast.)';
+        case SpiritualMood.kararsiz:
+          return 'اللَّهُمَّ خِرْ لِي وَاخْتَرْ لِي\n(O Allah, make a good choice for me and choose what is best for me.)';
+        case SpiritualMood.umutsuz:
+          return 'لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ الْعَلِيِّ الْعَظِيمِ\n(There is no might nor power except with Allah, the Most High, the Almighty.)';
+        case SpiritualMood.huzur:
+          return 'اللَّهُمَّ أَنْتَ السَّلَامُ وَمِنْكَ السَّلَامُ تَبَارَكْتَ يَا ذَا الْجَلَالِ وَالْإِكْرَامِ\n(O Allah, You are Peace and from You comes peace.)';
+      }
+    }
+    return propheticDua;
   }
 
   static const List<MoodVerseData> list = [

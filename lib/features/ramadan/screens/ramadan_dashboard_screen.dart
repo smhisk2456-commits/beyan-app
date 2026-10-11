@@ -362,17 +362,25 @@ class RamadanDashboardScreen extends ConsumerWidget {
           _buildDuaTile(
             title: strings.language == AppLanguage.turkish
                 ? 'Susuzluk Gidip Damarlar Islandığında'
-                : (strings.language == AppLanguage.english
-                    ? 'Dua for Breaking the Fast'
-                    : 'دعاء الإفطار'),
+                : (strings.language == AppLanguage.indonesian
+                    ? 'Doa Berbuka Puasa'
+                    : (strings.language == AppLanguage.arabic
+                        ? 'دعاء الإفطار'
+                        : 'Dua for Breaking the Fast')),
             arabic: 'ذَهَبَ الظَّمَأُ وَابْتَلَّتِ الْعُرُوقُ، وَثَبَتَ الْأَجْرُ إِنْ شَاءَ اللَّهُ',
             transliteration: 'Zehebe\'z-zama\' vebtelleti\'l-urûk, ve sebete\'l-ecru inşâallâh.',
             meaning: strings.language == AppLanguage.turkish
                 ? 'Susuzluk gitti, damarlar ıslandı ve inşallah mükâfat kesinleşti.'
-                : (strings.language == AppLanguage.english
-                    ? 'The thirst has gone, the veins are moist, and the reward is confirmed, if Allah wills.'
-                    : 'ذهب الظمأ وابتلت العروق وثبت الأجر إن شاء الله.'),
-            reference: 'Sünen-i Ebu Davud (2357)',
+                : (strings.language == AppLanguage.indonesian
+                    ? 'Telah hilang dahaga, telah basah urat-urat, dan telah pasti pahala jika Allah menghendaki.'
+                    : (strings.language == AppLanguage.arabic
+                        ? 'ذهب الظمأ وابتلت العروق وثبت الأجر إن شاء الله.'
+                        : 'The thirst has gone, the veins are moist, and the reward is confirmed, if Allah wills.')),
+            reference: strings.language == AppLanguage.turkish
+                ? 'Sünen-i Ebu Davud (2357)'
+                : (strings.language == AppLanguage.arabic
+                    ? 'سنن أبي داود (٢٣٥٧)'
+                    : 'Sunan Abi Dawud (2357)'),
             isDark: isDark,
           ),
           const SizedBox(height: 12),
@@ -380,17 +388,25 @@ class RamadanDashboardScreen extends ConsumerWidget {
           _buildDuaTile(
             title: strings.language == AppLanguage.turkish
                 ? 'Sahurda Bereket ve Teheccüd Niyazı'
-                : (strings.language == AppLanguage.english
-                    ? 'Blessing of Suhur'
-                    : 'بركة السحور'),
+                : (strings.language == AppLanguage.indonesian
+                    ? 'Berkah Sahur'
+                    : (strings.language == AppLanguage.arabic
+                        ? 'بركة السحور'
+                        : 'Blessing of Suhur')),
             arabic: 'يَرْحَمُ اللَّهُ الْمُتَسَحِّرِينَ',
             transliteration: 'Yerhamullâhu\'l-mütesahhirîn.',
             meaning: strings.language == AppLanguage.turkish
                 ? 'Allah sahur yapanlara merhamet eylesin.'
-                : (strings.language == AppLanguage.english
-                    ? 'May Allah have mercy on those who eat suhur.'
-                    : 'يرحم الله المتسحرين.'),
-            reference: 'Müsned-i Ahmed (3/12)',
+                : (strings.language == AppLanguage.indonesian
+                    ? 'Semoga Allah merahmati orang-orang yang bersahur.'
+                    : (strings.language == AppLanguage.arabic
+                        ? 'يرحم الله المتسحرين.'
+                        : 'May Allah have mercy on those who eat suhur.')),
+            reference: strings.language == AppLanguage.turkish
+                ? 'Müsned-i Ahmed (3/12)'
+                : (strings.language == AppLanguage.arabic
+                    ? 'مسند أحمد (٣/١٢)'
+                    : 'Musnad Ahmad (3/12)'),
             isDark: isDark,
           ),
           const SizedBox(height: 20),

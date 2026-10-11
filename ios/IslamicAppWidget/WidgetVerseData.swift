@@ -208,4 +208,92 @@ struct WidgetVerseData {
         ("Kevser 108:1", "Doğrusu sana pek çok nimet vermişizdir."),
         ("Kevser 108:2", "Öyleyse Rabbin için namaz kıl, kurban kes."),
     ]
+
+    static let englishFallbacks: [(ref: String, text: String)] = [
+        ("Ash-Sharh 94:6", "Indeed, with hardship comes ease."),
+        ("Ad-Duha 93:3", "Your Lord has not taken leave of you, nor has He detested."),
+        ("Ad-Duha 93:5", "And your Lord is going to give you, and you will be satisfied."),
+        ("Ar-Ra'd 13:28", "Unquestionably, by the remembrance of Allah hearts are assured."),
+        ("Yusuf 12:86", "I only complain of my suffering and my grief to Allah."),
+        ("Al-Baqarah 2:186", "When My servants ask about Me, indeed I am near."),
+        ("Al-Baqarah 2:152", "So remember Me; I will remember you. And be grateful to Me."),
+        ("Al-Baqarah 2:153", "Seek help through patience and prayer. Indeed, Allah is with the patient."),
+        ("Az-Zumar 39:36", "Is not Allah sufficient for His servant?"),
+        ("Az-Zumar 39:53", "Do not despair of the mercy of Allah. Indeed, Allah forgives all sins."),
+        ("At-Tawbah 9:40", "Do not grieve; indeed Allah is with us."),
+        ("Ta-Ha 20:46", "Fear not. Indeed, I am with you both; I hear and I see."),
+        ("Ta-Ha 20:25-26", "My Lord, expand for me my breast and ease for me my task."),
+        ("At-Talaq 65:3", "And whoever relies upon Allah - then He is sufficient for him."),
+        ("Ghafir 40:60", "Call upon Me; I will respond to you."),
+        ("Hud 11:90", "Indeed, my Lord is Merciful and Loving."),
+        ("Ali 'Imran 3:139", "Do not weaken and do not grieve, and you will be superior if you are believers."),
+        ("Yunus 10:62", "Unquestionably, for the allies of Allah there will be no fear nor will they grieve."),
+        ("Qaf 50:16", "We are closer to him than his jugular vein."),
+        ("Ali 'Imran 3:173", "Sufficient for us is Allah, and He is the best Disposer of affairs."),
+        ("Al-Baqarah 2:286", "Allah does not burden a soul beyond that it can bear."),
+        ("Al-Kahf 18:10", "Our Lord, grant us from Yourself mercy and facilitate our affair.")
+    ]
+
+    static let indonesianFallbacks: [(ref: String, text: String)] = [
+        ("Al-Insyirah 94:6", "Sesungguhnya beserta kesulitan ada kemudahan."),
+        ("Ad-Duha 93:3", "Tuhanmu tidak meninggalkan engkau dan tidak pula membencimu."),
+        ("Ad-Duha 93:5", "Dan sungguh, kelak Tuhanmu pasti memberikan karunia-Nya kepadamu sehingga engkau menjadi puas."),
+        ("Ar-Ra'd 13:28", "Ingatlah, hanya dengan mengingat Allah hati menjadi tenteram."),
+        ("Yusuf 12:86", "Hanya kepada Allah aku mengadukan kesusahan dan kesedihanku."),
+        ("Al-Baqarah 2:186", "Apabila hamba-hamba-Ku bertanya kepadamu tentang Aku, maka sesungguhnya Aku dekat."),
+        ("Al-Baqarah 2:152", "Maka ingatlah kepada-Ku, Aku pun akan ingat kepadamu. Bersyukurlah kepada-Ku."),
+        ("Al-Baqarah 2:153", "Mohonlah pertolongan dengan sabar dan sholat. Sungguh, Allah beserta orang-orang yang sabar."),
+        ("Az-Zumar 39:36", "Bukankah Allah yang mencukupi hamba-Nya?"),
+        ("Az-Zumar 39:53", "Janganlah kamu berputus asa dari rahmat Allah. Sungguh, Allah mengampuni dosa-dosa semuanya."),
+        ("At-Taubah 9:40", "Jangan engkau bersedih, sesungguhnya Allah bersama kita."),
+        ("Thaha 20:46", "Janganlah kamu berdua khawatir, sesungguhnya Aku bersama kamu berdua, Aku mendengar dan melihat."),
+        ("Thaha 20:25-26", "Ya Tuhanku, lapangkanlah dadaku, dan mudahkanlah urusanku."),
+        ("At-Talaq 65:3", "Dan barangsiapa bertawakal kepada Allah, niscaya Allah akan mencukupkan keperluannya."),
+        ("Ghafir 40:60", "Berdoalah kepada-Ku, niscaya akan Aku perkenankan bagimu."),
+        ("Hud 11:90", "Sungguh, Tuhanku Maha Penyayang lagi Maha Pengasih."),
+        ("Ali 'Imran 3:139", "Janganlah kamu merasa lemah, dan jangan pula bersedih hati, sebab kamu paling tinggi derajatnya."),
+        ("Yunus 10:62", "Ingatlah, sesungguhnya wali-wali Allah itu tidak ada kekhawatiran pada mereka dan tidak bersedih hati."),
+        ("Qaf 50:16", "Kami lebih dekat kepadanya daripada urat lehernya."),
+        ("Ali 'Imran 3:173", "Cukuplah Allah menjadi Penolong kami dan Allah adalah sebaik-baik Pelindung."),
+        ("Al-Baqarah 2:286", "Allah tidak membebani seseorang melainkan sesuai dengan kesanggupannya."),
+        ("Al-Kahf 18:10", "Ya Tuhan kami, berikanlah rahmat kepada kami dari sisi-Mu dan mudahkanlah urusan kami.")
+    ]
+
+    static let arabicFallbacks: [(ref: String, text: String)] = [
+        ("الشرح ٩٤:٦", "إِنَّ مَعَ الْعُسْرِ يُسْرًا"),
+        ("الضحى ٩٣:٣", "مَا وَدَّعَكَ رَبُّكَ وَمَا قَلَىٰ"),
+        ("الضحى ٩٣:٥", "وَلَسَوْفَ يُعْطِيكَ رَبُّكَ فَتَرْضَىٰ"),
+        ("الرعد ١٣:٢٨", "أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ"),
+        ("يوسف ١٢:٨٦", "إِنَّمَا أَشْكُو بَثِّي وَحُزْنِي إِلَى اللَّهِ"),
+        ("البقرة ٢:١٨٦", "وَإِذَا سَأَلَكَ عِبَادِي عَنِّي فَإِنِّي قَرِيبٌ"),
+        ("البقرة ٢:١٥٢", "فَاذْكُرُونِي أَذْكُرْكُمْ وَاشْكُرُوا لِي"),
+        ("البقرة ٢:١٥٣", "يَا أَيُّهَا الَّذِينَ آمَنُوا اسْتَعِينُوا بِالصَّبْرِ وَالصَّلَاةِ"),
+        ("الزمر ٣٩:٣٦", "أَلَيْسَ اللَّهُ بِكَافٍ عَبْدَهُ"),
+        ("الزمر ٣٩:٥٣", "لَا تَقْنَطُوا مِن رَّحْمَةِ اللَّهِ ۚ إِنَّ اللَّهَ يَغْفِرُ الذُّنُوبَ جَمِيعًا"),
+        ("التوبة ٩:٤٠", "لَا تَحْزَنْ إِنَّ اللَّهَ مَعَنَا"),
+        ("طه ٢٠:٤٦", "لَا تَخَافَا ۖ إِنَّنِي مَعَكُمَا أَسْمَعُ وَأَرَىٰ"),
+        ("طه ٢٠:٢٥-٢٦", "رَبِّ اشْرَحْ لِي صَدْرِي وَيَسِّرْ لِي أَمْرِي"),
+        ("الطلاق ٦٥:٣", "وَمَن يَتَوَكَّلْ عَلَى اللَّهِ فَهُوَ حَسْبُهُ"),
+        ("غافر ٤٠:٦٠", "ادْعُونِي أَسْتَجِبْ لَكُمْ"),
+        ("هود ١١:٩٠", "إِنَّ رَبِّي رَحِيمٌ وَدُودٌ"),
+        ("آل عمران ٣:١٣٩", "وَلَا تَهِنُوا وَلَا تَحْزَنُوا وَأَنتُمُ الْأَعْلَوْنَ إِن كُنتُم مُّؤْمِنِينَ"),
+        ("يونس ١٠:٦٢", "أَلَا إِنَّ أَوْلِيَاءَ اللَّهِ لَا خَوْفٌ عَلَيْهِمْ وَلَا هُمْ يَحْزَنُونَ"),
+        ("ق ٥٠:١٦", "وَنَحْنُ أَقْرَبُ إِلَيْهِ مِنْ حَبْلِ الْوَرِيدِ"),
+        ("آل عمران ٣:١٧٣", "حَسْبُنَا اللَّهُ وَنِعْمَ الْوَكِيلُ"),
+        ("البقرة ٢:٢٨٦", "لَا يُكَلِّفُ اللَّهُ نَفْسًا إِلَّا وُسْعَهَا"),
+        ("الكهف ١٨:١٠", "رَبَّنَا آتِنَا مِن لَّدُنكَ رَحْمَةً وَهَيِّئْ لَنَا مِنْ أَمْرِنَا رَشَدًا")
+    ]
+
+    static func multilingualFallbacks(for lang: String) -> [(ref: String, text: String)] {
+        switch lang {
+        case "id":
+            return indonesianFallbacks
+        case "ar":
+            return arabicFallbacks
+        case "tr":
+            return all
+        default:
+            return englishFallbacks
+        }
+    }
 }

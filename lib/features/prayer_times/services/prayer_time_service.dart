@@ -283,12 +283,25 @@ class PrayerTimeService {
     final mStr = m.toString().padLeft(2, '0');
     final sStr = s.toString().padLeft(2, '0');
     if (h > 0) {
-      if (lang == AppLanguage.english) {
-        return '${h}h ${mStr}m';
-      } else if (lang == AppLanguage.arabic) {
-        return '$h س $mStr د';
+      switch (lang) {
+        case AppLanguage.indonesian:
+          return '$h jam $mStr mnt';
+        case AppLanguage.english:
+          return '${h}h ${mStr}m';
+        case AppLanguage.arabic:
+          return '$h س $mStr د';
+        case AppLanguage.french:
+          return '${h}h ${mStr}m';
+        case AppLanguage.urdu:
+          return '$h گھنٹے $mStr منٹ';
+        case AppLanguage.german:
+          return '$h Std. $mStr Min.';
+        case AppLanguage.russian:
+          return '$h ч $mStr мин';
+        case AppLanguage.turkish:
+        case null:
+          return '${h}s ${mStr}dk';
       }
-      return '${h}s ${mStr}dk';
     }
     return '$mStr:$sStr';
   }

@@ -76,67 +76,135 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
     {
       'tr': 'Sübhanallâh',
       'en': 'SubhanAllah',
+      'id': 'SubhanAllah',
       'ar': 'سُبْحَانَ اللَّهِ',
+      'ur': 'سبحان اللہ',
       'meaning': 'Allah her türlü eksiklikten uzaktır',
       'meaning_tr': 'Allah her türlü eksiklikten uzaktır',
       'meaning_en': 'Glory be to Allah, free of all imperfections',
+      'meaning_id': 'Maha Suci Allah dari segala kekurangan',
       'meaning_ar': 'تنزيه الله عن كل نقص وعيب',
+      'meaning_fr': 'Gloire à Allah, exempt de toute imperfection',
+      'meaning_de': 'Gepriesen sei Allah, frei von allen Mängeln',
+      'meaning_ru': 'Пречист Аллах от всяких недостатков',
+      'meaning_ur': 'اللہ ہر قسم کے نقص سے پاک ہے',
     },
     {
       'tr': 'Elhamdülillâh',
       'en': 'Alhamdulillah',
+      'id': 'Alhamdulillah',
       'ar': 'الْحَمْدُ لِلَّهِ',
+      'ur': 'الحمد للہ',
       'meaning': 'Hamd ve övgü yalnızca Allah\'adır',
       'meaning_tr': 'Hamd ve övgü yalnızca Allah\'adır',
       'meaning_en': 'All praise and gratitude is due to Allah alone',
+      'meaning_id': 'Segala puji dan syukur hanya bagi Allah',
       'meaning_ar': 'الثناء والشكر لله وحده على كل نعمه',
+      'meaning_fr': 'Toutes les louanges sont à Allah seul',
+      'meaning_de': 'Alles Lob gebührt allein Allah',
+      'meaning_ru': 'Вся хвала принадлежит только Аллаху',
+      'meaning_ur': 'تمام تعریفیں صرف اللہ ہی کے لیے ہیں',
     },
     {
       'tr': 'Allâhu Ekber',
       'en': 'Allahu Akbar',
+      'id': 'Allahu Akbar',
       'ar': 'اللَّهُ أَكْبَرُ',
+      'ur': 'اللہ اکبر',
       'meaning': 'Allah en büyüktür',
       'meaning_tr': 'Allah en büyüktür',
       'meaning_en': 'Allah is the Greatest above all things',
+      'meaning_id': 'Allah Maha Besar di atas segala sesuatu',
       'meaning_ar': 'الله أكبر وأعظم من كل شيء',
+      'meaning_fr': 'Allah est le Plus Grand',
+      'meaning_de': 'Allah ist der Größte',
+      'meaning_ru': 'Аллах Превелик',
+      'meaning_ur': 'اللہ سب سے بڑا ہے',
     },
     {
       'tr': 'Lâ ilâhe illallâh',
       'en': 'La ilaha illallah',
+      'id': 'La ilaha illallah',
       'ar': 'لَا إِلَهَ إِلَّا اللَّهُ',
+      'ur': 'لا الہ الا اللہ',
       'meaning': 'Allah\'tan başka ilah yoktur',
       'meaning_tr': 'Allah\'tan başka ilah yoktur',
       'meaning_en': 'There is no deity worthy of worship except Allah',
+      'meaning_id': 'Tiada Tuhan yang berhak disembah selain Allah',
       'meaning_ar': 'لا معبود بحق إلا الله وحده لا شريك له',
+      'meaning_fr': 'Nul divinité digne d\'adoration sauf Allah',
+      'meaning_de': 'Es gibt keinen Gott außer Allah',
+      'meaning_ru': 'Нет божества, кроме Аллаха',
+      'meaning_ur': 'اللہ کے سوا کوئی معبود نہیں',
     },
     {
       'tr': 'Estağfirullâh',
       'en': 'Astaghfirullah',
+      'id': 'Astaghfirullah',
       'ar': 'أَسْتَغْفِرُ اللَّهَ',
+      'ur': 'استغفر اللہ',
       'meaning': 'Allah\'tan bağışlanma dilerim',
       'meaning_tr': 'Allah\'tan bağışlanma dilerim',
       'meaning_en': 'I seek the forgiveness of Allah',
+      'meaning_id': 'Aku memohon ampunan kepada Allah',
       'meaning_ar': 'أطلب المغفرة والستر من الله تعالى',
+      'meaning_fr': 'Je demande pardon à Allah',
+      'meaning_de': 'Ich bitte Allah um Vergebung',
+      'meaning_ru': 'Прошу прощения у Аллаха',
+      'meaning_ur': 'میں اللہ سے معافی مانگتا ہوں',
     },
     {
       'tr': 'Salavât-ı Şerîfe',
       'en': 'Salawat',
+      'id': 'Shalawat',
       'ar': 'اللَّهُمَّ صَلِّ عَلَى سَيِّدِنَا مُحَمَّدٍ',
+      'ur': 'درود شریف',
       'meaning': 'Allah\'ım Efendimiz Muhammed\'e salat eyle',
       'meaning_tr': 'Allah\'ım Efendimiz Muhammed\'e salat eyle',
       'meaning_en': 'O Allah, bestow blessings upon our Master Muhammad',
+      'meaning_id': 'Ya Allah, limpahkanlah shalawat kepada junjungan kami Nabi Muhammad',
       'meaning_ar': 'اللهم صل وسلم وبارك على سيدنا محمد',
+      'meaning_fr': 'Ô Allah, répands Tes bénédictions sur notre Prophète Muhammad',
+      'meaning_de': 'O Allah, segne unseren Meister Muhammad',
+      'meaning_ru': 'О Аллах, благослови нашего Пророка Мухаммада',
+      'meaning_ur': 'اے اللہ! ہمارے آقا حضرت محمد پر رحمتیں نازل فرما',
     },
   ];
 
   String _getDhikrMeaning(Map<String, String> dhikr, AppLanguage lang) {
-    if (lang == AppLanguage.english) {
-      return dhikr['meaning_en'] ?? dhikr['meaning_tr'] ?? dhikr['meaning'] ?? '';
+    switch (lang) {
+      case AppLanguage.indonesian:
+        return dhikr['meaning_id'] ?? dhikr['meaning_en'] ?? '';
+      case AppLanguage.english:
+        return dhikr['meaning_en'] ?? '';
+      case AppLanguage.arabic:
+        return dhikr['meaning_ar'] ?? '';
+      case AppLanguage.french:
+        return dhikr['meaning_fr'] ?? dhikr['meaning_en'] ?? '';
+      case AppLanguage.german:
+        return dhikr['meaning_de'] ?? dhikr['meaning_en'] ?? '';
+      case AppLanguage.russian:
+        return dhikr['meaning_ru'] ?? dhikr['meaning_en'] ?? '';
+      case AppLanguage.urdu:
+        return dhikr['meaning_ur'] ?? dhikr['meaning_ar'] ?? '';
+      case AppLanguage.turkish:
+        return dhikr['meaning_tr'] ?? dhikr['meaning'] ?? '';
     }
-    if (lang == AppLanguage.arabic) {
-      return dhikr['meaning_ar'] ?? dhikr['meaning_tr'] ?? dhikr['meaning'] ?? '';
+  }
+
+  String _getDhikrTitle(Map<String, String> dhikr, AppLanguage lang) {
+    switch (lang) {
+      case AppLanguage.indonesian:
+        return dhikr['id'] ?? dhikr['en'] ?? dhikr['tr']!;
+      case AppLanguage.arabic:
+        return dhikr['ar']!;
+      case AppLanguage.urdu:
+        return dhikr['ur'] ?? dhikr['ar']!;
+      case AppLanguage.turkish:
+        return dhikr['tr']!;
+      default:
+        return dhikr['en'] ?? dhikr['tr']!;
     }
-    return dhikr['meaning_tr'] ?? dhikr['meaning'] ?? '';
   }
 
   @override
@@ -218,12 +286,8 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
 
         final strings = ref.read(appStringsProvider);
         final lang = strings.language;
-        final prevTitle = lang == AppLanguage.english
-            ? prevDhikr['en']
-            : (lang == AppLanguage.arabic ? prevDhikr['ar'] : prevDhikr['tr']);
-        final nextTitle = lang == AppLanguage.english
-            ? nextDhikr['en']
-            : (lang == AppLanguage.arabic ? nextDhikr['ar'] : nextDhikr['tr']);
+        final prevTitle = _getDhikrTitle(prevDhikr, lang);
+        final nextTitle = _getDhikrTitle(nextDhikr, lang);
 
         ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(
@@ -241,11 +305,15 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    lang == AppLanguage.english
-                        ? '$prevTitle completed ($_target) ➔ Switched to $nextTitle'
-                        : (lang == AppLanguage.arabic
-                            ? '$prevTitle اكتمل ($_target) ➔ الانتقال إلى $nextTitle'
-                            : '$prevTitle tamamlandı ($_target) ➔ $nextTitle\'a geçildi'),
+                    lang == AppLanguage.indonesian
+                        ? '$prevTitle selesai ($_target) ➔ Beralih ke $nextTitle'
+                        : (lang == AppLanguage.english
+                            ? '$prevTitle completed ($_target) ➔ Switched to $nextTitle'
+                            : (lang == AppLanguage.arabic
+                                ? '$prevTitle اكتمل ($_target) ➔ الانتقال إلى $nextTitle'
+                                : (lang != AppLanguage.turkish
+                                    ? '$prevTitle completed ($_target) ➔ Switched to $nextTitle'
+                                    : '$prevTitle tamamlandı ($_target) ➔ $nextTitle\'a geçildi'))),
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 12.5,
@@ -362,17 +430,23 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                 setState(() {
                   final customMeaning = meaningController.text.trim().isNotEmpty
                       ? meaningController.text.trim()
-                      : (strings.language == AppLanguage.english
-                          ? 'Custom Dhikr'
-                          : (strings.language == AppLanguage.arabic ? 'ذكر مخصص' : 'Özel zikir'));
+                      : (strings.language == AppLanguage.turkish
+                          ? 'Özel zikir'
+                          : (strings.language == AppLanguage.arabic
+                              ? 'ذكر مخصص'
+                              : (strings.language == AppLanguage.indonesian
+                                  ? 'Dzikir Khusus'
+                                  : 'Custom Dhikr')));
                   _dhikrList.add({
                     'tr': title,
                     'en': title,
                     'ar': title,
+                    'id': title,
                     'meaning': customMeaning,
                     'meaning_tr': customMeaning,
                     'meaning_en': customMeaning,
                     'meaning_ar': customMeaning,
+                    'meaning_id': customMeaning,
                   });
                   _selectedDhikrIndex = _dhikrList.length - 1;
                   _count = 0;
@@ -404,9 +478,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
           if (_activeTab == 0)
             IconButton(
               icon: const Icon(Icons.add_circle_outline_rounded, color: Color(0xFFFFDF7A)),
-              tooltip: currentLang == AppLanguage.turkish
-                  ? 'Özel Zikir Ekle'
-                  : (currentLang == AppLanguage.english ? 'Add Custom Dhikr' : 'إضافة ذكر مخصص'),
+              tooltip: strings.addCustomDhikr,
               onPressed: _showAddCustomDhikrDialog,
             ),
           // Lüks Ayarlar Butonu
@@ -523,9 +595,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
               itemBuilder: (context, index) {
                 final item = _dhikrList[index];
                 final isSelected = index == _selectedDhikrIndex;
-                final title = currentLang == AppLanguage.english
-                    ? item['en']!
-                    : (currentLang == AppLanguage.arabic ? item['ar']! : item['tr']!);
+                final title = _getDhikrTitle(item, currentLang);
 
                 return ChoiceChip(
                   label: Text(title),
@@ -598,11 +668,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  currentLang == AppLanguage.english
-                      ? (activeDhikr['en'] ?? activeDhikr['tr']!)
-                      : (currentLang == AppLanguage.arabic
-                          ? (activeDhikr['ar'] ?? activeDhikr['tr']!)
-                          : activeDhikr['tr']!),
+                  _getDhikrTitle(activeDhikr, currentLang),
                   style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
                 ),
                 const SizedBox(height: 4),
@@ -1313,9 +1379,9 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
 
                 const SizedBox(height: 8),
 
-                // Türkçe Meal
+                // Meal
                 Text(
-                  verse.turkishMeaning,
+                  verse.localizedMeaning(strings.language.code),
                   style: const TextStyle(
                     fontSize: 12.5,
                     color: Colors.white,
@@ -1329,7 +1395,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
 
                 // Manevi Not
                 Text(
-                  '🤲 ${verse.spiritualNote}',
+                  '🤲 ${verse.localizedSpiritualNote(strings.language.code)}',
                   style: const TextStyle(
                     color: Color(0xFF85E3B3),
                     fontSize: 11.5,
@@ -1384,21 +1450,13 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  strings.language == AppLanguage.turkish
-                      ? 'Bugünkü İbadet İlerlemeniz'
-                      : (strings.language == AppLanguage.english
-                          ? 'Today\'s Worship Progress'
-                          : 'تقدم عباداتك اليوم'),
+                  strings.dailyProgressTitle,
                   style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFFFFDF7A)),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   completedCount == 0
-                      ? (strings.language == AppLanguage.turkish
-                          ? '5 Vakit Namaz, Kur\'an-ı Kerim tilaveti ve günlük zikrinizi buradan takip edin.'
-                          : (strings.language == AppLanguage.english
-                              ? 'Track your 5 daily prayers, Quran recitation and dhikr here.'
-                              : 'تابع صلواتك الخمس، تلاوة القرآن وأذكارك اليومية هنا.'))
+                      ? strings.dailyProgressSubtitle
                       : strings.remainingTasksText(7 - completedCount),
                   style: const TextStyle(fontSize: 12, color: Colors.white70),
                 ),
@@ -1450,11 +1508,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                 child: Column(
                   children: [
                     Text(
-                      strings.language == AppLanguage.turkish
-                          ? 'İbadet Serisi Dönüm Noktaları & Beratlar'
-                          : (strings.language == AppLanguage.english
-                              ? 'Worship Streak Milestones & Certificates'
-                              : 'محطات ومعالم سلسلة العبادات'),
+                      strings.streaksBannerTitle,
                       style: const TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.bold,
@@ -1464,11 +1518,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      strings.language == AppLanguage.turkish
-                          ? '5 Vakit namaz, Kur\'an ve zikir ile serinizi koruyun. Her dönüm noktasında (10, 30, 50, 100, 200, 400. gün) motive edici sure ve beratlar kazanın.'
-                          : (strings.language == AppLanguage.english
-                              ? 'Maintain your streak with prayers, Quran, and dhikr. Unlock inspiring surahs and certificates at each milestone.'
-                              : 'حافظ على سلسلتك مع الصلوات والقرآن والذكر. وافتح سورًا ملهمة وشهادات عند كل محطة.'),
+                      strings.streaksBannerSubtitle,
                       style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.7)),
                       textAlign: TextAlign.center,
                     ),
@@ -1529,7 +1579,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        milestone.title,
+                                        milestone.localizedTitle(strings.language.code),
                                         style: TextStyle(
                                           fontSize: 15,
                                           fontWeight: FontWeight.bold,
@@ -1539,11 +1589,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                                         ),
                                       ),
                                       Text(
-                                        strings.language == AppLanguage.turkish
-                                            ? '${milestone.days}. Gün Hedefi'
-                                            : (strings.language == AppLanguage.english
-                                                ? 'Day ${milestone.days} Goal'
-                                                : 'هدف اليوم ${milestone.days}'),
+                                        strings.dayGoalLabel(milestone.days),
                                         style: TextStyle(
                                           fontSize: 11,
                                           color: isUnlocked
@@ -1563,16 +1609,11 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                                   color: isUnlocked
                                       ? const Color(0xFFD4AF37)
                                       : Colors.white10,
-                                  borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Text(
                                   isUnlocked
-                                      ? (strings.language == AppLanguage.turkish
-                                        ? '🏆 KAZANILDI'
-                                        : (strings.language == AppLanguage.english
-                                            ? '🏆 UNLOCKED'
-                                            : '🏆 مكتمل'))
-                                      : '🔒 ${milestone.days - streak.currentStreak > 0 ? (strings.language == AppLanguage.turkish ? "${milestone.days - streak.currentStreak} Gün" : (strings.language == AppLanguage.english ? "${milestone.days - streak.currentStreak} Days" : "${milestone.days - streak.currentStreak} يوم")) : (strings.language == AppLanguage.turkish ? "Kilitli" : (strings.language == AppLanguage.english ? "Locked" : "مقفل"))}',
+                                      ? strings.unlockedBadge
+                                      : '🔒 ${milestone.days - streak.currentStreak > 0 ? strings.daysRemainingLock(milestone.days - streak.currentStreak) : strings.lockedBadge}',
                                   style: TextStyle(
                                     fontSize: 10.5,
                                     fontWeight: FontWeight.bold,
@@ -1599,7 +1640,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                                 const SizedBox(width: 6),
                                 Expanded(
                                   child: Text(
-                                    'Motive Edici Sure: ${milestone.ayahReference}',
+                                    '${strings.motivatingSurahLabel}: ${milestone.ayahReference}',
                                     style: const TextStyle(
                                       color: Color(0xFFFFDF7A),
                                       fontSize: 12,
@@ -1627,7 +1668,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                             ),
                             const SizedBox(height: 6),
                             Text(
-                              milestone.turkishMeaning,
+                              milestone.localizedMeaning(strings.language.code),
                               style: const TextStyle(
                                 fontSize: 12,
                                 color: Colors.white70,
@@ -1643,7 +1684,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                                 const SizedBox(width: 5),
                                 Expanded(
                                   child: Text(
-                                    milestone.spiritualVirtue,
+                                    milestone.localizedSpiritualVirtue(strings.language.code),
                                     style: const TextStyle(
                                       fontSize: 11.5,
                                       color: Color(0xFF85E3B3),
@@ -1654,7 +1695,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                             ),
                           ] else ...[
                             Text(
-                              'Bu beratı ve ${milestone.surahName} müjdesini açmak için ${milestone.days} gün boyunca 5 vakit namaz ve zikrinizi eksiksiz tamamlayın.',
+                              strings.milestoneUnlockHint(milestone.localizedSurahName(strings.language.code), milestone.days),
                               style: const TextStyle(
                                 fontSize: 11.5,
                                 color: Colors.white54,
@@ -1677,6 +1718,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
 
   /// Dönüm Noktasına Ulaşıldığında Tebrik Modalı
   void _showCelebrationDialog(BuildContext context, WorshipStreakMilestone milestone) {
+    final strings = ref.read(appStringsProvider);
     showDialog(
       context: context,
       builder: (ctx) {
@@ -1706,9 +1748,9 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                 children: [
                   Text(milestone.badgeIcon, style: const TextStyle(fontSize: 48)),
                   const SizedBox(height: 10),
-                  const Text(
-                    '🎉 MAŞAALLAH! 🎉',
-                    style: TextStyle(
+                  Text(
+                    strings.celebrationTitle,
+                    style: const TextStyle(
                       color: Color(0xFFFFDF7A),
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -1717,12 +1759,13 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    '${milestone.days}. GÜN SERİSİNE ULAŞTINIZ!',
+                    strings.celebrationStreakReached(milestone.days),
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                     ),
+                    textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 14),
                   Container(
@@ -1733,7 +1776,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                       border: Border.all(color: const Color(0xFFD4AF37)),
                     ),
                     child: Text(
-                      milestone.badgeName,
+                      milestone.localizedBadgeName(strings.language.code),
                       style: const TextStyle(
                         color: Color(0xFFFFDF7A),
                         fontSize: 14,
@@ -1744,7 +1787,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Motive Edici Sure: ${milestone.surahName}',
+                    '${strings.motivatingSurahLabel}: ${milestone.localizedSurahName(strings.language.code)}',
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 14,
@@ -1774,7 +1817,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          milestone.turkishMeaning,
+                          milestone.localizedMeaning(strings.language.code),
                           style: const TextStyle(
                             fontSize: 12.5,
                             color: Colors.white70,
@@ -1788,7 +1831,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    milestone.spiritualVirtue,
+                    milestone.localizedSpiritualVirtue(strings.language.code),
                     style: const TextStyle(
                       color: Color(0xFF85E3B3),
                       fontSize: 12,
@@ -1805,9 +1848,9 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                     ),
                     onPressed: () => Navigator.of(ctx).pop(),
-                    child: const Text(
-                      'Manevi Beratı Kabul Et 🤲',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    child: Text(
+                      strings.acceptSpiritualBadge,
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                     ),
                   ),
                 ],

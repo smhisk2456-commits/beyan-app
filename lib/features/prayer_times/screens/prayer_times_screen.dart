@@ -29,9 +29,7 @@ class PrayerTimesScreen extends ConsumerWidget {
           // Şehir / Konum Seçici Buton
           IconButton(
             icon: const Icon(Icons.location_on_rounded, color: Color(0xFFFFDF7A)),
-            tooltip: strings.language == AppLanguage.turkish
-                ? 'Şehir Değiştir'
-                : (strings.language == AppLanguage.english ? 'Change City' : 'تغيير المدينة'),
+            tooltip: strings.changeCity,
             onPressed: () => CitySelectorSheet.show(context, ref),
           ),
           // Lüks Ayarlar Butonu (Hesaplama Metodu, Ezan Makamları, Bildirimler, Dil vb.)
@@ -157,15 +155,19 @@ class _LocationDateCard extends StatelessWidget {
   }
 
   String _monthName(int month, AppLanguage lang) {
-    if (lang == AppLanguage.english) {
-      const months = ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    if (lang == AppLanguage.turkish) {
+      const months = ['', 'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
       return months[month];
     }
     if (lang == AppLanguage.arabic) {
       const months = ['', 'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
       return months[month];
     }
-    const months = ['', 'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+    if (lang == AppLanguage.indonesian) {
+      const months = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+      return months[month];
+    }
+    const months = ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     return months[month];
   }
 }

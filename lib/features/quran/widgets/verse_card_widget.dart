@@ -23,10 +23,16 @@ class VerseCard extends ConsumerWidget {
 
   void _shareVerse(BuildContext context, AppStrings strings) {
     HapticFeedback.lightImpact();
-    final text = 'Sure No: ${verse.surahId}, Ayet: ${verse.verseNumber}\n\n'
+    final isTr = strings.language == AppLanguage.turkish;
+    final meaning = verse.localizedMeaning(strings.language.code);
+    final header = isTr
+        ? 'Sure No: ${verse.surahId}, Ayet: ${verse.verseNumber}'
+        : 'Surah: ${verse.surahId}, Verse: ${verse.verseNumber}';
+    final label = isTr ? 'Meali:' : 'Translation:';
+    final text = '$header\n\n'
         '${verse.arabicText}\n\n'
-        'Meali: ${verse.turkishMeaning}\n\n'
-        '— Beyân İslami Yaşam';
+        '$label $meaning\n\n'
+        '— Beyân';
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -212,9 +218,9 @@ class VerseCard extends ConsumerWidget {
                 const SizedBox(height: 10),
               ],
 
-              // ── Türkçe Meal ──────────────────────────────────
+              // ── Meal ──────────────────────────────────────────
               Text(
-                verse.turkishMeaning,
+                verse.localizedMeaning(strings.language.code),
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       height: 1.6,
                       fontSize: 14.0,

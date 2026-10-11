@@ -79,6 +79,20 @@ class _OnboardingTrialPaywallScreenState
     }
   }
 
+  String _t(AppLanguage lang, {required String tr, required String en, required String ar, String? id}) {
+    switch (lang) {
+      case AppLanguage.turkish:
+        return tr;
+      case AppLanguage.arabic:
+      case AppLanguage.urdu:
+        return ar;
+      case AppLanguage.indonesian:
+        return id ?? en;
+      default:
+        return en;
+    }
+  }
+
   Future<void> _startPurchase() async {
     HapticFeedback.mediumImpact();
     setState(() => _isLoading = true);
@@ -96,23 +110,24 @@ class _OnboardingTrialPaywallScreenState
 
       if (mounted) {
         final strings = ref.read(appStringsProvider);
+        final lang = strings.language;
         final successMsg = _selectedTier == PremiumTier.yearly
-            ? (strings.language == AppLanguage.turkish
-                ? '3 Günlük Ücretsiz Denemeniz Başlatıldı!'
-                : (strings.language == AppLanguage.english
-                    ? 'Your 3-day free trial has started!'
-                    : 'بدأت تجربتك المجانية لـ ٣ أيام!'))
+            ? _t(lang,
+                tr: '3 Günlük Ücretsiz Denemeniz Başlatıldı!',
+                en: 'Your 3-day free trial has started!',
+                ar: 'بدأت تجربتك المجانية لـ ٣ أيام!',
+                id: 'Uji coba gratis 3 hari Anda telah dimulai!')
             : (_selectedTier == PremiumTier.lifetime
-                ? (strings.language == AppLanguage.turkish
-                    ? 'Ömür Boyu Üyeliğiniz Başlatılıyor!'
-                    : (strings.language == AppLanguage.english
-                        ? 'Activating your lifetime membership!'
-                        : 'جاري تفعيل عضويتك مدى الحياة!'))
-                : (strings.language == AppLanguage.turkish
-                    ? 'Aboneliğiniz Başlatılıyor!'
-                    : (strings.language == AppLanguage.english
-                        ? 'Starting your subscription!'
-                        : 'جاري بدء اشتراكك!')));
+                ? _t(lang,
+                    tr: 'Ömür Boyu Üyeliğiniz Başlatılıyor!',
+                    en: 'Activating your lifetime membership!',
+                    ar: 'جاري تفعيل عضويتك مدى الحياة!',
+                    id: 'Mengaktifkan keanggotaan seumur hidup Anda!')
+                : _t(lang,
+                    tr: 'Aboneliğiniz Başlatılıyor!',
+                    en: 'Starting your subscription!',
+                    ar: 'جاري بدء اشتراكك!',
+                    id: 'Memulai langganan Anda!'));
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -148,20 +163,21 @@ class _OnboardingTrialPaywallScreenState
     if (mounted) {
       setState(() => _isLoading = false);
       final strings = ref.read(appStringsProvider);
+      final lang = strings.language;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
             success
-                ? (strings.language == AppLanguage.turkish
-                    ? 'Satın alımlarınız başarıyla geri yüklendi!'
-                    : (strings.language == AppLanguage.english
-                        ? 'Purchases restored successfully!'
-                        : 'تم استعادة مشترياتك بنجاح!'))
-                : (strings.language == AppLanguage.turkish
-                    ? 'Aktif bir abonelik bulunamadı.'
-                    : (strings.language == AppLanguage.english
-                        ? 'No active subscription found.'
-                        : 'لم يتم العثور على اشتراك نشط.')),
+                ? _t(lang,
+                    tr: 'Satın alımlarınız başarıyla geri yüklendi!',
+                    en: 'Purchases restored successfully!',
+                    ar: 'تم استعادة مشترياتك بنجاح!',
+                    id: 'Pembelian Anda berhasil dipulihkan!')
+                : _t(lang,
+                    tr: 'Aktif bir abonelik bulunamadı.',
+                    en: 'No active subscription found.',
+                    ar: 'لم يتم العثور على اشتراك نشط.',
+                    id: 'Tidak ada langganan aktif yang ditemukan.'),
           ),
           backgroundColor: const Color(0xFF033E35),
           behavior: SnackBarBehavior.floating,
@@ -308,22 +324,22 @@ class _OnboardingTrialPaywallScreenState
                       // ── Ana Premium Kozları (Widget & Makam Öncelikli) ────────
                       _buildFeatureRow(
                         icon: Icons.widgets_rounded,
-                        tag: strings.language == AppLanguage.turkish
-                            ? 'ÖNE ÇIKAN'
-                            : (strings.language == AppLanguage.english
-                                ? 'FEATURED'
-                                : 'مميز'),
+                        tag: _t(strings.language,
+                            tr: 'ÖNE ÇIKAN',
+                            en: 'FEATURED',
+                            ar: 'مميز',
+                            id: 'UNGGULAN'),
                         title: strings.paywallFeatWidgets,
                         subtitle: strings.paywallFeatWidgetsDesc,
                       ),
                       const SizedBox(height: 12),
                       _buildFeatureRow(
                         icon: Icons.volume_up_rounded,
-                        tag: strings.language == AppLanguage.turkish
-                            ? 'LÜKS SES'
-                            : (strings.language == AppLanguage.english
-                                ? 'PREMIUM AUDIO'
-                                : 'صوت فاخر'),
+                        tag: _t(strings.language,
+                            tr: 'LÜKS SES',
+                            en: 'PREMIUM AUDIO',
+                            ar: 'صوت فاخر',
+                            id: 'AUDIO PREMIUM'),
                         title: strings.paywallFeatMakams,
                         subtitle: strings.paywallFeatMakamsDesc,
                       ),
@@ -347,88 +363,88 @@ class _OnboardingTrialPaywallScreenState
                       if (_selectedTier == PremiumTier.yearly) ...[
                         _buildTimelineStep(
                           icon: Icons.lock_open_rounded,
-                          title: strings.language == AppLanguage.turkish
-                              ? 'Bugün: Tüm Kilitler Açılır'
-                              : (strings.language == AppLanguage.english
-                                  ? 'Today: All Features Unlocked'
-                                  : 'اليوم: فتح جميع الميزات'),
-                          subtitle: strings.language == AppLanguage.turkish
-                              ? 'Widget\'lar, tüm ezan makamları ve lüks temalar anında aktif.'
-                              : (strings.language == AppLanguage.english
-                                  ? 'Lock screen widgets, adhan makams, and luxury themes active.'
-                                  : 'أدوات شاشة القفل، مقامات الأذان، والمظاهر الفاخرة فعالة.'),
+                          title: _t(strings.language,
+                              tr: 'Bugün: Tüm Kilitler Açılır',
+                              en: 'Today: All Features Unlocked',
+                              ar: 'اليوم: فتح جميع الميزات',
+                              id: 'Hari Ini: Semua Fitur Terbuka'),
+                          subtitle: _t(strings.language,
+                              tr: 'Widget\'lar, tüm ezan makamları ve lüks temalar anında aktif.',
+                              en: 'Lock screen widgets, adhan makams, and luxury themes active.',
+                              ar: 'أدوات شاشة القفل، مقامات الأذان، والمظاهر الفاخرة فعالة.',
+                              id: 'Widget layar kunci, makam adzan, dan tema mewah langsung aktif.'),
                           isLast: false,
                         ),
                         _buildTimelineStep(
                           icon: Icons.notifications_active_outlined,
-                          title: strings.language == AppLanguage.turkish
-                              ? '2 Gün İçinde: Hatırlatma'
-                              : (strings.language == AppLanguage.english
-                                  ? 'In 2 Days: Gentle Reminder'
-                                  : 'خلال يومين: تذكير لطيف'),
-                          subtitle: strings.language == AppLanguage.turkish
-                              ? 'Deneme sürenizin bitmek üzere olduğunu size bildireceğiz.'
-                              : (strings.language == AppLanguage.english
-                                  ? 'We will notify you that your free trial is ending.'
-                                  : 'سننبهك بأن فترتك التجريبية أوشكت على الانتهاء.'),
+                          title: _t(strings.language,
+                              tr: '2 Gün İçinde: Hatırlatma',
+                              en: 'In 2 Days: Gentle Reminder',
+                              ar: 'خلال يومين: تذكير لطيف',
+                              id: 'Dalam 2 Hari: Pengingat'),
+                          subtitle: _t(strings.language,
+                              tr: 'Deneme sürenizin bitmek üzere olduğunu size bildireceğiz.',
+                              en: 'We will notify you that your free trial is ending.',
+                              ar: 'سننبهك بأن فترتك التجريبية أوشكت على الانتهاء.',
+                              id: 'Kami akan mengingatkan bahwa masa uji coba gratis Anda akan berakhir.'),
                           isLast: false,
                         ),
                         _buildTimelineStep(
                           icon: Icons.check_circle_outline_rounded,
-                          title: strings.language == AppLanguage.turkish
-                              ? '3. Gün: Faturalandırma Başlar'
-                              : (strings.language == AppLanguage.english
-                                  ? 'Day 3: Billing Begins'
-                                  : 'اليوم الثالث: بدء الفوترة'),
-                          subtitle: strings.language == AppLanguage.turkish
-                              ? '$billingDateFormatted tarihine kadar dilediğiniz an tek tıkla iptal edebilirsiniz.'
-                              : (strings.language == AppLanguage.english
-                                  ? 'Cancel anytime before $billingDateFormatted in App Store settings.'
-                                  : 'يمكنك الإلغاء في أي وقت قبل $billingDateFormatted من إعدادات المتجر.'),
+                          title: _t(strings.language,
+                              tr: '3. Gün: Faturalandırma Başlar',
+                              en: 'Day 3: Billing Begins',
+                              ar: 'اليوم الثالث: بدء الفوترة',
+                              id: 'Hari ke-3: Penagihan Dimulai'),
+                          subtitle: _t(strings.language,
+                              tr: '$billingDateFormatted tarihine kadar dilediğiniz an tek tıkla iptal edebilirsiniz.',
+                              en: 'Cancel anytime before $billingDateFormatted in App Store settings.',
+                              ar: 'يمكنك الإلغاء في أي وقت قبل $billingDateFormatted من إعدادات المتجر.',
+                              id: 'Batalkan kapan saja sebelum $billingDateFormatted di pengaturan App Store.'),
                           isLast: true,
                         ),
                       ] else if (_selectedTier == PremiumTier.lifetime) ...[
                         _buildTimelineStep(
                           icon: Icons.all_inclusive_rounded,
-                          title: strings.language == AppLanguage.turkish
-                              ? 'Ömür Boyu Tek Seferlik Ödeme'
-                              : (strings.language == AppLanguage.english
-                                  ? 'Lifetime One-Time Purchase'
-                                  : 'شراء لمرة واحدة مدى الحياة'),
-                          subtitle: strings.language == AppLanguage.turkish
-                              ? 'Asla yinelenen abonelik ücreti yok. Bir kez ödeyin, sonsuza dek kullanın.'
-                              : (strings.language == AppLanguage.english
-                                  ? 'No recurring subscriptions ever. Pay once, enjoy forever.'
-                                  : 'لا توجد اشتراكات متكررة أبداً. ادفع مرة واستمتع للأبد.'),
+                          title: _t(strings.language,
+                              tr: 'Ömür Boyu Tek Seferlik Ödeme',
+                              en: 'Lifetime One-Time Purchase',
+                              ar: 'شراء لمرة واحدة مدى الحياة',
+                              id: 'Pembelian Sekali Seumur Hidup'),
+                          subtitle: _t(strings.language,
+                              tr: 'Asla yinelenen abonelik ücreti yok. Bir kez ödeyin, sonsuza dek kullanın.',
+                              en: 'No recurring subscriptions ever. Pay once, enjoy forever.',
+                              ar: 'لا توجد اشتراكات متكررة أبداً. ادفع مرة واستمتع للأبد.',
+                              id: 'Tanpa biaya langganan berulang. Bayar sekali, nikmati selamanya.'),
                           isLast: false,
                         ),
                         _buildTimelineStep(
                           icon: Icons.verified_rounded,
-                          title: strings.language == AppLanguage.turkish
-                              ? 'Gelecek Tüm Güncellemeler Dahil'
-                              : (strings.language == AppLanguage.english
-                                  ? 'All Future Updates Included'
-                                  : 'جميع التحديثات المستقبلية مشمولة'),
-                          subtitle: strings.language == AppLanguage.turkish
-                              ? 'Gelecekte eklenecek yeni ezan makamları ve widget\'lar ücretsiz.'
-                              : (strings.language == AppLanguage.english
-                                  ? 'Upcoming adhan makams and widget designs are free.'
-                                  : 'المقامات والأدوات الجديدة مستقبلاً مجاناً بالكامل.'),
+                          title: _t(strings.language,
+                              tr: 'Gelecek Tüm Güncellemeler Dahil',
+                              en: 'All Future Updates Included',
+                              ar: 'جميع التحديثات المستقبلية مشمولة',
+                              id: 'Termasuk Semua Pembaruan Mendatang'),
+                          subtitle: _t(strings.language,
+                              tr: 'Gelecekte eklenecek yeni ezan makamları ve widget\'lar ücretsiz.',
+                              en: 'Upcoming adhan makams and widget designs are free.',
+                              ar: 'المقامات والأدوات الجديدة مستقبلاً مجاناً بالكامل.',
+                              id: 'Makam adzan dan desain widget baru di masa mendatang gratis.'),
                           isLast: true,
                         ),
                       ] else ...[
                         _buildTimelineStep(
                           icon: Icons.calendar_month_rounded,
-                          title: strings.language == AppLanguage.turkish
-                              ? 'Aylık Esnek Kullanım'
-                              : (strings.language == AppLanguage.english
-                                  ? 'Flexible Monthly Access'
-                                  : 'استخدام شهري مرن'),
-                          subtitle: strings.language == AppLanguage.turkish
-                              ? 'Ayda ₺49,99. İstediğiniz ay durdurup devam ettirebilirsiniz.'
-                              : (strings.language == AppLanguage.english
-                                  ? '₺49.99 / month. Pause or cancel whenever you wish.'
-                                  : 'مرونة كاملة في الإلغاء أو التجديد شهرياً.'),
+                          title: _t(strings.language,
+                              tr: 'Aylık Esnek Kullanım',
+                              en: 'Flexible Monthly Access',
+                              ar: 'استخدام شهري مرن',
+                              id: 'Akses Bulanan Fleksibel'),
+                          subtitle: _t(strings.language,
+                              tr: 'Ayda ₺49,99. İstediğiniz ay durdurup devam ettirebilirsiniz.',
+                              en: '₺49.99 / month. Pause or cancel whenever you wish.',
+                              ar: 'مرونة كاملة في الإلغاء أو التجديد شهرياً.',
+                              id: '₺49,99 / bulan. Jeda atau batalkan kapan saja Anda inginkan.'),
                           isLast: true,
                         ),
                       ],
@@ -459,11 +475,11 @@ class _OnboardingTrialPaywallScreenState
                               subBadge: strings.badgeNoSubscription,
                               title: strings.planLifetime,
                               price: '₺499,99',
-                              totalPrice: strings.language == AppLanguage.turkish
-                                  ? 'Tek Seferlik'
-                                  : (strings.language == AppLanguage.english
-                                      ? 'One-Time'
-                                      : 'دفعة واحدة'),
+                              totalPrice: _t(strings.language,
+                                  tr: 'Tek Seferlik',
+                                  en: 'One-Time',
+                                  ar: 'دفعة واحدة',
+                                  id: 'Sekali Bayar'),
                               isSelected: _selectedTier == PremiumTier.lifetime,
                               onTap: () => setState(() => _selectedTier = PremiumTier.lifetime),
                             ),
@@ -485,7 +501,7 @@ class _OnboardingTrialPaywallScreenState
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                             child: Text(
                               _selectedTier == PremiumTier.monthly
-                                  ? '✓ ${strings.planMonthly}: ₺49,99 /ay (Seçili)'
+                                  ? '✓ ${strings.planMonthly}: ₺49,99 /ay ${_t(strings.language, tr: "(Seçili)", en: "(Selected)", ar: "(محدد)", id: "(Dipilih)")}'
                                   : '${strings.planMonthly}: ₺49,99 /ay',
                               style: TextStyle(
                                 color: _selectedTier == PremiumTier.monthly
@@ -524,9 +540,11 @@ class _OnboardingTrialPaywallScreenState
                                   ? strings.noPaymentNow
                                   : (_selectedTier == PremiumTier.lifetime
                                       ? strings.oneTimePaymentDesc
-                                      : (strings.language == AppLanguage.turkish
-                                          ? 'İstediğiniz zaman tek tıkla iptal'
-                                          : 'Cancel anytime in App Store')),
+                                      : _t(strings.language,
+                                          tr: 'İstediğiniz zaman tek tıkla iptal',
+                                          en: 'Cancel anytime in App Store',
+                                          ar: 'إلغاء في أي وقت من المتجر',
+                                          id: 'Batalkan kapan saja di App Store')),
                               style: const TextStyle(
                                 color: Colors.white70,
                                 fontSize: 12.5,
@@ -584,20 +602,22 @@ class _OnboardingTrialPaywallScreenState
                       Center(
                         child: Text(
                           _selectedTier == PremiumTier.yearly
-                              ? (strings.language == AppLanguage.turkish
-                                  ? '3 gün ücretsiz, sonra yılda ₺249,99 • İstediğin zaman iptal'
-                                  : (strings.language == AppLanguage.english
-                                      ? '3 days free, then ₺249.99 / year • Cancel anytime'
-                                      : '٣ أيام مجاناً ثم ٢٤٩.٩٩ ₺ سنوياً • إلغاء بأي وقت'))
+                              ? _t(strings.language,
+                                  tr: '3 gün ücretsiz, sonra yılda ₺249,99 • İstediğin zaman iptal',
+                                  en: '3 days free, then ₺249.99 / year • Cancel anytime',
+                                  ar: '٣ أيام مجاناً ثم ٢٤٩.٩٩ ₺ سنوياً • إلغاء بأي وقت',
+                                  id: '3 hari gratis, lalu ₺249,99 / tahun • Batalkan kapan saja')
                               : (_selectedTier == PremiumTier.lifetime
-                                  ? (strings.language == AppLanguage.turkish
-                                      ? '₺499,99 tek seferlik ödeme • Asla tekrar ücretlendirilmez'
-                                      : (strings.language == AppLanguage.english
-                                          ? '₺499.99 one-time payment • Never billed again'
-                                          : '٤٩٩.٩٩ ₺ دفعة واحدة لمرة واحدة'))
-                                  : (strings.language == AppLanguage.turkish
-                                      ? 'Ayda ₺49,99 • İstediğin zaman iptal'
-                                      : '₺49.99 / month • Cancel anytime')),
+                                  ? _t(strings.language,
+                                      tr: '₺499,99 tek seferlik ödeme • Asla tekrar ücretlendirilmez',
+                                      en: '₺499.99 one-time payment • Never billed again',
+                                      ar: '٤٩٩.٩٩ ₺ دفعة واحدة لمرة واحدة',
+                                      id: '₺499,99 sekali bayar • Tidak pernah ditagih lagi')
+                                  : _t(strings.language,
+                                      tr: 'Ayda ₺49,99 • İstediğin zaman iptal',
+                                      en: '₺49.99 / month • Cancel anytime',
+                                      ar: '٤٩.٩٩ ₺ شهرياً • إلغاء بأي وقت',
+                                      id: '₺49,99 / bulan • Batalkan kapan saja')),
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: Colors.white.withValues(alpha: 0.65),

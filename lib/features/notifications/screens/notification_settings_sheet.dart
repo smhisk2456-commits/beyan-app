@@ -131,11 +131,13 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              strings.language == AppLanguage.english
-                  ? 'In this mode, notifications are delivered automatically throughout the day (09:00 - 22:00).'
-                  : (strings.language == AppLanguage.arabic
-                      ? 'في هذا الوضع، يتم إرسال الإشعارات تلقائيًا طوال اليوم (09:00 - 22:00).'
-                      : 'Bu modda bildirimler gün boyu (09:00 - 22:00) otomatik aralıklarla iletilir.'),
+              strings.language == AppLanguage.turkish
+                  ? 'Bu modda bildirimler gün boyu (09:00 - 22:00) otomatik aralıklarla iletilir.'
+                  : (strings.language == AppLanguage.indonesian
+                      ? 'Dalam mode ini, notifikasi dikirim otomatis sepanjang hari (09:00 - 22:00).'
+                      : (strings.language == AppLanguage.arabic
+                          ? 'في هذا الوضع، يتم إرسال الإشعارات تلقائيًا طوال اليوم (09:00 - 22:00).'
+                          : 'In this mode, notifications are delivered automatically throughout the day (09:00 - 22:00).')),
             ),
             behavior: SnackBarBehavior.floating,
             duration: const Duration(seconds: 2),
@@ -904,22 +906,28 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                                         ),
                                         Text(
                                           _verseFrequency == 'hourly_2'
-                                              ? (strings.language == AppLanguage.english
-                                                  ? 'Delivered every 30 mins between 09:00 - 22:00'
-                                                  : (strings.language == AppLanguage.arabic
-                                                      ? 'يصل كل ٣٠ دقيقة بين ٠٩:٠٠ - ٢٢:٠٠'
-                                                      : '09:00 - 22:00 arasında her 30 dakikada bir iletilir'))
+                                              ? (strings.language == AppLanguage.turkish
+                                                  ? '09:00 - 22:00 arasında her 30 dakikada bir iletilir'
+                                                  : (strings.language == AppLanguage.indonesian
+                                                      ? 'Dikirim setiap 30 menit antara 09:00 - 22:00'
+                                                      : (strings.language == AppLanguage.arabic
+                                                          ? 'يصل كل ٣٠ دقيقة بين ٠٩:٠٠ - ٢٢:٠٠'
+                                                          : 'Delivered every 30 mins between 09:00 - 22:00')))
                                               : (_verseFrequency == 'hourly_1'
-                                                  ? (strings.language == AppLanguage.english
-                                                      ? 'Delivered hourly between 09:00 - 22:00'
-                                                      : (strings.language == AppLanguage.arabic
-                                                          ? 'يصل كل ساعة بين ٠٩:٠٠ - ٢٢:٠٠'
-                                                          : '09:00 - 22:00 arasında her saat başında iletilir'))
-                                                  : (strings.language == AppLanguage.english
-                                                      ? 'Daily verse arrives at this time (tap to change)'
-                                                      : (strings.language == AppLanguage.arabic
-                                                          ? 'تصل آية اليوم في هذا الوقت (المس للتعديل)'
-                                                          : 'Günün ayeti bu saatte iletilir (dokunup değiştir)'))),
+                                                  ? (strings.language == AppLanguage.turkish
+                                                      ? '09:00 - 22:00 arasında her saat başında iletilir'
+                                                      : (strings.language == AppLanguage.indonesian
+                                                          ? 'Dikirim setiap jam antara 09:00 - 22:00'
+                                                          : (strings.language == AppLanguage.arabic
+                                                              ? 'يصل كل ساعة بين ٠٩:٠٠ - ٢٢:٠٠'
+                                                              : 'Delivered hourly between 09:00 - 22:00')))
+                                                  : (strings.language == AppLanguage.turkish
+                                                      ? 'Günün ayeti bu saatte iletilir (dokunup değiştir)'
+                                                      : (strings.language == AppLanguage.indonesian
+                                                          ? 'Ayat harian dikirim pada jam ini (ketuk untuk mengubah)'
+                                                          : (strings.language == AppLanguage.arabic
+                                                              ? 'تصل آية اليوم في هذا الوقت (المس للتعديل)'
+                                                              : 'Daily verse arrives at this time (tap to change)')))),
                                           style: TextStyle(
                                             fontSize: 10.5,
                                             color: isDark ? Colors.white38 : AppColors.textSecondary,
@@ -937,9 +945,21 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                                     ),
                                     child: Text(
                                       _verseFrequency == 'hourly_2'
-                                          ? (strings.language == AppLanguage.english ? '30 min' : (strings.language == AppLanguage.arabic ? '٣٠ د' : '30 dk'))
+                                          ? (strings.language == AppLanguage.turkish
+                                              ? '30 dk'
+                                              : (strings.language == AppLanguage.arabic
+                                                  ? '٣٠ د'
+                                                  : (strings.language == AppLanguage.indonesian
+                                                      ? '30 mnt'
+                                                      : '30 min')))
                                           : (_verseFrequency == 'hourly_1'
-                                              ? (strings.language == AppLanguage.english ? '1 hour' : (strings.language == AppLanguage.arabic ? 'ساعة' : '1 saat'))
+                                              ? (strings.language == AppLanguage.turkish
+                                                  ? '1 saat'
+                                                  : (strings.language == AppLanguage.arabic
+                                                      ? 'ساعة'
+                                                      : (strings.language == AppLanguage.indonesian
+                                                          ? '1 jam'
+                                                          : '1 hour')))
                                               : '${_verseHour.toString().padLeft(2, '0')}:${_verseMinute.toString().padLeft(2, '0')}'),
                                       style: const TextStyle(
                                         color: Color(0xFFFFDF7A),

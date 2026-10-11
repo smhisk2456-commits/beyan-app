@@ -1,4 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import 'id_verse_translations.dart';
 
 /// Kısa, Öz ve İlham Verici Âyet Bildirim Modeli (TR, EN, AR)
 class ShortVerseNotification {
@@ -25,7 +26,10 @@ class ShortVerseNotification {
   /// Seçili dile göre kısa ve vurucu meal metnini döner
   String localizedText(String langCode) {
     if (langCode == 'ar' || langCode == 'ur') return textAr;
-    if (langCode == 'en' || langCode == 'id' || langCode == 'fr' || langCode == 'de' || langCode == 'ru') {
+    if (langCode == 'id') {
+      return kIndonesianShortVerses[verseReference] ?? textEn;
+    }
+    if (langCode == 'en' || langCode == 'fr' || langCode == 'de' || langCode == 'ru') {
       return textEn;
     }
     return textTr;

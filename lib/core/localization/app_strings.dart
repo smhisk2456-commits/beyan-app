@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:home_widget/home_widget.dart';
+import '../utils/app_constants.dart';
+import '../../features/widget_service/widget_service.dart';
 import '../../features/notifications/services/notification_service.dart';
 import 'translations/de_strings.dart';
 import 'translations/fr_strings.dart';
@@ -63,10 +66,17 @@ class LanguageNotifier extends StateNotifier<AppLanguage> {
   Future<void> _loadLanguage() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final code = prefs.getString(_prefKey);
-      if (code != null) {
-        state = AppLanguage.fromCode(code);
+      var code = prefs.getString(_prefKey);
+      if (code == null) {
+        final sysCode = WidgetsBinding.instance.platformDispatcher.locale.languageCode.toLowerCase();
+        final supported = ['tr', 'en', 'ar', 'id', 'fr', 'ur', 'de', 'ru'];
+        code = supported.contains(sysCode) ? sysCode : 'en';
+        await prefs.setString(_prefKey, code);
       }
+      state = AppLanguage.fromCode(code);
+      await HomeWidget.setAppGroupId(AppConstants.appGroupId);
+      await HomeWidget.saveWidgetData<String>('widget_app_language', code);
+      await WidgetService().updateAllWidgets();
     } catch (_) {}
   }
 
@@ -75,6 +85,10 @@ class LanguageNotifier extends StateNotifier<AppLanguage> {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_prefKey, language.code);
+      // Widget dilini ve verilerini hemen güncelle
+      await HomeWidget.setAppGroupId(AppConstants.appGroupId);
+      await HomeWidget.saveWidgetData<String>('widget_app_language', language.code);
+      await WidgetService().updateAllWidgets();
       // Yeni dilde hem namaz hem ayet bildirimlerini anında yeniden planla
       await NotificationService.instance.scheduleUpcomingPrayers();
       await NotificationService.instance.scheduleDailyVerseNotifications();
@@ -543,6 +557,106 @@ class AppStrings {
 
   // Konum & Rekat & Zaman
   String get currentLocation => _t('currentLocation', 'Mevcut Konum', 'Current Location', 'الموقع الحالي');
+  String get mosquesPill => _t('mosquesPill', 'Camiler', 'Mosques', 'المساجد');
+  String get nearbyMosques => _t('nearbyMosques', 'Yakındaki Camiler', 'Nearby Mosques', 'المساجد القريبة');
+  String get nearbyMosquesSubtitle => _t('nearbyMosquesSubtitle', 'En yakın mescidleri gör, yürüme mesafesi ve rota al', 'Find nearest mosques, walking distance & routes', 'ابحث عن أقرب المساجد ووقت المشي والاتجاهات');
+  String get gpsAndMap => _t('gpsAndMap', 'GPS & Harita', 'GPS & Maps', 'خرائط ونظام GPS');
+  String get howIsHeartToday => _t('howIsHeartToday', 'Bugün Kalbin Nasıl Hissediyor?', 'How is your heart feeling today?', 'كيف يشعر قلبك اليوم؟');
+  String get howIsHeartSubtitle => _t('howIsHeartSubtitle', 'Ruh haline özel âyet-i kerîme, dua ve şifâ', 'Tap for Quranic healing, prophetic dua & reflection', 'آيات وأدعية شافية تناسب مشاعرك');
+
+  // Widget ve Kilit Ekranı Ayarları
+  String get verseView => _t('verseView', 'Ayet Görünümü', 'Verse View', 'عرض الآية');
+  String get translationOnly => _t('translationOnly', 'Yalnızca Meal', 'Translation Only', 'الترجمة فقط');
+  String get arabicPlusTranslation => _t('arabicPlusTranslation', 'Arapça + Meal', 'Arabic + Translation', 'العربية + الترجمة');
+  String get arabicOnly => _t('arabicOnly', 'Yalnızca Arapça', 'Arabic Only', 'العربية فقط');
+  String get interval15m => _t('interval15m', '15 Dakika', '15 Minutes', '١٥ دقيقة');
+  String get interval30m => _t('interval30m', '30 Dakika', '30 Minutes', '٣٠ دقيقة');
+  String get interval1h => _t('interval1h', 'Her saat', 'Every Hour', 'كل ساعة');
+  String get interval1d => _t('interval1d', 'Her gün', 'Daily', 'يومياً');
+  String get comfortAndSolace => _t('comfortAndSolace', 'Kalbe Huzur & Teselli', 'Peace & Solace', 'طمأنينة وسلوى');
+  String get patienceAndGratitude => _t('patienceAndGratitude', 'Sabır ve Şükür', 'Patience & Gratitude', 'الصبر والشكر');
+  String get supplications => _t('supplications', 'Dualar', 'Supplications', 'الأدعية');
+  String get faithAndTrust => _t('faithAndTrust', 'İman ve Tevekkül', 'Faith & Trust', 'الإيمان والتوكل');
+  String get moralsAndEthics => _t('moralsAndEthics', 'Ahlak', 'Morals & Ethics', 'الأخلاق');
+  String get allCategories => _t('allCategories', 'Tümü', 'All', 'الكل');
+  String get applySettingsToWidget => _t('applySettingsToWidget', 'Ayarları Widget\'a Uygula', 'Apply Settings to Widget', 'تطبيق الإعدادات على الويدجت');
+  String get pinVerseToLockscreen => _t('pinVerseToLockscreen', 'Bu Âyeti Kilit Ekranına Sabitle', 'Pin this Verse to Lock Screen', 'تثبيت هذه الآية على شاشة القفل');
+  String get dynamicVerseCycleActive => _t('dynamicVerseCycleActive', 'Dinamik Âyet Döngüsü Aktif • Kilit ekranında âyetler periyodik olarak değişir.', 'Dynamic Verse Cycle Active • Verses change periodically on the lock screen.', 'دورة الآيات الديناميكية نشطة • تتغير الآيات دورياً على شاشة القفل.');
+  String get widgetTip => _t('widgetTip', '💡 İpucu: Widget\'ı telefonunuza eklemek için iPhone kilit ekranınıza basılı tutup "Özelleştir"e dokunun ve Beyân\'ı seçin.', '💡 Tip: To add the widget to your phone, press and hold your iPhone Lock Screen, tap "Customize", and select Beyân.', '💡 تلميح: لإضافة الويدجت، اضغط مطولاً على شاشة قفل الآيفون، انقر على "تخصيص"، ثم اختر بيان.');
+  String get settingsAppliedSnackBar => _t('settingsAppliedSnackBar', 'Ayarlar uygulandı! Dinamik âyet döngüsü aktif.', 'Settings applied! Dynamic verse cycle active.', 'تم تطبيق الإعدادات! دورة الآيات نشطة.');
+  String versePinnedSnackBar(String ref) => language == AppLanguage.turkish
+      ? '"$ref" âyeti kilit ekranına sabitlendi!'
+      : (language == AppLanguage.arabic
+          ? 'تم تثبيت الآية "$ref" على شاشة القفل!'
+          : (language == AppLanguage.indonesian
+              ? 'Ayat "$ref" disematkan ke layar kunci!'
+              : 'Verse "$ref" pinned to lock screen!'));
+
+  String get dailyVerseDesc => _t('dailyVerseDesc', 'Her gün otomatik olarak yeni bir ilham verici Kur\'an ayeti alın.', 'Receive a new inspiring Quran verse automatically every day.', 'احصل على آية قرآنية ملهمة جديدة تلقائياً كل يوم.');
+  String get prayerTimesWidgetDesc => _t('prayerTimesWidgetDesc', 'Canlı geri sayım sayacıyla mevcut ve yaklaşan namaz vakitlerini görün.', 'View current and upcoming prayer times with a live countdown timer.', 'عرض مواقيت الصلاة الحالية والقادمة مع عداد تنازلي مباشر.');
+  String get prayerCountdownDesc => _t('prayerCountdownDesc', 'Bir sonraki namazı canlı geri sayımla gösteren kompakt satır içi widget. Kilit Ekranınızda tarihin üzerinde görünür.', 'Compact inline widget showing live countdown to the next prayer. Appears right on your lock screen.', 'مصغر مضمن يعرض العد التنازلي للصلاة القادمة على شاشة القفل.');
+  String get hijriCalendarDesc => _t('hijriCalendarDesc', 'Hicri tarih, mübarek kandiller ve dini bayramları kilit ekranınızdan anlık takip edin.', 'Track Hijri date, blessed nights, and Islamic holidays instantly on your lock screen.', 'تابع التاريخ الهجري والمناسبات الإسلامية فوراً من شاشة القفل.');
+  String get sunTimesWidgetDesc => _t('sunTimesWidgetDesc', 'Güneş doğuşunu, kerahat çıkışını ve işrak vaktini kilit ekranınızda izleyin.', 'Monitor sunrise and Ishraq prayer times directly on your lock screen.', 'راقب وقت شروق الشمس والإشراق مباشرة على شاشة قفلك.');
+  String get currentlyPinnedLabel => _t('currentlyPinnedLabel', 'Kilit Ekranında Sabit:', 'Currently Pinned:', 'الآية المثبتة حالياً:');
+  String get rotateAction => _t('rotateAction', 'Döngüye Al', 'Rotate', 'تدوير');
+  String get trialEndedWidgetNotice => _t('trialEndedWidgetNotice', '3 Günlük Deneme Süresi Doldu • Widget için Premium\'a Geçin', '3-Day Free Trial Ended • Upgrade to Premium for Widgets', 'انتهت الفترة التجريبية (٣ أيام) • ترقية للبريميوم للويدجت');
+  String get textSizeSmall => _t('textSizeSmall', 'Küçük', 'Small', 'صغير');
+  String get textSizeStandard => _t('textSizeStandard', 'Standart', 'Standard', 'قياسي');
+  String get textSizeLarge => _t('textSizeLarge', 'Büyük', 'Large', 'كبير');
+  String get fontStandard => _t('fontStandard', 'Standart', 'Standard', 'قياسي');
+  String get fontLato => _t('fontLato', 'Zarif (Lato)', 'Elegant (Lato)', 'أنيق (لاتو)');
+  String get fontAmiri => _t('fontAmiri', 'Klasik (Amiri)', 'Classical (Amiri)', 'كلاسيكي (أميري)');
+  String get celebrationTitle => _t('celebrationTitle', '🎉 MAŞAALLAH! 🎉', '🎉 MA SHA ALLAH! 🎉', '🎉 ما شاء الله! 🎉');
+  String get acceptSpiritualBadge => _t('acceptSpiritualBadge', 'Manevi Beratı Kabul Et 🤲', 'Accept Spiritual Milestone 🤲', 'قبول الوسام الروحاني 🤲');
+  String get motivatingSurahLabel => _t('motivatingSurahLabel', 'Motive Edici Sure', 'Inspiring Surah', 'السورة التحفيزية');
+  String get unlockedBadge => _t('unlockedBadge', '🏆 KAZANILDI', '🏆 UNLOCKED', '🏆 مكتمل');
+  String get lockedBadge => _t('lockedBadge', 'Kilitli', 'Locked', 'مقفل');
+  String get dailyProgressTitle => _t('dailyProgressTitle', 'Bugünkü İbadet İlerlemeniz', 'Today\'s Worship Progress', 'تقدم عبادتك اليومي');
+  String get dailyProgressSubtitle => _t('dailyProgressSubtitle', '5 Vakit Namaz, Kur\'an-ı Kerim tilaveti ve günlük zikrinizi buradan takip edin.', 'Track your 5 daily prayers, Quran recitation and dhikr here.', 'تابع صلواتك الخمس وتلاوة القرآن والذكر هنا.');
+  String get streaksBannerTitle => _t('streaksBannerTitle', 'İbadet Serisi Dönüm Noktaları & Beratlar', 'Worship Streak Milestones & Certificates', 'محطات سلسلة العبادة والأوسمة');
+  String get streaksBannerSubtitle => _t('streaksBannerSubtitle', '5 Vakit namaz, Kur\'an ve zikir ile serinizi koruyun. Her dönüm noktasında motive edici sure ve beratlar kazanın.', 'Maintain your streak with prayers, Quran, and dhikr. Unlock inspiring surahs and certificates at each milestone.', 'حافظ على سلسلتك بالصلوات والقرآن والذكر واكسب السور والأوسمة عند كل إنجاز.');
+  String get countdownWidgetTitle => _t('countdownWidgetTitle', 'Namaz Geri Sayımı', 'Prayer Countdown', 'العد التنازلي للصلاة');
+  String get sunIshraqWidgetTitle => _t('sunIshraqWidgetTitle', 'Güneş & Kerahat Vakti', 'Sunrise & Ishraq', 'الشروق والإشراق');
+  String get dailyVerseWidgetTitle => _t('dailyVerseWidgetTitle', 'Günün Ayeti', 'Daily Verse', 'آية اليوم');
+  String get prayerTimesWidgetTitle => _t('prayerTimesWidgetTitle', 'Namaz Vakitleri', 'Prayer Times', 'مواقيت الصلاة');
+  String get hijriCalendarWidgetTitle => _t('hijriCalendarWidgetTitle', 'Hicri Takvim & Kandiller', 'Hijri Calendar & Holy Days', 'التقويم الهجري والمناسبات');
+
+  String dayGoalLabel(int day) {
+    switch (language) {
+      case AppLanguage.turkish: return '$day. Gün Hedefi';
+      case AppLanguage.indonesian: return 'Target Hari ke-$day';
+      case AppLanguage.arabic: return 'هدف اليوم $day';
+      default: return 'Day $day Goal';
+    }
+  }
+
+  String daysRemainingLock(int days) {
+    switch (language) {
+      case AppLanguage.turkish: return '$days Gün';
+      case AppLanguage.indonesian: return '$days Hari';
+      case AppLanguage.arabic: return '$days يوم';
+      default: return '$days Days';
+    }
+  }
+
+  String celebrationStreakReached(int days) {
+    switch (language) {
+      case AppLanguage.turkish: return '$days. GÜN SERİSİNE ULAŞTINIZ!';
+      case AppLanguage.indonesian: return 'ANDA MENCAPAI RANGKAIAN $days HARI!';
+      case AppLanguage.arabic: return 'وصلت إلى سلسلة $days يوماً!';
+      default: return 'YOU REACHED DAY $days STREAK!';
+    }
+  }
+
+  String milestoneUnlockHint(String surah, int days) {
+    switch (language) {
+      case AppLanguage.turkish: return 'Bu beratı ve $surah müjdesini açmak için $days gün boyunca 5 vakit namaz ve zikrinizi eksiksiz tamamlayın.';
+      case AppLanguage.indonesian: return 'Selesaikan 5 waktu shalat dan dzikir selama $days hari untuk membuka sertifikat ini dan kabar gembira $surah.';
+      case AppLanguage.arabic: return 'أتم الصلوات الخمس والذكر لمدة $days يوماً لفتح هذا الوسام وبشرى $surah.';
+      default: return 'Complete all 5 prayers and dhikr for $days days to unlock this milestone and the glad tidings of $surah.';
+    }
+  }
+
     String rakatsCount(int count) {
     switch (language) {
       case AppLanguage.turkish:
@@ -625,7 +739,6 @@ class AppStrings {
   String get widgetFeatureTitle => _t('widgetFeatureTitle', 'İslami Sözler, Dua ve Ayet', 'Islamic Quotes, Duas & Verses', 'أقوال إسلامية وأدعية وآيات');
   String get widgetFeatureDesc => _t('widgetFeatureDesc', 'Telefonunuzun kilidini açmadan Kilit Ekranınızda Kur\'an ayetlerini ve İslami alıntıları görüntüleyin.', 'Display Quran verses and Islamic quotes on your Lock Screen without unlocking your phone.', 'اعرض آيات القرآن والأدعية على شاشة القفل دون فتح قفل هاتفك.');
   String get displayCategories => _t('displayCategories', 'Görüntülenecek Kategoriler', 'Display Categories', 'الفئات المعروضة');
-  String get allCategories => _t('allCategories', 'Tümü', 'All', 'الكل');
   String get quoteRefreshInterval => _t('quoteRefreshInterval', 'Alıntı Yenileme Sıklığı', 'Quote Refresh Frequency', 'تكرار تحديث الأقوال');
   String get textSize => _t('textSize', 'Metin Boyutu', 'Text Size', 'حجم النص');
   String get fontFamily => _t('fontFamily', 'Yazı Tipi', 'Font Family', 'نوع الخط');
@@ -1014,7 +1127,108 @@ class AppStrings {
         return 'Чтение суры $surah';
     }
   }
+  String get changeCity => _t('changeCity', 'Şehir Değiştir', 'Change City', 'تغيير المدينة');
+  String get changeCitySubtitle => _t('changeCitySubtitle', 'Türkiye (Diyanet) ve dünya şehirleri', 'Diyanet and global cities', 'تركيا ومدن العالم');
+  String get calculationMethodSubtitle => _t('calculationMethodSubtitle', 'Diyanet İşleri Başkanlığı takvimi', 'Official prayer calculation standards', 'تقويم الشؤون الدينية الرسمي');
+  String get appearanceSection => _t('appearanceSection', 'Görünüm & Dil', 'Appearance & Language', 'المظهر واللغة');
+  String get adhanSection => _t('adhanSection', 'Ezan & Bildirimler', 'Adhan & Notifications', 'الأذان والإشعارات');
+  String get prayerCalculationSection => _t('prayerCalculationSection', 'Namaz Vakti & Konum', 'Prayer Times & Calculation', 'المواقيت والحساب');
+  String get specialFeaturesSection => _t('specialFeaturesSection', 'Lüks Deneyimler', 'Special Features', 'ميزات خاصة');
+  String get liveBroadcastTitle => _t('liveBroadcastTitle', 'Mekke & Medine 24/7 Canlı Yayın', 'Makkah & Madinah 24/7 Live', 'بث مباشر من مكة والمدينة ٢٤/٧');
+  String get liveBroadcastSubtitle => _t('liveBroadcastSubtitle', 'Kâbe-i Muazzama ve Mescid-i Nebevi resmi yayını', 'Official live broadcast from Holy Kaaba & Prophet\'s Mosque', 'البث الرسمي للكعبة المشرفة والمسجد النبوي');
+  String get bedsideClockTitle => _t('bedsideClockTitle', 'iOS StandBy (Gece Masası Saati)', 'Bedside Clock & StandBy', 'ساعة المنضدة وStandBy');
+  String get bedsideClockSubtitle => _t('bedsideClockSubtitle', 'Loş OLED dijital saat ve sahur/imsak sayacı', 'Dimmed OLED clock with countdown to Imsak', 'ساعة رقمية هادئة مع عداد الإمساك والسحور');
+  String get verseStudioTitle => _t('verseStudioTitle', 'Ayet & Hikaye Stüdyosu', 'Verse & Story Studio', 'استوديو الآيات والقصص');
+  String get verseStudioSubtitle => _t('verseStudioSubtitle', 'Instagram Hikaye ve estetik duvar kağıdı oluşturucu', 'Create aesthetic story cards & wallpapers', 'تصميم بطاقات وخلفيات جمالية لقصص إنستغرام');
+  String get nearbyMosquesTitle => _t('nearbyMosquesTitle', 'Yakındaki Camiler & Harita Navigasyonu', 'Nearby Mosques & Maps', 'المساجد القريبة والخرائط');
+  String get lockscreenWidgetsTitle => _t('lockscreenWidgetsTitle', 'Kilit Ekranı & Widget Tercihleri', 'Lock Screen & Widget Settings', 'شاشة القفل وإعدادات الويدجت');
+  String get lockscreenWidgetsSubtitle => _t('lockscreenWidgetsSubtitle', 'Yenileme sıklığı ve widget görünüm ayarları', 'Refresh interval and widget style options', 'تكرار التحديث وخيارات مظهر الويدجت');
+  String get aboutAndShareSection => _t('aboutAndShareSection', 'Hakkında & Paylaş', 'About & Share', 'حول التطبيق والمشاركة');
+  String get shareBeyanTitle => _t('shareBeyanTitle', 'Beyân\'ı Sevdiklerinle Paylaş', 'Share Beyân with Loved Ones', 'شارك تطبيق بيان مع أحبائك');
+  String get shareBeyanSubtitle => _t('shareBeyanSubtitle', 'Sadaka-i cariye niyetiyle hayra vesile ol', 'Be a means of goodness as ongoing charity', 'كن مفتاحاً للخير وصدقة جارية');
+  String get shareAppMessage => _t('shareAppMessage', 'Namaz vakitleri, kilit ekranı ayet widget\'ları ve tarihi ezan makamları içeren Beyân uygulamasını keşfedin: https://testflight.apple.com/join/Q3UDfndV', 'Discover Beyân with accurate prayer times, lock screen Quran widgets, and authentic adhan makams: https://testflight.apple.com/join/Q3UDfndV', 'اكتشف تطبيق بيان لأوقات الصلاة وأدوات آيات شاشة القفل ومقامات الأذان: https://testflight.apple.com/join/Q3UDfndV');
+  String get activeStatus => _t('activeStatus', 'AKTİF', 'ACTIVE', 'مفعل');
+  String get premiumActiveSubtitle => _t('premiumActiveSubtitle', 'Tüm tarihi ezan makamları ve lüks özellikler açık', 'All historic adhan makams & luxury features unlocked', 'جميع مقامات الأذان والميزات مفتوحة بالكامل');
+  String get premiumPromoSubtitle => _t('premiumPromoSubtitle', 'Mekke & Medine makamları, reklamsız huzur ve sınırsız widget', 'Makkah & Madinah adhans, ad-free peace, and widgets', 'مقامات مكة والمدينة، راحة بدون إعلانات وويدجت بلا حدود');
+  String get manageAction => _t('manageAction', 'Yönet', 'Manage', 'إدارة');
+  String get upgradeAction => _t('upgradeAction', 'Yükselt', 'Upgrade', 'ترقية');
+  String get themeSubtitle => _t('themeSubtitle', 'Zümrüt Yeşili, Gece Safiri, OLED Siyah...', 'Emerald Green, Night Sapphire, OLED Black...', 'الأخضر الزمردي، الياقوت الليلي، أسود OLED...');
+  String get specialAdhanSubtitle => _t('specialAdhanSubtitle', 'İstanbul, Mekke, Medine ve Tekbir Makamları', 'Istanbul, Makkah, Madinah & Historic Makams', 'مقامات إسطنبول، مكة، المدينة والتكبير');
+  String get notificationSettingsSubtitle => _t('notificationSettingsSubtitle', 'Vakit ezanları, hatırlatıcılar ve günlük âyetler', 'Prayer adhans, reminders, and daily verses', 'أذان الصلوات، التذكيرات والآيات اليومية');
+  String get rakatsAndOrderTitle => _t('rakatsAndOrderTitle', 'Rekat Düzeni & Kılınış Sırası', 'Rakats & Order of Prayer', 'ترتيب الركعات وكيفية الصلاة');
+  String get recommendedSurahsTitle => _t('recommendedSurahsTitle', 'Bu Vakte Özel Faziletli Sûre ve Âyetler', 'Special Recommended Surahs & Verses', 'سور وآيات مستحبة لهذا الوقت');
+  String get tapToReadBadge => _t('tapToReadBadge', 'Dokununca Açılır', 'Tap to Read', 'اضغط للقراءة');
+  String get surahsRecitedInPrayerTitle => _t('surahsRecitedInPrayerTitle', 'Namazda Okunan Zamm-ı Sûreler', 'Surahs Recited in Prayer (Zamm-i Surah)', 'قصار السور التي تقرأ في الصلاة');
+  String get tenShortSurahsBadge => _t('tenShortSurahsBadge', '10 Namaz Sûresi', '10 Short Surahs', '١٠ سور قصيرة');
+  String get prayerSurahTapHint => _t('prayerSurahTapHint', 'Fâtiha\'dan sonra okunan bu sûrelerden birine dokunarak Kur\'an-ı Kerim sayfasında anında açabilirsiniz.', 'Tap any surah to open its full recitation and meaning directly in the Holy Quran tab.', 'اضغط على أي سورة لفتحها مباشرة في مصحف التطبيق مع التلاوة والتفسير.');
+  String get makkahLiveTitle => _t('makkahLiveTitle', 'Kâbe-i Muazzama (Mekke)', 'Holy Kaaba (Makkah)', 'الكعبة المشرفة (مكة المكرمة)');
+  String get madinahLiveTitle => _t('madinahLiveTitle', 'Mescid-i Nebevi (Medine)', 'Prophet\'s Mosque (Madinah)', 'المسجد النبوي (المدينة المنورة)');
+  String get liveBadgeMakkah => _t('liveBadgeMakkah', 'CANLI • MEKKE', 'LIVE • MAKKAH', 'مباشر • مكة');
+  String get liveBadgeMadinah => _t('liveBadgeMadinah', 'CANLI • MEDİNE', 'LIVE • MADINAH', 'مباشر • المدينة');
+  String get connectingLive => _t('connectingLive', 'Bağlanıyor...', 'Connecting...', 'جاري الاتصال...');
+  String get openInYouTube => _t('openInYouTube', 'YouTube\'da Aç', 'Open in YouTube', 'فتح في يوتيوب');
+  String get directStream => _t('directStream', 'Doğrudan', 'Direct', 'مباشر');
+  String verseNumberLabel(int n) {
+    switch (language) {
+      case AppLanguage.turkish:
+        return '$n. Âyet';
+      case AppLanguage.english:
+        return 'Ayah $n';
+      case AppLanguage.arabic:
+        return 'الآية $n';
+      case AppLanguage.indonesian:
+        return 'Ayat $n';
+      case AppLanguage.french:
+        return 'Verset $n';
+      case AppLanguage.urdu:
+        return 'آیت $n';
+      case AppLanguage.german:
+        return 'Vers $n';
+      case AppLanguage.russian:
+        return 'Аят $n';
+    }
+  }
   String get closeBtn => _t('closeBtn', 'Kapat', 'Close', 'إغلاق');
+  String get makkahLiveSubtitle => _t('makkahLiveSubtitle', 'Suudi Arabistan Resmi Kur\'an TV 24/7 Canlı Yayın', 'Saudi Official Quran TV 24/7 Live Stream', 'تلفزيون القرآن الكريم الرسمي بث مباشر ٢٤/٧');
+  String get madinahLiveSubtitle => _t('madinahLiveSubtitle', 'Suudi Arabistan Resmi Sünnet TV 24/7 Canlı Yayın', 'Saudi Official Sunnah TV 24/7 Live Stream', 'تلفزيون السنة النبوية الرسمي بث مباشر ٢٤/٧');
+  String get makkahLiveDesc => _t('makkahLiveDesc', 'Beytullah\'ın etrafındaki tavafı ve Mescid-i Haram\'da kılınan vakit namazlarını 24 saat kesintisiz uygulama içinden canlı izleyin.', 'Watch the circumambulation around the Kaaba and prayers at the Grand Mosque live 24/7 in-app.', 'شاهد الطواف حول الكعبة المشرفة والصلوات في المسجد الحرام مباشرة ٢٤ ساعة من داخل التطبيق.');
+  String get madinahLiveDesc => _t('madinahLiveDesc', 'Peygamber Efendimiz\'in (s.a.v.) kabr-i şerifinin bulunduğu Mescid-i Nebevi Ravza-i Mutahhara atmosferini 24 saat kesintisiz canlı izleyin.', 'Experience the atmosphere of the Prophet\'s Mosque and Rawdah Mubarak live 24/7 in-app.', 'شاهد أجواء المسجد النبوي الشريف والروضة المباركة بجوار قبر النبي ﷺ مباشرة على مدار الساعة.');
+  String get makkahLiveHadith => _t('makkahLiveHadith', '«Yeryüzünde insanlar için kurulan ilk mabet, âlemlere bereket ve hidayet kaynağı olan Mekke\'deki Kâbe\'dir.» (Âl-i İmrân 96)', '«Indeed, the first House established for mankind was that at Makkah - blessed and a guidance for the worlds.» (Quran 3:96)', '«إِنَّ أَوَّلَ بَيْتٍ وُضِعَ لِلنَّاسِ لَلَّذِي بِبَكَّةَ مُبَارَكًا وَهُدًى لِّلْعَالَمِينَ» (آل عمران: ٩٦)');
+  String get madinahLiveHadith => _t('madinahLiveHadith', '«Evimle minberimin arası, cennet bahçelerinden bir bahçedir.» (Buhârî, Mescid-i Mekke 5)', '«Between my house and my pulpit is a garden from the gardens of Paradise.» (Bukhari)', '«مَا بَيْنَ بَيْتِي وَمِنْبَرِي رَوْضَةٌ مِنْ رِيَاضِ الْجَنَّةِ» (صحيح البخاري)');
+  String get refreshStream => _t('refreshStream', 'Yenile', 'Refresh', 'تحديث');
+  String get fullscreenTooltip => _t('fullscreenTooltip', 'Tam Ekran İzle', 'Watch Full Screen', 'ملء الشاشة');
+  String get healingDuaHadithBadge => _t('healingDuaHadithBadge', 'Şifâ Duası (Hadis-i Şerif)', 'Healing Dua (Hadith)', 'دعاء الشفاء (حديث شريف)');
+  String get heartComfortTitle => _t('heartComfortTitle', 'Kalbe Ferahlık', 'Heart Comfort', 'راحة القلب');
+  String get storyWallpaperButton => _t('storyWallpaperButton', 'Hikaye / Duvar Kağıdı', 'Story / Wallpaper', 'قصة / خلفية');
+  String get readInQuranTooltip => _t('readInQuranTooltip', 'Kur\'an\'da Oku', 'Read in Quran', 'اقرأ في المصحف');
+  String get shareTooltip => _t('shareTooltip', 'Paylaş', 'Share', 'مشاركة');
+  String get randomVerseTooltip => _t('randomVerseTooltip', 'Rastgele Âyet', 'Random Verse', 'آية عشوائية');
+  String get selectVerseAction => _t('selectVerseAction', 'Âyet Seç', 'Select Verse', 'اختر آية');
+  String get aspectRatioStory => _t('aspectRatioStory', 'Hikaye (9:16)', 'Story (9:16)', 'قصة (٩:١٦)');
+  String get aspectRatioSquare => _t('aspectRatioSquare', 'Kare (1:1)', 'Square (1:1)', 'مربع (١:١)');
+  String get saveToGallery => _t('saveToGallery', 'Galeriye Kaydet', 'Save to Photos', 'حفظ في الصور');
+  String get savedToGallerySuccess => _t('savedToGallerySuccess', 'Görsel galerinize kaydedildi!', 'Saved to photos successfully!', 'تم حفظ الصورة في ألبوم الصور بنجاح!');
+  String get verseAndDuaLibrary => _t('verseAndDuaLibrary', 'Âyet & Dua Kütüphanesi', 'Verse & Dua Library', 'مكتبة الآيات والأدعية');
+  String get writeCustomVerse => _t('writeCustomVerse', 'Kendin Yaz', 'Write Custom', 'اكتب بنفسك');
+  String get writeYourOwnVerseTitle => _t('writeYourOwnVerseTitle', 'Kendi Âyetini / Metnini Yaz', 'Write Your Own Verse / Text', 'اكتب آيتك أو نصك الخاص');
+  String get verseSourceHint => _t('verseSourceHint', 'Kaynak / Sure (Örn: İnşirâh 94:6)', 'Source / Surah (e.g. Ash-Sharh 94:6)', 'المصدر / السورة (مثال: الشرح ٩٤:٦)');
+  String get verseArabicTextHint => _t('verseArabicTextHint', 'Arapça Metin (İsteğe Bağlı)', 'Arabic Text (Optional)', 'النص العربي (اختياري)');
+  String get verseMeaningHint => _t('verseMeaningHint', 'Meâl / Anlam', 'Translation / Meaning', 'الترجمة / المعنى');
+  String get applyAction => _t('applyAction', 'Uygula', 'Apply', 'تطبيق');
+  String get fullscreenPreviewTooltip => _t('fullscreenPreviewTooltip', 'Tam Ekran Önizle', 'Full Screen Preview', 'معاينة ملء الشاشة');
+  String get wallpaperRatioStory => _t('wallpaperRatioStory', '9:16 Duvar Kağıdı', '9:16 Wallpaper', 'خلفية ٩:١٦');
+  String get squareRatioPost => _t('squareRatioPost', '1:1 Kare', '1:1 Square', 'مربع ١:١');
+  String get fontSerifElegant => _t('fontSerifElegant', 'Zarif Serif', 'Elegant Serif', 'خط أنيق');
+  String get fontNaskhClassic => _t('fontNaskhClassic', 'Klasik Nesih', 'Classic Naskh', 'نسخ كلاسيكي');
+  String get fontModern => _t('fontModern', 'Modern', 'Modern', 'حديث');
+  String get decreaseTextSize => _t('decreaseTextSize', 'Küçült', 'Decrease Size', 'تصغير الخط');
+  String get increaseTextSize => _t('increaseTextSize', 'Büyüt', 'Increase Size', 'تكبير الخط');
+  String get arabicTextToggle => _t('arabicTextToggle', 'Arapça', 'Arabic', 'عربي');
+  String get meaningToggle => _t('meaningToggle', 'Meâl', 'Translation', 'الترجمة');
+  String get logoToggle => _t('logoToggle', 'Logo', 'Logo', 'الشعار');
+  String get preparingImage => _t('preparingImage', 'Görsel Hazırlanıyor...', 'Preparing Image...', 'جاري تجهيز الصورة...');
+  String get shareAsWallpaperStory => _t('shareAsWallpaperStory', 'Duvar Kağıdı / Hikaye Olarak Paylaş', 'Share as Wallpaper / Story', 'مشاركة كخلفية أو قصة');
+  String get shareError => _t('shareError', 'Paylaşım hatası', 'Share error', 'خطأ في المشاركة');
 }
 
 

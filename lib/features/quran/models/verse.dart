@@ -1,3 +1,5 @@
+import '../../notifications/models/short_verse_notification.dart';
+
 /// Kur'an ayetlerini temsil eden veri modeli.
 ///
 /// Veritabanı tablosu: `verse`
@@ -71,6 +73,19 @@ class Verse {
 
   /// Ayet numarasını Arapça çevre sembolleriyle döner (ör: ﴿٢٥٥﴾)
   String get verseMarker => '﴿$verseNumber﴾';
+
+  /// Seçili dile göre meali döner (kısa ayet havuzunda mevcutsa çok dilli, değilse veritabanı meali)
+  String localizedMeaning(String langCode) {
+    if (langCode == 'tr') return turkishMeaning;
+    for (final item in ShortVerseNotification.pool) {
+      if (item.verseReference.endsWith(' $surahId:$verseNumber') ||
+          item.verseReference.contains(' $surahId:$verseNumber-') ||
+          item.verseReference.contains(' $surahId:$verseNumber,')) {
+        return item.localizedText(langCode);
+      }
+    }
+    return turkishMeaning;
+  }
 
   // ── Eşitlik ────────────────────────────────────────────────
 

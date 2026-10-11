@@ -1,13 +1,15 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/localization/app_strings.dart';
 import '../../quran/models/surah.dart';
 import '../../quran/widgets/arabic_text_widget.dart';
 
 /// Sure listesinde bir satırı gösteren widget.
 ///
-/// Sol taraf: Numaralı sekizgen + Türkçe isim + etiket
+/// Sol taraf: Numaralı sekizgen + Dil bazlı isim + etiket
 /// Sağ taraf: Arapça isim (Amiri fontu)
-class SurahListItem extends StatelessWidget {
+class SurahListItem extends ConsumerWidget {
   final Surah surah;
   final VoidCallback onTap;
 
@@ -18,8 +20,10 @@ class SurahListItem extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final strings = ref.watch(appStringsProvider);
+    final langCode = strings.language.code;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -52,13 +56,13 @@ class SurahListItem extends StatelessWidget {
                 _SurahNumber(number: surah.id, isDark: isDark),
                 const SizedBox(width: 14),
 
-                // ── Türkçe İsim + Bilgi Etiketleri ───────────────
+                // ── Dil Bazlı İsim + Bilgi Etiketleri ─────────────
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        surah.nameTurkish,
+                        surah.localizedName(langCode),
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
@@ -69,7 +73,7 @@ class SurahListItem extends StatelessWidget {
                       Row(
                         children: [
                           _InfoChip(
-                            label: surah.revelationLabel,
+                            label: surah.localizedRevelation(langCode),
                             color: surah.isMeccan
                                 ? const Color(0xFF0A685A)
                                 : const Color(0xFF996515),
@@ -77,7 +81,7 @@ class SurahListItem extends StatelessWidget {
                           ),
                           const SizedBox(width: 6),
                           Text(
-                            surah.verseCountLabel,
+                            surah.localizedVerseCount(langCode),
                             style: TextStyle(
                               fontSize: 12,
                               color: isDark ? Colors.white54 : const Color(0xFF5B6E6A),

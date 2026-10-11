@@ -1054,13 +1054,8 @@ class _SpiritualMoodsSection extends ConsumerWidget {
     final lang = strings.language.code;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final title = strings.language == AppLanguage.english
-        ? 'How is your heart feeling today?'
-        : (strings.language == AppLanguage.arabic ? 'كيف يشعر قلبك اليوم؟' : 'Bugün Kalbin Nasıl Hissediyor?');
-
-    final subtitle = strings.language == AppLanguage.english
-        ? 'Tap for Quranic healing, prophetic dua & reflection'
-        : (strings.language == AppLanguage.arabic ? 'آيات وأدعية شافية تناسب مشاعرك' : 'Ruh haline özel âyet-i kerîme, dua ve şifâ');
+    final title = strings.howIsHeartToday;
+    final subtitle = strings.howIsHeartSubtitle;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
@@ -1252,9 +1247,7 @@ class _NearbyMosquesCard extends ConsumerWidget {
                       Row(
                         children: [
                           Text(
-                            strings.language == AppLanguage.english
-                                ? 'Nearby Mosques'
-                                : (strings.language == AppLanguage.arabic ? 'المساجد القريبة' : 'Yakındaki Camiler'),
+                            strings.nearbyMosques,
                             style: TextStyle(
                               color: isDark ? Colors.white : const Color(0xFF064E3B),
                               fontSize: 14.5,
@@ -1268,9 +1261,9 @@ class _NearbyMosquesCard extends ConsumerWidget {
                               color: const Color(0xFF34D399).withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(6),
                             ),
-                            child: const Text(
-                              'GPS & Harita',
-                              style: TextStyle(
+                            child: Text(
+                              strings.gpsAndMap,
+                              style: const TextStyle(
                                 color: Color(0xFF059669),
                                 fontSize: 9.5,
                                 fontWeight: FontWeight.bold,
@@ -1281,11 +1274,7 @@ class _NearbyMosquesCard extends ConsumerWidget {
                       ),
                       const SizedBox(height: 3),
                       Text(
-                        strings.language == AppLanguage.english
-                            ? 'Find nearest mosques, walking distance & Apple Maps route'
-                            : (strings.language == AppLanguage.arabic
-                                ? 'ابحث عن أقرب المساجد ووقت المشي والاتجاهات'
-                                : 'En yakın mescidleri gör, yürüme mesafesi ve rota al'),
+                        strings.nearbyMosquesSubtitle,
                         style: TextStyle(
                           color: isDark ? Colors.white60 : const Color(0xFF047857),
                           fontSize: 11.5,

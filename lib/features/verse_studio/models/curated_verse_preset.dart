@@ -1,3 +1,5 @@
+import '../../notifications/models/short_verse_notification.dart';
+
 /// Duvar Kağıdı ve Hikaye Stüdyosu İçin Seçilmiş Estetik Âyet & Dua Modeli
 class CuratedVersePreset {
   final String category;
@@ -11,6 +13,60 @@ class CuratedVersePreset {
     required this.arabic,
     required this.meaning,
   });
+
+  String localizedMeaning(String langCode) {
+    if (langCode == 'tr') return meaning;
+    for (final item in ShortVerseNotification.pool) {
+      if (item.verseReference == reference ||
+          item.verseReference.contains(reference.split(' ').last)) {
+        return item.localizedText(langCode);
+      }
+    }
+    return meaning;
+  }
+
+  String localizedReference(String langCode) {
+    if (langCode == 'tr') return reference;
+    for (final item in ShortVerseNotification.pool) {
+      if (item.verseReference == reference ||
+          item.verseReference.contains(reference.split(' ').last)) {
+        return item.localizedReference(langCode);
+      }
+    }
+    return reference;
+  }
+
+  String localizedCategory(String langCode) {
+    switch (category) {
+      case 'Huzur & Şifa':
+        if (langCode == 'tr') return 'Huzur & Şifa';
+        if (langCode == 'id') return 'Kedamaian & Kesembuhan';
+        if (langCode == 'ar') return 'السكينة والشفاء';
+        return 'Peace & Healing';
+      case 'Dua & Münâcât':
+        if (langCode == 'tr') return 'Dua & Münâcât';
+        if (langCode == 'id') return 'Doa & Munajat';
+        if (langCode == 'ar') return 'الدعاء والمناجاة';
+        return 'Dua & Supplication';
+      case 'Umut & Rahmet':
+        if (langCode == 'tr') return 'Umut & Rahmet';
+        if (langCode == 'id') return 'Harapan & Rahmat';
+        if (langCode == 'ar') return 'الأمل والرحمة';
+        return 'Hope & Mercy';
+      case 'Sabır & Tevekkül':
+        if (langCode == 'tr') return 'Sabır & Tevekkül';
+        if (langCode == 'id') return 'Sabar & Tawakal';
+        if (langCode == 'ar') return 'الصبر والتوكل';
+        return 'Patience & Trust';
+      case 'Muhafaza':
+        if (langCode == 'tr') return 'Muhafaza';
+        if (langCode == 'id') return 'Perlindungan';
+        if (langCode == 'ar') return 'الحفظ والتحصين';
+        return 'Protection';
+      default:
+        return category;
+    }
+  }
 
   static const List<CuratedVersePreset> presets = [
     // ── Huzur & Şifa ──────────────────────────────────────────

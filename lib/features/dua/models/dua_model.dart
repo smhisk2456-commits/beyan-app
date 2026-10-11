@@ -87,8 +87,8 @@ class DuaItem {
   String localizedTitle(String langCode) {
     final entry = kDuaTranslations[id];
     if (entry != null) {
-      if (langCode == 'en' && entry.titleEn.isNotEmpty) return entry.titleEn;
       if (langCode == 'ar' && entry.titleAr.isNotEmpty) return entry.titleAr;
+      if (langCode != 'tr' && entry.titleEn.isNotEmpty) return entry.titleEn;
     }
     return title;
   }
@@ -96,8 +96,8 @@ class DuaItem {
   String localizedMeaning(String langCode) {
     final entry = kDuaTranslations[id];
     if (entry != null) {
-      if (langCode == 'en' && entry.meaningEn.isNotEmpty) return entry.meaningEn;
       if (langCode == 'ar' && entry.meaningAr.isNotEmpty) return entry.meaningAr;
+      if (langCode != 'tr' && entry.meaningEn.isNotEmpty) return entry.meaningEn;
     }
     return turkishMeaning;
   }
@@ -105,13 +105,13 @@ class DuaItem {
   String localizedReference(String langCode) {
     final entry = kDuaTranslations[id];
     if (entry != null) {
-      if (langCode == 'en' && entry.referenceEn.isNotEmpty) return entry.referenceEn;
       if (langCode == 'ar' && entry.referenceAr.isNotEmpty) return entry.referenceAr;
+      if (langCode != 'tr' && entry.referenceEn.isNotEmpty) return entry.referenceEn;
     }
-    if (langCode == 'en') {
-      return _translateReferenceToEn(reference);
-    } else if (langCode == 'ar') {
+    if (langCode == 'ar') {
       return _translateReferenceToAr(reference);
+    } else if (langCode != 'tr') {
+      return _translateReferenceToEn(reference);
     }
     return reference;
   }

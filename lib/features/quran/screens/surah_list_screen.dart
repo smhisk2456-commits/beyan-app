@@ -176,7 +176,7 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
                                   ),
                                 ),
                                 Text(
-                                  '${lastRead.surahName} • ${lastRead.verseNumber}. Ayet',
+                                  '${lastRead.surahName} • ${strings.verseNumberLabel(lastRead.verseNumber)}',
                                   style: const TextStyle(fontSize: 11.5, color: Colors.white70),
                                 ),
                               ],

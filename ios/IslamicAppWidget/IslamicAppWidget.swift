@@ -28,20 +28,284 @@ enum WidgetLocation {
     }
 }
 
+// MARK: - Çok Dilli Yerelleştirme (WidgetLocalization - 8 Dil)
+
+enum WidgetLocalization {
+    static var currentLanguage: String {
+        let defaults = UserDefaults(suiteName: "group.com.smhisk60.beyan") ?? UserDefaults.standard
+        if let lang = defaults.string(forKey: "widget_app_language"), !lang.isEmpty {
+            return lang
+        }
+        if let pref = Locale.preferredLanguages.first {
+            let prefix = String(pref.prefix(2)).lowercased()
+            let supported = ["tr", "en", "ar", "id", "fr", "ur", "de", "ru"]
+            if supported.contains(prefix) { return prefix }
+        }
+        return "en"
+    }
+
+    static func prayerName(for kind: PrayerKind) -> String {
+        let lang = currentLanguage
+        switch lang {
+        case "en":
+            switch kind {
+            case .imsak: return "Fajr"
+            case .gunes: return "Sunrise"
+            case .ogle: return "Dhuhr"
+            case .ikindi: return "Asr"
+            case .aksam: return "Maghrib"
+            case .yatsi: return "Isha"
+            }
+        case "id":
+            switch kind {
+            case .imsak: return "Subuh"
+            case .gunes: return "Terbit"
+            case .ogle: return "Dzuhur"
+            case .ikindi: return "Ashar"
+            case .aksam: return "Maghrib"
+            case .yatsi: return "Isya"
+            }
+        case "ar":
+            switch kind {
+            case .imsak: return "الفجر"
+            case .gunes: return "الشروق"
+            case .ogle: return "الظهر"
+            case .ikindi: return "العصر"
+            case .aksam: return "المغرب"
+            case .yatsi: return "العشاء"
+            }
+        case "fr":
+            switch kind {
+            case .imsak: return "Fajr"
+            case .gunes: return "Lever"
+            case .ogle: return "Dhuhr"
+            case .ikindi: return "Asr"
+            case .aksam: return "Maghrib"
+            case .yatsi: return "Isha"
+            }
+        case "ur":
+            switch kind {
+            case .imsak: return "فجر"
+            case .gunes: return "طلوع آفتاب"
+            case .ogle: return "ظہر"
+            case .ikindi: return "عصر"
+            case .aksam: return "مغرب"
+            case .yatsi: return "عشاء"
+            }
+        case "de":
+            switch kind {
+            case .imsak: return "Fadschr"
+            case .gunes: return "Sonnenaufgang"
+            case .ogle: return "Dhuhr"
+            case .ikindi: return "Asr"
+            case .aksam: return "Maghrib"
+            case .yatsi: return "Ischaa"
+            }
+        case "ru":
+            switch kind {
+            case .imsak: return "Фаджр"
+            case .gunes: return "Восход"
+            case .ogle: return "Зухр"
+            case .ikindi: return "Аср"
+            case .aksam: return "Магриб"
+            case .yatsi: return "Иша"
+            }
+        default: // "tr"
+            switch kind {
+            case .imsak: return "İmsak"
+            case .gunes: return "Güneş"
+            case .ogle: return "Öğle"
+            case .ikindi: return "İkindi"
+            case .aksam: return "Akşam"
+            case .yatsi: return "Yatsı"
+            }
+        }
+    }
+
+    static var nextPrayerTitle: String {
+        let lang = currentLanguage
+        switch lang {
+        case "en": return "Next Prayer"
+        case "id": return "Sholat Berikutnya"
+        case "ar": return "الصلاة القادمة"
+        case "fr": return "Prochaine Prière"
+        case "ur": return "اگلی نماز"
+        case "de": return "Nächstes Gebet"
+        case "ru": return "Следующий намаз"
+        default:   return "Sıradaki Namaz"
+        }
+    }
+
+    static var countdownTitle: String {
+        let lang = currentLanguage
+        switch lang {
+        case "en": return "Countdown"
+        case "id": return "Hitung Mundur"
+        case "ar": return "العد التنازلي"
+        case "fr": return "Compte à Rebours"
+        case "ur": return "الٹی گنتی"
+        case "de": return "Countdown"
+        case "ru": return "Обратный отсчет"
+        default:   return "Geri Sayım"
+        }
+    }
+
+    static func timeUntil(prayer: String) -> String {
+        let lang = currentLanguage
+        switch lang {
+        case "en": return "Until \(prayer):"
+        case "id": return "Menuju \(prayer):"
+        case "ar": return "المتبقي لـ \(prayer):"
+        case "fr": return "Jusqu'à \(prayer):"
+        case "ur": return "\(prayer) تک:"
+        case "de": return "Bis \(prayer):"
+        case "ru": return "До \(prayer):"
+        default:   return "\(prayer) Vaktine Kalan:"
+        }
+    }
+
+    static func prayerTimeLabel(prayer: String, time: String) -> String {
+        let lang = currentLanguage
+        switch lang {
+        case "en": return "\(prayer) Time: \(time)"
+        case "id": return "Waktu \(prayer): \(time)"
+        case "ar": return "وقت \(prayer): \(time)"
+        case "fr": return "Heure de \(prayer): \(time)"
+        case "ur": return "\(prayer) کا وقت: \(time)"
+        case "de": return "\(prayer) Zeit: \(time)"
+        case "ru": return "Время \(prayer): \(time)"
+        default:   return "\(prayer) Saati: \(time)"
+        }
+    }
+
+    static var verseOfTheDay: String {
+        let lang = currentLanguage
+        switch lang {
+        case "en": return "Verse of the Day"
+        case "id": return "Ayat Hari Ini"
+        case "ar": return "آية اليوم"
+        case "fr": return "Verset du Jour"
+        case "ur": return "آج کی آیت"
+        case "de": return "Vers des Tages"
+        case "ru": return "Аят Дня"
+        default:   return "Günün Ayeti"
+        }
+    }
+
+    static var verseOfTheDayLong: String {
+        let lang = currentLanguage
+        switch lang {
+        case "en": return "Verse of the Day"
+        case "id": return "Ayat Suci Hari Ini"
+        case "ar": return "آية اليوم الكريمة"
+        case "fr": return "Saint Verset du Jour"
+        case "ur": return "آج کی مقدس آیت"
+        case "de": return "Vers des Tages"
+        case "ru": return "Священный Аят Дня"
+        default:   return "Günün Ayet-i Kerimesi"
+        }
+    }
+
+    static var hijriCalendar: String {
+        let lang = currentLanguage
+        switch lang {
+        case "en": return "Hijri Calendar"
+        case "id": return "Kalender Hijriah"
+        case "ar": return "التقويم الهجري"
+        case "fr": return "Calendrier Hégirien"
+        case "ur": return "ہجری کیلنڈر"
+        case "de": return "Hidschri-Kalender"
+        case "ru": return "Хиджри Календарь"
+        default:   return "Hicri Takvim"
+        }
+    }
+
+    static var sunAndIshraq: String {
+        let lang = currentLanguage
+        switch lang {
+        case "en": return "Sunrise & Ishraq"
+        case "id": return "Terbit & Isyraq"
+        case "ar": return "الشروق والإشراق"
+        case "fr": return "Lever du soleil & Ishraq"
+        case "ur": return "طلوع و اشراق"
+        case "de": return "Sonnenaufgang & Ischraq"
+        case "ru": return "Восход и Ишрак"
+        default:   return "Güneş & Kerâhet Vakti"
+        }
+    }
+
+    static func sunInline(sunrise: String, ishraq: String) -> String {
+        let lang = currentLanguage
+        switch lang {
+        case "en": return "☀️ Sunrise \(sunrise) • Ishraq \(ishraq)"
+        case "id": return "☀️ Terbit \(sunrise) • Isyraq \(ishraq)"
+        case "ar": return "☀️ الشروق \(sunrise) • الإشراق \(ishraq)"
+        case "fr": return "☀️ Lever \(sunrise) • Ishraq \(ishraq)"
+        case "ur": return "☀️ طلوع \(sunrise) • اشراق \(ishraq)"
+        case "de": return "☀️ Sonnenaufgang \(sunrise) • Ischraq \(ishraq)"
+        case "ru": return "☀️ Восход \(sunrise) • Ишрак \(ishraq)"
+        default:   return "☀️ Güneş \(sunrise) • İşrak \(ishraq)"
+        }
+    }
+
+    static func sunDetail(sunrise: String, ishraq: String) -> String {
+        let lang = currentLanguage
+        switch lang {
+        case "en": return "Sunrise: \(sunrise) • Ishraq: \(ishraq)"
+        case "id": return "Terbit: \(sunrise) • Isyraq: \(ishraq)"
+        case "ar": return "الشروق: \(sunrise) • الإشراق: \(ishraq)"
+        case "fr": return "Lever: \(sunrise) • Ishraq: \(ishraq)"
+        case "ur": return "طلوع: \(sunrise) • اشراق: \(ishraq)"
+        case "de": return "Sonnenaufgang: \(sunrise) • Ischraq: \(ishraq)"
+        case "ru": return "Восход: \(sunrise) • Ишрак: \(ishraq)"
+        default:   return "Güneş: \(sunrise) • İşrak: \(ishraq)"
+        }
+    }
+
+    static func duhaTime(ishraq: String) -> String {
+        let lang = currentLanguage
+        switch lang {
+        case "en": return "Duha prayer starts: \(ishraq)"
+        case "id": return "Mulai sholat Dhuha: \(ishraq)"
+        case "ar": return "بداية صلاة الضحى: \(ishraq)"
+        case "fr": return "Prière de Douha: \(ishraq)"
+        case "ur": return "نماز چاشت کا وقت: \(ishraq)"
+        case "de": return "Duha-Gebet ab: \(ishraq)"
+        case "ru": return "Время намаза Духа: \(ishraq)"
+        default:   return "Kerâhet çıkışı: \(ishraq) (Duhâ namazı)"
+        }
+    }
+
+    static var fallbackVerse: (ref: String, text: String) {
+        let lang = currentLanguage
+        switch lang {
+        case "en":
+            return ("Al-Baqarah 2:153", "O you who have believed, seek help through patience and prayer. Indeed, Allah is with the patient.")
+        case "id":
+            return ("Al-Baqarah 2:153", "Wahai orang-orang yang beriman! Mohonlah pertolongan (kepada Allah) dengan sabar dan sholat. Sungguh, Allah beserta orang-orang yang sabar.")
+        case "ar":
+            return ("البقرة ٢:١٥٣", "يَا أَيُّهَا الَّذِينَ آمَنُوا اسْتَعِينُوا بِالصَّبْرِ وَالصَّلَاةِ ۚ إِنَّ اللَّهَ مَعَ الصَّابِرِينَ")
+        case "fr":
+            return ("Al-Baqarah 2:153", "Ô les croyants! Cherchez secours dans l'endurance et la prière. Car Allah est avec ceux qui sont endurants.")
+        case "ur":
+            return ("البقرۃ 2:153", "اے ایمان والو! صبر اور نماز سے مدد لو، بیشک اللہ صبر کرنے والوں کے ساتھ ہے۔")
+        case "de":
+            return ("Al-Baqarah 2:153", "O die ihr glaubt, sucht Hilfe in Geduld und Gebet! Gewiss, Allah ist mit den Standhaften.")
+        case "ru":
+            return ("Аль-Бакара 2:153", "О те, которые уверовали! Обратитесь за помощью к терпению и молитве. Воистину, Аллах — с терпеливыми.")
+        default:
+            return ("Bakara 2:153", "Ey iman edenler! Sabır ve namazla yardım dileyin. Şüphesiz Allah sabredenlerle beraberdir.")
+        }
+    }
+}
+
 // MARK: - Namaz Vakti Hesabı (Diyanet: Fecr 18°, İşa 17°, Hanefi ikindi)
 
 enum PrayerKind: Int, CaseIterable {
     case imsak, gunes, ogle, ikindi, aksam, yatsi
 
     var name: String {
-        switch self {
-        case .imsak: return "İmsak"
-        case .gunes: return "Güneş"
-        case .ogle: return "Öğle"
-        case .ikindi: return "İkindi"
-        case .aksam: return "Akşam"
-        case .yatsi: return "Yatsı"
-        }
+        return WidgetLocalization.prayerName(for: self)
     }
 
     var symbol: String {
@@ -305,7 +569,7 @@ struct PrayerSystemSmallView: View {
                     .foregroundColor(Color(red: 1.0, green: 0.85, blue: 0.45))
             }
             Spacer()
-            Text("Sıradaki Namaz")
+            Text(WidgetLocalization.nextPrayerTitle)
                 .font(.system(size: 11))
                 .foregroundColor(.white.opacity(0.7))
             Text(entry.next.kind.name)
@@ -340,7 +604,7 @@ struct PrayerSystemMediumView: View {
                         .foregroundColor(Color(red: 1.0, green: 0.85, blue: 0.45))
                 }
                 Spacer()
-                Text("Sıradaki Namaz")
+                Text(WidgetLocalization.nextPrayerTitle)
                     .font(.system(size: 11))
                     .foregroundColor(.white.opacity(0.7))
                 Text(entry.next.kind.name)
@@ -461,6 +725,13 @@ struct VerseProvider: TimelineProvider {
         if !dynamic.isEmpty {
             return dynamic
         }
+        let lang = WidgetLocalization.currentLanguage
+        if lang != "tr" {
+            let localized = WidgetVerseData.multilingualFallbacks(for: lang)
+            if !localized.isEmpty {
+                return localized
+            }
+        }
         return WidgetVerseData.all
     }
 
@@ -468,14 +739,16 @@ struct VerseProvider: TimelineProvider {
         let isPinned = Self.bool(forKey: "widget_is_pinned")
         if isPinned,
            let appliedRef = Self.string(forKey: "widget_applied_verse_ref"),
-           let appliedText = Self.string(forKey: "widget_applied_verse_text") {
+           let appliedText = Self.string(forKey: "widget_applied_verse_text"),
+           !appliedRef.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+           !appliedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             return VerseEntry(date: date, ref: appliedRef, text: appliedText)
         }
 
         let pool = Self.allVerses()
         guard !pool.isEmpty else {
-            return VerseEntry(date: date, ref: "Bakara 2:153",
-                              text: "Ey iman edenler! Sabır ve namazla yardım dileyin.")
+            let fallback = WidgetLocalization.fallbackVerse
+            return VerseEntry(date: date, ref: fallback.ref, text: fallback.text)
         }
 
         let slot = Self.slotDuration()
@@ -560,7 +833,7 @@ struct VerseSystemSmallView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
-                Text("Günün Ayeti")
+                Text(WidgetLocalization.verseOfTheDay)
                     .font(.system(size: 11, weight: .bold))
                     .foregroundColor(Color(red: 1.0, green: 0.85, blue: 0.45))
                 Spacer()
@@ -592,7 +865,7 @@ struct VerseSystemMediumView: View {
                     Image(systemName: "book.closed.fill")
                         .font(.system(size: 12))
                         .foregroundColor(Color(red: 1.0, green: 0.85, blue: 0.45))
-                    Text("Günün Ayet-i Kerimesi")
+                    Text(WidgetLocalization.verseOfTheDayLong)
                         .font(.system(size: 12, weight: .bold))
                         .foregroundColor(Color(red: 1.0, green: 0.85, blue: 0.45))
                 }
@@ -712,7 +985,7 @@ struct CountdownWidgetView: View {
             case .systemSmall:
                 VStack(alignment: .leading, spacing: 4) {
                     HStack {
-                        Text("Geri Sayım")
+                        Text(WidgetLocalization.countdownTitle)
                             .font(.system(size: 12, weight: .bold))
                             .foregroundColor(Color(red: 1.0, green: 0.85, blue: 0.45))
                         Spacer()
@@ -721,14 +994,14 @@ struct CountdownWidgetView: View {
                             .foregroundColor(Color(red: 1.0, green: 0.85, blue: 0.45))
                     }
                     Spacer()
-                    Text("\(entry.next.kind.name) Vaktine")
+                    Text(WidgetLocalization.timeUntil(prayer: entry.next.kind.name))
                         .font(.system(size: 12))
                         .foregroundColor(.white.opacity(0.75))
                     Text(entry.next.date, style: .timer)
                         .font(.system(size: 24, weight: .bold, design: .rounded))
                         .monospacedDigit()
                         .foregroundColor(.white)
-                    Text("\(entry.next.kind.name) Saati: \(hhmm.string(from: entry.next.date))")
+                    Text(WidgetLocalization.prayerTimeLabel(prayer: entry.next.kind.name, time: hhmm.string(from: entry.next.date)))
                         .font(.system(size: 11))
                         .foregroundColor(Color(red: 1.0, green: 0.85, blue: 0.45))
                 }
@@ -738,7 +1011,7 @@ struct CountdownWidgetView: View {
                     HStack(spacing: 4) {
                         Image(systemName: "timer")
                             .font(.system(size: 11, weight: .semibold))
-                        Text("\(entry.next.kind.name) Vaktine Kalan:")
+                        Text(WidgetLocalization.timeUntil(prayer: entry.next.kind.name))
                             .font(.system(size: 11.5, weight: .bold))
                             .lineLimit(1)
                     }
@@ -749,7 +1022,7 @@ struct CountdownWidgetView: View {
                         .foregroundColor(.white)
                         .minimumScaleFactor(0.75)
                         .lineLimit(1)
-                    Text("\(entry.next.kind.name) Saati: \(hhmm.string(from: entry.next.date))")
+                    Text(WidgetLocalization.prayerTimeLabel(prayer: entry.next.kind.name, time: hhmm.string(from: entry.next.date)))
                         .font(.system(size: 10.5, weight: .medium))
                         .foregroundColor(.white.opacity(0.75))
                         .lineLimit(1)
@@ -784,6 +1057,21 @@ enum HijriHelper {
         "Cemâziyelevvel", "Cemâziyelâhir", "Recep", "Şâban",
         "Ramazan", "Şevval", "Zilkade", "Zilhicce"
     ]
+    private static let monthsId = [
+        "", "Muharram", "Safar", "Rabiul Awal", "Rabiul Akhir",
+        "Jumadil Awal", "Jumadil Akhir", "Rajab", "Sya'ban",
+        "Ramadhan", "Syawal", "Dzulkaidah", "Dzulhijjah"
+    ]
+    private static let monthsEn = [
+        "", "Muharram", "Safar", "Rabi' al-Awwal", "Rabi' al-Thani",
+        "Jumada al-Awwal", "Jumada al-Thani", "Rajab", "Sha'ban",
+        "Ramadan", "Shawwal", "Dhu al-Qadah", "Dhu al-Hijjah"
+    ]
+    private static let monthsAr = [
+        "", "محرم", "صفر", "ربيع الأول", "ربيع الآخر",
+        "جمادى الأولى", "جمادى الآخرة", "رجب", "شعبان",
+        "رمضان", "شوال", "ذو القعدة", "ذو الحجة"
+    ]
 
     static func info(for date: Date) -> (day: Int, monthName: String, year: Int, specialNotice: String) {
         var cal = Calendar(identifier: .islamicUmmAlQura)
@@ -792,33 +1080,124 @@ enum HijriHelper {
         let month = cal.component(.month, from: date)
         let year = cal.component(.year, from: date)
 
-        let monthName = (month >= 1 && month <= 12) ? monthsTr[month] : "Ramazan"
+        let lang = WidgetLocalization.currentLanguage
+        let months: [String] = {
+            switch lang {
+            case "id": return monthsId
+            case "ar": return monthsAr
+            case "tr": return monthsTr
+            default:   return monthsEn
+            }
+        }()
+
+        let monthName = (month >= 1 && month <= 12) ? months[month] : (months.count > 9 ? months[9] : "Ramadan")
 
         var notice = ""
-        if month == 9 {
-            if day == 27 {
-                notice = "✨ Mübarek Kadir Gecesi"
-            } else if day < 27 {
-                notice = "Kadir Gecesine \(27 - day) gün kaldı"
+        switch lang {
+        case "id":
+            if month == 9 {
+                if day == 27 {
+                    notice = "✨ Malam Lailatul Qadr"
+                } else if day < 27 {
+                    notice = "\(27 - day) hari menuju Lailatul Qadr"
+                } else {
+                    notice = "\(30 - day + 1) hari menuju Idul Fitri"
+                }
+            } else if month == 10 && day <= 3 {
+                notice = "🎉 Hari Raya Idul Fitri"
+            } else if month == 12 && day >= 10 && day <= 13 {
+                notice = "🐑 Hari Raya Idul Adha"
+            } else if month == 12 && day == 9 {
+                notice = "🤲 Hari Arafah"
+            } else if month == 8 && day == 15 {
+                notice = "✨ Malam Nisfu Sya'ban"
+            } else if month == 7 && day == 27 {
+                notice = "✨ Isra Mi'raj"
+            } else if month == 1 && day == 10 {
+                notice = "Hari Asyura"
+            } else if month == 3 && day == 12 {
+                notice = "✨ Maulid Nabi Muhammad"
             } else {
-                notice = "Ramazan Bayramına \(30 - day + 1) gün kaldı"
+                notice = "Tahun Baru Hijriah \(year)"
             }
-        } else if month == 10 && day <= 3 {
-            notice = "🎉 Ramazan Bayramı"
-        } else if month == 12 && day >= 10 && day <= 13 {
-            notice = "🐑 Kurban Bayramı"
-        } else if month == 12 && day == 9 {
-            notice = "🤲 Arefe Günü"
-        } else if month == 8 && day == 15 {
-            notice = "✨ Mübarek Berat Kandili"
-        } else if month == 7 && day == 27 {
-            notice = "✨ Mübarek Miraç Kandili"
-        } else if month == 1 && day == 10 {
-            notice = "Aşure Günü"
-        } else if month == 3 && day == 12 {
-            notice = "✨ Mevlid Kandili"
-        } else {
-            notice = "Mübarek Hicri \(year)"
+        case "ar":
+            if month == 9 {
+                if day == 27 {
+                    notice = "✨ ليلة القدر المباركة"
+                } else if day < 27 {
+                    notice = "بقي \(27 - day) يوم على ليلة القدر"
+                } else {
+                    notice = "بقي \(30 - day + 1) يوم على عيد الفطر"
+                }
+            } else if month == 10 && day <= 3 {
+                notice = "🎉 عيد الفطر المبارك"
+            } else if month == 12 && day >= 10 && day <= 13 {
+                notice = "🐑 عيد الأضحى المبارك"
+            } else if month == 12 && day == 9 {
+                notice = "🤲 يوم عرفة"
+            } else if month == 8 && day == 15 {
+                notice = "✨ ليلة النصف من شعبان"
+            } else if month == 7 && day == 27 {
+                notice = "✨ ليلة الإسراء والمعراج"
+            } else if month == 1 && day == 10 {
+                notice = "يوم عاشوراء"
+            } else if month == 3 && day == 12 {
+                notice = "✨ المولد النبوي الشريف"
+            } else {
+                notice = "سنة هجرية مباركة \(year)"
+            }
+        case "tr":
+            if month == 9 {
+                if day == 27 {
+                    notice = "✨ Mübarek Kadir Gecesi"
+                } else if day < 27 {
+                    notice = "Kadir Gecesine \(27 - day) gün kaldı"
+                } else {
+                    notice = "Ramazan Bayramına \(30 - day + 1) gün kaldı"
+                }
+            } else if month == 10 && day <= 3 {
+                notice = "🎉 Ramazan Bayramı"
+            } else if month == 12 && day >= 10 && day <= 13 {
+                notice = "🐑 Kurban Bayramı"
+            } else if month == 12 && day == 9 {
+                notice = "🤲 Arefe Günü"
+            } else if month == 8 && day == 15 {
+                notice = "✨ Mübarek Berat Kandili"
+            } else if month == 7 && day == 27 {
+                notice = "✨ Mübarek Miraç Kandili"
+            } else if month == 1 && day == 10 {
+                notice = "Aşure Günü"
+            } else if month == 3 && day == 12 {
+                notice = "✨ Mevlid Kandili"
+            } else {
+                notice = "Mübarek Hicri \(year)"
+            }
+        default: // en, fr, de, ru, ur
+            if month == 9 {
+                if day == 27 {
+                    notice = "✨ Blessed Laylat al-Qadr"
+                } else if day < 27 {
+                    notice = "\(27 - day) days to Laylat al-Qadr"
+                } else {
+                    notice = "\(30 - day + 1) days to Eid al-Fitr"
+                }
+            } else if month == 10 && day <= 3 {
+                notice = "🎉 Eid al-Fitr"
+            } else if month == 12 && day >= 10 && day <= 13 {
+                notice = "🐑 Eid al-Adha"
+            } else if month == 12 && day == 9 {
+                notice = "🤲 Day of Arafah"
+            } else if month == 8 && day == 15 {
+                notice = "✨ Night of Mid-Sha'ban"
+            } else if month == 7 && day == 27 {
+                notice = "✨ Night of Isra & Mi'raj"
+            } else if month == 1 && day == 10 {
+                notice = "Day of Ashura"
+            } else if month == 3 && day == 12 {
+                notice = "✨ Mawlid al-Nabi"
+            } else {
+                notice = "Blessed Hijri \(year)"
+            }
         }
 
         return (day, monthName, year, notice)
@@ -878,7 +1257,7 @@ struct HijriWidgetView: View {
             case .systemSmall:
                 VStack(alignment: .leading, spacing: 4) {
                     HStack {
-                        Text("Hicri Takvim")
+                        Text(WidgetLocalization.hijriCalendar)
                             .font(.system(size: 12, weight: .bold))
                             .foregroundColor(Color(red: 1.0, green: 0.85, blue: 0.45))
                         Spacer()
@@ -978,22 +1357,22 @@ struct SunWidgetView: View {
         Group {
             switch family {
             case .accessoryInline:
-                Text("☀️ Güneş \(hhmm.string(from: entry.sunrise)) • İşrak \(hhmm.string(from: entry.ishraq))")
+                Text(WidgetLocalization.sunInline(sunrise: hhmm.string(from: entry.sunrise), ishraq: hhmm.string(from: entry.ishraq)))
             default: // .accessoryRectangular
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 4) {
                         Image(systemName: "sunrise.fill")
                             .font(.system(size: 11))
                             .foregroundColor(Color(red: 1.0, green: 0.85, blue: 0.45))
-                        Text("Güneş & İşrak Vakti")
+                        Text(WidgetLocalization.sunAndIshraq)
                             .font(.system(size: 12.5, weight: .bold))
                             .foregroundColor(.white)
                             .lineLimit(1)
                     }
-                    Text("Güneş: \(hhmm.string(from: entry.sunrise))  •  İşrak: \(hhmm.string(from: entry.ishraq))")
+                    Text(WidgetLocalization.sunDetail(sunrise: hhmm.string(from: entry.sunrise), ishraq: hhmm.string(from: entry.ishraq)))
                         .font(.system(size: 11.5, weight: .semibold, design: .rounded))
                         .foregroundColor(.white.opacity(0.95))
-                    Text("Kerâhet çıkışı: \(hhmm.string(from: entry.ishraq)) (Duhâ namazı)")
+                    Text(WidgetLocalization.duhaTime(ishraq: hhmm.string(from: entry.ishraq)))
                         .font(.system(size: 10, weight: .medium))
                         .foregroundColor(.white.opacity(0.72))
                         .lineLimit(1)

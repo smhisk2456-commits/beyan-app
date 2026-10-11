@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../notifications/models/id_verse_translations.dart';
+import '../../notifications/models/short_verse_notification.dart';
 
 /// Günlük ibadet takip modeli (5 vakit namaz + Kuran + zikir)
 class DailyWorshipEntry {
@@ -113,17 +115,8 @@ class WorshipStreakMilestone {
   });
 
   String localizedBadgeName(String langCode) {
-    if (langCode == 'en') {
-      switch (days) {
-        case 10: return '10-Day Steadfastness Certificate';
-        case 30: return '30-Day Perseverance Certificate';
-        case 50: return '50-Day Devotion & Patience Medal';
-        case 100: return '100-Day Prayer Guardian Badge';
-        case 200: return '200-Day Serenity & Victory Crown';
-        case 400: return '400-Day Ridwan & Content Soul Badge';
-        default: return '$days-Day Worship Streak Certificate';
-      }
-    } else if (langCode == 'ar') {
+    if (langCode == 'tr') return badgeName;
+    if (langCode == 'ar') {
       switch (days) {
         case 10: return 'شهادة الاستقامة لـ ١٠ أيام';
         case 30: return 'شهادة الثبات لـ ٣٠ يوماً';
@@ -134,7 +127,122 @@ class WorshipStreakMilestone {
         default: return 'شهادة استمرار العبادة لـ $days يوماً';
       }
     }
-    return badgeName;
+    if (langCode == 'id') {
+      switch (days) {
+        case 10: return 'Sertifikat Istiqamah 10 Hari';
+        case 30: return 'Sertifikat Ketekunan 30 Hari';
+        case 50: return 'Medali Khusyuk & Sabar 50 Hari';
+        case 100: return 'Lencana Penjaga Shalat 100 Hari';
+        case 200: return 'Mahkota Ketenangan & Kemenangan 200 Hari';
+        case 400: return 'Lencana Ridha & Jiwa Mutmainnah 400 Hari';
+        default: return 'Sertifikat Rangkaian Ibadah $days Hari';
+      }
+    }
+    switch (days) {
+      case 10: return '10-Day Steadfastness Certificate';
+      case 30: return '30-Day Perseverance Certificate';
+      case 50: return '50-Day Devotion & Patience Medal';
+      case 100: return '100-Day Prayer Guardian Badge';
+      case 200: return '200-Day Serenity & Victory Crown';
+      case 400: return '400-Day Ridwan & Content Soul Badge';
+      default: return '$days-Day Worship Streak Certificate';
+    }
+  }
+
+  String localizedTitle(String langCode) {
+    if (langCode == 'tr') return title;
+    if (langCode == 'id') {
+      switch (days) {
+        case 10: return 'Awal Istiqamah';
+        case 30: return 'Sebulan Ketekunan & Ketenangan';
+        case 50: return 'Perisai Sabar & Khusyuk';
+        case 100: return 'Penjaga Shalat & Kabar Firdaus';
+        case 200: return 'Ketenangan Hati & Kemenangan Rohani';
+        case 400: return 'Ridha Terbesar & Jiwa Mutmainnah';
+        default: return 'Pencapaian $days Hari';
+      }
+    }
+    if (langCode == 'ar') {
+      switch (days) {
+        case 10: return 'بداية الاستقامة';
+        case 30: return 'شهر من الثبات والانشراح';
+        case 50: return 'درع الصبر والخشوع';
+        case 100: return 'حارس الصلاة وبشرى الفردوس';
+        case 200: return 'سكينة القلب والفتح الروحي';
+        case 400: return 'الرضوان الأكبر والنفس المطمئنة';
+        default: return 'إنجاز $days يوماً';
+      }
+    }
+    switch (days) {
+      case 10: return 'Beginning of Steadfastness';
+      case 30: return 'One Month of Perseverance & Ease';
+      case 50: return 'Shield of Patience & Khushu';
+      case 100: return 'Prayer Guardian & Glad Tidings of Firdaus';
+      case 200: return 'Heart Serenity & Spiritual Victory';
+      case 400: return 'Supreme Contentment & Tranquil Soul';
+      default: return 'Day $days Milestone';
+    }
+  }
+
+  String localizedSurahName(String langCode) {
+    if (langCode == 'tr') return surahName;
+    switch (days) {
+      case 10: return 'Surah Al-Asr';
+      case 30: return 'Surah Ash-Sharh';
+      case 50: return 'Surah Al-Baqarah';
+      case 100: return 'Surah Al-Mu\'minun';
+      case 200: return 'Surah Al-Fath';
+      case 400: return 'Surah Al-Fajr';
+      default: return surahName;
+    }
+  }
+
+  String localizedMeaning(String langCode) {
+    if (langCode == 'tr') return turkishMeaning;
+    if (langCode == 'id') {
+      switch (days) {
+        case 10: return 'Demi masa. Sungguh, manusia berada dalam kerugian, kecuali orang-orang yang beriman dan mengerjakan kebajikan serta saling menasihati untuk kebenaran dan saling menasihati untuk kesabaran.';
+        case 30: return 'Maka sesungguhnya beserta kesulitan ada kemudahan, sesungguhnya beserta kesulitan itu ada kemudahan. Maka apabila engkau telah selesai (dari suatu urusan), tetaplah bekerja keras dan hanya kepada Tuhanmulah engkau berharap.';
+        case 50: return 'Dan mohonlah pertolongan (kepada Allah) dengan sabar dan shalat. Dan sesungguhnya yang demikian itu sungguh berat, kecuali bagi orang-orang yang khusyuk.';
+        case 100: return 'Sungguh beruntung orang-orang yang beriman, (yaitu) orang-orang yang khusyuk dalam shalatnya... dan orang-orang yang memelihara shalat mereka. Mereka itulah yang akan mewarisi surga Firdaus.';
+        case 200: return 'Sungguh, Kami telah memberikan kepadamu kemenangan yang nyata... Dialah yang telah menurunkan ketenangan ke dalam hati orang-orang mukmin untuk menambah keimanan mereka.';
+        case 400: return 'Wahai jiwa yang tenang! Kembalilah kepada Tuhanmu dengan hati yang ridha dan diridhai-Nya. Maka masuklah ke dalam golongan hamba-hamba-Ku, dan masuklah ke dalam surga-Ku!';
+        default: return turkishMeaning;
+      }
+    }
+    switch (days) {
+      case 10: return 'By time, indeed mankind is in loss, except for those who have believed and done righteous deeds and advised each other to truth and advised each other to patience.';
+      case 30: return 'For indeed, with hardship [will be] ease. Indeed, with hardship [will be] ease. So when you have finished, remain steadfast, and to your Lord direct [your] longing.';
+      case 50: return 'And seek help through patience and prayer, and indeed, it is difficult except for the humbly submissive.';
+      case 100: return 'Certainly will the believers have succeeded: They who are during their prayer humbly submissive... And they who carefully maintain their prayers. Those are the inheritors of al-Firdaws.';
+      case 200: return 'Indeed, We have granted you a clear triumph... It is He who sent down tranquility into the hearts of the believers that they would increase in faith.';
+      case 400: return 'O soul at peace, return to your Lord, well-pleased and pleasing [to Him], and enter among My [righteous] servants, and enter My Paradise.';
+      default: return turkishMeaning;
+    }
+  }
+
+  String localizedSpiritualVirtue(String langCode) {
+    if (langCode == 'tr') return spiritualVirtue;
+    if (langCode == 'id') {
+      switch (days) {
+        case 10: return 'Kunci emas pertama untuk ketekunan dalam ibadah adalah amal saleh yang memberi nilai pada waktu.';
+        case 30: return 'Barangsiapa istiqamah mendirikan 5 waktu shalat dan dzikir selama sebulan penuh, Allah memberikan kelapangan dan kemudahan.';
+        case 50: return 'Dengan 50 hari ibadah tanpa putus, khusyuk meresap ke dalam hati; shalat bukan lagi beban, melainkan tempat perlindungan paling damai.';
+        case 100: return 'Istiqamah 100 hari menjadikan shalat lebih dari sekadar kewajiban; itu menjadi kunci abadi surga Firdaus.';
+        case 200: return 'Hamba yang setia pada jalur ibadahnya selama 200 hari dibukakan pintu ketenangan ilahi dan kemenangan batin.';
+        case 400: return 'Istiqamah agung 400 hari mengangkat jiwa ke derajat mutmainnah; balasan tertinggi adalah keridhaan Allah dan surga-Nya yang abadi.';
+        default: return spiritualVirtue;
+      }
+    }
+    switch (days) {
+      case 10: return 'The first golden key to consistency in worship: righteous deeds that bring value to time.';
+      case 30: return 'To the servant who maintains prayers and dhikr for a full month, their Lord promises relief and ease.';
+      case 50: return 'Through 50 continuous days of devotion, khushu settles into the heart; prayer becomes a sanctuary of peace rather than a burden.';
+      case 100: return '100 days of steadfastness elevates prayer from duty to the eternal key of Firdaus Paradise.';
+      case 200: return 'Divine serenity and spiritual conquest are unlocked for the soul steadfast in devotion for 200 days.';
+      case 400: return 'A profound 400 days of devotion elevates the soul to tranquility; the greatest reward is Allah’s pleasure and eternal Paradise.';
+      default: return spiritualVirtue;
+    }
   }
 
   static const List<WorshipStreakMilestone> allMilestones = [
@@ -459,6 +567,31 @@ class DailyCompletionVerse {
     required this.turkishMeaning,
     required this.spiritualNote,
   });
+
+  String localizedSurahName(String langCode) {
+    if (langCode == 'tr') return surahName;
+    return surahName.replaceAll(' Suresi', '');
+  }
+
+  String localizedMeaning(String langCode) {
+    if (langCode == 'tr') return turkishMeaning;
+    if (langCode == 'id') {
+      return kIndonesianShortVerses[verseReference] ?? turkishMeaning;
+    }
+    final match = ShortVerseNotification.pool.where((s) => s.verseReference == verseReference);
+    if (match.isNotEmpty) {
+      return match.first.localizedText(langCode);
+    }
+    return turkishMeaning;
+  }
+
+  String localizedSpiritualNote(String langCode) {
+    if (langCode == 'tr') return spiritualNote;
+    if (langCode == 'id') {
+      return 'Dengan menyelesaikan ibadah hari ini, Anda telah menjaga perisai spiritual dan ketenangan hati.';
+    }
+    return 'By completing today\'s worship, you have maintained a spiritual shield and inner peace.';
+  }
 
   /// Her gün için farklı bir ayet döner (Yılın gününe göre otomatik döner)
   static DailyCompletionVerse getForDate([DateTime? date]) {
