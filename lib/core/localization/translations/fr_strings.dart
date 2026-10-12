@@ -36,6 +36,7 @@ const Map<String, String> frStrings = <String, String>{
   'anotherVerse': 'Autre verset',
   'appSignature': '— Beyân, votre compagnon de vie islamique',
   'appearanceAndTheme': 'Apparence & Thème',
+  'theme': 'Thème',
   'appearanceDesc': 'Personnalisez la palette de couleurs et le mode sombre',
   'appearanceModeSection': 'MODE D\'APPARENCE',
   'arabicFontSizeTitle': 'Taille de la police arabe',

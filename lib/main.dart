@@ -50,10 +50,29 @@ void main() async {
   // İnternet olmasa da çevrimdışı (offline) yerel fontları kullan:
   GoogleFonts.config.allowRuntimeFetching = false;
 
-  // Tarih formatları
-  await initializeDateFormatting('tr_TR', null);
-  await initializeDateFormatting('en_US', null);
-  await initializeDateFormatting('ar_SA', null);
+  // Tarih formatları (Tüm desteklenen diller için)
+  for (final loc in [
+    'tr',
+    'tr_TR',
+    'en',
+    'en_US',
+    'ar',
+    'ar_SA',
+    'id',
+    'id_ID',
+    'fr',
+    'fr_FR',
+    'de',
+    'de_DE',
+    'ru',
+    'ru_RU',
+    'ur',
+    'ur_PK'
+  ]) {
+    try {
+      await initializeDateFormatting(loc, null);
+    } catch (_) {}
+  }
 
   // Native servisleri arka planda (non-blocking ve izole) başlat:
   Future.microtask(() async {

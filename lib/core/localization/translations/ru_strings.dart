@@ -36,6 +36,7 @@ const Map<String, String> ruStrings = <String, String>{
   'anotherVerse': 'Другой аят',
   'appSignature': '— Исламское приложение Beyân',
   'appearanceAndTheme': 'Внешний вид и темы',
+  'theme': 'Тема',
   'appearanceDesc': 'Настройте цветовую палитру и темную тему',
   'appearanceModeSection': 'РЕЖИМ ОФОРМЛЕНИЯ',
   'arabicFontSizeTitle': 'Размер арабского шрифта',

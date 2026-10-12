@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../../../core/localization/app_strings.dart';
+import '../../prayer_times/models/prayer_time_model.dart';
 import '../../prayer_times/providers/prayer_time_providers.dart';
 
 enum StandByTheme {
@@ -16,6 +18,31 @@ enum StandByTheme {
   final Color glow;
 
   const StandByTheme(this.label, this.primary, this.glow);
+
+  String localizedLabel(String langCode) {
+    switch (this) {
+      case StandByTheme.nightRed:
+        if (langCode == 'tr') return 'Kırmızı Loş';
+        if (langCode == 'id') return 'Merah Redup';
+        if (langCode == 'ar') return 'أحمر هادئ';
+        return 'Dim Red';
+      case StandByTheme.golden:
+        if (langCode == 'tr') return 'Lüks Altın';
+        if (langCode == 'id') return 'Emas Mewah';
+        if (langCode == 'ar') return 'ذهبي فاخر';
+        return 'Luxury Gold';
+      case StandByTheme.emerald:
+        if (langCode == 'tr') return 'Zümrüt Huzur';
+        if (langCode == 'id') return 'Zamrud Tenang';
+        if (langCode == 'ar') return 'زمرد هادئ';
+        return 'Emerald Peace';
+      case StandByTheme.pureWhite:
+        if (langCode == 'tr') return 'Saf Beyaz';
+        if (langCode == 'id') return 'Putih Murni';
+        if (langCode == 'ar') return 'أبيض ناصع';
+        return 'Pure White';
+    }
+  }
 }
 
 /// iOS 18 StandBy & Lüks Başucu Gece Saati
@@ -79,6 +106,8 @@ class _BedsideClockScreenState extends ConsumerState<BedsideClockScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = ref.watch(appStringsProvider);
+    final langCode = strings.language.code;
     final dailyAsync = ref.watch(dailyPrayerTimesProvider);
     final nextPrayer = dailyAsync.valueOrNull?.nextPrayerEntry;
     final countdownAsync = ref.watch(countdownStringProvider);
@@ -86,6 +115,30 @@ class _BedsideClockScreenState extends ConsumerState<BedsideClockScreen> {
 
     final primaryColor = _isDimmed ? _theme.primary.withValues(alpha: 0.35) : _theme.primary;
     final glowColor = _isDimmed ? Colors.transparent : _theme.glow;
+
+    final dimLabel = _isDimmed
+        ? (strings.language == AppLanguage.turkish
+            ? 'Loş Uyku Modu'
+            : (strings.language == AppLanguage.indonesian
+                ? 'Mode Redup'
+                : (strings.language == AppLanguage.arabic ? 'وضع النوم' : 'Dim Sleep Mode')))
+        : (strings.language == AppLanguage.turkish
+            ? 'Dokun: Loşlaştır'
+            : (strings.language == AppLanguage.indonesian
+                ? 'Ketuk: Redupkan'
+                : (strings.language == AppLanguage.arabic ? 'اضغط للتهدئة' : 'Tap: Dim Screen')));
+
+    final orientationTooltip = isLandscapeNow
+        ? (strings.language == AppLanguage.turkish
+            ? 'Dikey Ekrana Geç'
+            : (strings.language == AppLanguage.indonesian
+                ? 'Beralih ke Potret'
+                : (strings.language == AppLanguage.arabic ? 'التبديل إلى الوضع الرأسي' : 'Switch to Portrait')))
+        : (strings.language == AppLanguage.turkish
+            ? 'Yatay StandBy Moduna Geç'
+            : (strings.language == AppLanguage.indonesian
+                ? 'Beralih ke StandBy Lanskap'
+                : (strings.language == AppLanguage.arabic ? 'التبديل إلى الوضع الأفقي' : 'Switch to StandBy')));
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -122,7 +175,7 @@ class _BedsideClockScreenState extends ConsumerState<BedsideClockScreen> {
                           ),
                           const SizedBox(width: 6),
                           Text(
-                            _isDimmed ? 'Loş Uyku Modu' : 'Dokun: Loşlaştır',
+                            dimLabel,
                             style: TextStyle(
                               color: primaryColor,
                               fontSize: 11,
@@ -137,7 +190,7 @@ class _BedsideClockScreenState extends ConsumerState<BedsideClockScreen> {
                     // Renk Teması Değiştirici
                     IconButton(
                       icon: Icon(Icons.palette_outlined, color: primaryColor, size: 22),
-                      tooltip: 'Renk Teması (${_theme.label})',
+                      tooltip: '${strings.theme}: ${_theme.localizedLabel(langCode)}',
                       onPressed: _nextTheme,
                     ),
 
@@ -148,14 +201,14 @@ class _BedsideClockScreenState extends ConsumerState<BedsideClockScreen> {
                         color: primaryColor,
                         size: 22,
                       ),
-                      tooltip: isLandscapeNow ? 'Dikey Ekrana Geç' : 'Yatay StandBy Moduna Geç',
+                      tooltip: orientationTooltip,
                       onPressed: _toggleOrientation,
                     ),
 
                     // Kapat
                     IconButton(
                       icon: const Icon(Icons.close_rounded, color: Colors.white60, size: 24),
-                      tooltip: 'Kapat',
+                      tooltip: strings.closeBtn,
                       onPressed: () => Navigator.pop(context),
                     ),
                   ],
@@ -166,14 +219,27 @@ class _BedsideClockScreenState extends ConsumerState<BedsideClockScreen> {
               Positioned.fill(
                 top: 60,
                 child: isLandscapeNow
-                    ? _buildLandscapeStandBy(nextPrayer, countdownAsync, primaryColor, glowColor)
-                    : _buildPortraitDock(nextPrayer, countdownAsync, primaryColor, glowColor),
+                    ? _buildLandscapeStandBy(nextPrayer, countdownAsync, primaryColor, glowColor, strings)
+                    : _buildPortraitDock(nextPrayer, countdownAsync, primaryColor, glowColor, strings),
               ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  String _nightVerseText(AppLanguage lang) {
+    switch (lang) {
+      case AppLanguage.english:
+        return '«And during a part of the night prostrate to Him and exalt Him a long part of the night.» (Al-Insan 76:26)';
+      case AppLanguage.indonesian:
+        return '«Dan pada sebagian dari malam, sujudlah kepada-Nya dan bertasbihlah kepada-Nya di bagian yang panjang pada malam hari.» (Al-Insan 76:26)';
+      case AppLanguage.arabic:
+        return '«وَمِنَ اللَّيْلِ فَاسْجُدْ لَهُ وَسَبِّحْهُ لَيْلًا طَوِيلًا» (الإنسان: ٢٦)';
+      default:
+        return '«Gecenin bir kısmında O\'na secde et ve geceleyin O\'nu uzun uzadıya tesbih et.» (İnsân 76:26)';
+    }
   }
 
   // ════════════════════════════════════════════════════════════════
@@ -184,11 +250,13 @@ class _BedsideClockScreenState extends ConsumerState<BedsideClockScreen> {
     AsyncValue<String> countdownAsync,
     Color primaryColor,
     Color glowColor,
+    AppStrings strings,
   ) {
+    final langCode = strings.language.code;
     final hours = DateFormat('HH').format(_now);
     final minutes = DateFormat('mm').format(_now);
     final seconds = DateFormat('ss').format(_now);
-    final dateStr = DateFormat('d MMMM yyyy, EEEE', 'tr_TR').format(_now);
+    final dateStr = DateFormat('d MMMM yyyy, EEEE', langCode).format(_now);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
@@ -289,7 +357,15 @@ class _BedsideClockScreenState extends ConsumerState<BedsideClockScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'SIRADAKİ VAKİT: ${nextPrayer.name.turkish.toUpperCase()}',
+                                nextPrayer != null
+                                    ? (strings.language == AppLanguage.turkish
+                                        ? 'SIRADAKİ VAKİT: ${(nextPrayer.name as PrayerName).localizedName(langCode).toUpperCase()}'
+                                        : (strings.language == AppLanguage.indonesian
+                                            ? 'SHALAT BERIKUTNYA: ${(nextPrayer.name as PrayerName).localizedName(langCode).toUpperCase()}'
+                                            : (strings.language == AppLanguage.arabic
+                                                ? 'الصلاة القادمة: ${(nextPrayer.name as PrayerName).localizedName(langCode)}'
+                                                : 'NEXT PRAYER: ${(nextPrayer.name as PrayerName).localizedName(langCode).toUpperCase()}')))
+                                    : '',
                                 style: TextStyle(
                                   color: Colors.white.withValues(alpha: 0.7),
                                   fontSize: 11,
@@ -321,7 +397,7 @@ class _BedsideClockScreenState extends ConsumerState<BedsideClockScreen> {
                               ),
                             ),
                             child: Text(
-                              '⏱ $str kaldı',
+                              '⏱ $str',
                               style: TextStyle(
                                 color: primaryColor,
                                 fontSize: 12,
@@ -347,7 +423,7 @@ class _BedsideClockScreenState extends ConsumerState<BedsideClockScreen> {
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Text(
-                    '«Gecenin bir kısmında O\'na secde et ve geceleyin O\'nu uzun uzadıya tesbih et.» (İnsân 76:26)',
+                    _nightVerseText(strings.language),
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: _isDimmed ? 0.25 : 0.6),
                       fontSize: 11.5,
@@ -373,11 +449,23 @@ class _BedsideClockScreenState extends ConsumerState<BedsideClockScreen> {
     AsyncValue<String> countdownAsync,
     Color primaryColor,
     Color glowColor,
+    AppStrings strings,
   ) {
+    final langCode = strings.language.code;
     final hours = DateFormat('HH').format(_now);
     final minutes = DateFormat('mm').format(_now);
     final seconds = DateFormat('ss').format(_now);
-    final dateStr = DateFormat('d MMMM yyyy, EEEE', 'tr_TR').format(_now);
+    final dateStr = DateFormat('d MMMM yyyy, EEEE', langCode).format(_now);
+
+    final nextLabel = nextPrayer != null
+        ? (strings.language == AppLanguage.turkish
+            ? 'Sıradaki: ${(nextPrayer.name as PrayerName).localizedName(langCode)}'
+            : (strings.language == AppLanguage.indonesian
+                ? 'Berikutnya: ${(nextPrayer.name as PrayerName).localizedName(langCode)}'
+                : (strings.language == AppLanguage.arabic
+                    ? 'القادمة: ${(nextPrayer.name as PrayerName).localizedName(langCode)}'
+                    : 'Next: ${(nextPrayer.name as PrayerName).localizedName(langCode)}')))
+        : '';
 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
@@ -461,7 +549,7 @@ class _BedsideClockScreenState extends ConsumerState<BedsideClockScreen> {
                       Icon(Icons.mosque_rounded, color: primaryColor, size: 18),
                       const SizedBox(width: 8),
                       Text(
-                        'Sıradaki: ${nextPrayer.name.turkish}',
+                        nextLabel,
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 16,
@@ -483,7 +571,7 @@ class _BedsideClockScreenState extends ConsumerState<BedsideClockScreen> {
                   const SizedBox(height: 6),
                   countdownAsync.when(
                     data: (str) => Text(
-                      '⏱ Kalan Süre: $str',
+                      '⏱ $str',
                       style: TextStyle(
                         color: primaryColor.withValues(alpha: 0.9),
                         fontSize: 13,
@@ -504,7 +592,7 @@ class _BedsideClockScreenState extends ConsumerState<BedsideClockScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Text(
-              '«Gecenin bir kısmında O\'na secde et ve geceleyin O\'nu uzun uzadıya tesbih et.»\n— İnsân 76:26',
+              _nightVerseText(strings.language),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.white.withValues(alpha: _isDimmed ? 0.25 : 0.55),

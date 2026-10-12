@@ -36,6 +36,7 @@ const Map<String, String> deStrings = <String, String>{
   'anotherVerse': 'Ein anderer Vers',
   'appSignature': '— Beyân Islamische Lebens-App',
   'appearanceAndTheme': 'Erscheinungsbild & Design',
+  'theme': 'Design',
   'appearanceDesc': 'Passe Farbpaletten und Dunkelmodus an',
   'appearanceModeSection': 'ERSCHEINUNGSBILD',
   'arabicFontSizeTitle': 'Arabische Schriftgröße',

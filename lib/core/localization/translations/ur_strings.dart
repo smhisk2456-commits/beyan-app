@@ -36,6 +36,7 @@ const Map<String, String> urStrings = <String, String>{
   'anotherVerse': 'ایک اور آیت',
   'appSignature': '— بیان اسلامی زندگی ایپ',
   'appearanceAndTheme': 'ظاہری شکل اور تھیم',
+  'theme': 'تھیم',
   'appearanceDesc': 'رنگوں اور نائٹ موڈ کی ترتیبات تبدیل کریں',
   'appearanceModeSection': 'ظاہری انداز',
   'arabicFontSizeTitle': 'عربی رسم الخط کا سائز',

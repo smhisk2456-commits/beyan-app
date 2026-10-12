@@ -36,6 +36,7 @@ const Map<String, String> idStrings = <String, String>{
   'anotherVerse': 'Ayat Lainnya',
   'appSignature': '— Aplikasi Kehidupan Islami Beyân',
   'appearanceAndTheme': 'Tampilan & Tema',
+  'theme': 'Tema',
   'appearanceDesc': 'Sesuaikan palet warna dan preferensi mode gelap',
   'appearanceModeSection': 'MODE TAMPILAN',
   'arabicFontSizeTitle': 'Ukuran Huruf Arab',

@@ -48,6 +48,10 @@
     <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
     <string>Kilit ekranı widget'ları ve namaz vakti güncellemeleri için konumunuza ihtiyaç duyulmaktadır.</string>
 
+    <!-- Fotoğraf Kaydetme İzni (Ayet Kartı Stüdyosu) ──────────────────────── -->
+    <key>NSPhotoLibraryAddUsageDescription</key>
+    <string>Ayet ve dua kartlarını galerinize kaydedebilmeniz için fotoğraf kitaplığına erişim izni gereklidir.</string>
+
     <!-- Arka Plan Modları (Ses Tilaveti & Arka Plan Bildirim Güncellemesi) ── -->
     <key>UIBackgroundModes</key>
     <array>

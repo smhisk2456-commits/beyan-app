@@ -996,6 +996,7 @@ class AppStrings {
 
   // ── Tema ve Görünüm ────────────────────────────────────────────
   String get appearanceAndTheme => _t('appearanceAndTheme', 'Görünüm & Tema', 'Appearance & Theme', 'المظهر والسمة');
+  String get theme => _t('theme', 'Tema', 'Theme', 'السمة');
   String get appearanceDesc => _t('appearanceDesc', 'Uygulamanın renk ve karanlık mod tercihlerini özelleştirin', 'Customize color palettes and dark mode preferences', 'خصص خيارات الألوان والوضع الليلي للتطبيق');
   String get appearanceModeSection => _t('appearanceModeSection', 'GÖRÜNÜM MODU', 'APPEARANCE MODE', 'وضع المظهر');
   String get modeLight => _t('modeLight', 'Açık', 'Light', 'فاتح');
