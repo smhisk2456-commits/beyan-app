@@ -20,6 +20,16 @@ class NotificationService {
   factory NotificationService() => instance;
   NotificationService._internal();
 
+  /// Belirli bir namaz vakti ve dile ait âyet metnini döner.
+  static String getPrayerVerse(PrayerName prayer, String langCode) {
+    return instance._getPrayerVerse(prayer, langCode);
+  }
+
+  /// Namaz vakti bildiriminin gövde metnini döner (vakit + âyet içerikli).
+  static String getPrayerEnteredBodyText(PrayerName prayer, String timeStr, String langCode) {
+    return instance._getPrayerEnteredBody(prayer, timeStr, langCode);
+  }
+
   final FlutterLocalNotificationsPlugin _notifications =
       FlutterLocalNotificationsPlugin();
 
@@ -361,26 +371,104 @@ class NotificationService {
     }
   }
 
+  String _getPrayerVerse(PrayerName prayer, String langCode) {
+    switch (prayer) {
+      case PrayerName.fajr:
+        switch (langCode) {
+          case 'en': return '"And recite the Quran at dawn; indeed, the dawn recitation is ever witnessed." (Al-Isra, 78)';
+          case 'ar': return '«وَقُرْآنَ الْفَجْرِ ۖ إِنَّ قُرْآنَ الْفَجْرِ كَانَ مَشْهُودًا» (الإسراء: ٧٨)';
+          case 'id': return '"Dan laksanakanlah shalat Subuh; sesungguhnya shalat Subuh itu disaksikan malaikat." (Al-Isra\', 78)';
+          case 'fr': return '"Et la récitation de l\'aube, car la récitation de l\'aube a des témoins." (Al-Isra, 78)';
+          case 'ur': return '«اور فجر کے وقت قرآن پڑھا کرو کیونکہ فجر کا قرآن فرشتوں کی حاضری کا وقت ہوتا ہے۔» (الاسراء، 78)';
+          case 'de': return '"Und das Rezitieren der Morgendämmerung; es wird bezeugt." (Al-Isra, 78)';
+          case 'ru': return '«Читай Коран на заре. Воистину, на заре Коран читают при свидетелях.» (Аль-Исра, 78)';
+          case 'tr':
+          default: return '«Sabah namazını kıl; çünkü sabah Kur\'an\'ı meleklerin şahit olduğu bir vakittir.» (İsrâ, 78)';
+        }
+      case PrayerName.sunrise:
+        switch (langCode) {
+          case 'en': return '"And celebrate the praises of your Lord before the rising of the sun and before its setting." (Ta-Ha, 130)';
+          case 'ar': return '«وَسَبِّحْ بِحَمْدِ رَبِّكَ قَبْلَ طُلُوعِ الشَّمْسِ وَقَبْلَ غُرُوبِهَا» (طه: ١٣٠)';
+          case 'id': return '"Bertasbihlah memuji Tuhanmu sebelum terbit matahari dan sebelum terbenamnya." (Ta-Ha, 130)';
+          case 'fr': return '"Célèbre les louanges de ton Seigneur avant le lever du soleil et avant son coucher." (Ta-Ha, 130)';
+          case 'ur': return '«سورج نکلنے سے پہلے اور غروب ہونے سے پہلے اپنے رب کی حمد کے ساتھ تسبیح کریں۔» (طه، 130)';
+          case 'de': return '"Lobe deinen Herrn vor dem Aufgang der Sonne und vor ihrem Untergang." (Ta-Ha, 130)';
+          case 'ru': return '«Прославляй хвалой твоего Господа перед восходом солнца и перед его закатом.» (Та Ха, 130)';
+          case 'tr':
+          default: return '«Güneşin doğmasından önce ve batmasından önce Rabbini hamd ile tesbih et.» (Tâhâ, 130)';
+        }
+      case PrayerName.dhuhr:
+        switch (langCode) {
+          case 'en': return '"Establish prayer at the two ends of the day; indeed, good deeds do away with misdeeds." (Hud, 114)';
+          case 'ar': return '«وَأَقِمِ الصَّلَاةَ طَرَفَيِ النَّهَارِ ۚ إِنَّ الْحَسَنَاتِ يُذْهِبْنَ السَّيِّئَاتِ» (هود: ١١٤)';
+          case 'id': return '"Laksanakanlah shalat pada kedua ujung siang; sesungguhnya kebaikan itu menghapus keburukan." (Hud, 114)';
+          case 'fr': return '"Accomplis la prière aux deux extrémités du jour; les bonnes actions dissipent les mauvaises." (Hud, 114)';
+          case 'ur': return '«دن کے دونوں سروں میں نماز قائم کرو؛ بے شک نیکیاں برائیوں کو مٹا دیتی ہیں۔» (ہود، 114)';
+          case 'de': return '"Verrichte das Gebet an den beiden Enden des Tages; gute Taten tilgen die bösen." (Hud, 114)';
+          case 'ru': return '«Совершай намаз в обоих концах дня; воистину, добрые деяния удаляют злодеяния.» (Худ, 114)';
+          case 'tr':
+          default: return '«Gündüzün iki tarafında namaz kıl; muhakkak ki iyilikler kötülükleri giderir.» (Hûd, 114)';
+        }
+      case PrayerName.asr:
+        switch (langCode) {
+          case 'en': return '"Maintain with care the prayers and especially the middle prayer, and stand before Allah devoutly." (Al-Baqarah, 238)';
+          case 'ar': return '«حَافِظُوا عَلَى الصَّلَوَاتِ وَالصَّلَاةِ الْوُسْطَىٰ وَقُومُوا لِلَّهِ قَانِتِينَ» (البقرة: ٢٣٨)';
+          case 'id': return '"Peliharalah semua shalat dan shalat wustha (Ashar), dan berdirilah untuk Allah dengan khusyuk." (Al-Baqarah, 238)';
+          case 'fr': return '"Soyez assidus aux prières et surtout la prière médiane; tenez-vous devant Allah avec dévotion." (Al-Baqarah, 238)';
+          case 'ur': return '«نمازوں کی حفاظت کرو اور خصوصاً درمیانی نماز کی، اور اللہ کے حضور با ادب کھڑے رہو۔» (البقرہ، 238)';
+          case 'de': return '"Haltet die Gebete ein und das mittlere Gebet, und steht demütig vor Gott." (Al-Baqarah, 238)';
+          case 'ru': return '«Оберегайте намазы, и особенно средний намаз. Стойте перед Аллахом благоговейно.» (Аль-Бакара, 238)';
+          case 'tr':
+          default: return '«Namazlara ve orta namaza (ikindiye) devam edin; gönülden Allah\'ın huzurunda durun.» (Bakara, 238)';
+        }
+      case PrayerName.maghrib:
+        switch (langCode) {
+          case 'en': return '"So exalted is Allah when you reach the evening and when you reach the morning." (Ar-Rum, 17)';
+          case 'ar': return '«فَسُبْحَانَ اللَّهِ حِينَ تُمْسُونَ وَحِينَ تُصْبِحُونَ» (الروم: ١٧)';
+          case 'id': return '"Bertasbihlah kepada Allah di waktu petang hari dan di waktu subuh." (Ar-Rum, 17)';
+          case 'fr': return '"Glorifiez donc Allah le soir et le matin !" (Ar-Rum, 17)';
+          case 'ur': return '«پس اللہ کی تسبیح کرو جب تم شام کرو اور جب تم صبح کرو۔» (الروم، 17)';
+          case 'de': return '"So preist Gott, wenn ihr den Abend erreicht und wenn ihr den Morgen erreicht!" (Ar-Rum, 17)';
+          case 'ru': return '«Славьте же Аллаха, когда для вас наступает вечер и когда наступает утро!» (Ар-Рум, 17)';
+          case 'tr':
+          default: return '«Akşama ulaştığınızda ve sabaha kavuştuğunuzda Allah\'ı tesbih edin.» (Rûm, 17)';
+        }
+      case PrayerName.isha:
+        switch (langCode) {
+          case 'en': return '"And during the night prostrate to Him and exalt Him a long part of the night." (Al-Insan, 26)';
+          case 'ar': return '«وَمِنَ اللَّيْلِ فَاسْجُدْ لَهُ وَسَبِّحْهُ لَيْلًا طَوِيلًا» (الإنسان: ٢٦)';
+          case 'id': return '"Dan pada sebagian malam, bersujudlah kepada-Nya dan bertasbihlah di malam hari." (Al-Insan, 26)';
+          case 'fr': return '"Et prosterne-toi devant Lui une partie de la nuit; glorifie-Le durant la nuit." (Al-Insan, 26)';
+          case 'ur': return '«اور رات کے کچھ حصے میں اس کے آگے سجدہ ریز ہو اور اس کی تسبیح کرو۔» (الانسان، 26)';
+          case 'de': return '"Und wirf dich in einem Teil der Nacht vor Ihm nieder und preise Ihn!" (Al-Insan, 26)';
+          case 'ru': return '«И ночью падай ниц перед Ним и славь Его долгой ночью!» (Аль-Инсан, 26)';
+          case 'tr':
+          default: return '«Gecenin bir kısmında O\'na secde et ve geceleyin O\'nu uzun uzun tesbih et.» (İnsân, 26)';
+        }
+    }
+  }
+
   String _getPrayerEnteredBody(PrayerName prayer, String timeStr, String langCode) {
     final pName = prayer.localizedName(langCode);
+    final verse = _getPrayerVerse(prayer, langCode);
     switch (langCode) {
       case 'en':
-        return '$pName prayer time has started ($timeStr). Come to prayer!';
+        return '$pName prayer time has started ($timeStr). Come to prayer!\n📖 $verse';
       case 'ar':
-        return 'حان الآن وقت صلاة $pName ($timeStr). حي على الصلاة!';
+        return 'حان الآن وقت صلاة $pName ($timeStr). حي على الصلاة!\n📖 $verse';
       case 'id':
-        return 'Waktu sholat $pName telah masuk ($timeStr). Mari sholat!';
+        return 'Waktu sholat $pName telah masuk ($timeStr). Mari sholat!\n📖 $verse';
       case 'fr':
-        return 'L\'heure de la prière de $pName a commencé ($timeStr). Venez à la prière !';
+        return 'L\'heure de la prière de $pName a commencé ($timeStr). Venez à la prière !\n📖 $verse';
       case 'ur':
-        return 'نماز $pName کا وقت شروع ہو گیا ہے ($timeStr)۔ چلو نماز کی طرف!';
+        return 'نماز $pName کا وقت شروع ہو گیا ہے ($timeStr)۔ چلو نماز کی طرف!\n📖 $verse';
       case 'de':
-        return 'Die Gebetszeit für $pName hat begonnen ($timeStr). Eilt zum Gebet!';
+        return 'Die Gebetszeit für $pName hat begonnen ($timeStr). Eilt zum Gebet!\n📖 $verse';
       case 'ru':
-        return 'Наступило время намаза $pName ($timeStr). Спешите на молитву!';
+        return 'Наступило время намаза $pName ($timeStr). Спешите на молитву!\n📖 $verse';
       case 'tr':
       default:
-        return '$pName namazı vakti girdi ($timeStr). Haydin namaza!';
+        return '$pName namazı vakti girdi ($timeStr). Haydin namaza!\n📖 $verse';
     }
   }
 
@@ -461,10 +549,13 @@ class NotificationService {
             final soundResource = currentMakam.soundResourceName;
             final targetChannelId = _getAndroidChannelIdForMakam(currentMakam);
 
+            final notifTitle = _getPrayerEnteredTitle(p.name, langCode);
+            final notifBody = _getPrayerEnteredBody(p.name, timeStr, langCode);
+
             await _notifications.zonedSchedule(
               id: notifId,
-              title: _getPrayerEnteredTitle(p.name, langCode),
-              body: _getPrayerEnteredBody(p.name, timeStr, langCode),
+              title: notifTitle,
+              body: notifBody,
               scheduledDate: scheduledTz,
               payload: 'prayer_${p.name.name}',
               notificationDetails: NotificationDetails(
@@ -479,6 +570,10 @@ class NotificationService {
                       ? RawResourceAndroidNotificationSound(soundResource)
                       : null,
                   enableVibration: true,
+                  styleInformation: BigTextStyleInformation(
+                    notifBody,
+                    contentTitle: notifTitle,
+                  ),
                 ),
                 iOS: DarwinNotificationDetails(
                   presentAlert: true,
@@ -562,11 +657,12 @@ class NotificationService {
     final testTitle = effectiveLang == 'en'
         ? 'Beyân Adhan Alert Test 🔔'
         : (effectiveLang == 'ar' ? 'اختبار تنبيه أذان بيان 🔔' : 'Beyân Ezan Bildirimi Testi 🔔');
+    final sampleVerse = _getPrayerVerse(PrayerName.fajr, effectiveLang);
     final testBody = effectiveLang == 'en'
-        ? 'Notification system is working properly! (${currentMakam.localizedTitle(effectiveLang)} selected).'
+        ? 'Notification system is working properly! (${currentMakam.localizedTitle(effectiveLang)} selected).\n📖 $sampleVerse'
         : (effectiveLang == 'ar'
-            ? 'نظام الإشعارات يعمل بنجاح! (${currentMakam.localizedTitle(effectiveLang)} محدد).'
-            : 'Bildirim sistemi sorunsuz çalışıyor! (${currentMakam.title} seçili).');
+            ? 'نظام الإشعارات يعمل بنجاح! (${currentMakam.localizedTitle(effectiveLang)} محدد).\n📖 $sampleVerse'
+            : 'Bildirim sistemi sorunsuz çalışıyor! (${currentMakam.title} seçili).\n📖 $sampleVerse');
 
     try {
       final targetChannelId = _getAndroidChannelIdForMakam(currentMakam);
@@ -587,6 +683,10 @@ class NotificationService {
                 ? RawResourceAndroidNotificationSound(soundResource)
                 : null,
             enableVibration: true,
+            styleInformation: BigTextStyleInformation(
+              testBody,
+              contentTitle: testTitle,
+            ),
           ),
           iOS: DarwinNotificationDetails(
             presentAlert: true,

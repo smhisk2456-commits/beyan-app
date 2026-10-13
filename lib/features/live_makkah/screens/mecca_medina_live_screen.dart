@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 import '../../../core/localization/app_strings.dart';
 
@@ -53,39 +54,41 @@ class _MeccaMedinaLiveScreenState extends ConsumerState<MeccaMedinaLiveScreen>
   static const String _browserUserAgent =
       'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1';
 
-  void _initControllers() {
-    _makkahController = WebViewController()
+  WebViewController _createController(String name, VoidCallback onFinished) {
+    late final PlatformWebViewControllerCreationParams params;
+    if (WebViewPlatform.instance is WebKitWebViewPlatform) {
+      params = WebKitWebViewControllerCreationParams(
+        allowsInlineMediaPlayback: true,
+        mediaTypesRequiringUserAction: const <PlaybackMediaTypes>{},
+      );
+    } else {
+      params = const PlatformWebViewControllerCreationParams();
+    }
+
+    return WebViewController.fromPlatformCreationParams(params)
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(Colors.black)
       ..setUserAgent(_browserUserAgent)
       ..setNavigationDelegate(
         NavigationDelegate(
-          onPageFinished: (_) {
-            if (mounted) setState(() => _isMakkahLoading = false);
-          },
+          onPageFinished: (_) => onFinished(),
           onWebResourceError: (error) {
-            debugPrint('Makkah stream error: ${error.description}');
-            if (mounted) setState(() => _isMakkahLoading = false);
+            debugPrint('$name stream error: ${error.description}');
+            onFinished();
           },
         ),
       );
+  }
+
+  void _initControllers() {
+    _makkahController = _createController('Makkah', () {
+      if (mounted) setState(() => _isMakkahLoading = false);
+    });
     _loadStream(_makkahController, _makkahVideoId);
 
-    _madinahController = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(Colors.black)
-      ..setUserAgent(_browserUserAgent)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onPageFinished: (_) {
-            if (mounted) setState(() => _isMadinahLoading = false);
-          },
-          onWebResourceError: (error) {
-            debugPrint('Madinah stream error: ${error.description}');
-            if (mounted) setState(() => _isMadinahLoading = false);
-          },
-        ),
-      );
+    _madinahController = _createController('Madinah', () {
+      if (mounted) setState(() => _isMadinahLoading = false);
+    });
     _loadStream(_madinahController, _madinahVideoId);
   }
 
@@ -94,7 +97,9 @@ class _MeccaMedinaLiveScreenState extends ConsumerState<MeccaMedinaLiveScreen>
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; background-color: #000; }
     html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
@@ -105,7 +110,8 @@ class _MeccaMedinaLiveScreenState extends ConsumerState<MeccaMedinaLiveScreen>
 <body>
   <div class="video-container">
     <iframe
-      src="https://www.youtube-nocookie.com/embed/$videoId?autoplay=1&mute=0&playsinline=1&rel=0&modestbranding=1&enablejsapi=1&fs=1"
+      src="https://www.youtube.com/embed/$videoId?autoplay=1&mute=0&playsinline=1&rel=0&modestbranding=1&enablejsapi=1&fs=1&origin=https://www.youtube.com&widget_referrer=https://www.youtube.com"
+      referrerpolicy="strict-origin-when-cross-origin"
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
       allowfullscreen>
     </iframe>

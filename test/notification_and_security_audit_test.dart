@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:islamic_app/core/localization/app_strings.dart';
 import 'package:islamic_app/features/notifications/models/adhan_makam.dart';
+import 'package:islamic_app/features/notifications/services/notification_service.dart';
 import 'package:islamic_app/features/prayer_times/models/prayer_time_model.dart';
 
 void main() {
@@ -108,6 +109,23 @@ void main() {
       expect(content.contains('<key>NSAllowsArbitraryLoads</key>'), isTrue);
       expect(content.contains('<false/>'), isTrue);
       expect(content.contains('<true/>\n    </dict>'), isFalse);
+    });
+  });
+
+  group('Namaz Vakti Âyet Bildirimi Testleri', () {
+    test('Her namaz vakti için 8 dilde âyet metni eksiksiz ve geçerli olmalı', () {
+      final supportedLangs = ['tr', 'en', 'ar', 'id', 'fr', 'ur', 'de', 'ru'];
+      for (final prayer in PrayerName.values) {
+        for (final lang in supportedLangs) {
+          final verse = NotificationService.getPrayerVerse(prayer, lang);
+          expect(verse.isNotEmpty, isTrue, reason: '$prayer için $lang dilinde âyet metni boş olamaz.');
+          expect(verse.length, greaterThan(15), reason: '$prayer için $lang dilinde geçerli âyet bulunmalı.');
+
+          final body = NotificationService.getPrayerEnteredBodyText(prayer, '12:00', lang);
+          expect(body.contains('📖'), isTrue, reason: 'Bildirim gövdesi âyet ikonu (📖) içermeli.');
+          expect(body.contains(verse), isTrue, reason: 'Bildirim gövdesi ilgili âyet metnini içermeli.');
+        }
+      }
     });
   });
 }
