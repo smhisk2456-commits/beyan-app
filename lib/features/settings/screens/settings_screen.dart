@@ -226,8 +226,24 @@ class SettingsScreen extends ConsumerWidget {
               ),
               _buildDivider(),
               _buildTile(
-                icon: Icons.info_outline_rounded,
-                iconColor: Colors.white60,
+                customLeading: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: const Color(0xFFFFDF7A).withValues(alpha: 0.5),
+                      width: 1,
+                    ),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(9),
+                    child: Image.asset(
+                      'assets/images/app_logo.png',
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
                 title: 'Beyân v1.0.0',
                 subtitle: 'Google Flutter & iOS 18+ Apple Design',
                 onTap: null,
@@ -376,8 +392,9 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   Widget _buildTile({
-    required IconData icon,
-    required Color iconColor,
+    IconData? icon,
+    Color? iconColor,
+    Widget? customLeading,
     required String title,
     required String subtitle,
     required VoidCallback? onTap,
@@ -385,17 +402,18 @@ class SettingsScreen extends ConsumerWidget {
     return ListTile(
       dense: true,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-      leading: Container(
-        width: 36,
-        height: 36,
-        decoration: BoxDecoration(
-          color: iconColor.withValues(alpha: 0.15),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Center(
-          child: Icon(icon, color: iconColor, size: 20),
-        ),
-      ),
+      leading: customLeading ??
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: (iconColor ?? const Color(0xFFFFDF7A)).withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Center(
+              child: Icon(icon, color: iconColor, size: 20),
+            ),
+          ),
       title: Text(
         title,
         style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),

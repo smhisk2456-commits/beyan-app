@@ -990,19 +990,28 @@ class _IslamicAppBar extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            padding: const EdgeInsets.all(4.5),
+            width: 28,
+            height: 28,
             decoration: BoxDecoration(
-              color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
               shape: BoxShape.circle,
               border: Border.all(
-                color: const Color(0xFFFFDF7A).withValues(alpha: 0.5),
-                width: 1,
+                color: const Color(0xFFFFDF7A).withValues(alpha: 0.6),
+                width: 1.2,
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFFD4AF37).withValues(alpha: 0.25),
+                  blurRadius: 6,
+                ),
+              ],
             ),
-            child: const Icon(
-              Icons.nights_stay_rounded,
-              color: Color(0xFFFFDF7A),
-              size: 17,
+            child: ClipOval(
+              child: Image.asset(
+                'assets/images/app_logo.png',
+                width: 28,
+                height: 28,
+                fit: BoxFit.cover,
+              ),
             ),
           ),
           const SizedBox(width: 10),

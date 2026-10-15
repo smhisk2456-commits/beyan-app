@@ -112,7 +112,37 @@ def apply_new_logo():
 
         print(f"Generated Android {folder} icons (size: {size}x{size})")
 
-    print("\nSUCCESS: All iOS, Android, and project icon assets updated with the new Arabic Ba logo!")
+    # 7. iOS LaunchImage.imageset
+    launch_dir = os.path.join(base_dir, "ios", "Runner", "Assets.xcassets", "LaunchImage.imageset")
+    sizes = {
+        "LaunchImage.png": 140,
+        "LaunchImage@2x.png": 280,
+        "LaunchImage@3x.png": 420
+    }
+    ss = 4
+    for filename, target_size in sizes.items():
+        big_size = target_size * ss
+        radius = int(round(big_size * 0.22))
+        logo_big = img.resize((big_size, big_size), Image.Resampling.LANCZOS)
+        mask = Image.new("L", (big_size, big_size), 0)
+        draw_mask = ImageDraw.Draw(mask)
+        draw_mask.rounded_rectangle([0, 0, big_size, big_size], radius=radius, fill=255)
+        output_big = Image.new("RGBA", (big_size, big_size), (0, 0, 0, 0))
+        output_big.paste(logo_big, (0, 0), mask)
+        draw_border = ImageDraw.Draw(output_big)
+        border_width = int(round(2.0 * ss * (target_size / 140.0)))
+        draw_border.rounded_rectangle(
+            [border_width // 2, border_width // 2, big_size - border_width // 2, big_size - border_width // 2],
+            radius=radius,
+            outline=(212, 175, 55, 180),
+            width=border_width
+        )
+        final_img = output_big.resize((target_size, target_size), Image.Resampling.LANCZOS)
+        out_path = os.path.join(launch_dir, filename)
+        final_img.save(out_path, "PNG")
+        print(f"Generated iOS LaunchImage {filename} ({target_size}x{target_size})")
+
+    print("\nSUCCESS: All iOS (AppIcon + LaunchImage), Android, and project icon assets updated with the new Arabic Ba logo!")
 
 if __name__ == "__main__":
     apply_new_logo()
