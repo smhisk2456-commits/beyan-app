@@ -54,7 +54,20 @@ class _MeccaMedinaLiveScreenState extends ConsumerState<MeccaMedinaLiveScreen>
   static const String _browserUserAgent =
       'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1';
 
-  WebViewController _createController(String name, VoidCallback onFinished) {
+  /// Gömülü oynatıcı için uygulamaya ait geçerli bir HTTPS origin.
+  /// YouTube, origin/referrer olarak youtube.com taklit eden gömmeleri
+  /// "Hata 152-4" ile reddeder; bu yüzden kendi origin'imizi kullanıyoruz.
+  static const String _embedOrigin = 'https://beyan.app';
+
+  // Gömülü oynatıcı hata verirse otomatik olarak mobil izleme sayfasına geçildi mi?
+  bool _makkahFallbackUsed = false;
+  bool _madinahFallbackUsed = false;
+
+  WebViewController _createController(
+    String name,
+    VoidCallback onFinished,
+    VoidCallback onPlayerError,
+  ) {
     late final PlatformWebViewControllerCreationParams params;
     if (WebViewPlatform.instance is WebKitWebViewPlatform) {
       params = WebKitWebViewControllerCreationParams(
@@ -65,33 +78,96 @@ class _MeccaMedinaLiveScreenState extends ConsumerState<MeccaMedinaLiveScreen>
       params = const PlatformWebViewControllerCreationParams();
     }
 
-    return WebViewController.fromPlatformCreationParams(params)
+    late final WebViewController controller;
+    controller = WebViewController.fromPlatformCreationParams(params)
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(Colors.black)
       ..setUserAgent(_browserUserAgent)
+      ..addJavaScriptChannel(
+        'BeyanPlayer',
+        onMessageReceived: (message) {
+          debugPrint('$name player event: ${message.message}');
+          if (message.message.startsWith('error')) {
+            onPlayerError();
+          } else if (message.message == 'ready' || message.message == 'playing') {
+            onFinished();
+          }
+        },
+      )
       ..setNavigationDelegate(
         NavigationDelegate(
-          onPageFinished: (_) => onFinished(),
+          onPageFinished: (url) {
+            onFinished();
+            // Mobil izleme sayfasında YouTube üst menüsünü ve öneri alanlarını gizle
+            if (url.contains('m.youtube.com/watch')) {
+              controller.runJavaScript(_watchPageCleanupJs).catchError((_) {});
+            }
+          },
           onWebResourceError: (error) {
             debugPrint('$name stream error: ${error.description}');
             onFinished();
           },
+          onNavigationRequest: (request) {
+            // Uygulama dışına (youtube://, App Store vb.) yönlendirmeleri engelle
+            final uri = Uri.tryParse(request.url);
+            if (uri == null) return NavigationDecision.prevent;
+            if (uri.scheme == 'https' || uri.scheme == 'http' || uri.scheme == 'about') {
+              return NavigationDecision.navigate;
+            }
+            return NavigationDecision.prevent;
+          },
         ),
       );
+    return controller;
   }
 
+  static const String _watchPageCleanupJs = '''
+(function() {
+  var css = 'ytm-mobile-topbar-renderer, header, .mobile-topbar-header, ytm-pivot-bar-renderer,'
+    + ' ytm-item-section-renderer, ytm-comment-section-renderer, .related-chips-slot-wrapper,'
+    + ' ytm-engagement-panel, ytm-slim-video-metadata-section-renderer { display:none !important; }'
+    + ' body, html, ytm-app { background:#000 !important; }'
+    + ' #player-container-id, .player-container { position:fixed !important; top:0 !important; left:0 !important;'
+    + ' width:100vw !important; height:100vh !important; z-index:9999 !important; }'
+    + ' video { object-fit: contain !important; }';
+  var s = document.createElement('style'); s.innerHTML = css; document.head.appendChild(s);
+  var v = document.querySelector('video');
+  if (v) { v.setAttribute('playsinline', ''); if (v.play) { v.play().catch(function(){}); } }
+})();
+''';
+
   void _initControllers() {
-    _makkahController = _createController('Makkah', () {
-      if (mounted) setState(() => _isMakkahLoading = false);
-    });
+    _makkahController = _createController(
+      'Makkah',
+      () {
+        if (mounted && _isMakkahLoading) setState(() => _isMakkahLoading = false);
+      },
+      () {
+        if (!_makkahFallbackUsed && mounted) {
+          _makkahFallbackUsed = true;
+          _loadWatchPage(_makkahController, _makkahVideoId);
+        }
+      },
+    );
     _loadStream(_makkahController, _makkahVideoId);
 
-    _madinahController = _createController('Madinah', () {
-      if (mounted) setState(() => _isMadinahLoading = false);
-    });
+    _madinahController = _createController(
+      'Madinah',
+      () {
+        if (mounted && _isMadinahLoading) setState(() => _isMadinahLoading = false);
+      },
+      () {
+        if (!_madinahFallbackUsed && mounted) {
+          _madinahFallbackUsed = true;
+          _loadWatchPage(_madinahController, _madinahVideoId);
+        }
+      },
+    );
     _loadStream(_madinahController, _madinahVideoId);
   }
 
+  /// YouTube IFrame Player API ile gömülü oynatıcıyı yükler.
+  /// Oynatıcı hata verirse (gömme kısıtlaması vb.) Flutter'a bildirir.
   void _loadStream(WebViewController controller, String videoId) {
     final html = '''
 <!DOCTYPE html>
@@ -103,101 +179,118 @@ class _MeccaMedinaLiveScreenState extends ConsumerState<MeccaMedinaLiveScreen>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; background-color: #000; }
     html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
-    .video-container { position: relative; width: 100%; height: 100%; }
-    iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+    #player { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
   </style>
 </head>
 <body>
-  <div class="video-container">
-    <iframe
-      src="https://www.youtube.com/embed/$videoId?autoplay=1&mute=0&playsinline=1&rel=0&modestbranding=1&enablejsapi=1&fs=1&origin=https://www.youtube.com&widget_referrer=https://www.youtube.com"
-      referrerpolicy="strict-origin-when-cross-origin"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-      allowfullscreen>
-    </iframe>
-  </div>
+  <div id="player"></div>
+  <script>
+    function post(m) { try { BeyanPlayer.postMessage(m); } catch (e) {} }
+    var player;
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('player', {
+        width: '100%',
+        height: '100%',
+        videoId: '$videoId',
+        playerVars: {
+          autoplay: 1, playsinline: 1, rel: 0, modestbranding: 1, fs: 1,
+          origin: '$_embedOrigin',
+          widget_referrer: '$_embedOrigin'
+        },
+        events: {
+          onReady: function(e) { post('ready'); try { e.target.playVideo(); } catch (x) {} },
+          onStateChange: function(e) { if (e.data === 1) { started = true; post('playing'); } },
+          onError: function(e) { post('error:' + e.data); }
+        }
+      });
+    }
+    var started = false;
+    // Oynatıcı hata ekranında kalıp hiç oynatmazsa (ör. Hata 152) yedek moda geç
+    setTimeout(function() { if (!started) post('error:noplay'); }, 15000);
+    var tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    tag.onerror = function() { post('error:api'); };
+    document.head.appendChild(tag);
+    // API 12 sn içinde hazır olmazsa yedek moda geç
+    setTimeout(function() { if (!player) post('error:timeout'); }, 12000);
+  </script>
 </body>
 </html>
 ''';
-    controller.loadHtmlString(html, baseUrl: 'https://www.youtube.com');
+    controller.loadHtmlString(html, baseUrl: _embedOrigin);
+  }
+
+  /// Yedek mod: YouTube mobil izleme sayfasını doğrudan uygulama içinde oynatır.
+  void _loadWatchPage(WebViewController controller, String videoId) {
+    controller.loadRequest(
+      Uri.parse('https://m.youtube.com/watch?v=$videoId&autoplay=1&playsinline=1'),
+      headers: const {'Referer': 'https://m.youtube.com/'},
+    );
+  }
+
+  /// Kanalın /live sayfasındaki canonical bağlantıdan güncel canlı yayın ID'sini çözer.
+  Future<String?> _resolveLiveVideoId(HttpClient client, String handle) async {
+    try {
+      final req = await client.getUrl(Uri.parse('https://www.youtube.com/$handle/live'));
+      req.followRedirects = true;
+      req.headers.set('Accept-Language', 'en-US,en;q=0.8');
+      req.headers.set('Cookie', 'CONSENT=YES+1');
+      final res = await req.close().timeout(const Duration(seconds: 10));
+      final body = await utf8.decoder.bind(res).join();
+      final canonical = RegExp(
+        r'<link rel="canonical" href="https://www\.youtube\.com/watch\?v=([a-zA-Z0-9_-]{11})"',
+      ).firstMatch(body);
+      if (canonical != null) return canonical.group(1);
+    } catch (_) {}
+    return null;
   }
 
   Future<void> _fetchLiveVideoIds() async {
+    final client = HttpClient()..userAgent = _browserUserAgent;
     try {
-      final client = HttpClient();
-      client.userAgent = _browserUserAgent;
+      final makkahId = await _resolveLiveVideoId(client, _makkahHandle);
+      if (makkahId != null && makkahId != _makkahVideoId && mounted) {
+        _makkahVideoId = makkahId;
+        _makkahFallbackUsed = false;
+        _loadStream(_makkahController, _makkahVideoId);
+      }
 
-      // Makkah Canlı Yayın ID Doğrulama
-      try {
-        final req = await client.getUrl(Uri.parse('https://m.youtube.com/$_makkahHandle/live'));
-        req.followRedirects = true;
-        final res = await req.close();
-        final body = await utf8.decoder.bind(res).join();
-        final match = RegExp(r'watch\?v=([a-zA-Z0-9_-]{11})').firstMatch(body) ??
-            RegExp(r'"videoId":"([a-zA-Z0-9_-]{11})"').firstMatch(body);
-        if (match != null && match.group(1) != null) {
-          final newId = match.group(1)!;
-          if (newId != _makkahVideoId) {
-            _makkahVideoId = newId;
-            if (mounted) {
-              _loadStream(_makkahController, _makkahVideoId);
-            }
-          }
-        }
-      } catch (_) {}
-
-      // Medine Canlı Yayın ID Doğrulama
-      try {
-        final req = await client.getUrl(Uri.parse('https://m.youtube.com/$_madinahHandle/live'));
-        req.followRedirects = true;
-        final res = await req.close();
-        final body = await utf8.decoder.bind(res).join();
-        final match = RegExp(r'watch\?v=([a-zA-Z0-9_-]{11})').firstMatch(body) ??
-            RegExp(r'"videoId":"([a-zA-Z0-9_-]{11})"').firstMatch(body);
-        if (match != null && match.group(1) != null) {
-          final newId = match.group(1)!;
-          if (newId != _madinahVideoId) {
-            _madinahVideoId = newId;
-            if (mounted) {
-              _loadStream(_madinahController, _madinahVideoId);
-            }
-          }
-        }
-      } catch (_) {}
-
+      final madinahId = await _resolveLiveVideoId(client, _madinahHandle);
+      if (madinahId != null && madinahId != _madinahVideoId && mounted) {
+        _madinahVideoId = madinahId;
+        _madinahFallbackUsed = false;
+        _loadStream(_madinahController, _madinahVideoId);
+      }
+    } finally {
       client.close();
-    } catch (_) {}
+    }
   }
 
   void _reloadCurrentStream() {
     HapticFeedback.lightImpact();
     if (_tabController.index == 0) {
       setState(() => _isMakkahLoading = true);
+      _makkahFallbackUsed = false;
       _loadStream(_makkahController, _makkahVideoId);
     } else {
       setState(() => _isMadinahLoading = true);
+      _madinahFallbackUsed = false;
       _loadStream(_madinahController, _madinahVideoId);
     }
   }
 
+  /// "Doğrudan" modu: gömülü oynatıcıyı atlayıp canlı yayını uygulama içinde
+  /// YouTube mobil izleme sayfasından oynatır.
   void _loadDirectStream() {
     HapticFeedback.lightImpact();
     if (_tabController.index == 0) {
       setState(() => _isMakkahLoading = true);
-      _makkahController.loadRequest(
-        Uri.parse('https://m.youtube.com/$_makkahHandle/live'),
-        headers: const {
-          'Referer': 'https://www.youtube.com/',
-        },
-      );
+      _makkahFallbackUsed = true;
+      _loadWatchPage(_makkahController, _makkahVideoId);
     } else {
       setState(() => _isMadinahLoading = true);
-      _madinahController.loadRequest(
-        Uri.parse('https://m.youtube.com/$_madinahHandle/live'),
-        headers: const {
-          'Referer': 'https://www.youtube.com/',
-        },
-      );
+      _madinahFallbackUsed = true;
+      _loadWatchPage(_madinahController, _madinahVideoId);
     }
   }
 
