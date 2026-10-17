@@ -5,6 +5,7 @@ import 'package:islamic_app/features/quran/services/quran_audio_service.dart';
 import 'package:islamic_app/features/prayer_times/models/calculation_settings_model.dart';
 import 'package:islamic_app/features/prayer_times/models/city_model.dart';
 import 'package:islamic_app/features/ramadan/screens/ramadan_dashboard_screen.dart';
+import 'package:islamic_app/features/ramadan/models/khatam_tracker_model.dart';
 
 void main() {
   group('İbadet Takibi ve Zikir Model Testleri', () {
@@ -181,6 +182,37 @@ void main() {
       final updated = data.copyWith(manualExtraDays: 10);
       expect(updated.totalDays, 10);
       expect(updated.manualExtraDays, 10);
+    });
+  });
+
+  group('30 Günde Ramazan Hatmi Takipçisi Testleri', () {
+    test('quranJuzList 30 cüzü eksiksiz ve sıralı içermelidir', () {
+      expect(quranJuzList.length, 30);
+      for (int i = 0; i < 30; i++) {
+        expect(quranJuzList[i].juzNumber, i + 1);
+        expect(quranJuzList[i].startPage, greaterThan(0));
+        expect(quranJuzList[i].endPage, greaterThanOrEqualTo(quranJuzList[i].startPage));
+        expect(quranJuzList[i].startSurah.isNotEmpty, isTrue);
+        expect(quranJuzList[i].pageCount, greaterThan(0));
+      }
+    });
+
+    test('KhatamProgressState ilerleme oranını ve tamamlanma durumunu doğru hesaplamalı', () {
+      const emptyState = KhatamProgressState(completedJuzs: {});
+      expect(emptyState.completedCount, 0);
+      expect(emptyState.percentage, 0.0);
+      expect(emptyState.isEntireQuranCompleted, isFalse);
+
+      const partialState = KhatamProgressState(completedJuzs: {1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
+      expect(partialState.completedCount, 10);
+      expect(partialState.percentage, closeTo(0.333, 0.01));
+      expect(partialState.isCompleted(1), isTrue);
+      expect(partialState.isCompleted(15), isFalse);
+
+      final fullState = KhatamProgressState(completedJuzs: List.generate(30, (i) => i + 1).toSet());
+      expect(fullState.completedCount, 30);
+      expect(fullState.percentage, 1.0);
+      expect(fullState.isEntireQuranCompleted, isTrue);
     });
   });
 }

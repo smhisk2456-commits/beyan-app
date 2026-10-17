@@ -10,16 +10,14 @@ class AdService {
   AdService._internal();
 
   bool _isInitialized = false;
-  bool _isAdFree = false;
 
   /// Kullanıcının reklamsız deneyim hakkı var mı?
   /// Premium üyelik sahibi olan kullanıcılara hiçbir reklam gösterilmez.
-  bool get isAdFree => _isAdFree;
-  set isAdFree(bool value) => _isAdFree = value;
+  bool isAdFree = false;
 
   /// Premium durumuna göre reklamsız deneyimi günceller.
   void updateAdFreeStatus(bool premium) {
-    _isAdFree = premium;
+    isAdFree = premium;
   }
 
   /// AdMob SDK'sını başlatır.

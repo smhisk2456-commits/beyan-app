@@ -4,8 +4,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/localization/app_strings.dart';
+import '../../monetization/providers/premium_provider.dart';
+import '../../monetization/screens/ramadan_special_offer_sheet.dart';
 import '../../monetization/widgets/banner_ad_widget.dart';
 import '../../prayer_times/providers/prayer_time_providers.dart';
+import '../../widget_service/screens/widget_center_screen.dart';
+import '../models/khatam_tracker_model.dart';
+import 'khatam_tracker_screen.dart';
 
 /// Oruç takibi veri modeli (Bugünkü durum + Toplam/Kaza/Nafile sayacı)
 class FastingTrackerData {
@@ -123,6 +128,8 @@ class RamadanDashboardScreen extends ConsumerWidget {
     final fastingData = ref.watch(fastingTrackerProvider);
     final isFasting = fastingData.isFastingToday(FastingTrackerNotifier.todayKey());
     final totalFastingDays = fastingData.totalDays;
+    final isPremium = ref.watch(premiumProvider).isPremium;
+    final khatamState = ref.watch(khatamProgressProvider);
 
     DateTime? imsakTime;
     DateTime? iftarTime;
@@ -141,6 +148,84 @@ class RamadanDashboardScreen extends ConsumerWidget {
         physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 30),
         children: [
+          // ── Ramazan & Kadir Gecesi %50 Özel Teklif Şeridi (Premium Olmayanlara) ──
+          if (!isPremium) ...[
+            InkWell(
+              onTap: () => RamadanSpecialOfferSheet.show(context),
+              borderRadius: BorderRadius.circular(20),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF2E1C03), Color(0xFF0F5A47)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: const Color(0xFFFFDF7A), width: 1.4),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFD4AF37).withValues(alpha: 0.3),
+                      blurRadius: 14,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 42,
+                      height: 42,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Color(0xFFFFDF7A),
+                      ),
+                      child: const Center(
+                        child: Text('🌙', style: TextStyle(fontSize: 22)),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                'Ramazan & Kadir Gecesi',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFFFFDF7A),
+                                ),
+                              ),
+                              SizedBox(width: 6),
+                              Text(
+                                '%50 İndirim',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w900,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 2),
+                          Text(
+                            'Ömür Boyu Hâmîlik paketinde sınırlı süre fırsatı.',
+                            style: TextStyle(fontSize: 11, color: Colors.white70),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Icon(Icons.arrow_forward_ios_rounded, color: Color(0xFFFFDF7A), size: 16),
+                  ],
+                ),
+              ),
+            ),
+          ],
+
           // ── İftar / Sahur Canlı Geri Sayım Kartı (Kendi içinde 1 sn tikler, 60 FPS) ──
           RepaintBoundary(
             child: _LiveIftarCountdown(
@@ -325,6 +410,187 @@ class RamadanDashboardScreen extends ConsumerWidget {
                   ],
                 ),
               ],
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // ── 30 Günde Hatim Takipçisi Kartı ──────────────────────────────
+          Container(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: isDark
+                    ? [const Color(0xFF072B23), const Color(0xFF021713)]
+                    : [const Color(0xFFE8F5EE), Colors.white],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.4 : 0.3),
+                width: 1.2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: const Color(0xFFFFDF7A), width: 1),
+                      ),
+                      child: const Icon(Icons.auto_stories_rounded, color: Color(0xFFFFDF7A), size: 22),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '30 Günde Hatim Takipçisi',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              color: isDark ? Colors.white : const Color(0xFF033E35),
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            '${khatamState.completedCount} / 30 Cüz Okundu (%${(khatamState.percentage * 100).toInt()})',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFFD4AF37),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    InkWell(
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const KhatamTrackerScreen()),
+                        );
+                      },
+                      borderRadius: BorderRadius.circular(14),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF0F5A47),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: const Color(0xFFFFDF7A), width: 1),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Takip Et',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(width: 4),
+                            Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 12),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(6),
+                  child: LinearProgressIndicator(
+                    value: khatamState.percentage,
+                    minHeight: 8,
+                    backgroundColor: isDark ? Colors.white12 : Colors.grey.shade200,
+                    valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFFFDF7A)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // ── Kilit Ekranı İftar & Sahur Canlı Widget Tanıtımı ──────────────
+          InkWell(
+            onTap: () {
+              HapticFeedback.lightImpact();
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const WidgetCenterScreen()),
+              );
+            },
+            borderRadius: BorderRadius.circular(20),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF06221D) : Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.35 : 0.25),
+                  width: 1,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.widgets_rounded, color: Color(0xFFD4AF37), size: 22),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'İftar & Sahur Kilit Ekranı Widget\'ı',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.white : const Color(0xFF033E35),
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Telefon kilidini açmadan iftara kalan süreyi saniye saniye takip edin.',
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            color: isDark ? Colors.white60 : Colors.black54,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.chevron_right_rounded, color: Color(0xFFD4AF37), size: 24),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 20),
