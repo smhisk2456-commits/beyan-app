@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:adhan/adhan.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -110,13 +111,24 @@ class PrayerTimeService {
     }
   }
 
-  /// Android emülatör sahte konumunu veya geçersiz koordinatları tespit eder.
+  /// Geçersiz veya bozuk koordinatları tespit eder.
+  /// Null Island (0,0) ve dünya koordinat sınırları (-90..90, -180..180) dışını filtreler.
+  /// Gerçek kullanıcıların (Amerika, Avrupa vb.) veya App Store inceleme ekibinin
+  /// koordinatlarının yanlışlıkla reddedilmemesi için genel boylam filtresi kaldırılmıştır;
+  /// yalnızca debug modunda varsayılan Google emülatör koordinatı yakalanır.
   bool _isEmulatorOrInvalidLocation(double lat, double lon) {
-    if (lon < -50 || (lat >= 36.5 && lat <= 38.5 && lon >= -123.0 && lon <= -120.0)) {
+    if (lat < -90.0 || lat > 90.0 || lon < -180.0 || lon > 180.0) {
       return true;
     }
     if (lat == 0.0 && lon == 0.0) {
       return true;
+    }
+    if (kDebugMode) {
+      final isGoogleEmulator =
+          (lat >= 37.4215 && lat <= 37.4225 && lon >= -122.0845 && lon <= -122.0835);
+      if (isGoogleEmulator) {
+        return true;
+      }
     }
     return false;
   }

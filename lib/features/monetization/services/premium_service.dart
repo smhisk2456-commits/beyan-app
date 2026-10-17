@@ -207,8 +207,12 @@ class PremiumService {
         if (purchase.pendingCompletePurchase) {
           await _iap.completePurchase(purchase);
         }
-      } else if (purchase.status == PurchaseStatus.error) {
-        debugPrint('Satın alma hatası: ${purchase.error}');
+      } else if (purchase.status == PurchaseStatus.error ||
+          purchase.status == PurchaseStatus.canceled) {
+        debugPrint('Satın alma durumu: ${purchase.status}, hata: ${purchase.error}');
+        if (purchase.pendingCompletePurchase) {
+          await _iap.completePurchase(purchase);
+        }
       }
     }
   }

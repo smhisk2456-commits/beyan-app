@@ -44,7 +44,21 @@ class _MeccaMedinaLiveScreenState extends ConsumerState<MeccaMedinaLiveScreen>
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     _tabController.addListener(() {
-      if (mounted) setState(() {});
+      if (!mounted) return;
+      if (_tabController.indexIsChanging) return;
+      // İki yayının aynı anda ses çalmasını önlemek için aktif olmayan sekmedeki videoyu durdur
+      if (_tabController.index == 0) {
+        _madinahController
+            .runJavaScript(
+                'try { if(window.player && player.pauseVideo){player.pauseVideo();} var v=document.querySelector("video"); if(v){v.pause();} } catch(e){}')
+            .catchError((_) {});
+      } else {
+        _makkahController
+            .runJavaScript(
+                'try { if(window.player && player.pauseVideo){player.pauseVideo();} var v=document.querySelector("video"); if(v){v.pause();} } catch(e){}')
+            .catchError((_) {});
+      }
+      setState(() {});
     });
 
     _initControllers();
@@ -311,6 +325,10 @@ class _MeccaMedinaLiveScreenState extends ConsumerState<MeccaMedinaLiveScreen>
 
   @override
   void dispose() {
+    try {
+      _makkahController.loadRequest(Uri.parse('about:blank'));
+      _madinahController.loadRequest(Uri.parse('about:blank'));
+    } catch (_) {}
     _tabController.dispose();
     super.dispose();
   }
