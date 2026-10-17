@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/premium_product.dart';
+import 'ad_service.dart';
 
 /// Beyân Uygulama İçi Satın Alma (In-App Purchase) ve Premium Servisi
 class PremiumService {
@@ -92,6 +93,9 @@ class PremiumService {
       _trialStartDate = now;
       await prefs.setString(keyWidgetTrialStart, now.toIso8601String());
     }
+
+    // Reklamsız deneyim durumunu senkronize et
+    AdService.instance.updateAdFreeStatus(_isPremium);
 
     // Satın alma akışını dinle
     _subscription = _iap.purchaseStream.listen(
@@ -230,6 +234,7 @@ class PremiumService {
       await prefs.remove(keyTier);
       await prefs.remove(keyIntegrityHash);
     }
+    AdService.instance.updateAdFreeStatus(premium);
     _changeController.add(premium);
   }
 

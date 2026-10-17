@@ -3,16 +3,33 @@ import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 /// Google AdMob Reklam Yönetim Servisi
+/// Premium aboneler için %100 reklamsız deneyim sağlar.
 class AdService {
   static final AdService instance = AdService._internal();
   factory AdService() => instance;
   AdService._internal();
 
   bool _isInitialized = false;
+  bool _isAdFree = false;
+
+  /// Kullanıcının reklamsız deneyim hakkı var mı?
+  /// Premium üyelik sahibi olan kullanıcılara hiçbir reklam gösterilmez.
+  bool get isAdFree => _isAdFree;
+  set isAdFree(bool value) => _isAdFree = value;
+
+  /// Premium durumuna göre reklamsız deneyimi günceller.
+  void updateAdFreeStatus(bool premium) {
+    _isAdFree = premium;
+  }
 
   /// AdMob SDK'sını başlatır.
+  /// Eğer kullanıcı Premium aboneyse AdMob SDK başlatılmaz, veri ve pil tasarrufu sağlanır.
   Future<void> initialize() async {
     if (_isInitialized) return;
+    if (isAdFree) {
+      debugPrint('[AdService] Kullanıcı Premium üye: %100 Reklamsız Deneyim aktif, AdMob SDK başlatılmadı.');
+      return;
+    }
     try {
       await MobileAds.instance.initialize();
       _isInitialized = true;
@@ -27,6 +44,7 @@ class AdService {
 
   /// Resmi Google Test Banner Ad Unit ID'si
   String get testBannerAdUnitId {
+    if (isAdFree) return '';
     if (Platform.isAndroid) return androidTestBannerId;
     if (Platform.isIOS) return iosTestBannerId;
     return '';
@@ -35,6 +53,7 @@ class AdService {
   /// Platforma göre Banner Reklam Birimi Kimliği (Ad Unit ID).
   /// Not: Geliştirme ve test aşamasında Google'ın resmi test kimlikleri kullanılır.
   String get bannerAdUnitId {
+    if (isAdFree) return '';
     if (kDebugMode) {
       return testBannerAdUnitId;
     }

@@ -76,10 +76,33 @@ class _BannerAdWidgetState extends ConsumerState<BannerAdWidget> {
 
   @override
   Widget build(BuildContext context) {
+    // Kullanıcı satın alma yapıp Premium olduğunda reklamı derhal yok et
+    ref.listen<PremiumState>(premiumProvider, (previous, next) {
+      if (next.isPremium && _bannerAd != null) {
+        debugPrint('[BannerAdWidget] Kullanıcı Premium oldu: Reklam anında bellekten kaldırılıyor.');
+        _bannerAd?.dispose();
+        _bannerAd = null;
+        if (mounted) {
+          setState(() {
+            _isLoaded = false;
+          });
+        }
+      }
+    });
+
     final isPremium = ref.watch(premiumProvider).isPremium;
 
     // Premium ise veya henüz yüklenmediyse yer kaplamaz
-    if (isPremium || !_isLoaded || _bannerAd == null) {
+    if (isPremium) {
+      if (_bannerAd != null) {
+        _bannerAd?.dispose();
+        _bannerAd = null;
+        _isLoaded = false;
+      }
+      return const SizedBox.shrink();
+    }
+
+    if (!_isLoaded || _bannerAd == null) {
       return const SizedBox.shrink();
     }
 
