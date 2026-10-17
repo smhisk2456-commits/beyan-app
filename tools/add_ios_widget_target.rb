@@ -12,12 +12,18 @@ app_target = project.targets.find { |t| t.name == 'Runner' } or abort('Runner ta
 app_bundle_id = app_target.build_configurations.first.build_settings['PRODUCT_BUNDLE_IDENTIFIER']
 
 # 1. Runner ana uygulama hedefi için imzalama ayarları
+runner_pp_path = File.join(ENV['RUNNER_TEMP'].to_s, 'build_pp.mobileprovision')
+widget_pp_path = File.join(ENV['RUNNER_TEMP'].to_s, 'widget_pp.mobileprovision')
+runner_has_app_group = File.exist?(runner_pp_path) && File.binread(runner_pp_path).include?('group.com.smhisk60.beyan')
+widget_has_app_group = File.exist?(widget_pp_path) && File.binread(widget_pp_path).include?('group.com.smhisk60.beyan')
+
 app_target.build_configurations.each do |config|
   s = config.build_settings
   s['DEVELOPMENT_TEAM']               = TEAM_ID
   s['CODE_SIGN_STYLE']                = 'Manual'
   s['CODE_SIGN_IDENTITY']             = 'Apple Distribution'
   s['PROVISIONING_PROFILE_SPECIFIER'] = 'Beyan AppStore Profile'
+  s['CODE_SIGN_ENTITLEMENTS']         = 'Runner/Runner.entitlements' if runner_has_app_group
 end
 
 # 2. Ses dosyalarını Runner target'ının Resources build phase'ine ekle:
@@ -74,8 +80,9 @@ widget.build_configurations.each do |config|
   s['CODE_SIGN_STYLE']                = 'Manual'
   s['CODE_SIGN_IDENTITY']             = 'Apple Distribution'
   s['PROVISIONING_PROFILE_SPECIFIER'] = 'Beyan Widget AppStore Profile'
+  s['CODE_SIGN_ENTITLEMENTS']         = 'IslamicAppWidget/IslamicAppWidget.entitlements' if widget_has_app_group
   s['LD_RUNPATH_SEARCH_PATHS']        = ['$(inherited)', '@executable_path/Frameworks', '@executable_path/../../Frameworks']
 end
 
 project.save
-puts "Xcode projesi basariyla guncellendi (Runner ve #{TARGET_NAME} icin Team: #{TEAM_ID}, Manual AppStore Signing aktif)."
+puts "Xcode projesi basariyla guncellendi (Runner AppGroup: #{runner_has_app_group}, Widget AppGroup: #{widget_has_app_group})."

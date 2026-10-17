@@ -7,6 +7,7 @@ import '../prayer_times/models/prayer_time_model.dart';
 import '../prayer_times/services/prayer_time_service.dart';
 import '../quran/repositories/quran_repository.dart';
 import '../notifications/models/short_verse_notification.dart';
+import 'screens/widget_center_screen.dart';
 
 import '../../core/localization/app_strings.dart';
 
@@ -44,6 +45,7 @@ class WidgetService {
   /// Widget verilerini hesaplar ve platforma yazar.
   Future<void> updateAllWidgets() async {
     try {
+      await HomeWidget.setAppGroupId(_appGroupId);
       final prefs = await SharedPreferences.getInstance();
       final langCode = prefs.getString('selected_app_language') ?? 'tr';
       final lang = AppLanguage.fromCode(langCode);
@@ -55,22 +57,52 @@ class WidgetService {
       final countdown = _prayerService.formatCountdown(daily.timeUntilNextPrayer, lang: lang);
       final nextPrayerName = next?.name.localizedName(langCode) ?? '--';
 
-      // 2. Çoklu Rastgele Ayet Çekimi (Seçili dile göre!)
-      List<Map<String, String>> widgetVerses;
-      if (langCode == 'tr') {
-        widgetVerses = await _quranRepo.getRandomWidgetVerses(limit: 100);
-        if (widgetVerses.isEmpty) {
-          widgetVerses = ShortVerseNotification.pool.map((v) => {
-            'ref': v.verseReference,
-            'text': v.textTr,
-          }).toList();
+      // 2. Seçili kategoriye ve görünüme göre duygusal ayet havuzu oluştur
+      final quoteCat = prefs.getString('widget_quote_category') ?? 'all';
+      final verseView = prefs.getString('widget_verse_view') ?? 'meal_only';
+      final activeCat = prefs.getString('widget_active_category') ?? 'quotes';
+
+      final List<Map<String, String>> widgetVerses = [];
+
+      if (activeCat == 'dailyVerse') {
+        for (final v in ShortVerseNotification.pool) {
+          final meal = v.localizedText(langCode);
+          final text = (verseView == 'arabic_only' || verseView == 'Yalnızca Arapça')
+              ? v.arabicText
+              : ((verseView == 'arabic_meal' || verseView == 'Arapça + Meal')
+                  ? '${v.arabicText}\n$meal'
+                  : meal);
+          widgetVerses.add({
+            'ref': v.localizedReference(langCode),
+            'text': text,
+          });
         }
       } else {
-        widgetVerses = ShortVerseNotification.pool.map((v) => {
-          'ref': v.localizedReference(langCode),
-          'text': v.localizedText(langCode),
-        }).toList();
+        final categoryList = kWidgetCategoryQuotes[quoteCat] ?? kWidgetCategoryQuotes['all']!;
+        for (final q in categoryList) {
+          widgetVerses.add({
+            'ref': q.localizedReference(langCode),
+            'text': q.formatForViewMode(verseView, langCode),
+          });
+        }
+        // 'all' seçiliyse ve केवल meal görünümündeyse ek kısa ayetlerle zenginleştir
+        if (quoteCat == 'all' && langCode == 'tr' && verseView == 'meal_only') {
+          final dbVerses = await _quranRepo.getRandomWidgetVerses(limit: 40);
+          widgetVerses.addAll(dbVerses);
+        }
       }
+
+      // Kullanıcının son uyguladığı ayeti listenin en başına ekle
+      final appliedRef = prefs.getString('widget_applied_verse_ref') ?? '';
+      final appliedText = prefs.getString('widget_applied_verse_text') ?? '';
+      if (appliedRef.isNotEmpty && appliedText.isNotEmpty) {
+        widgetVerses.removeWhere((item) => item['ref'] == appliedRef);
+        widgetVerses.insert(0, {
+          'ref': appliedRef,
+          'text': appliedText,
+        });
+      }
+
       final versesJson = jsonEncode(widgetVerses);
 
       // Kullanıcının seçtiği güncelleme aralığını al (varsayılan 5 dk, 3-15 dk arası güvenli sınır)
@@ -127,14 +159,15 @@ class WidgetService {
     await HomeWidget.saveWidgetData<String>('widget_active_category', activeCat);
     await HomeWidget.saveWidgetData<String>('widget_refresh_interval', refreshInterval);
 
-    // Kilit ekranına sabitlenen özel ayet durumu
+    // Kilit ekranına uygulanan / sabitlenen özel ayet durumu
     final isPinned = prefs.getBool('widget_is_pinned') ?? false;
-    var appliedRef = isPinned ? (prefs.getString('widget_applied_verse_ref') ?? '') : '';
-    var appliedText = isPinned ? (prefs.getString('widget_applied_verse_text') ?? '') : '';
-    final appliedSurah = isPinned ? (prefs.getInt('widget_applied_verse_surah') ?? 0) : 0;
-    final appliedVerseNum = isPinned ? (prefs.getInt('widget_applied_verse_number') ?? 0) : 0;
+    var appliedRef = prefs.getString('widget_applied_verse_ref') ?? '';
+    var appliedText = prefs.getString('widget_applied_verse_text') ?? '';
+    final appliedSurah = prefs.getInt('widget_applied_verse_surah') ?? 0;
+    final appliedVerseNum = prefs.getInt('widget_applied_verse_number') ?? 0;
+    final applyNonce = prefs.getInt('widget_apply_nonce') ?? 0;
 
-    if (isPinned && langCode != 'tr' && appliedSurah > 0 && appliedVerseNum > 0) {
+    if (appliedRef.isNotEmpty && langCode != 'tr' && appliedSurah > 0 && appliedVerseNum > 0) {
       final needle = '$appliedSurah:$appliedVerseNum';
       for (final v in ShortVerseNotification.pool) {
         if (v.verseReference.contains(needle)) {
@@ -150,6 +183,7 @@ class WidgetService {
     await HomeWidget.saveWidgetData<String>('widget_applied_verse_text', appliedText);
     await HomeWidget.saveWidgetData<int>('widget_applied_verse_surah', appliedSurah);
     await HomeWidget.saveWidgetData<int>('widget_applied_verse_number', appliedVerseNum);
+    await HomeWidget.saveWidgetData<int>('widget_apply_nonce', applyNonce);
 
     // Tüm vakitler
     for (final prayer in allPrayers) {

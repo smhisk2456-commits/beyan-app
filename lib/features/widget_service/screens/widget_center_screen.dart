@@ -71,162 +71,721 @@ class WidgetPreviewQuote {
     }
     return meaningEn;
   }
+  String formatForViewMode(String viewMode, String langCode) {
+    final meal = localizedMeaning(langCode);
+    if (viewMode == 'arabic_only' || viewMode == 'Yalnızca Arapça') {
+      return arabic;
+    }
+    if (viewMode == 'arabic_meal' || viewMode == 'Arapça + Meal') {
+      return '$arabic\n$meal';
+    }
+    return meal;
+  }
 }
 
-const Map<String, List<WidgetPreviewQuote>> _categoryQuotes = {
-  'comfort': [
-    WidgetPreviewQuote(
-      referenceTr: 'Ra\'d 13:28',
-      referenceEn: 'Ar-Ra\'d 13:28',
-      referenceAr: 'الرعد ١٣:٢٨',
-      arabic: 'أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ',
-      meaningTr: 'Bilin ki, kalpler ancak Allah\'ı anmakla huzur bulur.',
-      meaningEn: 'Unquestionably, by the remembrance of Allah hearts are assured.',
-      meaningAr: 'ألا بذكر الله تطمئن القلوب',
-    ),
-    WidgetPreviewQuote(
-      referenceTr: 'İnşirâh 94:6',
-      referenceEn: 'Ash-Sharh 94:6',
-      referenceAr: 'الشرح ٩٤:٦',
-      arabic: 'إِنَّ مَعَ الْعُسْرِ يُسْرًا',
-      meaningTr: 'Şüphesiz her güçlükle beraber bir kolaylık vardır.',
-      meaningEn: 'Indeed, with hardship comes ease.',
-      meaningAr: 'إن مع العسر يسراً',
-    ),
-    WidgetPreviewQuote(
-      referenceTr: 'Duhâ 93:3',
-      referenceEn: 'Ad-Duhaa 93:3',
-      referenceAr: 'الضحى ٩٣:٣',
-      arabic: 'مَا وَدَّعَكَ رَبُّكَ وَمَا قَلَىٰ',
-      meaningTr: 'Rabbin seni terk etmedi ve sana darılmadı.',
-      meaningEn: 'Your Lord has not taken leave of you, nor has He detested.',
-      meaningAr: 'ما ودعك ربك وما قلى',
-    ),
-    WidgetPreviewQuote(
-      referenceTr: 'Duhâ 93:5',
-      referenceEn: 'Ad-Duhaa 93:5',
-      referenceAr: 'الضحى ٩٣:٥',
-      arabic: 'وَلَسَوْفَ يُعْطِيكَ رَبُّكَ فَتَرْضَىٰ',
-      meaningTr: 'Rabbin sana verecek ve sen razı olacaksın.',
-      meaningEn: 'And your Lord is going to give you, and you will be satisfied.',
-      meaningAr: 'ولسوف يعطيك ربك فترضى',
-    ),
-    WidgetPreviewQuote(
-      referenceTr: 'Yûsuf 12:86',
-      referenceEn: 'Yusuf 12:86',
-      referenceAr: 'يوسف ١٢:٨٦',
-      arabic: 'إِنَّمَا أَشْكُو بَثِّي وَحُزْنِي إِلَى اللَّهِ',
-      meaningTr: 'Ben hüzün ve kederimi ancak Allah\'a arz ederim.',
-      meaningEn: 'I only complain of my suffering and my grief to Allah.',
-      meaningAr: 'إنما أشكو بثي وحزني إلى الله',
-    ),
-    WidgetPreviewQuote(
-      referenceTr: 'Bakara 2:186',
-      referenceEn: 'Al-Baqarah 2:186',
-      referenceAr: 'البقرة ٢:١٨٦',
-      arabic: 'وَإِذَا سَأَلَكَ عِبَادِي عَنِّي فَإِنِّي قَرِيبٌ',
-      meaningTr: 'Kullarım Beni sorarlarsa, şüphesiz Ben onlara çok yakınım.',
-      meaningEn: 'When My servants ask you concerning Me, indeed I am near.',
-      meaningAr: 'وإذا سألك عبادي عني فإني قريب',
-    ),
-    WidgetPreviewQuote(
-      referenceTr: 'Zümer 39:53',
-      referenceEn: 'Az-Zumar 39:53',
-      referenceAr: 'الزمر ٣٩:٥٣',
-      arabic: 'لَا تَقْنَطُوا مِن رَّحْمَةِ اللَّهِ',
-      meaningTr: 'Allah\'ın rahmetinden ümidinizi kesmeyin.',
-      meaningEn: 'Do not despair of the mercy of Allah.',
-      meaningAr: 'لا تقنطوا من رحمة الله',
-    ),
-    WidgetPreviewQuote(
-      referenceTr: 'Tevbe 9:40',
-      referenceEn: 'At-Tawbah 9:40',
-      referenceAr: 'التوبة ٩:٤٠',
-      arabic: 'لَا تَحْزَنْ إِنَّ اللَّهَ مَعَنَا',
-      meaningTr: 'Üzülme, çünkü Allah bizimle beraberdir.',
-      meaningEn: 'Do not grieve; indeed Allah is with us.',
-      meaningAr: 'لا تحزن إن الله معنا',
-    ),
-    WidgetPreviewQuote(
-      referenceTr: 'Tâhâ 20:46',
-      referenceEn: 'Taha 20:46',
-      referenceAr: 'طه ٢٠:٤٦',
-      arabic: 'لَا تَخَافَا ۖ إِنَّنِي مَعَكُمَا أَسْمَعُ وَأَرَىٰ',
-      meaningTr: 'Korkmayın, şüphesiz Ben sizinle beraberim; işitir ve görürüm.',
-      meaningEn: 'Fear not. Indeed, I am with you; I hear and I see.',
-      meaningAr: 'لا تخافا إنني معكما أسمع وأرى',
-    ),
-    WidgetPreviewQuote(
-      referenceTr: 'Tâhâ 20:25-26',
-      referenceEn: 'Taha 20:25-26',
-      referenceAr: 'طه ٢٠:٢٥-٢٦',
-      arabic: 'رَبِّ اشْرَحْ لِي صَدْرِي وَيَسِّرْ لِي أَمْرِي',
-      meaningTr: 'Rabbim! Gönlüme ferahlık ver, işimi bana kolaylaştır.',
-      meaningEn: 'My Lord, expand for me my chest and ease for me my task.',
-      meaningAr: 'رب اشرح لي صدري ويسر لي أمري',
-    ),
-    WidgetPreviewQuote(
-      referenceTr: 'Kâf 50:16',
-      referenceEn: 'Qaf 50:16',
-      referenceAr: 'ق ٥٠:١٦',
-      arabic: 'وَنَحْنُ أَقْرَبُ إِلَيْهِ مِنْ حَبْلِ الْوَرِيدِ',
-      meaningTr: 'Biz insana şah damarından daha yakınız.',
-      meaningEn: 'We are closer to him than his jugular vein.',
-      meaningAr: 'ونحن أقرب إليه من حبل الوريد',
-    ),
-    WidgetPreviewQuote(
-      referenceTr: 'Bakara 2:286',
-      referenceEn: 'Al-Baqarah 2:286',
-      referenceAr: 'البقرة ٢:٢٨٦',
-      arabic: 'لَا يُكَلِّفُ اللَّهُ نَفْسًا إِلَّا وُسْعَهَا',
-      meaningTr: 'Allah hiçbir kimseye gücünün yettiğinden fazlasını yüklemez.',
-      meaningEn: 'Allah does not burden a soul beyond that it can bear.',
-      meaningAr: 'لا يكلف الله نفسا إلا وسعها',
-    ),
-    WidgetPreviewQuote(
-      referenceTr: 'Hûd 11:90',
-      referenceEn: 'Hud 11:90',
-      referenceAr: 'هود ١١:٩٠',
-      arabic: 'إِنَّ رَبِّي رَحِيمٌ وَدُودٌ',
-      meaningTr: 'Şüphesiz Rabbim merhametlidir, çok sevendir.',
-      meaningEn: 'Indeed, my Lord is Merciful and Affectionate.',
-      meaningAr: 'إن ربي رحيم ودود',
-    ),
-    WidgetPreviewQuote(
-      referenceTr: 'Âl-i İmrân 3:139',
-      referenceEn: 'Ali \'Imran 3:139',
-      referenceAr: 'آل عمران ٣:١٣٩',
-      arabic: 'وَلَا تَهِنُوا وَلَا تَحْزَنُوا وَأَنتُمُ الْأَعْلَوْنَ',
-      meaningTr: 'Gevşemeyin, üzülmeyin; inanmışsanız üstün sizsiniz.',
-      meaningEn: 'Do not weaken and do not grieve; you will be superior.',
-      meaningAr: 'ولا تهنوا ولا تحزنوا وأنتم الأعلون',
-    ),
-    WidgetPreviewQuote(
-      referenceTr: 'Bakara 2:257',
-      referenceEn: 'Al-Baqarah 2:257',
-      referenceAr: 'البقرة ٢:٢٥٧',
-      arabic: 'اللَّهُ وَلِيُّ الَّذِينَ آمَنُوا يُخْرِجُهُم مِّنَ الظُّلُمَاتِ إِلَى النُّورِ',
-      meaningTr: 'Allah inananların dostudur; onları karanlıklardan nura çıkarır.',
-      meaningEn: 'Allah is the ally of those who believe, bringing them to light.',
-      meaningAr: 'الله ولي الذين آمنوا يخرجهم من الظلمات إلى النور',
-    ),
-    WidgetPreviewQuote(
-      referenceTr: 'Yûnus 10:62',
-      referenceEn: 'Yunus 10:62',
-      referenceAr: 'يونس ١٠:٦٢',
-      arabic: 'أَلَا إِنَّ أَوْلِيَاءَ اللَّهِ لَا خَوْفٌ عَلَيْهِمْ وَلَا هُمْ يَحْزَنُونَ',
-      meaningTr: 'İyi bilin ki, Allah\'ın dostlarına asla korku ve hüzün yoktur.',
-      meaningEn: 'Unquestionably, for the allies of Allah there will be no fear nor will they grieve.',
-      meaningAr: 'ألا إن أولياء الله لا خوف عليهم ولا هم يحزنون',
-    ),
-  ],
+const List<WidgetPreviewQuote> _comfortQuotes = [
+  WidgetPreviewQuote(
+    referenceTr: 'Duhâ 93:3',
+    referenceEn: 'Ad-Duhaa 93:3',
+    referenceAr: 'الضحى ٩٣:٣',
+    arabic: 'مَا وَدَّعَكَ رَبُّكَ وَمَا قَلَىٰ',
+    meaningTr: 'Rabbin seni terk etmedi ve sana darılmadı.',
+    meaningEn: 'Your Lord has not taken leave of you, nor has He detested you.',
+    meaningAr: 'ما ودعك ربك وما قلى',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Duhâ 93:5',
+    referenceEn: 'Ad-Duhaa 93:5',
+    referenceAr: 'الضحى ٩٣:٥',
+    arabic: 'وَلَسَوْفَ يُعْطِيكَ رَبُّكَ فَتَرْضَىٰ',
+    meaningTr: 'Rabbin sana yakında öyle verecek ki, gönlün razı olacak.',
+    meaningEn: 'And your Lord is going to give you, and you will be satisfied.',
+    meaningAr: 'ولسوف يعطيك ربك فترضى',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Yûsuf 12:86',
+    referenceEn: 'Yusuf 12:86',
+    referenceAr: 'يوسف ١٢:٨٦',
+    arabic: 'إِنَّمَا أَشْكُو بَثِّي وَحُزْنِي إِلَى اللَّهِ',
+    meaningTr: 'Ben kederimi ve hüznümü yalnız Allah\'a arz ederim.',
+    meaningEn: 'I only complain of my suffering and my grief to Allah.',
+    meaningAr: 'إنما أشكو بثي وحزني إلى الله',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'İnşirâh 94:5-6',
+    referenceEn: 'Ash-Sharh 94:5-6',
+    referenceAr: 'الشرح ٩٤:٥-٦',
+    arabic: 'فَإِنَّ مَعَ الْعُسْرِ يُسْرًا ۝ إِنَّ مَعَ الْعُسْرِ يُسْرًا',
+    meaningTr: 'Elbette zorluğun yanında bir kolaylık vardır; gerçekten her güçlükle beraber bir kolaylık vardır.',
+    meaningEn: 'For indeed, with hardship will be ease. Indeed, with hardship will be ease.',
+    meaningAr: 'فإن مع العسر يسرا إن مع العسر يسرا',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Tevbe 9:40',
+    referenceEn: 'At-Tawbah 9:40',
+    referenceAr: 'التوبة ٩:٤٠',
+    arabic: 'لَا تَحْزَنْ إِنَّ اللَّهَ مَعَنَا',
+    meaningTr: 'Üzülme! Şüphesiz Allah bizimle beraberdir.',
+    meaningEn: 'Do not grieve; indeed Allah is with us.',
+    meaningAr: 'لا تحزن إن الله معنا',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Ra\'d 13:28',
+    referenceEn: 'Ar-Ra\'d 13:28',
+    referenceAr: 'الرعد ١٣:٢٨',
+    arabic: 'أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ',
+    meaningTr: 'Bilin ki, yorgun kalpler ancak Allah\'ı anmakla huzur bulur.',
+    meaningEn: 'Unquestionably, by the remembrance of Allah hearts are assured.',
+    meaningAr: 'ألا بذكر الله تطمئن القلوب',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Kâf 50:16',
+    referenceEn: 'Qaf 50:16',
+    referenceAr: 'ق ٥٠:١٦',
+    arabic: 'وَنَحْنُ أَقْرَبُ إِلَيْهِ مِنْ حَبْلِ الْوَرِيدِ',
+    meaningTr: 'Biz insana şah damarından daha yakınız; kalbinden geçen her fısıltıyı biliriz.',
+    meaningEn: 'We know what his soul whispers to him, and We are closer to him than his jugular vein.',
+    meaningAr: 'ونحن أقرب إليه من حبل الوريد',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Bakara 2:186',
+    referenceEn: 'Al-Baqarah 2:186',
+    referenceAr: 'البقرة ٢:١٨٦',
+    arabic: 'وَإِذَا سَأَلَكَ عِبَادِي عَنِّي فَإِنِّي قَرِيبٌ ۖ أُجِيبُ دَعْوَةَ الدَّاعِ',
+    meaningTr: 'Kullarım Beni sorarlarsa, şüphesiz Ben onlara çok yakınım; bana el açanın duasına icabet ederim.',
+    meaningEn: 'When My servants ask you concerning Me, indeed I am near; I respond to the invocation of the supplicant.',
+    meaningAr: 'وإذا سألك عبادي عني فإني قريب أجيب دعوة الداع',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Zümer 39:53',
+    referenceEn: 'Az-Zumar 39:53',
+    referenceAr: 'الزمر ٣٩:٥٣',
+    arabic: 'لَا تَقْنَطُوا مِن رَّحْمَةِ اللَّهِ ۚ إِنَّ اللَّهَ يَغْفِرُ الذُّنُوبَ جَمِيعًا',
+    meaningTr: 'Allah\'ın rahmetinden asla ümidinizi kesmeyin! Şüphesiz Allah bütün günahları bağışlar.',
+    meaningEn: 'Do not despair of the mercy of Allah. Indeed, Allah forgives all sins.',
+    meaningAr: 'لا تقنطوا من رحمة الله إن الله يغفر الذنوب جميعا',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Talâk 65:7',
+    referenceEn: 'At-Talaq 65:7',
+    referenceAr: 'الطلاق ٦٥:٧',
+    arabic: 'سَيَجْعَلُ اللَّهُ بَعْدَ عُسْرٍ يُسْرًا',
+    meaningTr: 'Allah her darlığın ve güçlüğün ardından mutlaka bir ferahlık yaratacaktır.',
+    meaningEn: 'Allah will bring about, after hardship, ease.',
+    meaningAr: 'سيجعل الله بعد عسر يسرا',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Meryem 19:64',
+    referenceEn: 'Maryam 19:64',
+    referenceAr: 'مريم ١٩:٦٤',
+    arabic: 'وَمَا كَانَ رَبُّكَ نَسِيًّا',
+    meaningTr: 'Senin Rabbin seni de, dualarını da asla unutkan değildir.',
+    meaningEn: 'And never is your Lord forgetful.',
+    meaningAr: 'وما كان ربك نسيا',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Hicr 15:97-98',
+    referenceEn: 'Al-Hijr 15:97-98',
+    referenceAr: 'الحجر ١٥:٩٧-٩٨',
+    arabic: 'وَلَقَدْ نَعْلَمُ أَنَّكَ يَضِيقُ صَدْرُكَ بِمَا يَقُولُونَ ۝ فَسَبِّحْ بِحَمْدِ رَبِّكَ',
+    meaningTr: 'Onların söyledikleri yüzünden göğsünün daraldığını biliyoruz; sen Rabbini hamd ile tesbih et ve secdeye kapan.',
+    meaningEn: 'We already know that your breast is constrained by what they say; so exalt your Lord with praise.',
+    meaningAr: 'ولقد نعلم أنك يضيق صدرك بما يقولون فسبح بحمد ربك',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Bakara 2:216',
+    referenceEn: 'Al-Baqarah 2:216',
+    referenceAr: 'البقرة ٢:٢١٦',
+    arabic: 'وَعَسَىٰ أَن تَكْرَهُوا شَيْئًا وَهُوَ خَيْرٌ لَّكُمْ ۖ وَاللَّهُ يَعْلَمُ وَأَنتُمْ لَا تَعْلَمُونَ',
+    meaningTr: 'Olur ki hoşunuza gitmeyen bir şey sizin için hayırlıdır; Allah bilir, siz bilmezsiniz.',
+    meaningEn: 'Perhaps you dislike a thing and it is good for you; and Allah knows, while you know not.',
+    meaningAr: 'وعسى أن تكرهوا شيئا وهو خير لكم والله يعلم وأنتم لا تعلمون',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Enbiyâ 21:83',
+    referenceEn: 'Al-Anbiya 21:83',
+    referenceAr: 'الأنبياء ٢١:٨٣',
+    arabic: 'أَنِّي مَسَّنِيَ الضُّرُّ وَأَنتَ أَرْحَمُ الرَّاحِمِينَ',
+    meaningTr: 'Rabbim! Bana gerçekten dert dokundu; Sen merhametlilerin en merhametlisisin.',
+    meaningEn: 'Indeed, adversity has touched me, and You are the Most Merciful of the merciful.',
+    meaningAr: 'أني مسني الضر وأنت أرحم الراحمين',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Şuarâ 26:62',
+    referenceEn: 'Ash-Shu\'ara 26:62',
+    referenceAr: 'الشعراء ٢٦:٦٢',
+    arabic: 'كَلَّا ۖ إِنَّ مَعِيَ رَبِّي سَيَهْدِينِ',
+    meaningTr: 'Asla ümitsizliğe düşme! Rabbim benimle beraberdir; bana mutlaka bir çıkış yolu gösterecektir.',
+    meaningEn: 'No! Indeed, with me is my Lord; He will guide me.',
+    meaningAr: 'كلا إن معي ربي سيهدين',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Tâhâ 20:46',
+    referenceEn: 'Taha 20:46',
+    referenceAr: 'طه ٢٠:٤٦',
+    arabic: 'لَا تَخَافَا ۖ إِنَّنِي مَعَكُمَا أَسْمَعُ وَأَرَىٰ',
+    meaningTr: 'Korkmayın! Şüphesiz Ben sizinle beraberim; her şeyi işitir ve görürüm.',
+    meaningEn: 'Fear not. Indeed, I am with you; I hear and I see.',
+    meaningAr: 'لا تخافا إنني معكما أسمع وأرى',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'İnşirâh 94:1-3',
+    referenceEn: 'Ash-Sharh 94:1-3',
+    referenceAr: 'الشرح ٩٤:١-٣',
+    arabic: 'أَلَمْ نَشْرَحْ لَكَ صَدْرَكَ ۝ وَوَضَعْنَا عَنكَ وِزْرَكَ',
+    meaningTr: 'Senin daralan göğsünü açıp genişletmedik mi? Belini büken o ağır yükü üzerinden kaldırmadık mı?',
+    meaningEn: 'Did We not expand for you your breast? And We removed from you your burden.',
+    meaningAr: 'ألم نشرح لك صدرك ووضعنا عنك وزرك',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Duhâ 93:6-8',
+    referenceEn: 'Ad-Duhaa 93:6-8',
+    referenceAr: 'الضحى ٩٣:٦-٨',
+    arabic: 'أَلَمْ يَجِدْكَ يَتِيمًا فَآوَىٰ ۝ وَوَجَدَكَ ضَالًّا فَهَدَىٰ',
+    meaningTr: 'O seni yetim bulup da barındırmadı mı? Seni çaresiz bulup da yol göstermedi mi?',
+    meaningEn: 'Did He not find you an orphan and give you refuge? And He found you lost and guided you.',
+    meaningAr: 'ألم يجدك يتيما فآوى ووجدك ضالا فهدى',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Fetih 48:4',
+    referenceEn: 'Al-Fath 48:4',
+    referenceAr: 'الفتح ٤٨:٤',
+    arabic: 'هُوَ الَّذِي أَنزَلَ السَّكِينَةَ فِي قُلُوبِ الْمُؤْمِنِينَ',
+    meaningTr: 'Müminlerin yorgun kalplerine huzur ve sekînet indiren O\'dur.',
+    meaningEn: 'It is He who sent down tranquility into the hearts of the believers.',
+    meaningAr: 'هو الذي أنزل السكينة في قلوب المؤمنين',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Meryem 19:24',
+    referenceEn: 'Maryam 19:24',
+    referenceAr: 'مريم ١٩:٢٤',
+    arabic: 'أَلَّا تَحْزَنِي قَدْ جَعَلَ رَبُّكِ تَحْتَكِ سَرِيًّا',
+    meaningTr: 'Sakın üzülme! Rabbin senin kalbine ferahlık ve rahmet pınarı var etti.',
+    meaningEn: 'Do not grieve; your Lord has provided beneath you a stream of mercy.',
+    meaningAr: 'ألا تحزني قد جعل ربك تحتك سريا',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Kasas 28:7',
+    referenceEn: 'Al-Qasas 28:7',
+    referenceAr: 'القصص ٢٨:٧',
+    arabic: 'وَلَا تَخَافِي وَلَا تَحْزَنِي',
+    meaningTr: 'Korkma ve mahzun olma! Allah senin kalbine emanet ettiğini koruyacaktır.',
+    meaningEn: 'Do not fear and do not grieve.',
+    meaningAr: 'ولا تخافي ولا تحزني',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Hadîd 57:4',
+    referenceEn: 'Al-Hadid 57:4',
+    referenceAr: 'الحديد ٥٧:٤',
+    arabic: 'وَهُوَ مَعَكُمْ أَيْنَ مَا كُنتُمْ',
+    meaningTr: 'Yalnız hissetme; nerede olursanız olun, O sizinle beraberdir.',
+    meaningEn: 'And He is with you wherever you are.',
+    meaningAr: 'وهو معكم أين ما كنتم',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Bakara 2:286',
+    referenceEn: 'Al-Baqarah 2:286',
+    referenceAr: 'البقرة ٢:٢٨٦',
+    arabic: 'لَا يُكَلِّفُ اللَّهُ نَفْسًا إِلَّا وُسْعَهَا',
+    meaningTr: 'Allah hiçbir kalbe taşıyabileceğinden daha ağır bir yük yüklemez.',
+    meaningEn: 'Allah does not burden a soul beyond that it can bear.',
+    meaningAr: 'لا يكلف الله نفسا إلا وسعها',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Hûd 11:90',
+    referenceEn: 'Hud 11:90',
+    referenceAr: 'هود ١١:٩٠',
+    arabic: 'إِنَّ رَبِّي رَحِيمٌ وَدُودٌ',
+    meaningTr: 'Şüphesiz benim Rabbim çok merhametlidir, kullarını çok sevendir.',
+    meaningEn: 'Indeed, my Lord is Merciful and Affectionate.',
+    meaningAr: 'إن ربي رحيم ودود',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Âl-i İmrân 3:139',
+    referenceEn: 'Ali \'Imran 3:139',
+    referenceAr: 'آل عمران ٣:١٣٩',
+    arabic: 'وَلَا تَهِنُوا وَلَا تَحْزَنُوا وَأَنتُمُ الْأَعْلَوْنَ',
+    meaningTr: 'Gevşemeyin, hüzne kapılmayın; eğer inanıyorsanız üstün gelecek olan sizsiniz.',
+    meaningEn: 'Do not weaken and do not grieve, and you will be superior if you are believers.',
+    meaningAr: 'ولا تهنوا ولا تحزنوا وأنتم الأعلون',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Bakara 2:257',
+    referenceEn: 'Al-Baqarah 2:257',
+    referenceAr: 'البقرة ٢:٢٥٧',
+    arabic: 'اللَّهُ وَلِيُّ الَّذِينَ آمَنُوا يُخْرِجُهُم مِّنَ الظُّلُمَاتِ إِلَى النُّورِ',
+    meaningTr: 'Allah inananların dostudur; onları karanlıklardan aydınlığa çıkarır.',
+    meaningEn: 'Allah is the ally of those who believe; He brings them out from darknesses into the light.',
+    meaningAr: 'الله ولي الذين آمنوا يخرجهم من الظلمات إلى النور',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Yûnus 10:62',
+    referenceEn: 'Yunus 10:62',
+    referenceAr: 'يونس ١٠:٦٢',
+    arabic: 'أَلَا إِنَّ أَوْلِيَاءَ اللَّهِ لَا خَوْفٌ عَلَيْهِمْ وَلَا هُمْ يَحْزَنُونَ',
+    meaningTr: 'İyi bilin ki, Allah\'ın dostlarına hiçbir korku yoktur ve onlar mahzun olmayacaklardır.',
+    meaningEn: 'Unquestionably, for the allies of Allah there will be no fear nor will they grieve.',
+    meaningAr: 'ألا إن أولياء الله لا خوف عليهم ولا هم يحزنون',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'İsrâ 17:82',
+    referenceEn: 'Al-Isra 17:82',
+    referenceAr: 'الإسراء ١٧:٨٢',
+    arabic: 'وَنُنَزِّلُ مِنَ الْقُرْآنِ مَا هُوَ شِفَاءٌ وَرَحْمَةٌ لِّلْمُؤْمِنِينَ',
+    meaningTr: 'Biz Kur\'an\'dan, müminlerin yaralı gönüllerine şifa ve rahmet olan âyetler indiriyoruz.',
+    meaningEn: 'And We send down of the Quran that which is healing and mercy for the believers.',
+    meaningAr: 'وننزل من القرآن ما هو شفاء ورحمة للمؤمنين',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Necm 53:43',
+    referenceEn: 'An-Najm 53:43',
+    referenceAr: 'النجم ٥٣:٤٣',
+    arabic: 'وَأَنَّهُ هُوَ أَضْحَكَ وَأَبْكَىٰ',
+    meaningTr: 'Doğrusu güldüren de ağlatan da O\'dur; her gözyaşının ardında O\'nun hikmeti vardır.',
+    meaningEn: 'And that it is He who makes one laugh and weep.',
+    meaningAr: 'وأنه هو أضحك وأبكى',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Fâtır 35:2',
+    referenceEn: 'Fatir 35:2',
+    referenceAr: 'فاطر ٣٥:٢',
+    arabic: 'مَّا يَفْتَحِ اللَّهُ لِلنَّاسِ مِن رَّحْمَةٍ فَلَا مُمْسِكَ لَهَا',
+    meaningTr: 'Allah\'ın insanlara açacağı rahmet kapısını kapatabilecek hiçbir güç yoktur.',
+    meaningEn: 'Whatever Allah grants to people of mercy – none can withhold it.',
+    meaningAr: 'ما يفتح الله للناس من رحمة فلا ممسك لها',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Meryem 19:96',
+    referenceEn: 'Maryam 19:96',
+    referenceAr: 'مريم ١٩:٩٦',
+    arabic: 'سَيَجْعَلُ لَهُمُ الرَّحْمَٰنُ وُدًّا',
+    meaningTr: 'İman edip güzel işler yapanlar için Rahmân, gönüllerde sıcak bir sevgi yaratacaktır.',
+    meaningEn: 'The Most Merciful will appoint for them affection in hearts.',
+    meaningAr: 'سيجعل لهم الرحمن ودا',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Şuarâ 26:80',
+    referenceEn: 'Ash-Shu\'ara 26:80',
+    referenceAr: 'الشعراء ٢٦:٨٠',
+    arabic: 'وَإِذَا مَرِضْتُ فَهُوَ يَشْفِينِ',
+    meaningTr: 'Hastalandığım ve dermanım tükendiği zaman bana şifa veren ancak O\'dur.',
+    meaningEn: 'And when I am ill, it is He who cures me.',
+    meaningAr: 'وإذا مرضت فهو يشفين',
+  ),
+];
+
+const List<WidgetPreviewQuote> _sabrQuotes = [
+  WidgetPreviewQuote(
+    referenceTr: 'Bakara 2:153',
+    referenceEn: 'Al-Baqarah 2:153',
+    referenceAr: 'البقرة ٢:١٥٣',
+    arabic: 'يَا أَيُّهَا الَّذِينَ آمَنُوا اسْتَعِينُوا بِالصَّبْرِ وَالصَّلَاةِ ۚ إِنَّ اللَّهَ مَعَ الصَّابِرِينَ',
+    meaningTr: 'Ey iman edenler! Sabır ve namazla yardım dileyin. Şüphesiz Allah sabredenlerle beraberdir.',
+    meaningEn: 'O you who believe! Seek help through patience and prayer. Indeed, Allah is with the patient.',
+    meaningAr: 'يا أيها الذين آمنوا استعينوا بالصبر والصلاة إن الله مع الصابرين',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Yûsuf 12:18',
+    referenceEn: 'Yusuf 12:18',
+    referenceAr: 'يوسف ١٢:١٨',
+    arabic: 'فَصَبْرٌ جَمِيلٌ ۖ وَاللَّهُ الْمُسْتَعَانُ',
+    meaningTr: 'Bana düşen, şikâyetsiz güzel bir sabırdır (Sabr-ı Cemîl). Yardımına sığınılacak olan yalnız Allah\'tır.',
+    meaningEn: 'So patience is most fitting. And Allah is the one sought for help.',
+    meaningAr: 'فصبر جميل والله المستعان',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Zümer 39:10',
+    referenceEn: 'Az-Zumar 39:10',
+    referenceAr: 'الزمر ٣٩:١٠',
+    arabic: 'إِنَّمَا يُوَفَّى الصَّابِرُونَ أَجْرَهُم بِغَيْرِ حِسَابٍ',
+    meaningTr: 'Sabredenlere mükâfatları hesapsızca, sınırsızca verilecektir.',
+    meaningEn: 'Indeed, the patient will be given their reward without account.',
+    meaningAr: 'إنما يوفى الصابرون أجرهم بغير حساب',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Bakara 2:155',
+    referenceEn: 'Al-Baqarah 2:155',
+    referenceAr: 'البقرة ٢:١٥٥',
+    arabic: 'وَبَشِّرِ الصَّابِرِينَ',
+    meaningTr: 'Zorluklara göğüs gerip sabredenleri müjdele!',
+    meaningEn: 'And give good tidings to the patient.',
+    meaningAr: 'وبشر الصابرين',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'İbrâhîm 14:7',
+    referenceEn: 'Ibrahim 14:7',
+    referenceAr: 'إبراهيم ١٤:٧',
+    arabic: 'لَئِن شَكَرْتُمْ لَأَزِيدَنَّكُمْ',
+    meaningTr: 'Andolsun, eğer şükrederseniz nimetimi ve huzurunuzu mutlaka artırırım.',
+    meaningEn: 'If you are grateful, I will surely increase you in favor.',
+    meaningAr: 'لئن شكرتم لأزيدنكم',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Hûd 11:115',
+    referenceEn: 'Hud 11:115',
+    referenceAr: 'هود ١١:١١٥',
+    arabic: 'وَاصْبِرْ فَإِنَّ اللَّهَ لَا يُضِيعُ أَجْرَ الْمُحْسِنِينَ',
+    meaningTr: 'Sabret! Çünkü Allah güzel davrananların emeğini ve gözyaşını asla zayi etmez.',
+    meaningEn: 'And be patient, for indeed, Allah does not allow the reward of those who do good to be lost.',
+    meaningAr: 'واصبر فإن الله لا يضيع أجر المحسنين',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Âl-i İmrân 3:146',
+    referenceEn: 'Ali \'Imran 3:146',
+    referenceAr: 'آل عمران ٣:١٤٦',
+    arabic: 'وَاللَّهُ يُحِبُّ الصَّابِرِينَ',
+    meaningTr: 'Şüphesiz Allah sabredenleri sever.',
+    meaningEn: 'And Allah loves the steadfast.',
+    meaningAr: 'والله يحب الصابرين',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Tûr 52:48',
+    referenceEn: 'At-Tur 52:48',
+    referenceAr: 'الطور ٥٢:٤٨',
+    arabic: 'وَاصْبِرْ لِحُكْمِ رَبِّكَ فَإِنَّكَ بِأَعْيُنِنَا',
+    meaningTr: 'Rabbinin hükmüne sabret; çünkü sen Bizim gözetimimiz ve korumamız altındasın.',
+    meaningEn: 'And be patient for the decision of your Lord, for indeed, you are in Our eyes.',
+    meaningAr: 'واصبر لحكم ربك فإنك بأعيننا',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Ra\'d 13:24',
+    referenceEn: 'Ar-Ra\'d 13:24',
+    referenceAr: 'الرعد ١٣:٢٤',
+    arabic: 'سَلَامٌ عَلَيْكُم بِمَا صَبَرْتُمْ ۚ فَنِعْمَ عُقْبَى الدَّارِ',
+    meaningTr: 'Sabrettiğiniz için size selâm olsun! Dünya yurdunun sonu ne güzeldir.',
+    meaningEn: 'Peace be upon you for what you patiently endured. And excellent is the final home.',
+    meaningAr: 'سلام عليكم بما صبرتم فنعم عقبى الدار',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Yûsuf 12:90',
+    referenceEn: 'Yusuf 12:90',
+    referenceAr: 'يوسف ١٢:٩٠',
+    arabic: 'إِنَّهُ مَن يَتَّقِ وَيَصْبِرْ فَإِنَّ اللَّهَ لَا يُضِيعُ أَجْرَ الْمُحْسِنِينَ',
+    meaningTr: 'Kim Allah\'tan sakınır ve sabrederse, şüphesiz Allah iyilik edenlerin mükâfatını zayi etmez.',
+    meaningEn: 'Indeed, he who fears Allah and is patient, then indeed, Allah does not allow the reward of the doers of good to be lost.',
+    meaningAr: 'إنه من يتق ويصبر فإن الله لا يضيع أجر المحسنين',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Ankebût 29:69',
+    referenceEn: 'Al-\'Ankabut 29:69',
+    referenceAr: 'العنكبوت ٢٩:٦٩',
+    arabic: 'وَالَّذِينَ جَاهَدُوا فِينَا لَنَهْدِيَنَّهُمْ سُبُلَنَا',
+    meaningTr: 'Bizim uğrumuzda gayret gösterip direnenleri elbette kendi yollarımıza eriştireceğiz.',
+    meaningEn: 'And those who strive for Us – We will surely guide them to Our ways.',
+    meaningAr: 'والذين جاهدوا فينا لنهدينهم سبلنا',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Meâric 70:5',
+    referenceEn: 'Al-Ma\'arij 70:5',
+    referenceAr: 'المعارج ٧٠:٥',
+    arabic: 'فَاصْبِرْ صَبْرًا جَمِيلًا',
+    meaningTr: 'Şimdi sen, gönlünü daraltmadan güzel bir sabırla sabret.',
+    meaningEn: 'So be patient with gracious patience.',
+    meaningAr: 'فاصبر صبرا جميلا',
+  ),
+];
+
+const List<WidgetPreviewQuote> _duaQuotes = [
+  WidgetPreviewQuote(
+    referenceTr: 'Tâhâ 20:25-26',
+    referenceEn: 'Taha 20:25-26',
+    referenceAr: 'طه ٢٠:٢٥-٢٦',
+    arabic: 'رَبِّ اشْرَحْ لِي صَدْرِي ۝ وَيَسِّرْ لِي أَمْرِي',
+    meaningTr: 'Rabbim! Daralan gönlüme genişlik ve ferahlık ver, zor işimi bana kolaylaştır.',
+    meaningEn: 'My Lord, expand for me my chest and ease for me my task.',
+    meaningAr: 'رب اشرح لي صدري ويسر لي أمري',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Enbiyâ 21:87',
+    referenceEn: 'Al-Anbiya 21:87',
+    referenceAr: 'الأنبياء ٢١:٨٧',
+    arabic: 'لَّا إِلَٰهَ إِلَّا أَنتَ سُبْحَانَكَ إِنِّي كُنتُ مِنَ الظَّالِمِينَ',
+    meaningTr: 'Senden başka ilâh yoktur; Seni tenzih ederim. Gerçekten ben nefsine yazık edenlerden oldum.',
+    meaningEn: 'There is no deity except You; exalted are You. Indeed, I have been of the wrongdoers.',
+    meaningAr: 'لا إله إلا أنت سبحانك إني كنت من الظالمين',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Kasas 28:24',
+    referenceEn: 'Al-Qasas 28:24',
+    referenceAr: 'القصص ٢٨:٢٤',
+    arabic: 'رَبِّ إِنِّي لِمَا أَنزَلْتَ إِلَيَّ مِنْ خَيْرٍ فَقِيرٌ',
+    meaningTr: 'Rabbim! Doğrusu bana indireceğin her hayra öyle muhtacım ki...',
+    meaningEn: 'My Lord, indeed I am, for whatever good You would send down to me, in need.',
+    meaningAr: 'رب إني لما أنزلت إلي من خير فقير',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Bakara 2:201',
+    referenceEn: 'Al-Baqarah 2:201',
+    referenceAr: 'البقرة ٢:٢٠١',
+    arabic: 'رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ',
+    meaningTr: 'Rabbimiz! Bize dünyada da iyilik ve güzellik ver, ahirette de iyilik ver.',
+    meaningEn: 'Our Lord, give us in this world good and in the Hereafter good and protect us from the punishment of the Fire.',
+    meaningAr: 'ربنا آتنا في الدنيا حسنة وفي الآخرة حسنة وقنا عذاب النار',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Mü\'min 40:60',
+    referenceEn: 'Ghafir 40:60',
+    referenceAr: 'غافر ٤٠:٦٠',
+    arabic: 'وَقَالَ رَبُّكُمُ ادْعُونِي أَسْتَجِبْ لَكُمْ',
+    meaningTr: 'Rabbiniz buyurdu ki: Bana dua edin, size icabet edeyim.',
+    meaningEn: 'And your Lord says: Call upon Me; I will respond to you.',
+    meaningAr: 'وقال ربكم ادعوني أستجب لكم',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Kehf 18:10',
+    referenceEn: 'Al-Kahf 18:10',
+    referenceAr: 'الكهف ١٨:١٠',
+    arabic: 'رَبَّنَا آتِنَا مِن لَّدُنكَ رَحْمَةً وَهَيِّئْ لَنَا مِنْ أَمْرِنَا رَشَدًا',
+    meaningTr: 'Rabbimiz! Katından bize bir rahmet ver ve şu işimizde bize kurtuluş yolu hazırla.',
+    meaningEn: 'Our Lord, grant us from Yourself mercy and prepare for us from our affair right guidance.',
+    meaningAr: 'ربنا آتنا من لدنك رحمة وهيئ لنا من أمرنا رشدا',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'İbrâhîm 14:40',
+    referenceEn: 'Ibrahim 14:40',
+    referenceAr: 'إبراهيم ١٤:٤٠',
+    arabic: 'رَبِّ اجْعَلْنِي مُقِيمَ الصَّلَاةِ وَمِن ذُرِّيَّتِي ۚ رَبَّنَا وَتَقَبَّلْ دُعَاءِ',
+    meaningTr: 'Rabbim! Beni ve soyumu namazı aşkla yaşayanlardan eyle; Rabbimiz, duamı kabul buyur.',
+    meaningEn: 'My Lord, make me an establisher of prayer, and from my descendants. Our Lord, and accept my supplication.',
+    meaningAr: 'رب اجعلني مقيم الصلاة ومن ذريتي ربنا وتقبل دعاء',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Âl-i İmrân 3:8',
+    referenceEn: 'Ali \'Imran 3:8',
+    referenceAr: 'آل عمران ٣:٨',
+    arabic: 'رَبَّنَا لَا تُزِغْ قُلُوبَنَا بَعْدَ إِذْ هَدَيْتَنَا وَهَبْ لَنَا مِن لَّدُنكَ رَحْمَةً',
+    meaningTr: 'Rabbimiz! Bizi doğru yola ilettikten sonra kalplerimizi kaydırma ve bize katından rahmet bağışla.',
+    meaningEn: 'Our Lord, let not our hearts deviate after You have guided us and grant us from Yourself mercy.',
+    meaningAr: 'ربنا لا تزغ قلوبنا بعد إذ هديتنا وهب لنا من لدنك رحمة',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Furkân 25:74',
+    referenceEn: 'Al-Furqan 25:74',
+    referenceAr: 'الفرقان ٢٥:٧٤',
+    arabic: 'رَبَّنَا هَبْ لَنَا مِنْ أَزْوَاجِنَا وَذُرِّيَّاتِنَا قُرَّةَ أَعْيُنٍ',
+    meaningTr: 'Rabbimiz! Bize eşlerimizden ve evlatlarımızdan gözümüzün aydınlığı olacak iyilikler lütfet.',
+    meaningEn: 'Our Lord, grant us from among our spouses and offspring comfort to our eyes.',
+    meaningAr: 'ربنا هب لنا من أزواجنا وذرياتنا قرة أعين',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'A\'râf 7:55',
+    referenceEn: 'Al-A\'raf 7:55',
+    referenceAr: 'الأعراف ٧:٥٥',
+    arabic: 'ادْعُوا رَبَّكُمْ تَضَرُّعًا وَخُفْيَةً',
+    meaningTr: 'Rabbinize boyun bükerek, gönülden ve gizlice yalvarın.',
+    meaningEn: 'Call upon your Lord in humility and privately.',
+    meaningAr: 'ادعوا ربكم تضرعا وخفية',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Yûsuf 12:101',
+    referenceEn: 'Yusuf 12:101',
+    referenceAr: 'يوسف ١٢:١٠١',
+    arabic: 'أَنتَ وَلِيِّي فِي الدُّنْيَا وَالْآخِرَةِ ۖ تَوَفَّنِي مُسْلِمًا وَأَلْحِقْنِي بِالصَّالِحِينَ',
+    meaningTr: 'Dünyada da ahirette de benim dostum Sensin; canımı Müslüman olarak al ve beni iyilere kat.',
+    meaningEn: 'You are my protector in this world and the Hereafter. Cause me to die a Muslim and join me with the righteous.',
+    meaningAr: 'أنت وليي في الدنيا والآخرة توفني مسلما وألحقني بالصالحين',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Tahrîm 66:8',
+    referenceEn: 'At-Tahrim 66:8',
+    referenceAr: 'التحريم ٦٦:٨',
+    arabic: 'رَبَّنَا أَتْمِمْ لَنَا نُورَنَا وَاغْفِرْ لَنَا ۖ إِنَّكَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ',
+    meaningTr: 'Rabbimiz! Nurumuzu tamamla ve bizi bağışla; şüphesiz Sen her şeye kadirsin.',
+    meaningEn: 'Our Lord, perfect for us our light and forgive us. Indeed, You are over all things competent.',
+    meaningAr: 'ربنا أتمم لنا نورنا واغفر لنا إنك على كل شيء قدير',
+  ),
+];
+
+const List<WidgetPreviewQuote> _tawakkulQuotes = [
+  WidgetPreviewQuote(
+    referenceTr: 'Talâk 65:3',
+    referenceEn: 'At-Talaq 65:3',
+    referenceAr: 'الطلاق ٦٥:٣',
+    arabic: 'وَمَن يَتَوَكَّلْ عَلَى اللَّهِ فَهُوَ حَسْبُهُ',
+    meaningTr: 'Kim kalbini Allah\'a yaslayıp tevekkül ederse, O kendisine yeter.',
+    meaningEn: 'And whoever relies upon Allah – then He is sufficient for him.',
+    meaningAr: 'ومن يتوكل على الله فهو حسبه',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Âl-i İmrân 3:173',
+    referenceEn: 'Ali \'Imran 3:173',
+    referenceAr: 'آل عمران ٣:١٧٣',
+    arabic: 'حَسْبُنَا اللَّهُ وَنِعْمَ الْوَكِيلُ',
+    meaningTr: 'Allah bize yeter; O ne güzel dost ve ne güzel vekildir!',
+    meaningEn: 'Sufficient for us is Allah, and He is the best Disposer of affairs.',
+    meaningAr: 'حسبنا الله ونعم الوكيل',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Tevbe 9:129',
+    referenceEn: 'At-Tawbah 9:129',
+    referenceAr: 'التوبة ٩:١٢٩',
+    arabic: 'حَسْبِيَ اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ ۖ عَلَيْهِ تَوَكَّلْتُ',
+    meaningTr: 'Bana Allah yeter! O\'ndan başka ilâh yoktur; ben yalnız O\'na güvenip dayandım.',
+    meaningEn: 'Sufficient for me is Allah; there is no deity except Him. On Him I have relied.',
+    meaningAr: 'حسبي الله لا إله إلا هو عليه توكلت',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Zümer 39:36',
+    referenceEn: 'Az-Zumar 39:36',
+    referenceAr: 'الزمر ٣٩:٣٦',
+    arabic: 'أَلَيْسَ اللَّهُ بِكَافٍ عَبْدَهُ',
+    meaningTr: 'Allah kuluna kâfi değil midir? O varken kimden korkarsın?',
+    meaningEn: 'Is not Allah sufficient for His servant?',
+    meaningAr: 'أليس الله بكاف عبده',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Mü\'min 40:44',
+    referenceEn: 'Ghafir 40:44',
+    referenceAr: 'غافر ٤٠:٤٤',
+    arabic: 'وَأُفَوِّضُ أَمْرِي إِلَى اللَّهِ ۚ إِنَّ اللَّهَ بَصِيرٌ بِالْعِبَادِ',
+    meaningTr: 'Ben işimi ve kaderimi Allah\'a havale ediyorum; şüphesiz Allah kullarını hakkıyla görendir.',
+    meaningEn: 'And I entrust my affair to Allah. Indeed, Allah is Seeing of His servants.',
+    meaningAr: 'وأفوض أمري إلى الله إن الله بصير بالعباد',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Âl-i İmrân 3:160',
+    referenceEn: 'Ali \'Imran 3:160',
+    referenceAr: 'آل عمران ٣:١٦٠',
+    arabic: 'إِن يَنصُرْكُمُ اللَّهُ فَلَا غَالِبَ لَكُمْ',
+    meaningTr: 'Eğer Allah size yardım ederse, artık sizi yenecek hiçbir güç yoktur.',
+    meaningEn: 'If Allah should aid you, no one can overcome you.',
+    meaningAr: 'إن ينصركم الله فلا غالب لكم',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Furkân 25:58',
+    referenceEn: 'Al-Furqan 25:58',
+    referenceAr: 'الفرقان ٢٥:٥٨',
+    arabic: 'وَتَوَكَّلْ عَلَى الْحَيِّ الَّذِي لَا يَمُوتُ',
+    meaningTr: 'Sen, asla ölmeyecek olan o diri ve bâkî Allah\'a tevekkül et.',
+    meaningEn: 'And rely upon the Ever-Living who does not die.',
+    meaningAr: 'وتوكل على الحي الذي لا يموت',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Tevbe 9:51',
+    referenceEn: 'At-Tawbah 9:51',
+    referenceAr: 'التوبة ٩:٥١',
+    arabic: 'قُل لَّن يُصِيبَنَا إِلَّا مَا كَتَبَ اللَّهُ لَنَا هُوَ مَوْلَانَا',
+    meaningTr: 'De ki: Allah\'ın bizim için yazdığından başkası bize asla ulaşmaz; O bizim Mevlâmızdır.',
+    meaningEn: 'Say: Never will we be struck except by what Allah has decreed for us; He is our protector.',
+    meaningAr: 'قل لن يصيبنا إلا ما كتب الله لنا هو مولانا',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Âl-i İmrân 3:159',
+    referenceEn: 'Ali \'Imran 3:159',
+    referenceAr: 'آل عمران ٣:١٥٩',
+    arabic: 'إِنَّ اللَّهَ يُحِبُّ الْمُتَوَكِّلِينَ',
+    meaningTr: 'Şüphesiz Allah, kendisine güvenip tevekkül edenleri sever.',
+    meaningEn: 'Indeed, Allah loves those who rely upon Him.',
+    meaningAr: 'إن الله يحب المتوكلين',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Yûnus 10:107',
+    referenceEn: 'Yunus 10:107',
+    referenceAr: 'يونس ١٠:١٠٧',
+    arabic: 'وَإِن يُرِدْكَ بِخَيْرٍ فَلَا رَادَّ لِفَضْلِهِ',
+    meaningTr: 'Allah senin için bir hayır dilerse, O\'nun lütfunu geri çevirebilecek kimse yoktur.',
+    meaningEn: 'And if He intends for you good, then there is no repeller of His bounty.',
+    meaningAr: 'وإن يردك بخير فلا راد لفضله',
+  ),
+];
+
+const List<WidgetPreviewQuote> _akhlaqQuotes = [
+  WidgetPreviewQuote(
+    referenceTr: 'Fussilet 41:34',
+    referenceEn: 'Fussilat 41:34',
+    referenceAr: 'فصلت ٤١:٣٤',
+    arabic: 'ادْفَعْ بِالَّتِي هِيَ أَحْسَنُ فَإِذَا الَّذِي بَيْنَكَ وَبَيْنَهُ عَدَاوَةٌ كَأَنَّهُ وَلِيٌّ حَمِيمٌ',
+    meaningTr: 'Kötülüğü en güzel olanla sav; bir de bakarsın ki düşmanın sımsıcak bir dost oluvermiş.',
+    meaningEn: 'Repel evil by that which is better; and thereupon the one between whom and you is enmity will become as though a devoted friend.',
+    meaningAr: 'ادفع بالتي هي أحسن فإذا الذي بينك وبينه عداوة كأنه ولي حميم',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Kalem 68:4',
+    referenceEn: 'Al-Qalam 68:4',
+    referenceAr: 'القلم ٦٨:٤',
+    arabic: 'وَإِنَّكَ لَعَلَىٰ خُلُقٍ عَظِيمٍ',
+    meaningTr: 'Ve şüphesiz sen pek yüce bir ahlâk üzerindesin.',
+    meaningEn: 'And indeed, you are of a great moral character.',
+    meaningAr: 'وإنك لعلى خلق عظيم',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Âl-i İmrân 3:134',
+    referenceEn: 'Ali \'Imran 3:134',
+    referenceAr: 'آل عمران ٣:١٣٤',
+    arabic: 'وَالْكَاظِمِينَ الْغَيْظَ وَالْعَافِينَ عَنِ النَّاسِ ۗ وَاللَّهُ يُحِبُّ الْمُحْسِنِينَ',
+    meaningTr: 'Onlar öfkelerini yutarlar ve insanları affederler. Allah güzel davrananları sever.',
+    meaningEn: 'Who restrain anger and who pardon the people – and Allah loves the doers of good.',
+    meaningAr: 'والكاظمين الغيظ والعافين عن الناس والله يحب المحسنين',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Nûr 24:22',
+    referenceEn: 'An-Nur 24:22',
+    referenceAr: 'النور ٢٤:٢٢',
+    arabic: 'وَلْيَعْفُوا وَلْيَصْفَحُوا ۗ أَلَا تُحِبُّونَ أَن يَغْفِرَ اللَّهُ لَكُمْ',
+    meaningTr: 'Affetsinler ve hoş görsünler. Allah\'ın sizi bağışlamasını istemez misiniz?',
+    meaningEn: 'Let them pardon and overlook. Would you not like that Allah should forgive you?',
+    meaningAr: 'وليعفوا وليصفحوا ألا تحبون أن يغفر الله لكم',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'İsrâ 17:53',
+    referenceEn: 'Al-Isra 17:53',
+    referenceAr: 'الإسراء ١٧:٥٣',
+    arabic: 'وَقُل لِّعِبَادِي يَقُولُوا الَّتِي هِيَ أَحْسَنُ',
+    meaningTr: 'Kullarıma söyle: Kalp kırmasınlar, daima sözün en güzelini söylesinler.',
+    meaningEn: 'And tell My servants to say that which is best.',
+    meaningAr: 'وقل لعبادي يقولوا التي هي أحسن',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Rahmân 55:60',
+    referenceEn: 'Ar-Rahman 55:60',
+    referenceAr: 'الرحمن ٥٥:٦٠',
+    arabic: 'هَلْ جَزَاءُ الْإِحْسَانِ إِلَّا الْإِحْسَانُ',
+    meaningTr: 'İyiliğin karşılığı, iyilikten başka mıdır?',
+    meaningEn: 'Is the reward for good anything but good?',
+    meaningAr: 'هل جزاء الإحسان إلا الإحسان',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Hucurât 49:10',
+    referenceEn: 'Al-Hujurat 49:10',
+    referenceAr: 'الحجرات ٤٩:١٠',
+    arabic: 'إِنَّمَا الْمُؤْمِنُونَ إِخْوَةٌ فَأَصْلِحُوا بَيْنَ أَخَوَيْكُمْ',
+    meaningTr: 'Şüphesiz müminler ancak kardeştirler; öyleyse kardeşlerinizin arasını düzeltin.',
+    meaningEn: 'The believers are but brothers, so make settlement between your brothers.',
+    meaningAr: 'إنما المؤمنون إخوة فأصلحوا بين أخويكم',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'A\'râf 7:199',
+    referenceEn: 'Al-A\'raf 7:199',
+    referenceAr: 'الأعراف ٧:١٩٩',
+    arabic: 'خُذِ الْعَفْوَ وَأْمُرْ بِالْعُرْفِ وَأَعْرِضْ عَنِ الْجَاهِلِينَ',
+    meaningTr: 'Sen af yolunu tut, iyiliği emret ve cahillerden yüz çevir.',
+    meaningEn: 'Take what is given freely, enjoin what is good, and turn away from the ignorant.',
+    meaningAr: 'خذ العفو وأمر بالعرف وأعرض عن الجاهلين',
+  ),
+  WidgetPreviewQuote(
+    referenceTr: 'Lokmân 31:18',
+    referenceEn: 'Luqman 31:18',
+    referenceAr: 'لقمان ٣١:١٨',
+    arabic: 'وَلَا تُصَعِّرْ خَدَّكَ لِلنَّاسِ وَلَا تَمْشِ فِي الْأَرْضِ مَرَحًا',
+    meaningTr: 'İnsanlardan kibirle yüz çevirme ve yeryüzünde böbürlenerek yürüme.',
+    meaningEn: 'And do not turn your cheek in contempt toward people and do not walk through the earth exultantly.',
+    meaningAr: 'ولا تصعر خدك للناس ولا تمش في الأرض مرحا',
+  ),
+];
+
+const Map<String, List<WidgetPreviewQuote>> kWidgetCategoryQuotes = {
+  'comfort': _comfortQuotes,
+  'sabr': _sabrQuotes,
+  'dua': _duaQuotes,
+  'tawakkul': _tawakkulQuotes,
+  'akhlaq': _akhlaqQuotes,
   'all': [
     WidgetPreviewQuote(
       referenceTr: 'Ra\'d 13:28',
       referenceEn: 'Ar-Ra\'d 13:28',
       referenceAr: 'الرعد ١٣:٢٨',
       arabic: 'أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ',
-      meaningTr: 'Bilin ki, kalpler ancak Allah\'ı anmakla huzur bulur.',
+      meaningTr: 'Bilin ki, yorgun kalpler ancak Allah\'ı anmakla huzur bulur.',
       meaningEn: 'Unquestionably, by the remembrance of Allah hearts are assured.',
       meaningAr: 'ألا بذكر الله تطمئن القلوب',
     ),
@@ -235,261 +794,15 @@ const Map<String, List<WidgetPreviewQuote>> _categoryQuotes = {
       referenceEn: 'Al-Baqarah 2:152',
       referenceAr: 'البقرة ٢:١٥٢',
       arabic: 'فَاذْكُرُونِي أَذْكُرْكُمْ وَاشْكُرُوا لِي وَلَا تَكْفُرُونِ',
-      meaningTr: 'Beni anın ki, Ben de sizi anayım. Bana şükredin.',
-      meaningEn: 'Remember Me; I will remember you. Be grateful to Me.',
+      meaningTr: 'Öyleyse siz Beni anın ki, Ben de sizi anayım. Bana şükredin.',
+      meaningEn: 'So remember Me; I will remember you. And be grateful to Me.',
       meaningAr: 'فاذكروني أذكركم واشكروا لي ولا تكفرون',
     ),
-    WidgetPreviewQuote(
-      referenceTr: 'İnşirâh 94:6',
-      referenceEn: 'Ash-Sharh 94:6',
-      referenceAr: 'الشرح ٩٤:٦',
-      arabic: 'إِنَّ مَعَ الْعُسْرِ يُسْرًا',
-      meaningTr: 'Şüphesiz her güçlükle beraber bir kolaylık vardır.',
-      meaningEn: 'Indeed, with hardship comes ease.',
-      meaningAr: 'إن مع العسر يسراً',
-    ),
-    WidgetPreviewQuote(
-      referenceTr: 'Duhâ 93:3',
-      referenceEn: 'Ad-Duhaa 93:3',
-      referenceAr: 'الضحى ٩٣:٣',
-      arabic: 'مَا وَدَّعَكَ رَبُّكَ وَمَا قَلَىٰ',
-      meaningTr: 'Rabbin seni terk etmedi ve sana darılmadı.',
-      meaningEn: 'Your Lord has not taken leave of you, nor has He detested.',
-      meaningAr: 'ما ودعك ربك وما قلى',
-    ),
-    WidgetPreviewQuote(
-      referenceTr: 'Duhâ 93:5',
-      referenceEn: 'Ad-Duhaa 93:5',
-      referenceAr: 'الضحى ٩٣:٥',
-      arabic: 'وَلَسَوْفَ يُعْطِيكَ رَبُّكَ فَتَرْضَىٰ',
-      meaningTr: 'Rabbin sana verecek ve sen razı olacaksın.',
-      meaningEn: 'And your Lord is going to give you, and you will be satisfied.',
-      meaningAr: 'ولسوف يعطيك ربك فترضى',
-    ),
-    WidgetPreviewQuote(
-      referenceTr: 'Bakara 2:186',
-      referenceEn: 'Al-Baqarah 2:186',
-      referenceAr: 'البقرة ٢:١٨٦',
-      arabic: 'وَإِذَا سَأَلَكَ عِبَادِي عَنِّي فَإِنِّي قَرِيبٌ',
-      meaningTr: 'Kullarım Beni sorarlarsa, şüphesiz Ben onlara çok yakınım.',
-      meaningEn: 'When My servants ask you concerning Me, indeed I am near.',
-      meaningAr: 'وإذا سألك عبادي عني فإني قريب',
-    ),
-    WidgetPreviewQuote(
-      referenceTr: 'Zümer 39:53',
-      referenceEn: 'Az-Zumar 39:53',
-      referenceAr: 'الزمر ٣٩:٥٣',
-      arabic: 'لَا تَقْنَطُوا مِن رَّحْمَةِ اللَّهِ',
-      meaningTr: 'Allah\'ın rahmetinden ümidinizi kesmeyin.',
-      meaningEn: 'Do not despair of the mercy of Allah.',
-      meaningAr: 'لا تقنطوا من رحمة الله',
-    ),
-    WidgetPreviewQuote(
-      referenceTr: 'Bakara 2:277',
-      referenceEn: 'Al-Baqarah 2:277',
-      referenceAr: 'البقرة ٢:٢٧٧',
-      arabic: 'إِنَّ الَّذِينَ آمَنُوا وَعَمِلُوا الصَّالِحَاتِ وَأَقَامُوا الصَّلَاةَ',
-      meaningTr: 'İman edip iyi işler yapanların mükâfatı Rableri katındadır.',
-      meaningEn: 'Those who believe and do righteous deeds will have their reward.',
-      meaningAr: 'إن الذين آمنوا وعملوا الصالحات وأقاموا الصلاة لهم أجرهم',
-    ),
-  ],
-  'sabr': [
-    WidgetPreviewQuote(
-      referenceTr: 'Bakara 2:153',
-      referenceEn: 'Al-Baqarah 2:153',
-      referenceAr: 'البقرة ٢:١٥٣',
-      arabic: 'يَا أَيُّهَا الَّذِينَ آمَنُوا اسْتَعِينُوا بِالصَّبْرِ وَالصَّلَاةِ ۚ إِنَّ اللَّهَ مَعَ الصَّابِرِينَ',
-      meaningTr: 'Ey iman edenler! Sabır ve namazla yardım dileyin.',
-      meaningEn: 'O you who believe! Seek help through patience and prayer.',
-      meaningAr: 'يا أيها الذين آمنوا استعينوا بالصبر والصلاة إن الله مع الصابرين',
-    ),
-    WidgetPreviewQuote(
-      referenceTr: 'İbrâhîm 14:7',
-      referenceEn: 'Ibrahim 14:7',
-      referenceAr: 'إبراهيم ١٤:٧',
-      arabic: 'لَئِن شَكَرْتُمْ لَأَزِيدَنَّكُمْ',
-      meaningTr: 'Andolsun, eğer şükrederseniz nimetimi artırırım.',
-      meaningEn: 'If you are grateful, I will surely increase you in favor.',
-      meaningAr: 'لئن شكرتم لأزيدنكم',
-    ),
-    WidgetPreviewQuote(
-      referenceTr: 'Zümer 39:10',
-      referenceEn: 'Az-Zumar 39:10',
-      referenceAr: 'الزمر ٣٩:١٠',
-      arabic: 'إِنَّمَا يُوَفَّى الصَّابِرُونَ أَجْرَهُم بِغَيْرِ حِسَابٍ',
-      meaningTr: 'Sabredenlere mükâfatları hesapsız verilecektir.',
-      meaningEn: 'Indeed, the patient will be given their reward without measure.',
-      meaningAr: 'إنما يوفى الصابرون أجرهم بغير حساب',
-    ),
-    WidgetPreviewQuote(
-      referenceTr: 'Hûd 11:115',
-      referenceEn: 'Hud 11:115',
-      referenceAr: 'هود ١١:١١٥',
-      arabic: 'وَاصْبِرْ فَإِنَّ اللَّهَ لَا يُضِيعُ أَجْرَ الْمُحْسِنِينَ',
-      meaningTr: 'Sabret; Allah güzel davrananların mükâfatını zayi etmez.',
-      meaningEn: 'Be patient, for Allah does not allow the reward of the good to be lost.',
-      meaningAr: 'واصبر فإن الله لا يضيع أجر المحسنين',
-    ),
-    WidgetPreviewQuote(
-      referenceTr: 'Âl-i İmrân 3:146',
-      referenceEn: 'Ali \'Imran 3:146',
-      referenceAr: 'آل عمران ٣:١٤٦',
-      arabic: 'وَاللَّهُ يُحِبُّ الصَّابِرِينَ',
-      meaningTr: 'Şüphesiz Allah sabredenleri sever.',
-      meaningEn: 'And Allah loves the steadfast.',
-      meaningAr: 'والله يحب الصابرين',
-    ),
-  ],
-  'dua': [
-    WidgetPreviewQuote(
-      referenceTr: 'Bakara 2:201',
-      referenceEn: 'Al-Baqarah 2:201',
-      referenceAr: 'البقرة ٢:٢٠١',
-      arabic: 'رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ',
-      meaningTr: 'Rabbimiz! Bize dünyada da ahirette de iyilik ver.',
-      meaningEn: 'Our Lord, give us in this world good and in the Hereafter good.',
-      meaningAr: 'ربنا آتنا في الدنيا حسنة وفي الآخرة حسنة وقنا عذاب النار',
-    ),
-    WidgetPreviewQuote(
-      referenceTr: 'Mü\'min 40:60',
-      referenceEn: 'Ghafir 40:60',
-      referenceAr: 'غافر ٤٠:٦٠',
-      arabic: 'وَقَالَ رَبُّكُمُ ادْعُونِي أَسْتَجِبْ لَكُمْ',
-      meaningTr: 'Rabbiniz buyurdu ki: Bana dua edin, size icabet edeyim.',
-      meaningEn: 'And your Lord says: Call upon Me; I will respond to you.',
-      meaningAr: 'وقال ربكم ادعوني أستجب لكم',
-    ),
-    WidgetPreviewQuote(
-      referenceTr: 'İbrâhîm 14:40',
-      referenceEn: 'Ibrahim 14:40',
-      referenceAr: 'إبراهيم ١٤:٤٠',
-      arabic: 'رَبِّ اجْعَلْنِي مُقِيمَ الصَّلَاةِ وَمِن ذُرِّيَّتِي ۚ رَبَّنَا وَتَقَبَّلْ دُعَاءِ',
-      meaningTr: 'Rabbim! Beni ve neslimi namazı dosdoğru kılanlardan eyle.',
-      meaningEn: 'My Lord, make me an establisher of prayer, and from my descendants.',
-      meaningAr: 'رب اجعلني مقيم الصلاة ومن ذريتي ربنا وتقبل دعاء',
-    ),
-    WidgetPreviewQuote(
-      referenceTr: 'Kehf 18:10',
-      referenceEn: 'Al-Kahf 18:10',
-      referenceAr: 'الكهف ١٨:١٠',
-      arabic: 'رَبَّنَا آتِنَا مِن لَّدُنكَ رَحْمَةً وَهَيِّئْ لَنَا مِنْ أَمْرِنَا رَشَدًا',
-      meaningTr: 'Rabbimiz! Katından bize rahmet ver, işimizde kolaylık lütfet.',
-      meaningEn: 'Our Lord, grant us from Yourself mercy and facilitate our affair.',
-      meaningAr: 'ربنا آتنا من لدنك رحمة وهيئ لنا من أمرنا رشدا',
-    ),
-    WidgetPreviewQuote(
-      referenceTr: 'A\'râf 7:55',
-      referenceEn: 'Al-A\'raf 7:55',
-      referenceAr: 'الأعراف ٧:٥٥',
-      arabic: 'ادْعُوا رَبَّكُمْ تَضَرُّعًا وَخُفْيَةً',
-      meaningTr: 'Rabbinize gönülden ve gizlice yalvarın.',
-      meaningEn: 'Call upon your Lord in humility and privately.',
-      meaningAr: 'ادعوا ربكم تضرعا وخفية',
-    ),
-    WidgetPreviewQuote(
-      referenceTr: 'Tahrîm 66:8',
-      referenceEn: 'At-Tahrim 66:8',
-      referenceAr: 'التحريم ٦٦:٨',
-      arabic: 'رَبَّنَا أَتْمِمْ لَنَا نُورَنَا وَاغْفِرْ لَنَا ۖ إِنَّكَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ',
-      meaningTr: 'Rabbimiz! Nurumuzu tamamla ve bizi bağışla.',
-      meaningEn: 'Our Lord, perfect for us our light and forgive us.',
-      meaningAr: 'ربنا أتمم لنا نورنا واغفر لنا إنك على كل شيء قدير',
-    ),
-  ],
-  'tawakkul': [
-    WidgetPreviewQuote(
-      referenceTr: 'Talâk 65:3',
-      referenceEn: 'At-Talaq 65:3',
-      referenceAr: 'الطلاق ٦٥:٣',
-      arabic: 'وَمَن يَتَوَكَّلْ عَلَى اللَّهِ فَهُوَ حَسْبُهُ',
-      meaningTr: 'Kim Allah\'a tevekkül ederse, O kendisine yeter.',
-      meaningEn: 'And whoever relies upon Allah – then He is sufficient for him.',
-      meaningAr: 'ومن يتوكل على الله فهو حسبه',
-    ),
-    WidgetPreviewQuote(
-      referenceTr: 'Tevbe 9:129',
-      referenceEn: 'At-Tawbah 9:129',
-      referenceAr: 'التوبة ٩:١٢٩',
-      arabic: 'حَسْبِيَ اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ ۖ عَلَيْهِ تَوَكَّلْتُ',
-      meaningTr: 'Bana Allah yeter. O\'ndan başka ilah yoktur. O\'na güvendim.',
-      meaningEn: 'Sufficient for me is Allah; there is no deity except Him.',
-      meaningAr: 'حسبي الله لا إله إلا هو عليه توكلت',
-    ),
-    WidgetPreviewQuote(
-      referenceTr: 'Âl-i İmrân 3:173',
-      referenceEn: 'Ali \'Imran 3:173',
-      referenceAr: 'آل عمران ٣:١٧٣',
-      arabic: 'حَسْبُنَا اللَّهُ وَنِعْمَ الْوَكِيلُ',
-      meaningTr: 'Allah bize yeter; O ne güzel vekildir.',
-      meaningEn: 'Sufficient for us is Allah, and [He is] the best Disposer of affairs.',
-      meaningAr: 'حسبنا الله ونعم الوكيل',
-    ),
-    WidgetPreviewQuote(
-      referenceTr: 'Âl-i İmrân 3:159',
-      referenceEn: 'Ali \'Imran 3:159',
-      referenceAr: 'آل عمران ٣:١٥٩',
-      arabic: 'إِنَّ اللَّهَ يُحِبُّ الْمُتَوَكِّلِينَ',
-      meaningTr: 'Şüphesiz Allah, tevekkül edenleri sever.',
-      meaningEn: 'Indeed, Allah loves those who rely upon Him.',
-      meaningAr: 'إن الله يحب المتوكلين',
-    ),
-    WidgetPreviewQuote(
-      referenceTr: 'Zümer 39:36',
-      referenceEn: 'Az-Zumar 39:36',
-      referenceAr: 'الزمر ٣٩:٣٦',
-      arabic: 'أَلَيْسَ اللَّهُ بِكَافٍ عَبْدَهُ',
-      meaningTr: 'Allah kuluna kâfi değil midir?',
-      meaningEn: 'Is not Allah sufficient for His servant?',
-      meaningAr: 'أليس الله بكاف عبده',
-    ),
-    WidgetPreviewQuote(
-      referenceTr: 'Nisâ 4:132',
-      referenceEn: 'An-Nisa 4:132',
-      referenceAr: 'النساء ٤:١٣٢',
-      arabic: 'وَكَفَىٰ بِاللَّهِ وَكِيلًا',
-      meaningTr: 'Vekil olarak Allah yeter.',
-      meaningEn: 'And sufficient is Allah as Disposer of affairs.',
-      meaningAr: 'وكفى بالله وكيلا',
-    ),
-  ],
-  'akhlaq': [
-    WidgetPreviewQuote(
-      referenceTr: 'Fussilet 41:34',
-      referenceEn: 'Fussilat 41:34',
-      referenceAr: 'فصلت ٤١:٣٤',
-      arabic: 'ادْفَعْ بِالَّتِي هِيَ أَحْسَنُ فَإِذَا الَّذِي بَيْنَكَ وَبَيْنَهُ عَدَاوَةٌ كَأَنَّهُ وَلِيٌّ حَمِيمٌ',
-      meaningTr: 'Kötülüğü en güzel olanla sav; düşmanın sımsıcak bir dost olur.',
-      meaningEn: 'Repel evil by that which is better; enemy becomes close friend.',
-      meaningAr: 'ادفع بالتي هي أحسن فإذا الذي بينك وبينه عداوة كأنه ولي حميم',
-    ),
-    WidgetPreviewQuote(
-      referenceTr: 'Hucurât 49:10',
-      referenceEn: 'Al-Hujurat 49:10',
-      referenceAr: 'الحجرات ٤٩:١٠',
-      arabic: 'إِنَّمَا الْمُؤْمِنُونَ إِخْوَةٌ',
-      meaningTr: 'Şüphesiz müminler ancak kardeştirler.',
-      meaningEn: 'The believers are but brothers, so make peace.',
-      meaningAr: 'إنما المؤمنون إخوة فأصلحوا بين أخويكم',
-    ),
-    WidgetPreviewQuote(
-      referenceTr: 'Kalem 68:4',
-      referenceEn: 'Al-Qalam 68:4',
-      referenceAr: 'القلم ٦٨:٤',
-      arabic: 'وَإِنَّكَ لَعَلَىٰ خُلُقٍ عَظِيمٍ',
-      meaningTr: 'Ve şüphesiz sen pek yüce bir ahlak üzerindesin.',
-      meaningEn: 'And indeed, you are of a great moral character.',
-      meaningAr: 'وإنك لعلى خلق عظيم',
-    ),
-    WidgetPreviewQuote(
-      referenceTr: 'A\'râf 7:199',
-      referenceEn: 'Al-A\'raf 7:199',
-      referenceAr: 'الأعراف ٧:١٩٩',
-      arabic: 'خُذِ الْعَفْوَ وَأْمُرْ بِالْعُرْفِ وَأَعْرِضْ عَنِ الْجَاهِلِينَ',
-      meaningTr: 'Sen af yolunu tut, iyiliği emret, cahillerden yüz çevir.',
-      meaningEn: 'Take what is given freely, enjoin what is good, and turn away from the ignorant.',
-      meaningAr: 'خذ العفو وأمر بالعرف وأعرض عن الجاهلين',
-    ),
+    ..._comfortQuotes,
+    ..._sabrQuotes,
+    ..._duaQuotes,
+    ..._tawakkulQuotes,
+    ..._akhlaqQuotes,
   ],
 };
 
@@ -532,7 +845,8 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
       _textSize = prefs.getString('widget_text_size') ?? 'standard';
       _fontFamily = prefs.getString('widget_font_family') ?? 'standard';
       _isPinned = prefs.getBool('widget_is_pinned') ?? false;
-      _appliedVerseRef = _isPinned ? prefs.getString('widget_applied_verse_ref') : null;
+      final savedRef = prefs.getString('widget_applied_verse_ref');
+      _appliedVerseRef = (savedRef != null && savedRef.isNotEmpty) ? savedRef : null;
 
       // Eski Türkçe ayar değerlerini yeni standart kodlara dönüştür
       if (_selectedQuoteCategory == 'Tümü') _selectedQuoteCategory = 'all';
@@ -559,6 +873,17 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
       if (_fontFamily == 'Zarif (Lato)') _fontFamily = 'lato';
       if (_fontFamily == 'Klasik (Amiri)') _fontFamily = 'amiri';
 
+      if (_appliedVerseRef != null) {
+        final list = kWidgetCategoryQuotes[_selectedQuoteCategory] ?? kWidgetCategoryQuotes['all']!;
+        final idx = list.indexWhere((q) =>
+            q.referenceTr == _appliedVerseRef ||
+            q.referenceEn == _appliedVerseRef ||
+            q.referenceAr == _appliedVerseRef);
+        if (idx >= 0) {
+          _quoteIndex = idx;
+        }
+      }
+
       _isLoading = false;
     });
   }
@@ -566,20 +891,43 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
   Future<void> _savePreference(String key, String value, Function(String) updater) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(key, value);
-    setState(() => updater(value));
+    setState(() {
+      updater(value);
+      if (key == 'widget_quote_category') {
+        _quoteIndex = 0;
+      }
+    });
     HapticFeedback.lightImpact();
 
-    // Widget verilerini arka planda güncelle (kullanıcının erişimi varsa)
-    final premiumState = ref.read(premiumProvider);
-    if (premiumState.hasWidgetAccess) {
-      await WidgetService().updateAllWidgets();
+    await WidgetService().updateAllWidgets();
+  }
+
+   (String, String, String, String) _resolveActivePreviewVerse(AppLanguage lang) {
+    final langCode = lang.code;
+    if (_selectedCategory == WidgetCategoryType.dailyVerse) {
+      final verse = ShortVerseNotification.pool[_quoteIndex % ShortVerseNotification.pool.length];
+      final refText = verse.localizedReference(langCode);
+      final meal = verse.localizedText(langCode);
+      final arabic = verse.arabicText;
+      final formatted = (_verseViewMode == 'arabic_only' || _verseViewMode == 'Yalnızca Arapça')
+          ? arabic
+          : ((_verseViewMode == 'arabic_meal' || _verseViewMode == 'Arapça + Meal')
+              ? '$arabic\n$meal'
+              : meal);
+      return (refText, formatted, arabic, verse.verseReference);
     }
+    final currentQuote = _getCurrentQuote();
+    final refText = currentQuote.localizedReference(langCode);
+    final formatted = currentQuote.formatForViewMode(_verseViewMode, langCode);
+    return (refText, formatted, currentQuote.arabic, currentQuote.referenceTr);
   }
 
   Future<void> _syncAndApplyWidgetSettings() async {
     HapticFeedback.mediumImpact();
     await HomeWidget.setAppGroupId(AppConstants.appGroupId);
     final prefs = await SharedPreferences.getInstance();
+    final strings = ref.read(appStringsProvider);
+
     await prefs.setString('widget_quote_category', _selectedQuoteCategory);
     await prefs.setString('widget_verse_view', _verseViewMode);
     await prefs.setString('widget_refresh_interval', _refreshInterval);
@@ -588,47 +936,41 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
     await prefs.setString('widget_font_family', _fontFamily);
     await prefs.setString('widget_active_category', _selectedCategory.name);
 
-    // Eğer kullanıcı sabitleme yapmadıysa otomatik döngüyü koru ve temizle
-    if (!_isPinned) {
-      await prefs.setBool('widget_is_pinned', false);
-      await HomeWidget.saveWidgetData<bool>('widget_is_pinned', false);
-      await prefs.remove('widget_applied_verse_ref');
-      await prefs.remove('widget_applied_verse_text');
-      await prefs.remove('widget_applied_verse_surah');
-      await prefs.remove('widget_applied_verse_number');
-      await HomeWidget.saveWidgetData<String>('widget_applied_verse_ref', '');
-      await HomeWidget.saveWidgetData<String>('widget_applied_verse_text', '');
-      await HomeWidget.saveWidgetData<int>('widget_applied_verse_surah', 0);
-      await HomeWidget.saveWidgetData<int>('widget_applied_verse_number', 0);
+    final (refText, formattedText, arabicText, trRef) = _resolveActivePreviewVerse(strings.language);
+    final nonce = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+
+    await prefs.setString('widget_applied_verse_ref', refText);
+    await prefs.setString('widget_applied_verse_text', formattedText);
+    await prefs.setInt('widget_apply_nonce', nonce);
+    await HomeWidget.saveWidgetData<String>('widget_applied_verse_ref', refText);
+    await HomeWidget.saveWidgetData<String>('widget_applied_verse_text', formattedText);
+    await HomeWidget.saveWidgetData<String>('widget_applied_verse_arabic', arabicText);
+    await HomeWidget.saveWidgetData<int>('widget_apply_nonce', nonce);
+
+    final refMatch = RegExp(r'(\d+):(\d+)').firstMatch(trRef);
+    final surahNum = refMatch != null ? int.tryParse(refMatch.group(1)!) ?? 0 : 0;
+    final verseNum = refMatch != null ? int.tryParse(refMatch.group(2)!) ?? 0 : 0;
+    if (surahNum > 0) {
+      await prefs.setInt('widget_applied_verse_surah', surahNum);
+      await prefs.setInt('widget_applied_verse_number', verseNum);
+      await HomeWidget.saveWidgetData<int>('widget_applied_verse_surah', surahNum);
+      await HomeWidget.saveWidgetData<int>('widget_applied_verse_number', verseNum);
     }
 
-    final premiumState = ref.read(premiumProvider);
-    if (premiumState.hasWidgetAccess) {
-      await WidgetService().updateAllWidgets();
-    } else {
-      final iosWidgets = [
-        AppConstants.iOSVerseWidgetName,
-        AppConstants.iOSPrayerWidgetName,
-        AppConstants.iOSCountdownWidgetName,
-        AppConstants.iOSHijriWidgetName,
-        AppConstants.iOSSunWidgetName,
-      ];
-      for (final name in iosWidgets) {
-        await HomeWidget.updateWidget(name: name, iOSName: name);
-      }
-    }
+    setState(() {
+      _appliedVerseRef = refText;
+    });
+
+    await WidgetService().updateAllWidgets();
 
     if (mounted) {
-      final strings = ref.read(appStringsProvider);
-      final msg = _isPinned
-          ? (strings.language == AppLanguage.turkish
-              ? 'Ayarlar uygulandı! (Sabit âyet: $_appliedVerseRef)'
-              : (strings.language == AppLanguage.arabic
-                  ? 'تم تطبيق الإعدادات! (الآية المثبتة: $_appliedVerseRef)'
-                  : (strings.language == AppLanguage.indonesian
-                      ? 'Pengaturan diterapkan! (Ayat disematkan: $_appliedVerseRef)'
-                      : 'Settings applied! (Pinned verse: $_appliedVerseRef)')))
-          : strings.settingsAppliedSnackBar;
+      final msg = strings.language == AppLanguage.turkish
+          ? '✨ $refText kilit ekranı widget\'ına uygulandı!'
+          : (strings.language == AppLanguage.arabic
+              ? '✨ تم تطبيق $refText على ويدجت شاشة القفل!'
+              : (strings.language == AppLanguage.indonesian
+                  ? '✨ $refText diterapkan ke widget layar kunci!'
+                  : '✨ $refText applied to Lock Screen widget!'));
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -636,7 +978,16 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
             children: [
               const Icon(Icons.check_circle, color: Color(0xFFFFDF7A), size: 20),
               const SizedBox(width: 10),
-              Expanded(child: Text(msg)),
+              Expanded(
+                child: Text(
+                  msg,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13.5,
+                  ),
+                ),
+              ),
             ],
           ),
           backgroundColor: const Color(0xFF033E35),
@@ -653,20 +1004,21 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
     HapticFeedback.mediumImpact();
     await HomeWidget.setAppGroupId(AppConstants.appGroupId);
     final prefs = await SharedPreferences.getInstance();
-    final currentQuote = _getCurrentQuote();
     final strings = ref.read(appStringsProvider);
-    final refText = currentQuote.getReference(strings.language);
-    final mealText = currentQuote.getMeaning(strings.language);
+    final (refText, formattedText, arabicText, trRef) = _resolveActivePreviewVerse(strings.language);
+    final nonce = DateTime.now().millisecondsSinceEpoch ~/ 1000;
 
     await prefs.setBool('widget_is_pinned', true);
     await HomeWidget.saveWidgetData<bool>('widget_is_pinned', true);
     await prefs.setString('widget_applied_verse_ref', refText);
-    await prefs.setString('widget_applied_verse_text', mealText);
+    await prefs.setString('widget_applied_verse_text', formattedText);
+    await prefs.setInt('widget_apply_nonce', nonce);
     await HomeWidget.saveWidgetData<String>('widget_applied_verse_ref', refText);
-    await HomeWidget.saveWidgetData<String>('widget_applied_verse_text', mealText);
-    await HomeWidget.saveWidgetData<String>('widget_applied_verse_arabic', currentQuote.arabic);
+    await HomeWidget.saveWidgetData<String>('widget_applied_verse_text', formattedText);
+    await HomeWidget.saveWidgetData<String>('widget_applied_verse_arabic', arabicText);
+    await HomeWidget.saveWidgetData<int>('widget_apply_nonce', nonce);
 
-    final refMatch = RegExp(r'(\d+):(\d+)').firstMatch(currentQuote.referenceTr);
+    final refMatch = RegExp(r'(\d+):(\d+)').firstMatch(trRef);
     final surahNum = refMatch != null ? int.tryParse(refMatch.group(1)!) ?? 0 : 0;
     final verseNum = refMatch != null ? int.tryParse(refMatch.group(2)!) ?? 0 : 0;
     if (surahNum > 0) {
@@ -681,15 +1033,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
       _appliedVerseRef = refText;
     });
 
-    final premiumState = ref.read(premiumProvider);
-    if (premiumState.hasWidgetAccess) {
-      await WidgetService().updateAllWidgets();
-    } else {
-      await HomeWidget.updateWidget(
-        name: AppConstants.iOSVerseWidgetName,
-        iOSName: AppConstants.iOSVerseWidgetName,
-      );
-    }
+    await WidgetService().updateAllWidgets();
 
     if (mounted) {
       final msg = strings.versePinnedSnackBar(refText);
@@ -700,7 +1044,16 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
             children: [
               const Icon(Icons.push_pin, color: Color(0xFFFFDF7A), size: 20),
               const SizedBox(width: 10),
-              Expanded(child: Text(msg)),
+              Expanded(
+                child: Text(
+                  msg,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13.5,
+                  ),
+                ),
+              ),
             ],
           ),
           backgroundColor: const Color(0xFF033E35),
@@ -717,30 +1070,12 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('widget_is_pinned', false);
     await HomeWidget.saveWidgetData<bool>('widget_is_pinned', false);
-    await prefs.remove('widget_applied_verse_ref');
-    await prefs.remove('widget_applied_verse_text');
-    await prefs.remove('widget_applied_verse_surah');
-    await prefs.remove('widget_applied_verse_number');
-
-    await HomeWidget.saveWidgetData<String>('widget_applied_verse_ref', '');
-    await HomeWidget.saveWidgetData<String>('widget_applied_verse_text', '');
-    await HomeWidget.saveWidgetData<int>('widget_applied_verse_surah', 0);
-    await HomeWidget.saveWidgetData<int>('widget_applied_verse_number', 0);
-
-    final premiumState = ref.read(premiumProvider);
-    if (premiumState.hasWidgetAccess) {
-      await WidgetService().updateAllWidgets();
-    } else {
-      await HomeWidget.updateWidget(
-        name: AppConstants.iOSVerseWidgetName,
-        iOSName: AppConstants.iOSVerseWidgetName,
-      );
-    }
 
     setState(() {
       _isPinned = false;
-      _appliedVerseRef = null;
     });
+
+    await WidgetService().updateAllWidgets();
 
     if (mounted) {
       final strings = ref.read(appStringsProvider);
@@ -758,7 +1093,16 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
             children: [
               const Icon(Icons.autorenew, color: Color(0xFFFFDF7A), size: 20),
               const SizedBox(width: 10),
-              Expanded(child: Text(msg)),
+              Expanded(
+                child: Text(
+                  msg,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13.5,
+                  ),
+                ),
+              ),
             ],
           ),
           backgroundColor: const Color(0xFF033E35),
@@ -1291,41 +1635,83 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
           // ── Kilit Ekranı Saat Altı Widget Alanı ───────────────────────────
           _buildActiveWidgetPreviewContent(),
 
-          // ── Önizlemede Farklı Âyet Gösterme Butonu ───────────────────────
+          // ── Önizlemede Farklı Âyet Gösterme Butonu (< Başka Ayet Dene >) ──
           if (_selectedCategory == WidgetCategoryType.quotes ||
               _selectedCategory == WidgetCategoryType.dailyVerse) ...[
             const SizedBox(height: 12),
-            InkWell(
-              borderRadius: BorderRadius.circular(12),
-              onTap: () {
-                HapticFeedback.selectionClick();
-                setState(() => _quoteIndex++);
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.08),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                InkWell(
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.15),
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    final total = _selectedCategory == WidgetCategoryType.dailyVerse
+                        ? ShortVerseNotification.pool.length
+                        : (kWidgetCategoryQuotes[_selectedQuoteCategory] ?? kWidgetCategoryQuotes['all']!).length;
+                    setState(() => _quoteIndex = (_quoteIndex - 1 + total) % total);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+                    ),
+                    child: const Icon(Icons.chevron_left_rounded, color: Color(0xFFFFDF7A), size: 18),
                   ),
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.shuffle_rounded, color: Color(0xFFFFDF7A), size: 13),
-                    const SizedBox(width: 4),
-                    Text(
-                      strings.previewAnotherVerse,
-                      style: const TextStyle(
-                        color: Color(0xFFFFDF7A),
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
+                const SizedBox(width: 8),
+                InkWell(
+                  borderRadius: BorderRadius.circular(12),
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    setState(() => _quoteIndex++);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.15),
                       ),
                     ),
-                  ],
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.shuffle_rounded, color: Color(0xFFFFDF7A), size: 14),
+                        const SizedBox(width: 5),
+                        Text(
+                          strings.previewAnotherVerse,
+                          style: const TextStyle(
+                            color: Color(0xFFFFDF7A),
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(width: 8),
+                InkWell(
+                  borderRadius: BorderRadius.circular(10),
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    setState(() => _quoteIndex++);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+                    ),
+                    child: const Icon(Icons.chevron_right_rounded, color: Color(0xFFFFDF7A), size: 18),
+                  ),
+                ),
+              ],
             ),
           ],
         ],
@@ -1336,10 +1722,13 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
   // ── Font Boyutu Hesaplayıcıları (_textSize) ───────────────────────────────
   double get _previewTitleFontSize {
     switch (_textSize) {
+      case 'small':
       case 'Küçük':
         return 11.0;
+      case 'large':
       case 'Büyük':
         return 15.0;
+      case 'standard':
       case 'Standart':
       default:
         return 13.0;
@@ -1348,10 +1737,13 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
 
   double get _previewBodyFontSize {
     switch (_textSize) {
+      case 'small':
       case 'Küçük':
         return 11.0;
+      case 'large':
       case 'Büyük':
         return 15.0;
+      case 'standard':
       case 'Standart':
       default:
         return 12.5;
@@ -1360,10 +1752,13 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
 
   double get _previewArabicFontSize {
     switch (_textSize) {
+      case 'small':
       case 'Küçük':
         return 14.5;
+      case 'large':
       case 'Büyük':
         return 21.0;
+      case 'standard':
       case 'Standart':
       default:
         return 17.5;
@@ -1372,8 +1767,10 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
 
   String? get _previewFontFamily {
     switch (_fontFamily) {
+      case 'amiri':
       case 'Klasik (Amiri)':
         return 'Amiri';
+      case 'lato':
       case 'Zarif (Lato)':
         return 'Lato';
       default:
@@ -1383,9 +1780,9 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
 
   // Kategori bazlı aktif ayet verisi
   WidgetPreviewQuote _getCurrentQuote() {
-    final list = _categoryQuotes[_selectedQuoteCategory] ??
-        _categoryQuotes['all'] ??
-        _categoryQuotes.values.first;
+    final list = kWidgetCategoryQuotes[_selectedQuoteCategory] ??
+        kWidgetCategoryQuotes['all'] ??
+        kWidgetCategoryQuotes.values.first;
     return list[_quoteIndex % list.length];
   }
 
@@ -1478,7 +1875,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
         );
 
       case WidgetCategoryType.dailyVerse:
-        final verse = ShortVerseNotification.pool[0];
+        final verse = ShortVerseNotification.pool[_quoteIndex % ShortVerseNotification.pool.length];
         return _buildQuotePreviewWidget(
           reference: verse.localizedReference(langCode),
           arabic: verse.arabicText,
@@ -1774,11 +2171,19 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                 child: Text(
                   _isPinned
                       ? '$pinnedNotice ${_appliedVerseRef ?? ""}'
-                      : rotatingNotice,
+                      : (_appliedVerseRef != null && _appliedVerseRef!.isNotEmpty
+                          ? (strings.language == AppLanguage.turkish
+                              ? 'Uygulanan âyet: $_appliedVerseRef • Dinamik döngü aktif'
+                              : 'Applied: $_appliedVerseRef • $rotatingNotice')
+                          : rotatingNotice),
                   style: TextStyle(
-                    color: _isPinned ? const Color(0xFFFFDF7A) : Colors.white70,
+                    color: (_isPinned || (_appliedVerseRef != null && _appliedVerseRef!.isNotEmpty))
+                        ? const Color(0xFFFFDF7A)
+                        : Colors.white70,
                     fontSize: 12,
-                    fontWeight: _isPinned ? FontWeight.w600 : FontWeight.normal,
+                    fontWeight: (_isPinned || (_appliedVerseRef != null && _appliedVerseRef!.isNotEmpty))
+                        ? FontWeight.w600
+                        : FontWeight.normal,
                   ),
                 ),
               ),

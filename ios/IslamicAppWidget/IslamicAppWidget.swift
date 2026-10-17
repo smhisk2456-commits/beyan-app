@@ -699,6 +699,13 @@ struct VerseProvider: TimelineProvider {
         return UserDefaults.standard.bool(forKey: key)
     }
 
+    private static func int(forKey key: String) -> Int {
+        if let defaults = UserDefaults(suiteName: appGroupId), defaults.object(forKey: key) != nil {
+            return defaults.integer(forKey: key)
+        }
+        return UserDefaults.standard.integer(forKey: key)
+    }
+
     private static func slotDuration() -> TimeInterval {
         let intervalStr = Self.string(forKey: "widget_refresh_interval") ?? "1h"
         switch intervalStr {
@@ -735,9 +742,9 @@ struct VerseProvider: TimelineProvider {
         return WidgetVerseData.all
     }
 
-    private func verse(at date: Date) -> VerseEntry {
+    private func verse(at date: Date, preferApplied: Bool = false) -> VerseEntry {
         let isPinned = Self.bool(forKey: "widget_is_pinned")
-        if isPinned,
+        if (isPinned || preferApplied),
            let appliedRef = Self.string(forKey: "widget_applied_verse_ref"),
            let appliedText = Self.string(forKey: "widget_applied_verse_text"),
            !appliedRef.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
@@ -757,18 +764,19 @@ struct VerseProvider: TimelineProvider {
         let year = calendar.component(.year, from: date)
         let startOfDay = calendar.startOfDay(for: date)
         let slotIndex = Int(date.timeIntervalSince(startOfDay) / slot)
+        let nonce = Self.int(forKey: "widget_apply_nonce")
 
         // Asla aynı sırayla tekrar etmeyen güçlü hash karıştırma algoritması
-        let hash = abs((dayOfYear * 7919) ^ (year * 104729) ^ (slotIndex * 31))
+        let hash = abs((dayOfYear * 7919) ^ (year * 104729) ^ (slotIndex * 31) ^ (nonce * 17))
         let index = hash % pool.count
         let item = pool[index]
         return VerseEntry(date: date, ref: item.ref, text: item.text)
     }
 
-    func placeholder(in context: Context) -> VerseEntry { verse(at: Date()) }
+    func placeholder(in context: Context) -> VerseEntry { verse(at: Date(), preferApplied: true) }
 
     func getSnapshot(in context: Context, completion: @escaping (VerseEntry) -> Void) {
-        completion(verse(at: Date()))
+        completion(verse(at: Date(), preferApplied: true))
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<VerseEntry>) -> Void) {
@@ -776,7 +784,9 @@ struct VerseProvider: TimelineProvider {
         let isPinned = Self.bool(forKey: "widget_is_pinned")
         if isPinned,
            let appliedRef = Self.string(forKey: "widget_applied_verse_ref"),
-           let appliedText = Self.string(forKey: "widget_applied_verse_text") {
+           let appliedText = Self.string(forKey: "widget_applied_verse_text"),
+           !appliedRef.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+           !appliedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             let singleEntry = VerseEntry(date: now, ref: appliedRef, text: appliedText)
             completion(Timeline(entries: [singleEntry], policy: .never))
             return
@@ -784,13 +794,13 @@ struct VerseProvider: TimelineProvider {
 
         let slot = Self.slotDuration()
         let slotStart = Date(timeIntervalSince1970: floor(now.timeIntervalSince1970 / slot) * slot)
-        var entries = [verse(at: now)]
+        var entries = [verse(at: now, preferApplied: true)]
 
         // 24 ila 48 aralık üretip widget kit döngüsüne sun
         let count = min(48, max(24, Int(86400 / slot)))
         for i in 1...count {
             let nextDate = slotStart.addingTimeInterval(Double(i) * slot)
-            entries.append(verse(at: nextDate))
+            entries.append(verse(at: nextDate, preferApplied: false))
         }
         completion(Timeline(entries: entries, policy: .atEnd))
     }

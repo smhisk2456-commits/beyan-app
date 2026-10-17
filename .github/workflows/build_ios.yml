@@ -44,11 +44,6 @@ jobs:
       - name: Install Dependencies
         run: flutter pub get
 
-      - name: Add Lock Screen Widget Target & Configure Code Signing
-        run: |
-          sudo gem install xcodeproj --no-document
-          ruby tools/add_ios_widget_target.rb
-
       - name: Install Apple Certificate & Provisioning Profiles
         env:
           BUILD_CERTIFICATE_PEM: ${{ secrets.BUILD_CERTIFICATE_PEM }}
@@ -84,6 +79,11 @@ jobs:
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles/
           cp $WIDGET_PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles/
+
+      - name: Add Lock Screen Widget Target & Configure Code Signing
+        run: |
+          sudo gem install xcodeproj --no-document
+          ruby tools/add_ios_widget_target.rb
 
       - name: Build iOS Release IPA
         run: |
