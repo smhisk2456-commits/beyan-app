@@ -21,6 +21,7 @@ import 'features/monetization/services/premium_service.dart';
 import 'features/monetization/screens/onboarding_trial_paywall_screen.dart';
 import 'features/splash/screens/splash_screen.dart';
 import 'features/quran/widgets/quran_audio_player_bar.dart';
+import 'features/notifications/widgets/adhan_audio_player_bar.dart';
 import 'core/widgets/luxury_floating_dock.dart';
 import 'core/services/deep_link_service.dart';
 
@@ -229,6 +230,7 @@ class _MainNavigationState extends ConsumerState<MainNavigation>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            const AdhanAudioPlayerBar(),
             const QuranAudioPlayerBar(),
             LuxuryFloatingDock(
               currentIndex: selectedTab,

@@ -80,8 +80,24 @@ class NotificationService {
       const androidSettings =
           AndroidInitializationSettings('@mipmap/ic_launcher');
 
+      // iOS Kilit Ekranı Ezan Susturma Aksiyonu ve Bildirim Kategorisi
+      final darwinCategories = <DarwinNotificationCategory>[
+        DarwinNotificationCategory(
+          'prayer_adhan_category',
+          actions: <DarwinNotificationAction>[
+            DarwinNotificationAction.plain(
+              'action_stop_adhan',
+              '⏹ Ezanı Durdur / Sustur',
+              options: <DarwinNotificationActionOption>{
+                DarwinNotificationActionOption.destructive,
+              },
+            ),
+          ],
+        ),
+      ];
+
       // iOS Ayarları (Açılışta izinleri talep et ve ön plandayken de banner/ses göster)
-      const darwinSettings = DarwinInitializationSettings(
+      final darwinSettings = DarwinInitializationSettings(
         requestAlertPermission: true,
         requestBadgePermission: true,
         requestSoundPermission: true,
@@ -89,9 +105,10 @@ class NotificationService {
         defaultPresentSound: true,
         defaultPresentBadge: true,
         defaultPresentBanner: true,
+        notificationCategories: darwinCategories,
       );
 
-      const initSettings = InitializationSettings(
+      final initSettings = InitializationSettings(
         android: androidSettings,
         iOS: darwinSettings,
       );
@@ -99,14 +116,14 @@ class NotificationService {
       await _notifications.initialize(
         settings: initSettings,
         onDidReceiveNotificationResponse: (response) async {
-          debugPrint('Bildirime tıklandı: ${response.payload}');
-          final payload = response.payload;
-          if (payload != null && (payload.startsWith('prayer_') || payload == 'test_adhan')) {
-            final makam = await getSelectedMakam();
-            if (makam != AdhanMakam.silent) {
-              await AdhanAudioPlayerService.instance.togglePlayPreview(makam);
-            }
+          debugPrint('Bildirim yanıtı: payload=${response.payload}, actionId=${response.actionId}');
+          // Kullanıcı bildirim üzerindeki veya kilit ekranındaki "Ezanı Durdur" butonuna bastıysa
+          if (response.actionId == 'action_stop_adhan') {
+            await AdhanAudioPlayerService.instance.stop();
+            return;
           }
+          // Bildirime normal tıklanıp uygulama açıldığında çalan ezan varsa durdur (kullanıcıyı rahatsız etmemesi için)
+          await AdhanAudioPlayerService.instance.stop();
         },
       );
 
@@ -553,6 +570,16 @@ class NotificationService {
                       ? RawResourceAndroidNotificationSound(soundResource)
                       : null,
                   enableVibration: true,
+                  actions: isSilent
+                      ? null
+                      : const <AndroidNotificationAction>[
+                          AndroidNotificationAction(
+                            'action_stop_adhan',
+                            '⏹ Ezanı Durdur',
+                            showsUserInterface: false,
+                            cancelNotification: false,
+                          ),
+                        ],
                   styleInformation: BigTextStyleInformation(
                     notifBody,
                     contentTitle: notifTitle,
@@ -565,6 +592,7 @@ class NotificationService {
                   presentBadge: true,
                   presentSound: !isSilent,
                   sound: soundResource != null ? '$soundResource.caf' : null,
+                  categoryIdentifier: isSilent ? null : 'prayer_adhan_category',
                   interruptionLevel: InterruptionLevel.timeSensitive,
                 ),
               ),
@@ -664,6 +692,16 @@ class NotificationService {
                 ? RawResourceAndroidNotificationSound(soundResource)
                 : null,
             enableVibration: true,
+            actions: isSilent
+                ? null
+                : const <AndroidNotificationAction>[
+                    AndroidNotificationAction(
+                      'action_stop_adhan',
+                      '⏹ Ezanı Durdur',
+                      showsUserInterface: false,
+                      cancelNotification: false,
+                    ),
+                  ],
             styleInformation: BigTextStyleInformation(
               testBody,
               contentTitle: testTitle,
@@ -676,6 +714,7 @@ class NotificationService {
             presentBadge: true,
             presentSound: !isSilent,
             sound: soundResource != null ? '$soundResource.caf' : null,
+            categoryIdentifier: isSilent ? null : 'prayer_adhan_category',
             interruptionLevel: InterruptionLevel.timeSensitive,
           ),
         ),

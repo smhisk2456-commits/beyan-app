@@ -1,22 +1,40 @@
 import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/adhan_makam.dart';
 
-/// Ezan Makamları Önizleme Ses Çalar Servisi
-class AdhanAudioPlayerService {
+/// Ezan Makamları Ses Çalar Servisi
+/// Kilit ekranı / güç tuşuna basıldığında veya uygulama arka plana geçtiğinde
+/// ezanı otomatik olarak durdurma mekanizmasını içerir.
+class AdhanAudioPlayerService with WidgetsBindingObserver {
   static final AdhanAudioPlayerService instance = AdhanAudioPlayerService._internal();
   factory AdhanAudioPlayerService() => instance;
   AdhanAudioPlayerService._internal() {
     _player = AudioPlayer();
     _initAudioSession();
+    WidgetsBinding.instance.addObserver(this);
     _player.onPlayerStateChanged.listen((state) {
       if (state == PlayerState.completed || state == PlayerState.stopped) {
         _currentlyPlaying = null;
         _stateController.add(null);
       }
     });
+  }
+
+  /// Kullanıcı telefonun kilit tuşuna (güç/ekran kilitleme) bastığında,
+  /// ekran kapandığında veya uygulama arka plana alındığında çalan ezanı anında susturur.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.hidden) {
+      if (_currentlyPlaying != null) {
+        debugPrint('[AdhanAudioPlayerService] Kilit tuşuna basıldı / ekran kilitlendi -> Ezan durduruldu.');
+        stop();
+      }
+    }
   }
 
   Future<void> _initAudioSession() async {
@@ -28,10 +46,10 @@ class AdhanAudioPlayerService {
           ),
           android: const AudioContextAndroid(
             isSpeakerphoneOn: false,
-            stayAwake: true,
+            stayAwake: false,
             contentType: AndroidContentType.music,
             usageType: AndroidUsageType.media,
-            audioFocus: AndroidAudioFocus.gain,
+            audioFocus: AndroidAudioFocus.gainTransientMayDuck,
           ),
         ),
       );
@@ -91,7 +109,13 @@ class AdhanAudioPlayerService {
   }
 
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _player.dispose();
     _stateController.close();
   }
 }
+
+/// Çalmakta olan ezan makamını anlık olarak yayınlayan Riverpod provider'ı.
+final adhanPlayingProvider = StreamProvider<AdhanMakam?>((ref) {
+  return AdhanAudioPlayerService.instance.currentlyPlayingStream;
+});
