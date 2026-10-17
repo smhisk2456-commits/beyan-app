@@ -5,6 +5,7 @@ import '../../../core/localization/app_strings.dart';
 import '../../../main.dart';
 import '../../quran/repositories/quran_repository.dart';
 import '../../quran/screens/surah_detail_screen.dart';
+import '../models/prayer_how_to_model.dart';
 import '../models/prayer_time_model.dart';
 
 /// Namaz Rekat Adımı Modeli
@@ -77,6 +78,7 @@ class PrayerGuideSheet extends ConsumerWidget {
     final steps = _getSteps(prayerName, lang);
     final featuredSurahs = _getFeaturedSurahs(prayerName, lang);
     final generalSurahs = _getGeneralPrayerSurahs(lang);
+    final howToSteps = PrayerHowToGuide.steps(prayerName, lang);
 
     return Container(
       constraints: BoxConstraints(
@@ -202,6 +204,28 @@ class PrayerGuideSheet extends ConsumerWidget {
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(18, 14, 18, 24),
                 children: [
+                  // ── 0. Namaz Nasıl Kılınır? (Adım Adım) ─────────────
+                  _buildSectionHeader(
+                    icon: Icons.self_improvement_rounded,
+                    title: _howToTitle(lang),
+                    badge: _howToBadge(lang, howToSteps.length),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    PrayerHowToGuide.exampleCaption(prayerName, lang),
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.7),
+                      fontSize: 11.5,
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  ...howToSteps.asMap().entries.map(
+                        (e) => _buildHowToStepCard(e.key + 1, e.value, lang),
+                      ),
+
+                  const SizedBox(height: 20),
+
                   // ── 1. Rekat Dağılımı ve Kılınış Düzeni ─────────────
                   _buildSectionHeader(
                     icon: Icons.format_list_numbered_rounded,
@@ -291,6 +315,252 @@ class PrayerGuideSheet extends ConsumerWidget {
             ),
           ),
       ],
+    );
+  }
+
+  String _howToTitle(AppLanguage lang) {
+    switch (lang) {
+      case AppLanguage.turkish:
+        return 'Namaz Nasıl Kılınır?';
+      case AppLanguage.indonesian:
+        return 'Tata Cara Shalat';
+      case AppLanguage.arabic:
+        return 'كيفية أداء الصلاة';
+      default:
+        return 'How to Pray';
+    }
+  }
+
+  String _howToBadge(AppLanguage lang, int count) {
+    switch (lang) {
+      case AppLanguage.turkish:
+        return '$count Adım';
+      case AppLanguage.indonesian:
+        return '$count Langkah';
+      case AppLanguage.arabic:
+        return '$count خطوة';
+      default:
+        return '$count Steps';
+    }
+  }
+
+  Widget _buildHowToStepCard(int index, PrayerHowToStep step, AppLanguage lang) {
+    final hasDetails = step.hasRecitation || step.note != null;
+
+    final header = Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 26,
+          height: 26,
+          margin: const EdgeInsets.only(top: 1),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: const Color(0xFFD4AF37).withValues(alpha: 0.18),
+            border: Border.all(
+              color: const Color(0xFFFFDF7A).withValues(alpha: 0.6),
+              width: 1,
+            ),
+          ),
+          child: Center(
+            child: Text(
+              '$index',
+              style: const TextStyle(
+                color: Color(0xFFFFDF7A),
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                step.title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                step.description,
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.75),
+                  fontSize: 11.8,
+                  height: 1.4,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+
+    final decoration = BoxDecoration(
+      color: const Color(0xFF042F28),
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(color: Colors.white.withValues(alpha: 0.08), width: 1),
+    );
+
+    if (!hasDetails) {
+      return Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.fromLTRB(12, 11, 14, 11),
+        decoration: decoration,
+        child: header,
+      );
+    }
+
+    final readLabel = switch (lang) {
+      AppLanguage.turkish => 'Okunuşu ve anlamı için dokun',
+      AppLanguage.indonesian => 'Ketuk untuk bacaan & arti',
+      AppLanguage.arabic => 'اضغط لعرض النص',
+      _ => 'Tap for recitation & meaning',
+    };
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: decoration,
+      clipBehavior: Clip.antiAlias,
+      child: Theme(
+        // ExpansionTile'ın varsayılan ayırıcı çizgilerini gizle
+        data: ThemeData(dividerColor: Colors.transparent, splashColor: Colors.transparent),
+        child: ExpansionTile(
+          tilePadding: const EdgeInsets.fromLTRB(12, 4, 8, 4),
+          childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+          iconColor: const Color(0xFFFFDF7A),
+          collapsedIconColor: const Color(0xFFFFDF7A).withValues(alpha: 0.7),
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              header,
+              Padding(
+                padding: const EdgeInsets.only(left: 36, top: 6),
+                child: Text(
+                  readLabel,
+                  style: TextStyle(
+                    color: const Color(0xFFFFDF7A).withValues(alpha: 0.75),
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          children: [
+            if (step.arabic != null)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF021A16),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: const Color(0xFFD4AF37).withValues(alpha: 0.35),
+                    width: 0.8,
+                  ),
+                ),
+                child: Text(
+                  step.arabic!,
+                  textAlign: TextAlign.center,
+                  textDirection: TextDirection.rtl,
+                  style: const TextStyle(
+                    fontFamily: 'Amiri',
+                    color: Color(0xFFFFDF7A),
+                    fontSize: 19,
+                    height: 1.9,
+                  ),
+                ),
+              ),
+            if (step.transliteration != null) ...[
+              const SizedBox(height: 10),
+              _buildHowToLabeledText(
+                switch (lang) {
+                  AppLanguage.turkish => 'Okunuşu',
+                  AppLanguage.indonesian => 'Bacaan',
+                  _ => 'Transliteration',
+                },
+                step.transliteration!,
+                italic: true,
+              ),
+            ],
+            if (step.meaning != null) ...[
+              const SizedBox(height: 10),
+              _buildHowToLabeledText(
+                switch (lang) {
+                  AppLanguage.turkish => 'Anlamı',
+                  AppLanguage.indonesian => 'Arti',
+                  _ => 'Meaning',
+                },
+                step.meaning!,
+              ),
+            ],
+            if (step.note != null) ...[
+              const SizedBox(height: 10),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFD4AF37).withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(Icons.info_outline_rounded, size: 14, color: Color(0xFFFFDF7A)),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        step.note!,
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.8),
+                          fontSize: 11.2,
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHowToLabeledText(String label, String text, {bool italic = false}) {
+    return SizedBox(
+      width: double.infinity,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              color: Color(0xFFFFDF7A),
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.3,
+            ),
+          ),
+          const SizedBox(height: 3),
+          Text(
+            text,
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.85),
+              fontSize: 12,
+              height: 1.45,
+              fontStyle: italic ? FontStyle.italic : FontStyle.normal,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
