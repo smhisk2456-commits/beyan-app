@@ -922,6 +922,42 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
     return (refText, formatted, currentQuote.arabic, currentQuote.referenceTr);
   }
 
+  void _showWidgetFeedbackSnackBar(IconData icon, String msg) {
+    if (!mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.clearSnackBars();
+    messenger.showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(icon, color: const Color(0xFFFFDF7A), size: 20),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                msg,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13.5,
+                  height: 1.3,
+                ),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: const Color(0xFF0A382E),
+        elevation: 8,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 98),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+          side: const BorderSide(color: Color(0xFFFFDF7A), width: 1.2),
+        ),
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
   Future<void> _syncAndApplyWidgetSettings() async {
     HapticFeedback.mediumImpact();
     await HomeWidget.setAppGroupId(AppConstants.appGroupId);
@@ -972,30 +1008,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                   ? '✨ $refText diterapkan ke widget layar kunci!'
                   : '✨ $refText applied to Lock Screen widget!'));
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const Icon(Icons.check_circle, color: Color(0xFFFFDF7A), size: 20),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  msg,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13.5,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          backgroundColor: const Color(0xFF033E35),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          duration: const Duration(seconds: 3),
-        ),
-      );
+      _showWidgetFeedbackSnackBar(Icons.check_circle, msg);
     }
   }
 
@@ -1036,32 +1049,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
     await WidgetService().updateAllWidgets();
 
     if (mounted) {
-      final msg = strings.versePinnedSnackBar(refText);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const Icon(Icons.push_pin, color: Color(0xFFFFDF7A), size: 20),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  msg,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13.5,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          backgroundColor: const Color(0xFF033E35),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          duration: const Duration(seconds: 3),
-        ),
-      );
+      _showWidgetFeedbackSnackBar(Icons.push_pin, strings.versePinnedSnackBar(refText));
     }
   }
 
@@ -1087,30 +1075,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                   ? 'Widget layar kunci dikembalikan ke siklus otomatis ayat!'
                   : 'Lock screen widget restored to automatic rotation!'));
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const Icon(Icons.autorenew, color: Color(0xFFFFDF7A), size: 20),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  msg,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13.5,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          backgroundColor: const Color(0xFF033E35),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          duration: const Duration(seconds: 3),
-        ),
-      );
+      _showWidgetFeedbackSnackBar(Icons.autorenew, msg);
     }
   }
 

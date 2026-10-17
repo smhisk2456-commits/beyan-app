@@ -350,6 +350,20 @@ abstract class AppTheme {
         unselectedItemColor: AppColors.textHint,
         elevation: 8,
       ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: primary,
+        contentTextStyle: GoogleFonts.lato(
+          color: Colors.white,
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+        ),
+        actionTextColor: gold,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+          side: BorderSide(color: gold.withValues(alpha: 0.45), width: 1),
+        ),
+      ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.surface,
@@ -462,6 +476,20 @@ abstract class AppTheme {
         selectedItemColor: gold,
         unselectedItemColor: Colors.white38,
         elevation: 8,
+      ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: const Color(0xFF0A382E),
+        contentTextStyle: GoogleFonts.lato(
+          color: Colors.white,
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+        ),
+        actionTextColor: gold,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+          side: BorderSide(color: gold.withValues(alpha: 0.55), width: 1.2),
+        ),
       ),
     );
   }
