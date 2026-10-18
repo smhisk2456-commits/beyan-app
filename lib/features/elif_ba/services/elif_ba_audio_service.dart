@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import '../models/elif_ba_letter.dart';
 
 /// Elif-Bâ Ses Servisi
 /// 28 temel Arapça harf için yüksek kaliteli, gerçek hoca/kāri tilaveti (MP3) çalar.
@@ -146,7 +147,14 @@ class ElifBaAudioService {
       await _audioPlayer.play(AssetSource(assetPath));
       _isPlaying = true;
     } catch (e) {
-      debugPrint('[ElifBaAudioService] playLetter ($letterId) hatası: $e');
+      debugPrint('[ElifBaAudioService] playLetter ($letterId) hatası: $e, TTS yedeği devreye alınıyor.');
+      try {
+        final letter = elifBaLettersList.firstWhere(
+          (l) => l.id == letterId,
+          orElse: () => elifBaLettersList.first,
+        );
+        await _speakWithTts(letter.arabic);
+      } catch (_) {}
     }
   }
 

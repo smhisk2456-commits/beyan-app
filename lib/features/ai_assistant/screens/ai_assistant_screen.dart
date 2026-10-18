@@ -74,6 +74,100 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
     }
   }
 
+  void _showApiKeyDialog(BuildContext context) {
+    final currentKey = ref.read(aiAssistantProvider).geminiApiKey ?? '';
+    final keyController = TextEditingController(text: currentKey);
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF022B24),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+          side: const BorderSide(color: Color(0xFFFFDF7A), width: 1.2),
+        ),
+        title: const Row(
+          children: [
+            Icon(Icons.key_rounded, color: Color(0xFFFFDF7A), size: 24),
+            SizedBox(width: 8),
+            Text(
+              'Gemini API Anahtarı',
+              style: TextStyle(color: Color(0xFFFFDF7A), fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Google AI Studio\'dan (aistudio.google.com) edinebileceğiniz tamamen ücretsiz Gemini API anahtarınızı girerek Beyân AI\'yı kotasız ve sınırsız kullanabilirsiniz.',
+              style: TextStyle(color: Colors.white70, fontSize: 13, height: 1.45),
+            ),
+            const SizedBox(height: 14),
+            TextField(
+              controller: keyController,
+              style: const TextStyle(color: Colors.white, fontSize: 13.5),
+              decoration: InputDecoration(
+                hintText: 'AIzaSy...',
+                hintStyle: const TextStyle(color: Colors.white30),
+                filled: true,
+                fillColor: const Color(0xFF04382F),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFFD4AF37), width: 1),
+                ),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.paste_rounded, color: Color(0xFFFFDF7A), size: 20),
+                  tooltip: 'Panodan Yapıştır',
+                  onPressed: () async {
+                    final data = await Clipboard.getData(Clipboard.kTextPlain);
+                    if (data?.text != null) {
+                      keyController.text = data!.text!.trim();
+                    }
+                  },
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              '• API anahtarı eklemeden de dahili ilimler motorumuz tüm dini suallerinize eksiksiz cevap verir.',
+              style: TextStyle(color: Colors.white38, fontSize: 11),
+            ),
+          ],
+        ),
+        actions: [
+          if (currentKey.isNotEmpty)
+            TextButton(
+              onPressed: () async {
+                await ref.read(aiAssistantProvider.notifier).setGeminiApiKey(null);
+                if (ctx.mounted) Navigator.pop(ctx);
+              },
+              child: const Text('Kaldır', style: TextStyle(color: Colors.redAccent)),
+            ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('İptal', style: TextStyle(color: Colors.white60)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFD4AF37),
+              foregroundColor: const Color(0xFF01201B),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () async {
+              final newKey = keyController.text.trim();
+              await ref.read(aiAssistantProvider.notifier).setGeminiApiKey(newKey.isEmpty ? null : newKey);
+              if (ctx.mounted) Navigator.pop(ctx);
+            },
+            child: const Text('Kaydet', style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showQuotaExceededDialog() {
     showDialog(
       context: context,
@@ -95,8 +189,8 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
         ),
         content: const Text(
           'Bugünkü 3 ücretsiz soru hakkınız doldu.\n\n'
-          'Beyân AI Manevi Rehber & Tefsir Asistanı\'na 7/24 sınırsız soru sormak, '
-          'reklamsız deneyim ve tüm lüks özellikler için Beyân Premium\'a geçebilirsiniz.',
+          'Beyân AI Manevi Rehber & Tefsir Asistanı\'na 7/24 sınırsız soru sormak için '
+          'Beyân Premium\'a geçebilir veya ücretsiz kişisel Gemini API anahtarınızı ekleyebilirsiniz.',
           style: TextStyle(color: Colors.white, fontSize: 14, height: 1.5),
         ),
         actions: [
@@ -104,12 +198,24 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
             onPressed: () => Navigator.pop(ctx),
             child: const Text('Daha Sonra', style: TextStyle(color: Colors.white60)),
           ),
+          OutlinedButton(
+            style: OutlinedButton.styleFrom(
+              foregroundColor: const Color(0xFFFFDF7A),
+              side: const BorderSide(color: Color(0xFFFFDF7A)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () {
+              Navigator.pop(ctx);
+              _showApiKeyDialog(context);
+            },
+            child: const Text('API Anahtarı Ekle 🔑'),
+          ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFD4AF37),
               foregroundColor: const Color(0xFF01201B),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             ),
             onPressed: () {
               Navigator.pop(ctx);
@@ -205,6 +311,14 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
         ),
         actions: [
           IconButton(
+            icon: Icon(
+              aiState.hasCustomApiKey ? Icons.vpn_key_rounded : Icons.key_outlined,
+              color: const Color(0xFFFFDF7A),
+            ),
+            tooltip: 'Kişisel Gemini API Anahtarı',
+            onPressed: () => _showApiKeyDialog(context),
+          ),
+          IconButton(
             icon: const Icon(Icons.info_outline_rounded, color: Color(0xFFFFDF7A)),
             tooltip: 'Muteber Kaynaklar',
             onPressed: () => _showSourcesDialog(context),
@@ -219,7 +333,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
       body: Column(
         children: [
           // ── Quota & Status Banner ────────────────────────
-          _buildQuotaBanner(isPremium, aiState.remainingQuestions),
+          _buildQuotaBanner(isPremium, aiState.remainingQuestions, aiState.hasCustomApiKey),
 
           // ── Mesaj Akışı ──────────────────────────────────
           Expanded(
@@ -245,7 +359,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
     );
   }
 
-  Widget _buildQuotaBanner(bool isPremium, int remaining) {
+  Widget _buildQuotaBanner(bool isPremium, int remaining, bool hasCustomApiKey) {
     if (isPremium) {
       return Container(
         width: double.infinity,
@@ -261,6 +375,41 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
                 color: Color(0xFFFFDF7A),
                 fontSize: 12.5,
                 fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (hasCustomApiKey) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        color: const Color(0xFF0F3A30),
+        child: Row(
+          children: [
+            const Icon(Icons.vpn_key_rounded, color: Color(0xFFFFDF7A), size: 16),
+            const SizedBox(width: 8),
+            const Expanded(
+              child: Text(
+                'Kişisel Gemini API Anahtarı Aktif • Sınırsız Kullanım',
+                style: TextStyle(
+                  color: Color(0xFFFFDF7A),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            InkWell(
+              onTap: () => _showApiKeyDialog(context),
+              child: const Text(
+                'Yönet',
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 11.5,
+                  decoration: TextDecoration.underline,
+                ),
               ),
             ),
           ],
