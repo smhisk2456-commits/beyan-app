@@ -25,6 +25,8 @@ import '../../settings/screens/settings_screen.dart';
 import '../../spiritual_healing/models/mood_verse_model.dart';
 import '../../spiritual_healing/screens/mood_verse_sheet.dart';
 import '../../mosque_finder/screens/nearby_mosques_screen.dart';
+import '../../ai_assistant/screens/ai_assistant_screen.dart';
+import '../../elif_ba/screens/elif_ba_hub_screen.dart';
 
 /// Ana Ekran – Beyân lüks İslami kontrol merkezi.
 class HomeScreen extends ConsumerStatefulWidget {
@@ -102,6 +104,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 );
               },
             ),
+          ),
+
+          // ── Beyân AI & Sesli Elif-Bâ Öne Çıkan Kartları ────────
+          const SliverToBoxAdapter(
+            child: _SpotlightFeatureCards(),
           ),
 
           // ── "Bugün Kalbin Nasıl Hissediyor?" (Ruh Haline Göre Âyet & Şifa) ───
@@ -751,6 +758,179 @@ class _DailyFeaturedDuaCard extends ConsumerWidget {
                 color: Color(0xFFD4AF37),
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ════════════════════════════════════════════════════════════════
+// Öne Çıkan Lüks Özellik Kartları (Beyân AI & Sesli Elif-Bâ)
+// ════════════════════════════════════════════════════════════════
+
+class _SpotlightFeatureCards extends StatelessWidget {
+  const _SpotlightFeatureCards();
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 6, 20, 10),
+      child: Row(
+        children: [
+          // Beyân AI Manevi Rehber Kartı
+          Expanded(
+            child: _SpotlightCard(
+              title: 'Beyân AI',
+              subtitle: 'Manevi Rehber & Tefsir',
+              badge: 'YENİ ✨',
+              icon: Icons.auto_awesome_rounded,
+              gradientColors: isDark
+                  ? [const Color(0xFF04382F), const Color(0xFF021F1A)]
+                  : [const Color(0xFFE8F6F0), Colors.white],
+              onTap: () {
+                HapticFeedback.lightImpact();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const AiAssistantScreen()),
+                );
+              },
+            ),
+          ),
+          const SizedBox(width: 10),
+          // Sesli Elif-Bâ Kartı
+          Expanded(
+            child: _SpotlightCard(
+              title: 'Sesli Elif-Bâ',
+              subtitle: 'Çocuk & Başlangıç Talimi',
+              badge: 'EĞLENCELİ 🎯',
+              icon: Icons.menu_book_rounded,
+              gradientColors: isDark
+                  ? [const Color(0xFF0C3D32), const Color(0xFF031E18)]
+                  : [const Color(0xFFFBF4DF), Colors.white],
+              onTap: () {
+                HapticFeedback.lightImpact();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ElifBaHubScreen()),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SpotlightCard extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final String badge;
+  final IconData icon;
+  final List<Color> gradientColors;
+  final VoidCallback onTap;
+
+  const _SpotlightCard({
+    required this.title,
+    required this.subtitle,
+    required this.badge,
+    required this.icon,
+    required this.gradientColors,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(18),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: gradientColors,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: const Color(0xFFD4AF37).withValues(alpha: 0.45),
+            width: 1.2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    gradient: const RadialGradient(
+                      colors: [Color(0xFFFFDF7A), Color(0xFFB8860B)],
+                    ),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFFFFDF7A).withValues(alpha: 0.3),
+                        blurRadius: 6,
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: Icon(icon, color: const Color(0xFF01201B), size: 18),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFDF7A),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    badge,
+                    style: const TextStyle(
+                      fontSize: 8.5,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF012E2B),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              subtitle,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 11,
+                color: isDark ? Colors.white60 : Colors.black54,
               ),
             ),
           ],

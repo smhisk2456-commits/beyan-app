@@ -1409,6 +1409,125 @@ struct BeyanSunWidget: Widget {
     }
 }
 
+// MARK: - ActivityKit Live Activity & Dynamic Island (Apple Ekosistemi & Donanım)
+
+struct BeyanPrayerAttributes: ActivityAttributes {
+    public struct ContentState: Codable, Hashable {
+        var prayerName: String
+        var prayerTime: String
+        var targetTimestamp: Double
+        var cityName: String
+        var isKerahat: Bool
+    }
+
+    var title: String
+}
+
+@available(iOSApplicationExtension 16.1, *)
+struct BeyanLiveActivity: Widget {
+    var body: some WidgetConfiguration {
+        ActivityConfiguration(for: BeyanPrayerAttributes.self) { context in
+            // Lock Screen / StandBy Banner UI
+            HStack(spacing: 12) {
+                ZStack {
+                    Circle()
+                        .fill(RadialGradient(colors: [Color(red: 1.0, green: 0.87, blue: 0.48), Color(red: 0.72, green: 0.53, blue: 0.04)], center: .center, startRadius: 0, endRadius: 18))
+                        .frame(width: 36, height: 36)
+                    Image(systemName: "moon.stars.fill")
+                        .font(.system(size: 16))
+                        .foregroundColor(Color(red: 0.01, green: 0.12, blue: 0.10))
+                }
+
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 6) {
+                        Text(context.state.prayerName)
+                            .font(.system(size: 15, weight: .bold, design: .rounded))
+                            .foregroundColor(Color(red: 1.0, green: 0.87, blue: 0.48))
+
+                        Text("• \(context.state.cityName)")
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundColor(.white.opacity(0.7))
+                    }
+
+                    Text("Vakit: \(context.state.prayerTime)")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(.white.opacity(0.9))
+                }
+
+                Spacer()
+
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text(Date(timeIntervalSince1970: context.state.targetTimestamp), style: .timer)
+                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                        .monospacedDigit()
+                        .foregroundColor(Color(red: 1.0, green: 0.87, blue: 0.48))
+
+                    Text("kaldı")
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundColor(.white.opacity(0.6))
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(
+                LinearGradient(
+                    colors: [Color(red: 0.01, green: 0.15, blue: 0.12), Color(red: 0.02, green: 0.22, blue: 0.18)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .widgetURL(URL(string: "beyan://prayer"))
+        } dynamicIsland: { context in
+            DynamicIsland {
+                // Expanded UI (Long press on island)
+                DynamicIslandExpandedRegion(.leading) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "moon.stars.fill")
+                            .foregroundColor(Color(red: 1.0, green: 0.87, blue: 0.48))
+                        Text(context.state.prayerName)
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundColor(Color(red: 1.0, green: 0.87, blue: 0.48))
+                    }
+                    .padding(.leading, 8)
+                }
+                DynamicIslandExpandedRegion(.trailing) {
+                    Text(Date(timeIntervalSince1970: context.state.targetTimestamp), style: .timer)
+                        .font(.system(size: 14, weight: .bold))
+                        .monospacedDigit()
+                        .foregroundColor(Color(red: 1.0, green: 0.87, blue: 0.48))
+                        .padding(.trailing, 8)
+                }
+                DynamicIslandExpandedRegion(.bottom) {
+                    HStack {
+                        Text("Vakit: \(context.state.prayerTime)")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.white.opacity(0.8))
+                        Spacer()
+                        Text(context.state.cityName)
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundColor(Color(red: 1.0, green: 0.87, blue: 0.48))
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.bottom, 6)
+                }
+            } compactLeading: {
+                Image(systemName: "moon.stars.fill")
+                    .foregroundColor(Color(red: 1.0, green: 0.87, blue: 0.48))
+            } compactTrailing: {
+                Text(Date(timeIntervalSince1970: context.state.targetTimestamp), style: .timer)
+                    .monospacedDigit()
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundColor(Color(red: 1.0, green: 0.87, blue: 0.48))
+                    .frame(width: 44)
+            } minimal: {
+                Image(systemName: "moon.stars.fill")
+                    .foregroundColor(Color(red: 1.0, green: 0.87, blue: 0.48))
+            }
+            .widgetURL(URL(string: "beyan://prayer"))
+        }
+    }
+}
+
 // MARK: - Bundle
 
 @main
@@ -1420,5 +1539,8 @@ struct BeyanWidgetBundle: WidgetBundle {
         BeyanCountdownWidget()
         BeyanHijriWidget()
         BeyanSunWidget()
+        if #available(iOSApplicationExtension 16.1, *) {
+            BeyanLiveActivity()
+        }
     }
 }

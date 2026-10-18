@@ -11,6 +11,7 @@ class VerseCard extends ConsumerWidget {
   final Verse verse;
   final bool showSurahReference;
   final bool isHighlighted;
+  final bool isPlaying;
   final VoidCallback? onTap;
 
   const VerseCard({
@@ -18,6 +19,7 @@ class VerseCard extends ConsumerWidget {
     required this.verse,
     this.showSurahReference = false,
     this.isHighlighted = false,
+    this.isPlaying = false,
     this.onTap,
   });
 
@@ -59,23 +61,28 @@ class VerseCard extends ConsumerWidget {
     final isBookmarked = ref.watch(bookmarkedVersesProvider).contains('${verse.surahId}:${verse.verseNumber}');
     final lastRead = ref.watch(lastReadProvider);
     final isLastRead = lastRead?.surahId == verse.surahId && lastRead?.verseNumber == verse.verseNumber;
-    final shouldHighlight = isLastRead || isHighlighted;
+    final shouldHighlight = isLastRead || isHighlighted || isPlaying;
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      elevation: 0,
+      elevation: isPlaying ? 3 : 0,
+      shadowColor: isPlaying ? const Color(0xFFFFDF7A).withValues(alpha: 0.3) : Colors.transparent,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(18),
         side: BorderSide(
-          color: shouldHighlight
+          color: isPlaying
               ? const Color(0xFFFFDF7A)
-              : (isDark ? const Color(0xFF133B34) : const Color(0xFFE2EBE8)),
-          width: shouldHighlight ? 1.8 : 1,
+              : (shouldHighlight
+                  ? const Color(0xFFD4AF37)
+                  : (isDark ? const Color(0xFF133B34) : const Color(0xFFE2EBE8))),
+          width: isPlaying ? 2.2 : (shouldHighlight ? 1.8 : 1),
         ),
       ),
-      color: shouldHighlight
-          ? (isDark ? const Color(0xFF0F362F) : const Color(0xFFF1F8F5))
-          : (isDark ? const Color(0xFF0D2823) : Colors.white),
+      color: isPlaying
+          ? (isDark ? const Color(0xFF13423A) : const Color(0xFFE8F6F0))
+          : (shouldHighlight
+              ? (isDark ? const Color(0xFF0F362F) : const Color(0xFFF1F8F5))
+              : (isDark ? const Color(0xFF0D2823) : Colors.white)),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(18),
@@ -93,7 +100,9 @@ class VerseCard extends ConsumerWidget {
                     height: 36,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.2 : 0.1),
+                      color: isPlaying
+                          ? const Color(0xFFFFDF7A)
+                          : const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.2 : 0.1),
                       border: Border.all(
                         color: const Color(0xFFD4AF37).withValues(alpha: 0.6),
                         width: 1,
@@ -105,12 +114,48 @@ class VerseCard extends ConsumerWidget {
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
-                          color: isDark ? const Color(0xFFFFDF7A) : const Color(0xFF033E35),
+                          color: isPlaying
+                              ? const Color(0xFF012E2B)
+                              : (isDark ? const Color(0xFFFFDF7A) : const Color(0xFF033E35)),
                         ),
                       ),
                     ),
                   ),
                   const SizedBox(width: 8),
+
+                  if (isPlaying)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      margin: const EdgeInsets.only(right: 6),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFDF7A),
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFFFFDF7A).withValues(alpha: 0.35),
+                            blurRadius: 6,
+                            spreadRadius: 1,
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.graphic_eq_rounded, size: 12, color: Color(0xFF012E2B)),
+                          const SizedBox(width: 4),
+                          Text(
+                            strings.language == AppLanguage.turkish
+                                ? 'Okunuyor'
+                                : (strings.language == AppLanguage.arabic ? 'يتلى الآن' : 'Playing'),
+                            style: const TextStyle(
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF012E2B),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
 
                   if (isLastRead)
                     Container(

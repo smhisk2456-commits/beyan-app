@@ -33,11 +33,44 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
   final GlobalKey _targetVerseKey = GlobalKey();
   bool _showScrollToTop = false;
   bool _hasScrolledToInitialVerse = false;
+  int? _lastScrolledVerseNumber;
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+  }
+
+  void _scrollToVerseNumber(int verseNumber, List<Verse> verses) {
+    if (_lastScrolledVerseNumber == verseNumber) return;
+    _lastScrolledVerseNumber = verseNumber;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_scrollController.hasClients) return;
+
+      final targetIndex = verses.indexWhere((v) => v.verseNumber == verseNumber);
+      if (targetIndex < 0) return;
+
+      final maxScroll = _scrollController.position.maxScrollExtent;
+      double estimatedOffset = 210.0;
+      if (widget.surah.id != 9 && widget.surah.id != 1) {
+        estimatedOffset += 110.0;
+      }
+
+      for (int i = 0; i < targetIndex; i++) {
+        final v = verses[i];
+        final arabicLines = (v.arabicText.length / 28.0).ceil().clamp(1, 40);
+        final meaningLines = (v.turkishMeaning.length / 38.0).ceil().clamp(1, 40);
+        estimatedOffset += 90.0 + (arabicLines * 46.0) + (meaningLines * 22.0) + 12.0;
+      }
+
+      final targetScroll = (estimatedOffset - 40.0).clamp(0.0, maxScroll);
+      _scrollController.animateTo(
+        targetScroll,
+        duration: const Duration(milliseconds: 450),
+        curve: Curves.easeOutCubic,
+      );
+    });
   }
 
   void _scrollToInitialVerseIfNeeded(List<Verse> verses) {
@@ -262,6 +295,21 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
     final audioState = ref.watch(quranAudioProvider);
     final isThisSurahPlaying = audioState.currentSurahId == widget.surah.id && audioState.isPlaying;
 
+    ref.listen<QuranAudioState>(quranAudioProvider, (prev, next) {
+      if (next.currentSurahId == widget.surah.id && next.isPlaying) {
+        final verses = versesAsync.valueOrNull;
+        if (verses != null && verses.isNotEmpty) {
+          ref.read(quranAudioProvider.notifier).updateActiveVerseByProgress(verses);
+
+          if (next.isLiveTrackingEnabled &&
+              next.activeVerseNumber != null &&
+              next.activeVerseNumber != prev?.activeVerseNumber) {
+            _scrollToVerseNumber(next.activeVerseNumber!, verses);
+          }
+        }
+      }
+    });
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
@@ -269,7 +317,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
           versesAsync.when(
             loading: () => _buildLoadingScaffold(context, strings),
             error: (e, _) => _buildErrorScaffold(context, e.toString(), strings),
-            data: (verses) => _buildContent(context, verses, isDark, isThisSurahPlaying, strings),
+            data: (verses) => _buildContent(context, verses, isDark, isThisSurahPlaying, audioState, strings),
           ),
           // Alt Mini Tilavet Oynatıcısı
           const Positioned(
@@ -316,6 +364,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
     List<Verse> verses,
     bool isDark,
     bool isThisSurahPlaying,
+    QuranAudioState audioState,
     AppStrings strings,
   ) {
     if (!_hasScrolledToInitialVerse &&
@@ -334,6 +383,35 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
           pinned: true,
           backgroundColor: AppColors.teal,
           actions: [
+            // Canlı Takip (Karaoke / Takipçi) Modu Butonu
+            IconButton(
+              icon: Icon(
+                audioState.isLiveTrackingEnabled ? Icons.auto_stories_rounded : Icons.auto_stories_outlined,
+                color: audioState.isLiveTrackingEnabled ? const Color(0xFFFFDF7A) : Colors.white60,
+              ),
+              tooltip: audioState.isLiveTrackingEnabled
+                  ? (strings.language == AppLanguage.turkish ? 'Canlı Ayet Takibi Açık' : 'Live Verse Tracking Active')
+                  : (strings.language == AppLanguage.turkish ? 'Canlı Ayet Takibi Kapalı' : 'Live Verse Tracking Off'),
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                ref.read(quranAudioProvider.notifier).toggleLiveTracking();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      !audioState.isLiveTrackingEnabled
+                          ? (strings.language == AppLanguage.turkish
+                              ? 'Canlı Ayet Takibi Aktif (Otomatik kaydırma)'
+                              : 'Live Verse Tracking Enabled')
+                          : (strings.language == AppLanguage.turkish
+                              ? 'Canlı Ayet Takibi Duraklatıldı'
+                              : 'Live Verse Tracking Disabled'),
+                    ),
+                    duration: const Duration(seconds: 1),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              },
+            ),
             // Kâri Seçimi Butonu
             IconButton(
               icon: const Icon(Icons.person_outline_rounded, color: Color(0xFFFFDF7A)),
@@ -426,11 +504,21 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
             (context, index) {
               final verse = verses[index];
               final isTarget = widget.initialScrollToVerse == verse.verseNumber;
+              final isPlayingVerse = isThisSurahPlaying && audioState.activeVerseNumber == verse.verseNumber;
               return RepaintBoundary(
                 child: VerseCard(
                   key: isTarget ? _targetVerseKey : null,
                   verse: verse,
                   isHighlighted: isTarget,
+                  isPlaying: isPlayingVerse,
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    ref.read(quranAudioProvider.notifier).seekToVerse(
+                          verse.verseNumber,
+                          verses,
+                          surahName: widget.surah.localizedName(strings.language.code),
+                        );
+                  },
                 ),
               );
             },
