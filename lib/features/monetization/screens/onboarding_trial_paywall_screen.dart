@@ -451,73 +451,57 @@ class _OnboardingTrialPaywallScreenState
 
                       const SizedBox(height: 24),
 
-                      // ── Ana Paket Seçim Kartları (Yıllık & Ömür Boyu Hero) ────
-                      Row(
-                        children: [
-                          // 1. Yıllık Kart (3 Gün Deneme - En Popüler)
-                          Expanded(
-                            child: _buildPricingCard(
-                              topBadge: strings.badgeMostPopular,
-                              subBadge: strings.badgeFreeTrial,
-                              title: strings.planYearly,
-                              price: '₺20,83 /ay',
-                              oldPrice: '₺599,88',
-                              totalPrice: '₺249,99 /yıl',
-                              isSelected: _selectedTier == PremiumTier.yearly,
-                              onTap: () => setState(() => _selectedTier = PremiumTier.yearly),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          // 2. Ömür Boyu Kart (Sonsuz Erişim - En Avantajlı)
-                          Expanded(
-                            child: _buildPricingCard(
-                              topBadge: strings.badgeBestValue,
-                              subBadge: strings.badgeNoSubscription,
-                              title: strings.planLifetime,
-                              price: '₺499,99',
-                              totalPrice: _t(strings.language,
-                                  tr: 'Tek Seferlik',
-                                  en: 'One-Time',
-                                  ar: 'دفعة واحدة',
-                                  id: 'Sekali Bayar'),
-                              isSelected: _selectedTier == PremiumTier.lifetime,
-                              onTap: () => setState(() => _selectedTier = PremiumTier.lifetime),
-                            ),
-                          ),
-                        ],
+                      // ── Paket Seçim Kartları (Aylık • Yıllık • Ömür Boyu) ────
+                      // 1. Aylık Kart
+                      _buildPricingCard(
+                        subBadge: _t(strings.language,
+                            tr: 'İstediğin zaman iptal',
+                            en: 'Cancel anytime',
+                            ar: 'إلغاء في أي وقت',
+                            id: 'Batalkan kapan saja'),
+                        title: strings.planMonthly,
+                        price: '₺49,99',
+                        totalPrice: _t(strings.language,
+                            tr: '/ay', en: '/month', ar: '/شهر', id: '/bulan'),
+                        isSelected: _selectedTier == PremiumTier.monthly,
+                        onTap: () => setState(() => _selectedTier = PremiumTier.monthly),
                       ),
+                      const SizedBox(height: 16),
 
-                      const SizedBox(height: 10),
+                      // 2. Yıllık Kart (3 Gün Deneme - En Popüler)
+                      _buildPricingCard(
+                        topBadge: '${strings.badgeMostPopular} • %50',
+                        subBadge: strings.badgeFreeTrial,
+                        title: strings.planYearly,
+                        price: _t(strings.language,
+                            tr: '₺25,00 /ay',
+                            en: '₺25.00 /mo',
+                            ar: '٢٥ ₺ /شهر',
+                            id: '₺25,00 /bln'),
+                        oldPrice: '₺599,88',
+                        totalPrice: _t(strings.language,
+                            tr: '₺299,99 /yıl',
+                            en: '₺299.99 /year',
+                            ar: '٢٩٩.٩٩ ₺ /سنة',
+                            id: '₺299,99 /tahun'),
+                        isSelected: _selectedTier == PremiumTier.yearly,
+                        onTap: () => setState(() => _selectedTier = PremiumTier.yearly),
+                      ),
+                      const SizedBox(height: 16),
 
-                      // 3. Aylık Plan Alternatif Butonu (Kullanıcı isterse seçebilir)
-                      Center(
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(10),
-                          onTap: () {
-                            HapticFeedback.selectionClick();
-                            setState(() => _selectedTier = PremiumTier.monthly);
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                            child: Text(
-                              _selectedTier == PremiumTier.monthly
-                                  ? '✓ ${strings.planMonthly}: ₺49,99 /ay ${_t(strings.language, tr: "(Seçili)", en: "(Selected)", ar: "(محدد)", id: "(Dipilih)")}'
-                                  : '${strings.planMonthly}: ₺49,99 /ay',
-                              style: TextStyle(
-                                color: _selectedTier == PremiumTier.monthly
-                                    ? const Color(0xFFFFDF7A)
-                                    : Colors.white60,
-                                fontSize: 12,
-                                fontWeight: _selectedTier == PremiumTier.monthly
-                                    ? FontWeight.bold
-                                    : FontWeight.normal,
-                                decoration: _selectedTier == PremiumTier.monthly
-                                    ? TextDecoration.none
-                                    : TextDecoration.underline,
-                              ),
-                            ),
-                          ),
-                        ),
+                      // 3. Ömür Boyu Kart (Sonsuz Erişim - En Avantajlı)
+                      _buildPricingCard(
+                        topBadge: strings.badgeBestValue,
+                        subBadge: strings.badgeNoSubscription,
+                        title: strings.planLifetime,
+                        price: '₺499,99',
+                        totalPrice: _t(strings.language,
+                            tr: 'Tek Seferlik',
+                            en: 'One-Time',
+                            ar: 'دفعة واحدة',
+                            id: 'Sekali Bayar'),
+                        isSelected: _selectedTier == PremiumTier.lifetime,
+                        onTap: () => setState(() => _selectedTier = PremiumTier.lifetime),
                       ),
 
                       const SizedBox(height: 14),
@@ -603,10 +587,10 @@ class _OnboardingTrialPaywallScreenState
                         child: Text(
                           _selectedTier == PremiumTier.yearly
                               ? _t(strings.language,
-                                  tr: '3 gün ücretsiz, sonra yılda ₺249,99 • İstediğin zaman iptal',
-                                  en: '3 days free, then ₺249.99 / year • Cancel anytime',
-                                  ar: '٣ أيام مجاناً ثم ٢٤٩.٩٩ ₺ سنوياً • إلغاء بأي وقت',
-                                  id: '3 hari gratis, lalu ₺249,99 / tahun • Batalkan kapan saja')
+                                  tr: '3 gün ücretsiz, sonra yılda ₺299,99 • İstediğin zaman iptal',
+                                  en: '3 days free, then ₺299.99 / year • Cancel anytime',
+                                  ar: '٣ أيام مجاناً ثم ٢٩٩.٩٩ ₺ سنوياً • إلغاء بأي وقت',
+                                  id: '3 hari gratis, lalu ₺299,99 / tahun • Batalkan kapan saja')
                               : (_selectedTier == PremiumTier.lifetime
                                   ? _t(strings.language,
                                       tr: '₺499,99 tek seferlik ödeme • Asla tekrar ücretlendirilmez',
@@ -822,7 +806,7 @@ class _OnboardingTrialPaywallScreenState
         clipBehavior: Clip.none,
         children: [
           Container(
-            padding: const EdgeInsets.all(14),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
             decoration: BoxDecoration(
               color: isSelected
                   ? const Color(0xFF06332B)
@@ -844,96 +828,105 @@ class _OnboardingTrialPaywallScreenState
                     ]
                   : null,
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
               children: [
-                if (subBadge != null) ...[
-                  Text(
-                    subBadge,
-                    style: TextStyle(
-                      color: isSelected ? const Color(0xFFFFDF7A) : Colors.white60,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
+                Container(
+                  width: 22,
+                  height: 22,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: isSelected
+                        ? const Color(0xFFFFDF7A)
+                        : Colors.transparent,
+                    border: Border.all(
+                      color: isSelected
+                          ? const Color(0xFFFFDF7A)
+                          : Colors.white38,
+                      width: 1.5,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                ],
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
+                  child: isSelected
+                      ? const Icon(
+                          Icons.check_rounded,
+                          size: 15,
+                          color: Color(0xFF032620),
+                        )
+                      : null,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
                         title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
-                          fontSize: 14,
+                          fontSize: 15,
                         ),
                       ),
-                    ),
-                    Container(
-                      width: 20,
-                      height: 20,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: isSelected
-                            ? const Color(0xFFFFDF7A)
-                            : Colors.transparent,
-                        border: Border.all(
-                          color: isSelected
-                              ? const Color(0xFFFFDF7A)
-                              : Colors.white38,
-                          width: 1.5,
-                        ),
-                      ),
-                      child: isSelected
-                          ? const Icon(
-                              Icons.check_rounded,
-                              size: 14,
-                              color: Color(0xFF032620),
-                            )
-                          : null,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  price,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 16,
-                  ),
-                ),
-                if (totalPrice != null) ...[
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      if (oldPrice != null) ...[
+                      if (subBadge != null) ...[
+                        const SizedBox(height: 3),
                         Text(
-                          oldPrice,
-                          style: const TextStyle(
-                            color: Colors.white38,
+                          subBadge,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: isSelected ? const Color(0xFFFFDF7A) : Colors.white60,
                             fontSize: 10.5,
-                            decoration: TextDecoration.lineThrough,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
-                        const SizedBox(width: 4),
                       ],
-                      Text(
-                        totalPrice,
-                        style: TextStyle(
-                          color: isSelected
-                              ? const Color(0xFFFFDF7A)
-                              : Colors.white70,
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
                     ],
                   ),
-                ],
+                ),
+                const SizedBox(width: 8),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      price,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 16,
+                      ),
+                    ),
+                    if (totalPrice != null) ...[
+                      const SizedBox(height: 3),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (oldPrice != null) ...[
+                            Text(
+                              oldPrice,
+                              style: const TextStyle(
+                                color: Colors.white38,
+                                fontSize: 10.5,
+                                decoration: TextDecoration.lineThrough,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                          ],
+                          Text(
+                            totalPrice,
+                            style: TextStyle(
+                              color: isSelected
+                                  ? const Color(0xFFFFDF7A)
+                                  : Colors.white70,
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ],
+                ),
               ],
             ),
           ),

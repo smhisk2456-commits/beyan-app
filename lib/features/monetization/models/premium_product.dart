@@ -38,7 +38,7 @@ extension PremiumTierExtension on PremiumTier {
       case PremiumTier.monthly:
         return '₺49,99 / ay';
       case PremiumTier.yearly:
-        return '₺249,99 / yıl';
+        return '₺299,99 / yıl';
       case PremiumTier.lifetime:
         return '₺499,99 (Tek Seferlik)';
     }
@@ -49,7 +49,7 @@ extension PremiumTierExtension on PremiumTier {
       case PremiumTier.monthly:
         return '';
       case PremiumTier.yearly:
-        return '%58 İNDİRİM';
+        return '%50 İNDİRİM';
       case PremiumTier.lifetime:
         return 'EN DEĞERLİ';
     }
@@ -60,7 +60,7 @@ extension PremiumTierExtension on PremiumTier {
       case PremiumTier.monthly:
         return 'İstediğiniz zaman iptal edebilirsiniz';
       case PremiumTier.yearly:
-        return 'Ayda yalnızca ~₺20,83 (3 Gün Ücretsiz Deneme)';
+        return 'Ayda yalnızca ₺25,00 (3 Gün Ücretsiz Deneme)';
       case PremiumTier.lifetime:
         return 'Bir kez ödeyin, sonsuza dek reklamsız kullanın';
     }

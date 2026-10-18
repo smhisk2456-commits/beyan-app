@@ -10,7 +10,7 @@ abstract class AppConstants {
   static const String defaultCityName = 'İstanbul';
 
   // ── Database ─────────────────────────────────────────────────
-  static const String databaseName = 'quran_v3.db';
+  static const String databaseName = 'quran_v4.db';
   static const String databaseAssetPath = 'assets/database/quran.db';
 
   // ── SharedPreferences Keys ───────────────────────────────────

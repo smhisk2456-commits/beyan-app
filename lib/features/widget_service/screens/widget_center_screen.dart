@@ -881,6 +881,8 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
             q.referenceAr == _appliedVerseRef);
         if (idx >= 0) {
           _quoteIndex = idx;
+          final currentLang = ref.read(appStringsProvider).language;
+          _appliedVerseRef = list[idx].getReference(currentLang);
         }
       }
 
@@ -1159,6 +1161,27 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
       return strings.fontAmiri;
     }
     return font;
+  }
+
+  String _getAppliedPrefix(AppLanguage lang) {
+    switch (lang) {
+      case AppLanguage.turkish:
+        return 'Uygulanan âyet';
+      case AppLanguage.french:
+        return 'Verset appliqué';
+      case AppLanguage.arabic:
+        return 'الآية المطبقة';
+      case AppLanguage.indonesian:
+        return 'Ayat yang diterapkan';
+      case AppLanguage.german:
+        return 'Angewandter Vers';
+      case AppLanguage.russian:
+        return 'Применённый аят';
+      case AppLanguage.urdu:
+        return 'لاگو شدہ آیت';
+      default:
+        return 'Applied verse';
+    }
   }
 
   void _showOptionSheet<T>({
@@ -2137,9 +2160,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                   _isPinned
                       ? '$pinnedNotice ${_appliedVerseRef ?? ""}'
                       : (_appliedVerseRef != null && _appliedVerseRef!.isNotEmpty
-                          ? (strings.language == AppLanguage.turkish
-                              ? 'Uygulanan âyet: $_appliedVerseRef • Dinamik döngü aktif'
-                              : 'Applied: $_appliedVerseRef • $rotatingNotice')
+                          ? '${_getAppliedPrefix(strings.language)} : $_appliedVerseRef • $rotatingNotice'
                           : rotatingNotice),
                   style: TextStyle(
                     color: (_isPinned || (_appliedVerseRef != null && _appliedVerseRef!.isNotEmpty))
