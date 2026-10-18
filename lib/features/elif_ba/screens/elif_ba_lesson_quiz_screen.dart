@@ -268,9 +268,21 @@ class _ElifBaLessonQuizScreenState extends ConsumerState<ElifBaLessonQuizScreen>
               ),
               const SizedBox(height: 20),
 
-              // Large Arabic Prompt Card (Tıklayınca hoca sesiyle okur)
+              // Large Arabic Prompt Card (Cevaplandıktan sonra dinlemeye açılır, kopyayı önler)
               InkWell(
                 onTap: () {
+                  if (!_hasAnswered) {
+                    HapticFeedback.selectionClick();
+                    ScaffoldMessenger.of(context).clearSnackBars();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Cevabı işaretledikten sonra doğru telaffuzu dinleyebilirsiniz.'),
+                        duration: Duration(milliseconds: 1400),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                    return;
+                  }
                   HapticFeedback.lightImpact();
                   _speakCurrentPrompt();
                 },
@@ -311,13 +323,15 @@ class _ElifBaLessonQuizScreenState extends ConsumerState<ElifBaLessonQuizScreen>
                         child: Container(
                           padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFFDF7A).withValues(alpha: 0.18),
+                            color: _hasAnswered
+                                ? const Color(0xFFFFDF7A).withValues(alpha: 0.25)
+                                : Colors.white12,
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(
-                            Icons.volume_up_rounded,
-                            size: 18,
-                            color: Color(0xFFFFDF7A),
+                          child: Icon(
+                            _hasAnswered ? Icons.volume_up_rounded : Icons.volume_off_rounded,
+                            size: 16,
+                            color: _hasAnswered ? const Color(0xFFFFDF7A) : Colors.white38,
                           ),
                         ),
                       ),

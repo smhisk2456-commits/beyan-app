@@ -1,6 +1,24 @@
 import UIKit
 import Flutter
 import UserNotifications
+#if canImport(ActivityKit)
+import ActivityKit
+#endif
+
+#if canImport(ActivityKit)
+struct BeyanPrayerAttributes: ActivityAttributes {
+    public struct ContentState: Codable, Hashable {
+        var prayerName: String
+        var prayerTime: String
+        var targetTimestamp: Double
+        var cityName: String
+        var isKerahat: Bool
+        var triggerMinutes: Int?
+    }
+
+    var title: String
+}
+#endif
 
 /// iOS ana AppDelegate.
 @UIApplicationMain
@@ -13,7 +31,133 @@ import UserNotifications
             UNUserNotificationCenter.current().delegate = self as UNUserNotificationCenterDelegate
         }
         GeneratedPluginRegistrant.register(with: self)
+
+        setupLiveActivityChannel()
+
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)
     }
-}
 
+    private func setupLiveActivityChannel() {
+        guard let controller = window?.rootViewController as? FlutterViewController else {
+            DispatchQueue.main.async { [weak self] in
+                self?.setupLiveActivityChannel()
+            }
+            return
+        }
+
+        let channel = FlutterMethodChannel(
+            name: "com.smhisk60.beyan/live_activity",
+            binaryMessenger: controller.binaryMessenger
+        )
+
+        channel.setMethodCallHandler { [weak self] (call: FlutterMethodCall, result: @escaping FlutterResult) in
+            self?.handleLiveActivityCall(call: call, result: result)
+        }
+    }
+
+    private func handleLiveActivityCall(call: FlutterMethodCall, result: @escaping FlutterResult) {
+        #if canImport(ActivityKit)
+        if #available(iOS 16.1, *) {
+            switch call.method {
+            case "startOrUpdateLiveActivity":
+                guard let args = call.arguments as? [String: Any],
+                      let prayerName = args["prayerName"] as? String,
+                      let prayerTime = args["prayerTime"] as? String,
+                      let targetTimestamp = args["targetTimestamp"] as? Double,
+                      let cityName = args["cityName"] as? String else {
+                    result(FlutterError(code: "INVALID_ARGS", message: "Missing required arguments", details: nil))
+                    return
+                }
+
+                let isKerahat = args["isKerahat"] as? Bool ?? false
+                let triggerMinutes = args["triggerMinutes"] as? Int ?? 45
+
+                let contentState = BeyanPrayerAttributes.ContentState(
+                    prayerName: prayerName,
+                    prayerTime: prayerTime,
+                    targetTimestamp: targetTimestamp,
+                    cityName: cityName,
+                    isKerahat: isKerahat,
+                    triggerMinutes: triggerMinutes
+                )
+
+                guard ActivityAuthorizationInfo().areActivitiesEnabled else {
+                    result(FlutterError(code: "DISABLED", message: "Live Activities are disabled by user or system", details: nil))
+                    return
+                }
+
+                let activities = Activity<BeyanPrayerAttributes>.activities
+
+                if let existing = activities.first {
+                    Task {
+                        if #available(iOS 16.2, *) {
+                            await existing.update(ActivityContent<BeyanPrayerAttributes.ContentState>(state: contentState, staleDate: nil))
+                        } else {
+                            await existing.update(using: contentState)
+                        }
+                    }
+
+                    if activities.count > 1 {
+                        for extra in activities.dropFirst() {
+                            Task {
+                                if #available(iOS 16.2, *) {
+                                    await extra.end(nil, dismissalPolicy: .immediate)
+                                } else {
+                                    await extra.end(dismissalPolicy: .immediate)
+                                }
+                            }
+                        }
+                    }
+                    result(true)
+                } else {
+                    let attributes = BeyanPrayerAttributes(title: "Beyân Namaz Vakti")
+                    do {
+                        if #available(iOS 16.2, *) {
+                            let content = ActivityContent(state: contentState, staleDate: nil)
+                            _ = try Activity<BeyanPrayerAttributes>.request(
+                                attributes: attributes,
+                                content: content,
+                                pushType: nil
+                            )
+                        } else {
+                            _ = try Activity<BeyanPrayerAttributes>.request(
+                                attributes: attributes,
+                                contentState: contentState,
+                                pushType: nil
+                            )
+                        }
+                        result(true)
+                    } catch {
+                        result(FlutterError(code: "REQUEST_FAILED", message: error.localizedDescription, details: nil))
+                    }
+                }
+
+            case "stopLiveActivity":
+                Task {
+                    for activity in Activity<BeyanPrayerAttributes>.activities {
+                        if #available(iOS 16.2, *) {
+                            await activity.end(nil, dismissalPolicy: .immediate)
+                        } else {
+                            await activity.end(dismissalPolicy: .immediate)
+                        }
+                    }
+                    result(true)
+                }
+
+            case "isLiveActivitySupported":
+                result(ActivityAuthorizationInfo().areActivitiesEnabled)
+
+            default:
+                result(FlutterMethodNotImplemented)
+            }
+            return
+        }
+        #endif
+
+        if call.method == "isLiveActivitySupported" {
+            result(false)
+        } else {
+            result(FlutterError(code: "UNSUPPORTED", message: "Live Activities require iOS 16.1+", details: nil))
+        }
+    }
+}

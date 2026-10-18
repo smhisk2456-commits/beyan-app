@@ -47,7 +47,7 @@ unless widget
   sources = %w[IslamicAppWidget.swift WidgetVerseData.swift].map { |f| group.new_reference(f) }
   group.new_reference('Info.plist')
   widget.add_file_references(sources)
-  widget.add_system_frameworks(%w[WidgetKit SwiftUI])
+  widget.add_system_frameworks(%w[WidgetKit SwiftUI ActivityKit])
 
   # Runner'a bağımlılık + .appex'i PlugIns klasörüne göm
   app_target.add_dependency(widget)

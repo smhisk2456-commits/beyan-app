@@ -9,6 +9,7 @@ import 'package:islamic_app/features/elif_ba/models/elif_ba_lesson.dart';
 import 'package:islamic_app/features/elif_ba/services/elif_ba_progress_service.dart';
 import 'package:islamic_app/features/elif_ba/services/elif_ba_audio_service.dart';
 import 'package:islamic_app/features/widget_service/screens/live_activity_settings_sheet.dart';
+import 'package:islamic_app/features/widget_service/services/live_activity_service.dart';
 
 import 'package:flutter/services.dart';
 
@@ -347,6 +348,16 @@ void main() {
         expect(opt.localizedSubtitle('tr').isNotEmpty, isTrue);
         expect(opt.localizedSubtitle('en').isNotEmpty, isTrue);
       }
+    });
+
+    test('LiveActivityService instance oluşturulabilmeli ve çağrılar güvenli çalışmalı', () async {
+      final service = LiveActivityService();
+      expect(service, isNotNull);
+      // Non-iOS host platformda çağrıların exception fırlatmadan güvenle dönmesi gerekir
+      await service.syncLiveActivity(customTriggerMinutes: -1);
+      await service.stopLiveActivity();
+      final supported = await service.isSupported();
+      expect(supported, isFalse); // Windows test ortamında false döner
     });
   });
 

@@ -7,6 +7,7 @@ import '../prayer_times/models/prayer_time_model.dart';
 import '../prayer_times/services/prayer_time_service.dart';
 import '../quran/repositories/quran_repository.dart';
 import '../notifications/models/short_verse_notification.dart';
+import 'services/live_activity_service.dart';
 import 'screens/widget_center_screen.dart';
 
 import '../../core/localization/app_strings.dart';
@@ -121,6 +122,12 @@ class WidgetService {
 
       // 4. Native widget'ları yenile
       await _refreshNativeWidgets();
+
+      // 5. iOS Canlı Etkinlik (Live Activity) & Dynamic Island senkronizasyonu
+      await LiveActivityService().syncLiveActivity(
+        dailyPrayerTimes: daily,
+        cityName: location.cityName,
+      );
     } catch (e) {
       _log('Widget güncelleme hatası: $e');
     }

@@ -1431,8 +1431,10 @@ struct BeyanLiveActivity: Widget {
             let triggerMinutes: Int = {
                 if let tm = context.state.triggerMinutes { return tm }
                 let defaults = UserDefaults(suiteName: "group.com.smhisk60.beyan") ?? UserDefaults.standard
-                let saved = defaults.integer(forKey: "live_activity_trigger_minutes")
-                return saved != 0 ? saved : 45
+                if defaults.object(forKey: "live_activity_trigger_minutes") != nil {
+                    return defaults.integer(forKey: "live_activity_trigger_minutes")
+                }
+                return 45
             }()
             let remainingSeconds = context.state.targetTimestamp - Date().timeIntervalSince1970
             let remainingMinutes = remainingSeconds / 60.0
@@ -1474,7 +1476,7 @@ struct BeyanLiveActivity: Widget {
                             .monospacedDigit()
                             .foregroundColor(Color(red: 1.0, green: 0.87, blue: 0.48))
 
-                        Text("kaldı")
+                        Text(remainingSeconds <= 0 ? "vakti girdi" : "kaldı")
                             .font(.system(size: 10, weight: .medium))
                             .foregroundColor(.white.opacity(0.6))
                     }
@@ -1504,8 +1506,10 @@ struct BeyanLiveActivity: Widget {
             let triggerMinutes: Int = {
                 if let tm = context.state.triggerMinutes { return tm }
                 let defaults = UserDefaults(suiteName: "group.com.smhisk60.beyan") ?? UserDefaults.standard
-                let saved = defaults.integer(forKey: "live_activity_trigger_minutes")
-                return saved != 0 ? saved : 45
+                if defaults.object(forKey: "live_activity_trigger_minutes") != nil {
+                    return defaults.integer(forKey: "live_activity_trigger_minutes")
+                }
+                return 45
             }()
             let remainingSeconds = context.state.targetTimestamp - Date().timeIntervalSince1970
             let remainingMinutes = remainingSeconds / 60.0

@@ -81,6 +81,12 @@
     <key>UIViewControllerBasedStatusBarAppearance</key>
     <false/>
 
+    <!-- Live Activities & Dynamic Island (ActivityKit) ───────────── -->
+    <key>NSSupportsLiveActivities</key>
+    <true/>
+    <key>NSSupportsLiveActivitiesFrequentUpdates</key>
+    <true/>
+
     <!-- Network & Media Transport Security ─────────────────────── -->
     <key>NSAppTransportSecurity</key>
     <dict>

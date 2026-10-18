@@ -5,6 +5,7 @@ import 'package:home_widget/home_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/localization/app_strings.dart';
 import '../../../core/theme/app_theme.dart';
+import '../services/live_activity_service.dart';
 import '../widget_service.dart';
 
 class LiveActivityOption {
@@ -100,6 +101,7 @@ class LiveActivityTriggerNotifier extends StateNotifier<int> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setInt(key, minutes);
       await HomeWidget.saveWidgetData<int>(key, minutes);
+      await LiveActivityService().syncLiveActivity(customTriggerMinutes: minutes);
       await WidgetService().updateAllWidgets();
     } catch (_) {}
   }
