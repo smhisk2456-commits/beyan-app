@@ -32,7 +32,7 @@ void main() {
 
       for (final lesson in elifBaLessonsList) {
         expect(lesson.title.isNotEmpty, isTrue);
-        expect(lesson.questions.isNotEmpty, isTrue);
+        expect(lesson.questions.length, greaterThanOrEqualTo(12), reason: '${lesson.title} en az 12 soru içermelidir');
         expect(lesson.xpReward, greaterThan(0));
 
         for (final q in lesson.questions) {
