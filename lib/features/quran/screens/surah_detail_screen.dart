@@ -299,6 +299,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
       if (next.currentSurahId == widget.surah.id && next.isPlaying) {
         final verses = versesAsync.valueOrNull;
         if (verses != null && verses.isNotEmpty) {
+          ref.read(quranAudioProvider.notifier).setVerses(verses);
           ref.read(quranAudioProvider.notifier).updateActiveVerseByProgress(verses);
 
           if (next.isLiveTrackingEnabled &&
@@ -412,6 +413,31 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                 );
               },
             ),
+            // Kelime Kelime Canlı Takip (Karaoke) Butonu
+            IconButton(
+              icon: Icon(
+                audioState.isWordHighlightEnabled ? Icons.spellcheck_rounded : Icons.font_download_outlined,
+                color: audioState.isWordHighlightEnabled ? const Color(0xFFFFDF7A) : Colors.white60,
+              ),
+              tooltip: audioState.isWordHighlightEnabled
+                  ? strings.wordByWordLiveTracking
+                  : '${strings.wordByWordLiveTracking} (${strings.cancel})',
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                ref.read(quranAudioProvider.notifier).toggleWordHighlight();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      !audioState.isWordHighlightEnabled
+                          ? '${strings.wordByWordLiveTracking} Aktif'
+                          : '${strings.wordByWordLiveTracking} Kapatıldı',
+                    ),
+                    duration: const Duration(seconds: 1),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              },
+            ),
             // Kâri Seçimi Butonu
             IconButton(
               icon: const Icon(Icons.person_outline_rounded, color: Color(0xFFFFDF7A)),
@@ -511,6 +537,15 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                   verse: verse,
                   isHighlighted: isTarget,
                   isPlaying: isPlayingVerse,
+                  onWordTap: (wordIdx) {
+                    HapticFeedback.lightImpact();
+                    ref.read(quranAudioProvider.notifier).seekToWord(
+                          verse.verseNumber,
+                          wordIdx,
+                          verses,
+                          surahName: widget.surah.localizedName(strings.language.code),
+                        );
+                  },
                   onTap: () {
                     HapticFeedback.lightImpact();
                     ref.read(quranAudioProvider.notifier).seekToVerse(

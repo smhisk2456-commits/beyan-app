@@ -48,7 +48,10 @@ class QuranAudioState {
   final Duration position;
   final Duration duration;
   final int? activeVerseNumber;
+  final int? activeWordIndex;
+  final double verseProgress;
   final bool isLiveTrackingEnabled;
+  final bool isWordHighlightEnabled;
 
   const QuranAudioState({
     this.isPlaying = false,
@@ -59,7 +62,10 @@ class QuranAudioState {
     this.position = Duration.zero,
     this.duration = Duration.zero,
     this.activeVerseNumber,
+    this.activeWordIndex,
+    this.verseProgress = 0.0,
     this.isLiveTrackingEnabled = true,
+    this.isWordHighlightEnabled = true,
   });
 
   QuranAudioState copyWith({
@@ -71,9 +77,13 @@ class QuranAudioState {
     Duration? position,
     Duration? duration,
     int? activeVerseNumber,
+    int? activeWordIndex,
+    double? verseProgress,
     bool? isLiveTrackingEnabled,
+    bool? isWordHighlightEnabled,
     bool clearCurrentSurah = false,
     bool clearActiveVerse = false,
+    bool clearActiveWord = false,
   }) {
     return QuranAudioState(
       isPlaying: isPlaying ?? this.isPlaying,
@@ -84,7 +94,10 @@ class QuranAudioState {
       position: position ?? this.position,
       duration: duration ?? this.duration,
       activeVerseNumber: clearActiveVerse ? null : (activeVerseNumber ?? this.activeVerseNumber),
+      activeWordIndex: clearActiveWord ? null : (activeWordIndex ?? this.activeWordIndex),
+      verseProgress: verseProgress ?? this.verseProgress,
       isLiveTrackingEnabled: isLiveTrackingEnabled ?? this.isLiveTrackingEnabled,
+      isWordHighlightEnabled: isWordHighlightEnabled ?? this.isWordHighlightEnabled,
     );
   }
 }
@@ -94,11 +107,19 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
   StreamSubscription? _posSub;
   StreamSubscription? _durSub;
   StreamSubscription? _stateSub;
+  List<Verse>? _currentVerses;
 
   QuranAudioNotifier()
       : super(QuranAudioState(selectedReciter: quranRecitersList.first)) {
     _initAudioSession();
     _initListeners();
+  }
+
+  void setVerses(List<Verse> verses) {
+    _currentVerses = verses;
+    if (state.isPlaying) {
+      updateActiveVerseByProgress(verses);
+    }
   }
 
   Future<void> _initAudioSession() async {
@@ -125,6 +146,9 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
   void _initListeners() {
     _posSub = _player.onPositionChanged.listen((pos) {
       state = state.copyWith(position: pos);
+      if (_currentVerses != null && _currentVerses!.isNotEmpty) {
+        updateActiveVerseByProgress(_currentVerses!);
+      }
     });
 
     _durSub = _player.onDurationChanged.listen((dur) {
@@ -183,6 +207,10 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
     state = state.copyWith(isLiveTrackingEnabled: !state.isLiveTrackingEnabled);
   }
 
+  void toggleWordHighlight() {
+    state = state.copyWith(isWordHighlightEnabled: !state.isWordHighlightEnabled);
+  }
+
   void updateActiveVerseByProgress(List<Verse> verses) {
     if (verses.isEmpty || state.duration.inMilliseconds <= 0) return;
 
@@ -198,21 +226,119 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
 
     if (totalWeight <= 0) return;
 
-    int accumulated = 0;
+    int accumulatedBefore = 0;
     int determinedVerse = verses.first.verseNumber;
+    int activeVerseIdx = 0;
+    int verseStartMs = 0;
+    int verseEndMs = totalMs;
 
     for (int i = 0; i < verses.length; i++) {
-      accumulated += weights[i];
-      final verseEndMs = ((accumulated / totalWeight) * totalMs).round();
-      if (currentMs <= verseEndMs || i == verses.length - 1) {
+      final prevAccum = accumulatedBefore;
+      accumulatedBefore += weights[i];
+      final currentVerseEndMs = ((accumulatedBefore / totalWeight) * totalMs).round();
+      if (currentMs <= currentVerseEndMs || i == verses.length - 1) {
         determinedVerse = verses[i].verseNumber;
+        activeVerseIdx = i;
+        verseStartMs = ((prevAccum / totalWeight) * totalMs).round();
+        verseEndMs = currentVerseEndMs;
         break;
       }
     }
 
-    if (state.activeVerseNumber != determinedVerse) {
-      state = state.copyWith(activeVerseNumber: determinedVerse);
+    // Ayet içi ilerleme oranı (0.0 - 1.0)
+    final verseDurationMs = verseEndMs - verseStartMs;
+    final verseElapsedMs = (currentMs - verseStartMs).clamp(0, verseDurationMs > 0 ? verseDurationMs : 1);
+    final progress = verseDurationMs > 0 ? (verseElapsedMs / verseDurationMs).clamp(0.0, 1.0) : 0.0;
+
+    // Kelime kelime takip (Canlı Karaoke)
+    int determinedWord = 0;
+    final activeVerse = verses[activeVerseIdx];
+    final words = activeVerse.arabicText.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+    if (words.isNotEmpty) {
+      final wordWeights = words.map((w) => w.length + 2).toList();
+      final totalWordWeight = wordWeights.fold<int>(0, (a, b) => a + b);
+      if (totalWordWeight > 0) {
+        final targetWordWeight = progress * totalWordWeight;
+        int wordAccum = 0;
+        for (int w = 0; w < words.length; w++) {
+          wordAccum += wordWeights[w];
+          if (wordAccum >= targetWordWeight || w == words.length - 1) {
+            determinedWord = w;
+            break;
+          }
+        }
+      }
     }
+
+    if (state.activeVerseNumber != determinedVerse ||
+        state.activeWordIndex != determinedWord ||
+        (state.verseProgress - progress).abs() > 0.03) {
+      state = state.copyWith(
+        activeVerseNumber: determinedVerse,
+        activeWordIndex: determinedWord,
+        verseProgress: progress,
+      );
+    }
+  }
+
+  Future<void> seekToWord(
+    int verseNumber,
+    int wordIndex,
+    List<Verse> verses, {
+    String? surahName,
+  }) async {
+    if (verses.isEmpty) return;
+
+    final surahId = verses.first.surahId;
+    if (state.currentSurahId != surahId || !state.isPlaying) {
+      await playSurah(surahId, surahName ?? 'Surah $surahId');
+    }
+
+    int totalWeight = 0;
+    final weights = verses.map((v) {
+      final w = v.arabicText.length + 10;
+      totalWeight += w;
+      return w;
+    }).toList();
+
+    int accumulatedBefore = 0;
+    int verseWeight = 0;
+    Verse? targetVerse;
+    for (int i = 0; i < verses.length; i++) {
+      if (verses[i].verseNumber == verseNumber) {
+        targetVerse = verses[i];
+        verseWeight = weights[i];
+        break;
+      }
+      accumulatedBefore += weights[i];
+    }
+
+    final totalMs = state.duration.inMilliseconds;
+    if (totalMs > 0 && totalWeight > 0 && targetVerse != null) {
+      final verseStartMs = ((accumulatedBefore / totalWeight) * totalMs).round();
+      final verseDurationMs = ((verseWeight / totalWeight) * totalMs).round();
+
+      final words = targetVerse.arabicText.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+      double wordFraction = 0.0;
+      if (words.isNotEmpty && wordIndex > 0) {
+        final clampedIndex = wordIndex.clamp(0, words.length - 1);
+        final wordWeights = words.map((w) => w.length + 2).toList();
+        final totalWordWeight = wordWeights.fold<int>(0, (a, b) => a + b);
+        int accumWordBefore = 0;
+        for (int w = 0; w < clampedIndex; w++) {
+          accumWordBefore += wordWeights[w];
+        }
+        wordFraction = totalWordWeight > 0 ? (accumWordBefore / totalWordWeight) : 0.0;
+      }
+
+      final targetMs = (verseStartMs + (wordFraction * verseDurationMs)).round();
+      await seek(Duration(milliseconds: targetMs.clamp(0, totalMs)));
+    }
+
+    state = state.copyWith(
+      activeVerseNumber: verseNumber,
+      activeWordIndex: wordIndex,
+    );
   }
 
   Future<void> seekToVerse(int verseNumber, List<Verse> verses, {String? surahName}) async {
@@ -243,11 +369,17 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
       final startMs = ((accumulatedBefore / totalWeight) * totalMs).round();
       await seek(Duration(milliseconds: startMs));
     }
-    state = state.copyWith(activeVerseNumber: verseNumber);
+    state = state.copyWith(
+      activeVerseNumber: verseNumber,
+      activeWordIndex: 0,
+      verseProgress: 0.0,
+    );
   }
 
   Future<void> seek(Duration position) async {
-    await _player.seek(position);
+    try {
+      await _player.seek(position).timeout(const Duration(milliseconds: 300));
+    } catch (_) {}
   }
 
   Future<void> seekRelative(int seconds) async {
@@ -262,10 +394,14 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
     try {
       await _player.stop();
     } catch (_) {}
+    _currentVerses = null;
     state = state.copyWith(
       isPlaying: false,
       isLoading: false,
       clearCurrentSurah: true,
+      clearActiveVerse: true,
+      clearActiveWord: true,
+      verseProgress: 0.0,
       position: Duration.zero,
       duration: Duration.zero,
     );

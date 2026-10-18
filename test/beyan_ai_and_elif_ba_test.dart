@@ -102,6 +102,60 @@ void main() {
 
       notifier.dispose();
     });
+
+    test('updateActiveVerseByProgress ve seekToWord kelime bazlı takibi doğru hesaplamalı', () async {
+      final notifier = QuranAudioNotifier();
+
+      final mockVerses = [
+        const Verse(
+          id: 1,
+          surahId: 1,
+          verseNumber: 1,
+          arabicText: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ',
+          turkishMeaning: 'Rahmân ve Rahîm olan Allah\'ın adıyla.',
+        ),
+        const Verse(
+          id: 2,
+          surahId: 1,
+          verseNumber: 2,
+          arabicText: 'الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ',
+          turkishMeaning: 'Hamd, âlemlerin Rabbi Allah\'a aittir.',
+        ),
+      ];
+
+      notifier.state = notifier.state.copyWith(
+        currentSurahId: 1,
+        isPlaying: true,
+        duration: const Duration(seconds: 40),
+        position: const Duration(milliseconds: 2000), // 1. ayetin ilk kelimesi
+      );
+
+      notifier.updateActiveVerseByProgress(mockVerses);
+      expect(notifier.state.activeVerseNumber, 1);
+      expect(notifier.state.activeWordIndex, 0); // "بِسْمِ"
+      expect(notifier.state.isWordHighlightEnabled, isTrue);
+
+      // Kelime vurgusunu açma/kapama
+      notifier.toggleWordHighlight();
+      expect(notifier.state.isWordHighlightEnabled, isFalse);
+      notifier.toggleWordHighlight();
+      expect(notifier.state.isWordHighlightEnabled, isTrue);
+
+      // 1. ayetin sonuna doğru ilerleyelim
+      notifier.state = notifier.state.copyWith(
+        position: const Duration(milliseconds: 14000),
+      );
+      notifier.updateActiveVerseByProgress(mockVerses);
+      expect(notifier.state.activeVerseNumber, 1);
+      expect(notifier.state.activeWordIndex, greaterThanOrEqualTo(2));
+
+      // Belirli bir kelimeye atlama (seekToWord)
+      await notifier.seekToWord(2, 1, mockVerses);
+      expect(notifier.state.activeVerseNumber, 2);
+      expect(notifier.state.activeWordIndex, 1);
+
+      notifier.dispose();
+    });
   });
 
   group('Beyân AI Manevi Rehber & Tefsir Asistanı Testleri', () {

@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 
@@ -8,7 +9,8 @@ import '../../../core/theme/app_theme.dart';
 /// - `textDirection: TextDirection.rtl` her seferinde unutulmaz.
 /// - Satır yüksekliği (height: 2.0) harekeler için standarttır.
 /// - Tema değişimine karşı izole edilmiştir.
-class ArabicText extends StatelessWidget {
+/// - Canlı tilavet sırasında kelime kelime öne çıkarma (karaoke) destekler.
+class ArabicText extends StatefulWidget {
   final String text;
   final double fontSize;
 
@@ -25,6 +27,12 @@ class ArabicText extends StatelessWidget {
   /// Besmele gibi özel büyük metinler için true.
   final bool isBismillah;
 
+  /// Canlı takipte öne çıkarılacak kelimenin 0 tabanlı indeksi.
+  final int? highlightedWordIndex;
+
+  /// Kelimeye tıklandığında tilavette o kelimeye atlama callback'i.
+  final void Function(int wordIndex)? onWordTap;
+
   const ArabicText(
     this.text, {
     super.key,
@@ -36,6 +44,8 @@ class ArabicText extends StatelessWidget {
     this.maxLines,
     this.overflow = TextOverflow.clip,
     this.isBismillah = false,
+    this.highlightedWordIndex,
+    this.onWordTap,
   });
 
   /// Sure başındaki besmele için fabrika constructor.
@@ -64,29 +74,129 @@ class ArabicText extends StatelessWidget {
   }
 
   @override
+  State<ArabicText> createState() => _ArabicTextState();
+}
+
+class _ArabicTextState extends State<ArabicText> {
+  List<TapGestureRecognizer>? _recognizers;
+  List<String> _words = const [];
+
+  @override
+  void initState() {
+    super.initState();
+    _initWordsAndRecognizers();
+  }
+
+  @override
+  void didUpdateWidget(covariant ArabicText oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.text != widget.text || (oldWidget.onWordTap == null) != (widget.onWordTap == null)) {
+      _disposeRecognizers();
+      _initWordsAndRecognizers();
+    }
+  }
+
+  void _disposeRecognizers() {
+    if (_recognizers != null) {
+      for (final r in _recognizers!) {
+        r.dispose();
+      }
+      _recognizers = null;
+    }
+  }
+
+  void _initWordsAndRecognizers() {
+    if (widget.highlightedWordIndex != null || widget.onWordTap != null) {
+      _words = widget.text.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+      if (widget.onWordTap != null) {
+        _recognizers = List.generate(_words.length, (i) {
+          return TapGestureRecognizer()..onTap = () => widget.onWordTap!(i);
+        });
+      }
+    } else {
+      _words = const [];
+    }
+  }
+
+  @override
+  void dispose() {
+    _disposeRecognizers();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final defaultColor = isDark
-        ? AppColors.arabicTextDark
-        : AppColors.arabicText;
+    final defaultColor = widget.color ?? (isDark ? AppColors.arabicTextDark : AppColors.arabicText);
 
-    return Text(
-      text,
-      // Arapça için RTL yönü zorunludur.
-      textDirection: TextDirection.rtl,
-      textAlign: textAlign,
-      maxLines: maxLines,
-      overflow: overflow,
-      style: TextStyle(
-        fontFamily: 'Amiri',
-        fontSize: fontSize,
-        // Geniş satır aralığı → hareke işaretleri birbirine girmez
-        height: lineHeight,
-        fontWeight: fontWeight,
-        color: color ?? defaultColor,
-        // Arapça için kern ve ligatures
-        letterSpacing: 0.3,
+    // Canlı kelime takibi veya kelime dokunma yoksa standart ve hafif Text döndür
+    if (widget.highlightedWordIndex == null && widget.onWordTap == null) {
+      return Text(
+        widget.text,
+        textDirection: TextDirection.rtl,
+        textAlign: widget.textAlign,
+        maxLines: widget.maxLines,
+        overflow: widget.overflow,
+        style: TextStyle(
+          fontFamily: 'Amiri',
+          fontSize: widget.fontSize,
+          height: widget.lineHeight,
+          fontWeight: widget.fontWeight,
+          color: defaultColor,
+          letterSpacing: 0.3,
+        ),
+      );
+    }
+
+    final words = _words.isNotEmpty
+        ? _words
+        : widget.text.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+
+    return Text.rich(
+      TextSpan(
+        children: [
+          for (int i = 0; i < words.length; i++) ...[
+            TextSpan(
+              text: words[i],
+              recognizer: _recognizers != null && i < _recognizers!.length ? _recognizers![i] : null,
+              style: TextStyle(
+                fontFamily: 'Amiri',
+                fontSize: widget.fontSize,
+                height: widget.lineHeight,
+                letterSpacing: 0.3,
+                fontWeight: (widget.highlightedWordIndex == i)
+                    ? FontWeight.bold
+                    : widget.fontWeight,
+                color: (widget.highlightedWordIndex == null)
+                    ? defaultColor
+                    : (widget.highlightedWordIndex == i
+                        ? (isDark ? const Color(0xFFFFDF7A) : const Color(0xFF012E2B))
+                        : (i < widget.highlightedWordIndex!
+                            ? (isDark ? Colors.white.withValues(alpha: 0.95) : const Color(0xFF0A443C))
+                            : (isDark ? Colors.white38 : Colors.black38))),
+                backgroundColor: (widget.highlightedWordIndex == i)
+                    ? (isDark
+                        ? const Color(0xFFD4AF37).withValues(alpha: 0.42)
+                        : const Color(0xFFFFDF7A).withValues(alpha: 0.75))
+                    : null,
+              ),
+            ),
+            if (i < words.length - 1)
+              TextSpan(
+                text: ' ',
+                style: TextStyle(
+                  fontFamily: 'Amiri',
+                  fontSize: widget.fontSize,
+                  height: widget.lineHeight,
+                ),
+              ),
+          ],
+        ],
       ),
+      textDirection: TextDirection.rtl,
+      textAlign: widget.textAlign,
+      maxLines: widget.maxLines,
+      overflow: widget.overflow,
     );
   }
 }

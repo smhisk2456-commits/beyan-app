@@ -5,6 +5,7 @@ import '../../../core/localization/app_strings.dart';
 import '../../quran/models/verse.dart';
 import '../../quran/widgets/arabic_text_widget.dart';
 import '../providers/quran_reading_providers.dart';
+import '../services/quran_audio_service.dart';
 
 /// Tek bir ayeti tam olarak gösteren lüks kart widget'ı.
 class VerseCard extends ConsumerWidget {
@@ -13,6 +14,7 @@ class VerseCard extends ConsumerWidget {
   final bool isHighlighted;
   final bool isPlaying;
   final VoidCallback? onTap;
+  final void Function(int wordIndex)? onWordTap;
 
   const VerseCard({
     super.key,
@@ -21,6 +23,7 @@ class VerseCard extends ConsumerWidget {
     this.isHighlighted = false,
     this.isPlaying = false,
     this.onTap,
+    this.onWordTap,
   });
 
   void _shareVerse(BuildContext context, AppStrings strings) {
@@ -53,6 +56,65 @@ class VerseCard extends ConsumerWidget {
     );
   }
 
+  Widget _buildTransliterationText(
+    BuildContext context,
+    bool isDark,
+    int? activeWordIndex,
+  ) {
+    final text = verse.transliteration;
+    if (text == null || text.isEmpty) return const SizedBox.shrink();
+
+    if (activeWordIndex == null) {
+      return Text(
+        text,
+        style: TextStyle(
+          fontSize: 14.0,
+          fontStyle: FontStyle.italic,
+          color: isDark ? const Color(0xFF80CBC4) : const Color(0xFF0A685A),
+          height: 1.55,
+        ),
+        textAlign: TextAlign.left,
+      );
+    }
+
+    final words = text.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+    final clampedIndex = activeWordIndex.clamp(0, words.length - 1);
+
+    return Text.rich(
+      TextSpan(
+        children: [
+          for (int i = 0; i < words.length; i++) ...[
+            TextSpan(
+              text: words[i],
+              style: TextStyle(
+                fontSize: 14.0,
+                fontStyle: FontStyle.italic,
+                height: 1.55,
+                fontWeight: i == clampedIndex ? FontWeight.bold : FontWeight.normal,
+                color: i == clampedIndex
+                    ? (isDark ? const Color(0xFFFFDF7A) : const Color(0xFF012E2B))
+                    : (i < clampedIndex
+                        ? (isDark ? const Color(0xFF80CBC4) : const Color(0xFF0A685A))
+                        : (isDark ? Colors.white30 : Colors.black26)),
+                backgroundColor: i == clampedIndex
+                    ? (isDark
+                        ? const Color(0xFFD4AF37).withValues(alpha: 0.35)
+                        : const Color(0xFFFFDF7A).withValues(alpha: 0.65))
+                    : null,
+              ),
+            ),
+            if (i < words.length - 1)
+              const TextSpan(
+                text: ' ',
+                style: TextStyle(fontSize: 14.0, height: 1.55),
+              ),
+          ],
+        ],
+      ),
+      textAlign: TextAlign.left,
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final strings = ref.watch(appStringsProvider);
@@ -62,6 +124,18 @@ class VerseCard extends ConsumerWidget {
     final lastRead = ref.watch(lastReadProvider);
     final isLastRead = lastRead?.surahId == verse.surahId && lastRead?.verseNumber == verse.verseNumber;
     final shouldHighlight = isLastRead || isHighlighted || isPlaying;
+
+    // Yalnızca bu ayet çalıyorsa kelime indeksini ve ilerlemeyi dinle (performans optimizasyonu)
+    final activeWordIndex = isPlaying
+        ? ref.watch(quranAudioProvider.select((s) =>
+            (s.activeVerseNumber == verse.verseNumber && s.isWordHighlightEnabled)
+                ? s.activeWordIndex
+                : null))
+        : null;
+    final verseProgress = isPlaying
+        ? ref.watch(quranAudioProvider.select((s) =>
+            s.activeVerseNumber == verse.verseNumber ? s.verseProgress : 0.0))
+        : 0.0;
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -123,7 +197,7 @@ class VerseCard extends ConsumerWidget {
                   ),
                   const SizedBox(width: 8),
 
-                  if (isPlaying)
+                  if (isPlaying) ...[
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       margin: const EdgeInsets.only(right: 6),
@@ -156,6 +230,35 @@ class VerseCard extends ConsumerWidget {
                         ],
                       ),
                     ),
+                    if (activeWordIndex != null)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                        margin: const EdgeInsets.only(right: 6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFD4AF37).withValues(alpha: 0.22),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: const Color(0xFFD4AF37).withValues(alpha: 0.6),
+                            width: 0.8,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.auto_stories_rounded, size: 11, color: Color(0xFFFFDF7A)),
+                            const SizedBox(width: 3.5),
+                            Text(
+                              strings.wordTrackingBadge,
+                              style: const TextStyle(
+                                fontSize: 9.2,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFFFFDF7A),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
 
                   if (isLastRead)
                     Container(
@@ -229,14 +332,32 @@ class VerseCard extends ConsumerWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 14),
 
-              // ── Arapça Metin ─────────────────────────────────
+              // Ayet İlerleme Çizgisi (Canlı Okunurken)
+              if (isPlaying) ...[
+                const SizedBox(height: 8),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(2),
+                  child: LinearProgressIndicator(
+                    value: verseProgress.clamp(0.0, 1.0),
+                    minHeight: 2.2,
+                    backgroundColor: isDark ? Colors.white10 : Colors.black12,
+                    valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFFFDF7A)),
+                  ),
+                ),
+                const SizedBox(height: 10),
+              ] else ...[
+                const SizedBox(height: 14),
+              ],
+
+              // ── Arapça Metin (Canlı Kelime Takibi & Dokun-Atla Destekli) ──
               ArabicText(
                 verse.arabicText,
                 fontSize: arabicFontSize,
                 lineHeight: 2.1,
                 textAlign: TextAlign.right,
+                highlightedWordIndex: activeWordIndex,
+                onWordTap: onWordTap,
               ),
               const SizedBox(height: 14),
 
@@ -248,18 +369,9 @@ class VerseCard extends ConsumerWidget {
               ),
               const SizedBox(height: 12),
 
-              // ── Türkçe Okunuş (Transliterasyon) ─────────────
+              // ── Türkçe Okunuş (Transliterasyon - Eşzamanlı Kelime Vurgulu) ─
               if (verse.transliteration != null && verse.transliteration!.isNotEmpty) ...[
-                Text(
-                  verse.transliteration!,
-                  style: TextStyle(
-                    fontSize: 14.0,
-                    fontStyle: FontStyle.italic,
-                    color: isDark ? const Color(0xFF80CBC4) : const Color(0xFF0A685A),
-                    height: 1.55,
-                  ),
-                  textAlign: TextAlign.left,
-                ),
+                _buildTransliterationText(context, isDark, activeWordIndex),
                 const SizedBox(height: 10),
               ],
 

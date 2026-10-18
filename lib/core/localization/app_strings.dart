@@ -1108,6 +1108,10 @@ class AppStrings {
   }
   String get seekBackward10s => _t('seekBackward10s', '10 Saniye Geri', 'Rewind 10 Seconds', 'رجوع ١٠ ثوانٍ');
   String get seekForward10s => _t('seekForward10s', '10 Saniye İleri', 'Forward 10 Seconds', 'تقديم ١٠ ثوانٍ');
+  String get wordTrackingBadge => _t('wordTrackingBadge', 'Kelime Takibi', 'Word Tracking', 'تتبع الكلمات');
+  String get wordByWordLiveTracking => _t('wordByWordLiveTracking', 'Kelime Kelime Canlı Takip', 'Word-by-Word Live Tracking', 'تتبع حي كلمة بكلمة');
+  String get wordByWordLiveTrackingDesc => _t('wordByWordLiveTrackingDesc', 'Tilavet okunurken eşzamanlı olarak okunan kelimeyi altın sarısı ışıltıyla takip eder', 'Highlights each recited word in glowing gold in real-time as the Qari recites', 'يبرز كل كلمة متلوة باللون الذهبي في الوقت الفعلي أثناء تلاوة القارئ');
+  String get tapToSeekWord => _t('tapToSeekWord', 'Kelimeye Dokunup Oraya Atla', 'Tap Word to Seek', 'المس الكلمة للانتقال إليها');
     String recitationOfSurah(String surah) {
     switch (language) {
       case AppLanguage.turkish:

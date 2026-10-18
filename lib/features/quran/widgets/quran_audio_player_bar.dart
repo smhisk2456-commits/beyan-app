@@ -62,7 +62,9 @@ class QuranAudioPlayerBar extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      strings.recitationOfSurah(audioState.currentSurahName ?? 'Surah'),
+                      audioState.activeVerseNumber != null
+                          ? '${strings.recitationOfSurah(audioState.currentSurahName ?? 'Surah')} • ${audioState.activeVerseNumber}. Âyet'
+                          : strings.recitationOfSurah(audioState.currentSurahName ?? 'Surah'),
                       style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
@@ -72,7 +74,9 @@ class QuranAudioPlayerBar extends ConsumerWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      audioState.selectedReciter.nameTr,
+                      audioState.activeWordIndex != null && audioState.isWordHighlightEnabled
+                          ? '${audioState.selectedReciter.nameTr} • ${strings.wordTrackingBadge}'
+                          : audioState.selectedReciter.nameTr,
                       style: const TextStyle(
                         fontSize: 11,
                         color: Colors.white70,
