@@ -73,12 +73,9 @@ class _RamadanSpecialOfferSheetState
     final strings = ref.watch(appStringsProvider);
     final isPremium = ref.watch(premiumProvider).isPremium;
 
-    // Fiyatı dinamik olarak StoreKit / Play Store ürün detaylarından al (yoksa varsayılan)
-    final lifetimeProduct = PremiumService.instance.products.cast<dynamic>().firstWhere(
-          (p) => p.id == PremiumTier.lifetime.productId,
-          orElse: () => null,
-        );
-    final priceStr = lifetimeProduct?.price ?? '₺599,99';
+    // Fiyat: Standart Ömür Boyu ₺499,99 -> %50 Ramazan İndirimi ile ₺249,99
+    const originalPriceStr = '₺499,99';
+    const discountedPriceStr = '₺249,99';
 
     return Container(
       constraints: BoxConstraints(
@@ -220,10 +217,10 @@ class _RamadanSpecialOfferSheetState
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: const Color(0xFFFFDF7A), width: 1.4),
                 ),
-                child: Row(
+                child: const Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Column(
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
@@ -245,16 +242,32 @@ class _RamadanSpecialOfferSheetState
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text(
-                          priceStr,
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w900,
-                            color: Colors.white,
-                          ),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              originalPriceStr,
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.white54,
+                                decoration: TextDecoration.lineThrough,
+                                decorationColor: Color(0xFFFF6B6B),
+                                decorationThickness: 2,
+                              ),
+                            ),
+                            SizedBox(width: 8),
+                            Text(
+                              discountedPriceStr,
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w900,
+                                color: Color(0xFFFFDF7A),
+                              ),
+                            ),
+                          ],
                         ),
-                        const Text(
-                          '%50 İndirim Uygulandı',
+                        Text(
+                          '%50 Ramazan İndirimi',
                           style: TextStyle(
                             fontSize: 11,
                             color: Color(0xFFFFDF7A),
@@ -321,7 +334,7 @@ class _RamadanSpecialOfferSheetState
                               ),
                             )
                           : const Text(
-                              'Hemen %50 İndirimle Sahip Ol ➔',
+                              'Hemen ₺249,99\'a Sahip Ol ➔',
                               style: TextStyle(
                                 color: Color(0xFF071F1B),
                                 fontSize: 16,

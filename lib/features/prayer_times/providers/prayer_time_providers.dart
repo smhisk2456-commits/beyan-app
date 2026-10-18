@@ -37,6 +37,15 @@ final dailyPrayerTimesProvider = FutureProvider<DailyPrayerTimes>((ref) async {
   final service = ref.watch(prayerTimeServiceProvider);
   // Konumu al (GPS veya İstanbul)
   final location = await ref.watch(locationProvider.future);
+
+  // Gece yarısı olunca yeni günün vakitlerini otomatik yeniden hesapla
+  final now = DateTime.now();
+  final tomorrowMidnight = DateTime(now.year, now.month, now.day + 1);
+  final timer = Timer(tomorrowMidnight.difference(now), () {
+    ref.invalidateSelf();
+  });
+  ref.onDispose(() => timer.cancel());
+
   // Diyanet metoduyla hesapla
   return service.calculatePrayerTimes(location: location);
 });

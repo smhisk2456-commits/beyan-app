@@ -1,5 +1,6 @@
 package com.example.islamic_app
 
+import android.view.WindowManager
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -13,8 +14,9 @@ import io.flutter.plugin.common.MethodChannel
  */
 class MainActivity : FlutterActivity() {
 
-    // Flutter → Android iletişim kanalı
-    private val CHANNEL = "com.example.islamic_app/widget"
+    // Flutter → Android iletişim kanalları
+    private val WIDGET_CHANNEL = "com.example.islamic_app/widget"
+    private val SCREEN_CHANNEL = "com.example.islamic_app/screen"
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -23,18 +25,35 @@ class MainActivity : FlutterActivity() {
         // Uygulama her açıldığında çağrılır; KEEP policy çift planlamayı önler
         WidgetUpdateWorker.schedule(applicationContext)
 
-        // ── Flutter MethodChannel ────────────────────────────────
-        // Flutter tarafından `updateWidget()` çağrıldığında
-        // Android widget'ını yeniler
+        // ── Flutter Widget MethodChannel ────────────────────────
         MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
-            CHANNEL
+            WIDGET_CHANNEL
         ).setMethodCallHandler { call, result ->
             when (call.method) {
                 "updateWidget" -> {
-                    // home_widget'ın triggerWidgetUpdate metoduyla hallediliyor
-                    // Bu kanal ek Android-özel güncellemeler için rezerve
                     result.success(null)
+                }
+                else -> result.notImplemented()
+            }
+        }
+
+        // ── Flutter Screen Awake MethodChannel ──────────────────
+        MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            SCREEN_CHANNEL
+        ).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "setKeepScreenOn" -> {
+                    val enabled = call.argument<Boolean>("enabled") ?: false
+                    runOnUiThread {
+                        if (enabled) {
+                            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                        } else {
+                            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                        }
+                    }
+                    result.success(true)
                 }
                 else -> result.notImplemented()
             }

@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/localization/app_strings.dart';
+import '../../../core/services/screen_awake_service.dart';
 import '../../prayer_times/models/prayer_time_model.dart';
 import '../../prayer_times/providers/prayer_time_providers.dart';
 
@@ -56,8 +57,10 @@ class BedsideClockScreen extends ConsumerStatefulWidget {
 class _BedsideClockScreenState extends ConsumerState<BedsideClockScreen> {
   late Timer _clockTimer;
   DateTime _now = DateTime.now();
+  int _lastDay = DateTime.now().day;
   bool _isDimmed = false;
   bool _isLandscape = false;
+  bool _keepScreenOn = true;
   StandByTheme _theme = StandByTheme.golden;
 
   @override
@@ -65,14 +68,26 @@ class _BedsideClockScreenState extends ConsumerState<BedsideClockScreen> {
     super.initState();
     // Tam ekran sürükleyici mod
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    // Ekranı her zaman açık tut
+    ScreenAwakeService.setKeepScreenOn(true);
     _clockTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (mounted) setState(() => _now = DateTime.now());
+      if (mounted) {
+        final now = DateTime.now();
+        // Gece yarısı gün değiştiğinde vakitleri anında tazele
+        if (now.day != _lastDay) {
+          _lastDay = now.day;
+          ref.invalidate(dailyPrayerTimesProvider);
+        }
+        setState(() => _now = now);
+      }
     });
   }
 
   @override
   void dispose() {
     _clockTimer.cancel();
+    // Ekran kilidini ve uyku zamanlayıcısını serbest bırak
+    ScreenAwakeService.setKeepScreenOn(false);
     // Normal dikey yöne ve sistem çubuklarına dön
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -186,6 +201,23 @@ class _BedsideClockScreenState extends ConsumerState<BedsideClockScreen> {
                       ),
                     ),
                     const Spacer(),
+
+                    // Ekranı Her Zaman Açık Tut Butonu
+                    IconButton(
+                      icon: Icon(
+                        _keepScreenOn ? Icons.wb_sunny_rounded : Icons.wb_sunny_outlined,
+                        color: _keepScreenOn ? primaryColor : Colors.white38,
+                        size: 22,
+                      ),
+                      tooltip: _keepScreenOn
+                          ? (strings.language == AppLanguage.turkish ? 'Ekranı Her Zaman Açık Tut (Açık)' : 'Keep Screen Awake (On)')
+                          : (strings.language == AppLanguage.turkish ? 'Ekranı Her Zaman Açık Tut (Kapalı)' : 'Keep Screen Awake (Off)'),
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        setState(() => _keepScreenOn = !_keepScreenOn);
+                        ScreenAwakeService.setKeepScreenOn(_keepScreenOn);
+                      },
+                    ),
 
                     // Renk Teması Değiştirici
                     IconButton(

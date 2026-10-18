@@ -175,14 +175,27 @@ class RamadanDashboardScreen extends ConsumerWidget {
                 child: Row(
                   children: [
                     Container(
-                      width: 42,
-                      height: 42,
-                      decoration: const BoxDecoration(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Color(0xFFFFDF7A),
+                        gradient: const RadialGradient(
+                          colors: [Color(0xFF0F5A47), Color(0xFF042620)],
+                        ),
+                        border: Border.all(color: const Color(0xFFFFDF7A), width: 1.5),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFFFFDF7A).withValues(alpha: 0.35),
+                            blurRadius: 10,
+                          ),
+                        ],
                       ),
                       child: const Center(
-                        child: Text('🌙', style: TextStyle(fontSize: 22)),
+                        child: Icon(
+                          Icons.nights_stay_rounded,
+                          color: Color(0xFFFFDF7A),
+                          size: 22,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),

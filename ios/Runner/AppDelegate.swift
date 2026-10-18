@@ -33,8 +33,36 @@ struct BeyanPrayerAttributes: ActivityAttributes {
         GeneratedPluginRegistrant.register(with: self)
 
         setupLiveActivityChannel()
+        setupScreenChannel()
 
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+    }
+
+    private func setupScreenChannel() {
+        guard let controller = window?.rootViewController as? FlutterViewController else {
+            DispatchQueue.main.async { [weak self] in
+                self?.setupScreenChannel()
+            }
+            return
+        }
+
+        let channel = FlutterMethodChannel(
+            name: "com.example.islamic_app/screen",
+            binaryMessenger: controller.binaryMessenger
+        )
+
+        channel.setMethodCallHandler { (call: FlutterMethodCall, result: @escaping FlutterResult) in
+            switch call.method {
+            case "setKeepScreenOn":
+                let enabled = (call.arguments as? [String: Any])?["enabled"] as? Bool ?? false
+                DispatchQueue.main.async {
+                    UIApplication.shared.isIdleTimerDisabled = enabled
+                }
+                result(true)
+            default:
+                result(FlutterMethodNotImplemented)
+            }
+        }
     }
 
     private func setupLiveActivityChannel() {
@@ -86,9 +114,10 @@ struct BeyanPrayerAttributes: ActivityAttributes {
                     return
                 }
 
-                let activities = Activity<BeyanPrayerAttributes>.activities
+                // Sadece etkin (.active) canlı etkinlikleri bul; sonlanmış (.ended) olanları filtrele
+                let activeActivities = Activity<BeyanPrayerAttributes>.activities.filter { $0.activityState == .active }
 
-                if let existing = activities.first {
+                if let existing = activeActivities.first {
                     Task {
                         if #available(iOS 16.2, *) {
                             await existing.update(ActivityContent<BeyanPrayerAttributes.ContentState>(state: contentState, staleDate: nil))
@@ -97,8 +126,8 @@ struct BeyanPrayerAttributes: ActivityAttributes {
                         }
                     }
 
-                    if activities.count > 1 {
-                        for extra in activities.dropFirst() {
+                    if activeActivities.count > 1 {
+                        for extra in activeActivities.dropFirst() {
                             Task {
                                 if #available(iOS 16.2, *) {
                                     await extra.end(nil, dismissalPolicy: .immediate)
