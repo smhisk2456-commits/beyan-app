@@ -73,10 +73,10 @@ void main() {
   });
 
   group('Paywall Pricing Options', () {
-    test('Yıllık plan ₺299,99 ve %50 indirimli olmalı', () {
+    test('Yıllık plan ₺299,99 ve %60 indirimli olmalı (aylık ₺19,99)', () {
       expect(PremiumTier.yearly.defaultPriceText, '₺299,99 / yıl');
-      expect(PremiumTier.yearly.badgeText, '%50 İNDİRİM');
-      expect(PremiumTier.yearly.subtitle, contains('₺25,00'));
+      expect(PremiumTier.yearly.badgeText, '%60 İNDİRİM');
+      expect(PremiumTier.yearly.subtitle, contains('₺19,99'));
     });
 
     test('Aylık ve Ömür Boyu planlar doğru tanımlı olmalı', () {

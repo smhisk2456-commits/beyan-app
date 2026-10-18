@@ -49,7 +49,7 @@ extension PremiumTierExtension on PremiumTier {
       case PremiumTier.monthly:
         return '';
       case PremiumTier.yearly:
-        return '%50 İNDİRİM';
+        return '%60 İNDİRİM';
       case PremiumTier.lifetime:
         return 'EN DEĞERLİ';
     }
@@ -60,7 +60,7 @@ extension PremiumTierExtension on PremiumTier {
       case PremiumTier.monthly:
         return 'İstediğiniz zaman iptal edebilirsiniz';
       case PremiumTier.yearly:
-        return 'Ayda yalnızca ₺25,00 (3 Gün Ücretsiz Deneme)';
+        return 'Ayda yalnızca ₺19,99 (3 Gün Ücretsiz Deneme)';
       case PremiumTier.lifetime:
         return 'Bir kez ödeyin, sonsuza dek reklamsız kullanın';
     }

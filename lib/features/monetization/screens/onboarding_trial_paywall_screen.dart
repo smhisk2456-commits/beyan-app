@@ -470,14 +470,14 @@ class _OnboardingTrialPaywallScreenState
 
                       // 2. Yıllık Kart (3 Gün Deneme - En Popüler)
                       _buildPricingCard(
-                        topBadge: '${strings.badgeMostPopular} • %50',
+                        topBadge: '${strings.badgeMostPopular} • %60',
                         subBadge: strings.badgeFreeTrial,
                         title: strings.planYearly,
                         price: _t(strings.language,
-                            tr: '₺25,00 /ay',
-                            en: '₺25.00 /mo',
-                            ar: '٢٥ ₺ /شهر',
-                            id: '₺25,00 /bln'),
+                            tr: '₺19,99 /ay',
+                            en: '₺19.99 /mo',
+                            ar: '١٩.٩٩ ₺ /شهر',
+                            id: '₺19,99 /bln'),
                         oldPrice: '₺599,88',
                         totalPrice: _t(strings.language,
                             tr: '₺299,99 /yıl',

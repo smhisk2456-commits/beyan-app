@@ -20,7 +20,7 @@ void main() {
       expect(PremiumTier.yearly.title, 'Yıllık Abonelik');
       expect(PremiumTier.lifetime.title, 'Ömür Boyu Hâmî');
 
-      expect(PremiumTier.yearly.badgeText, '%50 İNDİRİM');
+      expect(PremiumTier.yearly.badgeText, '%60 İNDİRİM');
       expect(PremiumTier.lifetime.badgeText, 'EN DEĞERLİ');
     });
 
