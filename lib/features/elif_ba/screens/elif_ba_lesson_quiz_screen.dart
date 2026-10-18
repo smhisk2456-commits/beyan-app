@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../models/elif_ba_lesson.dart';
 import '../services/elif_ba_progress_service.dart';
+import '../services/elif_ba_audio_service.dart';
 
 class ElifBaLessonQuizScreen extends ConsumerStatefulWidget {
   final ElifBaLesson lesson;
@@ -20,11 +21,34 @@ class _ElifBaLessonQuizScreenState extends ConsumerState<ElifBaLessonQuizScreen>
   bool _hasAnswered = false;
   int _correctAnswersCount = 0;
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _speakCurrentPrompt();
+    });
+  }
+
+  @override
+  void dispose() {
+    ElifBaAudioService().stop();
+    super.dispose();
+  }
+
+  void _speakCurrentPrompt() {
+    final question = widget.lesson.questions[_currentQuestionIndex];
+    ElifBaAudioService().speakArabic(question.arabicPrompt);
+  }
+
   void _handleOptionSelect(int index) {
     if (_hasAnswered) return;
 
     final question = widget.lesson.questions[_currentQuestionIndex];
     final isCorrect = index == question.correctOptionIndex;
+    final selectedOpt = question.options[index];
+
+    // Seçilen şıkkı seslendir
+    ElifBaAudioService().speakArabic(selectedOpt);
 
     setState(() {
       _selectedOptionIndex = index;
@@ -47,6 +71,9 @@ class _ElifBaLessonQuizScreenState extends ConsumerState<ElifBaLessonQuizScreen>
         _currentQuestionIndex++;
         _selectedOptionIndex = null;
         _hasAnswered = false;
+      });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _speakCurrentPrompt();
       });
     } else {
       _finishQuiz();
@@ -222,32 +249,60 @@ class _ElifBaLessonQuizScreenState extends ConsumerState<ElifBaLessonQuizScreen>
               ),
               const SizedBox(height: 20),
 
-              // Large Arabic Prompt Card
-              Container(
-                height: 120,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: isDark
-                        ? [const Color(0xFF04332B), const Color(0xFF07241E)]
-                        : [const Color(0xFFE8F5F1), Colors.white],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
-                    width: 1.5,
-                  ),
-                ),
-                child: Center(
-                  child: Text(
-                    question.arabicPrompt,
-                    style: const TextStyle(
-                      fontFamily: 'Amiri',
-                      fontSize: 54,
-                      color: Color(0xFFFFDF7A),
-                      fontWeight: FontWeight.bold,
+              // Large Arabic Prompt Card (Tıklayınca seslendirir)
+              InkWell(
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  _speakCurrentPrompt();
+                },
+                borderRadius: BorderRadius.circular(20),
+                child: Container(
+                  height: 120,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: isDark
+                          ? [const Color(0xFF04332B), const Color(0xFF07241E)]
+                          : [const Color(0xFFE8F5F1), Colors.white],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Center(
+                        child: Text(
+                          question.arabicPrompt,
+                          style: const TextStyle(
+                            fontFamily: 'Amiri',
+                            fontSize: 54,
+                            color: Color(0xFFFFDF7A),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        right: 12,
+                        top: 12,
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFDF7A).withValues(alpha: 0.18),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.volume_up_rounded,
+                            size: 18,
+                            color: Color(0xFFFFDF7A),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),

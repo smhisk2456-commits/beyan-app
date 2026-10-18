@@ -1418,6 +1418,7 @@ struct BeyanPrayerAttributes: ActivityAttributes {
         var targetTimestamp: Double
         var cityName: String
         var isKerahat: Bool
+        var triggerMinutes: Int?
     }
 
     var title: String
@@ -1427,6 +1428,16 @@ struct BeyanPrayerAttributes: ActivityAttributes {
 struct BeyanLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: BeyanPrayerAttributes.self) { context in
+            let triggerMinutes: Int = {
+                if let tm = context.state.triggerMinutes { return tm }
+                let defaults = UserDefaults(suiteName: "group.com.smhisk60.beyan") ?? UserDefaults.standard
+                let saved = defaults.integer(forKey: "live_activity_trigger_minutes")
+                return saved != 0 ? saved : 45
+            }()
+            let remainingSeconds = context.state.targetTimestamp - Date().timeIntervalSince1970
+            let remainingMinutes = remainingSeconds / 60.0
+            let isWithinWindow = (triggerMinutes == -1) || (triggerMinutes == 0 && remainingSeconds <= 0) || (remainingMinutes <= Double(triggerMinutes))
+
             // Lock Screen / StandBy Banner UI
             HStack(spacing: 12) {
                 ZStack {
@@ -1456,15 +1467,27 @@ struct BeyanLiveActivity: Widget {
 
                 Spacer()
 
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text(Date(timeIntervalSince1970: context.state.targetTimestamp), style: .timer)
-                        .font(.system(size: 16, weight: .bold, design: .rounded))
-                        .monospacedDigit()
-                        .foregroundColor(Color(red: 1.0, green: 0.87, blue: 0.48))
+                if isWithinWindow {
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Text(Date(timeIntervalSince1970: context.state.targetTimestamp), style: .timer)
+                            .font(.system(size: 16, weight: .bold, design: .rounded))
+                            .monospacedDigit()
+                            .foregroundColor(Color(red: 1.0, green: 0.87, blue: 0.48))
 
-                    Text("kaldı")
-                        .font(.system(size: 10, weight: .medium))
-                        .foregroundColor(.white.opacity(0.6))
+                        Text("kaldı")
+                            .font(.system(size: 10, weight: .medium))
+                            .foregroundColor(.white.opacity(0.6))
+                    }
+                } else {
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Text(context.state.prayerTime)
+                            .font(.system(size: 15, weight: .bold, design: .rounded))
+                            .foregroundColor(Color(red: 1.0, green: 0.87, blue: 0.48))
+
+                        Text("\(triggerMinutes) dk kala başlar")
+                            .font(.system(size: 9.5, weight: .medium))
+                            .foregroundColor(.white.opacity(0.6))
+                    }
                 }
             }
             .padding(.horizontal, 16)
@@ -1478,7 +1501,17 @@ struct BeyanLiveActivity: Widget {
             )
             .widgetURL(URL(string: "beyan://prayer"))
         } dynamicIsland: { context in
-            DynamicIsland {
+            let triggerMinutes: Int = {
+                if let tm = context.state.triggerMinutes { return tm }
+                let defaults = UserDefaults(suiteName: "group.com.smhisk60.beyan") ?? UserDefaults.standard
+                let saved = defaults.integer(forKey: "live_activity_trigger_minutes")
+                return saved != 0 ? saved : 45
+            }()
+            let remainingSeconds = context.state.targetTimestamp - Date().timeIntervalSince1970
+            let remainingMinutes = remainingSeconds / 60.0
+            let isWithinWindow = (triggerMinutes == -1) || (triggerMinutes == 0 && remainingSeconds <= 0) || (remainingMinutes <= Double(triggerMinutes))
+
+            return DynamicIsland {
                 // Expanded UI (Long press on island)
                 DynamicIslandExpandedRegion(.leading) {
                     HStack(spacing: 6) {
@@ -1491,11 +1524,18 @@ struct BeyanLiveActivity: Widget {
                     .padding(.leading, 8)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    Text(Date(timeIntervalSince1970: context.state.targetTimestamp), style: .timer)
-                        .font(.system(size: 14, weight: .bold))
-                        .monospacedDigit()
-                        .foregroundColor(Color(red: 1.0, green: 0.87, blue: 0.48))
-                        .padding(.trailing, 8)
+                    if isWithinWindow {
+                        Text(Date(timeIntervalSince1970: context.state.targetTimestamp), style: .timer)
+                            .font(.system(size: 14, weight: .bold))
+                            .monospacedDigit()
+                            .foregroundColor(Color(red: 1.0, green: 0.87, blue: 0.48))
+                            .padding(.trailing, 8)
+                    } else {
+                        Text("\(triggerMinutes) dk kala")
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundColor(Color(red: 1.0, green: 0.87, blue: 0.48))
+                            .padding(.trailing, 8)
+                    }
                 }
                 DynamicIslandExpandedRegion(.bottom) {
                     HStack {
@@ -1514,11 +1554,18 @@ struct BeyanLiveActivity: Widget {
                 Image(systemName: "moon.stars.fill")
                     .foregroundColor(Color(red: 1.0, green: 0.87, blue: 0.48))
             } compactTrailing: {
-                Text(Date(timeIntervalSince1970: context.state.targetTimestamp), style: .timer)
-                    .monospacedDigit()
-                    .font(.system(size: 11, weight: .bold))
-                    .foregroundColor(Color(red: 1.0, green: 0.87, blue: 0.48))
-                    .frame(width: 44)
+                if isWithinWindow {
+                    Text(Date(timeIntervalSince1970: context.state.targetTimestamp), style: .timer)
+                        .monospacedDigit()
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(Color(red: 1.0, green: 0.87, blue: 0.48))
+                        .frame(width: 44)
+                } else {
+                    Text(context.state.prayerTime)
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(Color(red: 1.0, green: 0.87, blue: 0.48))
+                        .frame(width: 44)
+                }
             } minimal: {
                 Image(systemName: "moon.stars.fill")
                     .foregroundColor(Color(red: 1.0, green: 0.87, blue: 0.48))

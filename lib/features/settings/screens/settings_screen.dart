@@ -16,6 +16,7 @@ import '../../prayer_times/screens/city_selector_sheet.dart';
 import '../../notifications/models/short_verse_notification.dart';
 import '../../verse_studio/screens/verse_card_studio_screen.dart';
 import '../../widget_service/screens/widget_settings_dialog.dart';
+import '../../widget_service/screens/live_activity_settings_sheet.dart';
 import '../../mosque_finder/screens/nearby_mosques_screen.dart';
 
 /// Lüks & Kapsamlı Ayarlar Ekranı (Settings Hub)
@@ -200,6 +201,18 @@ class SettingsScreen extends ConsumerWidget {
                 title: strings.lockscreenWidgetsTitle,
                 subtitle: strings.lockscreenWidgetsSubtitle,
                 onTap: () => showWidgetSettings(context),
+              ),
+              _buildDivider(),
+              _buildTile(
+                icon: Icons.apple_rounded,
+                iconColor: const Color(0xFFFFDF7A),
+                title: strings.language == AppLanguage.turkish
+                    ? 'Dynamic Island & Canlı Etkinlik'
+                    : 'Dynamic Island & Live Activity',
+                subtitle: strings.language == AppLanguage.turkish
+                    ? 'Görünme zamanını ve ada ayarlarını özelleştir'
+                    : 'Customize trigger time & island behavior',
+                onTap: () => LiveActivitySettingsSheet.show(context),
               ),
             ],
           ),

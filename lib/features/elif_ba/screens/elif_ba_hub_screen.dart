@@ -7,6 +7,7 @@ import '../../monetization/screens/premium_paywall_sheet.dart';
 import '../models/elif_ba_lesson.dart';
 import '../models/elif_ba_letter.dart';
 import '../services/elif_ba_progress_service.dart';
+import '../services/elif_ba_audio_service.dart';
 import 'elif_ba_lesson_quiz_screen.dart';
 
 class ElifBaHubScreen extends ConsumerStatefulWidget {
@@ -27,12 +28,15 @@ class _ElifBaHubScreenState extends ConsumerState<ElifBaHubScreen> with SingleTi
 
   @override
   void dispose() {
+    ElifBaAudioService().stop();
     _tabController.dispose();
     super.dispose();
   }
 
   void _showLetterDetail(BuildContext context, ElifBaLetter letter, bool isDark) {
     HapticFeedback.lightImpact();
+    ElifBaAudioService().speakArabic(letter.arabic);
+
     showModalBottomSheet(
       context: context,
       backgroundColor: isDark ? const Color(0xFF022B24) : Colors.white,
@@ -57,46 +61,75 @@ class _ElifBaHubScreenState extends ConsumerState<ElifBaHubScreen> with SingleTi
                 ),
                 const SizedBox(height: 16),
 
-                // Large Letter Display
-                Container(
-                  width: 90,
-                  height: 90,
-                  decoration: BoxDecoration(
-                    gradient: const RadialGradient(
-                      colors: [Color(0xFFFFDF7A), Color(0xFFB8860B)],
+                // Large Letter Display (Tap to speak)
+                InkWell(
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    ElifBaAudioService().speakArabic(letter.arabic);
+                  },
+                  borderRadius: BorderRadius.circular(45),
+                  child: Container(
+                    width: 90,
+                    height: 90,
+                    decoration: BoxDecoration(
+                      gradient: const RadialGradient(
+                        colors: [Color(0xFFFFDF7A), Color(0xFFB8860B)],
+                      ),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFFFFDF7A).withValues(alpha: 0.35),
+                          blurRadius: 14,
+                        ),
+                      ],
                     ),
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFFFFDF7A).withValues(alpha: 0.35),
-                        blurRadius: 14,
-                      ),
-                    ],
-                  ),
-                  child: Center(
-                    child: Text(
-                      letter.arabic,
-                      style: const TextStyle(
-                        fontFamily: 'Amiri',
-                        fontSize: 52,
-                        color: Color(0xFF01201B),
-                        fontWeight: FontWeight.bold,
-                      ),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Text(
+                          letter.arabic,
+                          style: const TextStyle(
+                            fontFamily: 'Amiri',
+                            fontSize: 52,
+                            color: Color(0xFF01201B),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const Positioned(
+                          right: 8,
+                          bottom: 8,
+                          child: Icon(Icons.volume_up_rounded, size: 16, color: Color(0xFF01201B)),
+                        ),
+                      ],
                     ),
                   ),
                 ),
                 const SizedBox(height: 12),
 
-                // Letter Name & Phonetic
-                Text(
-                  '${letter.nameTr}  (${letter.nameEn})',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: isDark ? Colors.white : Colors.black87,
-                  ),
+                // Letter Name & Phonetic with Speaker Button
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      '${letter.nameTr}  (${letter.nameEn})',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: const Icon(Icons.volume_up_rounded, color: Color(0xFFFFDF7A), size: 24),
+                      tooltip: 'Sesli Dinle',
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        ElifBaAudioService().speakArabic(letter.arabic);
+                      },
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 Text(
                   'Telaffuz: "${letter.phonetic}"',
                   style: const TextStyle(
@@ -107,7 +140,7 @@ class _ElifBaHubScreenState extends ConsumerState<ElifBaHubScreen> with SingleTi
                 ),
                 const SizedBox(height: 16),
 
-                // 4 Yazılış Formu (Yalın, Başta, Ortada, Sonda)
+                // 4 Yazılış Formu (Yalın, Başta, Ortada, Sonda - Her biri tıklanınca seslendirir)
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
@@ -168,23 +201,35 @@ class _ElifBaHubScreenState extends ConsumerState<ElifBaHubScreen> with SingleTi
                 ),
                 const SizedBox(height: 12),
 
-                // Kur'an'dan Örnek Kelime
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text('Örnek Kelime: ', style: TextStyle(color: Colors.white60, fontSize: 13)),
-                    Text(
-                      letter.exampleWord,
-                      style: const TextStyle(
-                        fontFamily: 'Amiri',
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFFFFDF7A),
-                      ),
+                // Kur'an'dan Örnek Kelime (Tıklanınca kelimeyi seslendirir)
+                InkWell(
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    ElifBaAudioService().speakArabic(letter.exampleWord);
+                  },
+                  borderRadius: BorderRadius.circular(12),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text('Örnek Kelime: ', style: TextStyle(color: Colors.white60, fontSize: 13)),
+                        Text(
+                          letter.exampleWord,
+                          style: const TextStyle(
+                            fontFamily: 'Amiri',
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFFFFDF7A),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        const Icon(Icons.volume_up_rounded, size: 16, color: Color(0xFFFFDF7A)),
+                        const SizedBox(width: 4),
+                        Text('(${letter.exampleMeaning})', style: const TextStyle(color: Colors.white70, fontSize: 13)),
+                      ],
                     ),
-                    const SizedBox(width: 6),
-                    Text('(${letter.exampleMeaning})', style: const TextStyle(color: Colors.white70, fontSize: 13)),
-                  ],
+                  ),
                 ),
               ],
             ),
@@ -195,23 +240,33 @@ class _ElifBaHubScreenState extends ConsumerState<ElifBaHubScreen> with SingleTi
   }
 
   Widget _buildFormItem(String label, String form) {
-    return Column(
-      children: [
-        Text(
-          form,
-          style: const TextStyle(
-            fontFamily: 'Amiri',
-            fontSize: 26,
-            color: Color(0xFFFFDF7A),
-            fontWeight: FontWeight.bold,
-          ),
+    return InkWell(
+      onTap: () {
+        HapticFeedback.lightImpact();
+        ElifBaAudioService().speakArabic(form);
+      },
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+        child: Column(
+          children: [
+            Text(
+              form,
+              style: const TextStyle(
+                fontFamily: 'Amiri',
+                fontSize: 26,
+                color: Color(0xFFFFDF7A),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: const TextStyle(fontSize: 11, color: Colors.white70),
+            ),
+          ],
         ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: const TextStyle(fontSize: 11, color: Colors.white70),
-        ),
-      ],
+      ),
     );
   }
 
@@ -543,32 +598,47 @@ class _ElifBaHubScreenState extends ConsumerState<ElifBaHubScreen> with SingleTi
                 ),
               ],
             ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+            child: Stack(
               children: [
-                Text(
-                  letter.arabic,
-                  style: const TextStyle(
-                    fontFamily: 'Amiri',
-                    fontSize: 34,
-                    color: Color(0xFFFFDF7A),
-                    fontWeight: FontWeight.bold,
+                Positioned(
+                  top: 6,
+                  right: 6,
+                  child: Icon(
+                    Icons.volume_up_rounded,
+                    size: 13,
+                    color: const Color(0xFFFFDF7A).withValues(alpha: 0.6),
                   ),
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  letter.nameTr,
-                  style: TextStyle(
-                    fontSize: 11.5,
-                    fontWeight: FontWeight.w600,
-                    color: isDark ? Colors.white : Colors.black87,
-                  ),
-                ),
-                Text(
-                  letter.phonetic,
-                  style: const TextStyle(
-                    fontSize: 10,
-                    color: Colors.white54,
+                Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        letter.arabic,
+                        style: const TextStyle(
+                          fontFamily: 'Amiri',
+                          fontSize: 34,
+                          color: Color(0xFFFFDF7A),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        letter.nameTr,
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? Colors.white : Colors.black87,
+                        ),
+                      ),
+                      Text(
+                        letter.phonetic,
+                        style: const TextStyle(
+                          fontSize: 10,
+                          color: Colors.white54,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],

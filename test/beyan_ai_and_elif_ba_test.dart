@@ -7,6 +7,8 @@ import 'package:islamic_app/features/ai_assistant/models/ai_message.dart';
 import 'package:islamic_app/features/elif_ba/models/elif_ba_letter.dart';
 import 'package:islamic_app/features/elif_ba/models/elif_ba_lesson.dart';
 import 'package:islamic_app/features/elif_ba/services/elif_ba_progress_service.dart';
+import 'package:islamic_app/features/elif_ba/services/elif_ba_audio_service.dart';
+import 'package:islamic_app/features/widget_service/screens/live_activity_settings_sheet.dart';
 
 import 'package:flutter/services.dart';
 
@@ -22,6 +24,11 @@ void main() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
       const MethodChannel('xyz.luan/audioplayers'),
+      (MethodCall methodCall) async => 1,
+    );
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+      const MethodChannel('flutter_tts'),
       (MethodCall methodCall) async => 1,
     );
   });
@@ -204,6 +211,48 @@ void main() {
       await notifier.completeLesson('lesson_2_harekeler', 70);
       expect(notifier.state.totalXp, 120);
       expect(notifier.state.completedLessonIds.length, 2);
+    });
+  });
+
+  group('Apple Ekosistemi & Canlı Etkinlik (Live Activity) Zamanlama Testleri', () {
+    setUp(() {
+      SharedPreferences.setMockInitialValues({});
+    });
+
+    test('LiveActivityTriggerNotifier varsayılan 45 dk olmalı ve seçilen süreyi kaydetmeli', () async {
+      final notifier = LiveActivityTriggerNotifier();
+      expect(notifier.state, 45);
+
+      await notifier.setTriggerMinutes(60);
+      expect(notifier.state, 60);
+
+      await notifier.setTriggerMinutes(-1); // Sürekli
+      expect(notifier.state, -1);
+    });
+
+    test('liveActivityOptions tüm temel zamanlama seçeneklerini barındırmalı', () {
+      expect(liveActivityOptions.length, 6);
+      final minutesList = liveActivityOptions.map((o) => o.minutes).toList();
+      expect(minutesList, containsAll([-1, 60, 45, 30, 15, 0]));
+
+      for (final opt in liveActivityOptions) {
+        expect(opt.localizedTitle('tr').isNotEmpty, isTrue);
+        expect(opt.localizedTitle('en').isNotEmpty, isTrue);
+        expect(opt.localizedSubtitle('tr').isNotEmpty, isTrue);
+        expect(opt.localizedSubtitle('en').isNotEmpty, isTrue);
+      }
+    });
+  });
+
+  group('Sesli Elif-Bâ Telaffuz ve TTS Testleri', () {
+    test('ElifBaAudioService speakArabic ve stop metotları hatasız çalışmalı', () async {
+      final audioService = ElifBaAudioService();
+      expect(audioService.isPlaying, isFalse);
+
+      await audioService.speakArabic('ب');
+      await audioService.speakArabic('بَيْت');
+      await audioService.stop();
+      expect(audioService.isPlaying, isFalse);
     });
   });
 }

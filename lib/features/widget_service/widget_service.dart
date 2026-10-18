@@ -159,6 +159,10 @@ class WidgetService {
     await HomeWidget.saveWidgetData<String>('widget_active_category', activeCat);
     await HomeWidget.saveWidgetData<String>('widget_refresh_interval', refreshInterval);
 
+    // Live Activity & Dynamic Island tetiklenme süresi (dk)
+    final triggerMinutes = prefs.getInt('live_activity_trigger_minutes') ?? 45;
+    await HomeWidget.saveWidgetData<int>('live_activity_trigger_minutes', triggerMinutes);
+
     // Kilit ekranına uygulanan / sabitlenen özel ayet durumu
     final isPinned = prefs.getBool('widget_is_pinned') ?? false;
     var appliedRef = prefs.getString('widget_applied_verse_ref') ?? '';
