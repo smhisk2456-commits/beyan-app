@@ -74,6 +74,7 @@ flutter:
     - assets/images/
     - assets/images/wallpapers/
     - assets/audio/
+    - assets/audio/letters/
 
   fonts:
     # Amiri – Arapça metinler için özel tipografi

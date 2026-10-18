@@ -25,7 +25,10 @@ class _ElifBaLessonQuizScreenState extends ConsumerState<ElifBaLessonQuizScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _speakCurrentPrompt();
+      final question = widget.lesson.questions[_currentQuestionIndex];
+      if (question.autoPlayAudio) {
+        _speakCurrentPrompt();
+      }
     });
   }
 
@@ -37,7 +40,12 @@ class _ElifBaLessonQuizScreenState extends ConsumerState<ElifBaLessonQuizScreen>
 
   void _speakCurrentPrompt() {
     final question = widget.lesson.questions[_currentQuestionIndex];
-    ElifBaAudioService().speakArabic(question.arabicPrompt);
+    final target = (question.audioTarget != null && question.audioTarget!.isNotEmpty)
+        ? question.audioTarget!
+        : question.arabicPrompt;
+    if (target.isNotEmpty) {
+      ElifBaAudioService().speakArabic(target);
+    }
   }
 
   void _handleOptionSelect(int index) {
@@ -47,8 +55,15 @@ class _ElifBaLessonQuizScreenState extends ConsumerState<ElifBaLessonQuizScreen>
     final isCorrect = index == question.correctOptionIndex;
     final selectedOpt = question.options[index];
 
-    // Seçilen şıkkı seslendir
-    ElifBaAudioService().speakArabic(selectedOpt);
+    // Doğru ya da seçilen soru harfini hoca sesiyle dinlet
+    final target = (question.audioTarget != null && question.audioTarget!.isNotEmpty)
+        ? question.audioTarget!
+        : question.arabicPrompt;
+    if (target.isNotEmpty) {
+      ElifBaAudioService().speakArabic(target);
+    } else if (RegExp(r'[\u0600-\u06FF]').hasMatch(selectedOpt)) {
+      ElifBaAudioService().speakArabic(selectedOpt);
+    }
 
     setState(() {
       _selectedOptionIndex = index;
@@ -73,7 +88,10 @@ class _ElifBaLessonQuizScreenState extends ConsumerState<ElifBaLessonQuizScreen>
         _hasAnswered = false;
       });
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _speakCurrentPrompt();
+        final nextQuestion = widget.lesson.questions[_currentQuestionIndex];
+        if (nextQuestion.autoPlayAudio) {
+          _speakCurrentPrompt();
+        }
       });
     } else {
       _finishQuiz();
@@ -148,18 +166,19 @@ class _ElifBaLessonQuizScreenState extends ConsumerState<ElifBaLessonQuizScreen>
           Center(
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFD4AF37),
+                backgroundColor: const Color(0xFFFFDF7A),
                 foregroundColor: const Color(0xFF01201B),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
               ),
               onPressed: () {
-                Navigator.pop(ctx); // Close dialog
-                Navigator.pop(context); // Exit quiz
+                Navigator.pop(ctx); // Dialogu kapat
+                Navigator.pop(context); // Hub ekranına dön
               },
-              child: const Text('Harika!', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+              child: const Text('Devam Et', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             ),
           ),
+          const SizedBox(height: 8),
         ],
       ),
     );
@@ -173,9 +192,9 @@ class _ElifBaLessonQuizScreenState extends ConsumerState<ElifBaLessonQuizScreen>
     final isCorrect = _selectedOptionIndex == question.correctOptionIndex;
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF021B16) : const Color(0xFFF4F8F6),
+      backgroundColor: isDark ? const Color(0xFF01201B) : const Color(0xFFF6FAF8),
       appBar: AppBar(
-        backgroundColor: isDark ? const Color(0xFF012720) : AppColors.teal,
+        backgroundColor: isDark ? const Color(0xFF01201B) : AppColors.teal,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.close_rounded, color: Colors.white),
@@ -249,7 +268,7 @@ class _ElifBaLessonQuizScreenState extends ConsumerState<ElifBaLessonQuizScreen>
               ),
               const SizedBox(height: 20),
 
-              // Large Arabic Prompt Card (Tıklayınca seslendirir)
+              // Large Arabic Prompt Card (Tıklayınca hoca sesiyle okur)
               InkWell(
                 onTap: () {
                   HapticFeedback.lightImpact();
@@ -341,7 +360,10 @@ class _ElifBaLessonQuizScreenState extends ConsumerState<ElifBaLessonQuizScreen>
                         decoration: BoxDecoration(
                           color: cardBgColor,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: cardBorderColor, width: isSelected || (_hasAnswered && isOptionCorrect) ? 2 : 1),
+                          border: Border.all(
+                            color: cardBorderColor,
+                            width: isSelected || (_hasAnswered && isOptionCorrect) ? 2 : 1,
+                          ),
                         ),
                         child: Row(
                           children: [
@@ -388,7 +410,7 @@ class _ElifBaLessonQuizScreenState extends ConsumerState<ElifBaLessonQuizScreen>
               // Feedback & Next Button
               if (_hasAnswered) ...[
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   margin: const EdgeInsets.only(bottom: 12),
                   decoration: BoxDecoration(
                     color: isCorrect
@@ -404,7 +426,7 @@ class _ElifBaLessonQuizScreenState extends ConsumerState<ElifBaLessonQuizScreen>
                       Icon(
                         isCorrect ? Icons.check_circle_rounded : Icons.info_outline_rounded,
                         color: isCorrect ? Colors.greenAccent : Colors.orangeAccent,
-                        size: 20,
+                        size: 22,
                       ),
                       const SizedBox(width: 8),
                       Expanded(
@@ -415,6 +437,14 @@ class _ElifBaLessonQuizScreenState extends ConsumerState<ElifBaLessonQuizScreen>
                             color: isDark ? Colors.white : Colors.black87,
                           ),
                         ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.volume_up_rounded, color: Color(0xFFFFDF7A), size: 22),
+                        tooltip: 'Tekrar Dinle',
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+                          _speakCurrentPrompt();
+                        },
                       ),
                     ],
                   ),

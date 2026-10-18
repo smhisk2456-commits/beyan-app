@@ -35,7 +35,7 @@ class _ElifBaHubScreenState extends ConsumerState<ElifBaHubScreen> with SingleTi
 
   void _showLetterDetail(BuildContext context, ElifBaLetter letter, bool isDark) {
     HapticFeedback.lightImpact();
-    ElifBaAudioService().speakArabic(letter.arabic);
+    ElifBaAudioService().playLetter(letter.id);
 
     showModalBottomSheet(
       context: context,
@@ -65,7 +65,7 @@ class _ElifBaHubScreenState extends ConsumerState<ElifBaHubScreen> with SingleTi
                 InkWell(
                   onTap: () {
                     HapticFeedback.lightImpact();
-                    ElifBaAudioService().speakArabic(letter.arabic);
+                    ElifBaAudioService().playLetter(letter.id);
                   },
                   borderRadius: BorderRadius.circular(45),
                   child: Container(
@@ -124,7 +124,7 @@ class _ElifBaHubScreenState extends ConsumerState<ElifBaHubScreen> with SingleTi
                       tooltip: 'Sesli Dinle',
                       onPressed: () {
                         HapticFeedback.lightImpact();
-                        ElifBaAudioService().speakArabic(letter.arabic);
+                        ElifBaAudioService().playLetter(letter.id);
                       },
                     ),
                   ],
@@ -153,10 +153,10 @@ class _ElifBaHubScreenState extends ConsumerState<ElifBaHubScreen> with SingleTi
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _buildFormItem('Yalın', letter.isolated),
-                      _buildFormItem('Başta', letter.initial),
-                      _buildFormItem('Ortada', letter.medial),
-                      _buildFormItem('Sonda', letter.finalForm),
+                      _buildFormItem('Yalın', letter.isolated, letter.id),
+                      _buildFormItem('Başta', letter.initial, letter.id),
+                      _buildFormItem('Ortada', letter.medial, letter.id),
+                      _buildFormItem('Sonda', letter.finalForm, letter.id),
                     ],
                   ),
                 ),
@@ -239,11 +239,11 @@ class _ElifBaHubScreenState extends ConsumerState<ElifBaHubScreen> with SingleTi
     );
   }
 
-  Widget _buildFormItem(String label, String form) {
+  Widget _buildFormItem(String label, String form, int letterId) {
     return InkWell(
       onTap: () {
         HapticFeedback.lightImpact();
-        ElifBaAudioService().speakArabic(form);
+        ElifBaAudioService().playLetter(letterId);
       },
       borderRadius: BorderRadius.circular(12),
       child: Padding(
