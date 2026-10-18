@@ -201,6 +201,58 @@ void main() {
       final premiumQuota = await notifier.getRemainingQuota(true);
       expect(premiumQuota, 999);
       expect(await notifier.canAskQuestion(true), isTrue);
+
+      notifier.dispose();
+    });
+
+    test('AiAssistantNotifier dinler tarihi ve fıkıh sorularına doğru ve referanslı cevaplar vermeli', () async {
+      final notifier = AiAssistantNotifier();
+
+      // Diğer dinler / Dinler tarihi sorusu
+      final res1 = await notifier.askQuestion('Hristiyanlık ve Yahudilik hakkında bilgi verir misin?', isPremium: true);
+      expect(res1, isTrue);
+      final lastMsg1 = notifier.state.messages.last;
+      expect(lastMsg1.isUser, isFalse);
+      expect(lastMsg1.text.contains('Hristiyanlık'), isTrue);
+      expect(lastMsg1.text.contains('Âl-i İmrân'), isTrue);
+      expect(lastMsg1.references.isNotEmpty, isTrue);
+
+      // Abdest ve temizlik fıkhı sorusu
+      final res2 = await notifier.askQuestion('Abdest nasıl alınır ve farzları nelerdir?', isPremium: true);
+      expect(res2, isTrue);
+      final lastMsg2 = notifier.state.messages.last;
+      expect(lastMsg2.text.contains('4 Farz'), isTrue);
+      expect(lastMsg2.references.any((r) => r.contains('Mâide')), isTrue);
+
+      // Zekat ve nisap miktarı sorusu
+      final res3 = await notifier.askQuestion('Zekat kimlere verilir ve nisap nedir?', isPremium: true);
+      expect(res3, isTrue);
+      final lastMsg3 = notifier.state.messages.last;
+      expect(lastMsg3.text.contains('80.18 gram'), isTrue);
+      expect(lastMsg3.references.any((r) => r.contains('Tevbe')), isTrue);
+
+      notifier.dispose();
+    });
+
+    test('Gemini API key yönetimi ve özel anahtarla sınırsız kullanım çalışmalı', () async {
+      final notifier = AiAssistantNotifier();
+
+      expect(notifier.state.hasCustomApiKey, isFalse);
+
+      await notifier.setGeminiApiKey('AIzaSyDummyKeyForTest123');
+      expect(notifier.state.hasCustomApiKey, isTrue);
+      expect(notifier.state.geminiApiKey, 'AIzaSyDummyKeyForTest123');
+
+      // Özel API key varken ücretsiz kullanıcı olsa bile soru sorabilmeli
+      expect(await notifier.canAskQuestion(false), isTrue);
+      expect(await notifier.getRemainingQuota(false), 999);
+
+      // Anahtarı kaldırma
+      await notifier.setGeminiApiKey(null);
+      expect(notifier.state.hasCustomApiKey, isFalse);
+      expect(notifier.state.geminiApiKey, isNull);
+
+      notifier.dispose();
     });
   });
 

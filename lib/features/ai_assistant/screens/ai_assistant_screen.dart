@@ -205,6 +205,14 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
         ),
         actions: [
           IconButton(
+            icon: Icon(
+              aiState.hasCustomApiKey ? Icons.auto_awesome : Icons.tune_rounded,
+              color: const Color(0xFFFFDF7A),
+            ),
+            tooltip: 'Yapay Zeka & Gemini Ayarları',
+            onPressed: () => _showAiSettingsSheet(context),
+          ),
+          IconButton(
             icon: const Icon(Icons.stars_rounded, color: Color(0xFFFFDF7A)),
             tooltip: 'Beyân Premium',
             onPressed: () => PremiumPaywallSheet.show(context),
@@ -214,7 +222,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
       body: Column(
         children: [
           // ── Quota & Status Banner ────────────────────────
-          _buildQuotaBanner(isPremium, aiState.remainingQuestions),
+          _buildQuotaBanner(isPremium, aiState.remainingQuestions, aiState.hasCustomApiKey),
 
           // ── Mesaj Akışı ──────────────────────────────────
           Expanded(
@@ -240,7 +248,31 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
     );
   }
 
-  Widget _buildQuotaBanner(bool isPremium, int remaining) {
+  Widget _buildQuotaBanner(bool isPremium, int remaining, bool hasCustomApiKey) {
+    if (hasCustomApiKey) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        color: const Color(0xFF0F3A30),
+        child: const Row(
+          children: [
+            Icon(Icons.auto_awesome, color: Color(0xFFFFDF7A), size: 16),
+            SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Google Gemini 1.5 Flash Aktif • Sınırsız Canlı Yapay Zeka Sohbeti',
+                style: TextStyle(
+                  color: Color(0xFFFFDF7A),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     if (isPremium) {
       return Container(
         width: double.infinity,
@@ -304,6 +336,182 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showAiSettingsSheet(BuildContext context) {
+    final aiState = ref.read(aiAssistantProvider);
+    final keyController = TextEditingController(text: aiState.geminiApiKey ?? '');
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: const Color(0xFF022B24),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 20,
+            right: 20,
+            top: 20,
+            bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.white24,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Color(0xFFD4AF37),
+                    ),
+                    child: const Icon(Icons.psychology_rounded, color: Color(0xFF01201B), size: 20),
+                  ),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Yapay Zeka & Bilgi Motoru',
+                          style: TextStyle(color: Color(0xFFFFDF7A), fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          'İslami İlimler ve Canlı Model Tercihleri',
+                          style: TextStyle(color: Colors.white70, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 18),
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.06),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.white12),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          aiState.hasCustomApiKey ? Icons.cloud_done_rounded : Icons.offline_pin_rounded,
+                          color: const Color(0xFFFFDF7A),
+                          size: 18,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            aiState.hasCustomApiKey
+                                ? 'Google Gemini 1.5 Flash (Canlı Çevrimiçi Mod)'
+                                : 'Beyân İslami İlimler Motoru (Dahili & Çevrimdışı)',
+                            style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      aiState.hasCustomApiKey
+                          ? 'Kişisel API anahtarınız aktif. Her türlü dini ve felsefi soruya canlı Gemini yapay zekası yanıt vermektedir.'
+                          : 'Kur\'an, Hadis, Fıkıh, İman, İbadetler ve Dinler Tarihi (Hristiyanlık, Yahudilik vb.) konularında kapsamlı yerleşik kütüphanemiz kullanılır.',
+                      style: const TextStyle(color: Colors.white70, fontSize: 11.5, height: 1.4),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Google Gemini API Anahtarı (Opsiyonel):',
+                style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 6),
+              TextField(
+                controller: keyController,
+                obscureText: true,
+                style: const TextStyle(color: Colors.white, fontSize: 13),
+                decoration: InputDecoration(
+                  hintText: 'AIzaSy...',
+                  hintStyle: const TextStyle(color: Colors.white30, fontSize: 12),
+                  filled: true,
+                  fillColor: const Color(0xFF01201B),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Color(0xFFD4AF37)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Color(0xFFFFDF7A), width: 1.5),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                '💡 Google AI Studio\'dan (aistudio.google.com) tamamen ücretsiz alacağınız anahtarla sınırsız canlı sohbet edebilirsiniz.',
+                style: TextStyle(color: Colors.white54, fontSize: 11),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  if (aiState.hasCustomApiKey)
+                    Expanded(
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.redAccent,
+                          side: const BorderSide(color: Colors.redAccent),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        onPressed: () async {
+                          await ref.read(aiAssistantProvider.notifier).setGeminiApiKey(null);
+                          if (ctx.mounted) Navigator.pop(ctx);
+                        },
+                        child: const Text('Kaldır'),
+                      ),
+                    ),
+                  if (aiState.hasCustomApiKey) const SizedBox(width: 10),
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFD4AF37),
+                        foregroundColor: const Color(0xFF01201B),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      onPressed: () async {
+                        final key = keyController.text.trim();
+                        await ref.read(aiAssistantProvider.notifier).setGeminiApiKey(key.isEmpty ? null : key);
+                        if (ctx.mounted) Navigator.pop(ctx);
+                      },
+                      child: const Text('Kaydet ve Uygula', style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
