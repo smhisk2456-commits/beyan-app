@@ -423,37 +423,39 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
       color: const Color(0xFF032D26),
       child: Row(
         children: [
-          const Icon(Icons.auto_stories_rounded, color: Color(0xFFFFDF7A), size: 16),
+          const Icon(Icons.all_inclusive_rounded, color: Color(0xFFFFDF7A), size: 18),
           const SizedBox(width: 8),
-          Expanded(
+          const Expanded(
             child: Text(
-              'Kalan Ücretsiz Soru: $remaining / 3',
-              style: const TextStyle(color: Colors.white, fontSize: 12),
+              'Test Modu: Sınırsız Soru Aktif (Limitsiz)',
+              style: TextStyle(
+                color: Color(0xFFFFDF7A),
+                fontSize: 12.5,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
-          InkWell(
-            onTap: () => PremiumPaywallSheet.show(context),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFDF7A),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.bolt_rounded, size: 12, color: Color(0xFF012E2B)),
-                  SizedBox(width: 2),
-                  Text(
-                    'Sınırsız Yap',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF012E2B),
-                    ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFDF7A).withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFFFFDF7A), width: 0.8),
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.check_circle_rounded, size: 12, color: Color(0xFFFFDF7A)),
+                SizedBox(width: 4),
+                Text(
+                  'Limitsiz',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFFFFDF7A),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ],

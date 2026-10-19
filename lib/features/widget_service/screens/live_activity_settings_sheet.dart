@@ -78,7 +78,37 @@ const List<LiveActivityOption> liveActivityOptions = [
     subtitleEn: 'Appears at adhan moment and during prayer window',
     icon: Icons.mosque_rounded,
   ),
+  LiveActivityOption(
+    minutes: -999,
+    titleTr: 'Devre Dışı Bırak (Kapat)',
+    titleEn: 'Disable Completely (Turn Off)',
+    subtitleTr: 'Dynamic Island ve kilit ekranı canlı etkinliğini tamamen kapatır',
+    subtitleEn: 'Completely disables Dynamic Island & lock screen live activities',
+    icon: Icons.notifications_off_rounded,
+  ),
 ];
+
+class LiveActivityEnabledNotifier extends StateNotifier<bool> {
+  LiveActivityEnabledNotifier() : super(true) {
+    _load();
+  }
+
+  Future<void> _load() async {
+    final enabled = await LiveActivityService().isEnabled();
+    state = enabled;
+  }
+
+  Future<void> setEnabled(bool enabled) async {
+    state = enabled;
+    await LiveActivityService().setEnabled(enabled);
+    await WidgetService().updateAllWidgets();
+  }
+}
+
+final liveActivityEnabledProvider =
+    StateNotifierProvider<LiveActivityEnabledNotifier, bool>((ref) {
+  return LiveActivityEnabledNotifier();
+});
 
 class LiveActivityTriggerNotifier extends StateNotifier<int> {
   static const String key = 'live_activity_trigger_minutes';
@@ -130,6 +160,7 @@ class LiveActivitySettingsSheet extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final strings = ref.watch(appStringsProvider);
     final selectedMinutes = ref.watch(liveActivityTriggerProvider);
+    final isEnabled = ref.watch(liveActivityEnabledProvider);
     final langCode = strings.language.code;
 
     return Container(
@@ -211,60 +242,170 @@ class LiveActivitySettingsSheet extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
 
-          // Options List
-          ...liveActivityOptions.map((opt) {
-            final isSelected = selectedMinutes == opt.minutes;
-            return Container(
-              margin: const EdgeInsets.only(bottom: 8),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? (isDark ? const Color(0xFF0C3D32) : const Color(0xFFF1F8F5))
-                    : (isDark ? const Color(0xFF062C24) : Colors.white),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: isSelected
-                      ? const Color(0xFFFFDF7A)
-                      : (isDark ? const Color(0xFF0D3830) : const Color(0xFFE2EBE8)),
-                  width: isSelected ? 1.8 : 1,
-                ),
+          // ── Ana Açma / Kapatma Kartı ──────────────────────────────
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF083228) : const Color(0xFFF1F8F5),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(
+                color: isEnabled
+                    ? const Color(0xFFFFDF7A)
+                    : (isDark ? const Color(0xFF133B32) : const Color(0xFFE2EBE8)),
+                width: 1.4,
               ),
-              child: ListTile(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                leading: Icon(
-                  opt.icon,
-                  color: isSelected ? const Color(0xFFFFDF7A) : Colors.white54,
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  isEnabled ? Icons.power_settings_new_rounded : Icons.power_off_rounded,
+                  color: isEnabled ? const Color(0xFFFFDF7A) : Colors.white38,
                   size: 24,
                 ),
-                title: Text(
-                  opt.localizedTitle(langCode),
-                  style: TextStyle(
-                    fontSize: 14.5,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                    color: isSelected
-                        ? (isDark ? const Color(0xFFFFDF7A) : AppColors.teal)
-                        : (isDark ? Colors.white : Colors.black87),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        langCode == 'tr' ? 'Canlı Etkinlikleri Etkinleştir' : 'Enable Live Activities',
+                        style: TextStyle(
+                          fontSize: 14.5,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        isEnabled
+                            ? (langCode == 'tr'
+                                ? 'Dynamic Island ve Kilit Ekranı aktif'
+                                : 'Active on Dynamic Island & Lock Screen')
+                            : (langCode == 'tr'
+                                ? 'Tamamen devre dışı bırakıldı (Kapalı)'
+                                : 'Completely disabled (Off)'),
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          color: isEnabled
+                              ? (isDark ? const Color(0xFF80CBC4) : const Color(0xFF0F5A47))
+                              : Colors.white38,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                subtitle: Text(
-                  opt.localizedSubtitle(langCode),
-                  style: TextStyle(
-                    fontSize: 11.5,
-                    color: isDark ? Colors.white60 : Colors.black54,
-                  ),
+                Switch.adaptive(
+                  value: isEnabled,
+                  activeThumbColor: const Color(0xFFFFDF7A),
+                  activeTrackColor: const Color(0xFF0F5A47),
+                  onChanged: (val) {
+                    HapticFeedback.lightImpact();
+                    ref.read(liveActivityEnabledProvider.notifier).setEnabled(val);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          val
+                              ? (langCode == 'tr'
+                                  ? 'Canlı Etkinlikler etkinleştirildi.'
+                                  : 'Live Activities enabled.')
+                              : (langCode == 'tr'
+                                  ? 'Canlı Etkinlikler kapatıldı.'
+                                  : 'Live Activities disabled.'),
+                        ),
+                        backgroundColor: const Color(0xFF033E35),
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                  },
                 ),
-                trailing: isSelected
-                    ? const Icon(Icons.check_circle_rounded, color: Color(0xFFFFDF7A), size: 20)
-                    : const Icon(Icons.radio_button_off_rounded, color: Colors.white24, size: 20),
-                onTap: () {
-                  HapticFeedback.lightImpact();
-                  ref.read(liveActivityTriggerProvider.notifier).setTriggerMinutes(opt.minutes);
-                  Navigator.pop(context);
-                },
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Options List
+          Opacity(
+            opacity: isEnabled ? 1.0 : 0.45,
+            child: IgnorePointer(
+              ignoring: !isEnabled,
+              child: Column(
+                children: liveActivityOptions.map((opt) {
+                  final isDisableOption = opt.minutes == -999;
+                  final isSelected = isEnabled
+                      ? (selectedMinutes == opt.minutes)
+                      : isDisableOption;
+
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? (isDark ? const Color(0xFF0C3D32) : const Color(0xFFF1F8F5))
+                          : (isDark ? const Color(0xFF062C24) : Colors.white),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: isSelected
+                            ? (isDisableOption ? const Color(0xFFFF6B6B) : const Color(0xFFFFDF7A))
+                            : (isDark ? const Color(0xFF0D3830) : const Color(0xFFE2EBE8)),
+                        width: isSelected ? 1.8 : 1,
+                      ),
+                    ),
+                    child: ListTile(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      leading: Icon(
+                        opt.icon,
+                        color: isSelected
+                            ? (isDisableOption ? const Color(0xFFFF6B6B) : const Color(0xFFFFDF7A))
+                            : Colors.white54,
+                        size: 24,
+                      ),
+                      title: Text(
+                        opt.localizedTitle(langCode),
+                        style: TextStyle(
+                          fontSize: 14.5,
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                          color: isSelected
+                              ? (isDisableOption
+                                  ? const Color(0xFFFF6B6B)
+                                  : (isDark ? const Color(0xFFFFDF7A) : AppColors.teal))
+                              : (isDark ? Colors.white : Colors.black87),
+                        ),
+                      ),
+                      subtitle: Text(
+                        opt.localizedSubtitle(langCode),
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          color: isDark ? Colors.white60 : Colors.black54,
+                        ),
+                      ),
+                      trailing: isSelected
+                          ? Icon(
+                              Icons.check_circle_rounded,
+                              color: isDisableOption ? const Color(0xFFFF6B6B) : const Color(0xFFFFDF7A),
+                              size: 20,
+                            )
+                          : const Icon(Icons.radio_button_off_rounded, color: Colors.white24, size: 20),
+                      onTap: () async {
+                        HapticFeedback.lightImpact();
+                        if (isDisableOption) {
+                          await ref.read(liveActivityEnabledProvider.notifier).setEnabled(false);
+                        } else {
+                          if (!isEnabled) {
+                            await ref.read(liveActivityEnabledProvider.notifier).setEnabled(true);
+                          }
+                          await ref.read(liveActivityTriggerProvider.notifier).setTriggerMinutes(opt.minutes);
+                        }
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                        }
+                      },
+                    ),
+                  );
+                }).toList(),
               ),
-            );
-          }),
+            ),
+          ),
         ],
       ),
     );

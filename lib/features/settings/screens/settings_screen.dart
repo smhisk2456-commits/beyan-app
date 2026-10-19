@@ -36,6 +36,7 @@ class SettingsScreen extends ConsumerWidget {
     final strings = ref.watch(appStringsProvider);
     final currentLang = ref.watch(appLanguageProvider);
     final isPremium = ref.watch(premiumProvider).isPremium;
+    final isLiveActivityEnabled = ref.watch(liveActivityEnabledProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
@@ -209,9 +210,13 @@ class SettingsScreen extends ConsumerWidget {
                 title: strings.language == AppLanguage.turkish
                     ? 'Dynamic Island & Canlı Etkinlik'
                     : 'Dynamic Island & Live Activity',
-                subtitle: strings.language == AppLanguage.turkish
-                    ? 'Görünme zamanını ve ada ayarlarını özelleştir'
-                    : 'Customize trigger time & island behavior',
+                subtitle: isLiveActivityEnabled
+                    ? (strings.language == AppLanguage.turkish
+                        ? 'Açık • Görünme zamanını ve ada ayarlarını özelleştir'
+                        : 'Enabled • Customize trigger time & island behavior')
+                    : (strings.language == AppLanguage.turkish
+                        ? 'Kapalı • Canlı etkinlikler devre dışı'
+                        : 'Disabled • Live activities turned off'),
                 onTap: () => LiveActivitySettingsSheet.show(context),
               ),
             ],

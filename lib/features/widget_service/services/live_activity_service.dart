@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -9,10 +10,40 @@ import '../../prayer_times/services/prayer_time_service.dart';
 class LiveActivityService {
   static const MethodChannel _channel = MethodChannel('com.smhisk60.beyan/live_activity');
   static const String triggerMinutesKey = 'live_activity_trigger_minutes';
+  static const String enabledKey = 'live_activity_enabled';
 
   static final LiveActivityService _instance = LiveActivityService._internal();
   factory LiveActivityService() => _instance;
   LiveActivityService._internal();
+
+  Timer? _prayerTransitionTimer;
+
+  /// Canlı etkinliğin ayarlardan açık olup olmadığını döner.
+  Future<bool> isEnabled() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getBool(enabledKey) ?? true;
+    } catch (_) {
+      return true;
+    }
+  }
+
+  /// Canlı etkinliği açar veya tamamen devre dışı bırakır.
+  Future<void> setEnabled(bool enabled) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(enabledKey, enabled);
+      if (!enabled) {
+        _prayerTransitionTimer?.cancel();
+        _prayerTransitionTimer = null;
+        await stopLiveActivity();
+      } else {
+        await syncLiveActivity();
+      }
+    } catch (e) {
+      debugPrint('[LiveActivityService] setEnabled hatası: $e');
+    }
+  }
 
   /// Cihazın / platformun Canlı Etkinlikleri destekleyip desteklemediğini kontrol eder.
   Future<bool> isSupported() async {
@@ -35,6 +66,14 @@ class LiveActivityService {
     if (kIsWeb || !Platform.isIOS) return;
 
     try {
+      final isActEnabled = await isEnabled();
+      if (!isActEnabled) {
+        _prayerTransitionTimer?.cancel();
+        _prayerTransitionTimer = null;
+        await stopLiveActivity();
+        return;
+      }
+
       final prefs = await SharedPreferences.getInstance();
       final triggerMinutes = customTriggerMinutes ?? prefs.getInt(triggerMinutesKey) ?? 45;
       final langCode = prefs.getString('selected_app_language') ?? 'tr';
@@ -60,6 +99,16 @@ class LiveActivityService {
         'isKerahat': isKerahat,
         'triggerMinutes': triggerMinutes,
       });
+
+      // Vakit girdiğinde sayacın ileriye doğru kronometre gibi saymasını önle:
+      // Tam vakit saniyesinde otomatik olarak bir sonraki namazı senkronize et
+      final diff = next.time.difference(DateTime.now());
+      _prayerTransitionTimer?.cancel();
+      if (diff > Duration.zero) {
+        _prayerTransitionTimer = Timer(diff + const Duration(seconds: 2), () {
+          syncLiveActivity();
+        });
+      }
     } catch (e) {
       debugPrint('[LiveActivityService] Live Activity senkronizasyon hatası: $e');
     }
@@ -67,6 +116,8 @@ class LiveActivityService {
 
   /// Etkin tüm canlı etkinlikleri sonlandırır.
   Future<void> stopLiveActivity() async {
+    _prayerTransitionTimer?.cancel();
+    _prayerTransitionTimer = null;
     if (kIsWeb || !Platform.isIOS) return;
     try {
       await _channel.invokeMethod('stopLiveActivity');

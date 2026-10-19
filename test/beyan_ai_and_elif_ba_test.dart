@@ -184,21 +184,22 @@ void main() {
       expect(fromJson.suggestedFollowUps, ['Huzur duaları']);
     });
 
-    test('AiAssistantNotifier ücretsiz kullanıcılarda günlük 3 soru kotasını takip etmeli', () async {
+    test('AiAssistantNotifier test modunda sınırsız soru kotası sağlamalı', () async {
       final notifier = AiAssistantNotifier();
 
-      // Başlangıç kotası 3 olmalı
+      // Test modunda ücretsiz kullanıcılar için de sınırsız kota (999) sağlanmalı
       final remainingInitial = await notifier.getRemainingQuota(false);
-      expect(remainingInitial, 3);
+      expect(remainingInitial, 999);
+      expect(await notifier.canAskQuestion(false), isTrue);
 
-      // 1. soru sorulur
+      // Soru sorulabilir ve kota engeline takılmaz
       final res1 = await notifier.askQuestion('Kalp huzuru için ne yapmalıyım?', isPremium: false);
       expect(res1, isTrue);
 
       final remainingAfter1 = await notifier.getRemainingQuota(false);
-      expect(remainingAfter1, 2);
+      expect(remainingAfter1, 999);
 
-      // Premium kullanıcı için sınırsız kota dönmeli
+      // Premium kullanıcı için de sınırsız kota dönmeli
       final premiumQuota = await notifier.getRemainingQuota(true);
       expect(premiumQuota, 999);
       expect(await notifier.canAskQuestion(true), isTrue);
@@ -338,9 +339,9 @@ void main() {
     });
 
     test('liveActivityOptions tüm temel zamanlama seçeneklerini barındırmalı', () {
-      expect(liveActivityOptions.length, 6);
+      expect(liveActivityOptions.length, 7);
       final minutesList = liveActivityOptions.map((o) => o.minutes).toList();
-      expect(minutesList, containsAll([-1, 60, 45, 30, 15, 0]));
+      expect(minutesList, containsAll([-1, 60, 45, 30, 15, 0, -999]));
 
       for (final opt in liveActivityOptions) {
         expect(opt.localizedTitle('tr').isNotEmpty, isTrue);

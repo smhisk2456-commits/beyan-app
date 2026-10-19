@@ -100,6 +100,21 @@ struct BeyanPrayerAttributes: ActivityAttributes {
                 let isKerahat = args["isKerahat"] as? Bool ?? false
                 let triggerMinutes = args["triggerMinutes"] as? Int ?? 45
 
+                // Eğer canlı etkinlik devre dışı bırakılmışsa (-999), mevcutları durdur
+                if triggerMinutes == -999 {
+                    Task {
+                        for activity in Activity<BeyanPrayerAttributes>.activities {
+                            if #available(iOS 16.2, *) {
+                                await activity.end(nil, dismissalPolicy: .immediate)
+                            } else {
+                                await activity.end(dismissalPolicy: .immediate)
+                            }
+                        }
+                    }
+                    result(true)
+                    return
+                }
+
                 let contentState = BeyanPrayerAttributes.ContentState(
                     prayerName: prayerName,
                     prayerTime: prayerTime,
@@ -114,13 +129,15 @@ struct BeyanPrayerAttributes: ActivityAttributes {
                     return
                 }
 
+                let staleDate = Date(timeIntervalSince1970: targetTimestamp)
+
                 // Sadece etkin (.active) canlı etkinlikleri bul; sonlanmış (.ended) olanları filtrele
                 let activeActivities = Activity<BeyanPrayerAttributes>.activities.filter { $0.activityState == .active }
 
                 if let existing = activeActivities.first {
                     Task {
                         if #available(iOS 16.2, *) {
-                            await existing.update(ActivityContent<BeyanPrayerAttributes.ContentState>(state: contentState, staleDate: nil))
+                            await existing.update(ActivityContent<BeyanPrayerAttributes.ContentState>(state: contentState, staleDate: staleDate))
                         } else {
                             await existing.update(using: contentState)
                         }
@@ -142,7 +159,7 @@ struct BeyanPrayerAttributes: ActivityAttributes {
                     let attributes = BeyanPrayerAttributes(title: "Beyân Namaz Vakti")
                     do {
                         if #available(iOS 16.2, *) {
-                            let content = ActivityContent(state: contentState, staleDate: nil)
+                            let content = ActivityContent(state: contentState, staleDate: staleDate)
                             _ = try Activity<BeyanPrayerAttributes>.request(
                                 attributes: attributes,
                                 content: content,
