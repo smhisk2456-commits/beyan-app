@@ -98,7 +98,7 @@ struct BeyanPrayerAttributes: ActivityAttributes {
                 }
 
                 let isKerahat = args["isKerahat"] as? Bool ?? false
-                let triggerMinutes = args["triggerMinutes"] as? Int ?? 45
+                let triggerMinutes = args["triggerMinutes"] as? Int ?? -1
 
                 // Eğer canlı etkinlik devre dışı bırakılmışsa (-999), mevcutları durdur
                 if triggerMinutes == -999 {
@@ -129,7 +129,7 @@ struct BeyanPrayerAttributes: ActivityAttributes {
                     return
                 }
 
-                let staleDate = Date(timeIntervalSince1970: targetTimestamp)
+                let staleDate = Date(timeIntervalSince1970: targetTimestamp + 1800)
 
                 // Sadece etkin (.active) canlı etkinlikleri bul; sonlanmış (.ended) olanları filtrele
                 let activeActivities = Activity<BeyanPrayerAttributes>.activities.filter { $0.activityState == .active }

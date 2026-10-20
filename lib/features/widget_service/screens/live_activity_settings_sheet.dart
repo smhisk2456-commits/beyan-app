@@ -32,8 +32,8 @@ class LiveActivityOption {
 const List<LiveActivityOption> liveActivityOptions = [
   LiveActivityOption(
     minutes: -1,
-    titleTr: 'Her Zaman Açık (Sürekli)',
-    titleEn: 'Always Active (Continuous)',
+    titleTr: 'Her Zaman Açık (Sürekli - Önerilen)',
+    titleEn: 'Always Active (Continuous - Recommended)',
     subtitleTr: 'Dynamic Island ve kilit ekranında gün boyu sürekli canlı geri sayım',
     subtitleEn: 'Continuous countdown on Dynamic Island and Lock Screen all day',
     icon: Icons.all_inclusive_rounded,
@@ -48,8 +48,8 @@ const List<LiveActivityOption> liveActivityOptions = [
   ),
   LiveActivityOption(
     minutes: 45,
-    titleTr: 'Vakte 45 Dakika Kala (Önerilen)',
-    titleEn: '45 Minutes Before (Recommended)',
+    titleTr: 'Vakte 45 Dakika Kala',
+    titleEn: '45 Minutes Before',
     subtitleTr: 'İdeal pil ve dikkat dengesi, namaz hazırlığı için tam zamanında',
     subtitleEn: 'Ideal battery & focus balance, right on time for preparation',
     icon: Icons.stars_rounded,
@@ -113,14 +113,14 @@ final liveActivityEnabledProvider =
 class LiveActivityTriggerNotifier extends StateNotifier<int> {
   static const String key = 'live_activity_trigger_minutes';
 
-  LiveActivityTriggerNotifier() : super(45) {
+  LiveActivityTriggerNotifier() : super(-1) {
     _load();
   }
 
   Future<void> _load() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final val = prefs.getInt(key) ?? 45;
+      final val = prefs.getInt(key) ?? -1;
       state = val;
     } catch (_) {}
   }

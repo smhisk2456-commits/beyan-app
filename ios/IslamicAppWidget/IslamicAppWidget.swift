@@ -1476,20 +1476,11 @@ private func prayerVisuals(for prayerName: String) -> (icon: String, gradient: [
 struct BeyanLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: BeyanPrayerAttributes.self) { context in
-            let triggerMinutes: Int = {
-                if let tm = context.state.triggerMinutes { return tm }
-                let defaults = UserDefaults(suiteName: "group.com.smhisk60.beyan") ?? UserDefaults.standard
-                if defaults.object(forKey: "live_activity_trigger_minutes") != nil {
-                    return defaults.integer(forKey: "live_activity_trigger_minutes")
-                }
-                return 45
-            }()
             let targetDate = Date(timeIntervalSince1970: context.state.targetTimestamp)
             let now = Date()
             let isPast = now >= targetDate
-            let remainingSeconds = context.state.targetTimestamp - now.timeIntervalSince1970
-            let remainingMinutes = remainingSeconds / 60.0
-            let isWithinWindow = (triggerMinutes == -1) || (triggerMinutes == 0 && isPast) || (remainingMinutes <= Double(triggerMinutes))
+            let safeStartDate = min(now, targetDate.addingTimeInterval(-1))
+            let safeTargetDate = max(targetDate, safeStartDate.addingTimeInterval(1))
             let visuals = prayerVisuals(for: context.state.prayerName)
 
             // Ultra-Sleek Glassmorphic iOS Lock Screen Banner (Uncluttered & Wallpaper-Friendly)
@@ -1548,7 +1539,7 @@ struct BeyanLiveActivity: Widget {
 
                 Spacer()
 
-                // Right Side: Safe Countdown or Vakit Girdi Status
+                // Right Side: Always Active Countdown or Vakit Girdi Status
                 if isPast {
                     VStack(alignment: .trailing, spacing: 2) {
                         HStack(spacing: 4) {
@@ -1571,10 +1562,9 @@ struct BeyanLiveActivity: Widget {
                             .monospacedDigit()
                             .foregroundColor(.white.opacity(0.65))
                     }
-                } else if isWithinWindow {
+                } else {
                     VStack(alignment: .trailing, spacing: 1) {
-                        let startDate = min(now, targetDate)
-                        Text(timerInterval: startDate...targetDate, pauseTime: targetDate, countsDown: true)
+                        Text(timerInterval: safeStartDate...safeTargetDate, pauseTime: safeTargetDate, countsDown: true)
                             .font(.system(size: 17, weight: .heavy, design: .rounded))
                             .monospacedDigit()
                             .foregroundColor(Color(red: 1.0, green: 0.88, blue: 0.52))
@@ -1583,17 +1573,6 @@ struct BeyanLiveActivity: Widget {
                             .font(.system(size: 9.5, weight: .medium, design: .rounded))
                             .textCase(.uppercase)
                             .tracking(0.8)
-                            .foregroundColor(.white.opacity(0.6))
-                    }
-                } else {
-                    VStack(alignment: .trailing, spacing: 1) {
-                        Text(context.state.prayerTime)
-                            .font(.system(size: 15, weight: .bold, design: .rounded))
-                            .monospacedDigit()
-                            .foregroundColor(Color(red: 1.0, green: 0.88, blue: 0.52))
-
-                        Text("\(triggerMinutes) dk kala")
-                            .font(.system(size: 9.5, weight: .medium, design: .rounded))
                             .foregroundColor(.white.opacity(0.6))
                     }
                 }
@@ -1618,20 +1597,11 @@ struct BeyanLiveActivity: Widget {
             .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
             .widgetURL(URL(string: "beyan://prayer"))
         } dynamicIsland: { context in
-            let triggerMinutes: Int = {
-                if let tm = context.state.triggerMinutes { return tm }
-                let defaults = UserDefaults(suiteName: "group.com.smhisk60.beyan") ?? UserDefaults.standard
-                if defaults.object(forKey: "live_activity_trigger_minutes") != nil {
-                    return defaults.integer(forKey: "live_activity_trigger_minutes")
-                }
-                return 45
-            }()
             let targetDate = Date(timeIntervalSince1970: context.state.targetTimestamp)
             let now = Date()
             let isPast = now >= targetDate
-            let remainingSeconds = context.state.targetTimestamp - now.timeIntervalSince1970
-            let remainingMinutes = remainingSeconds / 60.0
-            let isWithinWindow = (triggerMinutes == -1) || (triggerMinutes == 0 && isPast) || (remainingMinutes <= Double(triggerMinutes))
+            let safeStartDate = min(now, targetDate.addingTimeInterval(-1))
+            let safeTargetDate = max(targetDate, safeStartDate.addingTimeInterval(1))
             let visuals = prayerVisuals(for: context.state.prayerName)
 
             return DynamicIsland {
@@ -1659,9 +1629,15 @@ struct BeyanLiveActivity: Widget {
                                 .font(.system(size: 14.5, weight: .heavy, design: .rounded))
                                 .foregroundColor(Color(red: 1.0, green: 0.90, blue: 0.60))
 
-                            Text(context.state.cityName)
-                                .font(.system(size: 10.5, weight: .medium))
-                                .foregroundColor(.white.opacity(0.65))
+                            let city = context.state.cityName.trimmingCharacters(in: .whitespacesAndNewlines)
+                            if !city.isEmpty &&
+                                !city.lowercased().contains("mevcut konum") &&
+                                !city.lowercased().contains("default") {
+                                Text(city)
+                                    .font(.system(size: 10.5, weight: .medium))
+                                    .foregroundColor(.white.opacity(0.65))
+                                    .lineLimit(1)
+                            }
                         }
                     }
                     .padding(.leading, 6)
@@ -1677,22 +1653,13 @@ struct BeyanLiveActivity: Widget {
                                 .font(.system(size: 12, weight: .bold, design: .rounded))
                                 .monospacedDigit()
                                 .foregroundColor(.white.opacity(0.7))
-                        } else if isWithinWindow {
-                            let startDate = min(now, targetDate)
-                            Text(timerInterval: startDate...targetDate, pauseTime: targetDate, countsDown: true)
+                        } else {
+                            Text(timerInterval: safeStartDate...safeTargetDate, pauseTime: safeTargetDate, countsDown: true)
                                 .font(.system(size: 15, weight: .heavy, design: .rounded))
                                 .monospacedDigit()
                                 .foregroundColor(Color(red: 1.0, green: 0.88, blue: 0.52))
 
                             Text("kalan süre")
-                                .font(.system(size: 9.5, weight: .medium))
-                                .foregroundColor(.white.opacity(0.6))
-                        } else {
-                            Text(context.state.prayerTime)
-                                .font(.system(size: 14, weight: .bold, design: .rounded))
-                                .foregroundColor(Color(red: 1.0, green: 0.88, blue: 0.52))
-
-                            Text("\(triggerMinutes) dk kala")
                                 .font(.system(size: 9.5, weight: .medium))
                                 .foregroundColor(.white.opacity(0.6))
                         }
@@ -1741,17 +1708,15 @@ struct BeyanLiveActivity: Widget {
                     if isPast {
                         Text("00:00")
                             .foregroundColor(Color(red: 0.20, green: 0.85, blue: 0.45))
-                    } else if isWithinWindow {
-                        let startDate = min(now, targetDate)
-                        Text(timerInterval: startDate...targetDate, pauseTime: targetDate, countsDown: true)
-                            .foregroundColor(Color(red: 1.0, green: 0.88, blue: 0.52))
                     } else {
-                        Text(context.state.prayerTime)
+                        Text(timerInterval: safeStartDate...safeTargetDate, pauseTime: safeTargetDate, countsDown: true)
                             .foregroundColor(Color(red: 1.0, green: 0.88, blue: 0.52))
                     }
                 }
                 .font(.system(size: 11.5, weight: .semibold, design: .rounded))
                 .monospacedDigit()
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
                 .multilineTextAlignment(.trailing)
                 .frame(width: 52, alignment: .trailing)
             } minimal: {

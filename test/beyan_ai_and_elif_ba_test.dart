@@ -327,12 +327,15 @@ void main() {
       SharedPreferences.setMockInitialValues({});
     });
 
-    test('LiveActivityTriggerNotifier varsayılan 45 dk olmalı ve seçilen süreyi kaydetmeli', () async {
+    test('LiveActivityTriggerNotifier varsayılan -1 (Sürekli) olmalı ve seçilen süreyi kaydetmeli', () async {
       final notifier = LiveActivityTriggerNotifier();
-      expect(notifier.state, 45);
+      expect(notifier.state, -1);
 
       await notifier.setTriggerMinutes(60);
       expect(notifier.state, 60);
+
+      await notifier.setTriggerMinutes(45);
+      expect(notifier.state, 45);
 
       await notifier.setTriggerMinutes(-1); // Sürekli
       expect(notifier.state, -1);

@@ -75,7 +75,7 @@ class LiveActivityService {
       }
 
       final prefs = await SharedPreferences.getInstance();
-      final triggerMinutes = customTriggerMinutes ?? prefs.getInt(triggerMinutesKey) ?? 45;
+      final triggerMinutes = customTriggerMinutes ?? prefs.getInt(triggerMinutesKey) ?? -1;
       final langCode = prefs.getString('selected_app_language') ?? 'tr';
 
       final prayerService = PrayerTimeService();
@@ -85,6 +85,35 @@ class LiveActivityService {
       final daily = dailyPrayerTimes ?? await prayerService.calculatePrayerTimes(location: location);
       final next = daily.nextPrayerEntry;
       if (next == null) return;
+
+      final diff = next.time.difference(DateTime.now());
+
+      // Eğer kullanıcı tamamen devre dışı bırakmışsa (-999):
+      if (triggerMinutes == -999) {
+        _prayerTransitionTimer?.cancel();
+        _prayerTransitionTimer = null;
+        await stopLiveActivity();
+        return;
+      }
+
+      // Eğer kullanıcı belirli bir dakika kala (ör: 45 dk kala) başlamasını seçmişse
+      // ve vakte henüz bu süreden fazla varsa, şimdilik durdur ve eşik zamanında başlat:
+      if (triggerMinutes > 0 && diff.inMinutes > triggerMinutes) {
+        await stopLiveActivity();
+        final waitDuration = diff - Duration(minutes: triggerMinutes);
+        _prayerTransitionTimer?.cancel();
+        _prayerTransitionTimer = Timer(waitDuration, () {
+          syncLiveActivity();
+        });
+        return;
+      } else if (triggerMinutes == 0 && diff > Duration.zero) {
+        await stopLiveActivity();
+        _prayerTransitionTimer?.cancel();
+        _prayerTransitionTimer = Timer(diff, () {
+          syncLiveActivity();
+        });
+        return;
+      }
 
       final nextPrayerName = next.name.localizedName(langCode);
       final nextPrayerTime = prayerService.formatTime(next.time);
@@ -102,7 +131,6 @@ class LiveActivityService {
 
       // Vakit girdiğinde sayacın ileriye doğru kronometre gibi saymasını önle:
       // Tam vakit saniyesinde otomatik olarak bir sonraki namazı senkronize et
-      final diff = next.time.difference(DateTime.now());
       _prayerTransitionTimer?.cancel();
       if (diff > Duration.zero) {
         _prayerTransitionTimer = Timer(diff + const Duration(seconds: 2), () {

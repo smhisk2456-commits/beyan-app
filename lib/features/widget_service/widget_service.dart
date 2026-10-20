@@ -167,7 +167,7 @@ class WidgetService {
     await HomeWidget.saveWidgetData<String>('widget_refresh_interval', refreshInterval);
 
     // Live Activity & Dynamic Island tetiklenme süresi (dk)
-    final triggerMinutes = prefs.getInt('live_activity_trigger_minutes') ?? 45;
+    final triggerMinutes = prefs.getInt('live_activity_trigger_minutes') ?? -1;
     await HomeWidget.saveWidgetData<int>('live_activity_trigger_minutes', triggerMinutes);
 
     // Kilit ekranına uygulanan / sabitlenen özel ayet durumu
