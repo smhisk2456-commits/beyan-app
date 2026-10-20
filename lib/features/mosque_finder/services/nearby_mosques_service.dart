@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 import 'package:url_launcher/url_launcher.dart';
+import '../../../core/utils/app_constants.dart';
 import '../models/nearby_mosque_model.dart';
 
 /// Yakındaki Camileri Arama ve Harita Navigasyon Servisi
@@ -10,13 +11,26 @@ class NearbyMosquesService {
   factory NearbyMosquesService() => instance;
   NearbyMosquesService._internal();
 
-  /// Verilen koordinatlar etrafındaki camileri bulur (Önce hızlı Nominatim API, sonra Overpass, hata halinde yedek zengin veri)
+  /// Verilen koordinatlar etrafındaki camileri bulur (Önce Google Places API, sonra hızlı Nominatim API, sonra Overpass, hata halinde yedek zengin veri)
   Future<List<NearbyMosque>> findNearbyMosques({
     required double userLat,
     required double userLng,
     double radiusMeters = 8000,
+    String? googleApiKey,
   }) async {
-    // 1. OpenStreetMap Nominatim Arama API (Hızlı, güncel ve kesintisiz)
+    // 1. Google Places API (Google Cloud'da Places API etkinse doğrudan resmi Google verisi çeker)
+    final key = googleApiKey ?? AppConstants.defaultGeminiApiKey;
+    if (key.isNotEmpty) {
+      try {
+        final googleMosques = await _fetchFromGooglePlaces(userLat, userLng, radiusMeters, key);
+        if (googleMosques.isNotEmpty) {
+          googleMosques.sort((a, b) => a.distanceMeters.compareTo(b.distanceMeters));
+          return googleMosques;
+        }
+      } catch (_) {}
+    }
+
+    // 2. OpenStreetMap Nominatim Arama API (Hızlı, güncel ve kesintisiz)
     try {
       final mosques = await _fetchFromNominatim(userLat, userLng, radiusMeters);
       if (mosques.isNotEmpty) {
@@ -25,7 +39,7 @@ class NearbyMosquesService {
       }
     } catch (_) {}
 
-    // 2. OpenStreetMap Overpass API (Alternatif yedek motor)
+    // 3. OpenStreetMap Overpass API (Alternatif yedek motor)
     try {
       final mosques = await _fetchFromOverpass(userLat, userLng, radiusMeters);
       if (mosques.isNotEmpty) {
@@ -34,10 +48,68 @@ class NearbyMosquesService {
       }
     } catch (_) {}
 
-    // 3. Fallback: Çevredeki bilinen camileri filtrele ve mesafeye göre sırala
+    // 4. Fallback: Çevredeki bilinen camileri filtrele ve mesafeye göre sırala
     final fallbackList = _getCuratedFallbackMosques(userLat, userLng);
     fallbackList.sort((a, b) => a.distanceMeters.compareTo(b.distanceMeters));
     return fallbackList;
+  }
+
+  /// Google Places API (Nearby Search) ile resmi Google cami verilerini alma
+  Future<List<NearbyMosque>> _fetchFromGooglePlaces(
+    double lat,
+    double lng,
+    double radiusMeters,
+    String apiKey,
+  ) async {
+    final client = HttpClient()..connectionTimeout = const Duration(seconds: 6);
+    try {
+      final uri = Uri.parse(
+        'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=$lat,$lng&radius=$radiusMeters&type=mosque&language=tr&key=$apiKey',
+      );
+      final request = await client.getUrl(uri);
+      final response = await request.close().timeout(const Duration(seconds: 7));
+      if (response.statusCode != HttpStatus.ok) return [];
+
+      final responseBody = await response.transform(utf8.decoder).join();
+      final data = jsonDecode(responseBody) as Map<String, dynamic>;
+      final status = data['status'] as String? ?? '';
+      if (status != 'OK') return [];
+
+      final results = data['results'] as List<dynamic>? ?? [];
+      final mosques = <NearbyMosque>[];
+
+      for (final item in results) {
+        if (item is! Map<String, dynamic>) continue;
+        final geom = item['geometry'] as Map<String, dynamic>?;
+        final loc = geom?['location'] as Map<String, dynamic>?;
+        final mLat = (loc?['lat'] as num?)?.toDouble();
+        final mLng = (loc?['lng'] as num?)?.toDouble();
+        if (mLat == null || mLng == null) continue;
+
+        final name = (item['name'] as String? ?? 'Cami').trim();
+        final address = (item['vicinity'] as String? ?? item['formatted_address'] as String?)?.trim();
+        final dist = NearbyMosque.calculateDistanceMeters(lat, lng, mLat, mLng);
+        final bearing = NearbyMosque.calculateBearing(lat, lng, mLat, mLng);
+        final placeId = (item['place_id'] as String?) ?? '$mLat,$mLng';
+
+        mosques.add(
+          NearbyMosque(
+            id: placeId,
+            name: name,
+            latitude: mLat,
+            longitude: mLng,
+            distanceMeters: dist,
+            address: address,
+            bearingDegrees: bearing,
+          ),
+        );
+      }
+      return mosques;
+    } catch (_) {
+      return [];
+    } finally {
+      client.close();
+    }
   }
 
   /// OpenStreetMap Nominatim Arama Sorgusu
@@ -224,55 +296,78 @@ out center 45;
     return [];
   }
 
-  /// Apple Haritalar veya Google Haritalar uygulamasında çevredeki tüm camileri arama
+  /// Google Haritalar veya Apple Haritalar uygulamasında çevredeki tüm camileri arama
   Future<void> openAllNearbyMosquesInMaps({
     required double userLat,
     required double userLng,
   }) async {
-    // 1. Apple Maps arama (iOS Haritalar doğrudan çevredeki camileri döker)
-    final appleMapsUri = Uri.parse('maps://?q=cami&sll=$userLat,$userLng');
-    if (await canLaunchUrl(appleMapsUri)) {
-      await launchUrl(appleMapsUri, mode: LaunchMode.externalApplication);
+    // 1. Google Maps uygulaması yüklüyse doğrudan aç
+    final googleAppUri = Uri.parse('comgooglemaps://?q=cami&center=$userLat,$userLng&zoom=15');
+    if (await canLaunchUrl(googleAppUri)) {
+      await launchUrl(googleAppUri, mode: LaunchMode.externalApplication);
       return;
     }
 
-    // 2. Google Maps arama
+    // 2. Google Maps evrensel web URL'si
     final googleMapsUri = Uri.parse('https://www.google.com/maps/search/cami/@$userLat,$userLng,15z');
     if (await canLaunchUrl(googleMapsUri)) {
       await launchUrl(googleMapsUri, mode: LaunchMode.externalApplication);
       return;
     }
 
-    // 3. Web Apple Maps evrensel bağlantı
+    // 3. Apple Maps arama (iOS Haritalar doğrudan çevredeki camileri döker)
+    final appleMapsUri = Uri.parse('maps://?q=cami&sll=$userLat,$userLng');
+    if (await canLaunchUrl(appleMapsUri)) {
+      await launchUrl(appleMapsUri, mode: LaunchMode.externalApplication);
+      return;
+    }
+
+    // 4. Web Apple Maps evrensel bağlantı
     final webMapsUri = Uri.parse('https://maps.apple.com/?q=cami&sll=$userLat,$userLng');
     if (await canLaunchUrl(webMapsUri)) {
       await launchUrl(webMapsUri, mode: LaunchMode.externalApplication);
     }
   }
 
-  /// Haritalarda Belli Bir Camiye Yürüme Rotası Açma (Apple Maps / Google Maps)
+  /// Google Haritalar'da çevredeki tüm camileri doğrudan canlı arama
+  Future<void> openGoogleMapsNearby({
+    required double userLat,
+    required double userLng,
+  }) async {
+    await openAllNearbyMosquesInMaps(userLat: userLat, userLng: userLng);
+  }
+
+  /// Haritalarda Belli Bir Camiye Yürüme Rotası Açma (Önce Google Maps, sonra Apple Maps)
   Future<void> openWalkingDirections({
     required double lat,
     required double lng,
     required String mosqueName,
   }) async {
-    // Apple Maps yürüme rotası: maps://?daddr=lat,lng&dirflg=w
+    // 1. Google Maps uygulaması yüklüyse
+    final googleAppUri = Uri.parse('comgooglemaps://?daddr=$lat,$lng&directionsmode=walking');
+    if (await canLaunchUrl(googleAppUri)) {
+      await launchUrl(googleAppUri, mode: LaunchMode.externalApplication);
+      return;
+    }
+
+    // 2. Google Maps evrensel web navigasyon linki
+    final googleMapsUri = Uri.parse('https://www.google.com/maps/dir/?api=1&destination=$lat,$lng&travelmode=walking');
+    if (await canLaunchUrl(googleMapsUri)) {
+      await launchUrl(googleMapsUri, mode: LaunchMode.externalApplication);
+      return;
+    }
+
+    // 3. Apple Maps yürüme rotası: maps://?daddr=lat,lng&dirflg=w
     final appleMapsUri = Uri.parse('maps://?daddr=$lat,$lng&dirflg=w');
     if (await canLaunchUrl(appleMapsUri)) {
       await launchUrl(appleMapsUri, mode: LaunchMode.externalApplication);
       return;
     }
 
-    // Web tabanlı harita linki (Evrensel yönlendirme)
+    // 4. Web tabanlı harita linki
     final webMapsUri = Uri.parse('https://maps.apple.com/?daddr=$lat,$lng&dirflg=w');
     if (await canLaunchUrl(webMapsUri)) {
       await launchUrl(webMapsUri, mode: LaunchMode.externalApplication);
-      return;
-    }
-
-    final googleMapsUri = Uri.parse('https://www.google.com/maps/dir/?api=1&destination=$lat,$lng&travelmode=walking');
-    if (await canLaunchUrl(googleMapsUri)) {
-      await launchUrl(googleMapsUri, mode: LaunchMode.externalApplication);
     }
   }
 

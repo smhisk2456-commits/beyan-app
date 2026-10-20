@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
@@ -89,7 +91,7 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
         }
       }
 
-      // 3. Canlı ve son bilinen GPS verilerini al
+      // 3. Hızlı ve kesintisiz konum alma (Önce son bilinen, sonra Wi-Fi/Baz istasyonu destekli high/medium)
       if (perm == LocationPermission.always || perm == LocationPermission.whileInUse) {
         try {
           final lastPos = await Geolocator.getLastKnownPosition();
@@ -98,13 +100,44 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
           }
         } catch (_) {}
 
+        if (position == null) {
+          try {
+            // Kapalı mekanlarda uydunun kilitlenmesini beklemeden hızlı Wi-Fi/Hücresel konum alma
+            position = await Geolocator.getCurrentPosition(
+              desiredAccuracy: LocationAccuracy.high,
+              timeLimit: const Duration(seconds: 6),
+            );
+          } catch (_) {
+            try {
+              position = await Geolocator.getCurrentPosition(
+                desiredAccuracy: LocationAccuracy.medium,
+                timeLimit: const Duration(seconds: 4),
+              );
+            } catch (_) {}
+          }
+        }
+      }
+
+      // 4. GPS kapalıysa veya ev içinde sinyal yoksa IP tabanlı anlık şehir tespiti
+      if (position == null) {
         try {
-          // Birebir hassas canlı GPS koordinatı (14 saniye zaman aşımı ile uydu kilidi)
-          final livePos = await Geolocator.getCurrentPosition(
-            desiredAccuracy: LocationAccuracy.best,
-            timeLimit: const Duration(seconds: 14),
-          );
-          position = livePos;
+          final client = HttpClient()..connectionTimeout = const Duration(seconds: 3);
+          final req = await client.getUrl(Uri.parse('http://ip-api.com/json'));
+          final res = await req.close().timeout(const Duration(seconds: 3));
+          if (res.statusCode == HttpStatus.ok) {
+            final body = await res.transform(utf8.decoder).join();
+            final map = jsonDecode(body) as Map<String, dynamic>;
+            final lat = (map['lat'] as num?)?.toDouble();
+            final lon = (map['lon'] as num?)?.toDouble();
+            final city = map['city'] as String? ?? map['regionName'] as String?;
+            if (lat != null && lon != null) {
+              _userLat = lat;
+              _userLng = lon;
+              _userLocationTitle = '${city ?? "Mevcut Konum"} (Ağ Konumu 📡)';
+              _isGpsActive = true;
+            }
+          }
+          client.close();
         } catch (_) {}
       }
 
@@ -116,7 +149,7 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
         // Koordinatları ilçe/mahalle adına ters jeokodla (Reverse Geocoding)
         String readableLocation = 'Canlı GPS Konumu';
         try {
-          final placemarks = await placemarkFromCoordinates(_userLat, _userLng);
+          final placemarks = await placemarkFromCoordinates(_userLat, _userLng).timeout(const Duration(seconds: 3));
           if (placemarks.isNotEmpty) {
             final p = placemarks.first;
             final subLoc = p.subLocality?.trim() ?? '';
@@ -147,7 +180,7 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
           await prefs.setDouble('beyan_widget_lng', _userLng);
           await prefs.setString('beyan_widget_city', readableLocation);
         } catch (_) {}
-      } else {
+      } else if (!_isGpsActive) {
         final loc = await PrayerTimeService.instance.getCurrentLocation();
         _userLat = loc.latitude;
         _userLng = loc.longitude;
@@ -272,55 +305,63 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
               ),
             ),
 
-            // ── 2. Canlı Apple/Google Haritalarda Aç Butonu ────────────
+            // ── 2. Canlı Google Haritalarda Aç Butonu ────────────
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 2, 16, 6),
               child: InkWell(
                 onTap: () {
                   HapticFeedback.lightImpact();
-                  _service.openAllNearbyMosquesInMaps(userLat: _userLat, userLng: _userLng);
+                  _service.openGoogleMapsNearby(userLat: _userLat, userLng: _userLng);
                 },
                 borderRadius: BorderRadius.circular(14),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [Color(0xFF0B463E), Color(0xFF042E28)],
+                      colors: [Color(0xFF0F4C42), Color(0xFF042E28)],
                     ),
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: const Color(0xFFFFDF7A).withValues(alpha: 0.5)),
+                    border: Border.all(color: const Color(0xFFFFDF7A).withValues(alpha: 0.6)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.25),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
                   child: Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(6),
+                        padding: const EdgeInsets.all(7),
                         decoration: BoxDecoration(
                           color: const Color(0xFFFFDF7A).withValues(alpha: 0.2),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.map_rounded, color: Color(0xFFFFDF7A), size: 16),
+                        child: const Icon(Icons.map_rounded, color: Color(0xFFFFDF7A), size: 18),
                       ),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: 12),
                       const Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Haritada Çevredeki Tüm Camileri Gör',
+                              'Google Haritalar\'da Çevredeki Tüm Camiler',
                               style: TextStyle(
                                 color: Color(0xFFFFDF7A),
                                 fontWeight: FontWeight.bold,
-                                fontSize: 12.5,
+                                fontSize: 13,
                               ),
                             ),
+                            SizedBox(height: 2),
                             Text(
-                              'Apple & Google Haritalar üzerinde canlı navigasyon',
-                              style: TextStyle(color: Colors.white70, fontSize: 10.5),
+                              'Google verileriyle canlı cami, mescid ve yol tariflerini aç',
+                              style: TextStyle(color: Colors.white70, fontSize: 11),
                             ),
                           ],
                         ),
                       ),
-                      const Icon(Icons.open_in_new_rounded, color: Color(0xFFFFDF7A), size: 16),
+                      const Icon(Icons.arrow_forward_ios_rounded, color: Color(0xFFFFDF7A), size: 14),
                     ],
                   ),
                 ),
@@ -511,134 +552,145 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
   }
 
   Widget _buildMosqueCard(NearbyMosque mosque) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: const Color(0xFF032620),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: const Color(0xFFD4AF37).withValues(alpha: 0.25),
-          width: 1,
+    return InkWell(
+      onTap: () {
+        HapticFeedback.lightImpact();
+        _service.openWalkingDirections(
+          lat: mosque.latitude,
+          lng: mosque.longitude,
+          mosqueName: mosque.name,
+        );
+      },
+      borderRadius: BorderRadius.circular(18),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: const Color(0xFF032620),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: const Color(0xFFD4AF37).withValues(alpha: 0.25),
+            width: 1,
+          ),
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              // Cami İkonu
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: const Color(0xFFFFDF7A).withValues(alpha: 0.4),
-                    width: 1,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                // Cami İkonu
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: const Color(0xFFFFDF7A).withValues(alpha: 0.4),
+                      width: 1,
+                    ),
+                  ),
+                  child: const Icon(Icons.mosque_rounded, color: Color(0xFFFFDF7A), size: 20),
+                ),
+                const SizedBox(width: 12),
+
+                // Cami Adı ve Adresi
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        mosque.name,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14.5,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        mosque.address ?? 'Yakın Çevre',
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.65),
+                          fontSize: 12,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ),
                 ),
-                child: const Icon(Icons.mosque_rounded, color: Color(0xFFFFDF7A), size: 20),
-              ),
-              const SizedBox(width: 12),
 
-              // Cami Adı ve Adresi
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      mosque.name,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 14.5,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                // Mesafe Rozeti
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFFFFDF7A).withValues(alpha: 0.5)),
+                  ),
+                  child: Text(
+                    mosque.formattedDistance,
+                    style: const TextStyle(
+                      color: Color(0xFFFFDF7A),
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      mosque.address ?? 'Yakın Çevre',
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.65),
-                        fontSize: 12,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-
-              // Mesafe Rozeti
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFFFDF7A).withValues(alpha: 0.5)),
-                ),
-                child: Text(
-                  mosque.formattedDistance,
-                  style: const TextStyle(
-                    color: Color(0xFFFFDF7A),
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
                   ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
+              ],
+            ),
+            const SizedBox(height: 12),
 
-          // Alt Bilgi Şeridi: Yürüme Süresi, Pusula Yönü ve Yol Tarifi Butonu
-          Row(
-            children: [
-              // Yürüme Süresi
-              Icon(Icons.directions_walk_rounded, size: 14, color: Colors.white.withValues(alpha: 0.7)),
-              const SizedBox(width: 4),
-              Text(
-                '~${mosque.estimatedWalkingMinutes} dk',
-                style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 11.5),
-              ),
-              const SizedBox(width: 14),
-
-              // Yön
-              Icon(Icons.navigation_rounded, size: 12, color: const Color(0xFF2DD4BF).withValues(alpha: 0.8)),
-              const SizedBox(width: 4),
-              Text(
-                mosque.compassDirection,
-                style: const TextStyle(color: Color(0xFF2DD4BF), fontSize: 11),
-              ),
-
-              const Spacer(),
-
-              // Yol Tarifi Al Düğmesi
-              ElevatedButton.icon(
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                  _service.openWalkingDirections(
-                    lat: mosque.latitude,
-                    lng: mosque.longitude,
-                    mosqueName: mosque.name,
-                  );
-                },
-                icon: const Icon(Icons.directions_rounded, size: 15),
-                label: const Text('Yol Tarifi', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFD4AF37),
-                  foregroundColor: Colors.black,
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            // Alt Bilgi Şeridi: Yürüme Süresi, Pusula Yönü ve Yol Tarifi Butonu
+            Row(
+              children: [
+                // Yürüme Süresi
+                Icon(Icons.directions_walk_rounded, size: 14, color: Colors.white.withValues(alpha: 0.7)),
+                const SizedBox(width: 4),
+                Text(
+                  '~${mosque.estimatedWalkingMinutes} dk',
+                  style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 11.5),
                 ),
-              ),
-            ],
-          ),
-        ],
+                const SizedBox(width: 14),
+
+                // Yön
+                Icon(Icons.navigation_rounded, size: 12, color: const Color(0xFF2DD4BF).withValues(alpha: 0.8)),
+                const SizedBox(width: 4),
+                Text(
+                  mosque.compassDirection,
+                  style: const TextStyle(color: Color(0xFF2DD4BF), fontSize: 11),
+                ),
+
+                const Spacer(),
+
+                // Yol Tarifi Al Düğmesi (Google Maps / Apple Maps)
+                ElevatedButton.icon(
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    _service.openWalkingDirections(
+                      lat: mosque.latitude,
+                      lng: mosque.longitude,
+                      mosqueName: mosque.name,
+                    );
+                  },
+                  icon: const Icon(Icons.directions_rounded, size: 15),
+                  label: const Text('Yol Tarifi', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFD4AF37),
+                    foregroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
