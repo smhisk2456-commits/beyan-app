@@ -188,7 +188,7 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
     String apiKey, {
     List<AiMessage> history = const [],
   }) async {
-    final candidateModels = ['gemini-flash-latest', 'gemini-1.5-flash'];
+    final candidateModels = ['gemini-3.8-flash', 'gemini-3.5-flash', 'gemini-flash-latest'];
 
     // Son konuşma geçmişini Gemini çoklu tur sohbet formatında hazırla
     final contents = <Map<String, dynamic>>[];
@@ -222,22 +222,22 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
                 'sahih hadisler, fıkıh, ibadetler, ahlak ve manevi hayat konularında derin bilgi sahibisin. '
                 'Ehl-i Sünnet vel-Cemaat ölçülerine ve Diyanet İşleri Başkanlığı\'nın muteber kaynaklarına bağlısın. '
                 'Üslubun her zaman hürmetkar, hikmetli, açık, kucaklayıcı ve sevgi doludur. '
-                'Sorulan her dini soruya gerekçesiyle, Kur\'an ayeti ve hadis referanslarıyla net ve tatmin edici yanıt ver. '
+                'Sorulan her dini soruya doğrudan, net, doğru ve tatmin edici yanıt ver; soruyu saptırma veya alakasız genel konu anlatımı yapma. '
                 'Cevabının sonunda mutlaka ilgili Kur\'an ayeti ve hadis kaynaklarını madde halinde listele.'
           }
         ]
       },
       'contents': contents,
       'generationConfig': {
-        'temperature': 0.4,
-        'maxOutputTokens': 1200,
+        'temperature': 0.3,
+        'maxOutputTokens': 1500,
       },
     });
 
     for (final modelName in candidateModels) {
       HttpClient? client;
       try {
-        client = HttpClient()..connectionTimeout = const Duration(seconds: 10);
+        client = HttpClient()..connectionTimeout = const Duration(seconds: 15);
         final url = Uri.parse(
           'https://generativelanguage.googleapis.com/v1beta/models/$modelName:generateContent?key=$apiKey',
         );
@@ -254,7 +254,15 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
             final content = candidates.first['content'] as Map<String, dynamic>?;
             final parts = content?['parts'] as List<dynamic>?;
             if (parts != null && parts.isNotEmpty) {
-              final replyText = parts.first['text'] as String?;
+              String? replyText;
+              for (final p in parts) {
+                final map = p as Map<String, dynamic>;
+                if (map['thought'] != true && map['text'] != null) {
+                  replyText = map['text'] as String;
+                  break;
+                }
+              }
+              replyText ??= (parts.first as Map<String, dynamic>)['text'] as String?;
               if (replyText != null && replyText.trim().isNotEmpty) {
                 return AiMessage(
                   id: 'ai_${DateTime.now().millisecondsSinceEpoch}',
