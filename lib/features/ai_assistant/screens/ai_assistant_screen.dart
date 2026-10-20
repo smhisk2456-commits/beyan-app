@@ -335,14 +335,15 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
           ],
         ),
         actions: [
-          IconButton(
-            icon: Icon(
-              aiState.hasCustomApiKey ? Icons.vpn_key_rounded : Icons.key_outlined,
-              color: const Color(0xFFFFDF7A),
+          if (!aiState.hasDeveloperGlobalKey)
+            IconButton(
+              icon: Icon(
+                aiState.hasCustomApiKey ? Icons.vpn_key_rounded : Icons.key_outlined,
+                color: const Color(0xFFFFDF7A),
+              ),
+              tooltip: 'Kişisel Gemini API Anahtarı',
+              onPressed: () => _showApiKeyDialog(context),
             ),
-            tooltip: 'Kişisel Gemini API Anahtarı',
-            onPressed: () => _showApiKeyDialog(context),
-          ),
           IconButton(
             icon: const Icon(Icons.info_outline_rounded, color: Color(0xFFFFDF7A)),
             tooltip: 'Muteber Kaynaklar',

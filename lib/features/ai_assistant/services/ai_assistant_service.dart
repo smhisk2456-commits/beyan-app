@@ -24,11 +24,11 @@ class AiAssistantState {
     this.geminiApiKey,
   });
 
-  bool get hasCustomApiKey =>
-      (geminiApiKey != null && geminiApiKey!.trim().isNotEmpty) ||
-      AppConstants.defaultGeminiApiKey.trim().isNotEmpty;
+  bool get hasCustomApiKey => geminiApiKey != null && geminiApiKey!.trim().isNotEmpty;
 
   bool get hasDeveloperGlobalKey => AppConstants.defaultGeminiApiKey.trim().isNotEmpty;
+
+  bool get hasAnyActiveKey => hasCustomApiKey || hasDeveloperGlobalKey;
 
   String? get effectiveApiKey {
     if (geminiApiKey != null && geminiApiKey!.trim().isNotEmpty) {
@@ -188,95 +188,98 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
     String apiKey, {
     List<AiMessage> history = const [],
   }) async {
-    HttpClient? client;
-    try {
-      client = HttpClient()..connectionTimeout = const Duration(seconds: 10);
-      final url = Uri.parse(
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$apiKey',
-      );
-      final request = await client.postUrl(url);
-      request.headers.contentType = ContentType.json;
+    final candidateModels = ['gemini-flash-latest', 'gemini-1.5-flash'];
 
-      // Son konuşma geçmişini Gemini çoklu tur sohbet formatında hazırla
-      final contents = <Map<String, dynamic>>[];
-      final validHistory = history.where((m) => m.id != 'welcome_1').toList();
-      final takeCount = validHistory.length > 8 ? 8 : validHistory.length;
-      final recent = validHistory.sublist(validHistory.length - takeCount);
+    // Son konuşma geçmişini Gemini çoklu tur sohbet formatında hazırla
+    final contents = <Map<String, dynamic>>[];
+    final validHistory = history.where((m) => m.id != 'welcome_1').toList();
+    final takeCount = validHistory.length > 8 ? 8 : validHistory.length;
+    final recent = validHistory.sublist(validHistory.length - takeCount);
 
-      for (final msg in recent) {
-        contents.add({
-          'role': msg.isUser ? 'user' : 'model',
-          'parts': [
-            {'text': msg.text}
-          ],
-        });
-      }
-
-      // Mevcut soruyu ekle
+    for (final msg in recent) {
       contents.add({
-        'role': 'user',
+        'role': msg.isUser ? 'user' : 'model',
         'parts': [
-          {'text': query}
+          {'text': msg.text}
         ],
       });
+    }
 
-      final body = jsonEncode({
-        'system_instruction': {
-          'parts': [
-            {
-              'text': 'Sen Beyân mobil uygulamasının "Beyân AI Manevi Rehber & Tefsir Asistanı"sın. '
-                  'İslam dini, dinler tarihi (İslam, Hristiyanlık, Yahudilik vb.), Kur\'an-ı Kerim, tefsir, '
-                  'sahih hadisler, fıkıh, ibadetler, ahlak ve manevi hayat konularında derin bilgi sahibisin. '
-                  'Ehl-i Sünnet vel-Cemaat ölçülerine ve Diyanet İşleri Başkanlığı\'nın muteber kaynaklarına bağlısın. '
-                  'Üslubun her zaman hürmetkar, hikmetli, açık, kucaklayıcı ve sevgi doludur. '
-                  'Sorulan her dini soruya gerekçesiyle, Kur\'an ayeti ve hadis referanslarıyla net ve tatmin edici yanıt ver. '
-                  'Cevabının sonunda mutlaka ilgili Kur\'an ayeti ve hadis kaynaklarını madde halinde listele.'
-            }
-          ]
-        },
-        'contents': contents,
-        'generationConfig': {
-          'temperature': 0.4,
-          'maxOutputTokens': 1200,
-        },
-      });
+    // Mevcut soruyu ekle
+    contents.add({
+      'role': 'user',
+      'parts': [
+        {'text': query}
+      ],
+    });
 
-      request.write(body);
-      final response = await request.close();
+    final body = jsonEncode({
+      'system_instruction': {
+        'parts': [
+          {
+            'text': 'Sen Beyân mobil uygulamasının "Beyân AI Manevi Rehber & Tefsir Asistanı"sın. '
+                'İslam dini, dinler tarihi (İslam, Hristiyanlık, Yahudilik vb.), Kur\'an-ı Kerim, tefsir, '
+                'sahih hadisler, fıkıh, ibadetler, ahlak ve manevi hayat konularında derin bilgi sahibisin. '
+                'Ehl-i Sünnet vel-Cemaat ölçülerine ve Diyanet İşleri Başkanlığı\'nın muteber kaynaklarına bağlısın. '
+                'Üslubun her zaman hürmetkar, hikmetli, açık, kucaklayıcı ve sevgi doludur. '
+                'Sorulan her dini soruya gerekçesiyle, Kur\'an ayeti ve hadis referanslarıyla net ve tatmin edici yanıt ver. '
+                'Cevabının sonunda mutlaka ilgili Kur\'an ayeti ve hadis kaynaklarını madde halinde listele.'
+          }
+        ]
+      },
+      'contents': contents,
+      'generationConfig': {
+        'temperature': 0.4,
+        'maxOutputTokens': 1200,
+      },
+    });
 
-      if (response.statusCode == 200) {
-        final responseBody = await response.transform(utf8.decoder).join();
-        final decoded = jsonDecode(responseBody) as Map<String, dynamic>;
-        final candidates = decoded['candidates'] as List<dynamic>?;
-        if (candidates != null && candidates.isNotEmpty) {
-          final content = candidates.first['content'] as Map<String, dynamic>?;
-          final parts = content?['parts'] as List<dynamic>?;
-          if (parts != null && parts.isNotEmpty) {
-            final replyText = parts.first['text'] as String?;
-            if (replyText != null && replyText.trim().isNotEmpty) {
-              return AiMessage(
-                id: 'ai_${DateTime.now().millisecondsSinceEpoch}',
-                text: replyText.trim(),
-                isUser: false,
-                timestamp: DateTime.now(),
-                references: const [
-                  'Google Gemini 1.5 Flash • Canlı İslami Danışman',
-                  'Kur\'an-ı Kerim ve Sahih Sünnet Ölçüleri'
-                ],
-                suggestedFollowUps: const [
-                  'Bu konuda Kur\'an\'da geçen diğer ayetler nelerdir?',
-                  'Günlük hayatımda bunu nasıl tatbik edebilirim?',
-                  'Diyanet İşleri Başkanlığı\'nın bu konudaki fetvası nedir?',
-                ],
-              );
+    for (final modelName in candidateModels) {
+      HttpClient? client;
+      try {
+        client = HttpClient()..connectionTimeout = const Duration(seconds: 10);
+        final url = Uri.parse(
+          'https://generativelanguage.googleapis.com/v1beta/models/$modelName:generateContent?key=$apiKey',
+        );
+        final request = await client.postUrl(url);
+        request.headers.contentType = ContentType.json;
+        request.write(body);
+        final response = await request.close();
+
+        if (response.statusCode == 200) {
+          final responseBody = await response.transform(utf8.decoder).join();
+          final decoded = jsonDecode(responseBody) as Map<String, dynamic>;
+          final candidates = decoded['candidates'] as List<dynamic>?;
+          if (candidates != null && candidates.isNotEmpty) {
+            final content = candidates.first['content'] as Map<String, dynamic>?;
+            final parts = content?['parts'] as List<dynamic>?;
+            if (parts != null && parts.isNotEmpty) {
+              final replyText = parts.first['text'] as String?;
+              if (replyText != null && replyText.trim().isNotEmpty) {
+                return AiMessage(
+                  id: 'ai_${DateTime.now().millisecondsSinceEpoch}',
+                  text: replyText.trim(),
+                  isUser: false,
+                  timestamp: DateTime.now(),
+                  references: const [
+                    'Google Gemini (Resmi Canlı Model) • Manevi Rehber',
+                    'Kur\'an-ı Kerim ve Sahih Sünnet Ölçüleri'
+                  ],
+                  suggestedFollowUps: const [
+                    'Bu konuda Kur\'an\'da geçen diğer ayetler nelerdir?',
+                    'Günlük hayatımda bunu nasıl tatbik edebilirim?',
+                    'Diyanet İşleri Başkanlığı\'nın bu konudaki fetvası nedir?',
+                  ],
+                );
+              }
             }
           }
         }
+      } catch (e) {
+        debugPrint('Gemini API ($modelName) hatası: $e');
+      } finally {
+        client?.close(force: true);
       }
-    } catch (e) {
-      debugPrint('Gemini API çağrı hatası (Dahili motora geçiliyor): $e');
-    } finally {
-      client?.close(force: true);
     }
     return null;
   }
