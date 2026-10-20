@@ -419,27 +419,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
     }
 
     if (hasDeveloperGlobalKey) {
-      return Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        color: const Color(0xFF0F3A30),
-        child: const Row(
-          children: [
-            Icon(Icons.auto_awesome_rounded, color: Color(0xFFFFDF7A), size: 16),
-            SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                'Google Gemini 1.5 Flash Aktif • Canlı İslami Danışmanlık',
-                style: TextStyle(
-                  color: Color(0xFFFFDF7A),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
+      return const SizedBox.shrink();
     }
 
     if (hasCustomApiKey) {

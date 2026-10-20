@@ -262,7 +262,7 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
                   isUser: false,
                   timestamp: DateTime.now(),
                   references: const [
-                    'Google Gemini (Resmi Canlı Model) • Manevi Rehber',
+                    'Beyân AI Manevi Rehber & Tefsir Asistanı',
                     'Kur\'an-ı Kerim ve Sahih Sünnet Ölçüleri'
                   ],
                   suggestedFollowUps: const [
