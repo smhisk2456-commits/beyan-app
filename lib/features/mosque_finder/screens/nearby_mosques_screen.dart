@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/utils/app_constants.dart';
 import '../../prayer_times/services/prayer_time_service.dart';
 import '../models/nearby_mosque_model.dart';
@@ -44,20 +46,63 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
     setState(() => _isLoading = true);
     try {
       Position? position;
+
+      // 1. Konum servisleri açık mı kontrol et
+      final isServiceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!isServiceEnabled) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Cihaz konum servisi kapalı. Lütfen GPS\'i açın.'),
+              action: SnackBarAction(
+                label: 'Ayarları Aç',
+                textColor: const Color(0xFFFFDF7A),
+                onPressed: () => Geolocator.openLocationSettings(),
+              ),
+              backgroundColor: const Color(0xFF032D26),
+              duration: const Duration(seconds: 4),
+            ),
+          );
+        }
+      }
+
+      // 2. İzin kontrolü ve talep
       LocationPermission perm = await Geolocator.checkPermission();
       if (perm == LocationPermission.denied) {
         perm = await Geolocator.requestPermission();
       }
 
+      if (perm == LocationPermission.deniedForever) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Konum izni kalıcı reddedildi. Ayarlardan izin verin.'),
+              action: SnackBarAction(
+                label: 'Uygulama İzinleri',
+                textColor: const Color(0xFFFFDF7A),
+                onPressed: () => Geolocator.openAppSettings(),
+              ),
+              backgroundColor: const Color(0xFF032D26),
+              duration: const Duration(seconds: 5),
+            ),
+          );
+        }
+      }
+
+      // 3. Canlı ve son bilinen GPS verilerini al
       if (perm == LocationPermission.always || perm == LocationPermission.whileInUse) {
         try {
-          position = await Geolocator.getLastKnownPosition();
+          final lastPos = await Geolocator.getLastKnownPosition();
+          if (lastPos != null) {
+            position = lastPos;
+          }
         } catch (_) {}
 
         try {
+          // Birebir hassas canlı GPS koordinatı (14 saniye zaman aşımı ile uydu kilidi)
           final livePos = await Geolocator.getCurrentPosition(
-            desiredAccuracy: LocationAccuracy.high,
-            timeLimit: const Duration(seconds: 6),
+            desiredAccuracy: LocationAccuracy.best,
+            timeLimit: const Duration(seconds: 14),
           );
           position = livePos;
         } catch (_) {}
@@ -66,8 +111,42 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
       if (position != null) {
         _userLat = position.latitude;
         _userLng = position.longitude;
-        _userLocationTitle = 'Mevcut Canlı Konumunuz (${_userLat.toStringAsFixed(2)}, ${_userLng.toStringAsFixed(2)})';
         _isGpsActive = true;
+
+        // Koordinatları ilçe/mahalle adına ters jeokodla (Reverse Geocoding)
+        String readableLocation = 'Canlı GPS Konumu';
+        try {
+          final placemarks = await placemarkFromCoordinates(_userLat, _userLng);
+          if (placemarks.isNotEmpty) {
+            final p = placemarks.first;
+            final subLoc = p.subLocality?.trim() ?? '';
+            final locality = p.locality?.trim() ?? '';
+            final subAdmin = p.subAdministrativeArea?.trim() ?? '';
+            final admin = p.administrativeArea?.trim() ?? '';
+
+            final district = subLoc.isNotEmpty
+                ? subLoc
+                : (locality.isNotEmpty ? locality : subAdmin);
+
+            if (district.isNotEmpty && admin.isNotEmpty && district != admin) {
+              readableLocation = '$district, $admin';
+            } else if (district.isNotEmpty) {
+              readableLocation = district;
+            } else if (admin.isNotEmpty) {
+              readableLocation = admin;
+            }
+          }
+        } catch (_) {}
+
+        _userLocationTitle = '$readableLocation (Canlı GPS 📍)';
+
+        // Widget ve konum önbelleğini canlı GPS ile güncelle
+        try {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setDouble('beyan_widget_lat', _userLat);
+          await prefs.setDouble('beyan_widget_lng', _userLng);
+          await prefs.setString('beyan_widget_city', readableLocation);
+        } catch (_) {}
       } else {
         final loc = await PrayerTimeService.instance.getCurrentLocation();
         _userLat = loc.latitude;

@@ -53,7 +53,7 @@ class NearbyMosquesService {
     final maxLng = lng + deltaLng;
 
     final uri = Uri.parse(
-      'https://nominatim.openstreetmap.org/search?format=json&q=cami&limit=50&viewbox=$minLng,$maxLat,$maxLng,$minLat&bounded=1&addressdetails=1',
+      'https://nominatim.openstreetmap.org/search?format=json&q=cami&limit=50&viewbox=$minLng,$maxLat,$maxLng,$minLat&bounded=0&addressdetails=1',
     );
 
     final client = HttpClient()..connectionTimeout = const Duration(seconds: 7);
@@ -139,30 +139,38 @@ class NearbyMosquesService {
   /// OpenStreetMap Overpass API sorgusu
   Future<List<NearbyMosque>> _fetchFromOverpass(double lat, double lng, double radius) async {
     final query = '''
-[out:json][timeout:8];
+[out:json][timeout:10];
 (
   node["amenity"="place_of_worship"]["religion"="muslim"](around:$radius,$lat,$lng);
   way["amenity"="place_of_worship"]["religion"="muslim"](around:$radius,$lat,$lng);
+  relation["amenity"="place_of_worship"]["religion"="muslim"](around:$radius,$lat,$lng);
+  node["building"="mosque"](around:$radius,$lat,$lng);
+  way["building"="mosque"](around:$radius,$lat,$lng);
 );
-out center 35;
+out center 45;
 ''';
 
-    final uri = Uri.parse('https://overpass-api.de/api/interpreter?data=${Uri.encodeComponent(query)}');
-    final client = HttpClient()..connectionTimeout = const Duration(seconds: 7);
-    try {
-      final request = await client.getUrl(uri);
-      request.headers.set('User-Agent', 'BeyanApp/1.0 (smhisk2456@gmail.com)');
-      final response = await request.close().timeout(const Duration(seconds: 8));
+    final endpoints = [
+      'https://overpass-api.de/api/interpreter?data=${Uri.encodeComponent(query)}',
+      'https://overpass.kumi.systems/api/interpreter?data=${Uri.encodeComponent(query)}',
+    ];
 
-      if (response.statusCode != HttpStatus.ok) {
-        return [];
-      }
+    for (final ep in endpoints) {
+      final client = HttpClient()..connectionTimeout = const Duration(seconds: 7);
+      try {
+        final request = await client.getUrl(Uri.parse(ep));
+        request.headers.set('User-Agent', 'BeyanApp/1.0 (smhisk2456@gmail.com)');
+        final response = await request.close().timeout(const Duration(seconds: 8));
 
-      final responseBody = await response.transform(utf8.decoder).join();
-      final data = jsonDecode(responseBody);
-      final elements = data['elements'] as List<dynamic>? ?? [];
+        if (response.statusCode != HttpStatus.ok) {
+          continue;
+        }
 
-      final result = <NearbyMosque>[];
+        final responseBody = await response.transform(utf8.decoder).join();
+        final data = jsonDecode(responseBody);
+        final elements = data['elements'] as List<dynamic>? ?? [];
+
+        final result = <NearbyMosque>[];
 
       for (final el in elements) {
         final tags = el['tags'] as Map<String, dynamic>? ?? {};
@@ -204,10 +212,16 @@ out center 35;
         );
       }
 
-      return result;
-    } finally {
-      client.close();
+        if (result.isNotEmpty) {
+          return result;
+        }
+      } catch (_) {
+        // Hata durumunda bir sonraki aynayı/sunucuyu dene
+      } finally {
+        client.close();
+      }
     }
+    return [];
   }
 
   /// Apple Haritalar veya Google Haritalar uygulamasında çevredeki tüm camileri arama

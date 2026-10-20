@@ -150,7 +150,7 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
     // 1. Canlı Gemini API çağrısı (varsa)
     AiMessage? aiReply;
     if (state.hasCustomApiKey) {
-      aiReply = await _callGeminiApi(query, state.geminiApiKey!);
+      aiReply = await _callGeminiApi(query, state.geminiApiKey!, history: state.messages);
     }
 
     // 2. Canlı API yoksa veya başarısız olursa Dahili İslami İlimler ve Dinler Bilgi Motoru
@@ -167,15 +167,42 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
     return true;
   }
 
-  Future<AiMessage?> _callGeminiApi(String query, String apiKey) async {
+  Future<AiMessage?> _callGeminiApi(
+    String query,
+    String apiKey, {
+    List<AiMessage> history = const [],
+  }) async {
     HttpClient? client;
     try {
-      client = HttpClient()..connectionTimeout = const Duration(seconds: 8);
+      client = HttpClient()..connectionTimeout = const Duration(seconds: 10);
       final url = Uri.parse(
         'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$apiKey',
       );
       final request = await client.postUrl(url);
       request.headers.contentType = ContentType.json;
+
+      // Son konuşma geçmişini Gemini çoklu tur sohbet formatında hazırla
+      final contents = <Map<String, dynamic>>[];
+      final validHistory = history.where((m) => m.id != 'welcome_1').toList();
+      final takeCount = validHistory.length > 8 ? 8 : validHistory.length;
+      final recent = validHistory.sublist(validHistory.length - takeCount);
+
+      for (final msg in recent) {
+        contents.add({
+          'role': msg.isUser ? 'user' : 'model',
+          'parts': [
+            {'text': msg.text}
+          ],
+        });
+      }
+
+      // Mevcut soruyu ekle
+      contents.add({
+        'role': 'user',
+        'parts': [
+          {'text': query}
+        ],
+      });
 
       final body = jsonEncode({
         'system_instruction': {
@@ -191,14 +218,7 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
             }
           ]
         },
-        'contents': [
-          {
-            'role': 'user',
-            'parts': [
-              {'text': query}
-            ]
-          }
-        ],
+        'contents': contents,
         'generationConfig': {
           'temperature': 0.4,
           'maxOutputTokens': 1200,

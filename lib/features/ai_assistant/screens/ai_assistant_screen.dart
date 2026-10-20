@@ -101,8 +101,33 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Google AI Studio\'dan (aistudio.google.com) edinebileceğiniz tamamen ücretsiz Gemini API anahtarınızı girerek Beyân AI\'yı kotasız ve sınırsız kullanabilirsiniz.',
+              'Google AI Studio\'dan (aistudio.google.com) 30 saniyede tamamen ücretsiz alabileceğiniz resmi Gemini API anahtarınızı girerek Beyân AI\'yı Google Gemini 1.5 Flash ile canlı olarak bağlayabilirsiniz.',
               style: TextStyle(color: Colors.white70, fontSize: 13, height: 1.45),
+            ),
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: const Color(0xFF032D26),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: const Color(0xFFFFDF7A).withValues(alpha: 0.3)),
+              ),
+              child: const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Nasıl Alınır? (Ücretsiz):',
+                    style: TextStyle(color: Color(0xFFFFDF7A), fontSize: 11.5, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    '1. aistudio.google.com adresini açın\n'
+                    '2. "Get API key" butonuna dokunup anahtar oluşturun\n'
+                    '3. Kopyalayıp aşağıdaki alana yapıştırın',
+                    style: TextStyle(color: Colors.white70, fontSize: 11, height: 1.4),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 14),
             TextField(

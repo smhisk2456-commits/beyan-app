@@ -1492,161 +1492,130 @@ struct BeyanLiveActivity: Widget {
             let isWithinWindow = (triggerMinutes == -1) || (triggerMinutes == 0 && isPast) || (remainingMinutes <= Double(triggerMinutes))
             let visuals = prayerVisuals(for: context.state.prayerName)
 
-            // Ultra-Premium iOS 18 Lock Screen & StandBy Banner UI
+            // Ultra-Sleek Glassmorphic iOS Lock Screen Banner (Uncluttered & Wallpaper-Friendly)
             HStack(spacing: 12) {
-                // Dual-layer Glassmorphic Icon Container
+                // Sleek Circular Icon Container
                 ZStack {
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    Circle()
                         .fill(
                             LinearGradient(
-                                colors: visuals.gradient,
+                                colors: [
+                                    Color(red: 0.10, green: 0.28, blue: 0.22).opacity(0.85),
+                                    Color(red: 0.03, green: 0.14, blue: 0.11).opacity(0.95)
+                                ],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             )
                         )
-                        .frame(width: 44, height: 44)
+                        .frame(width: 38, height: 38)
                         .overlay(
-                            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                .stroke(
-                                    LinearGradient(
-                                        colors: [Color(red: 1.0, green: 0.88, blue: 0.52).opacity(0.55), Color.clear],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    ),
-                                    lineWidth: 1
-                                )
+                            Circle()
+                                .stroke(Color(red: 1.0, green: 0.88, blue: 0.52).opacity(0.4), lineWidth: 1)
                         )
-                        .shadow(color: visuals.gradient.first?.opacity(0.4) ?? .clear, radius: 6, x: 0, y: 2)
 
                     Image(systemName: visuals.icon)
-                        .font(.system(size: 20, weight: .bold))
-                        .foregroundColor(.white)
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundColor(visuals.accentColor)
                 }
 
-                // Prayer Name & Location Row
+                // Prayer Name & Subtitle
                 VStack(alignment: .leading, spacing: 3) {
                     HStack(spacing: 6) {
                         Text(context.state.prayerName)
-                            .font(.system(size: 16.5, weight: .heavy, design: .rounded))
-                            .foregroundColor(Color(red: 1.0, green: 0.90, blue: 0.60))
+                            .font(.system(size: 16, weight: .bold, design: .rounded))
+                            .foregroundColor(Color(red: 1.0, green: 0.90, blue: 0.62))
 
-                        HStack(spacing: 3) {
-                            Image(systemName: "location.fill")
-                                .font(.system(size: 9))
-                            Text(context.state.cityName)
-                                .font(.system(size: 10.5, weight: .semibold, design: .rounded))
+                        let city = context.state.cityName.trimmingCharacters(in: .whitespacesAndNewlines)
+                        if !city.isEmpty &&
+                            !city.lowercased().contains("mevcut konum") &&
+                            !city.lowercased().contains("default") {
+                            Text("• \(city)")
+                                .font(.system(size: 11.5, weight: .medium, design: .rounded))
+                                .foregroundColor(.white.opacity(0.65))
+                                .lineLimit(1)
                         }
-                        .foregroundColor(.white.opacity(0.75))
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(
-                            Capsule().fill(Color.white.opacity(0.12))
-                        )
                     }
 
                     HStack(spacing: 4) {
-                        Image(systemName: "clock.fill")
-                            .font(.system(size: 10))
-                            .foregroundColor(visuals.accentColor.opacity(0.85))
+                        Image(systemName: "clock")
+                            .font(.system(size: 10, weight: .medium))
+                            .foregroundColor(.white.opacity(0.65))
                         Text("Ezan: \(context.state.prayerTime)")
-                            .font(.system(size: 12.5, weight: .semibold, design: .rounded))
-                            .foregroundColor(.white.opacity(0.92))
+                            .font(.system(size: 12, weight: .medium, design: .rounded))
+                            .foregroundColor(.white.opacity(0.85))
                     }
                 }
 
                 Spacer()
 
-                // Right Side: Safe Countdown or Vakit Girdi Status (Stopwatch Bug Fixed)
+                // Right Side: Safe Countdown or Vakit Girdi Status
                 if isPast {
-                    VStack(alignment: .trailing, spacing: 3) {
+                    VStack(alignment: .trailing, spacing: 2) {
                         HStack(spacing: 4) {
                             Circle()
-                                .fill(Color(red: 0.13, green: 0.77, blue: 0.36))
-                                .frame(width: 7, height: 7)
+                                .fill(Color(red: 0.20, green: 0.85, blue: 0.45))
+                                .frame(width: 6, height: 6)
                             Text("VAKİT GİRDİ")
-                                .font(.system(size: 10.5, weight: .black, design: .rounded))
-                                .foregroundColor(Color(red: 0.98, green: 0.88, blue: 0.60))
+                                .font(.system(size: 10, weight: .bold, design: .rounded))
+                                .foregroundColor(Color(red: 0.20, green: 0.85, blue: 0.45))
                         }
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 3.5)
+                        .padding(.horizontal, 7)
+                        .padding(.vertical, 3)
                         .background(
                             Capsule()
-                                .fill(Color(red: 0.04, green: 0.28, blue: 0.20).opacity(0.9))
-                                .overlay(
-                                    Capsule().stroke(Color(red: 0.13, green: 0.77, blue: 0.36).opacity(0.5), lineWidth: 1)
-                                )
+                                .fill(Color(red: 0.05, green: 0.25, blue: 0.18).opacity(0.7))
                         )
 
                         Text("00:00")
-                            .font(.system(size: 13, weight: .bold, design: .rounded))
+                            .font(.system(size: 12.5, weight: .bold, design: .rounded))
                             .monospacedDigit()
-                            .foregroundColor(.white.opacity(0.7))
+                            .foregroundColor(.white.opacity(0.65))
                     }
                 } else if isWithinWindow {
-                    VStack(alignment: .trailing, spacing: 2) {
+                    VStack(alignment: .trailing, spacing: 1) {
                         let startDate = min(now, targetDate)
                         Text(timerInterval: startDate...targetDate, pauseTime: targetDate, countsDown: true)
-                            .font(.system(size: 18, weight: .heavy, design: .rounded))
+                            .font(.system(size: 17, weight: .heavy, design: .rounded))
                             .monospacedDigit()
                             .foregroundColor(Color(red: 1.0, green: 0.88, blue: 0.52))
 
-                        HStack(spacing: 3) {
-                            Image(systemName: "hourglass")
-                                .font(.system(size: 9, weight: .bold))
-                            Text("KALDI")
-                                .font(.system(size: 9.5, weight: .bold, design: .rounded))
-                                .tracking(0.8)
-                        }
-                        .foregroundColor(.white.opacity(0.65))
+                        Text("kaldı")
+                            .font(.system(size: 9.5, weight: .medium, design: .rounded))
+                            .textCase(.uppercase)
+                            .tracking(0.8)
+                            .foregroundColor(.white.opacity(0.6))
                     }
                 } else {
-                    VStack(alignment: .trailing, spacing: 2) {
+                    VStack(alignment: .trailing, spacing: 1) {
                         Text(context.state.prayerTime)
-                            .font(.system(size: 16, weight: .heavy, design: .rounded))
+                            .font(.system(size: 15, weight: .bold, design: .rounded))
                             .monospacedDigit()
                             .foregroundColor(Color(red: 1.0, green: 0.88, blue: 0.52))
 
-                        Text("\(triggerMinutes) dk kala başlar")
+                        Text("\(triggerMinutes) dk kala")
                             .font(.system(size: 9.5, weight: .medium, design: .rounded))
-                            .foregroundColor(.white.opacity(0.65))
+                            .foregroundColor(.white.opacity(0.6))
                     }
                 }
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 13)
+            .padding(.horizontal, 15)
+            .padding(.vertical, 10)
             .background(
                 ZStack {
-                    LinearGradient(
-                        colors: [
-                            Color(red: 0.02, green: 0.11, blue: 0.09),
-                            Color(red: 0.01, green: 0.05, blue: 0.04)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                    RadialGradient(
-                        colors: [visuals.accentColor.opacity(0.12), Color.clear],
-                        center: .topLeading,
-                        startRadius: 0,
-                        endRadius: 130
-                    )
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .fill(.ultraThinMaterial)
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .fill(Color(red: 0.01, green: 0.07, blue: 0.05).opacity(0.55))
                 }
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
                     .stroke(
-                        LinearGradient(
-                            colors: [
-                                Color(red: 1.0, green: 0.88, blue: 0.52).opacity(0.35),
-                                Color(red: 0.13, green: 0.77, blue: 0.36).opacity(0.15)
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        lineWidth: 1
+                        Color(red: 1.0, green: 0.88, blue: 0.52).opacity(0.22),
+                        lineWidth: 0.8
                     )
             )
-            .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
             .widgetURL(URL(string: "beyan://prayer"))
         } dynamicIsland: { context in
             let triggerMinutes: Int = {
@@ -1764,31 +1733,32 @@ struct BeyanLiveActivity: Widget {
                 }
             } compactLeading: {
                 Image(systemName: visuals.icon)
-                    .font(.system(size: 13, weight: .bold))
+                    .font(.system(size: 13, weight: .semibold))
                     .foregroundColor(visuals.accentColor)
+                    .frame(width: 20, height: 20, alignment: .center)
             } compactTrailing: {
-                if isPast {
-                    Text("00:00")
-                        .monospacedDigit()
-                        .font(.system(size: 11.5, weight: .heavy, design: .rounded))
-                        .foregroundColor(Color(red: 0.20, green: 0.85, blue: 0.45))
-                } else if isWithinWindow {
-                    let startDate = min(now, targetDate)
-                    Text(timerInterval: startDate...targetDate, pauseTime: targetDate, countsDown: true)
-                        .monospacedDigit()
-                        .font(.system(size: 11.5, weight: .heavy, design: .rounded))
-                        .foregroundColor(Color(red: 1.0, green: 0.88, blue: 0.52))
-                        .frame(minWidth: 44)
-                } else {
-                    Text(context.state.prayerTime)
-                        .font(.system(size: 11.5, weight: .bold, design: .rounded))
-                        .foregroundColor(Color(red: 1.0, green: 0.88, blue: 0.52))
-                        .frame(minWidth: 44)
+                Group {
+                    if isPast {
+                        Text("00:00")
+                            .foregroundColor(Color(red: 0.20, green: 0.85, blue: 0.45))
+                    } else if isWithinWindow {
+                        let startDate = min(now, targetDate)
+                        Text(timerInterval: startDate...targetDate, pauseTime: targetDate, countsDown: true)
+                            .foregroundColor(Color(red: 1.0, green: 0.88, blue: 0.52))
+                    } else {
+                        Text(context.state.prayerTime)
+                            .foregroundColor(Color(red: 1.0, green: 0.88, blue: 0.52))
+                    }
                 }
+                .font(.system(size: 11.5, weight: .semibold, design: .rounded))
+                .monospacedDigit()
+                .multilineTextAlignment(.trailing)
+                .frame(width: 52, alignment: .trailing)
             } minimal: {
                 Image(systemName: visuals.icon)
-                    .font(.system(size: 12, weight: .bold))
+                    .font(.system(size: 12, weight: .semibold))
                     .foregroundColor(visuals.accentColor)
+                    .frame(width: 16, height: 16, alignment: .center)
             }
             .widgetURL(URL(string: "beyan://prayer"))
         }
