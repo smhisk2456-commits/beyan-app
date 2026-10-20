@@ -662,6 +662,102 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
     }
 
     // ─────────────────────────────────────────────────────────────
+    // 8.1. HZ. ALİ (K.V.) & EHL-İ BEYT
+    // ─────────────────────────────────────────────────────────────
+    if (q.contains('ali') ||
+        q.contains('ehl i beyt') ||
+        q.contains('hasan') ||
+        q.contains('huseyin') ||
+        q.contains('kerbela') ||
+        q.contains('zulfikar')) {
+      return AiMessage(
+        id: 'ai_${DateTime.now().millisecondsSinceEpoch}',
+        text: '### İlim Şehrinin Kapısı: Hz. Ali b. Ebî Tâlib (k.v.) ve Ehl-i Beyt\n\n'
+            '**1. Hayatı ve Faziletleri:**\n'
+            '• Peygamber Efendimiz\'in (s.a.v) amcasının oğlu, damadı (Hz. Fatıma\'nın eşi), dördüncü Hulefâ-yi Râşidîn halifesi ve çocuk yaşta ilk Müslüman olan kimsedir.\n'
+            '• Resûlullah (s.a.v) onun hakkında: *"Ben ilmin şehriyim, Ali ise onun kapısıdır"* (Tirmizî) buyurmuştur.\n\n'
+            '**2. Vefatı ve Şehadeti:**\n'
+            '• Hz. Ali (k.v.), **Miladi 661 yılında** (Hicri 40, Ramazan ayının 19. günü sabah namazına giderken) Kûfe Mescidi\'nde Hâricî Abdurrahman b. Mülcem tarafından zehirli kılıçla yaralanmış ve iki gün sonra (21 Ramazan 40) **şehit olmuştur**.\n'
+            '• Kabr-i şerifi günümüzde Irak\'ın Necef şehrindedir.\n\n'
+            '**3. Lakapları ve Kahramanlığı:**\n'
+            '• "Esedullâh" (Allah\'ın Aslanı), "Ebû Turâb", "Mürtezâ" ve Hayber Kalesi\'nin fatihidir.',
+        isUser: false,
+        timestamp: DateTime.now(),
+        references: const [
+          'Sünen-i Tirmizî, Menâkıb 20',
+          'Sahih-i Müslim, Fedâilü\'s-Sahâbe 4 (Hz. Ali\'nin Menkıbeleri)',
+          'Diyanet İslam Ansiklopedisi, "Ali b. Ebû Tâlib" Maddesi'
+        ],
+        suggestedFollowUps: const [
+          'Hz. Ali\'nin adalet ve ilim anlayışı nasıldı?',
+          'Ehl-i Beyt sevgisinin İslam\'daki yeri nedir?',
+          'Kerbela vakası ve Hz. Hüseyin\'in şehadeti',
+        ],
+      );
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // 8.2. HZ. ÖMER (R.A.) - ADALET TİMSALİ
+    // ─────────────────────────────────────────────────────────────
+    if (q.contains('omer') ||
+        q.contains('faruk')) {
+      return AiMessage(
+        id: 'ai_${DateTime.now().millisecondsSinceEpoch}',
+        text: '### Adalet Timsali: Hz. Ömer b. Hattâb (r.a.)\n\n'
+            '**1. Hayatı ve Hilafeti:**\n'
+            '• İkinci Hâlife ve Aşere-i Mübeşşere\'dendir. Hak ile batılı ayıran anlamına gelen **"el-Fârûk"** lakabını almıştır.\n'
+            '• Hilafetinde Kudüs, Şam, Mısır ve İran fethedilmiş; adliye teşkilatı ve Hicri takvim tesis edilmiştir.\n\n'
+            '**2. Vefatı ve Şehadeti:**\n'
+            '• **Miladi 644 yılında** (Hicri 23) Medine\'de Mescid-i Nebevî\'de sabah namazını kıldırırken Ebû Lü\'lüe tarafından hançerlenerek **şehit edilmiştir**.\n'
+            '• Kabri Mescid-i Nebevî\'de Peygamberimiz (s.a.v) ve Hz. Ebubekir\'in yanındadır.',
+        isUser: false,
+        timestamp: DateTime.now(),
+        references: const [
+          'Sahih-i Buhari, Fedâilü Ashâbi\'n-Nebî 6',
+          'Sahih-i Müslim, Fedâilü\'s-Sahâbe 2',
+          'Diyanet İslam Ansiklopedisi, "Ömer b. Hattâb" Maddesi'
+        ],
+      );
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // 8.3. HZ. EBUBEKİR & HZ. OSMAN
+    // ─────────────────────────────────────────────────────────────
+    if (q.contains('ebubekir') || q.contains('siddik')) {
+      return AiMessage(
+        id: 'ai_${DateTime.now().millisecondsSinceEpoch}',
+        text: '### Sıddîk-ı Ekber: Hz. Ebû Bekir (r.a.)\n\n'
+            '• İlk İslam halifesi, Peygamberimiz\'in (s.a.v) hicret yoldaşı ve en sadık dostudur.\n'
+            '• Kur\'an-ı Kerim\'i ilk kez tek bir mushaf halinde toplatmıştır.\n'
+            '• **Vefatı:** **Miladi 634 yılında** (Hicri 13) 63 yaşında Medine\'de vefat etmiştir. Kabri Hücre-i Saadet\'te Resûlullah\'ın (s.a.v) yanındadır.',
+        isUser: false,
+        timestamp: DateTime.now(),
+        references: const [
+          'Tevbe Sûresi, 40. Âyet (Mağara Arkadaşı)',
+          'Sahih-i Buhari, Fedâil 5',
+          'Diyanet İslam Ansiklopedisi, "Ebû Bekir" Maddesi'
+        ],
+      );
+    }
+
+    if (q.contains('osman') || q.contains('zinnureyn')) {
+      return AiMessage(
+        id: 'ai_${DateTime.now().millisecondsSinceEpoch}',
+        text: '### Hayâ ve Cömertlik Timsali: Hz. Osmân b. Affân (r.a.)\n\n'
+            '• Üçüncü halife ve Efendimiz\'in iki kızıyla evlendiği için "İki Nur Sahibi" (**Zinnûreyn**) unvanını almıştır.\n'
+            '• Hilafetinde Kur\'an-ı Kerim çoğaltılarak ana İslam beldelerine gönderilmiştir.\n'
+            '• **Vefatı ve Şehadeti:** **Miladi 656 yılında** (Hicri 35) evinde Kur\'an okurken isyancılar tarafından **şehit edilmiştir**.',
+        isUser: false,
+        timestamp: DateTime.now(),
+        references: const [
+          'Sahih-i Buhari, Fedâilü Ashâbi\'n-Nebî 7',
+          'Sahih-i Müslim, Fedâilü\'s-Sahâbe 3',
+          'Diyanet İslam Ansiklopedisi, "Osmân b. Affân" Maddesi'
+        ],
+      );
+    }
+
+    // ─────────────────────────────────────────────────────────────
     // 9. PEYGAMBERİMİZ (S.A.V), SÜNNET & ASHÂB-I KİRAM
     // ─────────────────────────────────────────────────────────────
     if (q.contains('peygamberimiz') ||
@@ -672,11 +768,7 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
         q.contains('salavat') ||
         q.contains('mirac') ||
         q.contains('mevlid') ||
-        q.contains('sahabe') ||
-        q.contains('ebubekir') ||
-        q.contains('omer') ||
-        q.contains('osman') ||
-        q.contains('ali')) {
+        q.contains('sahabe')) {
       return AiMessage(
         id: 'ai_${DateTime.now().millisecondsSinceEpoch}',
         text: '### Âlemlere Rahmet: Hz. Muhammed Mustafâ (s.a.v)\n\n'
