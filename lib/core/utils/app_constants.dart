@@ -52,4 +52,14 @@ abstract class AppConstants {
     'maghrib': 'Akşam',
     'isha': 'Yatsı',
   };
+
+  // ── Gemini AI Geliştirici Anahtarı ─────────────────────────────
+  /// Geliştiricinin tüm kullanıcılar için sağladığı merkezi Gemini API anahtarı.
+  /// Derleme anında enjekte etmek için:
+  /// flutter build ipa --dart-define=GEMINI_API_KEY=AIzaSy...
+  /// veya doğrudan buraya yazılarak tüm kullanıcılara varsayılan yapılabilir.
+  static const String defaultGeminiApiKey = String.fromEnvironment(
+    'GEMINI_API_KEY',
+    defaultValue: '',
+  );
 }

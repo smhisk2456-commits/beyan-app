@@ -358,7 +358,12 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
       body: Column(
         children: [
           // ── Quota & Status Banner ────────────────────────
-          _buildQuotaBanner(isPremium, aiState.remainingQuestions, aiState.hasCustomApiKey),
+          _buildQuotaBanner(
+            isPremium,
+            aiState.remainingQuestions,
+            aiState.hasCustomApiKey,
+            aiState.hasDeveloperGlobalKey,
+          ),
 
           // ── Mesaj Akışı ──────────────────────────────────
           Expanded(
@@ -384,7 +389,12 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
     );
   }
 
-  Widget _buildQuotaBanner(bool isPremium, int remaining, bool hasCustomApiKey) {
+  Widget _buildQuotaBanner(
+    bool isPremium,
+    int remaining,
+    bool hasCustomApiKey,
+    bool hasDeveloperGlobalKey,
+  ) {
     if (isPremium) {
       return Container(
         width: double.infinity,
@@ -400,6 +410,30 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
                 color: Color(0xFFFFDF7A),
                 fontSize: 12.5,
                 fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (hasDeveloperGlobalKey) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        color: const Color(0xFF0F3A30),
+        child: const Row(
+          children: [
+            Icon(Icons.auto_awesome_rounded, color: Color(0xFFFFDF7A), size: 16),
+            SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Google Gemini 1.5 Flash Aktif • Canlı İslami Danışmanlık',
+                style: TextStyle(
+                  color: Color(0xFFFFDF7A),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ],

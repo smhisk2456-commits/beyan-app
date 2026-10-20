@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/utils/app_constants.dart';
 import '../models/ai_message.dart';
 
 class AiAssistantState {
@@ -23,7 +24,21 @@ class AiAssistantState {
     this.geminiApiKey,
   });
 
-  bool get hasCustomApiKey => geminiApiKey != null && geminiApiKey!.trim().isNotEmpty;
+  bool get hasCustomApiKey =>
+      (geminiApiKey != null && geminiApiKey!.trim().isNotEmpty) ||
+      AppConstants.defaultGeminiApiKey.trim().isNotEmpty;
+
+  bool get hasDeveloperGlobalKey => AppConstants.defaultGeminiApiKey.trim().isNotEmpty;
+
+  String? get effectiveApiKey {
+    if (geminiApiKey != null && geminiApiKey!.trim().isNotEmpty) {
+      return geminiApiKey!.trim();
+    }
+    if (AppConstants.defaultGeminiApiKey.trim().isNotEmpty) {
+      return AppConstants.defaultGeminiApiKey.trim();
+    }
+    return null;
+  }
 
   AiAssistantState copyWith({
     List<AiMessage>? messages,
@@ -147,10 +162,11 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
       state = state.copyWith(remainingQuestions: newRemaining);
     }
 
-    // 1. Canlı Gemini API çağrısı (varsa)
+    // 1. Canlı Gemini API çağrısı (Geliştirici merkezi anahtarı veya kullanıcı anahtarı)
     AiMessage? aiReply;
-    if (state.hasCustomApiKey) {
-      aiReply = await _callGeminiApi(query, state.geminiApiKey!, history: state.messages);
+    final activeKey = state.effectiveApiKey;
+    if (activeKey != null && activeKey.isNotEmpty) {
+      aiReply = await _callGeminiApi(query, activeKey, history: state.messages);
     }
 
     // 2. Canlı API yoksa veya başarısız olursa Dahili İslami İlimler ve Dinler Bilgi Motoru
