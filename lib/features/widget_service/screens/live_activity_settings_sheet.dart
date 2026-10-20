@@ -120,7 +120,11 @@ class LiveActivityTriggerNotifier extends StateNotifier<int> {
   Future<void> _load() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final val = prefs.getInt(key) ?? -1;
+      var val = prefs.getInt(key) ?? -1;
+      if (val == 45) {
+        val = -1;
+        await prefs.setInt(key, -1);
+      }
       state = val;
     } catch (_) {}
   }

@@ -75,7 +75,12 @@ class LiveActivityService {
       }
 
       final prefs = await SharedPreferences.getInstance();
-      final triggerMinutes = customTriggerMinutes ?? prefs.getInt(triggerMinutesKey) ?? -1;
+      var triggerMinutes = customTriggerMinutes ?? prefs.getInt(triggerMinutesKey) ?? -1;
+      // Eski varsayılan olan 45'i otomatik olarak sürekli açık (-1) moduna geçir:
+      if (triggerMinutes == 45) {
+        triggerMinutes = -1;
+        await prefs.setInt(triggerMinutesKey, -1);
+      }
       final langCode = prefs.getString('selected_app_language') ?? 'tr';
 
       final prayerService = PrayerTimeService();
@@ -93,25 +98,6 @@ class LiveActivityService {
         _prayerTransitionTimer?.cancel();
         _prayerTransitionTimer = null;
         await stopLiveActivity();
-        return;
-      }
-
-      // Eğer kullanıcı belirli bir dakika kala (ör: 45 dk kala) başlamasını seçmişse
-      // ve vakte henüz bu süreden fazla varsa, şimdilik durdur ve eşik zamanında başlat:
-      if (triggerMinutes > 0 && diff.inMinutes > triggerMinutes) {
-        await stopLiveActivity();
-        final waitDuration = diff - Duration(minutes: triggerMinutes);
-        _prayerTransitionTimer?.cancel();
-        _prayerTransitionTimer = Timer(waitDuration, () {
-          syncLiveActivity();
-        });
-        return;
-      } else if (triggerMinutes == 0 && diff > Duration.zero) {
-        await stopLiveActivity();
-        _prayerTransitionTimer?.cancel();
-        _prayerTransitionTimer = Timer(diff, () {
-          syncLiveActivity();
-        });
         return;
       }
 
@@ -133,7 +119,7 @@ class LiveActivityService {
       // Tam vakit saniyesinde otomatik olarak bir sonraki namazı senkronize et
       _prayerTransitionTimer?.cancel();
       if (diff > Duration.zero) {
-        _prayerTransitionTimer = Timer(diff + const Duration(seconds: 2), () {
+        _prayerTransitionTimer = Timer(diff + const Duration(seconds: 1), () {
           syncLiveActivity();
         });
       }

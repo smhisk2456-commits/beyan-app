@@ -1479,8 +1479,6 @@ struct BeyanLiveActivity: Widget {
             let targetDate = Date(timeIntervalSince1970: context.state.targetTimestamp)
             let now = Date()
             let isPast = now >= targetDate
-            let safeStartDate = min(now, targetDate.addingTimeInterval(-1))
-            let safeTargetDate = max(targetDate, safeStartDate.addingTimeInterval(1))
             let visuals = prayerVisuals(for: context.state.prayerName)
 
             // Ultra-Sleek Glassmorphic iOS Lock Screen Banner (Uncluttered & Wallpaper-Friendly)
@@ -1564,9 +1562,10 @@ struct BeyanLiveActivity: Widget {
                     }
                 } else {
                     VStack(alignment: .trailing, spacing: 1) {
-                        Text(timerInterval: safeStartDate...safeTargetDate, pauseTime: safeTargetDate, countsDown: true)
+                        Text(targetDate, style: .timer)
                             .font(.system(size: 17, weight: .heavy, design: .rounded))
                             .monospacedDigit()
+                            .multilineTextAlignment(.trailing)
                             .foregroundColor(Color(red: 1.0, green: 0.88, blue: 0.52))
 
                         Text("kaldı")
@@ -1600,8 +1599,6 @@ struct BeyanLiveActivity: Widget {
             let targetDate = Date(timeIntervalSince1970: context.state.targetTimestamp)
             let now = Date()
             let isPast = now >= targetDate
-            let safeStartDate = min(now, targetDate.addingTimeInterval(-1))
-            let safeTargetDate = max(targetDate, safeStartDate.addingTimeInterval(1))
             let visuals = prayerVisuals(for: context.state.prayerName)
 
             return DynamicIsland {
@@ -1654,9 +1651,10 @@ struct BeyanLiveActivity: Widget {
                                 .monospacedDigit()
                                 .foregroundColor(.white.opacity(0.7))
                         } else {
-                            Text(timerInterval: safeStartDate...safeTargetDate, pauseTime: safeTargetDate, countsDown: true)
+                            Text(targetDate, style: .timer)
                                 .font(.system(size: 15, weight: .heavy, design: .rounded))
                                 .monospacedDigit()
+                                .multilineTextAlignment(.trailing)
                                 .foregroundColor(Color(red: 1.0, green: 0.88, blue: 0.52))
 
                             Text("kalan süre")
@@ -1709,7 +1707,7 @@ struct BeyanLiveActivity: Widget {
                         Text("00:00")
                             .foregroundColor(Color(red: 0.20, green: 0.85, blue: 0.45))
                     } else {
-                        Text(timerInterval: safeStartDate...safeTargetDate, pauseTime: safeTargetDate, countsDown: true)
+                        Text(targetDate, style: .timer)
                             .foregroundColor(Color(red: 1.0, green: 0.88, blue: 0.52))
                     }
                 }

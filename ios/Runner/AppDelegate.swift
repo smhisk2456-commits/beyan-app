@@ -134,6 +134,30 @@ struct BeyanPrayerAttributes: ActivityAttributes {
                 // Sadece etkin (.active) canlı etkinlikleri bul; sonlanmış (.ended) olanları filtrele
                 let activeActivities = Activity<BeyanPrayerAttributes>.activities.filter { $0.activityState == .active }
 
+                let remaining = targetTimestamp - Date().timeIntervalSince1970
+                if remaining > 0 {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + remaining) {
+                        Task {
+                            let active = Activity<BeyanPrayerAttributes>.activities.filter { $0.activityState == .active }
+                            for act in active {
+                                let pastState = BeyanPrayerAttributes.ContentState(
+                                    prayerName: act.content.state.prayerName,
+                                    prayerTime: act.content.state.prayerTime,
+                                    targetTimestamp: act.content.state.targetTimestamp,
+                                    cityName: act.content.state.cityName,
+                                    isKerahat: true,
+                                    triggerMinutes: act.content.state.triggerMinutes
+                                )
+                                if #available(iOS 16.2, *) {
+                                    await act.update(ActivityContent<BeyanPrayerAttributes.ContentState>(state: pastState, staleDate: staleDate))
+                                } else {
+                                    await act.update(using: pastState)
+                                }
+                            }
+                        }
+                    }
+                }
+
                 if let existing = activeActivities.first {
                     Task {
                         if #available(iOS 16.2, *) {
