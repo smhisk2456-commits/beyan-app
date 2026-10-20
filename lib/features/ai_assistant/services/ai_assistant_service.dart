@@ -188,7 +188,9 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
     String apiKey, {
     List<AiMessage> history = const [],
   }) async {
-    final candidateModels = ['gemini-3.8-flash', 'gemini-3.5-flash', 'gemini-flash-latest'];
+    // gemini-3.5-flash ve gemini-3.6-flash, düşünme yükü olmadan ultra hızlı (1-3 saniye) yanıt üretir.
+    // gemini-3.8-flash gibi ağır akıl yürütme modelleri dakikalarca beklettiği için kaldırıldı.
+    final candidateModels = ['gemini-3.5-flash', 'gemini-3.6-flash'];
 
     // Son konuşma geçmişini Gemini çoklu tur sohbet formatında hazırla
     final contents = <Map<String, dynamic>>[];
@@ -229,25 +231,31 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
       },
       'contents': contents,
       'generationConfig': {
-        'temperature': 0.3,
-        'maxOutputTokens': 1500,
+        'temperature': 0.2,
+        'maxOutputTokens': 800,
+        'thinkingConfig': {
+          'thinkingBudget': 0,
+        },
       },
     });
 
     for (final modelName in candidateModels) {
       HttpClient? client;
       try {
-        client = HttpClient()..connectionTimeout = const Duration(seconds: 15);
+        client = HttpClient()..connectionTimeout = const Duration(seconds: 4);
         final url = Uri.parse(
           'https://generativelanguage.googleapis.com/v1beta/models/$modelName:generateContent?key=$apiKey',
         );
         final request = await client.postUrl(url);
         request.headers.contentType = ContentType.json;
         request.write(body);
-        final response = await request.close();
+        final response = await request.close().timeout(const Duration(seconds: 7));
 
         if (response.statusCode == 200) {
-          final responseBody = await response.transform(utf8.decoder).join();
+          final responseBody = await response
+              .transform(utf8.decoder)
+              .join()
+              .timeout(const Duration(seconds: 7));
           final decoded = jsonDecode(responseBody) as Map<String, dynamic>;
           final candidates = decoded['candidates'] as List<dynamic>?;
           if (candidates != null && candidates.isNotEmpty) {
