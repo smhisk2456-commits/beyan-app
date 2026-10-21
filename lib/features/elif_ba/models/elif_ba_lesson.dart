@@ -284,14 +284,14 @@ final List<ElifBaLesson> elifBaLessonsList = [
     ],
   ),
 
-  // ── SEVİYE 3: Cezm, Şedde ve Tenvin (PREMIUM) ─────────────────
+  // ── SEVİYE 3: Cezm, Şedde ve Tenvin ─────────────────
   const ElifBaLesson(
     id: 'lesson_3_cezm_sedde',
     levelNumber: 3,
     title: '3. Adım: Cezm & Şedde',
     subtitle: 'Harfleri tutturma, çift okuma, tenvin ve uzatma kuralları',
-    iconName: 'workspace_premium',
-    isPremiumOnly: true,
+    iconName: 'auto_stories_rounded',
+    isPremiumOnly: false,
     xpReward: 120,
     questions: [
       QuizQuestion(
@@ -418,7 +418,7 @@ final List<ElifBaLesson> elifBaLessonsList = [
     title: '4. Adım: Namaz Duaları',
     subtitle: 'Sübhaneke, Fatiha, İhlas, namaz tesbihleri ve kısa sureler',
     iconName: 'star_rounded',
-    isPremiumOnly: true,
+    isPremiumOnly: false,
     xpReward: 160,
     questions: [
       QuizQuestion(

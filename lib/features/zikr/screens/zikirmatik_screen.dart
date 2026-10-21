@@ -1184,7 +1184,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.workspace_premium_rounded,
+                  const Icon(Icons.military_tech_rounded,
                       color: Color(0xFFFFDF7A), size: 18),
                   const SizedBox(width: 8),
                   Text(

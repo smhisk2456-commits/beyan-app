@@ -269,13 +269,11 @@ void main() {
     test('ElifBa dersleri, seviyeler ve soru yapıları eksiksiz olmalı', () {
       expect(elifBaLessonsList.length, 4);
 
-      // Seviye 1 ve 2 Ücretsiz olmalı
+      // v1.0 Tüm seviyeler ücretsiz ve kilitsiz olmalı
       expect(elifBaLessonsList[0].isPremiumOnly, isFalse);
       expect(elifBaLessonsList[1].isPremiumOnly, isFalse);
-
-      // Seviye 3 ve 4 Premium olmalı
-      expect(elifBaLessonsList[2].isPremiumOnly, isTrue);
-      expect(elifBaLessonsList[3].isPremiumOnly, isTrue);
+      expect(elifBaLessonsList[2].isPremiumOnly, isFalse);
+      expect(elifBaLessonsList[3].isPremiumOnly, isFalse);
 
       // Her dersteki sorular geçerli şıklara ve doğru cevap indeksine sahip olmalı
       for (final lesson in elifBaLessonsList) {

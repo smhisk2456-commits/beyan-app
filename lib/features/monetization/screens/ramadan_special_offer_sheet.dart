@@ -10,13 +10,9 @@ import '../services/premium_service.dart';
 class RamadanSpecialOfferSheet extends ConsumerStatefulWidget {
   const RamadanSpecialOfferSheet({super.key});
 
-  static Future<void> show(BuildContext context) {
-    return showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => const RamadanSpecialOfferSheet(),
-    );
+  static Future<void> show(BuildContext context) async {
+    // Free v1.0 release: Tüm özellikler ücretsiz ve açık olduğu için gösterilmez.
+    return;
   }
 
   @override

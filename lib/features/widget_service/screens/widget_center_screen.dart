@@ -7,7 +7,6 @@ import '../../../core/localization/app_strings.dart';
 import '../../../core/utils/app_constants.dart';
 import '../widget_service.dart';
 import '../../monetization/providers/premium_provider.dart';
-import '../../monetization/screens/onboarding_trial_paywall_screen.dart';
 import '../../monetization/widgets/banner_ad_widget.dart';
 import '../../notifications/models/id_verse_translations.dart';
 import '../../notifications/models/short_verse_notification.dart';
@@ -1263,7 +1262,6 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final premiumState = ref.watch(premiumProvider);
     final strings = ref.watch(appStringsProvider);
 
     return Scaffold(
@@ -1290,11 +1288,6 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // ── 3 Günlük Deneme / Premium Durum Şeridi ────────────────
-                  _buildTrialStatusBanner(premiumState, strings),
-
-                  const SizedBox(height: 14),
-
                   // ── iOS Kilit Ekranı Ekleme Bilgilendirme Kartı ───────────
                   _buildLockScreenGuideBanner(strings),
 
@@ -1340,110 +1333,6 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                 ],
               ),
             ),
-    );
-  }
-
-  // ── 3 Günlük Deneme Durum Şeridi ───────────────────────────────────────────
-  Widget _buildTrialStatusBanner(PremiumState premiumState, AppStrings strings) {
-    if (premiumState.isPremium) {
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        decoration: BoxDecoration(
-          color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
-          ),
-        ),
-        child: const Row(
-          children: [
-            Icon(Icons.workspace_premium_rounded, color: Color(0xFFFFDF7A), size: 18),
-            SizedBox(width: 8),
-            Text(
-              '★ Beyân Premium: Sınırsız Widget Erişimi',
-              style: TextStyle(
-                color: Color(0xFFFFDF7A),
-                fontWeight: FontWeight.bold,
-                fontSize: 12.5,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    if (premiumState.isTrialActive) {
-      return InkWell(
-        borderRadius: BorderRadius.circular(14),
-        onTap: () => OnboardingTrialPaywallScreen.show(context),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          decoration: BoxDecoration(
-            color: const Color(0xFF0F3E33),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: const Color(0xFF2DD4BF).withValues(alpha: 0.5),
-            ),
-          ),
-          child: Row(
-            children: [
-              const Icon(Icons.timer_outlined, color: Color(0xFF2DD4BF), size: 18),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  strings.trialActiveBanner(premiumState.trialDaysRemaining),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-              Text(
-                strings.upgrade,
-                style: const TextStyle(
-                  color: Color(0xFF2DD4BF),
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    // Deneme süresi doldu
-    return InkWell(
-      borderRadius: BorderRadius.circular(14),
-      onTap: () => OnboardingTrialPaywallScreen.show(context),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        decoration: BoxDecoration(
-          color: Colors.amber.shade900.withValues(alpha: 0.2),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: Colors.amber.shade600,
-          ),
-        ),
-        child: Row(
-          children: [
-            const Icon(Icons.lock_clock_rounded, color: Colors.amber, size: 18),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                strings.trialEndedWidgetNotice,
-                style: const TextStyle(
-                  color: Colors.amber,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 11.5,
-                ),
-              ),
-            ),
-            const Icon(Icons.arrow_forward_ios_rounded, color: Colors.amber, size: 12),
-          ],
-        ),
-      ),
     );
   }
 

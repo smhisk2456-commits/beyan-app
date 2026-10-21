@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../monetization/providers/premium_provider.dart';
 import '../models/elif_ba_lesson.dart';
 import '../models/elif_ba_letter.dart';
 import '../services/elif_ba_progress_service.dart';
@@ -292,8 +291,6 @@ class _ElifBaHubScreenState extends ConsumerState<ElifBaHubScreen> with SingleTi
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final progress = ref.watch(elifBaProgressProvider);
-    final premiumState = ref.watch(premiumProvider);
-    final isPremium = premiumState.isPremium;
 
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF021B16) : const Color(0xFFF4F8F6),
@@ -372,7 +369,7 @@ class _ElifBaHubScreenState extends ConsumerState<ElifBaHubScreen> with SingleTi
         controller: _tabController,
         children: [
           // ── 1. Tab: Duolingo Stili İlerleme Haritası ───────
-          _buildRoadmap(isDark, progress, isPremium),
+          _buildRoadmap(isDark, progress),
 
           // ── 2. Tab: 28 Harf ve Mahreç Tablosu ─────────────
           _buildLetterGrid(isDark),
@@ -381,7 +378,7 @@ class _ElifBaHubScreenState extends ConsumerState<ElifBaHubScreen> with SingleTi
     );
   }
 
-  Widget _buildRoadmap(bool isDark, ElifBaProgressState progress, bool isPremium) {
+  Widget _buildRoadmap(bool isDark, ElifBaProgressState progress) {
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       itemCount: elifBaLessonsList.length,
@@ -389,13 +386,13 @@ class _ElifBaHubScreenState extends ConsumerState<ElifBaHubScreen> with SingleTi
         final lesson = elifBaLessonsList[index];
         final isCompleted = progress.completedLessonIds.contains(lesson.id);
         final isPreviousCompleted = index == 0 || progress.completedLessonIds.contains(elifBaLessonsList[index - 1].id);
-        final isUnlocked = isPreviousCompleted && (!lesson.isPremiumOnly || isPremium);
+        final isUnlocked = isPreviousCompleted;
 
         return Column(
           children: [
             // Roadmap Node Card
             InkWell(
-              onTap: () => _onLessonTap(lesson, isPreviousCompleted),
+              onTap: () => _onLessonTap(lesson, isUnlocked),
               borderRadius: BorderRadius.circular(20),
               child: Container(
                 padding: const EdgeInsets.all(16),
@@ -448,9 +445,9 @@ class _ElifBaHubScreenState extends ConsumerState<ElifBaHubScreen> with SingleTi
                         child: Icon(
                           isCompleted
                               ? Icons.check_circle_rounded
-                              : (lesson.isPremiumOnly && !isPremium
-                                  ? Icons.lock_rounded
-                                  : Icons.play_arrow_rounded),
+                              : (isUnlocked
+                                  ? Icons.play_arrow_rounded
+                                  : Icons.lock_outline_rounded),
                           color: isCompleted
                               ? const Color(0xFF01201B)
                               : (isUnlocked ? const Color(0xFFFFDF7A) : Colors.white38),
@@ -465,35 +462,13 @@ class _ElifBaHubScreenState extends ConsumerState<ElifBaHubScreen> with SingleTi
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            children: [
-                              Text(
-                                lesson.title,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: isUnlocked || isCompleted ? Colors.white : Colors.white38,
-                                ),
-                              ),
-                              if (lesson.isPremiumOnly) ...[
-                                const SizedBox(width: 6),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFFFDF7A),
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: const Text(
-                                    'PREMIUM',
-                                    style: TextStyle(
-                                      fontSize: 9,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFF012E2B),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ],
+                          Text(
+                            lesson.title,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: isUnlocked || isCompleted ? Colors.white : Colors.white38,
+                            ),
                           ),
                           const SizedBox(height: 4),
                           Text(

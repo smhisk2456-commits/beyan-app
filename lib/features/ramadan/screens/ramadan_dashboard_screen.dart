@@ -4,8 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/localization/app_strings.dart';
-import '../../monetization/providers/premium_provider.dart';
-import '../../monetization/screens/ramadan_special_offer_sheet.dart';
 import '../../monetization/widgets/banner_ad_widget.dart';
 import '../../prayer_times/providers/prayer_time_providers.dart';
 import '../../widget_service/screens/widget_center_screen.dart';
@@ -128,7 +126,6 @@ class RamadanDashboardScreen extends ConsumerWidget {
     final fastingData = ref.watch(fastingTrackerProvider);
     final isFasting = fastingData.isFastingToday(FastingTrackerNotifier.todayKey());
     final totalFastingDays = fastingData.totalDays;
-    final isPremium = ref.watch(premiumProvider).isPremium;
     final khatamState = ref.watch(khatamProgressProvider);
 
     DateTime? imsakTime;
@@ -148,97 +145,6 @@ class RamadanDashboardScreen extends ConsumerWidget {
         physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 30),
         children: [
-          // ── Ramazan & Kadir Gecesi %50 Özel Teklif Şeridi (Premium Olmayanlara) ──
-          if (!isPremium) ...[
-            InkWell(
-              onTap: () => RamadanSpecialOfferSheet.show(context),
-              borderRadius: BorderRadius.circular(20),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF2E1C03), Color(0xFF0F5A47)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFFFFDF7A), width: 1.4),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFFD4AF37).withValues(alpha: 0.3),
-                      blurRadius: 14,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: const RadialGradient(
-                          colors: [Color(0xFF0F5A47), Color(0xFF042620)],
-                        ),
-                        border: Border.all(color: const Color(0xFFFFDF7A), width: 1.5),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFFFFDF7A).withValues(alpha: 0.35),
-                            blurRadius: 10,
-                          ),
-                        ],
-                      ),
-                      child: const Center(
-                        child: Icon(
-                          Icons.nights_stay_rounded,
-                          color: Color(0xFFFFDF7A),
-                          size: 22,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    const Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                'Ramazan & Kadir Gecesi',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFFFFDF7A),
-                                ),
-                              ),
-                              SizedBox(width: 6),
-                              Text(
-                                '%50 İndirim',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w900,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 2),
-                          Text(
-                            'Ömür Boyu Hâmîlik paketinde sınırlı süre fırsatı.',
-                            style: TextStyle(fontSize: 11, color: Colors.white70),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const Icon(Icons.arrow_forward_ios_rounded, color: Color(0xFFFFDF7A), size: 16),
-                  ],
-                ),
-              ),
-            ),
-          ],
-
           // ── İftar / Sahur Canlı Geri Sayım Kartı (Kendi içinde 1 sn tikler, 60 FPS) ──
           RepaintBoundary(
             child: _LiveIftarCountdown(

@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../monetization/providers/premium_provider.dart';
-import '../../monetization/screens/premium_paywall_sheet.dart';
 import '../models/ai_message.dart';
 import '../services/ai_assistant_service.dart';
 
@@ -204,36 +203,22 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
         ),
         title: const Row(
           children: [
-            Icon(Icons.stars_rounded, color: Color(0xFFFFDF7A), size: 28),
+            Icon(Icons.auto_awesome_rounded, color: Color(0xFFFFDF7A), size: 28),
             SizedBox(width: 8),
             Text(
-              'Günlük Soru Limiti',
+              'Yapay Zekâ Asistanı',
               style: TextStyle(color: Color(0xFFFFDF7A), fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ],
         ),
         content: const Text(
-          'Bugünkü 3 ücretsiz soru hakkınız doldu.\n\n'
-          'Beyân AI Manevi Rehber & Tefsir Asistanı\'na 7/24 sınırsız soru sormak için '
-          'Beyân Premium\'a geçebilir veya ücretsiz kişisel Gemini API anahtarınızı ekleyebilirsiniz.',
+          'Beyân AI Manevi Rehber & Tefsir Asistanı\'na kendi ücretsiz Gemini API anahtarınızı tanımlayarak en yüksek hızda ve kesintisiz yanıtlar alabilirsiniz.',
           style: TextStyle(color: Colors.white, fontSize: 14, height: 1.5),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Daha Sonra', style: TextStyle(color: Colors.white60)),
-          ),
-          OutlinedButton(
-            style: OutlinedButton.styleFrom(
-              foregroundColor: const Color(0xFFFFDF7A),
-              side: const BorderSide(color: Color(0xFFFFDF7A)),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-            onPressed: () {
-              Navigator.pop(ctx);
-              _showApiKeyDialog(context);
-            },
-            child: const Text('API Anahtarı Ekle 🔑'),
+            child: const Text('Kapat', style: TextStyle(color: Colors.white60)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -244,10 +229,10 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
             ),
             onPressed: () {
               Navigator.pop(ctx);
-              PremiumPaywallSheet.show(context);
+              _showApiKeyDialog(context);
             },
             child: const Text(
-              'Premium\'a Geç ✨',
+              'API Anahtarı Tanımla 🔑',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
           ),

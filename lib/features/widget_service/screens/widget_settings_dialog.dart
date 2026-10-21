@@ -177,33 +177,13 @@ class _WidgetSettingsDialogState extends ConsumerState<WidgetSettingsDialog> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          children: [
-                            Text(
-                              strings.specialAdhanMakamsPro,
-                              style: TextStyle(
-                                fontSize: 13.5,
-                                fontWeight: FontWeight.bold,
-                                color: isDark ? const Color(0xFFFFDF7A) : const Color(0xFF033E35),
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFD4AF37),
-                                borderRadius: BorderRadius.circular(5),
-                              ),
-                              child: const Text(
-                                'PRO',
-                                style: TextStyle(
-                                  fontSize: 8.5,
-                                  fontWeight: FontWeight.w900,
-                                  color: Color(0xFF071F1B),
-                                ),
-                              ),
-                            ),
-                          ],
+                        Text(
+                          strings.specialAdhanMakamsPro,
+                          style: TextStyle(
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? const Color(0xFFFFDF7A) : const Color(0xFF033E35),
+                          ),
                         ),
                         const SizedBox(height: 2),
                         Text(

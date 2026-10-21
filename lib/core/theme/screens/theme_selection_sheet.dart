@@ -320,7 +320,7 @@ class ThemeSelectionSheet extends ConsumerWidget {
                 ),
               ),
 
-              // Seçili İkonu veya PRO / Kilit Rozeti
+              // Seçili İkonu
               if (isSelected)
                 Container(
                   padding: const EdgeInsets.all(4),
@@ -332,57 +332,6 @@ class ThemeSelectionSheet extends ConsumerWidget {
                     Icons.check,
                     color: Colors.black,
                     size: 16,
-                  ),
-                )
-              else if (isLocked)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: palette.accentGold.withValues(alpha: 0.18),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: palette.accentGold.withValues(alpha: 0.6),
-                      width: 1,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.lock_rounded,
-                        size: 11,
-                        color: palette.accentGold,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'PRO',
-                        style: TextStyle(
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.bold,
-                          color: palette.accentGold,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              else if (palette != AppThemePalette.emerald)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: palette.accentGold.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: palette.accentGold.withValues(alpha: 0.4),
-                    ),
-                  ),
-                  child: Text(
-                    'PRO',
-                    style: TextStyle(
-                      fontSize: 10.5,
-                      fontWeight: FontWeight.bold,
-                      color: palette.accentGold,
-                    ),
                   ),
                 ),
             ],
