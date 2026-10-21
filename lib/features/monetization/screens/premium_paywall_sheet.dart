@@ -6,14 +6,14 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../models/premium_product.dart';
 import '../providers/premium_provider.dart';
-import 'onboarding_trial_paywall_screen.dart';
 
 /// Lüks Beyân Premium Üyelik ve Abonelik Tanıtım Ekranı
 class PremiumPaywallSheet extends ConsumerStatefulWidget {
   const PremiumPaywallSheet({super.key});
 
-  static Future<void> show(BuildContext context) {
-    return OnboardingTrialPaywallScreen.show(context);
+  static Future<void> show(BuildContext context) async {
+    // v1.0 sürümünde tüm özellikler ücretsizdir; paywall gösterilmez.
+    return;
   }
 
   @override

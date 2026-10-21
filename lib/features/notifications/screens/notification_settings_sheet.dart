@@ -8,7 +8,6 @@ import '../../prayer_times/models/prayer_time_model.dart';
 import '../models/adhan_makam.dart';
 import '../services/notification_service.dart';
 import '../services/adhan_audio_player_service.dart';
-import '../../monetization/screens/premium_paywall_sheet.dart';
 import 'adhan_makam_selector_sheet.dart';
 
 /// Ezan ve Namaz Bildirimleri Lüks Ayarlar Menüsü
@@ -384,15 +383,6 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                             ),
                           ],
                         ),
-                      ),
-                      IconButton(
-                        icon: const Icon(
-                          Icons.workspace_premium_rounded,
-                          color: Color(0xFFFFDF7A),
-                          size: 26,
-                        ),
-                        tooltip: 'Beyân Premium',
-                        onPressed: () => PremiumPaywallSheet.show(context),
                       ),
                     ],
                   ),

@@ -18,7 +18,6 @@ import 'features/notifications/services/notification_service.dart';
 import 'features/monetization/services/ad_service.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'features/monetization/services/premium_service.dart';
-import 'features/monetization/screens/onboarding_trial_paywall_screen.dart';
 import 'features/splash/screens/splash_screen.dart';
 import 'features/quran/widgets/quran_audio_player_bar.dart';
 import 'features/notifications/widgets/adhan_audio_player_bar.dart';
@@ -203,15 +202,8 @@ class _MainNavigationState extends ConsumerState<MainNavigation>
   }
 
   Future<void> _checkLaunchPaywall() async {
-    if (!mounted || DeepLinkService.instance.hasPendingLink) return;
-    final shouldShow = await PremiumService.instance.shouldShowLaunchPaywall();
-    if (shouldShow && mounted && !DeepLinkService.instance.hasPendingLink) {
-      // Yalnızca ilk yüklemede 1 kez gösterilmesi için hemen işaretle
-      await PremiumService.instance.markLaunchPaywallSeen();
-      if (mounted) {
-        await OnboardingTrialPaywallScreen.show(context);
-      }
-    }
+    // v1.0 sürümünde tüm özellikler ücretsizdir; açılışta paywall gösterilmez
+    return;
   }
 
   @override

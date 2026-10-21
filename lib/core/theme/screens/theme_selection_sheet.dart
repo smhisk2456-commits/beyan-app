@@ -3,8 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../app_theme.dart';
 import '../theme_provider.dart';
-import '../../../features/monetization/providers/premium_provider.dart';
-import '../../../features/monetization/screens/premium_paywall_sheet.dart';
 import '../../localization/app_strings.dart';
 
 /// Kullanıcının tema modu ve 4 lüks renk paletini seçtiği modern alt sayfa.
@@ -33,8 +31,6 @@ class ThemeSelectionSheet extends ConsumerWidget {
 
     final titleColor = isDark ? Colors.white : AppColors.textPrimary;
     final subtitleColor = isDark ? Colors.white70 : AppColors.textSecondary;
-
-    final isPremium = ref.watch(premiumProvider).isPremium;
 
     return Container(
       decoration: BoxDecoration(
@@ -105,17 +101,6 @@ class ThemeSelectionSheet extends ConsumerWidget {
                   ],
                 ),
               ),
-              IconButton(
-                icon: Icon(
-                  isPremium
-                      ? Icons.workspace_premium_rounded
-                      : Icons.workspace_premium_outlined,
-                  color: themeState.palette.accentGold,
-                  size: 26,
-                ),
-                tooltip: 'Beyân Premium',
-                onPressed: () => PremiumPaywallSheet.show(context),
-              ),
             ],
           ),
           const SizedBox(height: 24),
@@ -180,18 +165,12 @@ class ThemeSelectionSheet extends ConsumerWidget {
 
           ...AppThemePalette.values.map((palette) {
             final isSelected = themeState.palette == palette;
-            final isLocked = !isPremium && palette != AppThemePalette.emerald;
             return _buildPaletteTile(
               context: context,
               palette: palette,
               isSelected: isSelected,
-              isLocked: isLocked,
+              isLocked: false,
               onTap: () {
-                if (isLocked) {
-                  HapticFeedback.lightImpact();
-                  PremiumPaywallSheet.show(context);
-                  return;
-                }
                 HapticFeedback.selectionClick();
                 themeNotifier.setPalette(palette);
               },

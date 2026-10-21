@@ -22,35 +22,20 @@ class PremiumService {
   final InAppPurchase _iap = InAppPurchase.instance;
   StreamSubscription<List<PurchaseDetails>>? _subscription;
 
-  bool _isPremium = false;
-  PremiumTier? _activeTier;
+  bool _isPremium = true;
+  PremiumTier? _activeTier = PremiumTier.lifetime;
   DateTime? _trialStartDate;
   final _changeController = StreamController<bool>.broadcast();
 
-  bool get isPremium => _isPremium;
+  // v1.0 için tüm özellikler (widgetlar, ezan makamları, temalar, yapay zeka) tamamen ücretsizdir.
+  bool get isPremium => true;
   PremiumTier? get activeTier => _activeTier;
   DateTime? get trialStartDate => _trialStartDate;
   Stream<bool> get premiumStatusStream => _changeController.stream;
 
-  /// 3 Günlük Ücretsiz Deneme süresi devam ediyor mu?
-  bool get isTrialActive {
-    if (_isPremium) return true;
-    if (_trialStartDate == null) return true;
-    final diff = DateTime.now().difference(_trialStartDate!);
-    return diff.inDays < 3;
-  }
-
-  /// Deneme süresinden kalan gün sayısı (3, 2, 1 veya 0)
-  int get trialDaysRemaining {
-    if (_isPremium) return 999;
-    if (_trialStartDate == null) return 3;
-    final diff = DateTime.now().difference(_trialStartDate!);
-    final remaining = 3 - diff.inDays;
-    return remaining > 0 ? remaining : 0;
-  }
-
-  /// Kullanıcının Widget özelliğine erişim hakkı var mı?
-  bool get hasWidgetAccess => _isPremium || isTrialActive;
+  bool get isTrialActive => true;
+  int get trialDaysRemaining => 999;
+  bool get hasWidgetAccess => true;
 
   List<ProductDetails> _products = [];
   List<ProductDetails> get products => _products;
@@ -248,12 +233,9 @@ class PremiumService {
     _changeController.add(true);
   }
 
-  /// Açılış paywall'unun gösterilip gösterilmeyeceğini kontrol eder
+  /// Açılış paywall'unun gösterilip gösterilmeyeceğini kontrol eder (v1.0 için kapalı)
   Future<bool> shouldShowLaunchPaywall() async {
-    if (_isPremium) return false;
-    final prefs = await SharedPreferences.getInstance();
-    final hasSeen = prefs.getBool(keyHasSeenOnboardingPaywall) ?? false;
-    return !hasSeen;
+    return false;
   }
 
   Future<void> markLaunchPaywallSeen() async {

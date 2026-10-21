@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../monetization/providers/premium_provider.dart';
-import '../../monetization/screens/premium_paywall_sheet.dart';
 import '../models/elif_ba_lesson.dart';
 import '../models/elif_ba_letter.dart';
 import '../services/elif_ba_progress_service.dart';
@@ -271,14 +270,6 @@ class _ElifBaHubScreenState extends ConsumerState<ElifBaHubScreen> with SingleTi
   }
 
   void _onLessonTap(ElifBaLesson lesson, bool isUnlocked) {
-    final isPremium = ref.read(premiumProvider).isPremium;
-
-    if (lesson.isPremiumOnly && !isPremium) {
-      HapticFeedback.mediumImpact();
-      PremiumPaywallSheet.show(context);
-      return;
-    }
-
     if (!isUnlocked) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

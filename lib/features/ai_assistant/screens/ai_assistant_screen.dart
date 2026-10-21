@@ -349,11 +349,6 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
             tooltip: 'Muteber Kaynaklar',
             onPressed: () => _showSourcesDialog(context),
           ),
-          IconButton(
-            icon: const Icon(Icons.stars_rounded, color: Color(0xFFFFDF7A)),
-            tooltip: 'Beyân Premium',
-            onPressed: () => PremiumPaywallSheet.show(context),
-          ),
         ],
       ),
       body: Column(
@@ -396,111 +391,8 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
     bool hasCustomApiKey,
     bool hasDeveloperGlobalKey,
   ) {
-    if (isPremium) {
-      return Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        color: const Color(0xFF0F3A30),
-        child: const Row(
-          children: [
-            Icon(Icons.workspace_premium_rounded, color: Color(0xFFFFDF7A), size: 18),
-            SizedBox(width: 8),
-            Text(
-              'Beyân Premium: Sınırsız Manevi Danışmanlık Aktif',
-              style: TextStyle(
-                color: Color(0xFFFFDF7A),
-                fontSize: 12.5,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    if (hasDeveloperGlobalKey) {
-      return const SizedBox.shrink();
-    }
-
-    if (hasCustomApiKey) {
-      return Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        color: const Color(0xFF0F3A30),
-        child: Row(
-          children: [
-            const Icon(Icons.vpn_key_rounded, color: Color(0xFFFFDF7A), size: 16),
-            const SizedBox(width: 8),
-            const Expanded(
-              child: Text(
-                'Kişisel Gemini API Anahtarı Aktif • Sınırsız Kullanım',
-                style: TextStyle(
-                  color: Color(0xFFFFDF7A),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            InkWell(
-              onTap: () => _showApiKeyDialog(context),
-              child: const Text(
-                'Yönet',
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 11.5,
-                  decoration: TextDecoration.underline,
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      color: const Color(0xFF032D26),
-      child: Row(
-        children: [
-          const Icon(Icons.all_inclusive_rounded, color: Color(0xFFFFDF7A), size: 18),
-          const SizedBox(width: 8),
-          const Expanded(
-            child: Text(
-              'Test Modu: Sınırsız Soru Aktif (Limitsiz)',
-              style: TextStyle(
-                color: Color(0xFFFFDF7A),
-                fontSize: 12.5,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: const Color(0xFFFFDF7A).withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFFFDF7A), width: 0.8),
-            ),
-            child: const Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.check_circle_rounded, size: 12, color: Color(0xFFFFDF7A)),
-                SizedBox(width: 4),
-                Text(
-                  'Limitsiz',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFFFFDF7A),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+    // v1.0 sürümünde tüm özellikler ücretsizdir; kısıtlama veya ticari banner gösterilmez.
+    return const SizedBox.shrink();
   }
 
   void _showSourcesDialog(BuildContext context) {

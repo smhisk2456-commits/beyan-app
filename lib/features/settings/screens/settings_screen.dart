@@ -7,8 +7,6 @@ import '../../../core/localization/language_selector_sheet.dart';
 import '../../../core/theme/screens/theme_selection_sheet.dart';
 import '../../bedside_clock/screens/bedside_clock_screen.dart';
 import '../../live_makkah/screens/mecca_medina_live_screen.dart';
-import '../../monetization/providers/premium_provider.dart';
-import '../../monetization/screens/premium_paywall_sheet.dart';
 import '../../notifications/screens/notification_settings_sheet.dart';
 import '../../notifications/screens/adhan_makam_selector_sheet.dart';
 import '../../prayer_times/screens/calculation_method_sheet.dart';
@@ -35,7 +33,6 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final strings = ref.watch(appStringsProvider);
     final currentLang = ref.watch(appLanguageProvider);
-    final isPremium = ref.watch(premiumProvider).isPremium;
     final isLiveActivityEnabled = ref.watch(liveActivityEnabledProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -52,11 +49,7 @@ class SettingsScreen extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         physics: const BouncingScrollPhysics(),
         children: [
-          // ── 1. Beyân Premium Kartı ──────────────────────────────
-          _buildPremiumCard(context, isPremium, strings),
-          const SizedBox(height: 18),
-
-          // ── 2. Görünüm & Dil Bölümü ─────────────────────────────
+          // ── 1. Görünüm & Dil Bölümü ─────────────────────────────
           _buildSectionHeader(strings.appearanceSection),
           _buildCard(
             context,
@@ -269,113 +262,6 @@ class SettingsScreen extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 32),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPremiumCard(BuildContext context, bool isPremium, AppStrings strings) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(22),
-        gradient: const LinearGradient(
-          colors: [Color(0xFF033E35), Color(0xFF01201B)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        border: Border.all(
-          color: const Color(0xFFD4AF37).withValues(alpha: 0.5),
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
-            blurRadius: 15,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(18),
-      child: Row(
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: const Color(0xFFD4AF37).withValues(alpha: 0.18),
-              border: Border.all(color: const Color(0xFFFFDF7A), width: 1.2),
-            ),
-            child: const Center(
-              child: Icon(
-                Icons.workspace_premium_rounded,
-                color: Color(0xFFFFDF7A),
-                size: 26,
-              ),
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Text(
-                      'Beyân Premium',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    if (isPremium)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFD4AF37),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          strings.activeStatus,
-                          style: const TextStyle(
-                            color: Colors.black,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  isPremium
-                      ? strings.premiumActiveSubtitle
-                      : strings.premiumPromoSubtitle,
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          ElevatedButton(
-            onPressed: () => PremiumPaywallSheet.show(context),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFFFDF7A),
-              foregroundColor: const Color(0xFF01201B),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              elevation: 0,
-            ),
-            child: Text(
-              isPremium ? strings.manageAction : strings.upgradeAction,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5),
-            ),
-          ),
         ],
       ),
     );

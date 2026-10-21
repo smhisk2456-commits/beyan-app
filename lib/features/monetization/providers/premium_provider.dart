@@ -11,11 +11,11 @@ class PremiumState {
   final bool hasWidgetAccess;
 
   const PremiumState({
-    required this.isPremium,
-    this.activeTier,
+    this.isPremium = true,
+    this.activeTier = PremiumTier.lifetime,
     this.isLoading = false,
     this.isTrialActive = true,
-    this.trialDaysRemaining = 3,
+    this.trialDaysRemaining = 999,
     this.hasWidgetAccess = true,
   });
 

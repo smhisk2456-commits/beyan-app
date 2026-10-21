@@ -7,8 +7,6 @@ import '../../../main.dart';
 import '../../prayer_times/models/prayer_time_model.dart';
 import '../../prayer_times/providers/prayer_time_providers.dart';
 import '../../qibla/screens/qibla_compass_screen.dart';
-import '../../monetization/providers/premium_provider.dart';
-import '../../monetization/screens/premium_paywall_sheet.dart';
 import '../../monetization/widgets/banner_ad_widget.dart';
 import '../../dua/screens/dua_library_screen.dart';
 import '../../dua/providers/dua_providers.dart';
@@ -1207,17 +1205,6 @@ class _IslamicAppBar extends ConsumerWidget {
         ],
       ),
       actions: [
-        // Beyân Premium Rozeti
-        IconButton(
-          icon: Icon(
-            ref.watch(premiumProvider).isPremium
-                ? Icons.workspace_premium_rounded
-                : Icons.workspace_premium_outlined,
-            color: const Color(0xFFFFDF7A),
-          ),
-          tooltip: 'Beyân Premium',
-          onPressed: () => PremiumPaywallSheet.show(context),
-        ),
         // Lüks Ayarlar Butonu (Tek & Ferah)
         IconButton(
           icon: const Icon(Icons.settings_outlined, color: Colors.white),

@@ -32,23 +32,10 @@ class OnboardingTrialPaywallScreen extends ConsumerStatefulWidget {
     BuildContext context, {
     bool isDismissible = true,
     VoidCallback? onDismiss,
-  }) {
-    return Navigator.of(context).push(
-      PageRouteBuilder(
-        opaque: true,
-        pageBuilder: (context, animation, secondaryAnimation) =>
-            OnboardingTrialPaywallScreen(
-          isDismissible: isDismissible,
-          onDismiss: onDismiss,
-        ),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return FadeTransition(
-            opacity: animation,
-            child: child,
-          );
-        },
-      ),
-    );
+  }) async {
+    // v1.0 sürümünde tüm özellikler ücretsiz sunulur; satın alma paywall'u açılmaz.
+    if (onDismiss != null) onDismiss();
+    return;
   }
 
   @override
