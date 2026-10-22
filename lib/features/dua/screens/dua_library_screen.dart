@@ -21,6 +21,34 @@ class DuaLibraryScreen extends ConsumerStatefulWidget {
 class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
   final TextEditingController _searchController = TextEditingController();
 
+  static const _popularPills = [
+    ('Âyetü\'l-Kürsî', '✨'),
+    ('Nazar Duası', '🧿'),
+    ('Sübhaneke', '🤲'),
+    ('İnşirah', '🕊️'),
+    ('Şifa Duası', '🌿'),
+    ('Rabbi Yessir', '📖'),
+    ('Ezan Duası', '🕌'),
+    ('Tahiyyat', '📿'),
+    ('Kunut', '✨'),
+    ('Bereket', '💰'),
+    ('Fâtiha', '🌟'),
+    ('Lev Enzelnâ', '📜'),
+  ];
+
+  void _onQuickPillTap(String term) {
+    HapticFeedback.lightImpact();
+    if (_searchController.text.trim().toLowerCase() == term.toLowerCase()) {
+      _searchController.clear();
+      ref.read(duaSearchQueryProvider.notifier).state = '';
+    } else {
+      _searchController.text = term;
+      ref.read(selectedDuaCategoryProvider.notifier).state = null;
+      ref.read(duaSearchQueryProvider.notifier).state = term;
+    }
+    setState(() {});
+  }
+
   @override
   void dispose() {
     _searchController.dispose();
@@ -117,6 +145,62 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
                   ),
                 ),
               ),
+
+              // ── Hızlı Popüler Dualar Çubuğu ──────────────────────────────
+              SizedBox(
+                height: 34,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  physics: const BouncingScrollPhysics(),
+                  children: _popularPills.map((pill) {
+                    final isPillActive = _searchController.text.trim().toLowerCase() == pill.$1.toLowerCase();
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 6),
+                      child: InkWell(
+                        onTap: () => _onQuickPillTap(pill.$1),
+                        borderRadius: BorderRadius.circular(16),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 180),
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: isPillActive
+                                ? const Color(0xFFFFDF7A)
+                                : (isDark
+                                    ? const Color(0xFF0F3A32).withValues(alpha: 0.6)
+                                    : const Color(0xFFE3EFEA)),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: isPillActive
+                                  ? const Color(0xFFFFDF7A)
+                                  : const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.35 : 0.25),
+                              width: 1,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(pill.$2, style: const TextStyle(fontSize: 11)),
+                              const SizedBox(width: 4),
+                              Text(
+                                pill.$1,
+                                style: TextStyle(
+                                  fontSize: 11.5,
+                                  fontWeight: isPillActive ? FontWeight.bold : FontWeight.w600,
+                                  color: isPillActive
+                                      ? const Color(0xFF012E2B)
+                                      : (isDark ? const Color(0xFFFFDF7A) : const Color(0xFF07453B)),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+              const SizedBox(height: 8),
 
               // ── Kategori Çipleri (Yatay Kaydırılabilir) ────────────────────
               SizedBox(

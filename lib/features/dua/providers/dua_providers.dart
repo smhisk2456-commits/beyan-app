@@ -48,11 +48,30 @@ final selectedDuaCategoryProvider = StateProvider<DuaCategory?>((ref) => null);
 /// Dua arama sorgusu
 final duaSearchQueryProvider = StateProvider<String>((ref) => '');
 
+/// Türkçe ve Arapça karakter duyarsız metin normalleştirici
+String _normalizeForSearch(String text) {
+  var s = text.toLowerCase();
+  // Şapkalı harfler
+  s = s.replaceAll('â', 'a').replaceAll('Â', 'a')
+       .replaceAll('î', 'i').replaceAll('Î', 'i')
+       .replaceAll('û', 'u').replaceAll('Û', 'u');
+  // Türkçe özel harfleri standartlaştırma
+  s = s.replaceAll('ı', 'i').replaceAll('I', 'i').replaceAll('İ', 'i')
+       .replaceAll('ğ', 'g').replaceAll('Ğ', 'g')
+       .replaceAll('ü', 'u').replaceAll('Ü', 'u')
+       .replaceAll('ş', 's').replaceAll('Ş', 's')
+       .replaceAll('ö', 'o').replaceAll('Ö', 'o')
+       .replaceAll('ç', 'c').replaceAll('Ç', 'c');
+  // Noktalama, kesme ve tire işaretlerini boşluğa çevir
+  s = s.replaceAll(RegExp(r"['’`\-_/()\[\]\.,:;!?\n\r]"), ' ');
+  return s.replaceAll(RegExp(r'\s+'), ' ').trim();
+}
+
 /// Filtrelenmiş dua listesi
 final filteredDuasListProvider = Provider<List<DuaItem>>((ref) {
   final favorites = ref.watch(favoriteDuasProvider);
   final selectedCat = ref.watch(selectedDuaCategoryProvider);
-  final query = ref.watch(duaSearchQueryProvider).trim().toLowerCase();
+  final query = ref.watch(duaSearchQueryProvider).trim();
 
   return verifiedDuasList.map((item) {
     return item.copyWith(isFavorite: favorites.contains(item.id));
@@ -63,11 +82,31 @@ final filteredDuasListProvider = Provider<List<DuaItem>>((ref) {
     }
     // Arama sorgusu
     if (query.isNotEmpty) {
-      final inTitle = item.title.toLowerCase().contains(query);
-      final inMeaning = item.turkishMeaning.toLowerCase().contains(query);
-      final inRef = item.reference.toLowerCase().contains(query);
-      final inArabic = item.arabicText.contains(query);
-      return inTitle || inMeaning || inRef || inArabic;
+      // 1. Doğrudan Arapça metin eşleşmesi
+      if (item.arabicText.contains(query)) {
+        return true;
+      }
+
+      final normQuery = _normalizeForSearch(query);
+      if (normQuery.isEmpty) return true;
+
+      // 2. Normalleştirilmiş arama havuzu (Başlık, Okunuş, Anlam, Kaynak, Fazilet)
+      final combined = _normalizeForSearch(
+        '${item.title} ${item.transliteration} ${item.turkishMeaning} ${item.reference} ${item.virtueExplanation ?? ''}',
+      );
+
+      // Doğrudan alt metin eşleşmesi
+      if (combined.contains(normQuery)) {
+        return true;
+      }
+
+      // Kelime bazlı tam kapsama (örn: "nazar duası", "sınav zihin")
+      final queryWords = normQuery.split(' ').where((w) => w.isNotEmpty).toList();
+      if (queryWords.length > 1 && queryWords.every((w) => combined.contains(w))) {
+        return true;
+      }
+
+      return false;
     }
     return true;
   }).toList();

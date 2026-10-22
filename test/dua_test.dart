@@ -1,6 +1,8 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:islamic_app/features/dua/data/verified_duas_data.dart';
 import 'package:islamic_app/features/dua/models/dua_model.dart';
+import 'package:islamic_app/features/dua/providers/dua_providers.dart';
 
 void main() {
   group('Dua Kütüphanesi Model ve Veri Testleri', () {
@@ -47,6 +49,55 @@ void main() {
       final favorited = sample.copyWith(isFavorite: true);
       expect(favorited.isFavorite, isTrue);
       expect(favorited.id, sample.id);
+    });
+
+    test('Önemli dualar (Âyetü\'l-Kürsî, Nazar, Sübhaneke, Şifa, İnşirah) listede eksiksiz bulunmalı', () {
+      final ayetelKursi = verifiedDuasList.where((d) => d.id == 'kuran_ayetel_kursi').toList();
+      expect(ayetelKursi.isNotEmpty, isTrue);
+      expect(ayetelKursi.first.title.contains('Ayetel Kürsi'), isTrue);
+      expect(ayetelKursi.first.arabicText.contains('الْحَيُّ الْقَيُّومُ'), isTrue);
+
+      final nazar = verifiedDuasList.where((d) => d.id == 'gunluk_nazar_duasi').toList();
+      expect(nazar.isNotEmpty, isTrue);
+
+      final subhaneke = verifiedDuasList.where((d) => d.id == 'gunluk_subhaneke').toList();
+      expect(subhaneke.isNotEmpty, isTrue);
+
+      final sifa = verifiedDuasList.where((d) => d.id == 'sikinti_sifa_duasi').toList();
+      expect(sifa.isNotEmpty, isTrue);
+
+      final insirah = verifiedDuasList.where((d) => d.id == 'kuran_insirah').toList();
+      expect(insirah.isNotEmpty, isTrue);
+    });
+
+    test('Arama normalizasyonu ayetel kursi, nazar duası, subhaneke gibi sorguları doğru bulmalı', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      // "ayetel kursi" araması
+      container.read(duaSearchQueryProvider.notifier).state = 'ayetel kursi';
+      var results = container.read(filteredDuasListProvider);
+      expect(results.any((d) => d.id == 'kuran_ayetel_kursi'), isTrue);
+
+      // "nazar duasi" araması
+      container.read(duaSearchQueryProvider.notifier).state = 'nazar duasi';
+      results = container.read(filteredDuasListProvider);
+      expect(results.any((d) => d.id == 'gunluk_nazar_duasi'), isTrue);
+
+      // "subhaneke" araması
+      container.read(duaSearchQueryProvider.notifier).state = 'subhaneke';
+      results = container.read(filteredDuasListProvider);
+      expect(results.any((d) => d.id == 'gunluk_subhaneke'), isTrue);
+
+      // "sifa duasi" araması
+      container.read(duaSearchQueryProvider.notifier).state = 'sifa duasi';
+      results = container.read(filteredDuasListProvider);
+      expect(results.any((d) => d.id == 'sikinti_sifa_duasi'), isTrue);
+
+      // "rabbi yessir" araması
+      container.read(duaSearchQueryProvider.notifier).state = 'rabbi yessir';
+      results = container.read(filteredDuasListProvider);
+      expect(results.any((d) => d.id == 'sikinti_rabbi_yessir'), isTrue);
     });
   });
 }
