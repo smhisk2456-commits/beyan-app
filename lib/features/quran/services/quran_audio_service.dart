@@ -213,9 +213,9 @@ class QuranAudioState {
       selectedReciter: selectedReciter ?? this.selectedReciter,
       position: position ?? this.position,
       duration: duration ?? this.duration,
-      activeVerseNumber: clearActiveVerse ? null : (activeVerseNumber ?? this.activeVerseNumber),
-      activeWordIndex: clearActiveWord ? null : (activeWordIndex ?? this.activeWordIndex),
-      verseProgress: verseProgress ?? this.verseProgress,
+      activeVerseNumber: (clearCurrentSurah || clearActiveVerse) ? null : (activeVerseNumber ?? this.activeVerseNumber),
+      activeWordIndex: (clearCurrentSurah || clearActiveWord) ? null : (activeWordIndex ?? this.activeWordIndex),
+      verseProgress: clearCurrentSurah ? 0.0 : (verseProgress ?? this.verseProgress),
       isLiveTrackingEnabled: isLiveTrackingEnabled ?? this.isLiveTrackingEnabled,
       isWordHighlightEnabled: isWordHighlightEnabled ?? this.isWordHighlightEnabled,
     );
