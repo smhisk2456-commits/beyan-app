@@ -90,9 +90,9 @@ final filteredDuasListProvider = Provider<List<DuaItem>>((ref) {
       final normQuery = _normalizeForSearch(query);
       if (normQuery.isEmpty) return true;
 
-      // 2. Normalleştirilmiş arama havuzu (Başlık, Okunuş, Anlam, Kaynak, Fazilet)
+      // 2. Normalleştirilmiş arama havuzu (Başlık, Okunuş, Anlam, İngilizce, Kaynak, Fazilet)
       final combined = _normalizeForSearch(
-        '${item.title} ${item.transliteration} ${item.turkishMeaning} ${item.reference} ${item.virtueExplanation ?? ''}',
+        '${item.title} ${item.localizedTitle('en')} ${item.transliteration} ${item.turkishMeaning} ${item.localizedMeaning('en')} ${item.reference} ${item.virtueExplanation ?? ''}',
       );
 
       // Doğrudan alt metin eşleşmesi

@@ -23,6 +23,7 @@ class _MorningEveningAdhkarScreenState extends ConsumerState<MorningEveningAdhka
   int _currentIndex = 0;
   int _currentCount = 0;
   bool _isCompleted = false;
+  bool _isTransitioning = false;
 
   late final AnimationController _shimmerController;
   late final Animation<double> _shimmerAnimation;
@@ -63,6 +64,7 @@ class _MorningEveningAdhkarScreenState extends ConsumerState<MorningEveningAdhka
   }
 
   void _onTapCounter() {
+    if (_isTransitioning || _isCompleted) return;
     final list = _currentList;
     if (_currentIndex >= list.length) return;
     final item = list[_currentIndex];
@@ -74,6 +76,7 @@ class _MorningEveningAdhkarScreenState extends ConsumerState<MorningEveningAdhka
       _currentCount++;
       if (_currentCount >= item.targetCount) {
         // Hedef tamamlandı
+        _isTransitioning = true;
         HapticFeedback.mediumImpact();
         _shimmerController.forward(from: 0.0);
 
@@ -83,10 +86,12 @@ class _MorningEveningAdhkarScreenState extends ConsumerState<MorningEveningAdhka
             setState(() {
               _currentIndex++;
               _currentCount = 0;
+              _isTransitioning = false;
             });
           } else {
             setState(() {
               _isCompleted = true;
+              _isTransitioning = false;
             });
             HapticFeedback.heavyImpact();
           }
@@ -103,6 +108,7 @@ class _MorningEveningAdhkarScreenState extends ConsumerState<MorningEveningAdhka
       _currentIndex = 0;
       _currentCount = 0;
       _isCompleted = false;
+      _isTransitioning = false;
     });
   }
 
@@ -113,6 +119,7 @@ class _MorningEveningAdhkarScreenState extends ConsumerState<MorningEveningAdhka
       setState(() {
         _currentIndex++;
         _currentCount = 0;
+        _isTransitioning = false;
       });
     }
   }
@@ -123,6 +130,7 @@ class _MorningEveningAdhkarScreenState extends ConsumerState<MorningEveningAdhka
       setState(() {
         _currentIndex--;
         _currentCount = 0;
+        _isTransitioning = false;
       });
     }
   }
@@ -133,6 +141,7 @@ class _MorningEveningAdhkarScreenState extends ConsumerState<MorningEveningAdhka
       _currentIndex = 0;
       _currentCount = 0;
       _isCompleted = false;
+      _isTransitioning = false;
     });
   }
 

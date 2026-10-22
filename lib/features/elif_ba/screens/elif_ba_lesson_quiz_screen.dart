@@ -313,7 +313,7 @@ class _ElifBaLessonQuizScreenState extends ConsumerState<ElifBaLessonQuizScreen>
                           style: TextStyle(
                             fontFamily: 'Amiri',
                             fontSize: 54,
-                            color: BeyanColors.tone(0xFFFFDF7A),
+                            color: isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF012E2B),
                             fontWeight: FontWeight.bold,
                           ),
                         ),

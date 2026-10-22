@@ -13,6 +13,9 @@ class QuranAudioPlayerBar extends ConsumerWidget {
   String _formatDuration(Duration d) {
     final m = d.inMinutes.remainder(60).toString().padLeft(2, '0');
     final s = d.inSeconds.remainder(60).toString().padLeft(2, '0');
+    if (d.inHours > 0) {
+      return '${d.inHours}:$m:$s';
+    }
     return '$m:$s';
   }
 
@@ -91,6 +94,9 @@ class QuranAudioPlayerBar extends ConsumerWidget {
               ),
               // Döngü / Ezber Tekrar Modu (1x, 3x, 5x, 10x, ∞)
               IconButton(
+                visualDensity: VisualDensity.compact,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                 icon: Stack(
                   alignment: Alignment.center,
                   children: [
@@ -99,7 +105,7 @@ class QuranAudioPlayerBar extends ConsumerWidget {
                       color: audioState.loopRepeatCount > 1 || audioState.loopRepeatCount == -1
                           ? BeyanColors.tone(0xFFFFDF7A)
                           : Colors.white60,
-                      size: 21,
+                      size: 20,
                     ),
                     if (audioState.loopRepeatCount != 1)
                       Positioned(
@@ -124,6 +130,9 @@ class QuranAudioPlayerBar extends ConsumerWidget {
               ),
               // Manevi Ambiyans & Uyku Zamanlayıcısı
               IconButton(
+                visualDensity: VisualDensity.compact,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                 icon: Icon(
                   audioState.activeAmbience != null || audioState.sleepTimerSecondsRemaining != null
                       ? Icons.bedtime_rounded
@@ -131,19 +140,25 @@ class QuranAudioPlayerBar extends ConsumerWidget {
                   color: audioState.activeAmbience != null || audioState.sleepTimerSecondsRemaining != null
                       ? BeyanColors.tone(0xFFFFDF7A)
                       : Colors.white60,
-                  size: 20,
+                  size: 19,
                 ),
                 tooltip: strings.language == AppLanguage.turkish ? 'Manevi Ambiyans & Uyku Modu' : 'Ambience & Sleep Timer',
                 onPressed: () => SleepAndAmbienceSheet.show(context),
               ),
               // 10 sn geri
               IconButton(
-                icon: const Icon(Icons.replay_10_rounded, color: Colors.white70, size: 22),
+                visualDensity: VisualDensity.compact,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                icon: const Icon(Icons.replay_10_rounded, color: Colors.white70, size: 21),
                 tooltip: strings.seekBackward10s,
                 onPressed: () => ref.read(quranAudioProvider.notifier).seekRelative(-10),
               ),
               // Oynat / Duraklat
               IconButton(
+                visualDensity: VisualDensity.compact,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
                 icon: audioState.isLoading
                     ? SizedBox(
                         width: 22,
@@ -153,7 +168,7 @@ class QuranAudioPlayerBar extends ConsumerWidget {
                     : Icon(
                         audioState.isPlaying ? Icons.pause_circle_filled_rounded : Icons.play_circle_fill_rounded,
                         color: BeyanColors.tone(0xFFFFDF7A),
-                        size: 32,
+                        size: 31,
                       ),
                 onPressed: () {
                   HapticFeedback.lightImpact();
@@ -162,12 +177,18 @@ class QuranAudioPlayerBar extends ConsumerWidget {
               ),
               // 10 sn ileri
               IconButton(
-                icon: const Icon(Icons.forward_10_rounded, color: Colors.white70, size: 22),
+                visualDensity: VisualDensity.compact,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                icon: const Icon(Icons.forward_10_rounded, color: Colors.white70, size: 21),
                 tooltip: strings.seekForward10s,
                 onPressed: () => ref.read(quranAudioProvider.notifier).seekRelative(10),
               ),
               // Kapat
               IconButton(
+                visualDensity: VisualDensity.compact,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
                 icon: const Icon(Icons.close_rounded, color: Colors.white54, size: 18),
                 tooltip: strings.closeBtn,
                 onPressed: () => ref.read(quranAudioProvider.notifier).stop(),

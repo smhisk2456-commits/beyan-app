@@ -152,8 +152,9 @@ class _MushafPageViewState extends ConsumerState<MushafPageView> {
     final words = verse.arabicText.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
     final clampedWordIdx = words.isNotEmpty ? activeWordIndex.clamp(0, words.length - 1) : 0;
     final wp = wordProgress.clamp(0.0, 1.0);
-    final leadStop = (wp - 0.12).clamp(0.0, 1.0);
-    final trailStop = (wp + 0.12).clamp(0.0, 1.0);
+    final sweep = wp * 1.20 - 0.10;
+    final leadStop = (sweep - 0.10).clamp(0.0, 1.0);
+    final trailStop = (sweep + 0.10).clamp(0.0, 1.0);
     final litGold = isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF012E2B);
     final unlitColor = isDark ? Colors.white.withValues(alpha: 0.36) : Colors.black.withValues(alpha: 0.34);
 

@@ -25,6 +25,7 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
 
   bool _isLoading = true;
   bool _isGpsActive = false;
+  bool _hasAccurateGpsLock = false;
   double? _gpsAccuracyMeters;
   String _userLocationTitle = 'Canlı GPS konumu alınıyor...';
   double _userLat = AppConstants.defaultLatitude;
@@ -74,6 +75,11 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
         ),
       ).listen((pos) async {
         if (!mounted) return;
+        // Eğer elimizde yüksek hassasiyetli (<= 45m) bir GPS kilidi varsa ve yeni gelen paket
+        // baz istasyonu kaynaklı kaba bir sapmaysa (> 120m hata payı), hassas konumu ezme!
+        if (_hasAccurateGpsLock && pos.accuracy > 120) {
+          return;
+        }
         final movedDist = NearbyMosque.calculateDistanceMeters(
           _userLat,
           _userLng,
@@ -85,6 +91,9 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
           _userLng = pos.longitude;
           _gpsAccuracyMeters = pos.accuracy;
           _isGpsActive = true;
+          if (pos.accuracy <= 65) {
+            _hasAccurateGpsLock = true;
+          }
           if (_allMosques.isNotEmpty) {
             _allMosques = _allMosques.map((m) {
               final d = NearbyMosque.calculateDistanceMeters(pos.latitude, pos.longitude, m.latitude, m.longitude);
@@ -161,37 +170,54 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
       // 3. YÜKSEK HASSASİYETLİ (BEST ACCURACY) CANLI DONANIM GPS TESPİTİ
       if (perm == LocationPermission.always || perm == LocationPermission.whileInUse) {
         _startLivePositionStream();
-        try {
-          final lastPos = await Geolocator.getLastKnownPosition();
-          if (lastPos != null) {
-            _userLat = lastPos.latitude;
-            _userLng = lastPos.longitude;
-            _gpsAccuracyMeters = lastPos.accuracy;
-            _isGpsActive = true;
-          }
-        } catch (_) {}
+        if (!_hasAccurateGpsLock) {
+          try {
+            final lastPos = await Geolocator.getLastKnownPosition();
+            if (lastPos != null && (_gpsAccuracyMeters == null || lastPos.accuracy <= _gpsAccuracyMeters!)) {
+              _userLat = lastPos.latitude;
+              _userLng = lastPos.longitude;
+              _gpsAccuracyMeters = lastPos.accuracy;
+              _isGpsActive = true;
+              if (lastPos.accuracy <= 65) {
+                _hasAccurateGpsLock = true;
+              }
+            }
+          } catch (_) {}
+        }
 
         try {
           final livePos = await Geolocator.getCurrentPosition(
             desiredAccuracy: LocationAccuracy.best,
             timeLimit: const Duration(seconds: 8),
           );
-          _userLat = livePos.latitude;
-          _userLng = livePos.longitude;
-          _gpsAccuracyMeters = livePos.accuracy;
-          _isGpsActive = true;
-        } catch (_) {
-          // Best accuracy zaman aşımına uğrarsa high/medium ile hızlı yedek dene
-          try {
-            final fallbackPos = await Geolocator.getCurrentPosition(
-              desiredAccuracy: LocationAccuracy.medium,
-              timeLimit: const Duration(seconds: 4),
-            );
-            _userLat = fallbackPos.latitude;
-            _userLng = fallbackPos.longitude;
-            _gpsAccuracyMeters = fallbackPos.accuracy;
+          if (!_hasAccurateGpsLock || livePos.accuracy <= (_gpsAccuracyMeters ?? 9999) + 35) {
+            _userLat = livePos.latitude;
+            _userLng = livePos.longitude;
+            _gpsAccuracyMeters = livePos.accuracy;
             _isGpsActive = true;
-          } catch (_) {}
+            if (livePos.accuracy <= 65) {
+              _hasAccurateGpsLock = true;
+            }
+          }
+        } catch (_) {
+          // Best accuracy zaman aşımına uğrarsa ve henüz hassas kilit yoksa high ile yedek dene
+          if (!_hasAccurateGpsLock) {
+            try {
+              final fallbackPos = await Geolocator.getCurrentPosition(
+                desiredAccuracy: LocationAccuracy.high,
+                timeLimit: const Duration(seconds: 4),
+              );
+              if (_gpsAccuracyMeters == null || fallbackPos.accuracy <= _gpsAccuracyMeters!) {
+                _userLat = fallbackPos.latitude;
+                _userLng = fallbackPos.longitude;
+                _gpsAccuracyMeters = fallbackPos.accuracy;
+                _isGpsActive = true;
+                if (fallbackPos.accuracy <= 65) {
+                  _hasAccurateGpsLock = true;
+                }
+              }
+            } catch (_) {}
+          }
         }
       }
 

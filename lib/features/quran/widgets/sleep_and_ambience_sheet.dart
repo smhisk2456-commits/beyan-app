@@ -228,7 +228,11 @@ class SleepAndAmbienceSheet extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(14),
                       onTap: () {
                         HapticFeedback.lightImpact();
-                        audioNotifier.playSurah(item.id, item.name);
+                        if (audioState.currentSurahId == item.id) {
+                          audioNotifier.togglePlayPause();
+                        } else {
+                          audioNotifier.playSurah(item.id, item.name);
+                        }
                       },
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),

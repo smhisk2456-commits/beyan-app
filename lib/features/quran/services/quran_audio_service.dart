@@ -279,9 +279,15 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
     _initListeners();
   }
 
+  bool _isLoopSeeking = false;
+
   void setVerses(List<Verse> verses) {
+    final isNewSurahList = _currentVerses == null ||
+        _currentVerses!.isEmpty ||
+        (verses.isNotEmpty && _currentVerses!.first.surahId != verses.first.surahId) ||
+        _currentVerses!.length != verses.length;
     _currentVerses = verses;
-    if (state.isPlaying) {
+    if (isNewSurahList && state.isPlaying) {
       updateActiveVerseByProgress(verses);
     }
   }
@@ -533,6 +539,33 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
         }
       }
 
+      // Tek Âyet Ezber Tekrarı (loopVerseNumber aktifse ve sonraki âyete geçildiyse başa sar)
+      if (!_isLoopSeeking &&
+          state.loopVerseNumber != null &&
+          state.activeVerseNumber == state.loopVerseNumber &&
+          determinedVerse != state.loopVerseNumber) {
+        if (state.loopRepeatCount == -1 || state.currentLoopIteration < state.loopRepeatCount) {
+          _isLoopSeeking = true;
+          final targetV = state.loopVerseNumber!;
+          state = state.copyWith(
+            currentLoopIteration: state.currentLoopIteration + 1,
+            activeVerseNumber: targetV,
+            activeWordIndex: 0,
+            verseProgress: 0.0,
+            wordProgress: 0.0,
+          );
+          seekToVerse(targetV, verses, surahName: state.currentSurahName).whenComplete(() {
+            _isLoopSeeking = false;
+          });
+          return;
+        } else {
+          state = state.copyWith(
+            currentLoopIteration: 1,
+            clearLoopVerse: true,
+          );
+        }
+      }
+
       if (state.activeVerseNumber != determinedVerse ||
           state.activeWordIndex != determinedWord ||
           (state.verseProgress - progress).abs() > 0.002 ||
@@ -603,6 +636,33 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
             break;
           }
         }
+      }
+    }
+
+    // Tek Âyet Ezber Tekrarı (Yedek Oransal Modda da aktifse başa sar)
+    if (!_isLoopSeeking &&
+        state.loopVerseNumber != null &&
+        state.activeVerseNumber == state.loopVerseNumber &&
+        determinedVerse != state.loopVerseNumber) {
+      if (state.loopRepeatCount == -1 || state.currentLoopIteration < state.loopRepeatCount) {
+        _isLoopSeeking = true;
+        final targetV = state.loopVerseNumber!;
+        state = state.copyWith(
+          currentLoopIteration: state.currentLoopIteration + 1,
+          activeVerseNumber: targetV,
+          activeWordIndex: 0,
+          verseProgress: 0.0,
+          wordProgress: 0.0,
+        );
+        seekToVerse(targetV, verses, surahName: state.currentSurahName).whenComplete(() {
+          _isLoopSeeking = false;
+        });
+        return;
+      } else {
+        state = state.copyWith(
+          currentLoopIteration: 1,
+          clearLoopVerse: true,
+        );
       }
     }
 

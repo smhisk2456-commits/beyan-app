@@ -279,7 +279,7 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
                         ),
                         Expanded(
                           child: _buildSegmentButton(
-                            label: '${strings.language == AppLanguage.turkish ? 'Favorilerim' : 'Favorites'} (${duas.where((d) => d.isFavorite).length})',
+                            label: '${strings.language == AppLanguage.turkish ? 'Favorilerim' : 'Favorites'} (${ref.watch(favoriteDuasProvider).length})',
                             icon: Icons.favorite_rounded,
                             isActive: _activeTab == _DuaTab.favorites,
                             onTap: () {

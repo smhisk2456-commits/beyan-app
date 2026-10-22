@@ -434,8 +434,9 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
       if (next.currentSurahId == widget.surah.id && next.isPlaying) {
         final verses = versesAsync.valueOrNull;
         if (verses != null && verses.isNotEmpty) {
-          ref.read(quranAudioProvider.notifier).setVerses(verses);
-          ref.read(quranAudioProvider.notifier).updateActiveVerseByProgress(verses);
+          if (prev?.currentSurahId != next.currentSurahId) {
+            ref.read(quranAudioProvider.notifier).setVerses(verses);
+          }
 
           if (next.isLiveTrackingEnabled &&
               next.activeVerseNumber != null &&
@@ -813,6 +814,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                 if (isThisSurahPlaying) {
                   ref.read(quranAudioProvider.notifier).togglePlayPause();
                 } else {
+                  ref.read(quranAudioProvider.notifier).setVerses(verses);
                   ref.read(quranAudioProvider.notifier).playSurah(
                     widget.surah.id,
                     widget.surah.localizedName(strings.language.code),
@@ -895,6 +897,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                 if (isThisSurahPlaying) {
                   ref.read(quranAudioProvider.notifier).togglePlayPause();
                 } else {
+                  ref.read(quranAudioProvider.notifier).setVerses(verses);
                   ref.read(quranAudioProvider.notifier).playSurah(widget.surah.id, widget.surah.localizedName(strings.language.code));
                 }
               },

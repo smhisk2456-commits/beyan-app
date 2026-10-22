@@ -194,8 +194,9 @@ class _ArabicTextState extends State<ArabicText> {
               // Apple Music Live Lyrics Tarzı Aktif Kelime: Sağdan Sola (RTL) Harf Harf Altın Işık Dolumu
               if (activeIdx != null && i == activeIdx) {
                 final wp = widget.highlightedWordProgress.clamp(0.0, 1.0);
-                final leadStop = (wp - 0.12).clamp(0.0, 1.0);
-                final trailStop = (wp + 0.12).clamp(0.0, 1.0);
+                final sweep = wp * 1.20 - 0.10;
+                final leadStop = (sweep - 0.10).clamp(0.0, 1.0);
+                final trailStop = (sweep + 0.10).clamp(0.0, 1.0);
 
                 return WidgetSpan(
                   alignment: PlaceholderAlignment.baseline,
