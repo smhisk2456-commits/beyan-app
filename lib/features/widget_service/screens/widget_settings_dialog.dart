@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -23,10 +24,10 @@ class _WidgetSettingsDialogState extends ConsumerState<WidgetSettingsDialog> {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 36),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF071B18) : Colors.white,
+        color: isDark ? BeyanColors.tone(0xFF071B18) : Colors.white,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         border: Border.all(
-          color: const Color(0xFFD4AF37).withValues(alpha: 0.3),
+          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -53,12 +54,12 @@ class _WidgetSettingsDialogState extends ConsumerState<WidgetSettingsDialog> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.settings_suggest_rounded,
-                  color: Color(0xFFD4AF37),
+                  color: BeyanColors.tone(0xFFD4AF37),
                   size: 20,
                 ),
               ),
@@ -68,7 +69,7 @@ class _WidgetSettingsDialogState extends ConsumerState<WidgetSettingsDialog> {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: isDark ? Colors.white : const Color(0xFF033E35),
+                  color: isDark ? Colors.white : BeyanColors.tone(0xFF033E35),
                 ),
               ),
             ],
@@ -81,7 +82,7 @@ class _WidgetSettingsDialogState extends ConsumerState<WidgetSettingsDialog> {
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w700,
-              color: isDark ? Colors.white70 : const Color(0xFF033E35),
+              color: isDark ? Colors.white70 : BeyanColors.tone(0xFF033E35),
               letterSpacing: 0.5,
             ),
           ),
@@ -105,12 +106,12 @@ class _WidgetSettingsDialogState extends ConsumerState<WidgetSettingsDialog> {
                   padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? const Color(0xFF033E35).withValues(alpha: isDark ? 0.6 : 0.12)
-                        : (isDark ? const Color(0xFF0D2823) : const Color(0xFFF0F5F3)),
+                        ? BeyanColors.tone(0xFF033E35).withValues(alpha: isDark ? 0.6 : 0.12)
+                        : (isDark ? BeyanColors.tone(0xFF0D2823) : BeyanColors.tone(0xFFF0F5F3)),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: isSelected
-                          ? const Color(0xFFD4AF37)
+                          ? BeyanColors.tone(0xFFD4AF37)
                           : Colors.transparent,
                       width: 1.5,
                     ),
@@ -130,7 +131,7 @@ class _WidgetSettingsDialogState extends ConsumerState<WidgetSettingsDialog> {
                           fontSize: 11,
                           fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                           color: isSelected
-                              ? (isDark ? const Color(0xFFFFDF7A) : const Color(0xFF033E35))
+                              ? (isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF033E35))
                               : (isDark ? Colors.white60 : Colors.black87),
                         ),
                       ),
@@ -155,10 +156,10 @@ class _WidgetSettingsDialogState extends ConsumerState<WidgetSettingsDialog> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF0D2823) : const Color(0xFFF0F5F3),
+                color: isDark ? BeyanColors.tone(0xFF0D2823) : BeyanColors.tone(0xFFF0F5F3),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                  color: const Color(0xFFD4AF37).withValues(alpha: 0.45),
+                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.45),
                   width: 1,
                 ),
               ),
@@ -166,8 +167,8 @@ class _WidgetSettingsDialogState extends ConsumerState<WidgetSettingsDialog> {
                 children: [
                   Container(
                     padding: const EdgeInsets.all(7),
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFD4AF37),
+                    decoration: BoxDecoration(
+                      color: BeyanColors.tone(0xFFD4AF37),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(Icons.music_note_rounded, color: Colors.black, size: 16),
@@ -182,7 +183,7 @@ class _WidgetSettingsDialogState extends ConsumerState<WidgetSettingsDialog> {
                           style: TextStyle(
                             fontSize: 13.5,
                             fontWeight: FontWeight.bold,
-                            color: isDark ? const Color(0xFFFFDF7A) : const Color(0xFF033E35),
+                            color: isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF033E35),
                           ),
                         ),
                         const SizedBox(height: 2),
@@ -196,7 +197,7 @@ class _WidgetSettingsDialogState extends ConsumerState<WidgetSettingsDialog> {
                       ],
                     ),
                   ),
-                  const Icon(Icons.arrow_forward_ios_rounded, size: 13, color: Color(0xFFD4AF37)),
+                  Icon(Icons.arrow_forward_ios_rounded, size: 13, color: BeyanColors.tone(0xFFD4AF37)),
                 ],
               ),
             ),
@@ -214,10 +215,10 @@ class _WidgetSettingsDialogState extends ConsumerState<WidgetSettingsDialog> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF0D2823) : const Color(0xFFF0F5F3),
+                color: isDark ? BeyanColors.tone(0xFF0D2823) : BeyanColors.tone(0xFFF0F5F3),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                  color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.4),
                   width: 1,
                 ),
               ),
@@ -225,8 +226,8 @@ class _WidgetSettingsDialogState extends ConsumerState<WidgetSettingsDialog> {
                 children: [
                   Container(
                     padding: const EdgeInsets.all(7),
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFD4AF37),
+                    decoration: BoxDecoration(
+                      color: BeyanColors.tone(0xFFD4AF37),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(Icons.notifications_active_rounded, color: Colors.black, size: 16),
@@ -241,7 +242,7 @@ class _WidgetSettingsDialogState extends ConsumerState<WidgetSettingsDialog> {
                           style: TextStyle(
                             fontSize: 13.5,
                             fontWeight: FontWeight.bold,
-                            color: isDark ? const Color(0xFFFFDF7A) : const Color(0xFF033E35),
+                            color: isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF033E35),
                           ),
                         ),
                         const SizedBox(height: 2),
@@ -255,7 +256,7 @@ class _WidgetSettingsDialogState extends ConsumerState<WidgetSettingsDialog> {
                       ],
                     ),
                   ),
-                  const Icon(Icons.arrow_forward_ios_rounded, size: 13, color: Color(0xFFD4AF37)),
+                  Icon(Icons.arrow_forward_ios_rounded, size: 13, color: BeyanColors.tone(0xFFD4AF37)),
                 ],
               ),
             ),

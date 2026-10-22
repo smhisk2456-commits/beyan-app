@@ -79,7 +79,8 @@ class PrayerTimeService {
 
       if (lastKnown != null) {
         final age = DateTime.now().difference(lastKnown.timestamp);
-        if (age.inMinutes < 30 && !_isEmulatorOrInvalidLocation(lastKnown.latitude, lastKnown.longitude)) {
+        if (age.inMinutes < 15 && !_isEmulatorOrInvalidLocation(lastKnown.latitude, lastKnown.longitude)) {
+          await _saveVerifiedGps(prefs, lastKnown.latitude, lastKnown.longitude);
           return LocationData(
             latitude: lastKnown.latitude,
             longitude: lastKnown.longitude,
@@ -89,26 +90,54 @@ class PrayerTimeService {
         }
       }
 
-      final Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.medium,
-      ).timeout(
-        const Duration(seconds: 3),
-        onTimeout: () => throw TimeoutException('Konum zaman aşımı'),
-      );
+      try {
+        final Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high,
+          timeLimit: const Duration(seconds: 7),
+        );
 
-      if (_isEmulatorOrInvalidLocation(position.latitude, position.longitude)) {
-        return _defaultLocation('Emülatör GPS algılandı, varsayılan konum kullanıldı');
+        if (!_isEmulatorOrInvalidLocation(position.latitude, position.longitude)) {
+          await _saveVerifiedGps(prefs, position.latitude, position.longitude);
+          return LocationData(
+            latitude: position.latitude,
+            longitude: position.longitude,
+            cityName: 'Mevcut Konum',
+            isFromGPS: true,
+          );
+        }
+      } catch (_) {
+        // Canlı GPS zaman aşımına uğrarsa son bilinen gerçek donanım konumunu kullan
+        if (lastKnown != null && !_isEmulatorOrInvalidLocation(lastKnown.latitude, lastKnown.longitude)) {
+          return LocationData(
+            latitude: lastKnown.latitude,
+            longitude: lastKnown.longitude,
+            cityName: 'Mevcut Konum',
+            isFromGPS: true,
+          );
+        }
+        final savedLat = prefs.getDouble('beyan_verified_gps_lat');
+        final savedLng = prefs.getDouble('beyan_verified_gps_lng');
+        if (savedLat != null && savedLng != null && !_isEmulatorOrInvalidLocation(savedLat, savedLng)) {
+          return LocationData(
+            latitude: savedLat,
+            longitude: savedLng,
+            cityName: prefs.getString('beyan_verified_gps_title') ?? 'Mevcut Konum',
+            isFromGPS: true,
+          );
+        }
       }
 
-      return LocationData(
-        latitude: position.latitude,
-        longitude: position.longitude,
-        cityName: 'Mevcut Konum',
-        isFromGPS: true,
-      );
+      return _defaultLocation('Emülatör veya geçersiz GPS algılandı');
     } catch (e) {
       return _defaultLocation('GPS hatası: $e');
     }
+  }
+
+  Future<void> _saveVerifiedGps(SharedPreferences prefs, double lat, double lng) async {
+    try {
+      await prefs.setDouble('beyan_verified_gps_lat', lat);
+      await prefs.setDouble('beyan_verified_gps_lng', lng);
+    } catch (_) {}
   }
 
   /// Geçersiz veya bozuk koordinatları tespit eder.

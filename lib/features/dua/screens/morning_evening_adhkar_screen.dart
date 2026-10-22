@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -143,7 +144,7 @@ class _MorningEveningAdhkarScreenState extends ConsumerState<MorningEveningAdhka
     final list = _currentList;
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF021B16) : const Color(0xFFF3F7F5),
+      backgroundColor: isDark ? BeyanColors.tone(0xFF021B16) : BeyanColors.tone(0xFFF3F7F5),
       appBar: AppBar(
         title: Text(
           strings.language == AppLanguage.turkish
@@ -169,10 +170,10 @@ class _MorningEveningAdhkarScreenState extends ConsumerState<MorningEveningAdhka
               child: Container(
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF042B23) : const Color(0xFFE2EEEA),
+                  color: isDark ? BeyanColors.tone(0xFF042B23) : BeyanColors.tone(0xFFE2EEEA),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: const Color(0xFFD4AF37).withValues(alpha: 0.35),
+                    color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35),
                   ),
                 ),
                 child: Row(
@@ -185,7 +186,7 @@ class _MorningEveningAdhkarScreenState extends ConsumerState<MorningEveningAdhka
                           duration: const Duration(milliseconds: 250),
                           padding: const EdgeInsets.symmetric(vertical: 9),
                           decoration: BoxDecoration(
-                            color: _isMorning ? const Color(0xFFD4AF37) : Colors.transparent,
+                            color: _isMorning ? BeyanColors.tone(0xFFD4AF37) : Colors.transparent,
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Row(
@@ -218,7 +219,7 @@ class _MorningEveningAdhkarScreenState extends ConsumerState<MorningEveningAdhka
                           duration: const Duration(milliseconds: 250),
                           padding: const EdgeInsets.symmetric(vertical: 9),
                           decoration: BoxDecoration(
-                            color: !_isMorning ? const Color(0xFFD4AF37) : Colors.transparent,
+                            color: !_isMorning ? BeyanColors.tone(0xFFD4AF37) : Colors.transparent,
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Row(
@@ -261,9 +262,9 @@ class _MorningEveningAdhkarScreenState extends ConsumerState<MorningEveningAdhka
                       height: 4,
                       decoration: BoxDecoration(
                         color: isDone
-                            ? const Color(0xFFFFDF7A)
+                            ? BeyanColors.tone(0xFFFFDF7A)
                             : (isCurrent
-                                ? const Color(0xFFD4AF37).withValues(alpha: 0.8)
+                                ? BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.8)
                                 : (isDark ? Colors.white12 : Colors.black12)),
                         borderRadius: BorderRadius.circular(2),
                       ),
@@ -297,10 +298,10 @@ class _MorningEveningAdhkarScreenState extends ConsumerState<MorningEveningAdhka
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF04261F) : Colors.white,
+          color: isDark ? BeyanColors.tone(0xFF04261F) : Colors.white,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.4 : 0.25),
+            color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.4 : 0.25),
             width: 1.2,
           ),
           boxShadow: [
@@ -320,10 +321,10 @@ class _MorningEveningAdhkarScreenState extends ConsumerState<MorningEveningAdhka
                 Expanded(
                   child: Text(
                     item.localizedTitle(lang),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFFFFDF7A),
+                      color: BeyanColors.tone(0xFFFFDF7A),
                       letterSpacing: 0.2,
                     ),
                   ),
@@ -331,14 +332,14 @@ class _MorningEveningAdhkarScreenState extends ConsumerState<MorningEveningAdhka
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFD4AF37).withValues(alpha: 0.18),
+                    color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.18),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFFD4AF37).withValues(alpha: 0.5)),
+                    border: Border.all(color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.5)),
                   ),
                   child: Text(
                     '${_currentIndex + 1} / ${_currentList.length}',
-                    style: const TextStyle(
-                      color: Color(0xFFFFDF7A),
+                    style: TextStyle(
+                      color: BeyanColors.tone(0xFFFFDF7A),
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                     ),
@@ -353,17 +354,17 @@ class _MorningEveningAdhkarScreenState extends ConsumerState<MorningEveningAdhka
             Container(
               padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF021B16) : const Color(0xFFF7FAF9),
+                color: isDark ? BeyanColors.tone(0xFF021B16) : BeyanColors.tone(0xFFF7FAF9),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Text(
                 item.arabicText,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Amiri',
                   fontSize: 22,
                   height: 2.1,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFFFFDF7A),
+                  color: BeyanColors.tone(0xFFFFDF7A),
                 ),
                 textAlign: TextAlign.right,
                 textDirection: TextDirection.rtl,
@@ -379,7 +380,7 @@ class _MorningEveningAdhkarScreenState extends ConsumerState<MorningEveningAdhka
                 fontSize: 13.5,
                 height: 1.5,
                 fontStyle: FontStyle.italic,
-                color: isDark ? const Color(0xFF80CBC4) : const Color(0xFF0A685A),
+                color: isDark ? BeyanColors.tone(0xFF80CBC4) : BeyanColors.tone(0xFF0A685A),
               ),
             ),
 
@@ -393,7 +394,7 @@ class _MorningEveningAdhkarScreenState extends ConsumerState<MorningEveningAdhka
               style: TextStyle(
                 fontSize: 14,
                 height: 1.55,
-                color: isDark ? Colors.white.withValues(alpha: 0.9) : const Color(0xFF1E2E2B),
+                color: isDark ? Colors.white.withValues(alpha: 0.9) : BeyanColors.tone(0xFF1E2E2B),
               ),
             ),
 
@@ -403,10 +404,10 @@ class _MorningEveningAdhkarScreenState extends ConsumerState<MorningEveningAdhka
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF06332A) : const Color(0xFFEBF4F1),
+                color: isDark ? BeyanColors.tone(0xFF06332A) : BeyanColors.tone(0xFFEBF4F1),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                  color: const Color(0xFFD4AF37).withValues(alpha: 0.3),
+                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.3),
                   width: 0.8,
                 ),
               ),
@@ -415,12 +416,12 @@ class _MorningEveningAdhkarScreenState extends ConsumerState<MorningEveningAdhka
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.stars_rounded, color: Color(0xFFFFDF7A), size: 16),
+                      Icon(Icons.stars_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 16),
                       const SizedBox(width: 6),
                       Text(
                         strings.language == AppLanguage.turkish ? 'Manevi Mükafatı' : 'Virtue & Blessing',
-                        style: const TextStyle(
-                          color: Color(0xFFFFDF7A),
+                        style: TextStyle(
+                          color: BeyanColors.tone(0xFFFFDF7A),
                           fontWeight: FontWeight.bold,
                           fontSize: 12,
                         ),
@@ -442,7 +443,7 @@ class _MorningEveningAdhkarScreenState extends ConsumerState<MorningEveningAdhka
                     style: TextStyle(
                       fontSize: 12,
                       height: 1.45,
-                      color: isDark ? Colors.white70 : const Color(0xFF23443E),
+                      color: isDark ? Colors.white70 : BeyanColors.tone(0xFF23443E),
                     ),
                   ),
                 ],
@@ -480,18 +481,18 @@ class _MorningEveningAdhkarScreenState extends ConsumerState<MorningEveningAdhka
                   return Container(
                     height: 64,
                     decoration: BoxDecoration(
-                      gradient: const RadialGradient(
-                        colors: [Color(0xFF04584C), Color(0xFF012E2B)],
+                      gradient: RadialGradient(
+                        colors: [BeyanColors.tone(0xFF04584C), BeyanColors.tone(0xFF012E2B)],
                         radius: 0.9,
                       ),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: const Color(0xFFD4AF37),
+                        color: BeyanColors.tone(0xFFD4AF37),
                         width: 1.6,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFFD4AF37).withValues(alpha: 0.3),
+                          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.3),
                           blurRadius: 16,
                           offset: const Offset(0, 4),
                         ),
@@ -508,7 +509,7 @@ class _MorningEveningAdhkarScreenState extends ConsumerState<MorningEveningAdhka
                           width: MediaQuery.of(context).size.width * 0.65 * progress,
                           child: Container(
                             decoration: BoxDecoration(
-                              color: const Color(0xFFD4AF37).withValues(alpha: 0.22),
+                              color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.22),
                               borderRadius: BorderRadius.circular(18),
                             ),
                           ),
@@ -526,7 +527,7 @@ class _MorningEveningAdhkarScreenState extends ConsumerState<MorningEveningAdhka
                                     gradient: LinearGradient(
                                       colors: [
                                         Colors.transparent,
-                                        const Color(0xFFFFDF7A).withValues(alpha: 0.45),
+                                        BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.45),
                                         Colors.transparent,
                                       ],
                                     ),
@@ -540,7 +541,7 @@ class _MorningEveningAdhkarScreenState extends ConsumerState<MorningEveningAdhka
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(Icons.touch_app_rounded, color: Color(0xFFFFDF7A), size: 22),
+                            Icon(Icons.touch_app_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 22),
                             const SizedBox(width: 10),
                             Text(
                               '$_currentCount / ${item.targetCount}',
@@ -554,9 +555,9 @@ class _MorningEveningAdhkarScreenState extends ConsumerState<MorningEveningAdhka
                             const SizedBox(width: 8),
                             Text(
                               strings.language == AppLanguage.turkish ? 'Dokun' : 'Tap',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 13,
-                                color: Color(0xFFFFDF7A),
+                                color: BeyanColors.tone(0xFFFFDF7A),
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -593,13 +594,13 @@ class _MorningEveningAdhkarScreenState extends ConsumerState<MorningEveningAdhka
             Container(
               width: 90,
               height: 90,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
-                  colors: [Color(0xFFFFDF7A), Color(0xFFD4AF37)],
+                  colors: [BeyanColors.tone(0xFFFFDF7A), BeyanColors.tone(0xFFD4AF37)],
                 ),
               ),
-              child: const Icon(Icons.check_rounded, color: Color(0xFF012E2B), size: 52),
+              child: Icon(Icons.check_rounded, color: BeyanColors.tone(0xFF012E2B), size: 52),
             ),
             const SizedBox(height: 24),
             Text(
@@ -607,10 +608,10 @@ class _MorningEveningAdhkarScreenState extends ConsumerState<MorningEveningAdhka
                   ? 'Elhamdülillâh!\nVirdiniz Tamamlandı'
                   : 'Alhamdulillah!\nAdhkar Completed',
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFFFFDF7A),
+                color: BeyanColors.tone(0xFFFFDF7A),
                 height: 1.35,
               ),
             ),
@@ -632,8 +633,8 @@ class _MorningEveningAdhkarScreenState extends ConsumerState<MorningEveningAdhka
               icon: const Icon(Icons.home_rounded),
               label: Text(strings.language == AppLanguage.turkish ? 'Ana Sayfaya Dön' : 'Return Home'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFD4AF37),
-                foregroundColor: const Color(0xFF012E2B),
+                backgroundColor: BeyanColors.tone(0xFFD4AF37),
+                foregroundColor: BeyanColors.tone(0xFF012E2B),
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               ),

@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -120,14 +121,14 @@ class _OnboardingTrialPaywallScreenState
           SnackBar(
             content: Row(
               children: [
-                const Icon(Icons.check_circle_rounded, color: Color(0xFFFFDF7A)),
+                Icon(Icons.check_circle_rounded, color: BeyanColors.tone(0xFFFFDF7A)),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(successMsg),
                 ),
               ],
             ),
-            backgroundColor: const Color(0xFF033E35),
+            backgroundColor: BeyanColors.tone(0xFF033E35),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -166,7 +167,7 @@ class _OnboardingTrialPaywallScreenState
                     ar: 'لم يتم العثور على اشتراك نشط.',
                     id: 'Tidak ada langganan aktif yang ditemukan.'),
           ),
-          backgroundColor: const Color(0xFF033E35),
+          backgroundColor: BeyanColors.tone(0xFF033E35),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -183,16 +184,16 @@ class _OnboardingTrialPaywallScreenState
         DateFormat('d MMM yyyy', strings.language.code).format(billingStartDate);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF021612),
+      backgroundColor: BeyanColors.tone(0xFF021612),
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Color(0xFF011410),
-              Color(0xFF04261F),
-              Color(0xFF011511),
+              BeyanColors.tone(0xFF011410),
+              BeyanColors.tone(0xFF04261F),
+              BeyanColors.tone(0xFF011511),
             ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -260,26 +261,26 @@ class _OnboardingTrialPaywallScreenState
                           height: 58,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            gradient: const LinearGradient(
+                            gradient: LinearGradient(
                               colors: [
-                                Color(0xFFFFDF7A),
-                                Color(0xFFD4AF37),
-                                Color(0xFF997A15),
+                                BeyanColors.tone(0xFFFFDF7A),
+                                BeyanColors.tone(0xFFD4AF37),
+                                BeyanColors.tone(0xFF997A15),
                               ],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFFD4AF37).withValues(alpha: 0.35),
+                                color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35),
                                 blurRadius: 20,
                                 spreadRadius: 2,
                               ),
                             ],
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.workspace_premium_rounded,
-                            color: Color(0xFF071F1B),
+                            color: BeyanColors.tone(0xFF071F1B),
                             size: 32,
                           ),
                         ),
@@ -502,7 +503,7 @@ class _OnboardingTrialPaywallScreenState
                               _selectedTier == PremiumTier.lifetime
                                   ? Icons.all_inclusive_rounded
                                   : Icons.check_circle_outline_rounded,
-                              color: const Color(0xFFFFDF7A),
+                              color: BeyanColors.tone(0xFFFFDF7A),
                               size: 16,
                             ),
                             const SizedBox(width: 6),
@@ -535,21 +536,21 @@ class _OnboardingTrialPaywallScreenState
                           onPressed: _isLoading ? null : _startPurchase,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: _selectedTier == PremiumTier.lifetime
-                                ? const Color(0xFFFFDF7A)
-                                : const Color(0xFFD6EDE0),
-                            foregroundColor: const Color(0xFF022720),
+                                ? BeyanColors.tone(0xFFFFDF7A)
+                                : BeyanColors.tone(0xFFD6EDE0),
+                            foregroundColor: BeyanColors.tone(0xFF022720),
                             elevation: 0,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
                             ),
                           ),
                           child: _isLoading
-                              ? const SizedBox(
+                              ? SizedBox(
                                   width: 22,
                                   height: 22,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2.2,
-                                    color: Color(0xFF022720),
+                                    color: BeyanColors.tone(0xFF022720),
                                   ),
                                 )
                               : Text(
@@ -642,12 +643,12 @@ class _OnboardingTrialPaywallScreenState
           Container(
             padding: const EdgeInsets.all(9),
             decoration: BoxDecoration(
-              color: const Color(0xFFFFDF7A).withValues(alpha: 0.15),
+              color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
               icon,
-              color: const Color(0xFFFFDF7A),
+              color: BeyanColors.tone(0xFFFFDF7A),
               size: 22,
             ),
           ),
@@ -673,13 +674,13 @@ class _OnboardingTrialPaywallScreenState
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFFFDF7A),
+                          color: BeyanColors.tone(0xFFFFDF7A),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
                           tag,
-                          style: const TextStyle(
-                            color: Color(0xFF032620),
+                          style: TextStyle(
+                            color: BeyanColors.tone(0xFF032620),
                             fontSize: 9,
                             fontWeight: FontWeight.w800,
                           ),
@@ -720,13 +721,13 @@ class _OnboardingTrialPaywallScreenState
               Container(
                 width: 36,
                 height: 36,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFBCE3CE),
+                decoration: BoxDecoration(
+                  color: BeyanColors.tone(0xFFBCE3CE),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   icon,
-                  color: const Color(0xFF052B24),
+                  color: BeyanColors.tone(0xFF052B24),
                   size: 19,
                 ),
               ),
@@ -734,7 +735,7 @@ class _OnboardingTrialPaywallScreenState
                 Expanded(
                   child: Container(
                     width: 2,
-                    color: const Color(0xFFBCE3CE).withValues(alpha: 0.6),
+                    color: BeyanColors.tone(0xFFBCE3CE).withValues(alpha: 0.6),
                     margin: const EdgeInsets.symmetric(vertical: 4),
                   ),
                 ),
@@ -796,19 +797,19 @@ class _OnboardingTrialPaywallScreenState
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
             decoration: BoxDecoration(
               color: isSelected
-                  ? const Color(0xFF06332B)
-                  : const Color(0xFF08221D),
+                  ? BeyanColors.tone(0xFF06332B)
+                  : BeyanColors.tone(0xFF08221D),
               borderRadius: BorderRadius.circular(18),
               border: Border.all(
                 color: isSelected
-                    ? const Color(0xFFFFDF7A)
+                    ? BeyanColors.tone(0xFFFFDF7A)
                     : Colors.white.withValues(alpha: 0.15),
                 width: isSelected ? 1.8 : 1,
               ),
               boxShadow: isSelected
                   ? [
                       BoxShadow(
-                        color: const Color(0xFFFFDF7A).withValues(alpha: 0.18),
+                        color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.18),
                         blurRadius: 16,
                         spreadRadius: 1,
                       ),
@@ -823,20 +824,20 @@ class _OnboardingTrialPaywallScreenState
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: isSelected
-                        ? const Color(0xFFFFDF7A)
+                        ? BeyanColors.tone(0xFFFFDF7A)
                         : Colors.transparent,
                     border: Border.all(
                       color: isSelected
-                          ? const Color(0xFFFFDF7A)
+                          ? BeyanColors.tone(0xFFFFDF7A)
                           : Colors.white38,
                       width: 1.5,
                     ),
                   ),
                   child: isSelected
-                      ? const Icon(
+                      ? Icon(
                           Icons.check_rounded,
                           size: 15,
-                          color: Color(0xFF032620),
+                          color: BeyanColors.tone(0xFF032620),
                         )
                       : null,
                 ),
@@ -862,7 +863,7 @@ class _OnboardingTrialPaywallScreenState
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            color: isSelected ? const Color(0xFFFFDF7A) : Colors.white60,
+                            color: isSelected ? BeyanColors.tone(0xFFFFDF7A) : Colors.white60,
                             fontSize: 10.5,
                             fontWeight: FontWeight.w700,
                           ),
@@ -903,7 +904,7 @@ class _OnboardingTrialPaywallScreenState
                             totalPrice,
                             style: TextStyle(
                               color: isSelected
-                                  ? const Color(0xFFFFDF7A)
+                                  ? BeyanColors.tone(0xFFFFDF7A)
                                   : Colors.white70,
                               fontSize: 10.5,
                               fontWeight: FontWeight.bold,
@@ -926,8 +927,8 @@ class _OnboardingTrialPaywallScreenState
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFFFDF7A), Color(0xFFD4AF37)],
+                  gradient: LinearGradient(
+                    colors: [BeyanColors.tone(0xFFFFDF7A), BeyanColors.tone(0xFFD4AF37)],
                   ),
                   borderRadius: BorderRadius.circular(8),
                   boxShadow: [
@@ -940,8 +941,8 @@ class _OnboardingTrialPaywallScreenState
                 ),
                 child: Text(
                   topBadge,
-                  style: const TextStyle(
-                    color: Color(0xFF032B24),
+                  style: TextStyle(
+                    color: BeyanColors.tone(0xFF032B24),
                     fontSize: 9.5,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 0.2,

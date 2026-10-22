@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:islamic_app/core/theme/app_theme.dart';
+import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:islamic_app/core/theme/theme_provider.dart';
 import 'package:islamic_app/features/notifications/models/adhan_makam.dart';
 import 'package:islamic_app/features/quran/services/quran_audio_service.dart';
@@ -9,15 +10,35 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('AppThemePalette Testleri', () {
-    test('Tüm 4 palet tanımlı ve benzersiz başlıklara sahip olmalı', () {
-      expect(AppThemePalette.values.length, 4);
+    test('Tüm 7 lüks palet tanımlı ve benzersiz başlıklara sahip olmalı', () {
+      expect(AppThemePalette.values.length, 7);
 
       final titles = AppThemePalette.values.map((p) => p.title).toSet();
-      expect(titles.length, 4);
+      expect(titles.length, 7);
       expect(titles.contains('Zümrüt & Altın'), isTrue);
       expect(titles.contains('Gece Siyahı (OLED)'), isTrue);
-      expect(titles.contains('Kâbe Taş Grisi'), isTrue);
+      expect(titles.contains('Kâbe Füme'), isTrue);
       expect(titles.contains('Derin Lacivert'), isTrue);
+      expect(titles.contains('Osmanlı Bordosu'), isTrue);
+      expect(titles.contains('Seher Moru'), isTrue);
+      expect(titles.contains('Medine Hurması'), isTrue);
+    });
+
+    test('BeyanColors.tone her palet değiştiğinde yeşil tonları o paletin rengine dönüştürmeli', () {
+      BeyanColors.setPalette(AppThemePalette.emerald);
+      final emeraldCard = BeyanColors.tone(0xFF012E2B);
+      expect(emeraldCard, const Color(0xFF012E2B));
+
+      BeyanColors.setPalette(AppThemePalette.deepSapphire);
+      final sapphireCard = BeyanColors.tone(0xFF012E2B);
+      expect(sapphireCard, isNot(equals(emeraldCard)));
+
+      BeyanColors.setPalette(AppThemePalette.ottomanBurgundy);
+      final burgundyCard = BeyanColors.tone(0xFF012E2B);
+      expect(burgundyCard, isNot(equals(emeraldCard)));
+      expect(burgundyCard, isNot(equals(sapphireCard)));
+
+      BeyanColors.setPalette(AppThemePalette.emerald);
     });
 
     test('OLED Black paleti saf siyah (#000000) zemin rengine sahip olmalı', () {

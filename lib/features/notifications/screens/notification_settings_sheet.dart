@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -151,10 +152,10 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.dark(
-              primary: Color(0xFFD4AF37),
+            colorScheme: ColorScheme.dark(
+              primary: BeyanColors.tone(0xFFD4AF37),
               onPrimary: Colors.black,
-              surface: Color(0xFF032B25),
+              surface: BeyanColors.tone(0xFF032B25),
               onSurface: Colors.white,
             ),
           ),
@@ -187,14 +188,14 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
         SnackBar(
           content: Row(
             children: [
-              const Icon(Icons.check_circle_rounded, color: Color(0xFFFFDF7A), size: 20),
+              Icon(Icons.check_circle_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 20),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(strings.testVerseSuccessMsg),
               ),
             ],
           ),
-          backgroundColor: const Color(0xFF033E35),
+          backgroundColor: BeyanColors.tone(0xFF033E35),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           duration: const Duration(seconds: 3),
@@ -246,7 +247,7 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
             backgroundColor: const Color(0xFF3E1203),
             action: SnackBarAction(
               label: strings.grantPermissionBtn,
-              textColor: const Color(0xFFFFDF7A),
+              textColor: BeyanColors.tone(0xFFFFDF7A),
               onPressed: openAppSettings,
             ),
             behavior: SnackBarBehavior.floating,
@@ -271,14 +272,14 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
           SnackBar(
             content: Row(
               children: [
-                const Icon(Icons.check_circle, color: Color(0xFFFFDF7A), size: 20),
+                Icon(Icons.check_circle, color: BeyanColors.tone(0xFFFFDF7A), size: 20),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(strings.testAdhanSuccessMsg),
                 ),
               ],
             ),
-            backgroundColor: const Color(0xFF033E35),
+            backgroundColor: BeyanColors.tone(0xFF033E35),
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             duration: const Duration(seconds: 3),
@@ -308,18 +309,18 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
         maxHeight: MediaQuery.of(context).size.height * 0.85,
       ),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF071F1B) : Colors.white,
+        color: isDark ? BeyanColors.tone(0xFF071F1B) : Colors.white,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         border: Border.all(
-          color: const Color(0xFFD4AF37).withValues(alpha: 0.3),
+          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.3),
           width: 1,
         ),
       ),
       child: _loading
-          ? const Center(
+          ? Center(
               child: Padding(
-                padding: EdgeInsets.all(40),
-                child: CircularProgressIndicator(color: Color(0xFFD4AF37)),
+                padding: const EdgeInsets.all(40),
+                child: CircularProgressIndicator(color: BeyanColors.tone(0xFFD4AF37)),
               ),
             )
           : SingleChildScrollView(
@@ -348,15 +349,15 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+                          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.15),
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: const Color(0xFFD4AF37).withValues(alpha: 0.35),
+                            color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35),
                           ),
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.notifications_active_rounded,
-                          color: Color(0xFFD4AF37),
+                          color: BeyanColors.tone(0xFFD4AF37),
                           size: 24,
                         ),
                       ),
@@ -436,8 +437,8 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                           ElevatedButton(
                             onPressed: _requestOrOpenSettings,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFD4AF37),
-                              foregroundColor: const Color(0xFF033E35),
+                              backgroundColor: BeyanColors.tone(0xFFD4AF37),
+                              foregroundColor: BeyanColors.tone(0xFF033E35),
                               elevation: 0,
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 10,
@@ -467,20 +468,20 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
-                          const Color(0xFF033E35),
-                          isDark ? const Color(0xFF01241F) : const Color(0xFF064D43),
+                          BeyanColors.tone(0xFF033E35),
+                          isDark ? BeyanColors.tone(0xFF01241F) : BeyanColors.tone(0xFF064D43),
                         ],
                       ),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+                        color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.4),
                       ),
                     ),
                     child: Row(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.power_settings_new_rounded,
-                          color: Color(0xFFFFDF7A),
+                          color: BeyanColors.tone(0xFFFFDF7A),
                           size: 22,
                         ),
                         const SizedBox(width: 12),
@@ -508,8 +509,8 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                         ),
                         Switch.adaptive(
                           value: _masterEnabled,
-                          activeThumbColor: const Color(0xFFFFDF7A),
-                          activeTrackColor: const Color(0xFFD4AF37),
+                          activeThumbColor: BeyanColors.tone(0xFFFFDF7A),
+                          activeTrackColor: BeyanColors.tone(0xFFD4AF37),
                           onChanged: _toggleMaster,
                         ),
                       ],
@@ -525,17 +526,17 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                       decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF0D2823) : Colors.grey.shade50,
+                        color: isDark ? BeyanColors.tone(0xFF0D2823) : Colors.grey.shade50,
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(
-                          color: isDark ? const Color(0xFF133B34) : Colors.grey.shade200,
+                          color: isDark ? BeyanColors.tone(0xFF133B34) : Colors.grey.shade200,
                         ),
                       ),
                       child: Row(
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.timer_outlined,
-                            color: Color(0xFFD4AF37),
+                            color: BeyanColors.tone(0xFFD4AF37),
                             size: 20,
                           ),
                           const SizedBox(width: 12),
@@ -563,8 +564,8 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                           ),
                           Switch.adaptive(
                             value: _earlyReminder && _masterEnabled,
-                            activeThumbColor: const Color(0xFFFFDF7A),
-                            activeTrackColor: const Color(0xFFD4AF37),
+                            activeThumbColor: BeyanColors.tone(0xFFFFDF7A),
+                            activeTrackColor: BeyanColors.tone(0xFFD4AF37),
                             onChanged: _masterEnabled ? _toggleEarly : null,
                           ),
                         ],
@@ -590,12 +591,12 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF0D2823) : Colors.grey.shade50,
+                          color: isDark ? BeyanColors.tone(0xFF0D2823) : Colors.grey.shade50,
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
                             color: isDark
-                                ? const Color(0xFF133B34)
-                                : const Color(0xFFD4AF37).withValues(alpha: 0.35),
+                                ? BeyanColors.tone(0xFF133B34)
+                                : BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35),
                           ),
                         ),
                         child: Row(
@@ -603,12 +604,12 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                             Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+                                color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.15),
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(
                                 _currentMakam.icon,
-                                color: const Color(0xFFFFDF7A),
+                                color: BeyanColors.tone(0xFFFFDF7A),
                                 size: 18,
                               ),
                             ),
@@ -631,9 +632,9 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                                   ),
                                   Text(
                                     '${_currentMakam.localizedTitle(strings.language.code)} • ${strings.specialAdhanMakamsProDesc}',
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 11,
-                                      color: Color(0xFFFFDF7A),
+                                      color: BeyanColors.tone(0xFFFFDF7A),
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -643,7 +644,7 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+                                color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: Row(
@@ -651,17 +652,17 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                                 children: [
                                   Text(
                                     strings.changeBtn,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.bold,
-                                      color: Color(0xFFFFDF7A),
+                                      color: BeyanColors.tone(0xFFFFDF7A),
                                     ),
                                   ),
                                   const SizedBox(width: 4),
-                                  const Icon(
+                                  Icon(
                                     Icons.arrow_forward_ios_rounded,
                                     size: 10,
-                                    color: Color(0xFFFFDF7A),
+                                    color: BeyanColors.tone(0xFFFFDF7A),
                                   ),
                                 ],
                               ),
@@ -677,11 +678,11 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                   // ── Vakit Bazlı Ayarlar ──────────────────────────
                   Text(
                     strings.sectionPrayerAlerts,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1.1,
-                      color: Color(0xFFD4AF37),
+                      color: BeyanColors.tone(0xFFD4AF37),
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -691,10 +692,10 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                     opacity: _masterEnabled ? 1.0 : 0.4,
                     child: Container(
                       decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF0D2823) : Colors.white,
+                        color: isDark ? BeyanColors.tone(0xFF0D2823) : Colors.white,
                         borderRadius: BorderRadius.circular(18),
                         border: Border.all(
-                          color: isDark ? const Color(0xFF133B34) : Colors.grey.shade200,
+                          color: isDark ? BeyanColors.tone(0xFF133B34) : Colors.grey.shade200,
                         ),
                       ),
                       child: ClipRRect(
@@ -718,14 +719,14 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                                   height: 34,
                                   decoration: BoxDecoration(
                                     color: enabled
-                                        ? const Color(0xFFD4AF37).withValues(alpha: 0.15)
+                                        ? BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.15)
                                         : (isDark ? Colors.white10 : Colors.grey.shade100),
                                     shape: BoxShape.circle,
                                   ),
                                   child: Icon(
                                     _getPrayerIcon(p),
                                     color: enabled
-                                        ? const Color(0xFFD4AF37)
+                                        ? BeyanColors.tone(0xFFD4AF37)
                                         : (isDark ? Colors.white38 : Colors.grey),
                                     size: 18,
                                   ),
@@ -747,8 +748,8 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                                 ),
                                 trailing: Switch.adaptive(
                                   value: enabled,
-                                  activeThumbColor: const Color(0xFFFFDF7A),
-                                  activeTrackColor: const Color(0xFFD4AF37),
+                                  activeThumbColor: BeyanColors.tone(0xFFFFDF7A),
+                                  activeTrackColor: BeyanColors.tone(0xFFD4AF37),
                                   onChanged: _masterEnabled
                                       ? (v) => _togglePrayer(p, v)
                                       : null,
@@ -766,23 +767,23 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                   // ── Günün Âyeti ve Sure Bildirimleri ───────────
                   Text(
                     strings.sectionVerseAlerts,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1.1,
-                      color: Color(0xFFD4AF37),
+                      color: BeyanColors.tone(0xFFD4AF37),
                     ),
                   ),
                   const SizedBox(height: 10),
 
                   Container(
                     decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF0D2823) : Colors.white,
+                      color: isDark ? BeyanColors.tone(0xFF0D2823) : Colors.white,
                       borderRadius: BorderRadius.circular(18),
                       border: Border.all(
                         color: isDark
-                            ? const Color(0xFF133B34)
-                            : const Color(0xFFD4AF37).withValues(alpha: 0.35),
+                            ? BeyanColors.tone(0xFF133B34)
+                            : BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35),
                       ),
                     ),
                     padding: const EdgeInsets.all(16),
@@ -795,12 +796,12 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                             Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+                                color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.15),
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.menu_book_rounded,
-                                color: Color(0xFFFFDF7A),
+                                color: BeyanColors.tone(0xFFFFDF7A),
                                 size: 20,
                               ),
                             ),
@@ -830,8 +831,8 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                             ),
                             Switch.adaptive(
                               value: _verseEnabled,
-                              activeThumbColor: const Color(0xFFFFDF7A),
-                              activeTrackColor: const Color(0xFFD4AF37),
+                              activeThumbColor: BeyanColors.tone(0xFFFFDF7A),
+                              activeTrackColor: BeyanColors.tone(0xFFD4AF37),
                               onChanged: _toggleVerse,
                             ),
                           ],
@@ -852,17 +853,17 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                               decoration: BoxDecoration(
-                                color: isDark ? const Color(0xFF071F1B) : Colors.grey.shade50,
+                                color: isDark ? BeyanColors.tone(0xFF071F1B) : Colors.grey.shade50,
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  color: const Color(0xFFD4AF37).withValues(alpha: 0.3),
+                                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.3),
                                 ),
                               ),
                               child: Row(
                                 children: [
-                                  const Icon(
+                                  Icon(
                                     Icons.access_time_rounded,
-                                    color: Color(0xFFD4AF37),
+                                    color: BeyanColors.tone(0xFFD4AF37),
                                     size: 18,
                                   ),
                                   const SizedBox(width: 10),
@@ -913,9 +914,9 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
+                                      color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.2),
                                       borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(color: const Color(0xFFD4AF37)),
+                                      border: Border.all(color: BeyanColors.tone(0xFFD4AF37)),
                                     ),
                                     child: Text(
                                       _verseFrequency == 'hourly_2'
@@ -935,8 +936,8 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                                                           ? '1 jam'
                                                           : '1 hour')))
                                               : '${_verseHour.toString().padLeft(2, '0')}:${_verseMinute.toString().padLeft(2, '0')}'),
-                                      style: const TextStyle(
-                                        color: Color(0xFFFFDF7A),
+                                      style: TextStyle(
+                                        color: BeyanColors.tone(0xFFFFDF7A),
                                         fontSize: 13,
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -967,13 +968,13 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                                 ),
                                 selected: _verseFrequency == 'hourly_2',
                                 onSelected: (_) => _changeVerseFreq('hourly_2'),
-                                selectedColor: const Color(0xFFD4AF37),
-                                backgroundColor: isDark ? const Color(0xFF071F1B) : Colors.grey.shade100,
+                                selectedColor: BeyanColors.tone(0xFFD4AF37),
+                                backgroundColor: isDark ? BeyanColors.tone(0xFF071F1B) : Colors.grey.shade100,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10),
                                   side: BorderSide(
                                     color: _verseFrequency == 'hourly_2'
-                                        ? const Color(0xFFD4AF37)
+                                        ? BeyanColors.tone(0xFFD4AF37)
                                         : Colors.transparent,
                                   ),
                                 ),
@@ -991,13 +992,13 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                                 ),
                                 selected: _verseFrequency == 'hourly_1',
                                 onSelected: (_) => _changeVerseFreq('hourly_1'),
-                                selectedColor: const Color(0xFFD4AF37),
-                                backgroundColor: isDark ? const Color(0xFF071F1B) : Colors.grey.shade100,
+                                selectedColor: BeyanColors.tone(0xFFD4AF37),
+                                backgroundColor: isDark ? BeyanColors.tone(0xFF071F1B) : Colors.grey.shade100,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10),
                                   side: BorderSide(
                                     color: _verseFrequency == 'hourly_1'
-                                        ? const Color(0xFFD4AF37)
+                                        ? BeyanColors.tone(0xFFD4AF37)
                                         : Colors.transparent,
                                   ),
                                 ),
@@ -1015,13 +1016,13 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                                 ),
                                 selected: _verseFrequency == 'daily',
                                 onSelected: (_) => _changeVerseFreq('daily'),
-                                selectedColor: const Color(0xFFD4AF37),
-                                backgroundColor: isDark ? const Color(0xFF071F1B) : Colors.grey.shade100,
+                                selectedColor: BeyanColors.tone(0xFFD4AF37),
+                                backgroundColor: isDark ? BeyanColors.tone(0xFF071F1B) : Colors.grey.shade100,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10),
                                   side: BorderSide(
                                     color: _verseFrequency == 'daily'
-                                        ? const Color(0xFFD4AF37)
+                                        ? BeyanColors.tone(0xFFD4AF37)
                                         : Colors.transparent,
                                   ),
                                 ),
@@ -1039,13 +1040,13 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                                 ),
                                 selected: _verseFrequency == 'morning_evening',
                                 onSelected: (_) => _changeVerseFreq('morning_evening'),
-                                selectedColor: const Color(0xFFD4AF37),
-                                backgroundColor: isDark ? const Color(0xFF071F1B) : Colors.grey.shade100,
+                                selectedColor: BeyanColors.tone(0xFFD4AF37),
+                                backgroundColor: isDark ? BeyanColors.tone(0xFF071F1B) : Colors.grey.shade100,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10),
                                   side: BorderSide(
                                     color: _verseFrequency == 'morning_evening'
-                                        ? const Color(0xFFD4AF37)
+                                        ? BeyanColors.tone(0xFFD4AF37)
                                         : Colors.transparent,
                                   ),
                                 ),
@@ -1061,7 +1062,7 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                             child: TextButton.icon(
                               onPressed: _sendTestVerse,
                               style: TextButton.styleFrom(
-                                foregroundColor: const Color(0xFFFFDF7A),
+                                foregroundColor: BeyanColors.tone(0xFFFFDF7A),
                                 padding: const EdgeInsets.symmetric(vertical: 8),
                               ),
                               icon: const Icon(Icons.auto_awesome_rounded, size: 16),
@@ -1089,16 +1090,16 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                     child: OutlinedButton.icon(
                       onPressed: _sendTest,
                       style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Color(0xFFD4AF37), width: 1.2),
+                        side: BorderSide(color: BeyanColors.tone(0xFFD4AF37), width: 1.2),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
                       ),
-                      icon: const Icon(Icons.notifications_active, color: Color(0xFFD4AF37), size: 18),
+                      icon: Icon(Icons.notifications_active, color: BeyanColors.tone(0xFFD4AF37), size: 18),
                       label: Text(
                         strings.testAdhanBtn,
-                        style: const TextStyle(
-                          color: Color(0xFFD4AF37),
+                        style: TextStyle(
+                          color: BeyanColors.tone(0xFFD4AF37),
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
                         ),

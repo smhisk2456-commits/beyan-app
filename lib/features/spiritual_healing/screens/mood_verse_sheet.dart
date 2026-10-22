@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -37,13 +38,13 @@ class MoodVerseSheet extends ConsumerWidget {
       constraints: BoxConstraints(
         maxHeight: MediaQuery.of(context).size.height * 0.90,
       ),
-      decoration: const BoxDecoration(
-        color: Color(0xFF02211C),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      decoration: BoxDecoration(
+        color: BeyanColors.tone(0xFF02211C),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         border: Border(
-          top: BorderSide(color: Color(0xFFD4AF37), width: 1.8),
+          top: BorderSide(color: BeyanColors.tone(0xFFD4AF37), width: 1.8),
         ),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             color: Colors.black87,
             blurRadius: 25,
@@ -62,7 +63,7 @@ class MoodVerseSheet extends ConsumerWidget {
               width: 44,
               height: 4.5,
               decoration: BoxDecoration(
-                color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+                color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.4),
                 borderRadius: BorderRadius.circular(3),
               ),
             ),
@@ -106,8 +107,8 @@ class MoodVerseSheet extends ConsumerWidget {
                         ),
                         Text(
                           data.surahRef,
-                          style: const TextStyle(
-                            color: Color(0xFFFFDF7A),
+                          style: TextStyle(
+                            color: BeyanColors.tone(0xFFFFDF7A),
                             fontSize: 12.5,
                             fontWeight: FontWeight.w600,
                           ),
@@ -138,14 +139,14 @@ class MoodVerseSheet extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.all(18),
                       decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF03332B), Color(0xFF01201A)],
+                        gradient: LinearGradient(
+                          colors: [BeyanColors.tone(0xFF03332B), BeyanColors.tone(0xFF01201A)],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                          color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+                          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.4),
                           width: 1.2,
                         ),
                       ),
@@ -155,11 +156,11 @@ class MoodVerseSheet extends ConsumerWidget {
                             data.arabicText,
                             textAlign: TextAlign.center,
                             textDirection: TextDirection.rtl,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontFamily: 'Amiri',
                               fontSize: 20,
                               height: 1.8,
-                              color: Color(0xFFFFDF7A),
+                              color: BeyanColors.tone(0xFFFFDF7A),
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -167,7 +168,7 @@ class MoodVerseSheet extends ConsumerWidget {
                           Container(
                             height: 1,
                             width: 100,
-                            color: const Color(0xFFD4AF37).withValues(alpha: 0.3),
+                            color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.3),
                           ),
                           const SizedBox(height: 14),
                           Text(
@@ -190,10 +191,10 @@ class MoodVerseSheet extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF082721),
+                        color: BeyanColors.tone(0xFF082721),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: const Color(0xFF2DD4BF).withValues(alpha: 0.3),
+                          color: BeyanColors.tone(0xFF2DD4BF).withValues(alpha: 0.3),
                         ),
                       ),
                       child: Column(
@@ -201,12 +202,12 @@ class MoodVerseSheet extends ConsumerWidget {
                         children: [
                           Row(
                             children: [
-                              const Icon(Icons.auto_awesome, color: Color(0xFF2DD4BF), size: 16),
+                              Icon(Icons.auto_awesome, color: BeyanColors.tone(0xFF2DD4BF), size: 16),
                               const SizedBox(width: 8),
                               Text(
                                 strings.healingDuaHadithBadge,
-                                style: const TextStyle(
-                                  color: Color(0xFF2DD4BF),
+                                style: TextStyle(
+                                  color: BeyanColors.tone(0xFF2DD4BF),
                                   fontSize: 13,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -244,12 +245,12 @@ class MoodVerseSheet extends ConsumerWidget {
                         children: [
                           Row(
                             children: [
-                              const Icon(Icons.favorite_rounded, color: Color(0xFFFFDF7A), size: 16),
+                              Icon(Icons.favorite_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 16),
                               const SizedBox(width: 8),
                               Text(
                                 strings.heartComfortTitle,
-                                style: const TextStyle(
-                                  color: Color(0xFFFFDF7A),
+                                style: TextStyle(
+                                  color: BeyanColors.tone(0xFFFFDF7A),
                                   fontSize: 13,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -296,8 +297,8 @@ class MoodVerseSheet extends ConsumerWidget {
                               style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
                             ),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFD4AF37),
-                              foregroundColor: const Color(0xFF01201D),
+                              backgroundColor: BeyanColors.tone(0xFFD4AF37),
+                              foregroundColor: BeyanColors.tone(0xFF01201D),
                               padding: const EdgeInsets.symmetric(vertical: 13),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14),
@@ -328,11 +329,11 @@ class MoodVerseSheet extends ConsumerWidget {
                           },
                           icon: const Icon(Icons.menu_book_rounded, color: Colors.white),
                           style: IconButton.styleFrom(
-                            backgroundColor: const Color(0xFF0F3E33),
+                            backgroundColor: BeyanColors.tone(0xFF0F3E33),
                             padding: const EdgeInsets.all(12),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(14),
-                              side: BorderSide(color: const Color(0xFF2DD4BF).withValues(alpha: 0.4)),
+                              side: BorderSide(color: BeyanColors.tone(0xFF2DD4BF).withValues(alpha: 0.4)),
                             ),
                           ),
                           tooltip: strings.readInQuranTooltip,

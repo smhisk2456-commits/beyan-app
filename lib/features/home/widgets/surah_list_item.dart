@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import '../../quran/models/surah.dart';
 
@@ -22,10 +23,10 @@ class SurahListItem extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 3.5),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF0D2823) : Colors.white,
+          color: isDark ? BeyanColors.tone(0xFF0D2823) : Colors.white,
           borderRadius: BorderRadius.circular(15),
           border: Border.all(
-            color: isDark ? const Color(0xFF133B34) : const Color(0xFFE5ECE9),
+            color: isDark ? BeyanColors.tone(0xFF133B34) : BeyanColors.tone(0xFFE5ECE9),
             width: 1,
           ),
         ),
@@ -54,7 +55,7 @@ class SurahListItem extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 15.5,
                             fontWeight: FontWeight.w700,
-                            color: isDark ? Colors.white : const Color(0xFF11221F),
+                            color: isDark ? Colors.white : BeyanColors.tone(0xFF11221F),
                             letterSpacing: 0.1,
                           ),
                           maxLines: 1,
@@ -66,8 +67,8 @@ class SurahListItem extends StatelessWidget {
                             _InfoChip(
                               label: surah.localizedRevelation(langCode),
                               color: surah.isMeccan
-                                  ? const Color(0xFF0A685A)
-                                  : const Color(0xFF996515),
+                                  ? BeyanColors.tone(0xFF0A685A)
+                                  : BeyanColors.tone(0xFF996515),
                               isDark: isDark,
                             ),
                             const SizedBox(width: 6),
@@ -75,7 +76,7 @@ class SurahListItem extends StatelessWidget {
                               surah.localizedVerseCount(langCode),
                               style: TextStyle(
                                 fontSize: 11.5,
-                                color: isDark ? Colors.white54 : const Color(0xFF5B6E6A),
+                                color: isDark ? Colors.white54 : BeyanColors.tone(0xFF5B6E6A),
                               ),
                             ),
                           ],
@@ -93,7 +94,7 @@ class SurahListItem extends StatelessWidget {
                       fontSize: 20.0,
                       height: 1.4,
                       fontWeight: FontWeight.w600,
-                      color: isDark ? const Color(0xFFFFE082) : const Color(0xFF033E35),
+                      color: isDark ? BeyanColors.tone(0xFFFFE082) : BeyanColors.tone(0xFF033E35),
                     ),
                   ),
                 ],
@@ -119,11 +120,11 @@ class _SurahNumber extends StatelessWidget {
       height: 38,
       decoration: BoxDecoration(
         color: isDark
-            ? const Color(0xFFD4AF37).withValues(alpha: 0.12)
-            : const Color(0xFF033E35).withValues(alpha: 0.06),
+            ? BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.12)
+            : BeyanColors.tone(0xFF033E35).withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
-          color: const Color(0xFFD4AF37).withValues(alpha: 0.65),
+          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.65),
           width: 1.2,
         ),
       ),
@@ -133,7 +134,7 @@ class _SurahNumber extends StatelessWidget {
           style: TextStyle(
             fontSize: number > 99 ? 11 : 13,
             fontWeight: FontWeight.bold,
-            color: isDark ? const Color(0xFFFFDF7A) : const Color(0xFF033E35),
+            color: isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF033E35),
           ),
         ),
       ),

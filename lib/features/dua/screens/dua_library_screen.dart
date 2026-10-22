@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -82,7 +83,7 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.wb_sunny_outlined, color: Color(0xFFFFDF7A)),
+            icon: Icon(Icons.wb_sunny_outlined, color: BeyanColors.tone(0xFFFFDF7A)),
             tooltip: strings.language == AppLanguage.turkish ? 'Sabah & Akşam Duaları' : 'Morning & Evening Adhkar',
             onPressed: () {
               HapticFeedback.lightImpact();
@@ -95,7 +96,7 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
           IconButton(
             icon: Icon(
               selectedCategory == null ? Icons.filter_alt_outlined : Icons.filter_alt,
-              color: const Color(0xFFFFDF7A),
+              color: BeyanColors.tone(0xFFFFDF7A),
             ),
             tooltip: strings.duaFilterTooltip,
             onPressed: () {
@@ -120,10 +121,10 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF07201C) : Colors.white,
+                    color: isDark ? BeyanColors.tone(0xFF07201C) : Colors.white,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.35 : 0.25),
+                      color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.35 : 0.25),
                       width: 1,
                     ),
                     boxShadow: [
@@ -146,9 +147,9 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
                         color: isDark ? Colors.white38 : AppColors.textSecondary,
                         fontSize: 14,
                       ),
-                      prefixIcon: const Icon(
+                      prefixIcon: Icon(
                         Icons.search_rounded,
-                        color: Color(0xFFD4AF37),
+                        color: BeyanColors.tone(0xFFD4AF37),
                         size: 22,
                       ),
                       suffixIcon: _searchController.text.isNotEmpty
@@ -194,15 +195,15 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                           decoration: BoxDecoration(
                             color: isPillActive
-                                ? const Color(0xFFFFDF7A)
+                                ? BeyanColors.tone(0xFFFFDF7A)
                                 : (isDark
-                                    ? const Color(0xFF0F3A32).withValues(alpha: 0.6)
-                                    : const Color(0xFFE3EFEA)),
+                                    ? BeyanColors.tone(0xFF0F3A32).withValues(alpha: 0.6)
+                                    : BeyanColors.tone(0xFFE3EFEA)),
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
                               color: isPillActive
-                                  ? const Color(0xFFFFDF7A)
-                                  : const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.35 : 0.25),
+                                  ? BeyanColors.tone(0xFFFFDF7A)
+                                  : BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.35 : 0.25),
                               width: 1,
                             ),
                           ),
@@ -217,8 +218,8 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
                                   fontSize: 11.5,
                                   fontWeight: isPillActive ? FontWeight.bold : FontWeight.w600,
                                   color: isPillActive
-                                      ? const Color(0xFF012E2B)
-                                      : (isDark ? const Color(0xFFFFDF7A) : const Color(0xFF07453B)),
+                                      ? BeyanColors.tone(0xFF012E2B)
+                                      : (isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF07453B)),
                                 ),
                               ),
                             ],
@@ -238,10 +239,10 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
                   child: Container(
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF06221D) : const Color(0xFFE9F3EE),
+                      color: isDark ? BeyanColors.tone(0xFF06221D) : BeyanColors.tone(0xFFE9F3EE),
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(
-                        color: const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.3 : 0.2),
+                        color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.3 : 0.2),
                         width: 1,
                       ),
                     ),
@@ -375,7 +376,7 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
         padding: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
           color: isActive
-              ? (isDark ? const Color(0xFF0F3E34) : Colors.white)
+              ? (isDark ? BeyanColors.tone(0xFF0F3E34) : Colors.white)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(10),
           boxShadow: isActive
@@ -395,7 +396,7 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
               icon,
               size: 16,
               color: isActive
-                  ? const Color(0xFFFFDF7A)
+                  ? BeyanColors.tone(0xFFFFDF7A)
                   : (isDark ? Colors.white60 : Colors.black54),
             ),
             const SizedBox(width: 6),
@@ -405,7 +406,7 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
                 fontSize: 12.5,
                 fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
                 color: isActive
-                    ? (isDark ? const Color(0xFFFFDF7A) : const Color(0xFF012E2B))
+                    ? (isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF012E2B))
                     : (isDark ? Colors.white60 : Colors.black54),
               ),
             ),
@@ -466,7 +467,7 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
             Icon(
               Icons.menu_book_rounded,
               size: 54,
-              color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+              color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.4),
             ),
             const SizedBox(height: 12),
             Text(
@@ -587,12 +588,12 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: isDark
-                      ? [const Color(0xFF092922), const Color(0xFF051C17)]
-                      : [Colors.white, const Color(0xFFF7FAF8)],
+                      ? [BeyanColors.tone(0xFF092922), BeyanColors.tone(0xFF051C17)]
+                      : [Colors.white, BeyanColors.tone(0xFFF7FAF8)],
                 ),
                 borderRadius: BorderRadius.circular(18),
                 border: Border.all(
-                  color: const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.35 : 0.25),
+                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.35 : 0.25),
                   width: 1,
                 ),
                 boxShadow: [
@@ -612,32 +613,32 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
                         width: 36,
                         height: 36,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFD4AF37).withValues(alpha: 0.16),
+                          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.16),
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
-                            color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+                            color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.4),
                             width: 1,
                           ),
                         ),
                         child: Icon(
                           cat.icon,
                           size: 20,
-                          color: const Color(0xFFFFDF7A),
+                          color: BeyanColors.tone(0xFFFFDF7A),
                         ),
                       ),
                       const Spacer(),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+                          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
                           strings.categoryDuaCount(count),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 10.5,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFFD4AF37),
+                            color: BeyanColors.tone(0xFFD4AF37),
                           ),
                         ),
                       ),
@@ -649,7 +650,7 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
                     style: TextStyle(
                       fontSize: 13.5,
                       fontWeight: FontWeight.bold,
-                      color: isDark ? Colors.white : const Color(0xFF033E35),
+                      color: isDark ? Colors.white : BeyanColors.tone(0xFF033E35),
                       height: 1.2,
                     ),
                     maxLines: 2,
@@ -688,12 +689,12 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: isDark
-              ? [const Color(0xFF0D332B), const Color(0xFF06221D)]
-              : [const Color(0xFFE4F0EB), const Color(0xFFF2F8F5)],
+              ? [BeyanColors.tone(0xFF0D332B), BeyanColors.tone(0xFF06221D)]
+              : [BeyanColors.tone(0xFFE4F0EB), BeyanColors.tone(0xFFF2F8F5)],
         ),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.35 : 0.25),
+          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.35 : 0.25),
           width: 1,
         ),
       ),
@@ -704,15 +705,15 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
             height: 32,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
+              color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.2),
               border: Border.all(
-                color: const Color(0xFFD4AF37).withValues(alpha: 0.5),
+                color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.5),
                 width: 1,
               ),
             ),
             child: Icon(
               category.icon,
-              color: const Color(0xFFFFDF7A),
+              color: BeyanColors.tone(0xFFFFDF7A),
               size: 17,
             ),
           ),
@@ -729,7 +730,7 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
-                          color: isDark ? const Color(0xFFFFDF7A) : const Color(0xFF012E2B),
+                          color: isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF012E2B),
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -738,15 +739,15 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFD4AF37).withValues(alpha: 0.18),
+                        color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.18),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Text(
                         strings.categoryDuaCount(count),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 10.5,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFFD4AF37),
+                          color: BeyanColors.tone(0xFFD4AF37),
                         ),
                       ),
                     ),
@@ -775,17 +776,17 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
                 children: [
                   Text(
                     strings.language.code == 'tr' ? 'Tümü' : 'View',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFFD4AF37),
+                      color: BeyanColors.tone(0xFFD4AF37),
                     ),
                   ),
                   const SizedBox(width: 2),
-                  const Icon(
+                  Icon(
                     Icons.arrow_forward_ios_rounded,
                     size: 11,
-                    color: Color(0xFFD4AF37),
+                    color: BeyanColors.tone(0xFFD4AF37),
                   ),
                 ],
               ),
@@ -811,12 +812,12 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: isDark
-              ? [const Color(0xFF0D372E), const Color(0xFF07241F)]
-              : [const Color(0xFFE3EFE9), const Color(0xFFF3F8F5)],
+              ? [BeyanColors.tone(0xFF0D372E), BeyanColors.tone(0xFF07241F)]
+              : [BeyanColors.tone(0xFFE3EFE9), BeyanColors.tone(0xFFF3F8F5)],
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.4),
           width: 1,
         ),
       ),
@@ -829,14 +830,14 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
+                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                    color: const Color(0xFFD4AF37).withValues(alpha: 0.5),
+                    color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.5),
                     width: 1,
                   ),
                 ),
-                child: Icon(category.icon, color: const Color(0xFFFFDF7A), size: 20),
+                child: Icon(category.icon, color: BeyanColors.tone(0xFFFFDF7A), size: 20),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -848,15 +849,15 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : const Color(0xFF02362E),
+                        color: isDark ? Colors.white : BeyanColors.tone(0xFF02362E),
                       ),
                     ),
                     Text(
                       strings.categoryDuaCount(count),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 11.5,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFFD4AF37),
+                        color: BeyanColors.tone(0xFFD4AF37),
                       ),
                     ),
                   ],
@@ -868,24 +869,24 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFD4AF37).withValues(alpha: 0.16),
+                    color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.16),
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: const Color(0xFFD4AF37).withValues(alpha: 0.35),
+                      color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35),
                       width: 1,
                     ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.arrow_back_rounded, size: 14, color: Color(0xFFD4AF37)),
+                      Icon(Icons.arrow_back_rounded, size: 14, color: BeyanColors.tone(0xFFD4AF37)),
                       const SizedBox(width: 4),
                       Text(
                         strings.backToCategories,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFFD4AF37),
+                          color: BeyanColors.tone(0xFFD4AF37),
                         ),
                       ),
                     ],
@@ -928,16 +929,16 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
           fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
           color: isSelected
               ? Colors.black87
-              : (isDark ? Colors.white70 : const Color(0xFF033E35)),
+              : (isDark ? Colors.white70 : BeyanColors.tone(0xFF033E35)),
         ),
-        backgroundColor: isDark ? const Color(0xFF072420) : const Color(0xFFF2F7F5),
-        selectedColor: const Color(0xFFD4AF37),
+        backgroundColor: isDark ? BeyanColors.tone(0xFF072420) : BeyanColors.tone(0xFFF2F7F5),
+        selectedColor: BeyanColors.tone(0xFFD4AF37),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
           side: BorderSide(
             color: isSelected
-                ? const Color(0xFFFFDF7A)
-                : const Color(0xFFD4AF37).withValues(alpha: 0.25),
+                ? BeyanColors.tone(0xFFFFDF7A)
+                : BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.25),
             width: 1,
           ),
         ),
@@ -960,22 +961,22 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
               height: 80,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.15 : 0.1),
+                color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.15 : 0.1),
                 border: Border.all(
-                  color: const Color(0xFFD4AF37).withValues(alpha: 0.5),
+                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.5),
                   width: 1.5,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
+                    color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.2),
                     blurRadius: 20,
                     spreadRadius: 2,
                   ),
                 ],
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.favorite_rounded,
-                color: Color(0xFFFFDF7A),
+                color: BeyanColors.tone(0xFFFFDF7A),
                 size: 38,
               ),
             ),
@@ -985,7 +986,7 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: isDark ? Colors.white : const Color(0xFF012E2B),
+                color: isDark ? Colors.white : BeyanColors.tone(0xFF012E2B),
                 letterSpacing: 0.2,
               ),
             ),
@@ -1007,13 +1008,13 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
                 HapticFeedback.lightImpact();
                 setState(() => _activeTab = _DuaTab.categories);
               },
-              icon: const Icon(Icons.auto_stories_rounded, size: 18, color: Color(0xFF012E2B)),
+              icon: Icon(Icons.auto_stories_rounded, size: 18, color: BeyanColors.tone(0xFF012E2B)),
               label: Text(
                 strings.language == AppLanguage.turkish ? 'Duaları Keşfet' : 'Explore Duas',
-                style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF012E2B)),
+                style: TextStyle(fontWeight: FontWeight.bold, color: BeyanColors.tone(0xFF012E2B)),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFFDF7A),
+                backgroundColor: BeyanColors.tone(0xFFFFDF7A),
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 elevation: 4,
@@ -1045,12 +1046,12 @@ class _DuaCardItem extends ConsumerWidget {
       SnackBar(
         content: Row(
           children: [
-            const Icon(Icons.check_circle_rounded, color: Color(0xFFFFDF7A), size: 20),
+            Icon(Icons.check_circle_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 20),
             const SizedBox(width: 8),
             Text(strings.duaCopied),
           ],
         ),
-        backgroundColor: const Color(0xFF012E2B),
+        backgroundColor: BeyanColors.tone(0xFF012E2B),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         duration: const Duration(seconds: 2),
@@ -1067,10 +1068,10 @@ class _DuaCardItem extends ConsumerWidget {
       child: Container(
         margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF06221D) : Colors.white,
+        color: isDark ? BeyanColors.tone(0xFF06221D) : Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.35 : 0.25),
+          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.35 : 0.25),
           width: 1,
         ),
         boxShadow: [
@@ -1092,10 +1093,10 @@ class _DuaCardItem extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+                    color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+                      color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.4),
                       width: 1,
                     ),
                   ),
@@ -1105,15 +1106,15 @@ class _DuaCardItem extends ConsumerWidget {
                       Icon(
                         dua.category.icon,
                         size: 13,
-                        color: const Color(0xFFD4AF37),
+                        color: BeyanColors.tone(0xFFD4AF37),
                       ),
                       const SizedBox(width: 5),
                       Text(
                         dua.category.localizedName(strings.language.code),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFFD4AF37),
+                          color: BeyanColors.tone(0xFFD4AF37),
                         ),
                       ),
                     ],
@@ -1149,7 +1150,7 @@ class _DuaCardItem extends ConsumerWidget {
                                   : (isCurrent
                                       ? Icons.play_circle_filled_rounded
                                       : Icons.play_circle_outline_rounded),
-                              color: isCurrent ? const Color(0xFFFFDF7A) : const Color(0xFFD4AF37),
+                              color: isCurrent ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFFD4AF37),
                               size: 24,
                             ),
                             tooltip: isPlaying
@@ -1185,9 +1186,9 @@ class _DuaCardItem extends ConsumerWidget {
                   ),
                 // Kopyala butonu
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.copy_rounded,
-                    color: Color(0xFFD4AF37),
+                    color: BeyanColors.tone(0xFFD4AF37),
                     size: 20,
                   ),
                   tooltip: strings.copyAndShare,
@@ -1203,7 +1204,7 @@ class _DuaCardItem extends ConsumerWidget {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: isDark ? Colors.white : const Color(0xFF033E35),
+                color: isDark ? Colors.white : BeyanColors.tone(0xFF033E35),
                 letterSpacing: 0.2,
               ),
             ),
@@ -1214,10 +1215,10 @@ class _DuaCardItem extends ConsumerWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF021B17) : const Color(0xFFF7FAF9),
+                color: isDark ? BeyanColors.tone(0xFF021B17) : BeyanColors.tone(0xFFF7FAF9),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                  color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
+                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.2),
                   width: 0.8,
                 ),
               ),
@@ -1228,7 +1229,7 @@ class _DuaCardItem extends ConsumerWidget {
                   fontSize: 20,
                   height: 1.8,
                   fontWeight: FontWeight.w600,
-                  color: isDark ? const Color(0xFFFFDF7A) : const Color(0xFF012E2B),
+                  color: isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF012E2B),
                 ),
                 textAlign: TextAlign.right,
                 textDirection: TextDirection.rtl,
@@ -1267,17 +1268,17 @@ class _DuaCardItem extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
                   color: isDark
-                      ? const Color(0xFF0B2D26)
-                      : const Color(0xFFE8F2EF),
+                      ? BeyanColors.tone(0xFF0B2D26)
+                      : BeyanColors.tone(0xFFE8F2EF),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.info_outline_rounded,
                       size: 14,
-                      color: Color(0xFFD4AF37),
+                      color: BeyanColors.tone(0xFFD4AF37),
                     ),
                     const SizedBox(width: 6),
                     Expanded(
@@ -1285,7 +1286,7 @@ class _DuaCardItem extends ConsumerWidget {
                         dua.virtueExplanation!,
                         style: TextStyle(
                           fontSize: 11.5,
-                          color: isDark ? Colors.white70 : const Color(0xFF033E35),
+                          color: isDark ? Colors.white70 : BeyanColors.tone(0xFF033E35),
                           fontStyle: FontStyle.italic,
                         ),
                       ),
@@ -1299,19 +1300,19 @@ class _DuaCardItem extends ConsumerWidget {
             // Kaynak
             Row(
               children: [
-                const Icon(
+                Icon(
                   Icons.verified_outlined,
                   size: 14,
-                  color: Color(0xFFD4AF37),
+                  color: BeyanColors.tone(0xFFD4AF37),
                 ),
                 const SizedBox(width: 5),
                 Expanded(
                   child: Text(
                     dua.localizedReference(strings.language.code),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFFD4AF37),
+                      color: BeyanColors.tone(0xFFD4AF37),
                     ),
                   ),
                 ),

@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -83,7 +84,7 @@ class SettingsScreen extends ConsumerWidget {
             children: [
               _buildTile(
                 icon: Icons.music_note_rounded,
-                iconColor: const Color(0xFFFFDF7A),
+                iconColor: BeyanColors.tone(0xFFFFDF7A),
                 title: strings.specialAdhanMakamsPro,
                 subtitle: strings.specialAdhanSubtitle,
                 onTap: () => AdhanMakamSelectorSheet.show(context),
@@ -91,7 +92,7 @@ class SettingsScreen extends ConsumerWidget {
               _buildDivider(),
               _buildTile(
                 icon: Icons.notifications_active_outlined,
-                iconColor: const Color(0xFF4DB6AC),
+                iconColor: BeyanColors.tone(0xFF4DB6AC),
                 title: strings.notificationSettings,
                 subtitle: strings.notificationSettingsSubtitle,
                 onTap: () => NotificationSettingsSheet.show(context),
@@ -133,7 +134,7 @@ class SettingsScreen extends ConsumerWidget {
             children: [
               _buildTile(
                 icon: Icons.mosque_rounded,
-                iconColor: const Color(0xFFD4AF37),
+                iconColor: BeyanColors.tone(0xFFD4AF37),
                 title: strings.liveBroadcastTitle,
                 subtitle: strings.liveBroadcastSubtitle,
                 onTap: () {
@@ -146,7 +147,7 @@ class SettingsScreen extends ConsumerWidget {
               _buildDivider(),
               _buildTile(
                 icon: Icons.bedtime_rounded,
-                iconColor: const Color(0xFFFFD54F),
+                iconColor: BeyanColors.tone(0xFFFFD54F),
                 title: strings.bedsideClockTitle,
                 subtitle: strings.bedsideClockSubtitle,
                 onTap: () {
@@ -179,7 +180,7 @@ class SettingsScreen extends ConsumerWidget {
               _buildDivider(),
               _buildTile(
                 icon: Icons.explore_rounded,
-                iconColor: const Color(0xFF34D399),
+                iconColor: BeyanColors.tone(0xFF34D399),
                 title: strings.nearbyMosquesTitle,
                 subtitle: strings.nearbyMosquesSubtitle,
                 onTap: () {
@@ -192,7 +193,7 @@ class SettingsScreen extends ConsumerWidget {
               _buildDivider(),
               _buildTile(
                 icon: Icons.widgets_outlined,
-                iconColor: const Color(0xFF2DD4BF),
+                iconColor: BeyanColors.tone(0xFF2DD4BF),
                 title: strings.lockscreenWidgetsTitle,
                 subtitle: strings.lockscreenWidgetsSubtitle,
                 onTap: () => showWidgetSettings(context),
@@ -201,7 +202,7 @@ class SettingsScreen extends ConsumerWidget {
                 _buildDivider(),
                 _buildTile(
                   icon: Icons.apple_rounded,
-                  iconColor: const Color(0xFFFFDF7A),
+                  iconColor: BeyanColors.tone(0xFFFFDF7A),
                   title: strings.language == AppLanguage.turkish
                       ? 'Dynamic Island & Canlı Etkinlik'
                       : 'Dynamic Island & Live Activity',
@@ -246,7 +247,7 @@ class SettingsScreen extends ConsumerWidget {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: const Color(0xFFFFDF7A).withValues(alpha: 0.5),
+                      color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.5),
                       width: 1,
                     ),
                   ),
@@ -275,8 +276,8 @@ class SettingsScreen extends ConsumerWidget {
       padding: const EdgeInsets.fromLTRB(6, 4, 6, 8),
       child: Text(
         title.toUpperCase(),
-        style: const TextStyle(
-          color: Color(0xFFFFDF7A),
+        style: TextStyle(
+          color: BeyanColors.tone(0xFFFFDF7A),
           fontSize: 11.5,
           fontWeight: FontWeight.bold,
           letterSpacing: 0.8,
@@ -288,7 +289,7 @@ class SettingsScreen extends ConsumerWidget {
   Widget _buildCard(BuildContext context, bool isDark, {required List<Widget> children}) {
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF032620) : Colors.white,
+        color: isDark ? BeyanColors.tone(0xFF032620) : Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.06),
@@ -314,7 +315,7 @@ class SettingsScreen extends ConsumerWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: (iconColor ?? const Color(0xFFFFDF7A)).withValues(alpha: 0.15),
+              color: (iconColor ?? BeyanColors.tone(0xFFFFDF7A)).withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Center(

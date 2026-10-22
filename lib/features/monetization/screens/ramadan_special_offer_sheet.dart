@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -32,9 +33,9 @@ class _RamadanSpecialOfferSheetState
           await PremiumService.instance.buyTier(PremiumTier.lifetime);
       if (!success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Satın alma başlatılamadı. Lütfen App Store / Play Store bağlantınızı kontrol edin.'),
-            backgroundColor: Color(0xFF033E35),
+          SnackBar(
+            content: const Text('Satın alma başlatılamadı. Lütfen App Store / Play Store bağlantınızı kontrol edin.'),
+            backgroundColor: BeyanColors.tone(0xFF033E35),
           ),
         );
       } else if (mounted) {
@@ -54,7 +55,7 @@ class _RamadanSpecialOfferSheetState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(success ? 'Satın alımlar başarıyla geri yüklendi.' : 'Önceki bir satın alım bulunamadı.'),
-            backgroundColor: const Color(0xFF033E35),
+            backgroundColor: BeyanColors.tone(0xFF033E35),
           ),
         );
         if (success) Navigator.pop(context);
@@ -77,15 +78,15 @@ class _RamadanSpecialOfferSheetState
       constraints: BoxConstraints(
         maxHeight: MediaQuery.of(context).size.height * 0.90,
       ),
-      decoration: const BoxDecoration(
-        color: Color(0xFF021713),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+      decoration: BoxDecoration(
+        color: BeyanColors.tone(0xFF021713),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
         border: Border(
-          top: BorderSide(color: Color(0xFFFFDF7A), width: 1.8),
-          left: BorderSide(color: Color(0xFFD4AF37), width: 0.8),
-          right: BorderSide(color: Color(0xFFD4AF37), width: 0.8),
+          top: BorderSide(color: BeyanColors.tone(0xFFFFDF7A), width: 1.8),
+          left: BorderSide(color: BeyanColors.tone(0xFFD4AF37), width: 0.8),
+          right: BorderSide(color: BeyanColors.tone(0xFFD4AF37), width: 0.8),
         ),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             color: Colors.black,
             blurRadius: 40,
@@ -124,25 +125,25 @@ class _RamadanSpecialOfferSheetState
                       colors: [Color(0xFF2A1C04), Color(0xFF140D02)],
                     ),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: const Color(0xFFFFDF7A), width: 1.2),
+                    border: Border.all(color: BeyanColors.tone(0xFFFFDF7A), width: 1.2),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFFFFDF7A).withValues(alpha: 0.25),
+                        color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.25),
                         blurRadius: 12,
                       ),
                     ],
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text('🌙', style: TextStyle(fontSize: 16)),
-                      SizedBox(width: 8),
+                      const Text('🌙', style: TextStyle(fontSize: 16)),
+                      const SizedBox(width: 8),
                       Text(
                         'RAMAZAN-I ŞERİF & KADİR GECESİ ÖZEL',
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w900,
-                          color: Color(0xFFFFDF7A),
+                          color: BeyanColors.tone(0xFFFFDF7A),
                           letterSpacing: 1.1,
                         ),
                       ),
@@ -204,16 +205,16 @@ class _RamadanSpecialOfferSheetState
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      const Color(0xFFD4AF37).withValues(alpha: 0.15),
-                      const Color(0xFFFFDF7A).withValues(alpha: 0.05),
+                      BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.15),
+                      BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.05),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFFFFDF7A), width: 1.4),
+                  border: Border.all(color: BeyanColors.tone(0xFFFFDF7A), width: 1.4),
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Column(
@@ -224,12 +225,12 @@ class _RamadanSpecialOfferSheetState
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFFFFDF7A),
+                            color: BeyanColors.tone(0xFFFFDF7A),
                             letterSpacing: 1,
                           ),
                         ),
-                        SizedBox(height: 4),
-                        Text(
+                        const SizedBox(height: 4),
+                        const Text(
                           'Tek Seferlik Ödeme',
                           style: TextStyle(fontSize: 13, color: Colors.white70),
                         ),
@@ -241,7 +242,7 @@ class _RamadanSpecialOfferSheetState
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text(
+                            const Text(
                               originalPriceStr,
                               style: TextStyle(
                                 fontSize: 13,
@@ -251,13 +252,13 @@ class _RamadanSpecialOfferSheetState
                                 decorationThickness: 2,
                               ),
                             ),
-                            SizedBox(width: 8),
+                            const SizedBox(width: 8),
                             Text(
                               discountedPriceStr,
                               style: TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.w900,
-                                color: Color(0xFFFFDF7A),
+                                color: BeyanColors.tone(0xFFFFDF7A),
                               ),
                             ),
                           ],
@@ -266,7 +267,7 @@ class _RamadanSpecialOfferSheetState
                           '%50 Ramazan İndirimi',
                           style: TextStyle(
                             fontSize: 11,
-                            color: Color(0xFFFFDF7A),
+                            color: BeyanColors.tone(0xFFFFDF7A),
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -282,7 +283,7 @@ class _RamadanSpecialOfferSheetState
                 Container(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF0F5A47),
+                    color: BeyanColors.tone(0xFF0F5A47),
                     borderRadius: BorderRadius.circular(18),
                   ),
                   child: const Center(
@@ -303,17 +304,17 @@ class _RamadanSpecialOfferSheetState
                   child: Container(
                     height: 54,
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(
+                      gradient: LinearGradient(
                         colors: [
-                          Color(0xFFFFDF7A),
-                          Color(0xFFD4AF37),
-                          Color(0xFF997A15),
+                          BeyanColors.tone(0xFFFFDF7A),
+                          BeyanColors.tone(0xFFD4AF37),
+                          BeyanColors.tone(0xFF997A15),
                         ],
                       ),
                       borderRadius: BorderRadius.circular(18),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+                          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.4),
                           blurRadius: 18,
                           offset: const Offset(0, 4),
                         ),
@@ -321,18 +322,18 @@ class _RamadanSpecialOfferSheetState
                     ),
                     child: Center(
                       child: _isLoading
-                          ? const SizedBox(
+                          ? SizedBox(
                               width: 24,
                               height: 24,
                               child: CircularProgressIndicator(
-                                color: Color(0xFF071F1B),
+                                color: BeyanColors.tone(0xFF071F1B),
                                 strokeWidth: 2.5,
                               ),
                             )
-                          : const Text(
+                          : Text(
                               'Hemen ₺249,99\'a Sahip Ol ➔',
                               style: TextStyle(
-                                color: Color(0xFF071F1B),
+                                color: BeyanColors.tone(0xFF071F1B),
                                 fontSize: 16,
                                 fontWeight: FontWeight.w900,
                                 letterSpacing: 0.3,
@@ -393,14 +394,14 @@ class _RamadanSpecialOfferSheetState
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+              color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.15),
               shape: BoxShape.circle,
               border: Border.all(
-                color: const Color(0xFFFFDF7A).withValues(alpha: 0.4),
+                color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.4),
                 width: 1,
               ),
             ),
-            child: Icon(icon, color: const Color(0xFFFFDF7A), size: 18),
+            child: Icon(icon, color: BeyanColors.tone(0xFFFFDF7A), size: 18),
           ),
           const SizedBox(width: 12),
           Expanded(

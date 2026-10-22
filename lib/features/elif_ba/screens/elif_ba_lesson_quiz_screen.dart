@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -108,20 +109,20 @@ class _ElifBaLessonQuizScreenState extends ConsumerState<ElifBaLessonQuizScreen>
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF022B24),
+        backgroundColor: BeyanColors.tone(0xFF022B24),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
-          side: const BorderSide(color: Color(0xFFFFDF7A), width: 1.5),
+          side: BorderSide(color: BeyanColors.tone(0xFFFFDF7A), width: 1.5),
         ),
-        title: const Column(
+        title: Column(
           children: [
-            Icon(Icons.workspace_premium_rounded, color: Color(0xFFFFDF7A), size: 48),
-            SizedBox(height: 10),
+            Icon(Icons.workspace_premium_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 48),
+            const SizedBox(height: 10),
             Text(
               'Tebrikler! Ders Tamamlandı',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Color(0xFFFFDF7A),
+                color: BeyanColors.tone(0xFFFFDF7A),
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
@@ -140,19 +141,19 @@ class _ElifBaLessonQuizScreenState extends ConsumerState<ElifBaLessonQuizScreen>
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: const Color(0xFFFFDF7A).withValues(alpha: 0.15),
+                color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFFFDF7A)),
+                border: Border.all(color: BeyanColors.tone(0xFFFFDF7A)),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.bolt_rounded, color: Color(0xFFFFDF7A), size: 22),
+                  Icon(Icons.bolt_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 22),
                   const SizedBox(width: 6),
                   Text(
                     '+${widget.lesson.xpReward} XP Kazanıldı!',
-                    style: const TextStyle(
-                      color: Color(0xFFFFDF7A),
+                    style: TextStyle(
+                      color: BeyanColors.tone(0xFFFFDF7A),
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
@@ -166,8 +167,8 @@ class _ElifBaLessonQuizScreenState extends ConsumerState<ElifBaLessonQuizScreen>
           Center(
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFFDF7A),
-                foregroundColor: const Color(0xFF01201B),
+                backgroundColor: BeyanColors.tone(0xFFFFDF7A),
+                foregroundColor: BeyanColors.tone(0xFF01201B),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
               ),
@@ -192,9 +193,9 @@ class _ElifBaLessonQuizScreenState extends ConsumerState<ElifBaLessonQuizScreen>
     final isCorrect = _selectedOptionIndex == question.correctOptionIndex;
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF01201B) : const Color(0xFFF6FAF8),
+      backgroundColor: isDark ? BeyanColors.tone(0xFF01201B) : BeyanColors.tone(0xFFF6FAF8),
       appBar: AppBar(
-        backgroundColor: isDark ? const Color(0xFF01201B) : AppColors.teal,
+        backgroundColor: isDark ? BeyanColors.tone(0xFF01201B) : AppColors.teal,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.close_rounded, color: Colors.white),
@@ -209,7 +210,7 @@ class _ElifBaLessonQuizScreenState extends ConsumerState<ElifBaLessonQuizScreen>
           child: LinearProgressIndicator(
             value: (_currentQuestionIndex + (_hasAnswered ? 1 : 0)) / totalQuestions,
             backgroundColor: Colors.white24,
-            valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFFFDF7A)),
+            valueColor: AlwaysStoppedAnimation<Color>(BeyanColors.tone(0xFFFFDF7A)),
           ),
         ),
       ),
@@ -234,17 +235,17 @@ class _ElifBaLessonQuizScreenState extends ConsumerState<ElifBaLessonQuizScreen>
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+                      color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.bolt_rounded, color: Color(0xFFFFDF7A), size: 16),
+                        Icon(Icons.bolt_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 16),
                         const SizedBox(width: 4),
                         Text(
                           '${widget.lesson.xpReward} XP',
-                          style: const TextStyle(
-                            color: Color(0xFFFFDF7A),
+                          style: TextStyle(
+                            color: BeyanColors.tone(0xFFFFDF7A),
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
                           ),
@@ -292,14 +293,14 @@ class _ElifBaLessonQuizScreenState extends ConsumerState<ElifBaLessonQuizScreen>
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: isDark
-                          ? [const Color(0xFF04332B), const Color(0xFF07241E)]
-                          : [const Color(0xFFE8F5F1), Colors.white],
+                          ? [BeyanColors.tone(0xFF04332B), BeyanColors.tone(0xFF07241E)]
+                          : [BeyanColors.tone(0xFFE8F5F1), Colors.white],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+                      color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.4),
                       width: 1.5,
                     ),
                   ),
@@ -309,10 +310,10 @@ class _ElifBaLessonQuizScreenState extends ConsumerState<ElifBaLessonQuizScreen>
                       Center(
                         child: Text(
                           question.arabicPrompt,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontFamily: 'Amiri',
                             fontSize: 54,
-                            color: Color(0xFFFFDF7A),
+                            color: BeyanColors.tone(0xFFFFDF7A),
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -324,14 +325,14 @@ class _ElifBaLessonQuizScreenState extends ConsumerState<ElifBaLessonQuizScreen>
                           padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
                             color: _hasAnswered
-                                ? const Color(0xFFFFDF7A).withValues(alpha: 0.25)
+                                ? BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.25)
                                 : Colors.white12,
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
                             _hasAnswered ? Icons.volume_up_rounded : Icons.volume_off_rounded,
                             size: 16,
-                            color: _hasAnswered ? const Color(0xFFFFDF7A) : Colors.white38,
+                            color: _hasAnswered ? BeyanColors.tone(0xFFFFDF7A) : Colors.white38,
                           ),
                         ),
                       ),
@@ -351,8 +352,8 @@ class _ElifBaLessonQuizScreenState extends ConsumerState<ElifBaLessonQuizScreen>
                     final isSelected = _selectedOptionIndex == index;
                     final isOptionCorrect = index == question.correctOptionIndex;
 
-                    Color cardBorderColor = isDark ? const Color(0xFF0D3830) : const Color(0xFFE2EBE8);
-                    Color cardBgColor = isDark ? const Color(0xFF062B24) : Colors.white;
+                    Color cardBorderColor = isDark ? BeyanColors.tone(0xFF0D3830) : BeyanColors.tone(0xFFE2EBE8);
+                    Color cardBgColor = isDark ? BeyanColors.tone(0xFF062B24) : Colors.white;
 
                     if (_hasAnswered) {
                       if (isOptionCorrect) {
@@ -363,7 +364,7 @@ class _ElifBaLessonQuizScreenState extends ConsumerState<ElifBaLessonQuizScreen>
                         cardBgColor = Colors.red.withValues(alpha: 0.15);
                       }
                     } else if (isSelected) {
-                      cardBorderColor = const Color(0xFFFFDF7A);
+                      cardBorderColor = BeyanColors.tone(0xFFFFDF7A);
                     }
 
                     return InkWell(
@@ -386,14 +387,14 @@ class _ElifBaLessonQuizScreenState extends ConsumerState<ElifBaLessonQuizScreen>
                               height: 32,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: isDark ? const Color(0xFF0F3E34) : const Color(0xFFE2EBE8),
+                                color: isDark ? BeyanColors.tone(0xFF0F3E34) : BeyanColors.tone(0xFFE2EBE8),
                               ),
                               child: Center(
                                 child: Text(
                                   String.fromCharCode(65 + index), // A, B, C, D
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    color: isDark ? const Color(0xFFFFDF7A) : AppColors.teal,
+                                    color: isDark ? BeyanColors.tone(0xFFFFDF7A) : AppColors.teal,
                                   ),
                                 ),
                               ),
@@ -453,7 +454,7 @@ class _ElifBaLessonQuizScreenState extends ConsumerState<ElifBaLessonQuizScreen>
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.volume_up_rounded, color: Color(0xFFFFDF7A), size: 22),
+                        icon: Icon(Icons.volume_up_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 22),
                         tooltip: 'Tekrar Dinle',
                         onPressed: () {
                           HapticFeedback.lightImpact();
@@ -465,8 +466,8 @@ class _ElifBaLessonQuizScreenState extends ConsumerState<ElifBaLessonQuizScreen>
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFD4AF37),
-                    foregroundColor: const Color(0xFF01201B),
+                    backgroundColor: BeyanColors.tone(0xFFD4AF37),
+                    foregroundColor: BeyanColors.tone(0xFF01201B),
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   ),

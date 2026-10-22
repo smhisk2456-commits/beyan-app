@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -29,10 +30,10 @@ class QuranAudioPlayerBar extends ConsumerWidget {
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF032822) : const Color(0xFF01362F),
+        color: isDark ? BeyanColors.tone(0xFF032822) : BeyanColors.tone(0xFF01362F),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: const Color(0xFFD4AF37).withValues(alpha: 0.5),
+          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.5),
           width: 1.2,
         ),
         boxShadow: [
@@ -51,9 +52,9 @@ class QuranAudioPlayerBar extends ConsumerWidget {
               Container(
                 width: 36,
                 height: 36,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Color(0xFFD4AF37),
+                  color: BeyanColors.tone(0xFFD4AF37),
                 ),
                 child: const Icon(Icons.volume_up_rounded, color: Colors.black87, size: 20),
               ),
@@ -66,10 +67,10 @@ class QuranAudioPlayerBar extends ConsumerWidget {
                       audioState.activeVerseNumber != null
                           ? '${strings.recitationOfSurah(audioState.currentSurahName ?? 'Surah')} • ${audioState.activeVerseNumber}. Âyet'
                           : strings.recitationOfSurah(audioState.currentSurahName ?? 'Surah'),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFFFFDF7A),
+                        color: BeyanColors.tone(0xFFFFDF7A),
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -96,7 +97,7 @@ class QuranAudioPlayerBar extends ConsumerWidget {
                     Icon(
                       Icons.repeat_rounded,
                       color: audioState.loopRepeatCount > 1 || audioState.loopRepeatCount == -1
-                          ? const Color(0xFFFFDF7A)
+                          ? BeyanColors.tone(0xFFFFDF7A)
                           : Colors.white60,
                       size: 21,
                     ),
@@ -106,9 +107,9 @@ class QuranAudioPlayerBar extends ConsumerWidget {
                         right: 0,
                         child: Text(
                           audioState.loopRepeatCount == -1 ? '∞' : '${audioState.loopRepeatCount}x',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 8.5,
-                            color: Color(0xFFFFDF7A),
+                            color: BeyanColors.tone(0xFFFFDF7A),
                             fontWeight: FontWeight.w900,
                           ),
                         ),
@@ -128,7 +129,7 @@ class QuranAudioPlayerBar extends ConsumerWidget {
                       ? Icons.bedtime_rounded
                       : Icons.bedtime_outlined,
                   color: audioState.activeAmbience != null || audioState.sleepTimerSecondsRemaining != null
-                      ? const Color(0xFFFFDF7A)
+                      ? BeyanColors.tone(0xFFFFDF7A)
                       : Colors.white60,
                   size: 20,
                 ),
@@ -144,14 +145,14 @@ class QuranAudioPlayerBar extends ConsumerWidget {
               // Oynat / Duraklat
               IconButton(
                 icon: audioState.isLoading
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 22,
                         height: 22,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFFFFDF7A)),
+                        child: CircularProgressIndicator(strokeWidth: 2, color: BeyanColors.tone(0xFFFFDF7A)),
                       )
                     : Icon(
                         audioState.isPlaying ? Icons.pause_circle_filled_rounded : Icons.play_circle_fill_rounded,
-                        color: const Color(0xFFFFDF7A),
+                        color: BeyanColors.tone(0xFFFFDF7A),
                         size: 32,
                       ),
                 onPressed: () {
@@ -185,9 +186,9 @@ class QuranAudioPlayerBar extends ConsumerWidget {
                   data: SliderTheme.of(context).copyWith(
                     trackHeight: 2.5,
                     thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 5),
-                    activeTrackColor: const Color(0xFFD4AF37),
+                    activeTrackColor: BeyanColors.tone(0xFFD4AF37),
                     inactiveTrackColor: Colors.white24,
-                    thumbColor: const Color(0xFFFFDF7A),
+                    thumbColor: BeyanColors.tone(0xFFFFDF7A),
                   ),
                   child: Slider(
                     value: currSecs,

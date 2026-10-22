@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -53,6 +54,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ? DynamicPrayerAtmosphere.forPrayer(nextPrayer)
         : null;
 
+    if (themeState.isDynamicPrayerTheme) {
+      switch (nextPrayer) {
+        case PrayerName.fajr:
+        case PrayerName.isha:
+          BeyanColors.setPalette(AppThemePalette.deepSapphire);
+          break;
+        case PrayerName.sunrise:
+        case PrayerName.asr:
+          BeyanColors.setPalette(AppThemePalette.desertMocha);
+          break;
+        case PrayerName.maghrib:
+          BeyanColors.setPalette(AppThemePalette.amethystNight);
+          break;
+        case PrayerName.dhuhr:
+        default:
+          BeyanColors.setPalette(themeState.palette);
+          break;
+      }
+    } else {
+      BeyanColors.setPalette(themeState.palette);
+    }
+
     final scaffoldBg = atmosphere != null
         ? atmosphere.backgroundGradient.first
         : Theme.of(context).scaffoldBackgroundColor;
@@ -85,7 +108,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
 
             // ── Namaz Vakti Kartı (Zümrüt & Altın) ─────────────────
-            const SliverToBoxAdapter(child: PrayerCardWidget()),
+            // ignore: prefer_const_constructors
+            SliverToBoxAdapter(child: PrayerCardWidget()),
 
             // ── Son Okunan Kur'an'a Devam Etme Kartı ────────────────
             if (lastRead != null)
@@ -133,7 +157,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
 
           // ── Beyân AI & Sesli Elif-Bâ Öne Çıkan Kartları ────────
-          const SliverToBoxAdapter(
+          // ignore: prefer_const_constructors
+          SliverToBoxAdapter(
+            // ignore: prefer_const_constructors
             child: _SpotlightFeatureCards(),
           ),
 
@@ -143,12 +169,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
 
           // ── "Bugün Kalbin Nasıl Hissediyor?" (Ruh Haline Göre Âyet & Şifa) ───
-          const SliverToBoxAdapter(
+          // ignore: prefer_const_constructors
+          SliverToBoxAdapter(
+            // ignore: prefer_const_constructors
             child: _SpiritualMoodsSection(),
           ),
 
           // ── Yakındaki Camiler & Harita Navigasyonu ───────────
-          const SliverToBoxAdapter(
+          // ignore: prefer_const_constructors
+          SliverToBoxAdapter(
+            // ignore: prefer_const_constructors
             child: _NearbyMosquesCard(),
           ),
 
@@ -162,7 +192,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     width: 4,
                     height: 18,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFD4AF37),
+                      color: BeyanColors.tone(0xFFD4AF37),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -179,17 +209,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFD4AF37).withValues(alpha: 0.12),
+                      color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: const Color(0xFFD4AF37).withValues(alpha: 0.3),
+                        color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.3),
                       ),
                     ),
                     child: Text(
                       strings.diyanetMethod,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 11,
-                        color: Color(0xFFD4AF37),
+                        color: BeyanColors.tone(0xFFD4AF37),
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -201,11 +231,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
           // ── Günlük Vakit Kartları (Rekat Bilgileri ile) ────────
           prayerAsync.when(
-            loading: () => const SliverToBoxAdapter(
+            loading: () => SliverToBoxAdapter(
               child: Padding(
-                padding: EdgeInsets.all(32),
+                padding: const EdgeInsets.all(32),
                 child: Center(
-                  child: CircularProgressIndicator(color: Color(0xFFD4AF37)),
+                  child: CircularProgressIndicator(color: BeyanColors.tone(0xFFD4AF37)),
                 ),
               ),
             ),
@@ -232,9 +262,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
 
           // ── Günün Doğrulanmış Duası Kartı ──────────────────────
-          const SliverToBoxAdapter(
+          // ignore: prefer_const_constructors
+          SliverToBoxAdapter(
+            // ignore: prefer_const_constructors
             child: Padding(
-              padding: EdgeInsets.fromLTRB(20, 4, 20, 12),
+              padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
+              // ignore: prefer_const_constructors
               child: _DailyFeaturedDuaCard(),
             ),
           ),
@@ -287,11 +320,11 @@ class _UpcomingReligiousDayBanner extends ConsumerWidget {
             gradient: LinearGradient(
               colors: atmosphere != null
                   ? atmosphere!.cardGradient
-                  : const [Color(0xFF03312B), Color(0xFF01241F)],
+                  : [BeyanColors.tone(0xFF03312B), BeyanColors.tone(0xFF01241F)],
             ),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: (atmosphere?.cardBorder ?? const Color(0xFFD4AF37)).withValues(alpha: 0.4),
+              color: (atmosphere?.cardBorder ?? BeyanColors.tone(0xFFD4AF37)).withValues(alpha: 0.4),
               width: 1,
             ),
           ),
@@ -299,8 +332,8 @@ class _UpcomingReligiousDayBanner extends ConsumerWidget {
             children: [
               Container(
                 padding: const EdgeInsets.all(5),
-                decoration: const BoxDecoration(
-                  color: Color(0xFFD4AF37),
+                decoration: BoxDecoration(
+                  color: BeyanColors.tone(0xFFD4AF37),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.star_rounded, color: Colors.black, size: 14),
@@ -309,8 +342,8 @@ class _UpcomingReligiousDayBanner extends ConsumerWidget {
               Expanded(
                 child: Text(
                   '${day.localizedTitle(strings.language.code)} • $statusText',
-                  style: const TextStyle(
-                    color: Color(0xFFFFDF7A),
+                  style: TextStyle(
+                    color: BeyanColors.tone(0xFFFFDF7A),
                     fontSize: 12.5,
                     fontWeight: FontWeight.w600,
                   ),
@@ -380,11 +413,11 @@ class _LastReadQuranCard extends ConsumerWidget {
             gradient: LinearGradient(
               colors: atmosphere != null
                   ? atmosphere!.cardGradient
-                  : const [Color(0xFF012E2B), Color(0xFF02463B)],
+                  : [BeyanColors.tone(0xFF012E2B), BeyanColors.tone(0xFF02463B)],
             ),
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
-              color: const Color(0xFFD4AF37).withValues(alpha: 0.5),
+              color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.5),
               width: 1,
             ),
             boxShadow: [
@@ -400,10 +433,10 @@ class _LastReadQuranCard extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
+                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.2),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.menu_book_rounded, color: Color(0xFFFFDF7A), size: 20),
+                child: Icon(Icons.menu_book_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 20),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -412,10 +445,10 @@ class _LastReadQuranCard extends ConsumerWidget {
                   children: [
                     Text(
                       strings.continueReadingQuran,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFFFFDF7A),
+                        color: BeyanColors.tone(0xFFFFDF7A),
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -426,7 +459,7 @@ class _LastReadQuranCard extends ConsumerWidget {
                   ],
                 ),
               ),
-              const Icon(Icons.arrow_forward_ios_rounded, color: Color(0xFFFFDF7A), size: 14),
+              Icon(Icons.arrow_forward_ios_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 14),
             ],
           ),
         ),
@@ -465,10 +498,10 @@ class _DailyPrayersCardList extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Container(
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF071F1B) : Colors.white,
+          color: isDark ? BeyanColors.tone(0xFF071F1B) : Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.3 : 0.2),
+            color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.3 : 0.2),
             width: 1,
           ),
           boxShadow: [
@@ -492,7 +525,7 @@ class _DailyPrayersCardList extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
                   color: isNext
-                      ? const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.12 : 0.08)
+                      ? BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.12 : 0.08)
                       : Colors.transparent,
                   border: Border(
                     bottom: BorderSide(
@@ -508,13 +541,13 @@ class _DailyPrayersCardList extends ConsumerWidget {
                       height: 38,
                       decoration: BoxDecoration(
                         color: isNext
-                            ? const Color(0xFFD4AF37)
-                            : (isDark ? const Color(0xFF0F322C) : Colors.grey.shade100),
+                            ? BeyanColors.tone(0xFFD4AF37)
+                            : (isDark ? BeyanColors.tone(0xFF0F322C) : Colors.grey.shade100),
                         shape: BoxShape.circle,
                         border: Border.all(
                           color: isNext
-                              ? const Color(0xFFFFDF7A)
-                              : const Color(0xFFD4AF37).withValues(alpha: 0.2),
+                              ? BeyanColors.tone(0xFFFFDF7A)
+                              : BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.2),
                           width: 1,
                         ),
                       ),
@@ -527,7 +560,7 @@ class _DailyPrayersCardList extends ConsumerWidget {
                             fontWeight: FontWeight.bold,
                             color: isNext
                                 ? Colors.black87
-                                : (isDark ? const Color(0xFFFFDF7A) : AppColors.teal),
+                                : (isDark ? BeyanColors.tone(0xFFFFDF7A) : AppColors.teal),
                           ),
                         ),
                       ),
@@ -553,7 +586,7 @@ class _DailyPrayersCardList extends ConsumerWidget {
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFD4AF37),
+                                    color: BeyanColors.tone(0xFFD4AF37),
                                     borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: Text(
@@ -586,7 +619,7 @@ class _DailyPrayersCardList extends ConsumerWidget {
                         fontSize: 18,
                         fontWeight: isNext ? FontWeight.w800 : FontWeight.w600,
                         color: isNext
-                            ? const Color(0xFFD4AF37)
+                            ? BeyanColors.tone(0xFFD4AF37)
                             : (isDark ? Colors.white : Colors.black87),
                       ),
                     ),
@@ -620,16 +653,16 @@ class _DailyVerseCompactCard extends ConsumerWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            const Color(0xFF012E2B),
-            const Color(0xFF023E36),
-            isDark ? const Color(0xFF011C19) : const Color(0xFF012723),
+            BeyanColors.tone(0xFF012E2B),
+            BeyanColors.tone(0xFF023E36),
+            isDark ? BeyanColors.tone(0xFF011C19) : BeyanColors.tone(0xFF012723),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: const Color(0xFFD4AF37).withValues(alpha: 0.35),
+          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35),
           width: 1,
         ),
         boxShadow: [
@@ -648,20 +681,20 @@ class _DailyVerseCompactCard extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
+                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.menu_book_rounded,
-                  color: Color(0xFFFFDF7A),
+                  color: BeyanColors.tone(0xFFFFDF7A),
                   size: 16,
                 ),
               ),
               const SizedBox(width: 8),
               Text(
                 strings.dailyVerseTitle,
-                style: const TextStyle(
-                  color: Color(0xFFFFDF7A),
+                style: TextStyle(
+                  color: BeyanColors.tone(0xFFFFDF7A),
                   fontWeight: FontWeight.bold,
                   fontSize: 13,
                 ),
@@ -728,14 +761,14 @@ class _DailyFeaturedDuaCard extends ConsumerWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF02362F), Color(0xFF012620)],
+          gradient: LinearGradient(
+            colors: [BeyanColors.tone(0xFF02362F), BeyanColors.tone(0xFF012620)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: const Color(0xFFD4AF37).withValues(alpha: 0.35),
+            color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35),
             width: 1,
           ),
         ),
@@ -747,20 +780,20 @@ class _DailyFeaturedDuaCard extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
+                    color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.favorite_outline_rounded,
-                    color: Color(0xFFFFDF7A),
+                    color: BeyanColors.tone(0xFFFFDF7A),
                     size: 16,
                   ),
                 ),
                 const SizedBox(width: 8),
                 Text(
                   strings.dailyDuaTitle,
-                  style: const TextStyle(
-                    color: Color(0xFFFFDF7A),
+                  style: TextStyle(
+                    color: BeyanColors.tone(0xFFFFDF7A),
                     fontWeight: FontWeight.bold,
                     fontSize: 13,
                   ),
@@ -796,8 +829,8 @@ class _DailyFeaturedDuaCard extends ConsumerWidget {
             const SizedBox(height: 6),
             Text(
               dua.localizedReference(strings.language.code),
-              style: const TextStyle(
-                color: Color(0xFFD4AF37),
+              style: TextStyle(
+                color: BeyanColors.tone(0xFFD4AF37),
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
               ),
@@ -832,8 +865,8 @@ class _SpotlightFeatureCards extends StatelessWidget {
               badge: 'YENİ ✨',
               icon: Icons.auto_awesome_rounded,
               gradientColors: isDark
-                  ? [const Color(0xFF04382F), const Color(0xFF021F1A)]
-                  : [const Color(0xFFE8F6F0), Colors.white],
+                  ? [BeyanColors.tone(0xFF04382F), BeyanColors.tone(0xFF021F1A)]
+                  : [BeyanColors.tone(0xFFE8F6F0), Colors.white],
               onTap: () {
                 HapticFeedback.lightImpact();
                 Navigator.push(
@@ -852,7 +885,7 @@ class _SpotlightFeatureCards extends StatelessWidget {
               badge: 'EĞLENCELİ 🎯',
               icon: Icons.menu_book_rounded,
               gradientColors: isDark
-                  ? [const Color(0xFF0C3D32), const Color(0xFF031E18)]
+                  ? [BeyanColors.tone(0xFF0C3D32), BeyanColors.tone(0xFF031E18)]
                   : [const Color(0xFFFBF4DF), Colors.white],
               onTap: () {
                 HapticFeedback.lightImpact();
@@ -898,22 +931,22 @@ class _MorningEveningAdhkarBanner extends StatelessWidget {
               gradient: LinearGradient(
                 colors: isMorning
                     ? (isDark
-                        ? [const Color(0xFF04483D), const Color(0xFF012C25)]
-                        : [const Color(0xFFE2F3ED), Colors.white])
+                        ? [BeyanColors.tone(0xFF04483D), BeyanColors.tone(0xFF012C25)]
+                        : [BeyanColors.tone(0xFFE2F3ED), Colors.white])
                     : (isDark
-                        ? [const Color(0xFF012E27), const Color(0xFF001915)]
-                        : [const Color(0xFFE7ECEB), Colors.white]),
+                        ? [BeyanColors.tone(0xFF012E27), BeyanColors.tone(0xFF001915)]
+                        : [BeyanColors.tone(0xFFE7ECEB), Colors.white]),
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: const Color(0xFFD4AF37).withValues(alpha: 0.5),
+                color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.5),
                 width: 1.2,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFFD4AF37).withValues(alpha: 0.08),
+                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.08),
                   blurRadius: 10,
                   offset: const Offset(0, 3),
                 ),
@@ -926,19 +959,19 @@ class _MorningEveningAdhkarBanner extends StatelessWidget {
                   height: 44,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    gradient: const RadialGradient(
-                      colors: [Color(0xFFFFDF7A), Color(0xFFD4AF37)],
+                    gradient: RadialGradient(
+                      colors: [BeyanColors.tone(0xFFFFDF7A), BeyanColors.tone(0xFFD4AF37)],
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+                        color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.4),
                         blurRadius: 10,
                       ),
                     ],
                   ),
                   child: Icon(
                     isMorning ? Icons.wb_sunny_rounded : Icons.nightlight_round,
-                    color: const Color(0xFF012E2B),
+                    color: BeyanColors.tone(0xFF012E2B),
                     size: 24,
                   ),
                 ),
@@ -954,22 +987,22 @@ class _MorningEveningAdhkarBanner extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.bold,
-                              color: isDark ? const Color(0xFFFFDF7A) : const Color(0xFF01362F),
+                              color: isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF01362F),
                             ),
                           ),
                           const SizedBox(width: 8),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFD4AF37).withValues(alpha: 0.25),
+                              color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.25),
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Text(
+                            child: Text(
                               'Hısnu\'l-Müslim',
                               style: TextStyle(
                                 fontSize: 9.5,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFFD4AF37),
+                                color: BeyanColors.tone(0xFFD4AF37),
                               ),
                             ),
                           ),
@@ -982,7 +1015,7 @@ class _MorningEveningAdhkarBanner extends StatelessWidget {
                             : 'Günün yorgunluğunu akşam dualarıyla arındırın (3 Dk)',
                         style: TextStyle(
                           fontSize: 11.5,
-                          color: isDark ? Colors.white70 : const Color(0xFF334E48),
+                          color: isDark ? Colors.white70 : BeyanColors.tone(0xFF334E48),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -990,10 +1023,10 @@ class _MorningEveningAdhkarBanner extends StatelessWidget {
                     ],
                   ),
                 ),
-                const Icon(
+                Icon(
                   Icons.arrow_forward_ios_rounded,
                   size: 16,
-                  color: Color(0xFFD4AF37),
+                  color: BeyanColors.tone(0xFFD4AF37),
                 ),
               ],
             ),
@@ -1038,7 +1071,7 @@ class _SpotlightCard extends StatelessWidget {
           ),
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
-            color: const Color(0xFFD4AF37).withValues(alpha: 0.45),
+            color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.45),
             width: 1.2,
           ),
           boxShadow: [
@@ -1059,33 +1092,33 @@ class _SpotlightCard extends StatelessWidget {
                   width: 32,
                   height: 32,
                   decoration: BoxDecoration(
-                    gradient: const RadialGradient(
-                      colors: [Color(0xFFFFDF7A), Color(0xFFB8860B)],
+                    gradient: RadialGradient(
+                      colors: [BeyanColors.tone(0xFFFFDF7A), BeyanColors.tone(0xFFB8860B)],
                     ),
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFFFFDF7A).withValues(alpha: 0.3),
+                        color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.3),
                         blurRadius: 6,
                       ),
                     ],
                   ),
                   child: Center(
-                    child: Icon(icon, color: const Color(0xFF01201B), size: 18),
+                    child: Icon(icon, color: BeyanColors.tone(0xFF01201B), size: 18),
                   ),
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFFDF7A),
+                    color: BeyanColors.tone(0xFFFFDF7A),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
                     badge,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 8.5,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF012E2B),
+                      color: BeyanColors.tone(0xFF012E2B),
                     ),
                   ),
                 ),
@@ -1259,11 +1292,11 @@ class _ActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bgColor = atmosphere?.actionCardBg ?? (isDark ? const Color(0xFF0D2823) : Colors.white);
+    final bgColor = atmosphere?.actionCardBg ?? (isDark ? BeyanColors.tone(0xFF0D2823) : Colors.white);
     final borderColor = atmosphere != null
         ? atmosphere!.actionCardBorder.withValues(alpha: 0.6)
-        : (isDark ? const Color(0xFF133B34) : const Color(0xFFE2EBE8));
-    final iconColor = atmosphere?.accentGold ?? const Color(0xFFD4AF37);
+        : (isDark ? BeyanColors.tone(0xFF133B34) : BeyanColors.tone(0xFFE2EBE8));
+    final iconColor = atmosphere?.accentGold ?? BeyanColors.tone(0xFFD4AF37);
 
     return Expanded(
       child: Material(
@@ -1317,7 +1350,7 @@ class _ActionCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
-                    color: isDark ? Colors.white : const Color(0xFF11221F),
+                    color: isDark ? Colors.white : BeyanColors.tone(0xFF11221F),
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -1374,7 +1407,7 @@ class _IslamicAppBar extends ConsumerWidget {
       floating: false,
       pinned: true,
       elevation: 0,
-      backgroundColor: atmosphere?.appBarColor ?? (Theme.of(context).appBarTheme.backgroundColor ?? const Color(0xFF01201D)),
+      backgroundColor: atmosphere?.appBarColor ?? (Theme.of(context).appBarTheme.backgroundColor ?? BeyanColors.tone(0xFF01201D)),
       centerTitle: false,
       toolbarHeight: 64,
       title: Row(
@@ -1386,12 +1419,12 @@ class _IslamicAppBar extends ConsumerWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: const Color(0xFFFFDF7A).withValues(alpha: 0.6),
+                color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.6),
                 width: 1.2,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFFD4AF37).withValues(alpha: 0.25),
+                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.25),
                   blurRadius: 6,
                 ),
               ],
@@ -1422,8 +1455,8 @@ class _IslamicAppBar extends ConsumerWidget {
               ),
               Text(
                 _getSpiritualGreeting(strings),
-                style: const TextStyle(
-                  color: Color(0xFFFFDF7A),
+                style: TextStyle(
+                  color: BeyanColors.tone(0xFFFFDF7A),
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
                   letterSpacing: 0.2,
@@ -1467,10 +1500,10 @@ class _SpiritualMoodsSection extends ConsumerWidget {
       child: Container(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF032620) : Colors.white,
+          color: isDark ? BeyanColors.tone(0xFF032620) : Colors.white,
           borderRadius: BorderRadius.circular(22),
           border: Border.all(
-            color: const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.3 : 0.2),
+            color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.3 : 0.2),
             width: 1.2,
           ),
           boxShadow: [
@@ -1489,12 +1522,12 @@ class _SpiritualMoodsSection extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
+                    color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.2),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.favorite_rounded,
-                    color: Color(0xFFFFDF7A),
+                    color: BeyanColors.tone(0xFFFFDF7A),
                     size: 16,
                   ),
                 ),
@@ -1505,10 +1538,10 @@ class _SpiritualMoodsSection extends ConsumerWidget {
                     children: [
                       Text(
                         title,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFFFFDF7A),
+                          color: BeyanColors.tone(0xFFFFDF7A),
                         ),
                       ),
                       Text(
@@ -1606,14 +1639,14 @@ class _NearbyMosquesCard extends ConsumerWidget {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: isDark
-                    ? [const Color(0xFF02322C), const Color(0xFF01201D)]
-                    : [const Color(0xFFF0FDF4), const Color(0xFFDCFCE7)],
+                    ? [BeyanColors.tone(0xFF02322C), BeyanColors.tone(0xFF01201D)]
+                    : [BeyanColors.tone(0xFFF0FDF4), BeyanColors.tone(0xFFDCFCE7)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: const Color(0xFF34D399).withValues(alpha: isDark ? 0.4 : 0.6),
+                color: BeyanColors.tone(0xFF34D399).withValues(alpha: isDark ? 0.4 : 0.6),
                 width: 1.1,
               ),
               boxShadow: [
@@ -1630,16 +1663,16 @@ class _NearbyMosquesCard extends ConsumerWidget {
                   width: 42,
                   height: 42,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF34D399).withValues(alpha: 0.18),
+                    color: BeyanColors.tone(0xFF34D399).withValues(alpha: 0.18),
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: const Color(0xFF34D399).withValues(alpha: 0.5),
+                      color: BeyanColors.tone(0xFF34D399).withValues(alpha: 0.5),
                     ),
                   ),
-                  child: const Center(
+                  child: Center(
                     child: Icon(
                       Icons.mosque_rounded,
-                      color: Color(0xFF34D399),
+                      color: BeyanColors.tone(0xFF34D399),
                       size: 22,
                     ),
                   ),
@@ -1654,7 +1687,7 @@ class _NearbyMosquesCard extends ConsumerWidget {
                           Text(
                             strings.nearbyMosques,
                             style: TextStyle(
-                              color: isDark ? Colors.white : const Color(0xFF064E3B),
+                              color: isDark ? Colors.white : BeyanColors.tone(0xFF064E3B),
                               fontSize: 14.5,
                               fontWeight: FontWeight.bold,
                             ),
@@ -1663,13 +1696,13 @@ class _NearbyMosquesCard extends ConsumerWidget {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF34D399).withValues(alpha: 0.2),
+                              color: BeyanColors.tone(0xFF34D399).withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
                               strings.gpsAndMap,
-                              style: const TextStyle(
-                                color: Color(0xFF059669),
+                              style: TextStyle(
+                                color: BeyanColors.tone(0xFF059669),
                                 fontSize: 9.5,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -1681,7 +1714,7 @@ class _NearbyMosquesCard extends ConsumerWidget {
                       Text(
                         strings.nearbyMosquesSubtitle,
                         style: TextStyle(
-                          color: isDark ? Colors.white60 : const Color(0xFF047857),
+                          color: isDark ? Colors.white60 : BeyanColors.tone(0xFF047857),
                           fontSize: 11.5,
                         ),
                         maxLines: 1,
@@ -1690,10 +1723,10 @@ class _NearbyMosquesCard extends ConsumerWidget {
                     ],
                   ),
                 ),
-                const Icon(
+                Icon(
                   Icons.arrow_forward_ios_rounded,
                   size: 14,
-                  color: Color(0xFF34D399),
+                  color: BeyanColors.tone(0xFF34D399),
                 ),
               ],
             ),

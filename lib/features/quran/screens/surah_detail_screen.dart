@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -154,7 +155,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
   void _showFontSizeSheet(BuildContext context, AppStrings strings) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF032B25),
+      backgroundColor: BeyanColors.tone(0xFF032B25),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -179,8 +180,8 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                     const SizedBox(height: 14),
                     Text(
                       strings.arabicFontSizeTitle,
-                      style: const TextStyle(
-                        color: Color(0xFFFFDF7A),
+                      style: TextStyle(
+                        color: BeyanColors.tone(0xFFFFDF7A),
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
@@ -202,9 +203,9 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                         Expanded(
                           child: SliderTheme(
                             data: SliderTheme.of(context).copyWith(
-                              activeTrackColor: const Color(0xFFD4AF37),
+                              activeTrackColor: BeyanColors.tone(0xFFD4AF37),
                               inactiveTrackColor: Colors.white24,
-                              thumbColor: const Color(0xFFFFDF7A),
+                              thumbColor: BeyanColors.tone(0xFFFFDF7A),
                             ),
                             child: Slider(
                               value: currentSize,
@@ -238,7 +239,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
     return IconButton(
       icon: Icon(
         isDownloaded ? Icons.download_done_rounded : Icons.download_for_offline_outlined,
-        color: isDownloaded ? const Color(0xFF81C784) : const Color(0xFFFFDF7A),
+        color: isDownloaded ? const Color(0xFF81C784) : BeyanColors.tone(0xFFFFDF7A),
       ),
       tooltip: isDownloaded
           ? (strings.language == AppLanguage.turkish ? 'Çevrimdışı Dinlemeye Hazır' : 'Downloaded for Offline')
@@ -264,10 +265,10 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
             SnackBar(
               content: Row(
                 children: [
-                  const SizedBox(
+                  SizedBox(
                     width: 16,
                     height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFFFFDF7A)),
+                    child: CircularProgressIndicator(strokeWidth: 2, color: BeyanColors.tone(0xFFFFDF7A)),
                   ),
                   const SizedBox(width: 10),
                   Text('${widget.surah.localizedName(strings.language.code)} (${reciter.nameTr}) indiriliyor...'),
@@ -290,7 +291,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                       ? '✓ ${widget.surah.localizedName(strings.language.code)} çevrimdışı dinleme için indirildi!'
                       : 'İndirme başarısız oldu, lütfen internet bağlantınızı kontrol edin.',
                 ),
-                backgroundColor: success ? const Color(0xFF012E2B) : Colors.red[800],
+                backgroundColor: success ? BeyanColors.tone(0xFF012E2B) : Colors.red[800],
                 duration: const Duration(seconds: 2),
                 behavior: SnackBarBehavior.floating,
               ),
@@ -304,7 +305,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
   void _showReciterSheet(BuildContext context, AppStrings strings) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF032B25),
+      backgroundColor: BeyanColors.tone(0xFF032B25),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -320,8 +321,8 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                   children: [
                     Text(
                       strings.reciterSelectionTitle,
-                      style: const TextStyle(
-                        color: Color(0xFFFFDF7A),
+                      style: TextStyle(
+                        color: BeyanColors.tone(0xFFFFDF7A),
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
@@ -334,7 +335,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                       return ListTile(
                         leading: Icon(
                           isSel ? Icons.radio_button_checked : Icons.radio_button_off,
-                          color: const Color(0xFFD4AF37),
+                          color: BeyanColors.tone(0xFFD4AF37),
                         ),
                         title: Text(
                           reciter.nameTr,
@@ -368,7 +369,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                         trailing: IconButton(
                           icon: Icon(
                             isDownloaded ? Icons.download_done_rounded : Icons.download_for_offline_outlined,
-                            color: isDownloaded ? const Color(0xFF81C784) : const Color(0xFFD4AF37),
+                            color: isDownloaded ? const Color(0xFF81C784) : BeyanColors.tone(0xFFD4AF37),
                             size: 22,
                           ),
                           tooltip: isDownloaded ? 'Çevrimdışı İndirildi' : 'Çevrimdışı İndir',
@@ -396,7 +397,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Text('✓ ${widget.surah.localizedName(strings.language.code)} çevrimdışı hazır!'),
-                                    backgroundColor: const Color(0xFF012E2B),
+                                    backgroundColor: BeyanColors.tone(0xFF012E2B),
                                     duration: const Duration(seconds: 2),
                                     behavior: SnackBarBehavior.floating,
                                   ),
@@ -468,8 +469,8 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
               padding: const EdgeInsets.only(bottom: 60),
               child: FloatingActionButton.small(
                 onPressed: _scrollToTop,
-                backgroundColor: const Color(0xFF033E35),
-                foregroundColor: const Color(0xFFFFDF7A),
+                backgroundColor: BeyanColors.tone(0xFF033E35),
+                foregroundColor: BeyanColors.tone(0xFFFFDF7A),
                 child: const Icon(Icons.keyboard_arrow_up_rounded),
               ),
             )
@@ -494,6 +495,278 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
     );
   }
 
+  void _showReadingToolsSheet(BuildContext context, AppStrings strings) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) {
+        return Consumer(
+          builder: (context, ref, _) {
+            final audioState = ref.watch(quranAudioProvider);
+            final isFavoriteSurah = ref.watch(favoriteSurahsProvider).contains(widget.surah.id);
+            final isMemorization = ref.watch(quranMemorizationProvider).isActive;
+            final isComparative = ref.watch(comparativeMealProvider);
+            final isTr = strings.language == AppLanguage.turkish;
+
+            return Container(
+              padding: const EdgeInsets.fromLTRB(20, 14, 20, 28),
+              decoration: BoxDecoration(
+                color: BeyanColors.tone(0xFF01241F),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+                border: Border.all(
+                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.45),
+                  width: 1.2,
+                ),
+              ),
+              child: SafeArea(
+                top: false,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 42,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: Colors.white24,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      Row(
+                        children: [
+                          Icon(Icons.tune_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 22),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              isTr ? 'Okuma & Tilavet Araçları' : 'Reading & Recitation Tools',
+                              style: TextStyle(
+                                color: BeyanColors.tone(0xFFFFDF7A),
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          _buildDownloadButton(context, audioState, strings),
+                        ],
+                      ),
+                      const SizedBox(height: 14),
+
+                      // Hızlı Butonlar (Favori, Kâri, Yazı Boyutu, Ambiyans/Uyku)
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildToolActionTile(
+                              icon: isFavoriteSurah ? Icons.star_rounded : Icons.star_outline_rounded,
+                              label: isFavoriteSurah
+                                  ? (isTr ? 'Favoride' : 'Favorited')
+                                  : (isTr ? 'Favori Ekle' : 'Favorite'),
+                              isActive: isFavoriteSurah,
+                              onTap: () {
+                                HapticFeedback.mediumImpact();
+                                ref.read(favoriteSurahsProvider.notifier).toggleFavorite(widget.surah.id);
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: _buildToolActionTile(
+                              icon: Icons.person_outline_rounded,
+                              label: isTr ? 'Hafız Seç' : 'Reciter',
+                              isActive: false,
+                              onTap: () {
+                                Navigator.pop(ctx);
+                                _showReciterSheet(context, strings);
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: _buildToolActionTile(
+                              icon: Icons.format_size_rounded,
+                              label: isTr ? 'Yazı Boyutu' : 'Font Size',
+                              isActive: false,
+                              onTap: () {
+                                Navigator.pop(ctx);
+                                _showFontSizeSheet(context, strings);
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: _buildToolActionTile(
+                              icon: Icons.bedtime_rounded,
+                              label: isTr ? 'Uyku & Ses' : 'Ambience',
+                              isActive: audioState.activeAmbience != null ||
+                                  audioState.sleepTimerSecondsRemaining != null,
+                              onTap: () {
+                                Navigator.pop(ctx);
+                                SleepAndAmbienceSheet.show(context);
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Anahtarlar (Switches)
+                      _buildToolSwitchRow(
+                        icon: Icons.visibility_off_rounded,
+                        title: isTr ? 'Ezber & Hafızlık Testi (Kelimeleri Gizle)' : 'Memorization Mode (Blur Words)',
+                        subtitle: isTr ? 'Kelimeleri buğular, dokundukça açarak ezberinizi sınar' : 'Tap blurred words to reveal and test memory',
+                        value: isMemorization,
+                        onChanged: (_) {
+                          HapticFeedback.lightImpact();
+                          ref.read(quranMemorizationProvider.notifier).toggleMode();
+                        },
+                      ),
+                      _buildToolSwitchRow(
+                        icon: Icons.compare_arrows_rounded,
+                        title: isTr ? 'Çift Mealli Karşılaştırma Modu' : 'Comparative Translation Mode',
+                        subtitle: isTr ? 'Diyanet ve Elmalılı Hamdi Yazır meallerini alt alta kıyaslar' : 'Compare two translations side by side',
+                        value: isComparative,
+                        onChanged: (_) {
+                          HapticFeedback.lightImpact();
+                          ref.read(comparativeMealProvider.notifier).toggle();
+                        },
+                      ),
+                      _buildToolSwitchRow(
+                        icon: Icons.auto_stories_rounded,
+                        title: isTr ? 'Canlı Âyet Takibi (Otomatik Kaydırma)' : 'Live Verse Auto-Scroll',
+                        subtitle: isTr ? 'Tilavet esnasında okunan âyete otomatik kaydırır' : 'Automatically scrolls to active verse',
+                        value: audioState.isLiveTrackingEnabled,
+                        onChanged: (_) {
+                          HapticFeedback.lightImpact();
+                          ref.read(quranAudioProvider.notifier).toggleLiveTracking();
+                        },
+                      ),
+                      _buildToolSwitchRow(
+                        icon: Icons.spellcheck_rounded,
+                        title: strings.wordByWordLiveTracking,
+                        subtitle: isTr ? 'Okunan Arapça kelimeyi altın renkle vurgular' : 'Highlights the active Arabic word in gold',
+                        value: audioState.isWordHighlightEnabled,
+                        onChanged: (_) {
+                          HapticFeedback.lightImpact();
+                          ref.read(quranAudioProvider.notifier).toggleWordHighlight();
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildToolActionTile({
+    required IconData icon,
+    required String label,
+    required bool isActive,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(14),
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
+        decoration: BoxDecoration(
+          color: isActive
+              ? BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.22)
+              : Colors.white.withValues(alpha: 0.06),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isActive
+                ? BeyanColors.tone(0xFFFFDF7A)
+                : BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.25),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: isActive ? BeyanColors.tone(0xFFFFDF7A) : Colors.white,
+              size: 20,
+            ),
+            const SizedBox(height: 5),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 10.5,
+                fontWeight: FontWeight.w600,
+                color: isActive ? BeyanColors.tone(0xFFFFDF7A) : Colors.white,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildToolSwitchRow({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.04),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: value
+                ? BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.5)
+                : Colors.white10,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: BeyanColors.tone(0xFFFFDF7A), size: 20),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(color: Colors.white60, fontSize: 11),
+                  ),
+                ],
+              ),
+            ),
+            Switch(
+              value: value,
+              activeThumbColor: BeyanColors.tone(0xFFFFDF7A),
+              activeTrackColor: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35),
+              onChanged: onChanged,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildContent(
     BuildContext context,
     List<Verse> verses,
@@ -502,7 +775,10 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
     QuranAudioState audioState,
     AppStrings strings,
   ) {
-    final isFavoriteSurah = ref.watch(favoriteSurahsProvider).contains(widget.surah.id);
+    final hasActiveToolBadge = ref.watch(quranMemorizationProvider).isActive ||
+        ref.watch(comparativeMealProvider) ||
+        audioState.activeAmbience != null ||
+        audioState.sleepTimerSecondsRemaining != null;
 
     if (_isMushafMode) {
       return Scaffold(
@@ -510,45 +786,27 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
         appBar: AppBar(
           title: Text(
             widget.surah.localizedName(strings.language.code),
-            style: const TextStyle(fontWeight: FontWeight.bold),
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-          centerTitle: true,
+          centerTitle: false,
           actions: [
-            // Sureyi Favorilere Ekle / Çıkar
+            // 1. Ayet Listesi Görünümüne Geçiş
             IconButton(
-              icon: Icon(
-                isFavoriteSurah ? Icons.star_rounded : Icons.star_outline_rounded,
-                color: isFavoriteSurah ? const Color(0xFFFFDF7A) : Colors.white70,
-              ),
-              tooltip: isFavoriteSurah ? 'Sureyi Favorilerden Çıkar' : 'Sureyi Favorilere Ekle',
-              onPressed: () {
-                HapticFeedback.mediumImpact();
-                ref.read(favoriteSurahsProvider.notifier).toggleFavorite(widget.surah.id);
-              },
-            ),
-            // Ayet Listesi Görünümüne Geçiş
-            IconButton(
-              icon: const Icon(Icons.format_list_bulleted_rounded, color: Color(0xFFFFDF7A)),
+              icon: Icon(Icons.format_list_bulleted_rounded, color: BeyanColors.tone(0xFFFFDF7A)),
               tooltip: strings.language == AppLanguage.turkish ? 'Ayet Listesi Görünümüne Geç' : 'Switch to Verse List',
               onPressed: () {
                 HapticFeedback.lightImpact();
                 setState(() => _isMushafMode = false);
               },
             ),
-            // Çevrimdışı İndirme Butonu
-            _buildDownloadButton(context, audioState, strings),
-            // Kâri Seçimi
-            IconButton(
-              icon: const Icon(Icons.person_outline_rounded, color: Color(0xFFFFDF7A)),
-              tooltip: strings.reciterSelectionTooltip,
-              onPressed: () => _showReciterSheet(context, strings),
-            ),
-            // Tilavet Oynat/Durdur
+            // 2. Tilavet Oynat/Durdur
             IconButton(
               icon: Icon(
                 isThisSurahPlaying ? Icons.pause_circle_filled_rounded : Icons.play_circle_fill_rounded,
-                color: const Color(0xFFFFDF7A),
-                size: 26,
+                color: BeyanColors.tone(0xFFFFDF7A),
+                size: 27,
               ),
               onPressed: () {
                 HapticFeedback.mediumImpact();
@@ -562,6 +820,17 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                 }
               },
             ),
+            // 3. Tüm Okuma & Tilavet Araçları (Toplu, Ferah Menü)
+            IconButton(
+              icon: Badge(
+                isLabelVisible: hasActiveToolBadge,
+                backgroundColor: BeyanColors.tone(0xFFFFDF7A),
+                child: const Icon(Icons.tune_rounded, color: Colors.white),
+              ),
+              tooltip: strings.language == AppLanguage.turkish ? 'Okuma & Tilavet Araçları' : 'Reading & Audio Tools',
+              onPressed: () => _showReadingToolsSheet(context, strings),
+            ),
+            const SizedBox(width: 4),
           ],
         ),
         body: MushafPageView(
@@ -583,112 +852,37 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
       controller: _scrollController,
       physics: const BouncingScrollPhysics(),
       slivers: [
-        // ── Sure Başlığı AppBar ─────────────────────────────
+        // ── Sure Başlığı AppBar (Ferah & Toplu Üst Bar) ─────────────────────────────
         SliverAppBar(
           expandedHeight: 210,
           pinned: true,
           backgroundColor: AppColors.teal,
-          actions: [
-            // Sureyi Favorilere Ekle / Çıkar
-            IconButton(
-              icon: Icon(
-                isFavoriteSurah ? Icons.star_rounded : Icons.star_outline_rounded,
-                color: isFavoriteSurah ? const Color(0xFFFFDF7A) : Colors.white70,
-              ),
-              tooltip: isFavoriteSurah ? 'Sureyi Favorilerden Çıkar' : 'Sureyi Favorilere Ekle',
-              onPressed: () {
-                HapticFeedback.mediumImpact();
-                ref.read(favoriteSurahsProvider.notifier).toggleFavorite(widget.surah.id);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      !isFavoriteSurah
-                          ? '★ ${widget.surah.localizedName(strings.language.code)} favorilere eklendi'
-                          : '${widget.surah.localizedName(strings.language.code)} favorilerden çıkarıldı',
-                    ),
-                    backgroundColor: const Color(0xFF012E2B),
-                    behavior: SnackBarBehavior.floating,
-                    duration: const Duration(seconds: 1),
-                  ),
-                );
-              },
+          title: Text(
+            widget.surah.localizedName(strings.language.code),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
             ),
-            // Orijinal Mushaf Sayfa Moduna Geçiş Butonu
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          centerTitle: false,
+          actions: [
+            // 1. Orijinal Mushaf Sayfa Moduna Geçiş Butonu
             IconButton(
-              icon: const Icon(Icons.auto_stories_rounded, color: Color(0xFFFFDF7A)),
+              icon: Icon(Icons.auto_stories_rounded, color: BeyanColors.tone(0xFFFFDF7A)),
               tooltip: strings.language == AppLanguage.turkish ? 'Orijinal Mushaf Sayfa Modu' : 'Original Mushaf Page View',
               onPressed: () {
                 HapticFeedback.lightImpact();
                 setState(() => _isMushafMode = true);
               },
             ),
-            // Çevrimdışı İndirme Butonu
-            _buildDownloadButton(context, audioState, strings),
-            // Canlı Takip (Karaoke / Takipçi) Modu Butonu
-            IconButton(
-              icon: Icon(
-                audioState.isLiveTrackingEnabled ? Icons.auto_stories_rounded : Icons.auto_stories_outlined,
-                color: audioState.isLiveTrackingEnabled ? const Color(0xFFFFDF7A) : Colors.white60,
-              ),
-              tooltip: audioState.isLiveTrackingEnabled
-                  ? (strings.language == AppLanguage.turkish ? 'Canlı Ayet Takibi Açık' : 'Live Verse Tracking Active')
-                  : (strings.language == AppLanguage.turkish ? 'Canlı Ayet Takibi Kapalı' : 'Live Verse Tracking Off'),
-              onPressed: () {
-                HapticFeedback.lightImpact();
-                ref.read(quranAudioProvider.notifier).toggleLiveTracking();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      !audioState.isLiveTrackingEnabled
-                          ? (strings.language == AppLanguage.turkish
-                              ? 'Canlı Ayet Takibi Aktif (Otomatik kaydırma)'
-                              : 'Live Verse Tracking Enabled')
-                          : (strings.language == AppLanguage.turkish
-                              ? 'Canlı Ayet Takibi Duraklatıldı'
-                              : 'Live Verse Tracking Disabled'),
-                    ),
-                    duration: const Duration(seconds: 1),
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
-              },
-            ),
-            // Kelime Kelime Canlı Takip (Karaoke) Butonu
-            IconButton(
-              icon: Icon(
-                audioState.isWordHighlightEnabled ? Icons.spellcheck_rounded : Icons.font_download_outlined,
-                color: audioState.isWordHighlightEnabled ? const Color(0xFFFFDF7A) : Colors.white60,
-              ),
-              tooltip: audioState.isWordHighlightEnabled
-                  ? strings.wordByWordLiveTracking
-                  : '${strings.wordByWordLiveTracking} (${strings.cancel})',
-              onPressed: () {
-                HapticFeedback.lightImpact();
-                ref.read(quranAudioProvider.notifier).toggleWordHighlight();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      !audioState.isWordHighlightEnabled
-                          ? '${strings.wordByWordLiveTracking} Aktif'
-                          : '${strings.wordByWordLiveTracking} Kapatıldı',
-                    ),
-                    duration: const Duration(seconds: 1),
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
-              },
-            ),
-            // Kâri Seçimi Butonu
-            IconButton(
-              icon: const Icon(Icons.person_outline_rounded, color: Color(0xFFFFDF7A)),
-              tooltip: strings.reciterSelectionTooltip,
-              onPressed: () => _showReciterSheet(context, strings),
-            ),
-            // Tilavet Dinle Butonu
+            // 2. Tilavet Dinle Butonu
             IconButton(
               icon: Icon(
                 isThisSurahPlaying ? Icons.pause_circle_filled_rounded : Icons.play_circle_fill_rounded,
-                color: const Color(0xFFFFDF7A),
+                color: BeyanColors.tone(0xFFFFDF7A),
                 size: 28,
               ),
               tooltip: isThisSurahPlaying
@@ -705,68 +899,24 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                 }
               },
             ),
-            // 🙈 Ezber / Hafızlık Asistanı (Kelimeleri Gizle & Hatırla)
+            // 3. Tüm Okuma & Tilavet Araçları (Favori, Hafız, Ezber, Çift Meal, Uyku/Ambiyans, Boyut)
             IconButton(
-              icon: Icon(
-                ref.watch(quranMemorizationProvider).isActive
-                    ? Icons.visibility_off_rounded
-                    : Icons.visibility_rounded,
-                color: ref.watch(quranMemorizationProvider).isActive
-                    ? const Color(0xFFFFDF7A)
-                    : Colors.white70,
+              icon: Badge(
+                isLabelVisible: hasActiveToolBadge,
+                backgroundColor: BeyanColors.tone(0xFFFFDF7A),
+                child: const Icon(Icons.tune_rounded, color: Colors.white),
               ),
-              tooltip: ref.watch(quranMemorizationProvider).isActive
-                  ? (strings.language == AppLanguage.turkish ? 'Ezber Modunu Kapat' : 'Exit Memorization Mode')
-                  : (strings.language == AppLanguage.turkish ? 'Ezber Modu (Kelimeleri Gizle & Hatırla)' : 'Memorization Mode (Blur & Reveal)'),
-              onPressed: () {
-                HapticFeedback.lightImpact();
-                ref.read(quranMemorizationProvider.notifier).toggleMode();
-              },
+              tooltip: strings.language == AppLanguage.turkish ? 'Okuma & Tilavet Araçları' : 'Reading & Audio Tools',
+              onPressed: () => _showReadingToolsSheet(context, strings),
             ),
-            // 📜 Çift Mealli Karşılaştırma Modu
-            IconButton(
-              icon: Icon(
-                ref.watch(comparativeMealProvider)
-                    ? Icons.compare_arrows_rounded
-                    : Icons.compare_arrows_outlined,
-                color: ref.watch(comparativeMealProvider)
-                    ? const Color(0xFFFFDF7A)
-                    : Colors.white70,
-              ),
-              tooltip: ref.watch(comparativeMealProvider)
-                  ? (strings.language == AppLanguage.turkish ? 'Çift Meali Kapat' : 'Disable Comparative Translation')
-                  : (strings.language == AppLanguage.turkish ? 'Çift Mealli Karşılaştırma Modu' : 'Comparative Translation Mode'),
-              onPressed: () {
-                HapticFeedback.lightImpact();
-                ref.read(comparativeMealProvider.notifier).toggle();
-              },
-            ),
-            // 🎧 Manevi Ambiyans & Uyku Zamanlayıcısı
-            IconButton(
-              icon: Icon(
-                audioState.activeAmbience != null || audioState.sleepTimerSecondsRemaining != null
-                    ? Icons.bedtime_rounded
-                    : Icons.bedtime_outlined,
-                color: audioState.activeAmbience != null || audioState.sleepTimerSecondsRemaining != null
-                    ? const Color(0xFFFFDF7A)
-                    : Colors.white70,
-              ),
-              tooltip: strings.language == AppLanguage.turkish ? 'Manevi Ambiyans & Uyku Modu' : 'Spiritual Ambience & Sleep Mode',
-              onPressed: () => SleepAndAmbienceSheet.show(context),
-            ),
-            // Yazı Boyutu Butonu
-            IconButton(
-              icon: const Icon(Icons.format_size_rounded, color: Colors.white),
-              tooltip: strings.fontSizeTooltip,
-              onPressed: () => _showFontSizeSheet(context, strings),
-            ),
+            const SizedBox(width: 4),
           ],
           flexibleSpace: FlexibleSpaceBar(
             background: Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: isDark
-                      ? [const Color(0xFF00695C), const Color(0xFF0D1B2A)]
+                      ? [BeyanColors.tone(0xFF00695C), const Color(0xFF0D1B2A)]
                       : [AppColors.tealDark, AppColors.primary],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -911,7 +1061,7 @@ class _BismillahCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               fontStyle: FontStyle.italic,
-              color: isDark ? const Color(0xFFFFDF7A) : const Color(0xFF033E35),
+              color: isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF033E35),
               letterSpacing: 0.3,
             ),
           ),

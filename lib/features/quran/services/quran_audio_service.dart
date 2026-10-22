@@ -752,28 +752,47 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
     );
   }
 
-  // ── Manevi Ambiyans Sesleri (Rain, Ney, Breeze) ─────────────
+  // ── Gerçek Doğa & Huzur Ambiyans Sesleri (Yağmur/Orman, Deniz Dalgası, Esinti, Gece) ─────────────
+  static const Map<String, String> _ambienceAssets = {
+    'rain': 'audio/real_rain_forest.mp3',
+    'waves': 'audio/real_sea_waves.wav',
+    'breeze': 'audio/real_gentle_wind.mp3',
+    'night': 'audio/real_night_peace.wav',
+    // Geriye dönük uyumluluk:
+    'ney': 'audio/real_sea_waves.wav',
+  };
+
+  static const Map<String, String> _ambienceRemoteUrls = {
+    'rain': 'https://upload.wikimedia.org/wikipedia/commons/2/24/Bourne_woods_Birdsong_and_rain_2020-06-17_0742.mp3',
+    'waves': 'https://upload.wikimedia.org/wikipedia/commons/8/84/Sea_waves.wav',
+    'breeze': 'https://upload.wikimedia.org/wikipedia/commons/a/a3/Bourne_woods_windy_2020-05-05_0757.mp3',
+    'night': 'https://upload.wikimedia.org/wikipedia/commons/5/5f/Night_original_format.wav',
+  };
+
   Future<void> setAmbience(String? type) async {
     if (type == state.activeAmbience) return;
-    try {
-      await _ambiencePlayer.stop();
-      if (type != null) {
-        final asset = switch (type) {
-          'rain' => 'audio/rain_ambience.wav',
-          'ney' => 'audio/ney_ambience.wav',
-          'breeze' => 'audio/breeze_ambience.wav',
-          _ => null,
-        };
-        if (asset != null) {
-          await _ambiencePlayer.setVolume(state.ambienceVolume);
-          await _ambiencePlayer.play(AssetSource(asset)).timeout(const Duration(seconds: 2));
-        }
-      }
-    } catch (_) {}
     state = state.copyWith(
       activeAmbience: type,
       clearAmbience: type == null,
     );
+    try {
+      await _ambiencePlayer.stop();
+      if (type != null) {
+        final asset = _ambienceAssets[type];
+        await _ambiencePlayer.setReleaseMode(ReleaseMode.loop);
+        await _ambiencePlayer.setVolume(state.ambienceVolume);
+        if (asset != null) {
+          try {
+            await _ambiencePlayer.play(AssetSource(asset)).timeout(const Duration(seconds: 3));
+            return;
+          } catch (_) {}
+        }
+        final remoteUrl = _ambienceRemoteUrls[type];
+        if (remoteUrl != null) {
+          await _ambiencePlayer.play(UrlSource(remoteUrl)).timeout(const Duration(seconds: 6));
+        }
+      }
+    } catch (_) {}
   }
 
   Future<void> setAmbienceVolume(double vol) async {

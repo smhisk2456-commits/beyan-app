@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -103,10 +104,10 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
                 padding: const EdgeInsets.fromLTRB(16, 10, 16, 6),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF07201C) : Colors.white,
+                    color: isDark ? BeyanColors.tone(0xFF07201C) : Colors.white,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.35 : 0.25),
+                      color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.35 : 0.25),
                       width: 1,
                     ),
                     boxShadow: [
@@ -132,9 +133,9 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
                         fontSize: 13,
                         color: isDark ? Colors.white54 : AppColors.textHint,
                       ),
-                      prefixIcon: const Icon(
+                      prefixIcon: Icon(
                         Icons.search_rounded,
-                        color: Color(0xFFD4AF37),
+                        color: BeyanColors.tone(0xFFD4AF37),
                         size: 20,
                       ),
                       suffixIcon: _searchController.text.isNotEmpty
@@ -180,12 +181,12 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
                       decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF012E2B), Color(0xFF034A3E)],
+                        gradient: LinearGradient(
+                          colors: [BeyanColors.tone(0xFF012E2B), BeyanColors.tone(0xFF034A3E)],
                         ),
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(
-                          color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+                          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.4),
                           width: 1,
                         ),
                       ),
@@ -194,10 +195,10 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
                           Container(
                             padding: const EdgeInsets.all(5),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
+                              color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.2),
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.bookmark_added_rounded, color: Color(0xFFFFDF7A), size: 16),
+                            child: Icon(Icons.bookmark_added_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 16),
                           ),
                           const SizedBox(width: 10),
                           Expanded(
@@ -206,10 +207,10 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
                               children: [
                                 Text(
                                   strings.resumeReading,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
-                                    color: Color(0xFFFFDF7A),
+                                    color: BeyanColors.tone(0xFFFFDF7A),
                                   ),
                                 ),
                                 Text(
@@ -219,7 +220,7 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
                               ],
                             ),
                           ),
-                          const Icon(Icons.arrow_forward_ios_rounded, color: Color(0xFFFFDF7A), size: 12),
+                          Icon(Icons.arrow_forward_ios_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 12),
                         ],
                       ),
                     ),
@@ -233,10 +234,10 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
                   child: Container(
                     padding: const EdgeInsets.all(3.5),
                     decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF06221D) : const Color(0xFFE9F3EE),
+                      color: isDark ? BeyanColors.tone(0xFF06221D) : BeyanColors.tone(0xFFE9F3EE),
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(
-                        color: const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.3 : 0.2),
+                        color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.3 : 0.2),
                         width: 1,
                       ),
                     ),
@@ -419,7 +420,7 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
         padding: const EdgeInsets.symmetric(vertical: 7),
         decoration: BoxDecoration(
           color: isActive
-              ? (isDark ? const Color(0xFF0F3E34) : Colors.white)
+              ? (isDark ? BeyanColors.tone(0xFF0F3E34) : Colors.white)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(10),
           boxShadow: isActive
@@ -439,7 +440,7 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
               icon,
               size: 14,
               color: isActive
-                  ? const Color(0xFFFFDF7A)
+                  ? BeyanColors.tone(0xFFFFDF7A)
                   : (isDark ? Colors.white60 : Colors.black54),
             ),
             const SizedBox(width: 4),
@@ -450,7 +451,7 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
                   fontSize: 11.5,
                   fontWeight: isActive ? FontWeight.bold : FontWeight.w600,
                   color: isActive
-                      ? (isDark ? const Color(0xFFFFDF7A) : const Color(0xFF012E2B))
+                      ? (isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF012E2B))
                       : (isDark ? Colors.white60 : Colors.black54),
                 ),
                 maxLines: 1,
@@ -480,13 +481,13 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
           color: isSelected
-              ? const Color(0xFFD4AF37)
-              : (isDark ? const Color(0xFF082621) : const Color(0xFFF1F6F4)),
+              ? BeyanColors.tone(0xFFD4AF37)
+              : (isDark ? BeyanColors.tone(0xFF082621) : BeyanColors.tone(0xFFF1F6F4)),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected
-                ? const Color(0xFFFFDF7A)
-                : const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.3 : 0.2),
+                ? BeyanColors.tone(0xFFFFDF7A)
+                : BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.3 : 0.2),
             width: 1,
           ),
         ),
@@ -497,7 +498,7 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
             fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
             color: isSelected
                 ? Colors.black87
-                : (isDark ? Colors.white70 : const Color(0xFF033E35)),
+                : (isDark ? Colors.white70 : BeyanColors.tone(0xFF033E35)),
           ),
         ),
       ),
@@ -571,10 +572,10 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
           child: Container(
             margin: const EdgeInsets.only(bottom: 8),
             decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF0D2823) : Colors.white,
+              color: isDark ? BeyanColors.tone(0xFF0D2823) : Colors.white,
               borderRadius: BorderRadius.circular(15),
               border: Border.all(
-                color: isDark ? const Color(0xFF133B34) : const Color(0xFFE5ECE9),
+                color: isDark ? BeyanColors.tone(0xFF133B34) : BeyanColors.tone(0xFFE5ECE9),
                 width: 1,
               ),
             ),
@@ -593,10 +594,10 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
                         width: 42,
                         height: 42,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+                          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
-                            color: const Color(0xFFD4AF37).withValues(alpha: 0.5),
+                            color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.5),
                             width: 1.2,
                           ),
                         ),
@@ -605,10 +606,10 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
                           children: [
                             Text(
                               strings.juzLabel,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 9,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFFD4AF37),
+                                color: BeyanColors.tone(0xFFD4AF37),
                               ),
                             ),
                             Text(
@@ -616,7 +617,7 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
-                                color: isDark ? const Color(0xFFFFDF7A) : const Color(0xFF012E2B),
+                                color: isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF012E2B),
                                 height: 1.1,
                               ),
                             ),
@@ -635,7 +636,7 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
                               style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold,
-                                color: isDark ? Colors.white : const Color(0xFF02362E),
+                                color: isDark ? Colors.white : BeyanColors.tone(0xFF02362E),
                               ),
                             ),
                             const SizedBox(height: 3),
@@ -657,23 +658,23 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+                              color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
                               '${juz.startAyah}. Âyet',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFFD4AF37),
+                                color: BeyanColors.tone(0xFFD4AF37),
                               ),
                             ),
                           ),
                           const SizedBox(height: 4),
-                          const Icon(
+                          Icon(
                             Icons.arrow_forward_ios_rounded,
                             size: 12,
-                            color: Color(0xFFD4AF37),
+                            color: BeyanColors.tone(0xFFD4AF37),
                           ),
                         ],
                       ),
@@ -713,12 +714,12 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: isDark
-                    ? [const Color(0xFF0D372E), const Color(0xFF06221D)]
-                    : [const Color(0xFFE2EFE9), const Color(0xFFF3F8F5)],
+                    ? [BeyanColors.tone(0xFF0D372E), BeyanColors.tone(0xFF06221D)]
+                    : [BeyanColors.tone(0xFFE2EFE9), BeyanColors.tone(0xFFF3F8F5)],
               ),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: const Color(0xFFD4AF37).withValues(alpha: 0.5),
+                color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.5),
                 width: 1.2,
               ),
               boxShadow: [
@@ -735,16 +736,16 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
+                    color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: const Color(0xFFD4AF37).withValues(alpha: 0.5),
+                      color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.5),
                       width: 1,
                     ),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.auto_stories_rounded,
-                    color: Color(0xFFFFDF7A),
+                    color: BeyanColors.tone(0xFFFFDF7A),
                     size: 24,
                   ),
                 ),
@@ -758,7 +759,7 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
-                          color: isDark ? const Color(0xFFFFDF7A) : const Color(0xFF012E2B),
+                          color: isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF012E2B),
                         ),
                       ),
                       const SizedBox(height: 3),
@@ -774,9 +775,9 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                const Icon(
+                Icon(
                   Icons.arrow_forward_rounded,
-                  color: Color(0xFFD4AF37),
+                  color: BeyanColors.tone(0xFFD4AF37),
                   size: 20,
                 ),
               ],
@@ -819,10 +820,10 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF0D2823) : Colors.white,
+        color: isDark ? BeyanColors.tone(0xFF0D2823) : Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isDark ? const Color(0xFF133B34) : const Color(0xFFE5ECE9),
+          color: isDark ? BeyanColors.tone(0xFF133B34) : BeyanColors.tone(0xFFE5ECE9),
           width: 1,
         ),
       ),
@@ -842,15 +843,15 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFD4AF37).withValues(alpha: 0.16),
+                        color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.16),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
                         '${verse.surahName} ${verse.verseRange}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFFD4AF37),
+                          color: BeyanColors.tone(0xFFD4AF37),
                         ),
                       ),
                     ),
@@ -861,13 +862,13 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                         visualDensity: VisualDensity.compact,
                       ),
-                      icon: const Icon(Icons.menu_book_rounded, size: 14, color: Color(0xFFD4AF37)),
+                      icon: Icon(Icons.menu_book_rounded, size: 14, color: BeyanColors.tone(0xFFD4AF37)),
                       label: Text(
                         strings.readInSurah,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 11.5,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFFD4AF37),
+                          color: BeyanColors.tone(0xFFD4AF37),
                         ),
                       ),
                     ),
@@ -879,7 +880,7 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
-                    color: isDark ? Colors.white : const Color(0xFF02362E),
+                    color: isDark ? Colors.white : BeyanColors.tone(0xFF02362E),
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -895,7 +896,7 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF071F1B) : const Color(0xFFF7FAF9),
+                    color: isDark ? BeyanColors.tone(0xFF071F1B) : BeyanColors.tone(0xFFF7FAF9),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -904,7 +905,7 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
                     style: TextStyle(
                       fontFamily: 'Amiri',
                       fontSize: 15,
-                      color: isDark ? const Color(0xFFFFDF7A) : const Color(0xFF02362E),
+                      color: isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF02362E),
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -980,7 +981,7 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
               ElevatedButton.icon(
                 onPressed: () => _openDuaLibraryWithQuery(query),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFD4AF37),
+                  backgroundColor: BeyanColors.tone(0xFFD4AF37),
                   foregroundColor: Colors.black,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -1006,24 +1007,24 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
           margin: const EdgeInsets.only(bottom: 10),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
-            color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+            color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: const Color(0xFFD4AF37).withValues(alpha: 0.35),
+              color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35),
               width: 1,
             ),
           ),
           child: Row(
             children: [
-              const Icon(Icons.auto_stories_rounded, color: Color(0xFFD4AF37), size: 18),
+              Icon(Icons.auto_stories_rounded, color: BeyanColors.tone(0xFFD4AF37), size: 18),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   'Dua Kütüphanesi\'nde "$query" ara (40+ Dua)',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFFD4AF37),
+                    color: BeyanColors.tone(0xFFD4AF37),
                   ),
                 ),
               ),
@@ -1033,11 +1034,11 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   visualDensity: VisualDensity.compact,
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('Aç', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFD4AF37))),
-                    Icon(Icons.arrow_forward_rounded, size: 14, color: Color(0xFFD4AF37)),
+                    Text('Aç', style: TextStyle(fontWeight: FontWeight.bold, color: BeyanColors.tone(0xFFD4AF37))),
+                    Icon(Icons.arrow_forward_rounded, size: 14, color: BeyanColors.tone(0xFFD4AF37)),
                   ],
                 ),
               ),
@@ -1051,14 +1052,14 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
             padding: const EdgeInsets.symmetric(vertical: 6),
             child: Row(
               children: [
-                const Icon(Icons.stars_rounded, color: Color(0xFFFFDF7A), size: 16),
+                Icon(Icons.stars_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 16),
                 const SizedBox(width: 6),
                 Text(
                   '${strings.foundVersesAndDuas} (${matchedVerses.length})',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFFFFDF7A),
+                    color: BeyanColors.tone(0xFFFFDF7A),
                   ),
                 ),
               ],
@@ -1092,14 +1093,14 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
             padding: const EdgeInsets.symmetric(vertical: 6),
             child: Row(
               children: [
-                const Icon(Icons.format_list_bulleted_rounded, color: Color(0xFFD4AF37), size: 16),
+                Icon(Icons.format_list_bulleted_rounded, color: BeyanColors.tone(0xFFD4AF37), size: 16),
                 const SizedBox(width: 6),
                 Text(
                   '${strings.foundSurahs} (${matchedSurahs.length})',
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
-                    color: isDark ? Colors.white70 : const Color(0xFF02362E),
+                    color: isDark ? Colors.white70 : BeyanColors.tone(0xFF02362E),
                   ),
                 ),
               ],
@@ -1144,16 +1145,16 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
             padding: const EdgeInsets.fromLTRB(4, 6, 4, 8),
             child: Row(
               children: [
-                const Icon(Icons.star_rounded, color: Color(0xFFFFDF7A), size: 18),
+                Icon(Icons.star_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 18),
                 const SizedBox(width: 8),
                 Text(
                   strings.language == AppLanguage.turkish
                       ? 'Favori Sureler (${favoriteSurahs.length})'
                       : 'Favorite Surahs (${favoriteSurahs.length})',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFFFFDF7A),
+                    color: BeyanColors.tone(0xFFFFDF7A),
                   ),
                 ),
               ],
@@ -1175,7 +1176,7 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
             padding: const EdgeInsets.fromLTRB(4, 6, 4, 8),
             child: Row(
               children: [
-                const Icon(Icons.bookmark_added_rounded, color: Color(0xFFD4AF37), size: 18),
+                Icon(Icons.bookmark_added_rounded, color: BeyanColors.tone(0xFFD4AF37), size: 18),
                 const SizedBox(width: 8),
                 Text(
                   strings.language == AppLanguage.turkish
@@ -1184,7 +1185,7 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: isDark ? Colors.white : const Color(0xFF012E2B),
+                    color: isDark ? Colors.white : BeyanColors.tone(0xFF012E2B),
                   ),
                 ),
               ],
@@ -1210,10 +1211,10 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
             return Container(
               margin: const EdgeInsets.only(bottom: 10),
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF082621) : Colors.white,
+                color: isDark ? BeyanColors.tone(0xFF082621) : Colors.white,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.35 : 0.25),
+                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.35 : 0.25),
                   width: 1,
                 ),
                 boxShadow: [
@@ -1238,10 +1239,10 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+                            color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.15),
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: const Color(0xFFD4AF37).withValues(alpha: 0.5),
+                              color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.5),
                               width: 1,
                             ),
                           ),
@@ -1251,7 +1252,7 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
-                                color: isDark ? const Color(0xFFFFDF7A) : const Color(0xFF033E35),
+                                color: isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF033E35),
                               ),
                             ),
                           ),
@@ -1266,7 +1267,7 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
-                                  color: isDark ? Colors.white : const Color(0xFF02362E),
+                                  color: isDark ? Colors.white : BeyanColors.tone(0xFF02362E),
                                 ),
                               ),
                               const SizedBox(height: 3),
@@ -1281,17 +1282,17 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.star_rounded, color: Color(0xFFFFDF7A), size: 22),
+                          icon: Icon(Icons.star_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 22),
                           tooltip: strings.removeBookmark,
                           onPressed: () {
                             HapticFeedback.mediumImpact();
                             ref.read(bookmarkedVersesProvider.notifier).toggleBookmark(sId, vNum);
                           },
                         ),
-                        const Icon(
+                        Icon(
                           Icons.arrow_forward_ios_rounded,
                           size: 13,
-                          color: Color(0xFFD4AF37),
+                          color: BeyanColors.tone(0xFFD4AF37),
                         ),
                       ],
                     ),
@@ -1321,22 +1322,22 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
               height: 80,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.15 : 0.1),
+                color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.15 : 0.1),
                 border: Border.all(
-                  color: const Color(0xFFD4AF37).withValues(alpha: 0.5),
+                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.5),
                   width: 1.5,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
+                    color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.2),
                     blurRadius: 20,
                     spreadRadius: 2,
                   ),
                 ],
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.star_rounded,
-                color: Color(0xFFFFDF7A),
+                color: BeyanColors.tone(0xFFFFDF7A),
                 size: 40,
               ),
             ),
@@ -1346,7 +1347,7 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: isDark ? Colors.white : const Color(0xFF012E2B),
+                color: isDark ? Colors.white : BeyanColors.tone(0xFF012E2B),
                 letterSpacing: 0.2,
               ),
             ),
@@ -1368,13 +1369,13 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
                 HapticFeedback.lightImpact();
                 setState(() => _selectedTab = _QuranTab.surahs);
               },
-              icon: const Icon(Icons.auto_stories_rounded, size: 18, color: Color(0xFF012E2B)),
+              icon: Icon(Icons.auto_stories_rounded, size: 18, color: BeyanColors.tone(0xFF012E2B)),
               label: Text(
                 strings.language == AppLanguage.turkish ? 'Sureleri Keşfet' : 'Explore Surahs',
-                style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF012E2B)),
+                style: TextStyle(fontWeight: FontWeight.bold, color: BeyanColors.tone(0xFF012E2B)),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFFDF7A),
+                backgroundColor: BeyanColors.tone(0xFFFFDF7A),
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 elevation: 4,

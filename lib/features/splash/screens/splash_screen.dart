@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -152,7 +153,7 @@ class _SplashScreenState extends State<SplashScreen>
   Widget build(BuildContext context) {
     debugPrint('>>> SPLASH SCREEN BUILD CALLED');
     return Scaffold(
-      backgroundColor: const Color(0xFF01201D),
+      backgroundColor: BeyanColors.tone(0xFF01201D),
       body: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () {
@@ -162,18 +163,18 @@ class _SplashScreenState extends State<SplashScreen>
         child: Container(
           width: double.infinity,
           height: double.infinity,
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                Color(0xFF001512),
-                Color(0xFF012522),
-                Color(0xFF012E2B),
-                Color(0xFF023E36),
-                Color(0xFF001714),
+                BeyanColors.tone(0xFF001512),
+                BeyanColors.tone(0xFF012522),
+                BeyanColors.tone(0xFF012E2B),
+                BeyanColors.tone(0xFF023E36),
+                BeyanColors.tone(0xFF001714),
               ],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              stops: [0.0, 0.25, 0.5, 0.75, 1.0],
+              stops: const [0.0, 0.25, 0.5, 0.75, 1.0],
             ),
           ),
           child: Stack(
@@ -192,8 +193,8 @@ class _SplashScreenState extends State<SplashScreen>
                         shape: BoxShape.circle,
                         gradient: RadialGradient(
                           colors: [
-                            const Color(0xFFD4AF37).withValues(alpha: 0.22),
-                            const Color(0xFF033E35).withValues(alpha: 0.12),
+                            BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.22),
+                            BeyanColors.tone(0xFF033E35).withValues(alpha: 0.12),
                             Colors.transparent,
                           ],
                           stops: const [0.0, 0.6, 1.0],
@@ -229,12 +230,12 @@ class _SplashScreenState extends State<SplashScreen>
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(38),
                           border: Border.all(
-                            color: const Color(0xFFD4AF37).withValues(alpha: 0.6),
+                            color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.6),
                             width: 1.8,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFFD4AF37).withValues(alpha: 0.35),
+                              color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35),
                               blurRadius: 36,
                               spreadRadius: 4,
                               offset: const Offset(0, 10),
@@ -277,12 +278,12 @@ class _SplashScreenState extends State<SplashScreen>
                         children: [
                           // Beyân Başlığı
                           ShaderMask(
-                            shaderCallback: (bounds) => const LinearGradient(
+                            shaderCallback: (bounds) => LinearGradient(
                               colors: [
-                                Color(0xFFFFF4D0),
-                                Color(0xFFFFDF7A),
-                                Color(0xFFD4AF37),
-                                Color(0xFFA57D1B),
+                                const Color(0xFFFFF4D0),
+                                BeyanColors.tone(0xFFFFDF7A),
+                                BeyanColors.tone(0xFFD4AF37),
+                                BeyanColors.tone(0xFFA57D1B),
                               ],
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
@@ -305,10 +306,10 @@ class _SplashScreenState extends State<SplashScreen>
                             width: 64,
                             height: 2,
                             decoration: BoxDecoration(
-                              gradient: const LinearGradient(
+                              gradient: LinearGradient(
                                 colors: [
                                   Colors.transparent,
-                                  Color(0xFFD4AF37),
+                                  BeyanColors.tone(0xFFD4AF37),
                                   Colors.transparent,
                                 ],
                               ),
@@ -319,13 +320,13 @@ class _SplashScreenState extends State<SplashScreen>
                           const SizedBox(height: 12),
 
                           // Sade ve Zarif Alt Başlık
-                          const Text(
+                          Text(
                             'Vakitler • Kur\'an • Tesbihat',
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w500,
                               letterSpacing: 2.0,
-                              color: Color(0xFFFFDF7A),
+                              color: BeyanColors.tone(0xFFFFDF7A),
                             ),
                           ),
                         ],
@@ -348,8 +349,8 @@ class _SplashScreenState extends State<SplashScreen>
                                 height: 4,
                                 decoration: BoxDecoration(
                                   color: index == 1
-                                      ? const Color(0xFFD4AF37)
-                                      : const Color(0xFFD4AF37).withValues(alpha: 0.35),
+                                      ? BeyanColors.tone(0xFFD4AF37)
+                                      : BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35),
                                   borderRadius: BorderRadius.circular(2),
                                 ),
                               );

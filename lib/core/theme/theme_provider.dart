@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'app_theme.dart';
+import 'beyan_colors.dart';
 
 /// Tema ve palet durumunu temsil eden model.
 @immutable
@@ -41,6 +42,7 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
           palette: AppThemePalette.emerald,
           isDynamicPrayerTheme: false,
         )) {
+    BeyanColors.setPalette(AppThemePalette.emerald);
     _loadFromPrefs();
   }
 
@@ -63,6 +65,7 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
         );
       }
 
+      BeyanColors.setPalette(palette);
       state = ThemeState(
         mode: mode,
         palette: palette,
@@ -81,9 +84,11 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
   }
 
   Future<void> setPalette(AppThemePalette palette) async {
-    state = state.copyWith(palette: palette);
+    BeyanColors.setPalette(palette);
+    state = state.copyWith(palette: palette, isDynamicPrayerTheme: false);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_keyThemePalette, palette.name);
+    await prefs.setBool(_keyDynamicPrayerTheme, false);
   }
 
   Future<void> setDynamicPrayerTheme(bool enabled) async {

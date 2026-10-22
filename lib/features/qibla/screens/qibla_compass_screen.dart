@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:adhan/adhan.dart';
@@ -116,34 +117,34 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
     final isAligned = diff.abs() <= 3.5;
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF011815) : const Color(0xFFF4F7F6),
+      backgroundColor: isDark ? BeyanColors.tone(0xFF011815) : BeyanColors.tone(0xFFF4F7F6),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFFD4AF37)),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: BeyanColors.tone(0xFFD4AF37)),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           strings.qiblaCompassTitle,
-          style: const TextStyle(
-            color: Color(0xFFD4AF37),
+          style: TextStyle(
+            color: BeyanColors.tone(0xFFD4AF37),
             fontWeight: FontWeight.bold,
             fontSize: 20,
           ),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.info_outline_rounded, color: Color(0xFFD4AF37)),
+            icon: Icon(Icons.info_outline_rounded, color: BeyanColors.tone(0xFFD4AF37)),
             onPressed: () => _showCalibrationInfo(strings),
           ),
         ],
       ),
       body: SafeArea(
         child: _loadingLocation
-            ? const Center(
-                child: CircularProgressIndicator(color: Color(0xFFD4AF37)),
+            ? Center(
+                child: CircularProgressIndicator(color: BeyanColors.tone(0xFFD4AF37)),
               )
             : SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
@@ -155,11 +156,11 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       decoration: BoxDecoration(
                         color: isDark
-                            ? const Color(0xFF0D2823)
+                            ? BeyanColors.tone(0xFF0D2823)
                             : Colors.white,
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                          color: const Color(0xFFD4AF37).withValues(alpha: 0.3),
+                          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.3),
                         ),
                         boxShadow: [
                           BoxShadow(
@@ -171,8 +172,8 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.location_on_rounded,
-                              color: Color(0xFFD4AF37), size: 16),
+                          Icon(Icons.location_on_rounded,
+                              color: BeyanColors.tone(0xFFD4AF37), size: 16),
                           const SizedBox(width: 6),
                           Text(
                             _cityName,
@@ -186,8 +187,8 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
                           Container(
                             width: 4,
                             height: 4,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFFD4AF37),
+                            decoration: BoxDecoration(
+                              color: BeyanColors.tone(0xFFD4AF37),
                               shape: BoxShape.circle,
                             ),
                           ),
@@ -235,19 +236,19 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
                       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                       decoration: BoxDecoration(
                         color: isAligned
-                            ? const Color(0xFF0F5A47)
-                            : (isDark ? const Color(0xFF0B221E) : Colors.white),
+                            ? BeyanColors.tone(0xFF0F5A47)
+                            : (isDark ? BeyanColors.tone(0xFF0B221E) : Colors.white),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
                           color: isAligned
-                              ? const Color(0xFFFFDF7A)
-                              : const Color(0xFFD4AF37).withValues(alpha: 0.25),
+                              ? BeyanColors.tone(0xFFFFDF7A)
+                              : BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.25),
                           width: isAligned ? 1.5 : 1,
                         ),
                         boxShadow: isAligned
                             ? [
                                 BoxShadow(
-                                  color: const Color(0xFFD4AF37).withValues(alpha: 0.3),
+                                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.3),
                                   blurRadius: 16,
                                   spreadRadius: 2,
                                 )
@@ -259,7 +260,7 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
                         children: [
                           Icon(
                             isAligned ? Icons.check_circle_rounded : Icons.explore_rounded,
-                            color: isAligned ? const Color(0xFFFFDF7A) : const Color(0xFFD4AF37),
+                            color: isAligned ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFFD4AF37),
                             size: 20,
                           ),
                           const SizedBox(width: 10),
@@ -298,21 +299,21 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
                               gradient: RadialGradient(
                                 colors: [
                                   isAligned
-                                      ? const Color(0xFF034A3E).withValues(alpha: 0.9)
-                                      : (isDark ? const Color(0xFF052B25) : Colors.white),
-                                  isDark ? const Color(0xFF011A16) : Colors.grey.shade100,
+                                      ? BeyanColors.tone(0xFF034A3E).withValues(alpha: 0.9)
+                                      : (isDark ? BeyanColors.tone(0xFF052B25) : Colors.white),
+                                  isDark ? BeyanColors.tone(0xFF011A16) : Colors.grey.shade100,
                                 ],
                               ),
                               border: Border.all(
                                 color: isAligned
-                                    ? const Color(0xFFFFDF7A)
-                                    : const Color(0xFFD4AF37).withValues(alpha: 0.5),
+                                    ? BeyanColors.tone(0xFFFFDF7A)
+                                    : BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.5),
                                 width: isAligned ? 3 : 2,
                               ),
                               boxShadow: [
                                 BoxShadow(
                                   color: isAligned
-                                      ? const Color(0xFFD4AF37).withValues(alpha: 0.45)
+                                      ? BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.45)
                                       : Colors.black.withValues(alpha: 0.2),
                                   blurRadius: isAligned ? 24 : 14,
                                   spreadRadius: isAligned ? 4 : 1,
@@ -343,15 +344,15 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
                                 Container(
                                   padding: const EdgeInsets.all(7),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFF011C18),
+                                    color: BeyanColors.tone(0xFF011C18),
                                     shape: BoxShape.circle,
                                     border: Border.all(
-                                      color: const Color(0xFFFFDF7A),
+                                      color: BeyanColors.tone(0xFFFFDF7A),
                                       width: 2,
                                     ),
-                                    boxShadow: const [
+                                    boxShadow: [
                                       BoxShadow(
-                                        color: Color(0xFFD4AF37),
+                                        color: BeyanColors.tone(0xFFD4AF37),
                                         blurRadius: 10,
                                       ),
                                     ],
@@ -365,8 +366,8 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
                                   width: 3,
                                   height: 48,
                                   decoration: BoxDecoration(
-                                    gradient: const LinearGradient(
-                                      colors: [Color(0xFFFFDF7A), Colors.transparent],
+                                    gradient: LinearGradient(
+                                      colors: [BeyanColors.tone(0xFFFFDF7A), Colors.transparent],
                                       begin: Alignment.topCenter,
                                       end: Alignment.bottomCenter,
                                     ),
@@ -383,8 +384,8 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
                             child: Container(
                               width: 14,
                               height: 14,
-                              decoration: const BoxDecoration(
-                                color: Color(0xFFFFDF7A),
+                              decoration: BoxDecoration(
+                                color: BeyanColors.tone(0xFFFFDF7A),
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(Icons.arrow_drop_down,
@@ -398,8 +399,8 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
                             height: 60,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              gradient: const RadialGradient(
-                                colors: [Color(0xFFD4AF37), Color(0xFF7A5F12)],
+                              gradient: RadialGradient(
+                                colors: [BeyanColors.tone(0xFFD4AF37), BeyanColors.tone(0xFF7A5F12)],
                               ),
                               border: Border.all(color: Colors.white, width: 2),
                               boxShadow: [
@@ -454,14 +455,14 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: isDark
-                            ? const Color(0xFF0D2823).withValues(alpha: 0.6)
+                            ? BeyanColors.tone(0xFF0D2823).withValues(alpha: 0.6)
                             : Colors.grey.shade100,
                         borderRadius: BorderRadius.circular(14),
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.screen_rotation_rounded,
-                              color: Color(0xFFD4AF37), size: 18),
+                          Icon(Icons.screen_rotation_rounded,
+                              color: BeyanColors.tone(0xFFD4AF37), size: 18),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
@@ -493,10 +494,10 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF071F1B) : Colors.white,
+          color: isDark ? BeyanColors.tone(0xFF071F1B) : Colors.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: const Color(0xFFD4AF37).withValues(alpha: 0.25),
+            color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.25),
           ),
           boxShadow: [
             BoxShadow(
@@ -510,7 +511,7 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
           children: [
             Row(
               children: [
-                Icon(icon, color: const Color(0xFFD4AF37), size: 16),
+                Icon(icon, color: BeyanColors.tone(0xFFD4AF37), size: 16),
                 const SizedBox(width: 6),
                 Text(
                   title,
@@ -560,10 +561,10 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        backgroundColor: const Color(0xFF071F1B),
+        backgroundColor: BeyanColors.tone(0xFF071F1B),
         title: Row(
           children: [
-            const Icon(Icons.compass_calibration_rounded, color: Color(0xFFD4AF37)),
+            Icon(Icons.compass_calibration_rounded, color: BeyanColors.tone(0xFFD4AF37)),
             const SizedBox(width: 10),
             Text(strings.compassCalibrationTitle, style: const TextStyle(color: Colors.white, fontSize: 16)),
           ],
@@ -575,7 +576,7 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text(strings.iUnderstand, style: const TextStyle(color: Color(0xFFD4AF37))),
+            child: Text(strings.iUnderstand, style: TextStyle(color: BeyanColors.tone(0xFFD4AF37))),
           ),
         ],
       ),
@@ -595,11 +596,11 @@ class _CompassDialPainter extends CustomPainter {
     final radius = size.width / 2;
 
     final tickPaint = Paint()
-      ..color = const Color(0xFFD4AF37).withValues(alpha: 0.6)
+      ..color = BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.6)
       ..strokeWidth = 1.2;
 
     final majorTickPaint = Paint()
-      ..color = const Color(0xFFFFDF7A)
+      ..color = BeyanColors.tone(0xFFFFDF7A)
       ..strokeWidth = 2.0;
 
     // 360 derece işaretleri (her 10 derecede bir çizgi, her 30 derecede büyük çizgi)
@@ -637,7 +638,7 @@ class _CompassDialPainter extends CustomPainter {
       final textSpan = TextSpan(
         text: entry.key,
         style: TextStyle(
-          color: isNorth ? const Color(0xFFFF4D4D) : const Color(0xFFFFDF7A),
+          color: isNorth ? const Color(0xFFFF4D4D) : BeyanColors.tone(0xFFFFDF7A),
           fontSize: 16,
           fontWeight: FontWeight.bold,
         ),

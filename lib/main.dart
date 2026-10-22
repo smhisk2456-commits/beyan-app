@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'core/localization/app_strings.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/beyan_colors.dart';
 import 'core/theme/theme_provider.dart';
 import 'features/home/screens/home_screen.dart';
 import 'features/prayer_times/screens/prayer_times_screen.dart';
@@ -122,6 +123,7 @@ class IslamicApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final currentLang = ref.watch(appLanguageProvider);
     final themeState = ref.watch(themeProvider);
+    BeyanColors.setPalette(themeState.palette);
 
     return MaterialApp(
       navigatorKey: DeepLinkService.navigatorKey,
@@ -166,14 +168,6 @@ class MainNavigation extends ConsumerStatefulWidget {
 
 class _MainNavigationState extends ConsumerState<MainNavigation>
     with WidgetsBindingObserver {
-  static const _screens = [
-    HomeScreen(),
-    PrayerTimesScreen(),
-    SurahListScreen(),
-    ZikirmatikScreen(),
-    WidgetCenterScreen(),
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -209,26 +203,47 @@ class _MainNavigationState extends ConsumerState<MainNavigation>
   @override
   Widget build(BuildContext context) {
     final selectedTab = ref.watch(selectedTabProvider);
+    final themeState = ref.watch(themeProvider);
+    BeyanColors.setPalette(themeState.palette);
+    final themeKey = ValueKey(
+      '${themeState.palette.name}_${themeState.mode.name}_${themeState.isDynamicPrayerTheme}',
+    );
 
-    return Scaffold(
-      extendBody: true,
-      body: RepaintBoundary(
-        child: IndexedStack(
-          index: selectedTab,
-          children: _screens,
+    return KeyedSubtree(
+      key: themeKey,
+      child: Scaffold(
+        extendBody: true,
+        body: RepaintBoundary(
+          child: IndexedStack(
+            index: selectedTab,
+            // ignore: prefer_const_constructors, prefer_const_literals_to_create_immutables
+            children: [
+              // ignore: prefer_const_constructors
+              HomeScreen(key: ValueKey('home_${themeState.palette.name}')),
+              // ignore: prefer_const_constructors
+              PrayerTimesScreen(key: ValueKey('prayers_${themeState.palette.name}')),
+              // ignore: prefer_const_constructors
+              SurahListScreen(key: ValueKey('surahs_${themeState.palette.name}')),
+              // ignore: prefer_const_constructors
+              ZikirmatikScreen(key: ValueKey('zikr_${themeState.palette.name}')),
+              // ignore: prefer_const_constructors
+              WidgetCenterScreen(key: ValueKey('widgets_${themeState.palette.name}')),
+            ],
+          ),
         ),
-      ),
-      bottomNavigationBar: RepaintBoundary(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const AdhanAudioPlayerBar(),
-            const QuranAudioPlayerBar(),
-            LuxuryFloatingDock(
-              currentIndex: selectedTab,
-              onTap: (i) => ref.read(selectedTabProvider.notifier).state = i,
-            ),
-          ],
+        bottomNavigationBar: RepaintBoundary(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AdhanAudioPlayerBar(key: ValueKey('adhan_bar_${themeState.palette.name}')),
+              QuranAudioPlayerBar(key: ValueKey('quran_bar_${themeState.palette.name}')),
+              LuxuryFloatingDock(
+                key: ValueKey('dock_${themeState.palette.name}'),
+                currentIndex: selectedTab,
+                onTap: (i) => ref.read(selectedTabProvider.notifier).state = i,
+              ),
+            ],
+          ),
         ),
       ),
     );

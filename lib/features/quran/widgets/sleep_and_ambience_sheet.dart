@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -33,10 +34,10 @@ class SleepAndAmbienceSheet extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF03221C) : const Color(0xFF01362F),
+        color: isDark ? BeyanColors.tone(0xFF03221C) : BeyanColors.tone(0xFF01362F),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         border: Border.all(
-          color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.4),
           width: 1.2,
         ),
         boxShadow: const [
@@ -70,11 +71,11 @@ class SleepAndAmbienceSheet extends ConsumerWidget {
               Container(
                 width: 38,
                 height: 38,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Color(0xFFD4AF37),
+                  color: BeyanColors.tone(0xFFD4AF37),
                 ),
-                child: const Icon(Icons.bedtime_rounded, color: Color(0xFF012E2B), size: 22),
+                child: Icon(Icons.bedtime_rounded, color: BeyanColors.tone(0xFF012E2B), size: 22),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -85,10 +86,10 @@ class SleepAndAmbienceSheet extends ConsumerWidget {
                       strings.language == AppLanguage.turkish
                           ? 'Manevi Ambiyans & Uyku Modu'
                           : 'Sleep & Spiritual Ambience',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFFFFDF7A),
+                        color: BeyanColors.tone(0xFFFFDF7A),
                       ),
                     ),
                     Text(
@@ -109,9 +110,11 @@ class SleepAndAmbienceSheet extends ConsumerWidget {
 
           const SizedBox(height: 20),
 
-          // ── 1. Ambiyans Sesi Seçimi ────────────────────────────────
+          // ── 1. Gerçek Doğa Ambiyansı Seçimi ────────────────────────────────
           Text(
-            strings.language == AppLanguage.turkish ? 'Arka Plan Ambiyansı' : 'Background Ambience',
+            strings.language == AppLanguage.turkish
+                ? 'Gerçek Doğa Ambiyansı (Yüksek Kalite Kayıt)'
+                : 'Authentic Nature Ambience (HD Recordings)',
             style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
           ),
           const SizedBox(height: 10),
@@ -127,7 +130,7 @@ class SleepAndAmbienceSheet extends ConsumerWidget {
                   audioNotifier.setAmbience(null);
                 },
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 6),
               _AmbienceChip(
                 label: strings.language == AppLanguage.turkish ? '🌧️ Yağmur' : '🌧️ Rain',
                 icon: Icons.water_drop_rounded,
@@ -137,24 +140,34 @@ class SleepAndAmbienceSheet extends ConsumerWidget {
                   audioNotifier.setAmbience('rain');
                 },
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 6),
               _AmbienceChip(
-                label: strings.language == AppLanguage.turkish ? '🪈 Ney' : '🪈 Ney',
-                icon: Icons.music_note_rounded,
-                isSelected: audioState.activeAmbience == 'ney',
+                label: strings.language == AppLanguage.turkish ? '🌊 Dalga' : '🌊 Waves',
+                icon: Icons.waves_rounded,
+                isSelected: audioState.activeAmbience == 'waves',
                 onTap: () {
                   HapticFeedback.lightImpact();
-                  audioNotifier.setAmbience('ney');
+                  audioNotifier.setAmbience('waves');
                 },
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 6),
               _AmbienceChip(
-                label: strings.language == AppLanguage.turkish ? '🍃 Rüzgar' : '🍃 Breeze',
+                label: strings.language == AppLanguage.turkish ? '🍃 Esinti' : '🍃 Breeze',
                 icon: Icons.air_rounded,
                 isSelected: audioState.activeAmbience == 'breeze',
                 onTap: () {
                   HapticFeedback.lightImpact();
                   audioNotifier.setAmbience('breeze');
+                },
+              ),
+              const SizedBox(width: 6),
+              _AmbienceChip(
+                label: strings.language == AppLanguage.turkish ? '🌌 Gece' : '🌌 Night',
+                icon: Icons.nights_stay_rounded,
+                isSelected: audioState.activeAmbience == 'night',
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  audioNotifier.setAmbience('night');
                 },
               ),
             ],
@@ -171,9 +184,9 @@ class SleepAndAmbienceSheet extends ConsumerWidget {
                     data: SliderTheme.of(context).copyWith(
                       trackHeight: 3,
                       thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
-                      activeTrackColor: const Color(0xFFD4AF37),
+                      activeTrackColor: BeyanColors.tone(0xFFD4AF37),
                       inactiveTrackColor: Colors.white24,
-                      thumbColor: const Color(0xFFFFDF7A),
+                      thumbColor: BeyanColors.tone(0xFFFFDF7A),
                     ),
                     child: Slider(
                       value: audioState.ambienceVolume,
@@ -187,6 +200,95 @@ class SleepAndAmbienceSheet extends ConsumerWidget {
               ],
             ),
           ],
+
+          const SizedBox(height: 16),
+
+          // ── 1.5 Uyku Öncesi Huzur Sûreleri (İnternetten Canlı Tilavet) ──
+          Text(
+            strings.language == AppLanguage.turkish
+                ? 'Uyku Öncesi Huzur Tilaveti (Tek Dokunuşla Dinle)'
+                : 'Bedtime Peaceful Recitation (One-Tap Stream)',
+            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
+          ),
+          const SizedBox(height: 10),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            child: Row(
+              children: [
+                for (final item in const [
+                  (id: 67, name: 'Mülk Sûresi', sub: 'Kabir & Gece Koruyucusu'),
+                  (id: 36, name: 'Yâsîn Sûresi', sub: 'Kur\'an\'ın Kalbi'),
+                  (id: 55, name: 'Rahmân Sûresi', sub: 'İlahi Huzur & Şifa'),
+                  (id: 56, name: 'Vâkıa Sûresi', sub: 'Bereket & Sekînet'),
+                ])
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(14),
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        audioNotifier.playSurah(item.id, item.name);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                        decoration: BoxDecoration(
+                          color: audioState.currentSurahId == item.id && audioState.isPlaying
+                              ? BeyanColors.tone(0xFFD4AF37)
+                              : Colors.white.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: audioState.currentSurahId == item.id && audioState.isPlaying
+                                ? BeyanColors.tone(0xFFFFDF7A)
+                                : BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              audioState.currentSurahId == item.id && audioState.isPlaying
+                                  ? Icons.pause_circle_filled_rounded
+                                  : Icons.play_circle_fill_rounded,
+                              size: 20,
+                              color: audioState.currentSurahId == item.id && audioState.isPlaying
+                                  ? BeyanColors.tone(0xFF012E2B)
+                                  : BeyanColors.tone(0xFFFFDF7A),
+                            ),
+                            const SizedBox(width: 8),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  item.name,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: audioState.currentSurahId == item.id && audioState.isPlaying
+                                        ? BeyanColors.tone(0xFF012E2B)
+                                        : Colors.white,
+                                  ),
+                                ),
+                                Text(
+                                  item.sub,
+                                  style: TextStyle(
+                                    fontSize: 9.5,
+                                    color: audioState.currentSurahId == item.id && audioState.isPlaying
+                                        ? BeyanColors.tone(0xFF012E2B).withValues(alpha: 0.8)
+                                        : Colors.white60,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
 
           const SizedBox(height: 18),
           Divider(color: Colors.white.withValues(alpha: 0.15), thickness: 0.8),
@@ -204,14 +306,14 @@ class SleepAndAmbienceSheet extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
+                    color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFFFDF7A), width: 1),
+                    border: Border.all(color: BeyanColors.tone(0xFFFFDF7A), width: 1),
                   ),
                   child: Text(
                     '⏳ ${_formatSeconds(audioState.sleepTimerSecondsRemaining!)}',
-                    style: const TextStyle(
-                      color: Color(0xFFFFDF7A),
+                    style: TextStyle(
+                      color: BeyanColors.tone(0xFFFFDF7A),
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                     ),
@@ -233,14 +335,14 @@ class SleepAndAmbienceSheet extends ConsumerWidget {
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         backgroundColor: audioState.sleepTimerMinutes == mins
-                            ? const Color(0xFFD4AF37)
+                            ? BeyanColors.tone(0xFFD4AF37)
                             : Colors.transparent,
                         foregroundColor: audioState.sleepTimerMinutes == mins
-                            ? const Color(0xFF012E2B)
+                            ? BeyanColors.tone(0xFF012E2B)
                             : Colors.white,
                         side: BorderSide(
                           color: audioState.sleepTimerMinutes == mins
-                              ? const Color(0xFFFFDF7A)
+                              ? BeyanColors.tone(0xFFFFDF7A)
                               : Colors.white24,
                         ),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -318,10 +420,10 @@ class _AmbienceChip extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFFD4AF37) : Colors.white10,
+            color: isSelected ? BeyanColors.tone(0xFFD4AF37) : Colors.white10,
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: isSelected ? const Color(0xFFFFDF7A) : Colors.white24,
+              color: isSelected ? BeyanColors.tone(0xFFFFDF7A) : Colors.white24,
               width: 1,
             ),
           ),
@@ -331,7 +433,7 @@ class _AmbienceChip extends StatelessWidget {
               Icon(
                 icon,
                 size: 18,
-                color: isSelected ? const Color(0xFF012E2B) : Colors.white70,
+                color: isSelected ? BeyanColors.tone(0xFF012E2B) : Colors.white70,
               ),
               const SizedBox(height: 4),
               Text(
@@ -339,7 +441,7 @@ class _AmbienceChip extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                  color: isSelected ? const Color(0xFF012E2B) : Colors.white,
+                  color: isSelected ? BeyanColors.tone(0xFF012E2B) : Colors.white,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,

@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -84,13 +85,13 @@ class PrayerGuideSheet extends ConsumerWidget {
       constraints: BoxConstraints(
         maxHeight: MediaQuery.of(context).size.height * 0.88,
       ),
-      decoration: const BoxDecoration(
-        color: Color(0xFF02211C),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      decoration: BoxDecoration(
+        color: BeyanColors.tone(0xFF02211C),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         border: Border(
-          top: BorderSide(color: Color(0xFFD4AF37), width: 1.8),
+          top: BorderSide(color: BeyanColors.tone(0xFFD4AF37), width: 1.8),
         ),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             color: Colors.black54,
             blurRadius: 20,
@@ -109,7 +110,7 @@ class PrayerGuideSheet extends ConsumerWidget {
               width: 48,
               height: 4.5,
               decoration: BoxDecoration(
-                color: const Color(0xFFD4AF37).withValues(alpha: 0.45),
+                color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.45),
                 borderRadius: BorderRadius.circular(3),
               ),
             ),
@@ -125,20 +126,20 @@ class PrayerGuideSheet extends ConsumerWidget {
                     height: 44,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF004D40), Color(0xFF00241E)],
+                      gradient: LinearGradient(
+                        colors: [BeyanColors.tone(0xFF004D40), BeyanColors.tone(0xFF00241E)],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
                       border: Border.all(
-                        color: const Color(0xFFFFDF7A).withValues(alpha: 0.6),
+                        color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.6),
                         width: 1.2,
                       ),
                     ),
                     child: Center(
                       child: Icon(
                         _prayerIcon(prayerName),
-                        color: const Color(0xFFFFDF7A),
+                        color: BeyanColors.tone(0xFFFFDF7A),
                         size: 22,
                       ),
                     ),
@@ -164,7 +165,7 @@ class PrayerGuideSheet extends ConsumerWidget {
                               prayerName.arabic,
                               style: TextStyle(
                                 fontFamily: 'Amiri',
-                                color: const Color(0xFFFFDF7A).withValues(alpha: 0.8),
+                                color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.8),
                                 fontSize: 16,
                               ),
                             ),
@@ -174,7 +175,7 @@ class PrayerGuideSheet extends ConsumerWidget {
                         Text(
                           _headerSubtitle(prayerName, lang),
                           style: TextStyle(
-                            color: const Color(0xFFFFDF7A).withValues(alpha: 0.9),
+                            color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.9),
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                           ),
@@ -281,13 +282,13 @@ class PrayerGuideSheet extends ConsumerWidget {
   }) {
     return Row(
       children: [
-        Icon(icon, size: 17, color: const Color(0xFFFFDF7A)),
+        Icon(icon, size: 17, color: BeyanColors.tone(0xFFFFDF7A)),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
             title,
-            style: const TextStyle(
-              color: Color(0xFFFFDF7A),
+            style: TextStyle(
+              color: BeyanColors.tone(0xFFFFDF7A),
               fontSize: 14.5,
               fontWeight: FontWeight.bold,
               letterSpacing: 0.2,
@@ -298,17 +299,17 @@ class PrayerGuideSheet extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
             decoration: BoxDecoration(
-              color: const Color(0xFFD4AF37).withValues(alpha: 0.18),
+              color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.18),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: const Color(0xFFFFDF7A).withValues(alpha: 0.4),
+                color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.4),
                 width: 0.8,
               ),
             ),
             child: Text(
               badge,
-              style: const TextStyle(
-                color: Color(0xFFFFDF7A),
+              style: TextStyle(
+                color: BeyanColors.tone(0xFFFFDF7A),
                 fontSize: 10.5,
                 fontWeight: FontWeight.w600,
               ),
@@ -356,17 +357,17 @@ class PrayerGuideSheet extends ConsumerWidget {
           margin: const EdgeInsets.only(top: 1),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: const Color(0xFFD4AF37).withValues(alpha: 0.18),
+            color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.18),
             border: Border.all(
-              color: const Color(0xFFFFDF7A).withValues(alpha: 0.6),
+              color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.6),
               width: 1,
             ),
           ),
           child: Center(
             child: Text(
               '$index',
-              style: const TextStyle(
-                color: Color(0xFFFFDF7A),
+              style: TextStyle(
+                color: BeyanColors.tone(0xFFFFDF7A),
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
               ),
@@ -402,7 +403,7 @@ class PrayerGuideSheet extends ConsumerWidget {
     );
 
     final decoration = BoxDecoration(
-      color: const Color(0xFF042F28),
+      color: BeyanColors.tone(0xFF042F28),
       borderRadius: BorderRadius.circular(12),
       border: Border.all(color: Colors.white.withValues(alpha: 0.08), width: 1),
     );
@@ -433,8 +434,8 @@ class PrayerGuideSheet extends ConsumerWidget {
         child: ExpansionTile(
           tilePadding: const EdgeInsets.fromLTRB(12, 4, 8, 4),
           childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-          iconColor: const Color(0xFFFFDF7A),
-          collapsedIconColor: const Color(0xFFFFDF7A).withValues(alpha: 0.7),
+          iconColor: BeyanColors.tone(0xFFFFDF7A),
+          collapsedIconColor: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.7),
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -444,7 +445,7 @@ class PrayerGuideSheet extends ConsumerWidget {
                 child: Text(
                   readLabel,
                   style: TextStyle(
-                    color: const Color(0xFFFFDF7A).withValues(alpha: 0.75),
+                    color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.75),
                     fontSize: 10.5,
                     fontWeight: FontWeight.w600,
                   ),
@@ -458,10 +459,10 @@ class PrayerGuideSheet extends ConsumerWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF021A16),
+                  color: BeyanColors.tone(0xFF021A16),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                    color: const Color(0xFFD4AF37).withValues(alpha: 0.35),
+                    color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35),
                     width: 0.8,
                   ),
                 ),
@@ -469,9 +470,9 @@ class PrayerGuideSheet extends ConsumerWidget {
                   step.arabic!,
                   textAlign: TextAlign.center,
                   textDirection: TextDirection.rtl,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Amiri',
-                    color: Color(0xFFFFDF7A),
+                    color: BeyanColors.tone(0xFFFFDF7A),
                     fontSize: 19,
                     height: 1.9,
                   ),
@@ -506,13 +507,13 @@ class PrayerGuideSheet extends ConsumerWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFD4AF37).withValues(alpha: 0.1),
+                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.info_outline_rounded, size: 14, color: Color(0xFFFFDF7A)),
+                    Icon(Icons.info_outline_rounded, size: 14, color: BeyanColors.tone(0xFFFFDF7A)),
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(
@@ -542,8 +543,8 @@ class PrayerGuideSheet extends ConsumerWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(
-              color: Color(0xFFFFDF7A),
+            style: TextStyle(
+              color: BeyanColors.tone(0xFFFFDF7A),
               fontSize: 11,
               fontWeight: FontWeight.bold,
               letterSpacing: 0.3,
@@ -569,7 +570,7 @@ class PrayerGuideSheet extends ConsumerWidget {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: const Color(0xFF042F28),
+        color: BeyanColors.tone(0xFF042F28),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: Colors.white.withValues(alpha: 0.08),
@@ -584,11 +585,11 @@ class PrayerGuideSheet extends ConsumerWidget {
             padding: const EdgeInsets.all(5),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+              color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.15),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.check_rounded,
-              color: Color(0xFFFFDF7A),
+              color: BeyanColors.tone(0xFFFFDF7A),
               size: 13,
             ),
           ),
@@ -616,8 +617,8 @@ class PrayerGuideSheet extends ConsumerWidget {
                       ),
                       child: Text(
                         step.type,
-                        style: const TextStyle(
-                          color: Color(0xFFFFDF7A),
+                        style: TextStyle(
+                          color: BeyanColors.tone(0xFFFFDF7A),
                           fontSize: 10,
                           fontWeight: FontWeight.w500,
                         ),
@@ -653,11 +654,11 @@ class PrayerGuideSheet extends ConsumerWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: isFeatured ? const Color(0xFF053E34) : const Color(0xFF042F28),
+        color: isFeatured ? BeyanColors.tone(0xFF053E34) : BeyanColors.tone(0xFF042F28),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: isFeatured
-              ? const Color(0xFFFFDF7A).withValues(alpha: 0.45)
+              ? BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.45)
               : Colors.white.withValues(alpha: 0.08),
           width: isFeatured ? 1.2 : 1,
         ),
@@ -678,18 +679,18 @@ class PrayerGuideSheet extends ConsumerWidget {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: isFeatured
-                        ? const Color(0xFFD4AF37).withValues(alpha: 0.25)
+                        ? BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.25)
                         : Colors.white.withValues(alpha: 0.07),
                     border: Border.all(
-                      color: const Color(0xFFD4AF37).withValues(alpha: isFeatured ? 0.8 : 0.3),
+                      color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: isFeatured ? 0.8 : 0.3),
                       width: 1,
                     ),
                   ),
                   child: Center(
                     child: Text(
                       '${item.surahId}',
-                      style: const TextStyle(
-                        color: Color(0xFFFFDF7A),
+                      style: TextStyle(
+                        color: BeyanColors.tone(0xFFFFDF7A),
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
                       ),
@@ -723,7 +724,7 @@ class PrayerGuideSheet extends ConsumerWidget {
                             style: TextStyle(
                               fontFamily: 'Amiri',
                               fontSize: 14,
-                              color: const Color(0xFFFFDF7A).withValues(alpha: 0.85),
+                              color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.85),
                             ),
                           ),
                         ],
@@ -733,7 +734,7 @@ class PrayerGuideSheet extends ConsumerWidget {
                         item.note,
                         style: TextStyle(
                           color: isFeatured
-                              ? const Color(0xFFFFDF7A).withValues(alpha: 0.88)
+                              ? BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.88)
                               : Colors.white.withValues(alpha: 0.68),
                           fontSize: 11,
                           height: 1.3,
@@ -750,25 +751,25 @@ class PrayerGuideSheet extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+                    color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: const Color(0xFFFFDF7A).withValues(alpha: 0.3),
+                      color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.3),
                       width: 0.8,
                     ),
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
                         Icons.auto_stories_rounded,
-                        color: Color(0xFFFFDF7A),
+                        color: BeyanColors.tone(0xFFFFDF7A),
                         size: 13,
                       ),
-                      SizedBox(width: 4),
+                      const SizedBox(width: 4),
                       Icon(
                         Icons.chevron_right_rounded,
-                        color: Color(0xFFFFDF7A),
+                        color: BeyanColors.tone(0xFFFFDF7A),
                         size: 15,
                       ),
                     ],

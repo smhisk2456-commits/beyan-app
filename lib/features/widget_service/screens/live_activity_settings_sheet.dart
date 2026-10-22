@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -174,10 +175,10 @@ class LiveActivitySettingsSheet extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 36),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF04241E) : Colors.white,
+        color: isDark ? BeyanColors.tone(0xFF04241E) : Colors.white,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         border: Border.all(
-          color: const Color(0xFFD4AF37).withValues(alpha: 0.35),
+          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35),
           width: 1.2,
         ),
       ),
@@ -205,19 +206,19 @@ class LiveActivitySettingsSheet extends ConsumerWidget {
                 width: 42,
                 height: 42,
                 decoration: BoxDecoration(
-                  gradient: const RadialGradient(
-                    colors: [Color(0xFFFFDF7A), Color(0xFFB8860B)],
+                  gradient: RadialGradient(
+                    colors: [BeyanColors.tone(0xFFFFDF7A), BeyanColors.tone(0xFFB8860B)],
                   ),
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFFFFDF7A).withValues(alpha: 0.3),
+                      color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.3),
                       blurRadius: 8,
                     ),
                   ],
                 ),
-                child: const Center(
-                  child: Icon(Icons.apple_rounded, color: Color(0xFF01201B), size: 24),
+                child: Center(
+                  child: Icon(Icons.apple_rounded, color: BeyanColors.tone(0xFF01201B), size: 24),
                 ),
               ),
               const SizedBox(width: 12),
@@ -256,12 +257,12 @@ class LiveActivitySettingsSheet extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF083228) : const Color(0xFFF1F8F5),
+              color: isDark ? BeyanColors.tone(0xFF083228) : BeyanColors.tone(0xFFF1F8F5),
               borderRadius: BorderRadius.circular(18),
               border: Border.all(
                 color: isEnabled
-                    ? const Color(0xFFFFDF7A)
-                    : (isDark ? const Color(0xFF133B32) : const Color(0xFFE2EBE8)),
+                    ? BeyanColors.tone(0xFFFFDF7A)
+                    : (isDark ? BeyanColors.tone(0xFF133B32) : BeyanColors.tone(0xFFE2EBE8)),
                 width: 1.4,
               ),
             ),
@@ -269,7 +270,7 @@ class LiveActivitySettingsSheet extends ConsumerWidget {
               children: [
                 Icon(
                   isEnabled ? Icons.power_settings_new_rounded : Icons.power_off_rounded,
-                  color: isEnabled ? const Color(0xFFFFDF7A) : Colors.white38,
+                  color: isEnabled ? BeyanColors.tone(0xFFFFDF7A) : Colors.white38,
                   size: 24,
                 ),
                 const SizedBox(width: 12),
@@ -297,7 +298,7 @@ class LiveActivitySettingsSheet extends ConsumerWidget {
                         style: TextStyle(
                           fontSize: 11.5,
                           color: isEnabled
-                              ? (isDark ? const Color(0xFF80CBC4) : const Color(0xFF0F5A47))
+                              ? (isDark ? BeyanColors.tone(0xFF80CBC4) : BeyanColors.tone(0xFF0F5A47))
                               : Colors.white38,
                         ),
                       ),
@@ -306,8 +307,8 @@ class LiveActivitySettingsSheet extends ConsumerWidget {
                 ),
                 Switch.adaptive(
                   value: isEnabled,
-                  activeThumbColor: const Color(0xFFFFDF7A),
-                  activeTrackColor: const Color(0xFF0F5A47),
+                  activeThumbColor: BeyanColors.tone(0xFFFFDF7A),
+                  activeTrackColor: BeyanColors.tone(0xFF0F5A47),
                   onChanged: (val) {
                     HapticFeedback.lightImpact();
                     ref.read(liveActivityEnabledProvider.notifier).setEnabled(val);
@@ -322,7 +323,7 @@ class LiveActivitySettingsSheet extends ConsumerWidget {
                                   ? 'Canlı Etkinlikler kapatıldı.'
                                   : 'Live Activities disabled.'),
                         ),
-                        backgroundColor: const Color(0xFF033E35),
+                        backgroundColor: BeyanColors.tone(0xFF033E35),
                         duration: const Duration(seconds: 2),
                       ),
                     );
@@ -349,13 +350,13 @@ class LiveActivitySettingsSheet extends ConsumerWidget {
                     margin: const EdgeInsets.only(bottom: 8),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? (isDark ? const Color(0xFF0C3D32) : const Color(0xFFF1F8F5))
-                          : (isDark ? const Color(0xFF062C24) : Colors.white),
+                          ? (isDark ? BeyanColors.tone(0xFF0C3D32) : BeyanColors.tone(0xFFF1F8F5))
+                          : (isDark ? BeyanColors.tone(0xFF062C24) : Colors.white),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
                         color: isSelected
-                            ? (isDisableOption ? const Color(0xFFFF6B6B) : const Color(0xFFFFDF7A))
-                            : (isDark ? const Color(0xFF0D3830) : const Color(0xFFE2EBE8)),
+                            ? (isDisableOption ? const Color(0xFFFF6B6B) : BeyanColors.tone(0xFFFFDF7A))
+                            : (isDark ? BeyanColors.tone(0xFF0D3830) : BeyanColors.tone(0xFFE2EBE8)),
                         width: isSelected ? 1.8 : 1,
                       ),
                     ),
@@ -364,7 +365,7 @@ class LiveActivitySettingsSheet extends ConsumerWidget {
                       leading: Icon(
                         opt.icon,
                         color: isSelected
-                            ? (isDisableOption ? const Color(0xFFFF6B6B) : const Color(0xFFFFDF7A))
+                            ? (isDisableOption ? const Color(0xFFFF6B6B) : BeyanColors.tone(0xFFFFDF7A))
                             : Colors.white54,
                         size: 24,
                       ),
@@ -376,7 +377,7 @@ class LiveActivitySettingsSheet extends ConsumerWidget {
                           color: isSelected
                               ? (isDisableOption
                                   ? const Color(0xFFFF6B6B)
-                                  : (isDark ? const Color(0xFFFFDF7A) : AppColors.teal))
+                                  : (isDark ? BeyanColors.tone(0xFFFFDF7A) : AppColors.teal))
                               : (isDark ? Colors.white : Colors.black87),
                         ),
                       ),
@@ -390,7 +391,7 @@ class LiveActivitySettingsSheet extends ConsumerWidget {
                       trailing: isSelected
                           ? Icon(
                               Icons.check_circle_rounded,
-                              color: isDisableOption ? const Color(0xFFFF6B6B) : const Color(0xFFFFDF7A),
+                              color: isDisableOption ? const Color(0xFFFF6B6B) : BeyanColors.tone(0xFFFFDF7A),
                               size: 20,
                             )
                           : const Icon(Icons.radio_button_off_rounded, color: Colors.white24, size: 20),

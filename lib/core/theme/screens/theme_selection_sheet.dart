@@ -32,222 +32,230 @@ class ThemeSelectionSheet extends ConsumerWidget {
     final titleColor = isDark ? Colors.white : AppColors.textPrimary;
     final subtitleColor = isDark ? Colors.white70 : AppColors.textSecondary;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: sheetBg,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.35),
-            blurRadius: 30,
-            offset: const Offset(0, -10),
-          ),
-        ],
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.86,
       ),
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Çekme çubuğu
-          Center(
-            child: Container(
-              width: 44,
-              height: 5,
-              decoration: BoxDecoration(
-                color: isDark ? Colors.white24 : Colors.black12,
-                borderRadius: BorderRadius.circular(2.5),
-              ),
+      child: Container(
+        decoration: BoxDecoration(
+          color: sheetBg,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.35),
+              blurRadius: 30,
+              offset: const Offset(0, -10),
             ),
-          ),
-          const SizedBox(height: 18),
-
-          // Başlık
-          Row(
+          ],
+        ),
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: themeState.palette.accentGold.withValues(alpha: 0.18),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.palette_outlined,
-                  color: themeState.palette.accentGold,
-                  size: 22,
+              // Çekme çubuğu
+              Center(
+                child: Container(
+                  width: 44,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: isDark ? Colors.white24 : Colors.black12,
+                    borderRadius: BorderRadius.circular(2.5),
+                  ),
                 ),
               ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              const SizedBox(height: 18),
+
+              // Başlık
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: themeState.palette.accentGold.withValues(alpha: 0.18),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.palette_outlined,
+                      color: themeState.palette.accentGold,
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          strings.appearanceAndTheme,
+                          style: TextStyle(
+                            fontFamily: 'Amiri',
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: titleColor,
+                          ),
+                        ),
+                        Text(
+                          strings.appearanceDesc,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: subtitleColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              // Bölüm 1: Karanlık Mod Seçici
+              Text(
+                strings.appearanceModeSection,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.2,
+                  color: themeState.palette.accentGold,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  _buildModeOption(
+                    context: context,
+                    title: strings.modeLight,
+                    icon: Icons.wb_sunny_rounded,
+                    selected: themeState.mode == ThemeMode.light,
+                    onTap: () => themeNotifier.setThemeMode(ThemeMode.light),
+                    isDark: isDark,
+                    accentColor: themeState.palette.accentGold,
+                  ),
+                  const SizedBox(width: 8),
+                  _buildModeOption(
+                    context: context,
+                    title: strings.modeDark,
+                    icon: Icons.nightlight_round,
+                    selected: themeState.mode == ThemeMode.dark,
+                    onTap: () => themeNotifier.setThemeMode(ThemeMode.dark),
+                    isDark: isDark,
+                    accentColor: themeState.palette.accentGold,
+                  ),
+                  const SizedBox(width: 8),
+                  _buildModeOption(
+                    context: context,
+                    title: strings.modeSystem,
+                    icon: Icons.settings_suggest_rounded,
+                    selected: themeState.mode == ThemeMode.system,
+                    onTap: () => themeNotifier.setThemeMode(ThemeMode.system),
+                    isDark: isDark,
+                    accentColor: themeState.palette.accentGold,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 22),
+
+              // Bölüm 2: Lüks Renk Paletleri
+              Text(
+                strings.colorPaletteSection,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.2,
+                  color: themeState.palette.accentGold,
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              ...AppThemePalette.values.map((palette) {
+                final isSelected = themeState.palette == palette;
+                return _buildPaletteTile(
+                  context: context,
+                  palette: palette,
+                  isSelected: isSelected,
+                  isLocked: false,
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    themeNotifier.setPalette(palette);
+                  },
+                  isDark: isDark,
+                  langCode: strings.language.code,
+                );
+              }),
+
+              const SizedBox(height: 10),
+
+              // Bölüm 3: Vakte Göre Canlı Tema (Tüm Ekran)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.white.withValues(alpha: 0.04) : Colors.black.withValues(alpha: 0.03),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: themeState.isDynamicPrayerTheme
+                        ? themeState.palette.accentGold.withValues(alpha: 0.6)
+                        : (isDark ? Colors.white10 : Colors.black12),
+                  ),
+                ),
+                child: Row(
                   children: [
-                    Text(
-                      strings.appearanceAndTheme,
-                      style: TextStyle(
-                        fontFamily: 'Amiri',
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: titleColor,
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: themeState.palette.accentGold.withValues(alpha: 0.18),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.auto_awesome_rounded,
+                        color: themeState.palette.accentGold,
+                        size: 19,
                       ),
                     ),
-                    Text(
-                      strings.appearanceDesc,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: subtitleColor,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            strings.language == AppLanguage.turkish
+                                ? 'Vakte Göre Canlı Tema (Tüm Ekran)'
+                                : 'Dynamic Prayer Theme (Full Screen)',
+                            style: TextStyle(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.bold,
+                              color: titleColor,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            strings.language == AppLanguage.turkish
+                                ? 'Namaz vaktine göre ana ekranın tümünü (arka plan ve kartları) tek bir bütün olarak uyarlar.'
+                                : 'Dynamically adapts the entire home screen as a single unified atmosphere based on prayer time.',
+                            style: TextStyle(
+                              fontSize: 10.5,
+                              color: subtitleColor,
+                            ),
+                          ),
+                        ],
                       ),
+                    ),
+                    Switch(
+                      value: themeState.isDynamicPrayerTheme,
+                      activeThumbColor: themeState.palette.accentGold,
+                      activeTrackColor: themeState.palette.accentGold.withValues(alpha: 0.35),
+                      onChanged: (val) {
+                        HapticFeedback.selectionClick();
+                        themeNotifier.setDynamicPrayerTheme(val);
+                      },
                     ),
                   ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 24),
-
-          // Bölüm 1: Karanlık Mod Seçici
-          Text(
-            strings.appearanceModeSection,
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1.2,
-              color: themeState.palette.accentGold,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              _buildModeOption(
-                context: context,
-                title: strings.modeLight,
-                icon: Icons.wb_sunny_rounded,
-                selected: themeState.mode == ThemeMode.light,
-                onTap: () => themeNotifier.setThemeMode(ThemeMode.light),
-                isDark: isDark,
-                accentColor: themeState.palette.accentGold,
-              ),
-              const SizedBox(width: 8),
-              _buildModeOption(
-                context: context,
-                title: strings.modeDark,
-                icon: Icons.nightlight_round,
-                selected: themeState.mode == ThemeMode.dark,
-                onTap: () => themeNotifier.setThemeMode(ThemeMode.dark),
-                isDark: isDark,
-                accentColor: themeState.palette.accentGold,
-              ),
-              const SizedBox(width: 8),
-              _buildModeOption(
-                context: context,
-                title: strings.modeSystem,
-                icon: Icons.settings_suggest_rounded,
-                selected: themeState.mode == ThemeMode.system,
-                onTap: () => themeNotifier.setThemeMode(ThemeMode.system),
-                isDark: isDark,
-                accentColor: themeState.palette.accentGold,
-              ),
-            ],
-          ),
-          const SizedBox(height: 26),
-
-          // Bölüm 2: Lüks Renk Paletleri
-          Text(
-            strings.colorPaletteSection,
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1.2,
-              color: themeState.palette.accentGold,
-            ),
-          ),
-          const SizedBox(height: 12),
-
-          ...AppThemePalette.values.map((palette) {
-            final isSelected = themeState.palette == palette;
-            return _buildPaletteTile(
-              context: context,
-              palette: palette,
-              isSelected: isSelected,
-              isLocked: false,
-              onTap: () {
-                HapticFeedback.selectionClick();
-                themeNotifier.setPalette(palette);
-              },
-              isDark: isDark,
-              langCode: strings.language.code,
-            );
-          }),
-
-          const SizedBox(height: 14),
-
-          // Bölüm 3: Vakte Göre Canlı Tema (Tüm Ekran)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: BoxDecoration(
-              color: isDark ? Colors.white.withValues(alpha: 0.04) : Colors.black.withValues(alpha: 0.03),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: themeState.isDynamicPrayerTheme
-                    ? themeState.palette.accentGold.withValues(alpha: 0.6)
-                    : (isDark ? Colors.white10 : Colors.black12),
-              ),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: themeState.palette.accentGold.withValues(alpha: 0.18),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.auto_awesome_rounded,
-                    color: themeState.palette.accentGold,
-                    size: 19,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        strings.language == AppLanguage.turkish
-                            ? 'Vakte Göre Canlı Tema (Tüm Ekran)'
-                            : 'Dynamic Prayer Theme (Full Screen)',
-                        style: TextStyle(
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.bold,
-                          color: titleColor,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        strings.language == AppLanguage.turkish
-                            ? 'Namaz vaktine göre ana ekranın tümünü (arka plan ve kartları) tek bir bütün olarak uyarlar.'
-                            : 'Dynamically adapts the entire home screen as a single unified atmosphere based on prayer time.',
-                        style: TextStyle(
-                          fontSize: 10.5,
-                          color: subtitleColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Switch(
-                  value: themeState.isDynamicPrayerTheme,
-                  activeThumbColor: themeState.palette.accentGold,
-                  activeTrackColor: themeState.palette.accentGold.withValues(alpha: 0.35),
-                  onChanged: (val) {
-                    HapticFeedback.selectionClick();
-                    themeNotifier.setDynamicPrayerTheme(val);
-                  },
-                ),
-              ],
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -339,25 +347,40 @@ class ThemeSelectionSheet extends ConsumerWidget {
           ),
           child: Row(
             children: [
-              // Önizleme Renk Halkası
+              // Önizleme Renk Halkası (Üçlü Lüks Degrade + Altın Mühür)
               Stack(
                 alignment: Alignment.center,
                 children: [
                   Container(
-                    width: 38,
-                    height: 38,
+                    width: 42,
+                    height: 42,
                     decoration: BoxDecoration(
-                      color: palette.darkBackground,
+                      gradient: LinearGradient(
+                        colors: palette.previewGradient,
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
                       shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white24, width: 1.5),
+                      border: Border.all(
+                        color: palette.accentGold.withValues(alpha: 0.75),
+                        width: 1.6,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: palette.primaryColor.withValues(alpha: 0.35),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
                   ),
                   Container(
-                    width: 18,
-                    height: 18,
+                    width: 16,
+                    height: 16,
                     decoration: BoxDecoration(
                       color: palette.accentGold,
                       shape: BoxShape.circle,
+                      border: Border.all(color: palette.darkBackground, width: 2),
                     ),
                   ),
                 ],

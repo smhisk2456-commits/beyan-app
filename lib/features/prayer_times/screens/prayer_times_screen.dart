@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/localization/app_strings.dart';
@@ -28,7 +29,7 @@ class PrayerTimesScreen extends ConsumerWidget {
         actions: [
           // Şehir / Konum Seçici Buton
           IconButton(
-            icon: const Icon(Icons.location_on_rounded, color: Color(0xFFFFDF7A)),
+            icon: Icon(Icons.location_on_rounded, color: BeyanColors.tone(0xFFFFDF7A)),
             tooltip: strings.changeCity,
             onPressed: () => CitySelectorSheet.show(context, ref),
           ),
@@ -121,7 +122,7 @@ class _LocationDateCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            const Icon(Icons.location_on_rounded, color: AppColors.teal, size: 20),
+            Icon(Icons.location_on_rounded, color: AppColors.teal, size: 20),
             const SizedBox(width: 8),
             Expanded(
               child: Column(
@@ -189,7 +190,7 @@ class _NextPrayerBanner extends ConsumerWidget {
 
     return Container(
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           colors: [AppColors.tealDark, AppColors.primary],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -217,8 +218,8 @@ class _NextPrayerBanner extends ConsumerWidget {
                   Container(
                     width: 7,
                     height: 7,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFFFDF7A),
+                    decoration: BoxDecoration(
+                      color: BeyanColors.tone(0xFFFFDF7A),
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -237,17 +238,17 @@ class _NextPrayerBanner extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFD4AF37).withValues(alpha: 0.25),
+                    color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.25),
                     borderRadius: BorderRadius.circular(6),
                     border: Border.all(
-                      color: const Color(0xFFFFDF7A).withValues(alpha: 0.4),
+                      color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.4),
                       width: 1,
                     ),
                   ),
                   child: Text(
                     strings.rakatsCount(next.name.rakatTotal),
-                    style: const TextStyle(
-                      color: Color(0xFFFFDF7A),
+                    style: TextStyle(
+                      color: BeyanColors.tone(0xFFFFDF7A),
                       fontSize: 10.5,
                       fontWeight: FontWeight.bold,
                     ),
@@ -316,11 +317,11 @@ class _NextPrayerBanner extends ConsumerWidget {
                             ),
                             child: Text(
                               '⏱ $str ${s.remainingTime}',
-                              style: const TextStyle(
-                                color: Color(0xFFFFDF7A),
+                              style: TextStyle(
+                                color: BeyanColors.tone(0xFFFFDF7A),
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
-                                fontFeatures: [FontFeature.tabularFigures()],
+                                fontFeatures: const [FontFeature.tabularFigures()],
                               ),
                             ),
                           ),
@@ -342,27 +343,27 @@ class _NextPrayerBanner extends ConsumerWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFD4AF37).withValues(alpha: 0.18),
+                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.18),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                    color: const Color(0xFFFFDF7A).withValues(alpha: 0.4),
+                    color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.4),
                     width: 1,
                   ),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.mosque_rounded,
                       size: 13,
-                      color: Color(0xFFFFDF7A),
+                      color: BeyanColors.tone(0xFFFFDF7A),
                     ),
                     const SizedBox(width: 6),
                     Flexible(
                       child: Text(
                         next.name.localizedRakat(strings.language.code),
-                        style: const TextStyle(
-                          color: Color(0xFFFFDF7A),
+                        style: TextStyle(
+                          color: BeyanColors.tone(0xFFFFDF7A),
                           fontSize: 11.5,
                           fontWeight: FontWeight.w600,
                         ),
@@ -371,10 +372,10 @@ class _NextPrayerBanner extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(width: 5),
-                    const Icon(
+                    Icon(
                       Icons.info_outline_rounded,
                       size: 12,
-                      color: Color(0xFFFFDF7A),
+                      color: BeyanColors.tone(0xFFFFDF7A),
                     ),
                   ],
                 ),
@@ -418,13 +419,13 @@ class _NextPrayerBanner extends ConsumerWidget {
                                 child: Container(
                                   height: 7,
                                   decoration: BoxDecoration(
-                                    gradient: const LinearGradient(
-                                      colors: [Color(0xFFD4AF37), Color(0xFFFFDF7A), Color(0xFFFFF3B0)],
+                                    gradient: LinearGradient(
+                                      colors: [BeyanColors.tone(0xFFD4AF37), BeyanColors.tone(0xFFFFDF7A), const Color(0xFFFFF3B0)],
                                     ),
                                     borderRadius: BorderRadius.circular(4),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: const Color(0xFFFFDF7A).withValues(alpha: 0.45),
+                                        color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.45),
                                         blurRadius: 6,
                                         spreadRadius: 1,
                                       ),
@@ -446,9 +447,9 @@ class _NextPrayerBanner extends ConsumerWidget {
                               Container(
                                 width: 6,
                                 height: 6,
-                                decoration: const BoxDecoration(
+                                decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: Color(0xFFD4AF37),
+                                  color: BeyanColors.tone(0xFFD4AF37),
                                 ),
                               ),
                               const SizedBox(width: 5),
@@ -461,17 +462,17 @@ class _NextPrayerBanner extends ConsumerWidget {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
+                              color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(6),
                               border: Border.all(
-                                color: const Color(0xFFFFDF7A).withValues(alpha: 0.35),
+                                color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.35),
                                 width: 0.8,
                               ),
                             ),
                             child: Text(
                               '%$percent',
-                              style: const TextStyle(
-                                color: Color(0xFFFFDF7A),
+                              style: TextStyle(
+                                color: BeyanColors.tone(0xFFFFDF7A),
                                 fontSize: 10.5,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -482,7 +483,7 @@ class _NextPrayerBanner extends ConsumerWidget {
                             children: [
                               Text(
                                 next?.name.localizedName(strings.language.code) ?? '',
-                                style: const TextStyle(color: Color(0xFFFFDF7A), fontSize: 11.5, fontWeight: FontWeight.w600),
+                                style: TextStyle(color: BeyanColors.tone(0xFFFFDF7A), fontSize: 11.5, fontWeight: FontWeight.w600),
                               ),
                               const SizedBox(width: 5),
                               Container(
@@ -490,7 +491,7 @@ class _NextPrayerBanner extends ConsumerWidget {
                                 height: 6,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: const Color(0xFFFFDF7A).withValues(alpha: 0.5),
+                                  color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.5),
                                 ),
                               ),
                             ],
@@ -622,7 +623,7 @@ class _PrayerTimeCard extends ConsumerWidget {
                               ),
                               child: Text(
                                 strings.currentPrayer,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 10,
                                   color: AppColors.gold,
                                   fontWeight: FontWeight.bold,
@@ -638,7 +639,7 @@ class _PrayerTimeCard extends ConsumerWidget {
                               ),
                               child: Text(
                                 strings.nextPrayer,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 10,
                                   color: AppColors.teal,
                                   fontWeight: FontWeight.bold,
@@ -651,10 +652,10 @@ class _PrayerTimeCard extends ConsumerWidget {
                       // Rekat Bilgisi & Rehber İpucu
                       Row(
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.mosque_rounded,
                             size: 12,
-                            color: Color(0xFFD4AF37),
+                            color: BeyanColors.tone(0xFFD4AF37),
                           ),
                           const SizedBox(width: 4),
                           Expanded(
@@ -663,7 +664,7 @@ class _PrayerTimeCard extends ConsumerWidget {
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w500,
-                                color: isDark ? const Color(0xFFFFDF7A) : const Color(0xFF8C6D08),
+                                color: isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF8C6D08),
                               ),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
@@ -673,7 +674,7 @@ class _PrayerTimeCard extends ConsumerWidget {
                           Icon(
                             Icons.auto_stories_outlined,
                             size: 13,
-                            color: const Color(0xFFFFDF7A).withValues(alpha: 0.7),
+                            color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.7),
                           ),
                         ],
                       ),

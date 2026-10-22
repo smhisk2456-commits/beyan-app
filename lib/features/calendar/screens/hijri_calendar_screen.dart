@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/localization/app_strings.dart';
@@ -45,7 +46,7 @@ class HijriCalendarScreen extends ConsumerWidget {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.tune_rounded, color: Color(0xFFFFDF7A)),
+            icon: Icon(Icons.tune_rounded, color: BeyanColors.tone(0xFFFFDF7A)),
             tooltip: strings.hijriAdjustmentTooltip,
             onPressed: () => _showAdjustmentDialog(context, ref, adjustment, strings),
           ),
@@ -59,18 +60,18 @@ class HijriCalendarScreen extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
+              gradient: LinearGradient(
                 colors: [
-                  Color(0xFF012E2B),
-                  Color(0xFF034A3E),
-                  Color(0xFF021E1B),
+                  BeyanColors.tone(0xFF012E2B),
+                  BeyanColors.tone(0xFF034A3E),
+                  BeyanColors.tone(0xFF021E1B),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(24),
               border: Border.all(
-                color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+                color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.4),
                 width: 1.2,
               ),
               boxShadow: [
@@ -89,13 +90,13 @@ class HijriCalendarScreen extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
+                        color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Text(
                         strings.diyanetTakvimi,
-                        style: const TextStyle(
-                          color: Color(0xFFFFDF7A),
+                        style: TextStyle(
+                          color: BeyanColors.tone(0xFFFFDF7A),
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
                         ),
@@ -114,11 +115,11 @@ class HijriCalendarScreen extends ConsumerWidget {
                 const SizedBox(height: 14),
                 Text(
                   hijriDate.formatAr(),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Amiri',
                     fontSize: 26,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFFFFDF7A),
+                    color: BeyanColors.tone(0xFFFFDF7A),
                   ),
                   textAlign: TextAlign.center,
                   textDirection: TextDirection.rtl,
@@ -153,7 +154,7 @@ class HijriCalendarScreen extends ConsumerWidget {
                 width: 4,
                 height: 18,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFD4AF37),
+                  color: BeyanColors.tone(0xFFD4AF37),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -183,14 +184,14 @@ class HijriCalendarScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF032B25),
+        backgroundColor: BeyanColors.tone(0xFF032B25),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: Color(0xFFD4AF37), width: 1),
+          side: BorderSide(color: BeyanColors.tone(0xFFD4AF37), width: 1),
         ),
         title: Text(
           strings.hijriAdjustmentTitle,
-          style: const TextStyle(color: Color(0xFFFFDF7A), fontSize: 17),
+          style: TextStyle(color: BeyanColors.tone(0xFFFFDF7A), fontSize: 17),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -208,7 +209,7 @@ class HijriCalendarScreen extends ConsumerWidget {
                 return ChoiceChip(
                   label: Text(chipLabel),
                   selected: isSel,
-                  selectedColor: const Color(0xFFD4AF37),
+                  selectedColor: BeyanColors.tone(0xFFD4AF37),
                   onSelected: (_) {
                     ref.read(hijriAdjustmentProvider.notifier).setAdjustment(d);
                     Navigator.pop(ctx);
@@ -245,12 +246,12 @@ class _ReligiousDayCard extends ConsumerWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF06221D) : Colors.white,
+        color: isDark ? BeyanColors.tone(0xFF06221D) : Colors.white,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
           color: isToday
-              ? const Color(0xFFFFDF7A)
-              : const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.3 : 0.2),
+              ? BeyanColors.tone(0xFFFFDF7A)
+              : BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.3 : 0.2),
           width: isToday ? 1.5 : 1,
         ),
         boxShadow: [
@@ -270,11 +271,11 @@ class _ReligiousDayCard extends ConsumerWidget {
             height: 48,
             decoration: BoxDecoration(
               color: isToday
-                  ? const Color(0xFFD4AF37)
-                  : const Color(0xFFD4AF37).withValues(alpha: 0.15),
+                  ? BeyanColors.tone(0xFFD4AF37)
+                  : BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
-                color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+                color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.4),
                 width: 1,
               ),
             ),
@@ -286,18 +287,18 @@ class _ReligiousDayCard extends ConsumerWidget {
                       children: [
                         Text(
                           '$days',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFFD4AF37),
+                            color: BeyanColors.tone(0xFFD4AF37),
                           ),
                         ),
                         Text(
                           strings.daysRemainingUnit,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 9,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFFD4AF37),
+                            color: BeyanColors.tone(0xFFD4AF37),
                           ),
                         ),
                       ],
@@ -319,7 +320,7 @@ class _ReligiousDayCard extends ConsumerWidget {
                         style: TextStyle(
                           fontSize: 15.5,
                           fontWeight: FontWeight.bold,
-                          color: isDark ? Colors.white : const Color(0xFF033E35),
+                          color: isDark ? Colors.white : BeyanColors.tone(0xFF033E35),
                         ),
                       ),
                     ),
@@ -327,7 +328,7 @@ class _ReligiousDayCard extends ConsumerWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFD4AF37),
+                          color: BeyanColors.tone(0xFFD4AF37),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
@@ -344,10 +345,10 @@ class _ReligiousDayCard extends ConsumerWidget {
                 const SizedBox(height: 4),
                 Text(
                   '${item.hijriDate} • ${item.gregorianDate.day}.${item.gregorianDate.month.toString().padLeft(2, '0')}.${item.gregorianDate.year}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFFD4AF37),
+                    color: BeyanColors.tone(0xFFD4AF37),
                   ),
                 ),
                 const SizedBox(height: 6),

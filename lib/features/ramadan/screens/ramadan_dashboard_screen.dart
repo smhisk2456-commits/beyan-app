@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -158,10 +159,10 @@ class RamadanDashboardScreen extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF06221D) : Colors.white,
+              color: isDark ? BeyanColors.tone(0xFF06221D) : Colors.white,
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.35 : 0.25),
+                color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.35 : 0.25),
                 width: 1,
               ),
               boxShadow: [
@@ -180,12 +181,12 @@ class RamadanDashboardScreen extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+                        color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.15),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.check_circle_outline_rounded,
-                        color: Color(0xFFD4AF37),
+                        color: BeyanColors.tone(0xFFD4AF37),
                         size: 22,
                       ),
                     ),
@@ -199,7 +200,7 @@ class RamadanDashboardScreen extends ConsumerWidget {
                             style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.bold,
-                              color: isDark ? Colors.white : const Color(0xFF033E35),
+                              color: isDark ? Colors.white : BeyanColors.tone(0xFF033E35),
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -208,7 +209,7 @@ class RamadanDashboardScreen extends ConsumerWidget {
                             style: TextStyle(
                               fontSize: 12,
                               color: isFasting
-                                  ? const Color(0xFFD4AF37)
+                                  ? BeyanColors.tone(0xFFD4AF37)
                                   : (isDark ? Colors.white60 : Colors.black54),
                               fontWeight: isFasting ? FontWeight.w600 : FontWeight.normal,
                             ),
@@ -218,8 +219,8 @@ class RamadanDashboardScreen extends ConsumerWidget {
                     ),
                     Switch.adaptive(
                       value: isFasting,
-                      activeTrackColor: const Color(0xFF033E35),
-                      activeThumbColor: const Color(0xFFD4AF37),
+                      activeTrackColor: BeyanColors.tone(0xFF033E35),
+                      activeThumbColor: BeyanColors.tone(0xFFD4AF37),
                       onChanged: (_) {
                         HapticFeedback.lightImpact();
                         ref.read(fastingTrackerProvider.notifier).toggleTodayFasting();
@@ -239,12 +240,12 @@ class RamadanDashboardScreen extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+                        color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.15),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.calendar_today_rounded,
-                        color: Color(0xFFD4AF37),
+                        color: BeyanColors.tone(0xFFD4AF37),
                         size: 20,
                       ),
                     ),
@@ -258,7 +259,7 @@ class RamadanDashboardScreen extends ConsumerWidget {
                             style: TextStyle(
                               fontSize: 14.5,
                               fontWeight: FontWeight.bold,
-                              color: isDark ? Colors.white : const Color(0xFF033E35),
+                              color: isDark ? Colors.white : BeyanColors.tone(0xFF033E35),
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -276,10 +277,10 @@ class RamadanDashboardScreen extends ConsumerWidget {
                     // + / - Sayacı Butonları
                     Container(
                       decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF012C28) : const Color(0xFFF0F5F3),
+                        color: isDark ? BeyanColors.tone(0xFF012C28) : BeyanColors.tone(0xFFF0F5F3),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+                          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.4),
                           width: 1,
                         ),
                       ),
@@ -291,7 +292,7 @@ class RamadanDashboardScreen extends ConsumerWidget {
                             icon: const Icon(Icons.remove_rounded),
                             iconSize: 20,
                             color: totalFastingDays > 0
-                                ? const Color(0xFFD4AF37)
+                                ? BeyanColors.tone(0xFFD4AF37)
                                 : Colors.grey.shade400,
                             tooltip: strings.decrementDayTooltip,
                             onPressed: totalFastingDays > 0
@@ -306,17 +307,17 @@ class RamadanDashboardScreen extends ConsumerWidget {
                             alignment: Alignment.center,
                             child: Text(
                               strings.fastingDaysCount(totalFastingDays),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFFD4AF37),
+                                color: BeyanColors.tone(0xFFD4AF37),
                               ),
                             ),
                           ),
                           IconButton(
                             icon: const Icon(Icons.add_rounded),
                             iconSize: 20,
-                            color: const Color(0xFFD4AF37),
+                            color: BeyanColors.tone(0xFFD4AF37),
                             tooltip: strings.incrementDayTooltip,
                             onPressed: () {
                               HapticFeedback.lightImpact();
@@ -339,14 +340,14 @@ class RamadanDashboardScreen extends ConsumerWidget {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: isDark
-                    ? [const Color(0xFF072B23), const Color(0xFF021713)]
-                    : [const Color(0xFFE8F5EE), Colors.white],
+                    ? [BeyanColors.tone(0xFF072B23), BeyanColors.tone(0xFF021713)]
+                    : [BeyanColors.tone(0xFFE8F5EE), Colors.white],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.4 : 0.3),
+                color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.4 : 0.3),
                 width: 1.2,
               ),
               boxShadow: [
@@ -365,11 +366,11 @@ class RamadanDashboardScreen extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+                        color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.15),
                         shape: BoxShape.circle,
-                        border: Border.all(color: const Color(0xFFFFDF7A), width: 1),
+                        border: Border.all(color: BeyanColors.tone(0xFFFFDF7A), width: 1),
                       ),
-                      child: const Icon(Icons.auto_stories_rounded, color: Color(0xFFFFDF7A), size: 22),
+                      child: Icon(Icons.auto_stories_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 22),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -381,15 +382,15 @@ class RamadanDashboardScreen extends ConsumerWidget {
                             style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.bold,
-                              color: isDark ? Colors.white : const Color(0xFF033E35),
+                              color: isDark ? Colors.white : BeyanColors.tone(0xFF033E35),
                             ),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             '${khatamState.completedCount} / 30 Cüz Okundu (%${(khatamState.percentage * 100).toInt()})',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 12,
-                              color: Color(0xFFD4AF37),
+                              color: BeyanColors.tone(0xFFD4AF37),
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -408,9 +409,9 @@ class RamadanDashboardScreen extends ConsumerWidget {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF0F5A47),
+                          color: BeyanColors.tone(0xFF0F5A47),
                           borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: const Color(0xFFFFDF7A), width: 1),
+                          border: Border.all(color: BeyanColors.tone(0xFFFFDF7A), width: 1),
                         ),
                         child: const Row(
                           mainAxisSize: MainAxisSize.min,
@@ -438,7 +439,7 @@ class RamadanDashboardScreen extends ConsumerWidget {
                     value: khatamState.percentage,
                     minHeight: 8,
                     backgroundColor: isDark ? Colors.white12 : Colors.grey.shade200,
-                    valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFFFDF7A)),
+                    valueColor: AlwaysStoppedAnimation<Color>(BeyanColors.tone(0xFFFFDF7A)),
                   ),
                 ),
               ],
@@ -459,10 +460,10 @@ class RamadanDashboardScreen extends ConsumerWidget {
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF06221D) : Colors.white,
+                color: isDark ? BeyanColors.tone(0xFF06221D) : Colors.white,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.35 : 0.25),
+                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.35 : 0.25),
                   width: 1,
                 ),
                 boxShadow: [
@@ -478,10 +479,10 @@ class RamadanDashboardScreen extends ConsumerWidget {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+                      color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.15),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.widgets_rounded, color: Color(0xFFD4AF37), size: 22),
+                    child: Icon(Icons.widgets_rounded, color: BeyanColors.tone(0xFFD4AF37), size: 22),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -493,7 +494,7 @@ class RamadanDashboardScreen extends ConsumerWidget {
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
-                            color: isDark ? Colors.white : const Color(0xFF033E35),
+                            color: isDark ? Colors.white : BeyanColors.tone(0xFF033E35),
                           ),
                         ),
                         const SizedBox(height: 2),
@@ -507,7 +508,7 @@ class RamadanDashboardScreen extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  const Icon(Icons.chevron_right_rounded, color: Color(0xFFD4AF37), size: 24),
+                  Icon(Icons.chevron_right_rounded, color: BeyanColors.tone(0xFFD4AF37), size: 24),
                 ],
               ),
             ),
@@ -521,7 +522,7 @@ class RamadanDashboardScreen extends ConsumerWidget {
                 width: 4,
                 height: 18,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFD4AF37),
+                  color: BeyanColors.tone(0xFFD4AF37),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -614,10 +615,10 @@ class RamadanDashboardScreen extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF06221D) : Colors.white,
+        color: isDark ? BeyanColors.tone(0xFF06221D) : Colors.white,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.3 : 0.2),
+          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.3 : 0.2),
           width: 1,
         ),
       ),
@@ -629,16 +630,16 @@ class RamadanDashboardScreen extends ConsumerWidget {
             style: TextStyle(
               fontSize: 14.5,
               fontWeight: FontWeight.bold,
-              color: isDark ? Colors.white : const Color(0xFF033E35),
+              color: isDark ? Colors.white : BeyanColors.tone(0xFF033E35),
             ),
           ),
           const SizedBox(height: 8),
           Text(
             arabic,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'Amiri',
               fontSize: 18,
-              color: Color(0xFFFFDF7A),
+              color: BeyanColors.tone(0xFFFFDF7A),
               height: 1.6,
             ),
             textDirection: TextDirection.rtl,
@@ -663,9 +664,9 @@ class RamadanDashboardScreen extends ConsumerWidget {
           const SizedBox(height: 6),
           Text(
             'Kaynak: $reference',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 11,
-              color: Color(0xFFD4AF37),
+              color: BeyanColors.tone(0xFFD4AF37),
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -741,18 +742,18 @@ class _LiveIftarCountdownState extends ConsumerState<_LiveIftarCountdown> {
     return Container(
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           colors: [
-            Color(0xFF012C28),
-            Color(0xFF034A3E),
-            Color(0xFF011C1A),
+            BeyanColors.tone(0xFF012C28),
+            BeyanColors.tone(0xFF034A3E),
+            BeyanColors.tone(0xFF011C1A),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.4),
           width: 1.2,
         ),
         boxShadow: [
@@ -770,16 +771,16 @@ class _LiveIftarCountdownState extends ConsumerState<_LiveIftarCountdown> {
             children: [
               Icon(
                 isWaitingForIftar ? Icons.wb_twilight_rounded : Icons.nightlight_round,
-                color: const Color(0xFFFFDF7A),
+                color: BeyanColors.tone(0xFFFFDF7A),
                 size: 20,
               ),
               const SizedBox(width: 8),
               Text(
                 countdownTitle,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFFFFDF7A),
+                  color: BeyanColors.tone(0xFFFFDF7A),
                   letterSpacing: 0.3,
                 ),
               ),
@@ -791,14 +792,14 @@ class _LiveIftarCountdownState extends ConsumerState<_LiveIftarCountdown> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               _buildTimeUnit(hours, strings.hoursUnit),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 6),
-                child: Text(':', style: TextStyle(color: Color(0xFFFFDF7A), fontSize: 32, fontWeight: FontWeight.bold)),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6),
+                child: Text(':', style: TextStyle(color: BeyanColors.tone(0xFFFFDF7A), fontSize: 32, fontWeight: FontWeight.bold)),
               ),
               _buildTimeUnit(minutes, strings.minsUnit),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 6),
-                child: Text(':', style: TextStyle(color: Color(0xFFFFDF7A), fontSize: 32, fontWeight: FontWeight.bold)),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6),
+                child: Text(':', style: TextStyle(color: BeyanColors.tone(0xFFFFDF7A), fontSize: 32, fontWeight: FontWeight.bold)),
               ),
               _buildTimeUnit(seconds, strings.secsUnit),
             ],
@@ -810,7 +811,7 @@ class _LiveIftarCountdownState extends ConsumerState<_LiveIftarCountdown> {
             decoration: BoxDecoration(
               color: Colors.black.withValues(alpha: 0.25),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: const Color(0xFFD4AF37).withValues(alpha: 0.25)),
+              border: Border.all(color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.25)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -823,7 +824,7 @@ class _LiveIftarCountdownState extends ConsumerState<_LiveIftarCountdown> {
                       imsakTime != null
                           ? '${imsakTime.hour.toString().padLeft(2, '0')}:${imsakTime.minute.toString().padLeft(2, '0')}'
                           : '--:--',
-                      style: const TextStyle(color: Color(0xFFFFDF7A), fontSize: 16, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: BeyanColors.tone(0xFFFFDF7A), fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
@@ -836,7 +837,7 @@ class _LiveIftarCountdownState extends ConsumerState<_LiveIftarCountdown> {
                       iftarTime != null
                           ? '${iftarTime.hour.toString().padLeft(2, '0')}:${iftarTime.minute.toString().padLeft(2, '0')}'
                           : '--:--',
-                      style: const TextStyle(color: Color(0xFFFFDF7A), fontSize: 16, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: BeyanColors.tone(0xFFFFDF7A), fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
@@ -856,7 +857,7 @@ class _LiveIftarCountdownState extends ConsumerState<_LiveIftarCountdown> {
           decoration: BoxDecoration(
             color: Colors.black.withValues(alpha: 0.45),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFD4AF37).withValues(alpha: 0.5)),
+            border: Border.all(color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.5)),
           ),
           child: Text(
             value,

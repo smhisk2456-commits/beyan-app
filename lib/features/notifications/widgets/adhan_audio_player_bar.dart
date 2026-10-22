@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -26,19 +27,19 @@ class AdhanAudioPlayerBar extends ConsumerWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: isDark
-              ? [const Color(0xFF1E1505), const Color(0xFF032822)]
-              : [const Color(0xFFFFF7E6), const Color(0xFFE8F5EE)],
+              ? [const Color(0xFF1E1505), BeyanColors.tone(0xFF032822)]
+              : [const Color(0xFFFFF7E6), BeyanColors.tone(0xFFE8F5EE)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: const Color(0xFFFFDF7A),
+          color: BeyanColors.tone(0xFFFFDF7A),
           width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFD4AF37).withValues(alpha: 0.3),
+            color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.3),
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),
@@ -52,7 +53,7 @@ class AdhanAudioPlayerBar extends ConsumerWidget {
             height: 38,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: const Color(0xFFFFDF7A),
+              color: BeyanColors.tone(0xFFFFDF7A),
               boxShadow: [
                 BoxShadow(
                   color: Colors.amber.withValues(alpha: 0.5),
@@ -80,7 +81,7 @@ class AdhanAudioPlayerBar extends ConsumerWidget {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
-                    color: isDark ? const Color(0xFFFFDF7A) : const Color(0xFF0F5A47),
+                    color: isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF0F5A47),
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,

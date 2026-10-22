@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'beyan_colors.dart';
 
 /// Kullanıcının seçebileceği premium renk paletleri.
+///
+/// Her palet, [BeyanColors] motoru üzerinden uygulamanın TÜM yüzeylerine
+/// (zemin, kart, gradyan, dock, rozet, alt sayfa) tek bütün olarak uygulanır.
 enum AppThemePalette {
   /// Klasik zümrüt yeşili ve altın
   emerald,
@@ -9,11 +13,20 @@ enum AppThemePalette {
   /// OLED ekranlar için saf siyah ve amber altın
   oledBlack,
 
-  /// Kâbe mermeri ve örtü hatları (Koyu bazalt füme)
+  /// Kâbe örtüsü füme / grafit ve antik altın
   kaabaSlate,
 
   /// Gece göğü safiri ve şampanya altın
   deepSapphire,
+
+  /// Osmanlı bordosu ve saray altını
+  ottomanBurgundy,
+
+  /// Seher moru (ametist) ve gül altını
+  amethystNight,
+
+  /// Medine hurması kahvesi ve bal altını
+  desertMocha,
 }
 
 extension AppThemePaletteExtension on AppThemePalette {
@@ -30,13 +43,25 @@ extension AppThemePaletteExtension on AppThemePalette {
         if (langCode == 'ar') return 'الأسود الليلي (OLED)';
         return 'Gece Siyahı (OLED)';
       case AppThemePalette.kaabaSlate:
-        if (langCode == 'en') return 'Kaaba Slate Grey';
-        if (langCode == 'ar') return 'رمادي رخام الكعبة';
-        return 'Kâbe Taş Grisi';
+        if (langCode == 'en') return 'Kaaba Graphite';
+        if (langCode == 'ar') return 'جرافيت الكعبة';
+        return 'Kâbe Füme';
       case AppThemePalette.deepSapphire:
         if (langCode == 'en') return 'Deep Sapphire Navy';
         if (langCode == 'ar') return 'الياقوت الكحلي';
         return 'Derin Lacivert';
+      case AppThemePalette.ottomanBurgundy:
+        if (langCode == 'en') return 'Ottoman Burgundy';
+        if (langCode == 'ar') return 'العنابي العثماني';
+        return 'Osmanlı Bordosu';
+      case AppThemePalette.amethystNight:
+        if (langCode == 'en') return 'Amethyst Dawn';
+        if (langCode == 'ar') return 'جمشت السحر';
+        return 'Seher Moru';
+      case AppThemePalette.desertMocha:
+        if (langCode == 'en') return 'Medina Date Mocha';
+        if (langCode == 'ar') return 'تمر المدينة';
+        return 'Medine Hurması';
     }
   }
 
@@ -53,110 +78,52 @@ extension AppThemePaletteExtension on AppThemePalette {
         if (langCode == 'ar') return 'سواد نقي عميق وعنبر دافئ لشاشات أوليد';
         return 'Saf zifiri siyah ve sıcak kehribar, OLED dostu';
       case AppThemePalette.kaabaSlate:
-        if (langCode == 'en') return 'Kaaba marble tones, noble slate and gold';
-        if (langCode == 'ar') return 'ظلال رخام الكعبة والرمادي الأنيق مع الذهب';
-        return 'Kâbe mermeri tonları, asil füme ve altın';
+        if (langCode == 'en') return 'Kiswah graphite, steel grey and antique gold';
+        if (langCode == 'ar') return 'جرافيت الكسوة والرمادي الفولاذي والذهب العتيق';
+        return 'Kâbe örtüsü grafiti, çelik gri ve antik altın';
       case AppThemePalette.deepSapphire:
         if (langCode == 'en') return 'Night sky sapphire and champagne gold shimmer';
         if (langCode == 'ar') return 'سماء الليل الكحلية وبريق الذهب الشامباني';
         return 'Gece göğü safiri ve şampanya altın ışıltısı';
+      case AppThemePalette.ottomanBurgundy:
+        if (langCode == 'en') return 'Imperial burgundy velvet and palace gold';
+        if (langCode == 'ar') return 'المخمل العنابي الإمبراطوري وذهب القصور';
+        return 'Saray kadifesi bordo ve Osmanlı altını';
+      case AppThemePalette.amethystNight:
+        if (langCode == 'en') return 'Pre-dawn amethyst violet and rose gold';
+        if (langCode == 'ar') return 'بنفسجي السحر وذهب وردي';
+        return 'Seher vaktinin ametist moru ve gül altını';
+      case AppThemePalette.desertMocha:
+        if (langCode == 'en') return 'Warm date-palm mocha and honey gold';
+        if (langCode == 'ar') return 'بني التمر الدافئ وذهب العسل';
+        return 'Sıcak hurma kahvesi ve bal altını';
     }
   }
 
-  Color get primaryColor {
-    switch (this) {
-      case AppThemePalette.emerald:
-        return const Color(0xFF033E35);
-      case AppThemePalette.oledBlack:
-        return const Color(0xFF14171A);
-      case AppThemePalette.kaabaSlate:
-        return const Color(0xFF262A2F);
-      case AppThemePalette.deepSapphire:
-        return const Color(0xFF0C1B33);
-    }
-  }
+  /// Zümrüt referans tonunu bu palete uyarlar.
+  Color _t(int argb) => BeyanColors.toneFor(this, argb);
 
-  Color get accentGold {
-    switch (this) {
-      case AppThemePalette.emerald:
-        return const Color(0xFFD4AF37);
-      case AppThemePalette.oledBlack:
-        return const Color(0xFFFFB800);
-      case AppThemePalette.kaabaSlate:
-        return const Color(0xFFC5A059);
-      case AppThemePalette.deepSapphire:
-        return const Color(0xFFE5C07B);
-    }
-  }
+  Color get primaryColor => _t(0xFF033E35);
+
+  Color get accentGold => _t(0xFFD4AF37);
+
+  Color get accentGoldLight => _t(0xFFFFDF7A);
 
   Color get darkBackground {
-    switch (this) {
-      case AppThemePalette.emerald:
-        return const Color(0xFF071B18);
-      case AppThemePalette.oledBlack:
-        return const Color(0xFF000000); // Gerçek OLED Black
-      case AppThemePalette.kaabaSlate:
-        return const Color(0xFF101214);
-      case AppThemePalette.deepSapphire:
-        return const Color(0xFF070E1A);
-    }
+    if (this == AppThemePalette.oledBlack) return const Color(0xFF000000);
+    return _t(0xFF071B18);
   }
 
-  Color get darkSurface {
-    switch (this) {
-      case AppThemePalette.emerald:
-        return const Color(0xFF0D2823);
-      case AppThemePalette.oledBlack:
-        return const Color(0xFF0B0D0F);
-      case AppThemePalette.kaabaSlate:
-        return const Color(0xFF181B1E);
-      case AppThemePalette.deepSapphire:
-        return const Color(0xFF0E1C33);
-    }
-  }
+  Color get darkSurface => _t(0xFF0D2823);
 
-  Color get darkCard {
-    switch (this) {
-      case AppThemePalette.emerald:
-        return const Color(0xFF133630);
-      case AppThemePalette.oledBlack:
-        return const Color(0xFF13171B);
-      case AppThemePalette.kaabaSlate:
-        return const Color(0xFF22262B);
-      case AppThemePalette.deepSapphire:
-        return const Color(0xFF162947);
-    }
-  }
+  Color get darkCard => _t(0xFF133630);
 
   /// Namaz vakti ana kartı için palete özel uyumlu lüks gradyan
-  List<Color> get prayerCardGradient {
-    switch (this) {
-      case AppThemePalette.emerald:
-        return const [
-          Color(0xFF02362E),
-          Color(0xFF01201B),
-          Color(0xFF03443A),
-        ];
-      case AppThemePalette.oledBlack:
-        return const [
-          Color(0xFF14171A),
-          Color(0xFF040506),
-          Color(0xFF181C20),
-        ];
-      case AppThemePalette.kaabaSlate:
-        return const [
-          Color(0xFF262B30),
-          Color(0xFF15181B),
-          Color(0xFF2D333A),
-        ];
-      case AppThemePalette.deepSapphire:
-        return const [
-          Color(0xFF0E2242),
-          Color(0xFF061326),
-          Color(0xFF142E57),
-        ];
-    }
-  }
+  List<Color> get prayerCardGradient => [
+        _t(0xFF02362E),
+        _t(0xFF01201B),
+        _t(0xFF03443A),
+      ];
 
   /// Namaz vakti ana kartı için ışıltı rengi
   Color get prayerCardGlow {
@@ -168,49 +135,51 @@ extension AppThemePaletteExtension on AppThemePalette {
       case AppThemePalette.kaabaSlate:
         return const Color(0xFFC5A059);
       case AppThemePalette.deepSapphire:
-        return const Color(0xFF5C6BC0);
+        return const Color(0xFF5C8DF0);
+      case AppThemePalette.ottomanBurgundy:
+        return const Color(0xFFE0526B);
+      case AppThemePalette.amethystNight:
+        return const Color(0xFFA77BF3);
+      case AppThemePalette.desertMocha:
+        return const Color(0xFFE0A15A);
     }
   }
 
-  Color get lightBackground {
-    switch (this) {
-      case AppThemePalette.emerald:
-        return const Color(0xFFF4F7F5);
-      case AppThemePalette.oledBlack:
-        return const Color(0xFFF5F6F8);
-      case AppThemePalette.kaabaSlate:
-        return const Color(0xFFF6F5F2);
-      case AppThemePalette.deepSapphire:
-        return const Color(0xFFF2F5FA);
-    }
-  }
+  /// Tema seçicide önizleme için 3 tonlu gradyan
+  List<Color> get previewGradient => [
+        darkBackground,
+        darkCard,
+        primaryColor,
+      ];
+
+  Color get lightBackground => _t(0xFFF4F7F5);
 
   Color get lightSurface => const Color(0xFFFFFFFF);
 
   Color get lightCard => const Color(0xFFFFFFFF);
 }
 
-/// Statik geri uyumluluk renkleri.
+/// Palet duyarlı geri uyumluluk renkleri.
 abstract class AppColors {
-  static const Color primary = Color(0xFF033E35);
-  static const Color primaryDark = Color(0xFF012E2B);
-  static const Color primaryLight = Color(0xFF095A4D);
+  static Color get primary => BeyanColors.tone(0xFF033E35);
+  static Color get primaryDark => BeyanColors.tone(0xFF012E2B);
+  static Color get primaryLight => BeyanColors.tone(0xFF095A4D);
 
-  static const Color emerald = Color(0xFF012E2B);
-  static const Color emeraldLight = Color(0xFF064E43);
-  static const Color teal = Color(0xFF033E35);
-  static const Color tealDark = Color(0xFF012E2B);
-  static const Color tealLight = Color(0xFF0A685A);
-  static const Color green = Color(0xFF1B5E20);
+  static Color get emerald => BeyanColors.tone(0xFF012E2B);
+  static Color get emeraldLight => BeyanColors.tone(0xFF064E43);
+  static Color get teal => BeyanColors.tone(0xFF033E35);
+  static Color get tealDark => BeyanColors.tone(0xFF012E2B);
+  static Color get tealLight => BeyanColors.tone(0xFF0A685A);
+  static Color get green => BeyanColors.tone(0xFF1B5E20);
   static const Color greenLight = Color(0xFF43A047);
 
-  static const Color background = Color(0xFFF6F8F7);
+  static Color get background => BeyanColors.tone(0xFFF6F8F7);
   static const Color surface = Color(0xFFFFFFFF);
   static const Color cardColor = Color(0xFFFFFFFF);
 
-  static const Color darkBackground = Color(0xFF071B18);
-  static const Color darkSurface = Color(0xFF0D2823);
-  static const Color darkCard = Color(0xFF133630);
+  static Color get darkBackground => BeyanColors.palette.darkBackground;
+  static Color get darkSurface => BeyanColors.tone(0xFF0D2823);
+  static Color get darkCard => BeyanColors.tone(0xFF133630);
 
   static const Color textPrimary = Color(0xFF11221F);
   static const Color textSecondary = Color(0xFF5B6E6A);
@@ -220,11 +189,11 @@ abstract class AppColors {
   static const Color arabicText = Color(0xFF11221F);
   static const Color arabicTextDark = Color(0xFFF5EEDB);
 
-  static const Color gold = Color(0xFFD4AF37);
-  static const Color goldLight = Color(0xFFFFDF7A);
-  static const Color goldDark = Color(0xFFAA8018);
-  static const Color divider = Color(0xFFE2EBE8);
-  static const Color shadow = Color(0x1A012E2B);
+  static Color get gold => BeyanColors.tone(0xFFD4AF37);
+  static Color get goldLight => BeyanColors.tone(0xFFFFDF7A);
+  static Color get goldDark => BeyanColors.tone(0xFFAA8018);
+  static Color get divider => BeyanColors.tone(0xFFE2EBE8);
+  static Color get shadow => BeyanColors.tone(0x1A012E2B);
 }
 
 /// Tipografi
@@ -383,7 +352,7 @@ abstract class AppTheme {
           color: AppColors.textHint,
         ),
       ),
-      dividerTheme: const DividerThemeData(
+      dividerTheme: DividerThemeData(
         color: AppColors.divider,
         thickness: 1,
         space: 1,
@@ -413,11 +382,11 @@ abstract class AppTheme {
         fillColor: AppColors.surface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.divider),
+          borderSide: BorderSide(color: AppColors.divider),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.divider),
+          borderSide: BorderSide(color: AppColors.divider),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -522,7 +491,7 @@ abstract class AppTheme {
         elevation: 8,
       ),
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: const Color(0xFF0A382E),
+        backgroundColor: BeyanColors.toneFor(palette, 0xFF0A382E),
         contentTextStyle: GoogleFonts.lato(
           color: Colors.white,
           fontSize: 14,

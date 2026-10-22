@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -366,7 +367,7 @@ class _BedsideClockScreenState extends ConsumerState<BedsideClockScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF041C17).withValues(alpha: _isDimmed ? 0.2 : 0.8),
+                      color: BeyanColors.tone(0xFF041C17).withValues(alpha: _isDimmed ? 0.2 : 0.8),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: primaryColor.withValues(alpha: 0.4),
@@ -560,7 +561,7 @@ class _BedsideClockScreenState extends ConsumerState<BedsideClockScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
               decoration: BoxDecoration(
-                color: const Color(0xFF041C17).withValues(alpha: _isDimmed ? 0.25 : 0.85),
+                color: BeyanColors.tone(0xFF041C17).withValues(alpha: _isDimmed ? 0.25 : 0.85),
                 borderRadius: BorderRadius.circular(22),
                 border: Border.all(
                   color: primaryColor.withValues(alpha: 0.4),

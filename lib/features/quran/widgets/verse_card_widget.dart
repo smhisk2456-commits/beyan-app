@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -43,12 +44,12 @@ class VerseCard extends ConsumerWidget {
       SnackBar(
         content: Row(
           children: [
-            const Icon(Icons.check_circle_rounded, color: Color(0xFFFFDF7A), size: 18),
+            Icon(Icons.check_circle_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 18),
             const SizedBox(width: 8),
             Text(strings.verseCopied(verse.reference)),
           ],
         ),
-        backgroundColor: const Color(0xFF012E2B),
+        backgroundColor: BeyanColors.tone(0xFF012E2B),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         duration: const Duration(seconds: 2),
@@ -70,7 +71,7 @@ class VerseCard extends ConsumerWidget {
         style: TextStyle(
           fontSize: 14.0,
           fontStyle: FontStyle.italic,
-          color: isDark ? const Color(0xFF80CBC4) : const Color(0xFF0A685A),
+          color: isDark ? BeyanColors.tone(0xFF80CBC4) : BeyanColors.tone(0xFF0A685A),
           height: 1.55,
         ),
         textAlign: TextAlign.left,
@@ -92,14 +93,14 @@ class VerseCard extends ConsumerWidget {
                 height: 1.55,
                 fontWeight: i == clampedIndex ? FontWeight.bold : FontWeight.normal,
                 color: i == clampedIndex
-                    ? (isDark ? const Color(0xFFFFDF7A) : const Color(0xFF012E2B))
+                    ? (isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF012E2B))
                     : (i < clampedIndex
-                        ? (isDark ? const Color(0xFF80CBC4) : const Color(0xFF0A685A))
+                        ? (isDark ? BeyanColors.tone(0xFF80CBC4) : BeyanColors.tone(0xFF0A685A))
                         : (isDark ? Colors.white30 : Colors.black26)),
                 backgroundColor: i == clampedIndex
                     ? (isDark
-                        ? const Color(0xFFD4AF37).withValues(alpha: 0.35)
-                        : const Color(0xFFFFDF7A).withValues(alpha: 0.65))
+                        ? BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35)
+                        : BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.65))
                     : null,
               ),
             ),
@@ -145,23 +146,23 @@ class VerseCard extends ConsumerWidget {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       elevation: isPlaying ? 3 : 0,
-      shadowColor: isPlaying ? const Color(0xFFFFDF7A).withValues(alpha: 0.3) : Colors.transparent,
+      shadowColor: isPlaying ? BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.3) : Colors.transparent,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(18),
         side: BorderSide(
           color: isPlaying
-              ? const Color(0xFFFFDF7A)
+              ? BeyanColors.tone(0xFFFFDF7A)
               : (shouldHighlight
-                  ? const Color(0xFFD4AF37)
-                  : (isDark ? const Color(0xFF133B34) : const Color(0xFFE2EBE8))),
+                  ? BeyanColors.tone(0xFFD4AF37)
+                  : (isDark ? BeyanColors.tone(0xFF133B34) : BeyanColors.tone(0xFFE2EBE8))),
           width: isPlaying ? 2.2 : (shouldHighlight ? 1.8 : 1),
         ),
       ),
       color: isPlaying
-          ? (isDark ? const Color(0xFF13423A) : const Color(0xFFE8F6F0))
+          ? (isDark ? BeyanColors.tone(0xFF13423A) : BeyanColors.tone(0xFFE8F6F0))
           : (shouldHighlight
-              ? (isDark ? const Color(0xFF0F362F) : const Color(0xFFF1F8F5))
-              : (isDark ? const Color(0xFF0D2823) : Colors.white)),
+              ? (isDark ? BeyanColors.tone(0xFF0F362F) : BeyanColors.tone(0xFFF1F8F5))
+              : (isDark ? BeyanColors.tone(0xFF0D2823) : Colors.white)),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(18),
@@ -180,10 +181,10 @@ class VerseCard extends ConsumerWidget {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: isPlaying
-                          ? const Color(0xFFFFDF7A)
-                          : const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.2 : 0.1),
+                          ? BeyanColors.tone(0xFFFFDF7A)
+                          : BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.2 : 0.1),
                       border: Border.all(
-                        color: const Color(0xFFD4AF37).withValues(alpha: 0.6),
+                        color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.6),
                         width: 1,
                       ),
                     ),
@@ -194,8 +195,8 @@ class VerseCard extends ConsumerWidget {
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
                           color: isPlaying
-                              ? const Color(0xFF012E2B)
-                              : (isDark ? const Color(0xFFFFDF7A) : const Color(0xFF033E35)),
+                              ? BeyanColors.tone(0xFF012E2B)
+                              : (isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF033E35)),
                         ),
                       ),
                     ),
@@ -207,11 +208,11 @@ class VerseCard extends ConsumerWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       margin: const EdgeInsets.only(right: 6),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFFDF7A),
+                        color: BeyanColors.tone(0xFFFFDF7A),
                         borderRadius: BorderRadius.circular(8),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFFFFDF7A).withValues(alpha: 0.35),
+                            color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.35),
                             blurRadius: 6,
                             spreadRadius: 1,
                           ),
@@ -220,16 +221,16 @@ class VerseCard extends ConsumerWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.graphic_eq_rounded, size: 12, color: Color(0xFF012E2B)),
+                          Icon(Icons.graphic_eq_rounded, size: 12, color: BeyanColors.tone(0xFF012E2B)),
                           const SizedBox(width: 4),
                           Text(
                             strings.language == AppLanguage.turkish
                                 ? 'Okunuyor'
                                 : (strings.language == AppLanguage.arabic ? 'يتلى الآن' : 'Playing'),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 9.5,
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFF012E2B),
+                              color: BeyanColors.tone(0xFF012E2B),
                             ),
                           ),
                         ],
@@ -240,24 +241,24 @@ class VerseCard extends ConsumerWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                         margin: const EdgeInsets.only(right: 6),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFD4AF37).withValues(alpha: 0.22),
+                          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.22),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: const Color(0xFFD4AF37).withValues(alpha: 0.6),
+                            color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.6),
                             width: 0.8,
                           ),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.auto_stories_rounded, size: 11, color: Color(0xFFFFDF7A)),
+                            Icon(Icons.auto_stories_rounded, size: 11, color: BeyanColors.tone(0xFFFFDF7A)),
                             const SizedBox(width: 3.5),
                             Text(
                               strings.wordTrackingBadge,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 9.2,
                                 fontWeight: FontWeight.w600,
-                                color: Color(0xFFFFDF7A),
+                                color: BeyanColors.tone(0xFFFFDF7A),
                               ),
                             ),
                           ],
@@ -269,7 +270,7 @@ class VerseCard extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFD4AF37),
+                        color: BeyanColors.tone(0xFFD4AF37),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
@@ -284,15 +285,15 @@ class VerseCard extends ConsumerWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.2 : 0.1),
+                      color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.2 : 0.1),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
                       verse.reference,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 11.5,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFFD4AF37),
+                        color: BeyanColors.tone(0xFFD4AF37),
                       ),
                     ),
                   ),
@@ -302,7 +303,7 @@ class VerseCard extends ConsumerWidget {
                     icon: Icon(
                       isLastRead ? Icons.bookmark_added_rounded : Icons.bookmark_add_outlined,
                       size: 20,
-                      color: isLastRead ? const Color(0xFFFFDF7A) : (isDark ? Colors.white60 : Colors.black45),
+                      color: isLastRead ? BeyanColors.tone(0xFFFFDF7A) : (isDark ? Colors.white60 : Colors.black45),
                     ),
                     tooltip: strings.saveAsLastRead,
                     onPressed: () {
@@ -320,7 +321,7 @@ class VerseCard extends ConsumerWidget {
                     icon: Icon(
                       isBookmarked ? Icons.star_rounded : Icons.star_border_rounded,
                       size: 20,
-                      color: isBookmarked ? const Color(0xFFFFDF7A) : (isDark ? Colors.white60 : Colors.black45),
+                      color: isBookmarked ? BeyanColors.tone(0xFFFFDF7A) : (isDark ? Colors.white60 : Colors.black45),
                     ),
                     tooltip: isBookmarked ? strings.removeBookmark : strings.addBookmark,
                     onPressed: () {
@@ -334,7 +335,7 @@ class VerseCard extends ConsumerWidget {
                     icon: Icon(
                       isLoopingThisVerse ? Icons.repeat_one_on_rounded : Icons.repeat_one_rounded,
                       size: 20,
-                      color: isLoopingThisVerse ? const Color(0xFFFFDF7A) : (isDark ? Colors.white60 : Colors.black45),
+                      color: isLoopingThisVerse ? BeyanColors.tone(0xFFFFDF7A) : (isDark ? Colors.white60 : Colors.black45),
                     ),
                     tooltip: isLoopingThisVerse
                         ? (strings.language == AppLanguage.turkish ? 'Âyet Tekrarını Kapat' : 'Stop Verse Loop')
@@ -354,7 +355,7 @@ class VerseCard extends ConsumerWidget {
 
                   // Paylaş & Kopyala
                   IconButton(
-                    icon: const Icon(Icons.share_outlined, size: 19, color: Color(0xFFD4AF37)),
+                    icon: Icon(Icons.share_outlined, size: 19, color: BeyanColors.tone(0xFFD4AF37)),
                     tooltip: strings.shareVerse,
                     onPressed: () => _shareVerse(context, strings),
                   ),
@@ -367,23 +368,23 @@ class VerseCard extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+                    color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+                      color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.4),
                       width: 0.8,
                     ),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.visibility_rounded, size: 14, color: Color(0xFFFFDF7A)),
+                      Icon(Icons.visibility_rounded, size: 14, color: BeyanColors.tone(0xFFFFDF7A)),
                       const SizedBox(width: 6),
                       Text(
                         'Ezber Testi: ${revealedSet.length} / ${allWords.length} kelime açık',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 11.5,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFFFFDF7A),
+                          color: BeyanColors.tone(0xFFFFDF7A),
                         ),
                       ),
                       const Spacer(),
@@ -398,10 +399,10 @@ class VerseCard extends ConsumerWidget {
                         },
                         child: Text(
                           revealedSet.length >= allWords.length ? 'Hepsini Gizle' : 'Tümünü Aç',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFFFFDF7A),
+                            color: BeyanColors.tone(0xFFFFDF7A),
                             decoration: TextDecoration.underline,
                           ),
                         ),
@@ -420,7 +421,7 @@ class VerseCard extends ConsumerWidget {
                     value: verseProgress.clamp(0.0, 1.0),
                     minHeight: 2.2,
                     backgroundColor: isDark ? Colors.white10 : Colors.black12,
-                    valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFFFDF7A)),
+                    valueColor: AlwaysStoppedAnimation<Color>(BeyanColors.tone(0xFFFFDF7A)),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -449,7 +450,7 @@ class VerseCard extends ConsumerWidget {
 
               // Arapça / Latin bölücü çizgi
               Divider(
-                color: isDark ? const Color(0xFF1A3D36) : const Color(0xFFE8EEEC),
+                color: isDark ? BeyanColors.tone(0xFF1A3D36) : BeyanColors.tone(0xFFE8EEEC),
                 thickness: 0.8,
                 height: 1,
               ),
@@ -467,7 +468,7 @@ class VerseCard extends ConsumerWidget {
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       height: 1.6,
                       fontSize: 14.0,
-                      color: isDark ? Colors.white70 : const Color(0xFF334E48),
+                      color: isDark ? Colors.white70 : BeyanColors.tone(0xFF334E48),
                     ),
                 textAlign: TextAlign.left,
               ),
@@ -478,10 +479,10 @@ class VerseCard extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF042B24) : const Color(0xFFE8F2EF),
+                    color: isDark ? BeyanColors.tone(0xFF042B24) : BeyanColors.tone(0xFFE8F2EF),
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: const Color(0xFFD4AF37).withValues(alpha: 0.35),
+                      color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35),
                       width: 0.8,
                     ),
                   ),
@@ -490,16 +491,16 @@ class VerseCard extends ConsumerWidget {
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.compare_arrows_rounded, size: 14, color: Color(0xFFD4AF37)),
+                          Icon(Icons.compare_arrows_rounded, size: 14, color: BeyanColors.tone(0xFFD4AF37)),
                           const SizedBox(width: 5),
                           Text(
                             strings.language == AppLanguage.turkish
                                 ? 'Saheeh International (İngilizce Karşılaştırmalı)'
                                 : 'Turkish Translation (Diyanet Comparative)',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFFD4AF37),
+                              color: BeyanColors.tone(0xFFD4AF37),
                             ),
                           ),
                         ],

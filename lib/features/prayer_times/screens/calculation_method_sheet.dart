@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -45,10 +46,10 @@ class _CalculationMethodSheetState extends State<CalculationMethodSheet> {
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16),
-      decoration: const BoxDecoration(
-        color: Color(0xFF02211C),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        border: Border(top: BorderSide(color: Color(0xFFD4AF37), width: 1.5)),
+      decoration: BoxDecoration(
+        color: BeyanColors.tone(0xFF02211C),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        border: Border(top: BorderSide(color: BeyanColors.tone(0xFFD4AF37), width: 1.5)),
       ),
       child: SafeArea(
         child: Column(
@@ -65,10 +66,10 @@ class _CalculationMethodSheetState extends State<CalculationMethodSheet> {
             const SizedBox(height: 16),
             Text(
               strings.calculationMethodTitle,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFFFFDF7A),
+                color: BeyanColors.tone(0xFFFFDF7A),
               ),
             ),
             const SizedBox(height: 6),
@@ -82,7 +83,7 @@ class _CalculationMethodSheetState extends State<CalculationMethodSheet> {
               return ListTile(
                 leading: Icon(
                   isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
-                  color: const Color(0xFFD4AF37),
+                  color: BeyanColors.tone(0xFFD4AF37),
                 ),
                 title: Text(
                   method.localizedName(strings.language.code),

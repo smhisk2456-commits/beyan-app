@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -931,7 +932,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
       SnackBar(
         content: Row(
           children: [
-            Icon(icon, color: const Color(0xFFFFDF7A), size: 20),
+            Icon(icon, color: BeyanColors.tone(0xFFFFDF7A), size: 20),
             const SizedBox(width: 10),
             Expanded(
               child: Text(
@@ -946,13 +947,13 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
             ),
           ],
         ),
-        backgroundColor: const Color(0xFF0A382E),
+        backgroundColor: BeyanColors.tone(0xFF0A382E),
         elevation: 8,
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.fromLTRB(16, 0, 16, 98),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14),
-          side: const BorderSide(color: Color(0xFFFFDF7A), width: 1.2),
+          side: BorderSide(color: BeyanColors.tone(0xFFFFDF7A), width: 1.2),
         ),
         duration: const Duration(seconds: 3),
       ),
@@ -1194,7 +1195,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: isDark ? const Color(0xFF07211C) : Colors.white,
+      backgroundColor: isDark ? BeyanColors.tone(0xFF07211C) : Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -1237,12 +1238,12 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                     style: TextStyle(
                       fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                       color: isSelected
-                          ? const Color(0xFFD4AF37)
+                          ? BeyanColors.tone(0xFFD4AF37)
                           : (isDark ? Colors.white : Colors.black87),
                     ),
                   ),
                   trailing: isSelected
-                      ? const Icon(Icons.check_rounded, color: Color(0xFFD4AF37))
+                      ? Icon(Icons.check_rounded, color: BeyanColors.tone(0xFFD4AF37))
                       : null,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -1265,9 +1266,9 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
     final strings = ref.watch(appStringsProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF051C17),
+      backgroundColor: BeyanColors.tone(0xFF051C17),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF051C17),
+        backgroundColor: BeyanColors.tone(0xFF051C17),
         elevation: 0,
         title: Text(
           strings.lockScreenWidgetsTitle,
@@ -1281,7 +1282,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
         centerTitle: true,
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: Color(0xFFD4AF37)))
+          ? Center(child: CircularProgressIndicator(color: BeyanColors.tone(0xFFD4AF37)))
           : SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
               physics: const BouncingScrollPhysics(),
@@ -1343,13 +1344,13 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
       decoration: BoxDecoration(
-        color: const Color(0xFF0C2923),
+        color: BeyanColors.tone(0xFF0C2923),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.35)),
+        border: Border.all(color: BeyanColors.tone(0xFF10B981).withValues(alpha: 0.35)),
       ),
       child: Row(
         children: [
-          const Icon(Icons.info_outline_rounded, color: Color(0xFF2DD4BF), size: 18),
+          Icon(Icons.info_outline_rounded, color: BeyanColors.tone(0xFF2DD4BF), size: 18),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
@@ -1404,11 +1405,11 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: isSelected
-                      ? const Color(0xFF10B981)
-                      : const Color(0xFF0E2C24),
+                      ? BeyanColors.tone(0xFF10B981)
+                      : BeyanColors.tone(0xFF0E2C24),
                   border: Border.all(
                     color: isSelected
-                        ? const Color(0xFF34D399)
+                        ? BeyanColors.tone(0xFF34D399)
                         : Colors.white.withValues(alpha: 0.1),
                     width: 1.2,
                   ),
@@ -1433,7 +1434,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 36),
       decoration: BoxDecoration(
-        color: const Color(0xFF041713),
+        color: BeyanColors.tone(0xFF041713),
         borderRadius: BorderRadius.circular(28),
         border: Border.all(
           color: Colors.white.withValues(alpha: 0.12),
@@ -1535,7 +1536,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
                     ),
-                    child: const Icon(Icons.chevron_left_rounded, color: Color(0xFFFFDF7A), size: 18),
+                    child: Icon(Icons.chevron_left_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 18),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -1557,12 +1558,12 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.shuffle_rounded, color: Color(0xFFFFDF7A), size: 14),
+                        Icon(Icons.shuffle_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 14),
                         const SizedBox(width: 5),
                         Text(
                           strings.previewAnotherVerse,
-                          style: const TextStyle(
-                            color: Color(0xFFFFDF7A),
+                          style: TextStyle(
+                            color: BeyanColors.tone(0xFFFFDF7A),
                             fontSize: 11.5,
                             fontWeight: FontWeight.bold,
                           ),
@@ -1585,7 +1586,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
                     ),
-                    child: const Icon(Icons.chevron_right_rounded, color: Color(0xFFFFDF7A), size: 18),
+                    child: Icon(Icons.chevron_right_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 18),
                   ),
                 ),
               ],
@@ -1688,7 +1689,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
           Text(
             reference,
             style: TextStyle(
-              color: const Color(0xFFFFDF7A),
+              color: BeyanColors.tone(0xFFFFDF7A),
               fontWeight: FontWeight.bold,
               fontSize: _previewTitleFontSize,
               fontFamily: _previewFontFamily,
@@ -1928,7 +1929,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
   Widget _buildCustomizationOptionsCard(AppStrings strings) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF0A241F),
+        color: BeyanColors.tone(0xFF0A241F),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: Colors.white.withValues(alpha: 0.1),
@@ -2028,19 +2029,19 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           decoration: BoxDecoration(
-            color: const Color(0xFF0B2B24),
+            color: BeyanColors.tone(0xFF0B2B24),
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
               color: _isPinned
-                  ? const Color(0xFFFFDF7A).withValues(alpha: 0.5)
-                  : const Color(0xFF2DD4BF).withValues(alpha: 0.4),
+                  ? BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.5)
+                  : BeyanColors.tone(0xFF2DD4BF).withValues(alpha: 0.4),
             ),
           ),
           child: Row(
             children: [
               Icon(
                 _isPinned ? Icons.push_pin : Icons.autorenew,
-                color: _isPinned ? const Color(0xFFFFDF7A) : const Color(0xFF2DD4BF),
+                color: _isPinned ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF2DD4BF),
                 size: 18,
               ),
               const SizedBox(width: 8),
@@ -2053,7 +2054,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                           : rotatingNotice),
                   style: TextStyle(
                     color: (_isPinned || (_appliedVerseRef != null && _appliedVerseRef!.isNotEmpty))
-                        ? const Color(0xFFFFDF7A)
+                        ? BeyanColors.tone(0xFFFFDF7A)
                         : Colors.white70,
                     fontSize: 12,
                     fontWeight: (_isPinned || (_appliedVerseRef != null && _appliedVerseRef!.isNotEmpty))
@@ -2072,8 +2073,8 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                   ),
                   child: Text(
                     strings.rotateAction,
-                    style: const TextStyle(
-                      color: Color(0xFFFFDF7A),
+                    style: TextStyle(
+                      color: BeyanColors.tone(0xFFFFDF7A),
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                       decoration: TextDecoration.underline,
@@ -2088,18 +2089,18 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
         // Ana Uygula Butonu
         ElevatedButton.icon(
           onPressed: _syncAndApplyWidgetSettings,
-          icon: const Icon(Icons.sync_rounded, color: Color(0xFF071F1B), size: 20),
+          icon: Icon(Icons.sync_rounded, color: BeyanColors.tone(0xFF071F1B), size: 20),
           label: Text(
             btnText,
-            style: const TextStyle(
-              color: Color(0xFF071F1B),
+            style: TextStyle(
+              color: BeyanColors.tone(0xFF071F1B),
               fontSize: 15,
               fontWeight: FontWeight.bold,
             ),
           ),
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFFFFDF7A),
-            foregroundColor: const Color(0xFF071F1B),
+            backgroundColor: BeyanColors.tone(0xFFFFDF7A),
+            foregroundColor: BeyanColors.tone(0xFF071F1B),
             padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
@@ -2112,17 +2113,17 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
         const SizedBox(height: 8),
         OutlinedButton.icon(
           onPressed: _pinCurrentVerse,
-          icon: const Icon(Icons.push_pin_outlined, color: Color(0xFFFFDF7A), size: 18),
+          icon: Icon(Icons.push_pin_outlined, color: BeyanColors.tone(0xFFFFDF7A), size: 18),
           label: Text(
             pinBtnText,
-            style: const TextStyle(
-              color: Color(0xFFFFDF7A),
+            style: TextStyle(
+              color: BeyanColors.tone(0xFFFFDF7A),
               fontSize: 13,
               fontWeight: FontWeight.w600,
             ),
           ),
           style: OutlinedButton.styleFrom(
-            side: BorderSide(color: const Color(0xFFFFDF7A).withValues(alpha: 0.35)),
+            side: BorderSide(color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.35)),
             padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(14),
@@ -2198,7 +2199,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: const Color(0xFF0A241F),
+            color: BeyanColors.tone(0xFF0A241F),
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
               color: Colors.white.withValues(alpha: 0.08),
@@ -2225,14 +2226,14 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
       children: [
         Container(
           padding: const EdgeInsets.all(2),
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: Color(0xFF10B981),
+            color: BeyanColors.tone(0xFF10B981),
           ),
-          child: const Icon(
+          child: Icon(
             Icons.check_rounded,
             size: 14,
-            color: Color(0xFF032620),
+            color: BeyanColors.tone(0xFF032620),
           ),
         ),
         const SizedBox(width: 10),
@@ -2267,7 +2268,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: const Color(0xFF0A241F),
+            color: BeyanColors.tone(0xFF0A241F),
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
               color: Colors.white.withValues(alpha: 0.08),
@@ -2303,15 +2304,15 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
         Container(
           width: 22,
           height: 22,
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: Color(0xFF10B981),
+            color: BeyanColors.tone(0xFF10B981),
           ),
           child: Center(
             child: Text(
               number,
-              style: const TextStyle(
-                color: Color(0xFF032620),
+              style: TextStyle(
+                color: BeyanColors.tone(0xFF032620),
                 fontWeight: FontWeight.bold,
                 fontSize: 12,
               ),

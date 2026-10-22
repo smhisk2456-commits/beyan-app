@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
@@ -175,8 +176,8 @@ class _ArabicTextState extends State<ArabicText> {
                         fontSize: widget.fontSize * 0.82,
                         height: widget.lineHeight,
                         fontWeight: FontWeight.bold,
-                        color: const Color(0xFFFFDF7A),
-                        backgroundColor: const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.35 : 0.22),
+                        color: BeyanColors.tone(0xFFFFDF7A),
+                        backgroundColor: BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.35 : 0.22),
                       )
                     : TextStyle(
                         fontFamily: 'Amiri',
@@ -189,14 +190,14 @@ class _ArabicTextState extends State<ArabicText> {
                         color: (widget.highlightedWordIndex == null)
                             ? defaultColor
                             : (widget.highlightedWordIndex == i
-                                ? (isDark ? const Color(0xFFFFDF7A) : const Color(0xFF012E2B))
+                                ? (isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF012E2B))
                                 : (i < widget.highlightedWordIndex!
-                                    ? (isDark ? Colors.white.withValues(alpha: 0.95) : const Color(0xFF0A443C))
+                                    ? (isDark ? Colors.white.withValues(alpha: 0.95) : BeyanColors.tone(0xFF0A443C))
                                     : (isDark ? Colors.white38 : Colors.black38))),
                         backgroundColor: (widget.highlightedWordIndex == i)
                             ? (isDark
-                                ? const Color(0xFFD4AF37).withValues(alpha: 0.42)
-                                : const Color(0xFFFFDF7A).withValues(alpha: 0.75))
+                                ? BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.42)
+                                : BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.75))
                             : null,
                       ),
               );

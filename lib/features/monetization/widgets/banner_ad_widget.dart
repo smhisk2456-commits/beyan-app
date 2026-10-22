@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -114,10 +115,10 @@ class _BannerAdWidgetState extends ConsumerState<BannerAdWidget> {
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         padding: const EdgeInsets.symmetric(vertical: 4),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF071F1B) : Colors.grey.shade50,
+          color: isDark ? BeyanColors.tone(0xFF071F1B) : Colors.grey.shade50,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
+            color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.2),
             width: 1,
           ),
         ),

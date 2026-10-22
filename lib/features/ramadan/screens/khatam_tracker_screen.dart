@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,7 +21,7 @@ class KhatamTrackerScreen extends ConsumerWidget {
     final percentage = (khatamState.percentage * 100).toInt();
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF011815) : const Color(0xFFF4F7F6),
+      backgroundColor: isDark ? BeyanColors.tone(0xFF011815) : BeyanColors.tone(0xFFF4F7F6),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -34,7 +35,7 @@ class KhatamTrackerScreen extends ConsumerWidget {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: isDark ? Colors.white : const Color(0xFF033E35),
+            color: isDark ? Colors.white : BeyanColors.tone(0xFF033E35),
           ),
         ),
         actions: [
@@ -60,8 +61,8 @@ class KhatamTrackerScreen extends ConsumerWidget {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: isDark
-                    ? [const Color(0xFF062A24), const Color(0xFF011815)]
-                    : [const Color(0xFF0F5A47), const Color(0xFF063A2D)],
+                    ? [BeyanColors.tone(0xFF062A24), BeyanColors.tone(0xFF011815)]
+                    : [BeyanColors.tone(0xFF0F5A47), BeyanColors.tone(0xFF063A2D)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -130,7 +131,7 @@ class KhatamTrackerScreen extends ConsumerWidget {
                 const SizedBox(height: 14),
                 Row(
                   children: [
-                    const Icon(Icons.lightbulb_outline_rounded, color: Color(0xFFFFDF7A), size: 16),
+                    Icon(Icons.lightbulb_outline_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 16),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -160,7 +161,7 @@ class KhatamTrackerScreen extends ConsumerWidget {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: isDark ? Colors.white : const Color(0xFF033E35),
+                  color: isDark ? Colors.white : BeyanColors.tone(0xFF033E35),
                 ),
               ),
               Text(
@@ -181,8 +182,8 @@ class KhatamTrackerScreen extends ConsumerWidget {
               margin: const EdgeInsets.only(bottom: 10),
               decoration: BoxDecoration(
                 color: isDone
-                    ? (isDark ? const Color(0xFF0A332A) : const Color(0xFFE8F5EE))
-                    : (isDark ? const Color(0xFF06221D) : Colors.white),
+                    ? (isDark ? BeyanColors.tone(0xFF0A332A) : BeyanColors.tone(0xFFE8F5EE))
+                    : (isDark ? BeyanColors.tone(0xFF06221D) : Colors.white),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color: isDone
@@ -227,7 +228,7 @@ class KhatamTrackerScreen extends ConsumerWidget {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: isDark ? Colors.white : const Color(0xFF033E35),
+                    color: isDark ? Colors.white : BeyanColors.tone(0xFF033E35),
                   ),
                 ),
                 subtitle: Text(
@@ -286,7 +287,7 @@ class KhatamTrackerScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: isDark ? const Color(0xFF06221D) : Colors.white,
+        backgroundColor: isDark ? BeyanColors.tone(0xFF06221D) : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: Row(
           children: [
@@ -305,10 +306,10 @@ class KhatamTrackerScreen extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: isDark ? Colors.black26 : const Color(0xFFF4F7F6),
+                  color: isDark ? Colors.black26 : BeyanColors.tone(0xFFF4F7F6),
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: const Text(
+                child: Text(
                   'صَدَقَ اللهُ الْعَظِيمُ وَبَلَّغَ رَسُولُهُ الْكَرِيمُ\n\n'
                   '«اَللَّهُمَّ ارْحَمْنَا بِالْقُرْآنِ، وَاجْعَلْهُ لَنَا إِمَامًا وَنُورًا وَهُدًى وَرَحْمَةً. '
                   'اَللَّهُمَّ ذَكِّرْنَا مِنْهُ مَا نَسِينَا، وَعَلِّمْنَا مِنْهُ مَا جَهِلْنَا، '
@@ -319,7 +320,7 @@ class KhatamTrackerScreen extends ConsumerWidget {
                     fontFamily: 'Amiri',
                     fontSize: 18,
                     height: 1.8,
-                    color: Color(0xFFD4AF37),
+                    color: BeyanColors.tone(0xFFD4AF37),
                   ),
                 ),
               ),

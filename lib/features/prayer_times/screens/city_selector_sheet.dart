@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -46,10 +47,10 @@ class _CitySelectorSheetState extends State<CitySelectorSheet> {
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.75,
-      decoration: const BoxDecoration(
-        color: Color(0xFF02211C),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        border: Border(top: BorderSide(color: Color(0xFFD4AF37), width: 1.5)),
+      decoration: BoxDecoration(
+        color: BeyanColors.tone(0xFF02211C),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        border: Border(top: BorderSide(color: BeyanColors.tone(0xFFD4AF37), width: 1.5)),
       ),
       child: Column(
         children: [
@@ -65,10 +66,10 @@ class _CitySelectorSheetState extends State<CitySelectorSheet> {
           const SizedBox(height: 16),
           Text(
             strings.cityLocationTitle,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.bold,
-              color: Color(0xFFFFDF7A),
+              color: BeyanColors.tone(0xFFFFDF7A),
             ),
           ),
           const SizedBox(height: 14),
@@ -79,9 +80,9 @@ class _CitySelectorSheetState extends State<CitySelectorSheet> {
             child: ListTile(
               leading: Container(
                 padding: const EdgeInsets.all(8),
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Color(0xFFD4AF37),
+                  color: BeyanColors.tone(0xFFD4AF37),
                 ),
                 child: const Icon(Icons.my_location_rounded, color: Colors.black87, size: 20),
               ),
@@ -96,7 +97,7 @@ class _CitySelectorSheetState extends State<CitySelectorSheet> {
               tileColor: Colors.white.withValues(alpha: 0.05),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
-                side: const BorderSide(color: Color(0xFFD4AF37), width: 0.8),
+                side: BorderSide(color: BeyanColors.tone(0xFFD4AF37), width: 0.8),
               ),
               onTap: () async {
                 HapticFeedback.lightImpact();
@@ -117,9 +118,9 @@ class _CitySelectorSheetState extends State<CitySelectorSheet> {
               decoration: InputDecoration(
                 hintText: strings.searchCityHint,
                 hintStyle: const TextStyle(color: Colors.white38, fontSize: 13),
-                prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFFD4AF37), size: 20),
+                prefixIcon: Icon(Icons.search_rounded, color: BeyanColors.tone(0xFFD4AF37), size: 20),
                 filled: true,
-                fillColor: const Color(0xFF03312A),
+                fillColor: BeyanColors.tone(0xFF03312A),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
                   borderSide: BorderSide.none,
@@ -141,7 +142,7 @@ class _CitySelectorSheetState extends State<CitySelectorSheet> {
               itemBuilder: (context, index) {
                 final city = filtered[index];
                 return ListTile(
-                  leading: const Icon(Icons.location_on_outlined, color: Color(0xFFD4AF37), size: 20),
+                  leading: Icon(Icons.location_on_outlined, color: BeyanColors.tone(0xFFD4AF37), size: 20),
                   title: Text(
                     city.name,
                     style: const TextStyle(color: Colors.white, fontSize: 14.5, fontWeight: FontWeight.w600),

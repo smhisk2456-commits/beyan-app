@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -86,7 +87,7 @@ class _PremiumPaywallSheetState extends ConsumerState<PremiumPaywallSheet> {
                               ? 'Geliştirici Modu: Premium AKTİF edildi!'
                               : 'Geliştirici Modu: Premium KAPATILDI.',
                         ),
-                        backgroundColor: const Color(0xFF033E35),
+                        backgroundColor: BeyanColors.tone(0xFF033E35),
                         duration: const Duration(seconds: 2),
                       ),
                     );
@@ -97,8 +98,8 @@ class _PremiumPaywallSheetState extends ConsumerState<PremiumPaywallSheet> {
                   height: 76,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFFFFDF7A), Color(0xFFD4AF37), Color(0xFF997A15)],
+                    gradient: LinearGradient(
+                      colors: [BeyanColors.tone(0xFFFFDF7A), BeyanColors.tone(0xFFD4AF37), BeyanColors.tone(0xFF997A15)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -110,9 +111,9 @@ class _PremiumPaywallSheetState extends ConsumerState<PremiumPaywallSheet> {
                       ),
                     ],
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.workspace_premium_rounded,
-                    color: Color(0xFF071F1B),
+                    color: BeyanColors.tone(0xFF071F1B),
                     size: 42,
                   ),
                 ),
@@ -187,17 +188,17 @@ class _PremiumPaywallSheetState extends ConsumerState<PremiumPaywallSheet> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF033E35), Color(0xFF071F1B)],
+                  gradient: LinearGradient(
+                    colors: [BeyanColors.tone(0xFF033E35), BeyanColors.tone(0xFF071F1B)],
                   ),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: gold, width: 1.2),
                 ),
-                child: const Row(
+                child: Row(
                   children: [
-                    Icon(Icons.check_circle_rounded, color: Color(0xFFFFDF7A), size: 28),
-                    SizedBox(width: 14),
-                    Expanded(
+                    Icon(Icons.check_circle_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 28),
+                    const SizedBox(width: 14),
+                    const Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -283,10 +284,10 @@ class _PremiumPaywallSheetState extends ConsumerState<PremiumPaywallSheet> {
                                         ),
                                         child: Text(
                                           tier.badgeText,
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             fontSize: 9,
                                             fontWeight: FontWeight.bold,
-                                            color: Color(0xFF071F1B),
+                                            color: BeyanColors.tone(0xFF071F1B),
                                           ),
                                         ),
                                       ),
@@ -337,9 +338,9 @@ class _PremiumPaywallSheetState extends ConsumerState<PremiumPaywallSheet> {
                             if (success) {
                               Navigator.pop(context);
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Tebrikler! Beyân Premium üyeliğiniz başlatıldı 👑'),
-                                  backgroundColor: Color(0xFF033E35),
+                                SnackBar(
+                                  content: const Text('Tebrikler! Beyân Premium üyeliğiniz başlatıldı 👑'),
+                                  backgroundColor: BeyanColors.tone(0xFF033E35),
                                 ),
                               );
                             } else {
@@ -354,19 +355,19 @@ class _PremiumPaywallSheetState extends ConsumerState<PremiumPaywallSheet> {
                         },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: gold,
-                    foregroundColor: const Color(0xFF071F1B),
+                    foregroundColor: BeyanColors.tone(0xFF071F1B),
                     elevation: 4,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
                   child: premiumState.isLoading
-                      ? const SizedBox(
+                      ? SizedBox(
                           width: 22,
                           height: 22,
                           child: CircularProgressIndicator(
                             strokeWidth: 2.5,
-                            color: Color(0xFF071F1B),
+                            color: BeyanColors.tone(0xFF071F1B),
                           ),
                         )
                       : Text(
@@ -391,9 +392,9 @@ class _PremiumPaywallSheetState extends ConsumerState<PremiumPaywallSheet> {
                     await ref.read(premiumProvider.notifier).restorePurchases();
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Önceki satın alımlar kontrol edildi.'),
-                          backgroundColor: Color(0xFF033E35),
+                        SnackBar(
+                          content: const Text('Önceki satın alımlar kontrol edildi.'),
+                          backgroundColor: BeyanColors.tone(0xFF033E35),
                         ),
                       );
                     }

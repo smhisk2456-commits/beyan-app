@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -31,6 +32,7 @@ class _MushafPageViewState extends ConsumerState<MushafPageView> {
   late PageController _pageController;
   late List<List<Verse>> _pages;
   int _currentPageIndex = 0;
+  int _lastHapticMilestone = -1;
   double _fontSize = 22.0;
   bool _showInlineTranslation = false;
 
@@ -40,7 +42,22 @@ class _MushafPageViewState extends ConsumerState<MushafPageView> {
     _pages = _partitionVersesIntoPages(widget.verses);
     final initialPage = _findInitialPageIndex();
     _currentPageIndex = initialPage;
-    _pageController = PageController(initialPage: initialPage);
+    _pageController = PageController(initialPage: initialPage)
+      ..addListener(_onPageScrollTick);
+  }
+
+  void _onPageScrollTick() {
+    if (!_pageController.hasClients || !_pageController.position.haveDimensions) return;
+    final page = _pageController.page ?? _currentPageIndex.toDouble();
+    final fraction = (page - page.floor()).abs();
+    // Parmakla sayfa kıvrılırken %35 geçiş eşiğinde ince dokunsal sayfa gerilimi hissi
+    final milestone = (fraction > 0.32 && fraction < 0.68) ? page.floor() : -1;
+    if (milestone != -1 && milestone != _lastHapticMilestone) {
+      _lastHapticMilestone = milestone;
+      HapticFeedback.selectionClick();
+    } else if (milestone == -1) {
+      _lastHapticMilestone = -1;
+    }
   }
 
   @override
@@ -109,10 +126,10 @@ class _MushafPageViewState extends ConsumerState<MushafPageView> {
         return Container(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 30),
           decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF06221D) : Colors.white,
+            color: isDark ? BeyanColors.tone(0xFF06221D) : Colors.white,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
             border: Border.all(
-              color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+              color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.4),
               width: 1,
             ),
           ),
@@ -136,25 +153,25 @@ class _MushafPageViewState extends ConsumerState<MushafPageView> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFD4AF37).withValues(alpha: 0.16),
+                      color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.16),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+                        color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.4),
                         width: 1,
                       ),
                     ),
                     child: Text(
                       '${widget.surah.localizedName(strings.language.code)} • ${verse.verseNumber}. Âyet',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFFD4AF37),
+                        color: BeyanColors.tone(0xFFD4AF37),
                       ),
                     ),
                   ),
                   const Spacer(),
                   IconButton(
-                    icon: const Icon(Icons.copy_rounded, color: Color(0xFFD4AF37), size: 20),
+                    icon: Icon(Icons.copy_rounded, color: BeyanColors.tone(0xFFD4AF37), size: 20),
                     tooltip: strings.copyAndShare,
                     onPressed: () {
                       HapticFeedback.lightImpact();
@@ -180,19 +197,19 @@ class _MushafPageViewState extends ConsumerState<MushafPageView> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF031A16) : const Color(0xFFF9FBF9),
+                  color: isDark ? BeyanColors.tone(0xFF031A16) : const Color(0xFFF9FBF9),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFD4AF37).withValues(alpha: 0.2)),
+                  border: Border.all(color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.2)),
                 ),
                 child: Text(
                   verse.arabicText,
                   textDirection: TextDirection.rtl,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Amiri',
                     fontSize: 21,
                     height: 1.8,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFFFFDF7A),
+                    color: BeyanColors.tone(0xFFFFDF7A),
                   ),
                 ),
               ),
@@ -232,7 +249,7 @@ class _MushafPageViewState extends ConsumerState<MushafPageView> {
 
     // Sayfalar boşsa
     if (_pages.isEmpty) {
-      return const Center(child: CircularProgressIndicator(color: Color(0xFFD4AF37)));
+      return Center(child: CircularProgressIndicator(color: BeyanColors.tone(0xFFD4AF37)));
     }
 
     // Sesli tilavet ilerlerken aktif ayet başka bir sayfadaysa sayfayı otomatik çevir
@@ -250,8 +267,6 @@ class _MushafPageViewState extends ConsumerState<MushafPageView> {
     });
 
     final totalPages = _pages.length;
-    final isFirstSurahPage = _currentPageIndex == 0;
-    final showBismillah = isFirstSurahPage && widget.surah.id != 9 && widget.surah.id != 1;
 
     return Column(
       children: [
@@ -259,10 +274,10 @@ class _MushafPageViewState extends ConsumerState<MushafPageView> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF031A16) : const Color(0xFFF6F3E9),
+            color: isDark ? BeyanColors.tone(0xFF031A16) : const Color(0xFFF6F3E9),
             border: Border(
               bottom: BorderSide(
-                color: const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.3 : 0.25),
+                color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.3 : 0.25),
                 width: 1,
               ),
             ),
@@ -276,21 +291,21 @@ class _MushafPageViewState extends ConsumerState<MushafPageView> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+                    color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFFD4AF37).withValues(alpha: 0.3)),
+                    border: Border.all(color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.3)),
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.format_list_bulleted_rounded, size: 14, color: Color(0xFFD4AF37)),
-                      SizedBox(width: 4),
+                      Icon(Icons.format_list_bulleted_rounded, size: 14, color: BeyanColors.tone(0xFFD4AF37)),
+                      const SizedBox(width: 4),
                       Text(
                         'Ayet Listesi',
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFFD4AF37),
+                          color: BeyanColors.tone(0xFFD4AF37),
                         ),
                       ),
                     ],
@@ -302,7 +317,7 @@ class _MushafPageViewState extends ConsumerState<MushafPageView> {
               // Yazı Boyutu A- / A+
               IconButton(
                 icon: const Icon(Icons.text_decrease_rounded, size: 18),
-                color: const Color(0xFFD4AF37),
+                color: BeyanColors.tone(0xFFD4AF37),
                 tooltip: 'Yazı Boyutunu Küçült',
                 onPressed: () {
                   if (_fontSize > 18.0) {
@@ -312,11 +327,11 @@ class _MushafPageViewState extends ConsumerState<MushafPageView> {
               ),
               Text(
                 '${_fontSize.toInt()}',
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFFD4AF37)),
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: BeyanColors.tone(0xFFD4AF37)),
               ),
               IconButton(
                 icon: const Icon(Icons.text_increase_rounded, size: 18),
-                color: const Color(0xFFD4AF37),
+                color: BeyanColors.tone(0xFFD4AF37),
                 tooltip: 'Yazı Boyutunu Büyüt',
                 onPressed: () {
                   if (_fontSize < 32.0) {
@@ -330,7 +345,7 @@ class _MushafPageViewState extends ConsumerState<MushafPageView> {
               IconButton(
                 icon: Icon(
                   _showInlineTranslation ? Icons.translate_rounded : Icons.g_translate_outlined,
-                  color: _showInlineTranslation ? const Color(0xFFFFDF7A) : Colors.white60,
+                  color: _showInlineTranslation ? BeyanColors.tone(0xFFFFDF7A) : Colors.white60,
                   size: 20,
                 ),
                 tooltip: _showInlineTranslation ? 'Meal Gizle' : 'Meal Göster',
@@ -343,14 +358,13 @@ class _MushafPageViewState extends ConsumerState<MushafPageView> {
           ),
         ),
 
-        // ── Ana Mushaf Sayfası (PageView ile Sağa/Sola Çevirmeli) ────────────
+        // ── Ana Mushaf Sayfası (Parmak Hareketine Duyarlı 3B Gerçek Sayfa Çevirme) ────────────
         Expanded(
           child: PageView.builder(
             controller: _pageController,
             physics: const BouncingScrollPhysics(),
             itemCount: totalPages,
             onPageChanged: (idx) {
-              HapticFeedback.selectionClick();
               AcousticAudioService.instance.playParchmentPageFlip();
               setState(() {
                 _currentPageIndex = idx;
@@ -358,33 +372,58 @@ class _MushafPageViewState extends ConsumerState<MushafPageView> {
             },
             itemBuilder: (context, pageIndex) {
               final pageVerses = _pages[pageIndex];
+              final pageShowBismillah =
+                  pageIndex == 0 && widget.surah.id != 9 && widget.surah.id != 1;
 
-              return Padding(
+              final pageCard = Padding(
                 padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
                 child: Container(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: isDark
-                          ? const [Color(0xFF03221D), Color(0xFF011613)]
+                          ? [BeyanColors.tone(0xFF03221D), BeyanColors.tone(0xFF011613)]
                           : const [Color(0xFFFDFBF7), Color(0xFFF5EFE3)],
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                     ),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.45 : 0.35),
+                      color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.45 : 0.35),
                       width: 1.5,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.06),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
+                        color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
+                        blurRadius: 16,
+                        offset: const Offset(0, 6),
                       ),
                     ],
                   ),
                   child: Stack(
                     children: [
+                      // Cilt Sırtı Gölgelendirmesi (Gerçek Kitap Oluk Hissi)
+                      Positioned(
+                        top: 0,
+                        bottom: 0,
+                        right: 0,
+                        width: 24,
+                        child: IgnorePointer(
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              borderRadius: const BorderRadius.horizontal(right: Radius.circular(20)),
+                              gradient: LinearGradient(
+                                begin: Alignment.centerRight,
+                                end: Alignment.centerLeft,
+                                colors: [
+                                  Colors.black.withValues(alpha: isDark ? 0.32 : 0.08),
+                                  Colors.transparent,
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+
                       // İç Tezhib Çerçeve Çizgisi
                       Positioned.fill(
                         child: Container(
@@ -392,7 +431,7 @@ class _MushafPageViewState extends ConsumerState<MushafPageView> {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                              color: const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.25 : 0.18),
+                              color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.25 : 0.18),
                               width: 1,
                             ),
                           ),
@@ -412,34 +451,45 @@ class _MushafPageViewState extends ConsumerState<MushafPageView> {
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
-                                    color: isDark ? const Color(0xFFFFDF7A) : const Color(0xFF034A3E),
+                                    color: isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF034A3E),
                                   ),
                                 ),
                                 const Spacer(),
-                                Text(
-                                  widget.surah.nameArabic,
-                                  style: TextStyle(
-                                    fontFamily: 'Amiri',
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: isDark ? const Color(0xFFFFDF7A) : const Color(0xFF034A3E),
-                                  ),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.swipe_rounded,
+                                      size: 13,
+                                      color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.7),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      widget.surah.nameArabic,
+                                      style: TextStyle(
+                                        fontFamily: 'Amiri',
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF034A3E),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
-                            const Divider(color: Color(0xFFD4AF37), height: 12, thickness: 0.8),
+                            Divider(color: BeyanColors.tone(0xFFD4AF37), height: 12, thickness: 0.8),
 
                             // Besmele (1. Sayfada)
-                            if (showBismillah) ...[
+                            if (pageShowBismillah) ...[
                               Container(
                                 width: double.infinity,
                                 margin: const EdgeInsets.symmetric(vertical: 4),
                                 padding: const EdgeInsets.symmetric(vertical: 6),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFD4AF37).withValues(alpha: 0.12),
+                                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.12),
                                   borderRadius: BorderRadius.circular(10),
                                 ),
-                                child: const Text(
+                                child: Text(
                                   'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ',
                                   textAlign: TextAlign.center,
                                   textDirection: TextDirection.rtl,
@@ -447,7 +497,7 @@ class _MushafPageViewState extends ConsumerState<MushafPageView> {
                                     fontFamily: 'Amiri',
                                     fontSize: 20,
                                     fontWeight: FontWeight.w600,
-                                    color: Color(0xFFFFDF7A),
+                                    color: BeyanColors.tone(0xFFFFDF7A),
                                   ),
                                 ),
                               ),
@@ -473,7 +523,7 @@ class _MushafPageViewState extends ConsumerState<MushafPageView> {
                                                   padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 1),
                                                   decoration: BoxDecoration(
                                                     color: (activeVerseNumber == verse.verseNumber)
-                                                        ? const Color(0xFFD4AF37).withValues(alpha: 0.35)
+                                                        ? BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35)
                                                         : Colors.transparent,
                                                     borderRadius: BorderRadius.circular(6),
                                                   ),
@@ -488,8 +538,8 @@ class _MushafPageViewState extends ConsumerState<MushafPageView> {
                                                             height: 2.15,
                                                             letterSpacing: 0.2,
                                                             color: isDark
-                                                                ? const Color(0xFFFFE082)
-                                                                : const Color(0xFF012E2B),
+                                                                ? BeyanColors.tone(0xFFFFE082)
+                                                                : BeyanColors.tone(0xFF012E2B),
                                                             fontWeight: (activeVerseNumber == verse.verseNumber)
                                                                 ? FontWeight.bold
                                                                 : FontWeight.w600,
@@ -500,7 +550,7 @@ class _MushafPageViewState extends ConsumerState<MushafPageView> {
                                                           style: TextStyle(
                                                             fontFamily: 'Amiri',
                                                             fontSize: _fontSize * 0.85,
-                                                            color: const Color(0xFFD4AF37),
+                                                            color: BeyanColors.tone(0xFFD4AF37),
                                                             fontWeight: FontWeight.bold,
                                                           ),
                                                         ),
@@ -522,7 +572,7 @@ class _MushafPageViewState extends ConsumerState<MushafPageView> {
                                     // Meal görünümü açıkken altta Türkçe meal
                                     if (_showInlineTranslation) ...[
                                       const SizedBox(height: 14),
-                                      const Divider(color: Color(0xFFD4AF37), height: 16),
+                                      Divider(color: BeyanColors.tone(0xFFD4AF37), height: 16),
                                       for (final v in pageVerses) ...[
                                         Padding(
                                           padding: const EdgeInsets.only(bottom: 8),
@@ -543,14 +593,14 @@ class _MushafPageViewState extends ConsumerState<MushafPageView> {
                             ),
 
                             // ── Alt Sayfa Numarası (Mushaf Çerçevesi) ─────────
-                            const Divider(color: Color(0xFFD4AF37), height: 12, thickness: 0.8),
+                            Divider(color: BeyanColors.tone(0xFFD4AF37), height: 12, thickness: 0.8),
                             Center(
                               child: Text(
                                 '— ${pageIndex + 1} / $totalPages —',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.bold,
-                                  color: Color(0xFFD4AF37),
+                                  color: BeyanColors.tone(0xFFD4AF37),
                                   letterSpacing: 1.5,
                                 ),
                               ),
@@ -562,6 +612,64 @@ class _MushafPageViewState extends ConsumerState<MushafPageView> {
                   ),
                 ),
               );
+
+              // Parmak hareketini anlık takip eden 3B Mushaf Sayfa Kıvrılma & Gölge Efekti
+              return AnimatedBuilder(
+                animation: _pageController,
+                child: pageCard,
+                builder: (context, child) {
+                  double pageOffset = _currentPageIndex.toDouble();
+                  if (_pageController.hasClients && _pageController.position.haveDimensions) {
+                    pageOffset = _pageController.page ?? _currentPageIndex.toDouble();
+                  }
+                  final delta = (pageOffset - pageIndex).clamp(-1.0, 1.0);
+                  if (delta.abs() < 0.001) return child!;
+
+                  final absDelta = delta.abs();
+                  final isTurningAway = delta > 0;
+                  final rotationY = delta * 0.62; // 3B perspektif açısı
+                  final scale = 1.0 - (absDelta * 0.045);
+
+                  final matrix = Matrix4.identity()
+                    ..setEntry(3, 2, 0.0018) // 3B derinlik perspektifi
+                    ..rotateY(rotationY)
+                    ..scaleByDouble(scale, scale, 1.0, 1.0);
+
+                  return Transform(
+                    alignment: isTurningAway ? Alignment.centerLeft : Alignment.centerRight,
+                    transform: matrix,
+                    child: Stack(
+                      children: [
+                        child!,
+                        // Parmakla çevrilirken oluşan dinamik kağıt kıvrımı ve gölgesi
+                        Positioned.fill(
+                          child: IgnorePointer(
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  gradient: LinearGradient(
+                                    begin: isTurningAway ? Alignment.centerRight : Alignment.centerLeft,
+                                    end: isTurningAway ? Alignment.centerLeft : Alignment.centerRight,
+                                    stops: const [0.0, 0.25, 0.65, 1.0],
+                                    colors: [
+                                      Colors.black.withValues(alpha: (absDelta * 0.42).clamp(0.0, 0.42)),
+                                      BeyanColors.tone(0xFFFFDF7A).withValues(alpha: (absDelta * 0.14).clamp(0.0, 0.14)),
+                                      Colors.transparent,
+                                      Colors.black.withValues(alpha: (absDelta * 0.22).clamp(0.0, 0.22)),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              );
             },
           ),
         ),
@@ -570,10 +678,10 @@ class _MushafPageViewState extends ConsumerState<MushafPageView> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
           decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF031A16) : const Color(0xFFF6F3E9),
+            color: isDark ? BeyanColors.tone(0xFF031A16) : const Color(0xFFF6F3E9),
             border: Border(
               top: BorderSide(
-                color: const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.3 : 0.25),
+                color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.3 : 0.25),
                 width: 1,
               ),
             ),
@@ -584,7 +692,7 @@ class _MushafPageViewState extends ConsumerState<MushafPageView> {
               // Önceki Sayfa
               IconButton(
                 icon: const Icon(Icons.arrow_back_ios_rounded, size: 18),
-                color: _currentPageIndex > 0 ? const Color(0xFFD4AF37) : Colors.white24,
+                color: _currentPageIndex > 0 ? BeyanColors.tone(0xFFD4AF37) : Colors.white24,
                 onPressed: _currentPageIndex > 0
                     ? () {
                         HapticFeedback.selectionClick();
@@ -600,16 +708,16 @@ class _MushafPageViewState extends ConsumerState<MushafPageView> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFD4AF37).withValues(alpha: 0.35)),
+                  border: Border.all(color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35)),
                 ),
                 child: Text(
                   'Sayfa ${_currentPageIndex + 1} / $totalPages',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFFD4AF37),
+                    color: BeyanColors.tone(0xFFD4AF37),
                   ),
                 ),
               ),
@@ -617,7 +725,7 @@ class _MushafPageViewState extends ConsumerState<MushafPageView> {
               // Sonraki Sayfa
               IconButton(
                 icon: const Icon(Icons.arrow_forward_ios_rounded, size: 18),
-                color: _currentPageIndex < totalPages - 1 ? const Color(0xFFD4AF37) : Colors.white24,
+                color: _currentPageIndex < totalPages - 1 ? BeyanColors.tone(0xFFD4AF37) : Colors.white24,
                 onPressed: _currentPageIndex < totalPages - 1
                     ? () {
                         HapticFeedback.selectionClick();

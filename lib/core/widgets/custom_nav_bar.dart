@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 
@@ -31,7 +32,7 @@ class BeyanBottomNavBar extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF0F1A18) : Colors.white,
+        color: isDark ? BeyanColors.tone(0xFF0F1A18) : Colors.white,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.07),

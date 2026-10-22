@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
@@ -19,10 +21,12 @@ class NearbyMosquesScreen extends StatefulWidget {
 class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
   final TextEditingController _searchCtrl = TextEditingController();
   final NearbyMosquesService _service = NearbyMosquesService.instance;
+  StreamSubscription<Position>? _positionSub;
 
   bool _isLoading = true;
   bool _isGpsActive = false;
-  String _userLocationTitle = 'Konum alınıyor...';
+  double? _gpsAccuracyMeters;
+  String _userLocationTitle = 'Canlı GPS konumu alınıyor...';
   double _userLat = AppConstants.defaultLatitude;
   double _userLng = AppConstants.defaultLongitude;
 
@@ -39,10 +43,14 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
   Future<void> _initSavedLocationAndLoad() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final sLat = prefs.getDouble('beyan_verified_gps_lat') ?? prefs.getDouble('beyan_widget_lat');
-      final sLng = prefs.getDouble('beyan_verified_gps_lng') ?? prefs.getDouble('beyan_widget_lng');
-      final sTitle = prefs.getString('beyan_verified_gps_title') ?? prefs.getString('beyan_widget_city');
-      if (sLat != null && sLng != null && mounted) {
+      final sLat = prefs.getDouble('beyan_verified_gps_lat');
+      final sLng = prefs.getDouble('beyan_verified_gps_lng');
+      final sTitle = prefs.getString('beyan_verified_gps_title');
+      final isDefaultFallback = sLat != null &&
+          sLng != null &&
+          (sLat - AppConstants.defaultLatitude).abs() < 0.0005 &&
+          (sLng - AppConstants.defaultLongitude).abs() < 0.0005;
+      if (sLat != null && sLng != null && !isDefaultFallback && mounted) {
         setState(() {
           _userLat = sLat;
           _userLng = sLng;
@@ -56,13 +64,60 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
     _loadNearbyMosques();
   }
 
+  void _startLivePositionStream() {
+    _positionSub?.cancel();
+    try {
+      _positionSub = Geolocator.getPositionStream(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.best,
+          distanceFilter: 20,
+        ),
+      ).listen((pos) async {
+        if (!mounted) return;
+        final movedDist = NearbyMosque.calculateDistanceMeters(
+          _userLat,
+          _userLng,
+          pos.latitude,
+          pos.longitude,
+        );
+        setState(() {
+          _userLat = pos.latitude;
+          _userLng = pos.longitude;
+          _gpsAccuracyMeters = pos.accuracy;
+          _isGpsActive = true;
+          if (_allMosques.isNotEmpty) {
+            _allMosques = _allMosques.map((m) {
+              final d = NearbyMosque.calculateDistanceMeters(pos.latitude, pos.longitude, m.latitude, m.longitude);
+              final b = NearbyMosque.calculateBearing(pos.latitude, pos.longitude, m.latitude, m.longitude);
+              return m.copyWith(distanceMeters: d, bearingDegrees: b);
+            }).toList()
+              ..sort((a, b) => a.distanceMeters.compareTo(b.distanceMeters));
+          }
+        });
+        // Konum ilk tahminden >120 metre daha hassas bir noktaya oturduysa camileri yeniden tara
+        if (movedDist > 120) {
+          final mosques = await _service.findNearbyMosques(
+            userLat: pos.latitude,
+            userLng: pos.longitude,
+            radiusMeters: 5000,
+            forceRefresh: true,
+          );
+          if (mounted && mosques.isNotEmpty) {
+            setState(() => _allMosques = mosques);
+          }
+        }
+      });
+    } catch (_) {}
+  }
+
   @override
   void dispose() {
+    _positionSub?.cancel();
     _searchCtrl.dispose();
     super.dispose();
   }
 
-  Future<void> _loadNearbyMosques() async {
+  Future<void> _loadNearbyMosques({bool forceRefresh = false}) async {
     setState(() => _isLoading = true);
     try {
       // 1. Konum servisleri açık mı kontrol et
@@ -73,10 +128,10 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
             content: const Text('Cihaz konum servisi (GPS) kapalı. Lütfen GPS\'i açın.'),
             action: SnackBarAction(
               label: 'Ayarları Aç',
-              textColor: const Color(0xFFFFDF7A),
+              textColor: BeyanColors.tone(0xFFFFDF7A),
               onPressed: () => Geolocator.openLocationSettings(),
             ),
-            backgroundColor: const Color(0xFF032D26),
+            backgroundColor: BeyanColors.tone(0xFF032D26),
             duration: const Duration(seconds: 4),
           ),
         );
@@ -94,39 +149,49 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
             content: const Text('Konum izni kalıcı reddedildi. Ayarlardan izin verin.'),
             action: SnackBarAction(
               label: 'Uygulama İzinleri',
-              textColor: const Color(0xFFFFDF7A),
+              textColor: BeyanColors.tone(0xFFFFDF7A),
               onPressed: () => Geolocator.openAppSettings(),
             ),
-            backgroundColor: const Color(0xFF032D26),
+            backgroundColor: BeyanColors.tone(0xFF032D26),
             duration: const Duration(seconds: 5),
           ),
         );
       }
 
-      // 3. ANINDA VE KESİN GPS TESPİTİ (Sıfır bekleme süreli son bilinen konum + Canlı GPS)
+      // 3. YÜKSEK HASSASİYETLİ (BEST ACCURACY) CANLI DONANIM GPS TESPİTİ
       if (perm == LocationPermission.always || perm == LocationPermission.whileInUse) {
+        _startLivePositionStream();
         try {
-          // Önce son bilinen cihaz GPS konumunu al (0 ms gecikme, kesin ve gerçek donanım konumu)
           final lastPos = await Geolocator.getLastKnownPosition();
           if (lastPos != null) {
             _userLat = lastPos.latitude;
             _userLng = lastPos.longitude;
+            _gpsAccuracyMeters = lastPos.accuracy;
             _isGpsActive = true;
           }
         } catch (_) {}
 
-        // Ardından taze canlı GPS sinyali almayı dene (4 sn hızlı zaman aşımı)
         try {
           final livePos = await Geolocator.getCurrentPosition(
-            desiredAccuracy: LocationAccuracy.medium,
-            timeLimit: const Duration(seconds: 4),
+            desiredAccuracy: LocationAccuracy.best,
+            timeLimit: const Duration(seconds: 8),
           );
           _userLat = livePos.latitude;
           _userLng = livePos.longitude;
+          _gpsAccuracyMeters = livePos.accuracy;
           _isGpsActive = true;
         } catch (_) {
-          // Canlı GPS zaman aşımına uğrarsa (örneğin kapalı mekan),
-          // BİLİNEN GERÇEK KONUMU KORU! Asla genel şehir merkezine zıplama!
+          // Best accuracy zaman aşımına uğrarsa high/medium ile hızlı yedek dene
+          try {
+            final fallbackPos = await Geolocator.getCurrentPosition(
+              desiredAccuracy: LocationAccuracy.medium,
+              timeLimit: const Duration(seconds: 4),
+            );
+            _userLat = fallbackPos.latitude;
+            _userLng = fallbackPos.longitude;
+            _gpsAccuracyMeters = fallbackPos.accuracy;
+            _isGpsActive = true;
+          } catch (_) {}
         }
       }
 
@@ -147,15 +212,17 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
           if (placemarks.isNotEmpty) {
             final p = placemarks.first;
             final subLoc = p.subLocality?.trim() ?? '';
+            final street = p.thoroughfare?.trim() ?? '';
             final locality = p.locality?.trim() ?? '';
             final subAdmin = p.subAdministrativeArea?.trim() ?? '';
             final admin = p.administrativeArea?.trim() ?? '';
 
-            final district = subLoc.isNotEmpty
-                ? subLoc
-                : (locality.isNotEmpty ? locality : subAdmin);
+            final neighborhood = subLoc.isNotEmpty ? subLoc : street;
+            final district = locality.isNotEmpty ? locality : subAdmin;
 
-            if (district.isNotEmpty && admin.isNotEmpty && district != admin) {
+            if (neighborhood.isNotEmpty && district.isNotEmpty && neighborhood != district) {
+              readableLocation = '$neighborhood, $district';
+            } else if (district.isNotEmpty && admin.isNotEmpty && district != admin) {
               readableLocation = '$district, $admin';
             } else if (district.isNotEmpty) {
               readableLocation = district;
@@ -165,7 +232,10 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
           }
         } catch (_) {}
 
-        _userLocationTitle = '$readableLocation (Canlı GPS 📍)';
+        final accStr = _gpsAccuracyMeters != null && _gpsAccuracyMeters! > 0
+            ? ' • ±${_gpsAccuracyMeters!.round()}m'
+            : '';
+        _userLocationTitle = '$readableLocation (Canlı GPS 📍$accStr)';
 
         // Widget ve konum önbelleğini canlı GPS ile güncelle
         try {
@@ -179,11 +249,12 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
         } catch (_) {}
       }
 
-      // 6. Çevredeki camileri ara
+      // 6. Çevredeki camileri ara (Dar mahalle kutusu + Photon + Overpass paralel)
       final mosques = await _service.findNearbyMosques(
         userLat: _userLat,
         userLng: _userLng,
         radiusMeters: 5000,
+        forceRefresh: forceRefresh,
       );
 
       if (mounted) {
@@ -224,7 +295,7 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
     final filtered = _filteredMosques;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF011815),
+      backgroundColor: BeyanColors.tone(0xFF011815),
       appBar: AppBar(
         title: const Text(
           'Yakındaki Camiler',
@@ -233,11 +304,11 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.my_location_rounded, color: Color(0xFFFFDF7A)),
+            icon: Icon(Icons.my_location_rounded, color: BeyanColors.tone(0xFFFFDF7A)),
             tooltip: 'Konumu Yenile',
             onPressed: () {
               HapticFeedback.lightImpact();
-              _loadNearbyMosques();
+              _loadNearbyMosques(forceRefresh: true);
             },
           ),
         ],
@@ -250,12 +321,12 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
               margin: const EdgeInsets.fromLTRB(16, 8, 16, 6),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF03312B), Color(0xFF01241F)],
+                gradient: LinearGradient(
+                  colors: [BeyanColors.tone(0xFF03312B), BeyanColors.tone(0xFF01241F)],
                 ),
                 borderRadius: BorderRadius.circular(18),
                 border: Border.all(
-                  color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.4),
                   width: 1,
                 ),
               ),
@@ -265,10 +336,10 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
+                      color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.explore_rounded, color: Color(0xFFFFDF7A), size: 20),
+                    child: Icon(Icons.explore_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 20),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -277,8 +348,8 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
                       children: [
                         Text(
                           _isLoading ? 'Camiler Taranıyor...' : '${filtered.length} Cami Bulundu',
-                          style: const TextStyle(
-                            color: Color(0xFFFFDF7A),
+                          style: TextStyle(
+                            color: BeyanColors.tone(0xFFFFDF7A),
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
                           ),
@@ -296,12 +367,12 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
                     ),
                   ),
                   if (_isLoading)
-                    const SizedBox(
+                    SizedBox(
                       width: 18,
                       height: 18,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: Color(0xFFFFDF7A),
+                        color: BeyanColors.tone(0xFFFFDF7A),
                       ),
                     ),
                 ],
@@ -320,11 +391,11 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF0F4C42), Color(0xFF042E28)],
+                    gradient: LinearGradient(
+                      colors: [BeyanColors.tone(0xFF0F4C42), BeyanColors.tone(0xFF042E28)],
                     ),
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: const Color(0xFFFFDF7A).withValues(alpha: 0.6)),
+                    border: Border.all(color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.6)),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.25),
@@ -338,33 +409,33 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
                       Container(
                         padding: const EdgeInsets.all(7),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFFFDF7A).withValues(alpha: 0.2),
+                          color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.2),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.map_rounded, color: Color(0xFFFFDF7A), size: 18),
+                        child: Icon(Icons.map_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 18),
                       ),
                       const SizedBox(width: 12),
-                      const Expanded(
+                      Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               'Google Haritalar\'da Çevredeki Tüm Camiler',
                               style: TextStyle(
-                                color: Color(0xFFFFDF7A),
+                                color: BeyanColors.tone(0xFFFFDF7A),
                                 fontWeight: FontWeight.bold,
                                 fontSize: 13,
                               ),
                             ),
-                            SizedBox(height: 2),
-                            Text(
+                            const SizedBox(height: 2),
+                            const Text(
                               'Google verileriyle canlı cami, mescid ve yol tariflerini aç',
                               style: TextStyle(color: Colors.white70, fontSize: 11),
                             ),
                           ],
                         ),
                       ),
-                      const Icon(Icons.arrow_forward_ios_rounded, color: Color(0xFFFFDF7A), size: 14),
+                      Icon(Icons.arrow_forward_ios_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 14),
                     ],
                   ),
                 ),
@@ -409,13 +480,13 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
                 margin: const EdgeInsets.fromLTRB(16, 0, 16, 6),
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFD4AF37).withValues(alpha: 0.12),
+                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFFFDF7A).withValues(alpha: 0.3)),
+                  border: Border.all(color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.info_outline_rounded, color: Color(0xFFFFDF7A), size: 16),
+                    Icon(Icons.info_outline_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 16),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -442,7 +513,7 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
                   decoration: InputDecoration(
                     hintText: 'Cami adına veya semte göre ara...',
                     hintStyle: const TextStyle(color: Colors.white38, fontSize: 13),
-                    prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFFFFDF7A), size: 20),
+                    prefixIcon: Icon(Icons.search_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 20),
                     suffixIcon: _searchQuery.isNotEmpty
                         ? IconButton(
                             icon: const Icon(Icons.clear_rounded, color: Colors.white54, size: 18),
@@ -481,7 +552,7 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
             // ── 3. Cami Listesi ─────────────────────────────────────
             Expanded(
               child: _isLoading && _allMosques.isEmpty
-                  ? const Center(child: CircularProgressIndicator(color: Color(0xFFD4AF37)))
+                  ? Center(child: CircularProgressIndicator(color: BeyanColors.tone(0xFFD4AF37)))
                   : filtered.isEmpty
                       ? Center(
                           child: Padding(
@@ -518,8 +589,8 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
                                       icon: const Icon(Icons.refresh_rounded, size: 16),
                                       label: const Text('Filtreyi Sıfırla'),
                                       style: OutlinedButton.styleFrom(
-                                        foregroundColor: const Color(0xFFFFDF7A),
-                                        side: const BorderSide(color: Color(0xFFFFDF7A)),
+                                        foregroundColor: BeyanColors.tone(0xFFFFDF7A),
+                                        side: BorderSide(color: BeyanColors.tone(0xFFFFDF7A)),
                                       ),
                                     ),
                                     ElevatedButton.icon(
@@ -529,7 +600,7 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
                                       icon: const Icon(Icons.map_rounded, size: 16),
                                       label: const Text('Haritada Aç'),
                                       style: ElevatedButton.styleFrom(
-                                        backgroundColor: const Color(0xFFD4AF37),
+                                        backgroundColor: BeyanColors.tone(0xFFD4AF37),
                                         foregroundColor: Colors.black,
                                       ),
                                     ),
@@ -540,8 +611,8 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
                           ),
                         )
                       : RefreshIndicator(
-                          color: const Color(0xFFD4AF37),
-                          backgroundColor: const Color(0xFF032620),
+                          color: BeyanColors.tone(0xFFD4AF37),
+                          backgroundColor: BeyanColors.tone(0xFF032620),
                           onRefresh: _loadNearbyMosques,
                           child: ListView.builder(
                             padding: const EdgeInsets.fromLTRB(16, 6, 16, 24),
@@ -567,7 +638,7 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
         label: Text(label),
         selected: isSelected,
         onSelected: (_) => setState(() => _maxDistanceFilter = dist),
-        selectedColor: const Color(0xFFD4AF37),
+        selectedColor: BeyanColors.tone(0xFFD4AF37),
         backgroundColor: Colors.white.withValues(alpha: 0.06),
         labelStyle: TextStyle(
           color: isSelected ? Colors.black : Colors.white70,
@@ -593,10 +664,10 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: const Color(0xFF032620),
+          color: BeyanColors.tone(0xFF032620),
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
-            color: const Color(0xFFD4AF37).withValues(alpha: 0.25),
+            color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.25),
             width: 1,
           ),
         ),
@@ -610,14 +681,14 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+                    color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: const Color(0xFFFFDF7A).withValues(alpha: 0.4),
+                      color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.4),
                       width: 1,
                     ),
                   ),
-                  child: const Icon(Icons.mosque_rounded, color: Color(0xFFFFDF7A), size: 20),
+                  child: Icon(Icons.mosque_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 20),
                 ),
                 const SizedBox(width: 12),
 
@@ -654,14 +725,14 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
+                    color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFFFDF7A).withValues(alpha: 0.5)),
+                    border: Border.all(color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.5)),
                   ),
                   child: Text(
                     mosque.formattedDistance,
-                    style: const TextStyle(
-                      color: Color(0xFFFFDF7A),
+                    style: TextStyle(
+                      color: BeyanColors.tone(0xFFFFDF7A),
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                     ),
@@ -684,11 +755,11 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
                 const SizedBox(width: 14),
 
                 // Yön
-                Icon(Icons.navigation_rounded, size: 12, color: const Color(0xFF2DD4BF).withValues(alpha: 0.8)),
+                Icon(Icons.navigation_rounded, size: 12, color: BeyanColors.tone(0xFF2DD4BF).withValues(alpha: 0.8)),
                 const SizedBox(width: 4),
                 Text(
                   mosque.compassDirection,
-                  style: const TextStyle(color: Color(0xFF2DD4BF), fontSize: 11),
+                  style: TextStyle(color: BeyanColors.tone(0xFF2DD4BF), fontSize: 11),
                 ),
 
                 const Spacer(),
@@ -706,7 +777,7 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
                   icon: const Icon(Icons.directions_rounded, size: 15),
                   label: const Text('Yol Tarifi', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFD4AF37),
+                    backgroundColor: BeyanColors.tone(0xFFD4AF37),
                     foregroundColor: Colors.black,
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     minimumSize: Size.zero,

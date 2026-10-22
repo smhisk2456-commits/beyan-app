@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'dart:convert';
 import 'dart:io';
 
@@ -366,7 +367,7 @@ class _MeccaMedinaLiveScreenState extends ConsumerState<MeccaMedinaLiveScreen>
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFF011815),
+      backgroundColor: BeyanColors.tone(0xFF011815),
       appBar: AppBar(
         title: Text(
           strings.liveBroadcastTitle,
@@ -375,16 +376,16 @@ class _MeccaMedinaLiveScreenState extends ConsumerState<MeccaMedinaLiveScreen>
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh_rounded, color: Color(0xFFFFDF7A)),
+            icon: Icon(Icons.refresh_rounded, color: BeyanColors.tone(0xFFFFDF7A)),
             tooltip: strings.refreshStream,
             onPressed: _reloadCurrentStream,
           ),
         ],
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: const Color(0xFFFFDF7A),
+          indicatorColor: BeyanColors.tone(0xFFFFDF7A),
           indicatorWeight: 3,
-          labelColor: const Color(0xFFFFDF7A),
+          labelColor: BeyanColors.tone(0xFFFFDF7A),
           unselectedLabelColor: Colors.white60,
           tabs: [
             Tab(
@@ -407,7 +408,7 @@ class _MeccaMedinaLiveScreenState extends ConsumerState<MeccaMedinaLiveScreen>
             title: strings.makkahLiveTitle,
             subtitle: strings.makkahLiveSubtitle,
             badge: strings.liveBadgeMakkah,
-            accentColor: const Color(0xFFD4AF37),
+            accentColor: BeyanColors.tone(0xFFD4AF37),
             handle: _makkahHandle,
             description: strings.makkahLiveDesc,
             hadith: strings.makkahLiveHadith,
@@ -419,7 +420,7 @@ class _MeccaMedinaLiveScreenState extends ConsumerState<MeccaMedinaLiveScreen>
             title: strings.madinahLiveTitle,
             subtitle: strings.madinahLiveSubtitle,
             badge: strings.liveBadgeMadinah,
-            accentColor: const Color(0xFF2DD4BF),
+            accentColor: BeyanColors.tone(0xFF2DD4BF),
             handle: _madinahHandle,
             description: strings.madinahLiveDesc,
             hadith: strings.madinahLiveHadith,
@@ -478,7 +479,7 @@ class _MeccaMedinaLiveScreenState extends ConsumerState<MeccaMedinaLiveScreen>
                   if (isLoading)
                     Positioned.fill(
                       child: Container(
-                        color: const Color(0xFF032620),
+                        color: BeyanColors.tone(0xFF032620),
                         child: Center(
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
@@ -572,8 +573,8 @@ class _MeccaMedinaLiveScreenState extends ConsumerState<MeccaMedinaLiveScreen>
                   icon: const Icon(Icons.refresh_rounded, size: 18),
                   label: Text(strings.refreshStream),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFFFFDF7A),
-                    side: BorderSide(color: const Color(0xFFFFDF7A).withValues(alpha: 0.5)),
+                    foregroundColor: BeyanColors.tone(0xFFFFDF7A),
+                    side: BorderSide(color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.5)),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   ),
@@ -585,8 +586,8 @@ class _MeccaMedinaLiveScreenState extends ConsumerState<MeccaMedinaLiveScreen>
                 icon: const Icon(Icons.bolt_rounded, size: 18),
                 label: Text(strings.directStream),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFF2DD4BF),
-                  side: BorderSide(color: const Color(0xFF2DD4BF).withValues(alpha: 0.5)),
+                  foregroundColor: BeyanColors.tone(0xFF2DD4BF),
+                  side: BorderSide(color: BeyanColors.tone(0xFF2DD4BF).withValues(alpha: 0.5)),
                   padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 ),
@@ -613,7 +614,7 @@ class _MeccaMedinaLiveScreenState extends ConsumerState<MeccaMedinaLiveScreen>
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              color: const Color(0xFF032620),
+              color: BeyanColors.tone(0xFF032620),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
                 color: accentColor.withValues(alpha: 0.3),
@@ -670,7 +671,7 @@ class _MeccaMedinaLiveScreenState extends ConsumerState<MeccaMedinaLiveScreen>
                   child: Text(
                     hadith,
                     style: TextStyle(
-                      color: const Color(0xFFFFDF7A).withValues(alpha: 0.95),
+                      color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.95),
                       fontSize: 12,
                       fontStyle: FontStyle.italic,
                       height: 1.4,

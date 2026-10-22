@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -38,11 +39,11 @@ class _LoadingCard extends StatelessWidget {
       margin: const EdgeInsets.all(16),
       height: 220,
       decoration: BoxDecoration(
-        color: const Color(0xFF012E2B),
+        color: BeyanColors.tone(0xFF012E2B),
         borderRadius: BorderRadius.circular(24),
       ),
-      child: const Center(
-        child: CircularProgressIndicator(color: Color(0xFFFFDF7A), strokeWidth: 2),
+      child: Center(
+        child: CircularProgressIndicator(color: BeyanColors.tone(0xFFFFDF7A), strokeWidth: 2),
       ),
     );
   }
@@ -59,7 +60,7 @@ class _ErrorCard extends StatelessWidget {
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF012E2B),
+        color: BeyanColors.tone(0xFF012E2B),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: Colors.redAccent.withValues(alpha: 0.4)),
       ),
@@ -105,14 +106,14 @@ class _PrayerCard extends ConsumerWidget {
       gradientColors = atmosphere.cardGradient;
       glowColor = atmosphere.glowColor;
       borderColor = isApproaching
-          ? const Color(0xFFFFDF7A)
+          ? BeyanColors.tone(0xFFFFDF7A)
           : atmosphere.cardBorder.withValues(alpha: 0.45);
     } else {
       // Saf ve Kusursuz Tema Uyumu (Seçilen palete %100 sadık kalarak orantısızlığı önler)
       gradientColors = themeState.palette.prayerCardGradient;
       glowColor = themeState.palette.prayerCardGlow;
       borderColor = isApproaching
-          ? const Color(0xFFFFDF7A)
+          ? BeyanColors.tone(0xFFFFDF7A)
           : themeState.palette.accentGold.withValues(alpha: 0.38);
     }
 
@@ -132,7 +133,7 @@ class _PrayerCard extends ConsumerWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: (isApproaching ? const Color(0xFFFFDF7A) : glowColor).withValues(alpha: isApproaching ? 0.3 : 0.22),
+            color: (isApproaching ? BeyanColors.tone(0xFFFFDF7A) : glowColor).withValues(alpha: isApproaching ? 0.3 : 0.22),
             blurRadius: isApproaching ? 28 : 20,
             offset: const Offset(0, 8),
           ),
@@ -161,8 +162,8 @@ class _PrayerCard extends ConsumerWidget {
                         children: [
                           Text(
                             strings.nextPrayer,
-                            style: const TextStyle(
-                              color: Color(0xFFFFDF7A),
+                            style: TextStyle(
+                              color: BeyanColors.tone(0xFFFFDF7A),
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
                               letterSpacing: 0.5,
@@ -198,27 +199,27 @@ class _PrayerCard extends ConsumerWidget {
                               child: Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFD4AF37).withValues(alpha: 0.18),
+                                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.18),
                                   borderRadius: BorderRadius.circular(10),
                                   border: Border.all(
-                                    color: const Color(0xFFFFDF7A).withValues(alpha: 0.45),
+                                    color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.45),
                                     width: 1,
                                   ),
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    const Icon(
+                                    Icon(
                                       Icons.mosque_outlined,
                                       size: 13,
-                                      color: Color(0xFFFFDF7A),
+                                      color: BeyanColors.tone(0xFFFFDF7A),
                                     ),
                                     const SizedBox(width: 5),
                                     Flexible(
                                       child: Text(
                                         next.name.localizedRakat(langCode),
-                                        style: const TextStyle(
-                                          color: Color(0xFFFFDF7A),
+                                        style: TextStyle(
+                                          color: BeyanColors.tone(0xFFFFDF7A),
                                           fontSize: 11,
                                           fontWeight: FontWeight.w600,
                                           letterSpacing: 0.2,
@@ -228,10 +229,10 @@ class _PrayerCard extends ConsumerWidget {
                                       ),
                                     ),
                                     const SizedBox(width: 4),
-                                    const Icon(
+                                    Icon(
                                       Icons.info_outline_rounded,
                                       size: 11,
-                                      color: Color(0xFFFFDF7A),
+                                      color: BeyanColors.tone(0xFFFFDF7A),
                                     ),
                                   ],
                                 ),
@@ -374,7 +375,7 @@ class _LocationRow extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.location_on_rounded, color: Color(0xFFFFDF7A), size: 14),
+              Icon(Icons.location_on_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 14),
               const SizedBox(width: 4),
               Text(
                 locationName,
@@ -384,19 +385,19 @@ class _LocationRow extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFD4AF37).withValues(alpha: 0.22),
+                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.22),
                   borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: const Color(0xFFFFDF7A).withValues(alpha: 0.35), width: 0.8),
+                  border: Border.all(color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.35), width: 0.8),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.mosque_rounded, size: 10, color: Color(0xFFFFDF7A)),
+                    Icon(Icons.mosque_rounded, size: 10, color: BeyanColors.tone(0xFFFFDF7A)),
                     const SizedBox(width: 3),
                     Text(
                       strings.mosquesPill,
-                      style: const TextStyle(
-                        color: Color(0xFFFFDF7A),
+                      style: TextStyle(
+                        color: BeyanColors.tone(0xFFFFDF7A),
                         fontSize: 9.5,
                         fontWeight: FontWeight.bold,
                       ),
@@ -413,11 +414,11 @@ class _LocationRow extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.black.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: const Color(0xFFD4AF37).withValues(alpha: 0.3), width: 0.8),
+            border: Border.all(color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.3), width: 0.8),
           ),
           child: Text(
             '$hijriStr • $dateStr',
-            style: const TextStyle(color: Color(0xFFFFDF7A), fontSize: 11, fontWeight: FontWeight.w600),
+            style: TextStyle(color: BeyanColors.tone(0xFFFFDF7A), fontSize: 11, fontWeight: FontWeight.w600),
           ),
         ),
       ],
@@ -435,22 +436,22 @@ class _CountdownBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
       decoration: BoxDecoration(
-        color: const Color(0xFFD4AF37).withValues(alpha: 0.18),
+        color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.18),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFFFDF7A).withValues(alpha: 0.4), width: 1),
+        border: Border.all(color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.4), width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.timer_outlined, size: 13, color: Color(0xFFFFDF7A)),
+          Icon(Icons.timer_outlined, size: 13, color: BeyanColors.tone(0xFFFFDF7A)),
           const SizedBox(width: 5),
           Text(
             text,
-            style: const TextStyle(
-              color: Color(0xFFFFDF7A),
+            style: TextStyle(
+              color: BeyanColors.tone(0xFFFFDF7A),
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              fontFeatures: [FontFeature.tabularFigures()],
+              fontFeatures: const [FontFeature.tabularFigures()],
             ),
           ),
         ],
@@ -504,13 +505,13 @@ class _ProgressBar extends StatelessWidget {
                     child: Container(
                       height: 7,
                       decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFFD4AF37), Color(0xFFFFDF7A), Color(0xFFFFF3B0)],
+                        gradient: LinearGradient(
+                          colors: [BeyanColors.tone(0xFFD4AF37), BeyanColors.tone(0xFFFFDF7A), const Color(0xFFFFF3B0)],
                         ),
                         borderRadius: BorderRadius.circular(4),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFFFFDF7A).withValues(alpha: 0.45),
+                            color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.45),
                             blurRadius: 6,
                             spreadRadius: 1,
                           ),
@@ -532,9 +533,9 @@ class _ProgressBar extends StatelessWidget {
                   Container(
                     width: 6,
                     height: 6,
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Color(0xFFD4AF37),
+                      color: BeyanColors.tone(0xFFD4AF37),
                     ),
                   ),
                   const SizedBox(width: 5),
@@ -544,17 +545,17 @@ class _ProgressBar extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
+                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(6),
                   border: Border.all(
-                    color: const Color(0xFFFFDF7A).withValues(alpha: 0.35),
+                    color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.35),
                     width: 0.8,
                   ),
                 ),
                 child: Text(
                   '%$percent',
-                  style: const TextStyle(
-                    color: Color(0xFFFFDF7A),
+                  style: TextStyle(
+                    color: BeyanColors.tone(0xFFFFDF7A),
                     fontSize: 10.5,
                     fontWeight: FontWeight.bold,
                   ),
@@ -563,14 +564,14 @@ class _ProgressBar extends StatelessWidget {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(toLabel, style: const TextStyle(color: Color(0xFFFFDF7A), fontSize: 11.5, fontWeight: FontWeight.w600)),
+                  Text(toLabel, style: TextStyle(color: BeyanColors.tone(0xFFFFDF7A), fontSize: 11.5, fontWeight: FontWeight.w600)),
                   const SizedBox(width: 5),
                   Container(
                     width: 6,
                     height: 6,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: const Color(0xFFFFDF7A).withValues(alpha: 0.5),
+                      color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.5),
                     ),
                   ),
                 ],
@@ -641,10 +642,10 @@ class _MiniPrayerItem extends ConsumerWidget {
         duration: const Duration(milliseconds: 250),
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
         decoration: BoxDecoration(
-          color: isActive ? const Color(0xFFD4AF37).withValues(alpha: 0.24) : Colors.transparent,
+          color: isActive ? BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.24) : Colors.transparent,
           borderRadius: BorderRadius.circular(14),
           border: isActive
-              ? Border.all(color: const Color(0xFFFFDF7A).withValues(alpha: 0.55), width: 1)
+              ? Border.all(color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.55), width: 1)
               : null,
         ),
         child: Column(
@@ -652,7 +653,7 @@ class _MiniPrayerItem extends ConsumerWidget {
             Text(
               entry.name.localizedName(langCode),
               style: TextStyle(
-                color: isActive ? const Color(0xFFFFDF7A) : Colors.white60,
+                color: isActive ? BeyanColors.tone(0xFFFFDF7A) : Colors.white60,
                 fontSize: 11,
                 fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
               ),
@@ -680,7 +681,7 @@ class _MiniPrayerItem extends ConsumerWidget {
                   '${entry.name.rakatTotal}R',
                   style: TextStyle(
                     fontSize: 9,
-                    color: isActive ? const Color(0xFFFFDF7A) : Colors.white38,
+                    color: isActive ? BeyanColors.tone(0xFFFFDF7A) : Colors.white38,
                     fontWeight: FontWeight.w600,
                   ),
                 ),

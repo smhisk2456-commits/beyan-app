@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../../core/services/acoustic_audio_service.dart';
@@ -318,16 +319,16 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
         ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            backgroundColor: const Color(0xFF012E2B),
+            backgroundColor: BeyanColors.tone(0xFF012E2B),
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
-              side: const BorderSide(color: Color(0xFFD4AF37), width: 1.2),
+              side: BorderSide(color: BeyanColors.tone(0xFFD4AF37), width: 1.2),
             ),
             duration: const Duration(seconds: 2),
             content: Row(
               children: [
-                const Icon(Icons.check_circle_rounded, color: Color(0xFFFFDF7A), size: 20),
+                Icon(Icons.check_circle_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 20),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
@@ -370,12 +371,12 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF032B25),
+        backgroundColor: BeyanColors.tone(0xFF032B25),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: Color(0xFFD4AF37), width: 1),
+          side: BorderSide(color: BeyanColors.tone(0xFFD4AF37), width: 1),
         ),
-        title: Text(strings.resetConfirmTitle, style: const TextStyle(color: Color(0xFFFFDF7A))),
+        title: Text(strings.resetConfirmTitle, style: TextStyle(color: BeyanColors.tone(0xFFFFDF7A))),
         content: Text(
           strings.resetConfirmDesc,
           style: const TextStyle(color: Colors.white70),
@@ -387,7 +388,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFD4AF37),
+              backgroundColor: BeyanColors.tone(0xFFD4AF37),
               foregroundColor: Colors.black,
             ),
             onPressed: () {
@@ -413,12 +414,12 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF032B25),
+        backgroundColor: BeyanColors.tone(0xFF032B25),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: Color(0xFFD4AF37), width: 1),
+          side: BorderSide(color: BeyanColors.tone(0xFFD4AF37), width: 1),
         ),
-        title: Text(strings.addCustomDhikr, style: const TextStyle(color: Color(0xFFFFDF7A))),
+        title: Text(strings.addCustomDhikr, style: TextStyle(color: BeyanColors.tone(0xFFFFDF7A))),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -428,7 +429,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
               decoration: InputDecoration(
                 labelText: strings.customDhikrTitleHint,
                 labelStyle: const TextStyle(color: Colors.white70),
-                enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFD4AF37))),
+                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: BeyanColors.tone(0xFFD4AF37))),
               ),
             ),
             const SizedBox(height: 10),
@@ -449,7 +450,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
             child: Text(strings.cancel, style: const TextStyle(color: Colors.white60)),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFD4AF37), foregroundColor: Colors.black),
+            style: ElevatedButton.styleFrom(backgroundColor: BeyanColors.tone(0xFFD4AF37), foregroundColor: Colors.black),
             onPressed: () {
               final title = titleController.text.trim();
               if (title.isNotEmpty) {
@@ -505,7 +506,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
             IconButton(
               icon: Icon(
                 _isSoundMuted ? Icons.volume_off_rounded : Icons.volume_up_rounded,
-                color: _isSoundMuted ? Colors.white38 : const Color(0xFFFFDF7A),
+                color: _isSoundMuted ? Colors.white38 : BeyanColors.tone(0xFFFFDF7A),
               ),
               tooltip: _isSoundMuted
                   ? (strings.language == AppLanguage.turkish ? 'Kuka Sesini Aç' : 'Unmute Sound')
@@ -521,7 +522,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
           // Özel zikir ekle butonu (Zikir sekmesinde aktif)
           if (_activeTab == 0)
             IconButton(
-              icon: const Icon(Icons.add_circle_outline_rounded, color: Color(0xFFFFDF7A)),
+              icon: Icon(Icons.add_circle_outline_rounded, color: BeyanColors.tone(0xFFFFDF7A)),
               tooltip: strings.addCustomDhikr,
               onPressed: _showAddCustomDhikrDialog,
             ),
@@ -543,10 +544,10 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
               child: Container(
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF04201B) : const Color(0xFFE5EEEB),
+                  color: isDark ? BeyanColors.tone(0xFF04201B) : BeyanColors.tone(0xFFE5EEEB),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: const Color(0xFFD4AF37).withValues(alpha: 0.3),
+                    color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.3),
                   ),
                 ),
                 child: Row(
@@ -558,7 +559,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 8),
                           decoration: BoxDecoration(
-                            color: _activeTab == 0 ? const Color(0xFFD4AF37) : Colors.transparent,
+                            color: _activeTab == 0 ? BeyanColors.tone(0xFFD4AF37) : Colors.transparent,
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Center(
@@ -581,7 +582,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 8),
                           decoration: BoxDecoration(
-                            color: _activeTab == 1 ? const Color(0xFFD4AF37) : Colors.transparent,
+                            color: _activeTab == 1 ? BeyanColors.tone(0xFFD4AF37) : Colors.transparent,
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Center(
@@ -653,8 +654,8 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                     });
                     _saveDhikrState();
                   },
-                  selectedColor: const Color(0xFFD4AF37),
-                  backgroundColor: isDark ? const Color(0xFF07211C) : Colors.grey.shade100,
+                  selectedColor: BeyanColors.tone(0xFFD4AF37),
+                  backgroundColor: isDark ? BeyanColors.tone(0xFF07211C) : Colors.grey.shade100,
                   labelStyle: TextStyle(
                     fontSize: 12,
                     fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
@@ -663,7 +664,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                     side: BorderSide(
-                      color: isSelected ? const Color(0xFFD4AF37) : Colors.transparent,
+                      color: isSelected ? BeyanColors.tone(0xFFD4AF37) : Colors.transparent,
                     ),
                   ),
                 );
@@ -678,14 +679,14 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF012E2B), Color(0xFF023E36), Color(0xFF01201D)],
+              gradient: LinearGradient(
+                colors: [BeyanColors.tone(0xFF012E2B), BeyanColors.tone(0xFF023E36), BeyanColors.tone(0xFF01201D)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(22),
               border: Border.all(
-                color: const Color(0xFFD4AF37).withValues(alpha: 0.35),
+                color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35),
                 width: 1.2,
               ),
               boxShadow: [
@@ -700,11 +701,11 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
               children: [
                 Text(
                   activeDhikr['ar']!,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Amiri',
                     fontSize: 26,
                     height: 1.5,
-                    color: Color(0xFFFFDF7A),
+                    color: BeyanColors.tone(0xFFFFDF7A),
                     fontWeight: FontWeight.bold,
                   ),
                   textAlign: TextAlign.center,
@@ -747,13 +748,13 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFD4AF37).withValues(alpha: 0.18),
+                    color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.18),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFFD4AF37).withValues(alpha: 0.5)),
+                    border: Border.all(color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.5)),
                   ),
                   child: Text(
                     strings.lapsText(_completedLaps),
-                    style: const TextStyle(color: Color(0xFFFFDF7A), fontSize: 12, fontWeight: FontWeight.bold),
+                    style: TextStyle(color: BeyanColors.tone(0xFFFFDF7A), fontSize: 12, fontWeight: FontWeight.bold),
                   ),
                 ),
             ],
@@ -777,7 +778,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                       value: _target > 0 ? progress : 1.0,
                       strokeWidth: 8,
                       backgroundColor: isDark ? Colors.white12 : Colors.grey.shade200,
-                      valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFD4AF37)),
+                      valueColor: AlwaysStoppedAnimation<Color>(BeyanColors.tone(0xFFD4AF37)),
                     ),
                   ),
 
@@ -787,17 +788,17 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                     height: 202,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      gradient: const RadialGradient(
-                        colors: [Color(0xFF04584C), Color(0xFF012E2B), Color(0xFF011512)],
-                        stops: [0.0, 0.65, 1.0],
+                      gradient: RadialGradient(
+                        colors: [BeyanColors.tone(0xFF04584C), BeyanColors.tone(0xFF012E2B), BeyanColors.tone(0xFF011512)],
+                        stops: const [0.0, 0.65, 1.0],
                       ),
                       border: Border.all(
-                        color: const Color(0xFFD4AF37).withValues(alpha: 0.7),
+                        color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.7),
                         width: 2.2,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFFD4AF37).withValues(alpha: 0.25),
+                          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.25),
                           blurRadius: 30,
                           spreadRadius: 2,
                         ),
@@ -827,21 +828,21 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFFD4AF37).withValues(alpha: 0.35),
+                                      color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35),
                                       borderRadius: BorderRadius.circular(10),
                                       border: Border.all(
-                                        color: const Color(0xFFFFDF7A),
+                                        color: BeyanColors.tone(0xFFFFDF7A),
                                         width: 1,
                                       ),
                                     ),
-                                    child: const Text(
+                                    child: Text(
                                       '+1',
                                       style: TextStyle(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w900,
-                                        color: Color(0xFFFFDF7A),
+                                        color: BeyanColors.tone(0xFFFFDF7A),
                                         shadows: [
-                                          Shadow(color: Color(0xFFD4AF37), blurRadius: 6),
+                                          Shadow(color: BeyanColors.tone(0xFFD4AF37), blurRadius: 6),
                                         ],
                                       ),
                                     ),
@@ -875,13 +876,13 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                           child: Text(
                             '$_count',
                             key: ValueKey<int>(_count),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 54,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                               letterSpacing: 1.5,
                               shadows: [
-                                Shadow(color: Color(0xFFD4AF37), blurRadius: 14),
+                                Shadow(color: BeyanColors.tone(0xFFD4AF37), blurRadius: 14),
                               ],
                             ),
                           ),
@@ -892,9 +893,9 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                             padding: const EdgeInsets.only(top: 2),
                             child: Text(
                               '/ $_target',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 14,
-                                color: Color(0xFFFFDF7A),
+                                color: BeyanColors.tone(0xFFFFDF7A),
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -934,10 +935,10 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                                 transform: GradientRotation(animValue * math.pi * 2),
                                 colors: [
                                   Colors.transparent,
-                                  const Color(0xFFFFDF7A).withValues(alpha: 0.0),
-                                  const Color(0xFFFFDF7A).withValues(alpha: sweepIntensity),
+                                  BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.0),
+                                  BeyanColors.tone(0xFFFFDF7A).withValues(alpha: sweepIntensity),
                                   Colors.white.withValues(alpha: isMilestone ? 0.75 : 0.45),
-                                  const Color(0xFFFFDF7A).withValues(alpha: sweepIntensity),
+                                  BeyanColors.tone(0xFFFFDF7A).withValues(alpha: sweepIntensity),
                                   Colors.transparent,
                                 ],
                                 stops: const [0.0, 0.40, 0.48, 0.50, 0.52, 0.65],
@@ -998,8 +999,8 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                 icon: const Icon(Icons.refresh_rounded, size: 18),
                 label: Text(strings.reset),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFFD4AF37),
-                  side: BorderSide(color: const Color(0xFFD4AF37).withValues(alpha: 0.5)),
+                  foregroundColor: BeyanColors.tone(0xFFD4AF37),
+                  side: BorderSide(color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.5)),
                   padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 ),
@@ -1013,9 +1014,9 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF04201B) : Colors.grey.shade100,
+              color: isDark ? BeyanColors.tone(0xFF04201B) : Colors.grey.shade100,
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: const Color(0xFFD4AF37).withValues(alpha: 0.2)),
+              border: Border.all(color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.2)),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -1023,7 +1024,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                 Icon(
                   _hapticMode == 0 ? Icons.vibration_outlined : Icons.vibration_rounded,
                   size: 16,
-                  color: const Color(0xFFFFDF7A),
+                  color: BeyanColors.tone(0xFFFFDF7A),
                 ),
                 const SizedBox(width: 8),
                 Text(
@@ -1064,7 +1065,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFD4AF37) : Colors.transparent,
+          color: isSelected ? BeyanColors.tone(0xFFD4AF37) : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
@@ -1126,19 +1127,19 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: isDark
-              ? [const Color(0xFF04241E), const Color(0xFF07382E)]
-              : [const Color(0xFF063B32), const Color(0xFF084F43)],
+              ? [BeyanColors.tone(0xFF04241E), BeyanColors.tone(0xFF07382E)]
+              : [BeyanColors.tone(0xFF063B32), BeyanColors.tone(0xFF084F43)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: const Color(0xFFD4AF37).withValues(alpha: 0.5),
+          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.5),
           width: 1.3,
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+            color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.15),
             blurRadius: 18,
             offset: const Offset(0, 6),
           ),
@@ -1156,7 +1157,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFFDF7A).withValues(alpha: 0.2),
+                      color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                     ),
                     child: const Text('🔥', style: TextStyle(fontSize: 20)),
@@ -1169,10 +1170,10 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                         hasStreak
                             ? strings.streakDaysTitle(streak.currentStreak)
                             : strings.startStreak,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFFFFDF7A),
+                          color: BeyanColors.tone(0xFFFFDF7A),
                         ),
                       ),
                       Text(
@@ -1182,7 +1183,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                         style: TextStyle(
                           fontSize: 12,
                           color: streak.isTodayCompleted
-                              ? const Color(0xFF85E3B3)
+                              ? BeyanColors.tone(0xFF85E3B3)
                               : Colors.white70,
                           fontWeight: streak.isTodayCompleted
                               ? FontWeight.bold
@@ -1200,14 +1201,14 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                   color: Colors.black26,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: const Color(0xFFD4AF37).withValues(alpha: 0.3),
+                    color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.3),
                   ),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.emoji_events_rounded,
-                        color: Color(0xFFFFDF7A), size: 14),
+                    Icon(Icons.emoji_events_rounded,
+                        color: BeyanColors.tone(0xFFFFDF7A), size: 14),
                     const SizedBox(width: 4),
                     Text(
                       strings.bestStreakLabel(streak.bestStreak),
@@ -1247,10 +1248,10 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                 ),
                 Text(
                   strings.daysRemainingText(streak.daysToNextMilestone),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFFFFDF7A),
+                    color: BeyanColors.tone(0xFFFFDF7A),
                   ),
                 ),
               ],
@@ -1262,7 +1263,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                 value: streak.milestoneProgress,
                 minHeight: 7,
                 backgroundColor: Colors.white12,
-                valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFFFDF7A)),
+                valueColor: AlwaysStoppedAnimation<Color>(BeyanColors.tone(0xFFFFDF7A)),
               ),
             ),
             const SizedBox(height: 14),
@@ -1275,30 +1276,30 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
-                color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+                color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                  color: const Color(0xFFD4AF37).withValues(alpha: 0.5),
+                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.5),
                   width: 1,
                 ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.military_tech_rounded,
-                      color: Color(0xFFFFDF7A), size: 18),
+                  Icon(Icons.military_tech_rounded,
+                      color: BeyanColors.tone(0xFFFFDF7A), size: 18),
                   const SizedBox(width: 8),
                   Text(
                     '${strings.spiritualRewardsBtn} (10-400 Gün)',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12.5,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFFFFDF7A),
+                      color: BeyanColors.tone(0xFFFFDF7A),
                     ),
                   ),
                   const SizedBox(width: 4),
-                  const Icon(Icons.chevron_right_rounded,
-                      color: Color(0xFFFFDF7A), size: 18),
+                  Icon(Icons.chevron_right_rounded,
+                      color: BeyanColors.tone(0xFFFFDF7A), size: 18),
                 ],
               ),
             ),
@@ -1321,19 +1322,19 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: isDark
-              ? [const Color(0xFF042F26), const Color(0xFF02231C)]
-              : [const Color(0xFF063F34), const Color(0xFF022A23)],
+              ? [BeyanColors.tone(0xFF042F26), BeyanColors.tone(0xFF02231C)]
+              : [BeyanColors.tone(0xFF063F34), BeyanColors.tone(0xFF022A23)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: const Color(0xFFD4AF37),
+          color: BeyanColors.tone(0xFFD4AF37),
           width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFD4AF37).withValues(alpha: 0.25),
+            color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.25),
             blurRadius: 20,
             offset: const Offset(0, 6),
           ),
@@ -1350,23 +1351,23 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                 height: 56,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFD4AF37), Color(0xFFFFDF7A)],
+                  gradient: LinearGradient(
+                    colors: [BeyanColors.tone(0xFFD4AF37), BeyanColors.tone(0xFFFFDF7A)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+                      color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.4),
                       blurRadius: 10,
                       offset: const Offset(0, 3),
                     ),
                   ],
                 ),
-                child: const Center(
+                child: Center(
                   child: Icon(
                     Icons.check_rounded,
-                    color: Color(0xFF012E2B),
+                    color: BeyanColors.tone(0xFF012E2B),
                     size: 34,
                   ),
                 ),
@@ -1378,10 +1379,10 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                   children: [
                     Text(
                       strings.dayTasksCompleted(streakDay),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16.5,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFFFFDF7A),
+                        color: BeyanColors.tone(0xFFFFDF7A),
                         letterSpacing: -0.2,
                       ),
                     ),
@@ -1409,7 +1410,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
               color: Colors.black.withValues(alpha: 0.35),
               borderRadius: BorderRadius.circular(18),
               border: Border.all(
-                color: const Color(0xFFD4AF37).withValues(alpha: 0.35),
+                color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35),
                 width: 1,
               ),
             ),
@@ -1421,12 +1422,12 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.auto_awesome, color: Color(0xFFFFDF7A), size: 15),
+                        Icon(Icons.auto_awesome, color: BeyanColors.tone(0xFFFFDF7A), size: 15),
                         const SizedBox(width: 6),
                         Text(
                           '${strings.dailyCompletionVerseBadge} • ${verse.verseReference}',
-                          style: const TextStyle(
-                            color: Color(0xFFFFDF7A),
+                          style: TextStyle(
+                            color: BeyanColors.tone(0xFFFFDF7A),
                             fontWeight: FontWeight.bold,
                             fontSize: 12.5,
                           ),
@@ -1468,11 +1469,11 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                 // Arapça Âyet Metni (Amiri Fontu)
                 Text(
                   verse.arabicText,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Amiri',
                     fontSize: 18,
                     height: 1.6,
-                    color: Color(0xFFFFDF7A),
+                    color: BeyanColors.tone(0xFFFFDF7A),
                   ),
                   textAlign: TextAlign.center,
                   textDirection: TextDirection.rtl,
@@ -1497,8 +1498,8 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                 // Manevi Not
                 Text(
                   '🤲 ${verse.localizedSpiritualNote(strings.language.code)}',
-                  style: const TextStyle(
-                    color: Color(0xFF85E3B3),
+                  style: TextStyle(
+                    color: BeyanColors.tone(0xFF85E3B3),
                     fontSize: 11.5,
                     fontWeight: FontWeight.w500,
                   ),
@@ -1518,11 +1519,11 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF012E2B), Color(0xFF034A3E)],
+        gradient: LinearGradient(
+          colors: [BeyanColors.tone(0xFF012E2B), BeyanColors.tone(0xFF034A3E)],
         ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFD4AF37).withValues(alpha: 0.4)),
+        border: Border.all(color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.4)),
       ),
       child: Row(
         children: [
@@ -1536,7 +1537,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                   value: todayEntry.completionRatio,
                   strokeWidth: 6,
                   backgroundColor: Colors.white12,
-                  valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFD4AF37)),
+                  valueColor: AlwaysStoppedAnimation<Color>(BeyanColors.tone(0xFFD4AF37)),
                 ),
               ),
               Text(
@@ -1552,7 +1553,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
               children: [
                 Text(
                   strings.dailyProgressTitle,
-                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFFFFDF7A)),
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: BeyanColors.tone(0xFFFFDF7A)),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -1582,10 +1583,10 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
             maxHeight: MediaQuery.of(context).size.height * 0.88,
           ),
           decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF031B17) : const Color(0xFF052B24),
+            color: isDark ? BeyanColors.tone(0xFF031B17) : BeyanColors.tone(0xFF052B24),
             borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
             border: Border.all(
-              color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+              color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.4),
               width: 1.2,
             ),
           ),
@@ -1610,10 +1611,10 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                   children: [
                     Text(
                       strings.streaksBannerTitle,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFFFFDF7A),
+                        color: BeyanColors.tone(0xFFFFDF7A),
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -1645,19 +1646,19 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: isUnlocked
-                            ? const Color(0xFF083C32)
+                            ? BeyanColors.tone(0xFF083C32)
                             : Colors.white.withValues(alpha: 0.04),
                         borderRadius: BorderRadius.circular(18),
                         border: Border.all(
                           color: isUnlocked
-                              ? const Color(0xFFD4AF37)
+                              ? BeyanColors.tone(0xFFD4AF37)
                               : Colors.white12,
                           width: isUnlocked ? 1.4 : 1,
                         ),
                         boxShadow: isUnlocked
                             ? [
                                 BoxShadow(
-                                  color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+                                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.15),
                                   blurRadius: 10,
                                   offset: const Offset(0, 4),
                                 )
@@ -1685,7 +1686,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                                           fontSize: 15,
                                           fontWeight: FontWeight.bold,
                                           color: isUnlocked
-                                              ? const Color(0xFFFFDF7A)
+                                              ? BeyanColors.tone(0xFFFFDF7A)
                                               : Colors.white,
                                         ),
                                       ),
@@ -1694,7 +1695,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                                         style: TextStyle(
                                           fontSize: 11,
                                           color: isUnlocked
-                                              ? const Color(0xFF85E3B3)
+                                              ? BeyanColors.tone(0xFF85E3B3)
                                               : Colors.white60,
                                         ),
                                       ),
@@ -1708,7 +1709,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                                     horizontal: 9, vertical: 4),
                                 decoration: BoxDecoration(
                                   color: isUnlocked
-                                      ? const Color(0xFFD4AF37)
+                                      ? BeyanColors.tone(0xFFD4AF37)
                                       : Colors.white10,
                                 ),
                                 child: Text(
@@ -1736,14 +1737,14 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                             ),
                             child: Row(
                               children: [
-                                const Icon(Icons.menu_book_rounded,
-                                    color: Color(0xFFFFDF7A), size: 14),
+                                Icon(Icons.menu_book_rounded,
+                                    color: BeyanColors.tone(0xFFFFDF7A), size: 14),
                                 const SizedBox(width: 6),
                                 Expanded(
                                   child: Text(
                                     '${strings.motivatingSurahLabel}: ${milestone.ayahReference}',
-                                    style: const TextStyle(
-                                      color: Color(0xFFFFDF7A),
+                                    style: TextStyle(
+                                      color: BeyanColors.tone(0xFFFFDF7A),
                                       fontSize: 12,
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -1758,11 +1759,11 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                           if (isUnlocked) ...[
                             Text(
                               milestone.arabicText,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontFamily: 'Amiri',
                                 fontSize: 16,
                                 height: 1.6,
-                                color: Color(0xFFFFDF7A),
+                                color: BeyanColors.tone(0xFFFFDF7A),
                               ),
                               textAlign: TextAlign.right,
                               textDirection: TextDirection.rtl,
@@ -1780,15 +1781,15 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                             const SizedBox(height: 8),
                             Row(
                               children: [
-                                const Icon(Icons.stars_rounded,
-                                    color: Color(0xFF85E3B3), size: 14),
+                                Icon(Icons.stars_rounded,
+                                    color: BeyanColors.tone(0xFF85E3B3), size: 14),
                                 const SizedBox(width: 5),
                                 Expanded(
                                   child: Text(
                                     milestone.localizedSpiritualVirtue(strings.language.code),
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 11.5,
-                                      color: Color(0xFF85E3B3),
+                                      color: BeyanColors.tone(0xFF85E3B3),
                                     ),
                                   ),
                                 ),
@@ -1828,16 +1829,16 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
           child: Container(
             padding: const EdgeInsets.all(22),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF012E2B), Color(0xFF034A3E), Color(0xFF011C18)],
+              gradient: LinearGradient(
+                colors: [BeyanColors.tone(0xFF012E2B), BeyanColors.tone(0xFF034A3E), BeyanColors.tone(0xFF011C18)],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               ),
               borderRadius: BorderRadius.circular(28),
-              border: Border.all(color: const Color(0xFFD4AF37), width: 1.8),
+              border: Border.all(color: BeyanColors.tone(0xFFD4AF37), width: 1.8),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFFD4AF37).withValues(alpha: 0.3),
+                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.3),
                   blurRadius: 30,
                   spreadRadius: 2,
                 ),
@@ -1851,8 +1852,8 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                   const SizedBox(height: 10),
                   Text(
                     strings.celebrationTitle,
-                    style: const TextStyle(
-                      color: Color(0xFFFFDF7A),
+                    style: TextStyle(
+                      color: BeyanColors.tone(0xFFFFDF7A),
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1.2,
@@ -1872,14 +1873,14 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
+                      color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFFD4AF37)),
+                      border: Border.all(color: BeyanColors.tone(0xFFD4AF37)),
                     ),
                     child: Text(
                       milestone.localizedBadgeName(strings.language.code),
-                      style: const TextStyle(
-                        color: Color(0xFFFFDF7A),
+                      style: TextStyle(
+                        color: BeyanColors.tone(0xFFFFDF7A),
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                       ),
@@ -1907,11 +1908,11 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                       children: [
                         Text(
                           milestone.arabicText,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontFamily: 'Amiri',
                             fontSize: 17,
                             height: 1.6,
-                            color: Color(0xFFFFDF7A),
+                            color: BeyanColors.tone(0xFFFFDF7A),
                           ),
                           textAlign: TextAlign.center,
                           textDirection: TextDirection.rtl,
@@ -1933,8 +1934,8 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                   const SizedBox(height: 12),
                   Text(
                     milestone.localizedSpiritualVirtue(strings.language.code),
-                    style: const TextStyle(
-                      color: Color(0xFF85E3B3),
+                    style: TextStyle(
+                      color: BeyanColors.tone(0xFF85E3B3),
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
                     ),
@@ -1943,8 +1944,8 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                   const SizedBox(height: 20),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFD4AF37),
-                      foregroundColor: const Color(0xFF012E2B),
+                      backgroundColor: BeyanColors.tone(0xFFD4AF37),
+                      foregroundColor: BeyanColors.tone(0xFF012E2B),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                     ),
@@ -1975,12 +1976,12 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF06221D) : Colors.white,
+        color: isDark ? BeyanColors.tone(0xFF06221D) : Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isCompleted
-              ? const Color(0xFFD4AF37)
-              : (isDark ? const Color(0xFF133B34) : const Color(0xFFE2EBE8)),
+              ? BeyanColors.tone(0xFFD4AF37)
+              : (isDark ? BeyanColors.tone(0xFF133B34) : BeyanColors.tone(0xFFE2EBE8)),
           width: isCompleted ? 1.4 : 1,
         ),
       ),
@@ -1989,11 +1990,11 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             color: isCompleted
-                ? const Color(0xFFD4AF37).withValues(alpha: 0.2)
+                ? BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.2)
                 : (isDark ? Colors.white10 : Colors.grey.shade100),
             shape: BoxShape.circle,
           ),
-          child: Icon(icon, color: isCompleted ? const Color(0xFFFFDF7A) : Colors.grey, size: 20),
+          child: Icon(icon, color: isCompleted ? BeyanColors.tone(0xFFFFDF7A) : Colors.grey, size: 20),
         ),
         title: Text(
           title,
@@ -2006,7 +2007,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
         ),
         trailing: Checkbox(
           value: isCompleted,
-          activeColor: const Color(0xFFD4AF37),
+          activeColor: BeyanColors.tone(0xFFD4AF37),
           checkColor: Colors.black,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
           onChanged: (_) => handleToggle(),
@@ -2033,13 +2034,13 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected
-              ? const Color(0xFFD4AF37)
+              ? BeyanColors.tone(0xFFD4AF37)
               : (Theme.of(context).brightness == Brightness.dark
-                  ? const Color(0xFF07211C)
+                  ? BeyanColors.tone(0xFF07211C)
                   : Colors.grey.shade100),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? const Color(0xFFD4AF37) : Colors.white12,
+            color: isSelected ? BeyanColors.tone(0xFFD4AF37) : Colors.white12,
           ),
         ),
         child: Text(

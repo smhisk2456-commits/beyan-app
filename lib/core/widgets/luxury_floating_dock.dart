@@ -1,3 +1,5 @@
+import 'package:islamic_app/core/theme/beyan_colors.dart';
+import 'package:islamic_app/core/theme/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,6 +19,8 @@ class LuxuryFloatingDock extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final strings = ref.watch(appStringsProvider);
+    final themeState = ref.watch(themeProvider);
+    BeyanColors.setPalette(themeState.palette);
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
@@ -32,17 +36,17 @@ class LuxuryFloatingDock extends ConsumerWidget {
                 child: Container(
                   height: 66,
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
+                    gradient: LinearGradient(
                       colors: [
-                        Color(0xFF012E2B),
-                        Color(0xFF021B17),
+                        BeyanColors.tone(0xFF012E2B),
+                        BeyanColors.tone(0xFF021B17),
                       ],
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                     ),
                     borderRadius: BorderRadius.circular(36),
                     border: Border.all(
-                      color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+                      color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.4),
                       width: 1.2,
                     ),
                       boxShadow: [
@@ -52,7 +56,7 @@ class LuxuryFloatingDock extends ConsumerWidget {
                           offset: const Offset(0, 10),
                         ),
                         BoxShadow(
-                          color: const Color(0xFF033E35).withValues(alpha: 0.3),
+                          color: BeyanColors.tone(0xFF033E35).withValues(alpha: 0.3),
                           blurRadius: 16,
                           offset: const Offset(0, -2),
                         ),
@@ -139,12 +143,12 @@ class LuxuryFloatingDock extends ConsumerWidget {
         ),
         decoration: BoxDecoration(
           color: isSelected
-              ? const Color(0xFFD4AF37).withValues(alpha: 0.18)
+              ? BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.18)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
           border: isSelected
               ? Border.all(
-                  color: const Color(0xFFFFDF7A).withValues(alpha: 0.35),
+                  color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.35),
                   width: 1,
                 )
               : null,
@@ -156,7 +160,7 @@ class LuxuryFloatingDock extends ConsumerWidget {
             Icon(
               isSelected ? activeIcon : icon,
               size: isSelected ? 23 : 21,
-              color: isSelected ? const Color(0xFFFFE082) : Colors.white60,
+              color: isSelected ? BeyanColors.tone(0xFFFFE082) : Colors.white60,
             ),
             const SizedBox(height: 3),
             Text(
@@ -164,7 +168,7 @@ class LuxuryFloatingDock extends ConsumerWidget {
               style: TextStyle(
                 fontSize: 10.5,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                color: isSelected ? const Color(0xFFFFE082) : Colors.white60,
+                color: isSelected ? BeyanColors.tone(0xFFFFE082) : Colors.white60,
                 letterSpacing: 0.2,
               ),
             ),
@@ -192,18 +196,18 @@ class LuxuryFloatingDock extends ConsumerWidget {
           height: isSelected ? 62 : 58,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            gradient: const LinearGradient(
+            gradient: LinearGradient(
               colors: [
-                Color(0xFFFFEA75),
-                Color(0xFFD4AF37),
-                Color(0xFF996515),
+                BeyanColors.tone(0xFFFFEA75),
+                BeyanColors.tone(0xFFD4AF37),
+                BeyanColors.tone(0xFF996515),
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFFD4AF37).withValues(alpha: isSelected ? 0.65 : 0.4),
+                color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: isSelected ? 0.65 : 0.4),
                 blurRadius: isSelected ? 20 : 16,
                 offset: const Offset(0, 4),
                 spreadRadius: isSelected ? 3 : 1,
@@ -222,16 +226,16 @@ class LuxuryFloatingDock extends ConsumerWidget {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: isSelected
-                      ? const [Color(0xFF0A6B5C), Color(0xFF023E36)]
-                      : const [Color(0xFF064E43), Color(0xFF012E2B)],
+                      ? [BeyanColors.tone(0xFF0A6B5C), BeyanColors.tone(0xFF023E36)]
+                      : [BeyanColors.tone(0xFF064E43), BeyanColors.tone(0xFF012E2B)],
                   center: const Alignment(0.0, -0.2),
                   radius: 0.85,
                 ),
               ),
-              child: const Center(
+              child: Center(
                 child: Icon(
                   Icons.menu_book_rounded,
-                  color: Color(0xFFFFEA75),
+                  color: BeyanColors.tone(0xFFFFEA75),
                   size: 26,
                 ),
               ),
