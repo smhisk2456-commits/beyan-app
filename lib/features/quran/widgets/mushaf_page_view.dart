@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/localization/app_strings.dart';
+import '../../../core/services/acoustic_audio_service.dart';
 import '../models/surah.dart';
 import '../models/verse.dart';
 import '../services/quran_audio_service.dart';
@@ -350,6 +351,7 @@ class _MushafPageViewState extends ConsumerState<MushafPageView> {
             itemCount: totalPages,
             onPageChanged: (idx) {
               HapticFeedback.selectionClick();
+              AcousticAudioService.instance.playParchmentPageFlip();
               setState(() {
                 _currentPageIndex = idx;
               });

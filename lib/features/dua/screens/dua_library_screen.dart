@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/localization/app_strings.dart';
@@ -417,6 +418,8 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
       }
       return ListView.builder(
         physics: const BouncingScrollPhysics(),
+        scrollCacheExtent: const ScrollCacheExtent.viewport(2.0),
+        addRepaintBoundaries: true,
         padding: EdgeInsets.fromLTRB(16, 8, 16, bottomPadding),
         itemCount: favoriteDuas.length,
         itemBuilder: (context, index) {
@@ -469,6 +472,8 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
     if (selectedCategory != null && !isSearching) {
       return ListView(
         physics: const BouncingScrollPhysics(),
+        scrollCacheExtent: const ScrollCacheExtent.viewport(2.0),
+        addRepaintBoundaries: true,
         padding: EdgeInsets.fromLTRB(16, 4, 16, bottomPadding),
         children: [
           _buildSelectedCategoryBanner(
@@ -493,6 +498,8 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
     if (isSearching) {
       return ListView.builder(
         physics: const BouncingScrollPhysics(),
+        scrollCacheExtent: const ScrollCacheExtent.viewport(2.0),
+        addRepaintBoundaries: true,
         padding: EdgeInsets.fromLTRB(16, 8, 16, bottomPadding),
         itemCount: duas.length,
         itemBuilder: (context, index) {
@@ -504,6 +511,8 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
     // 5. Tüm Dualar Liste Görünümü (Kategorilere Göre Başlıklı & Gruplanmış)
     return ListView(
       physics: const BouncingScrollPhysics(),
+      scrollCacheExtent: const ScrollCacheExtent.viewport(2.0),
+      addRepaintBoundaries: true,
       padding: EdgeInsets.fromLTRB(16, 4, 16, bottomPadding),
       children: [
         for (final cat in DuaCategory.values) ...[
@@ -1041,8 +1050,9 @@ class _DuaCardItem extends ConsumerWidget {
     final strings = ref.watch(appStringsProvider);
     final linked = _getLinkedSurah(dua);
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 14),
+    return RepaintBoundary(
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF06221D) : Colors.white,
         borderRadius: BorderRadius.circular(20),
@@ -1296,6 +1306,7 @@ class _DuaCardItem extends ConsumerWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }

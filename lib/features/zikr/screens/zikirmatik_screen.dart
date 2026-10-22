@@ -1,4 +1,6 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import '../../../core/services/acoustic_audio_service.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -33,6 +35,10 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
   late final Animation<double> _plusOneOpacity;
   late final Animation<Offset> _plusOneOffset;
 
+  late final AnimationController _shimmerController;
+  late final Animation<double> _shimmerAnimation;
+  bool _isSoundMuted = false;
+
   Future<void> _loadSavedDhikrState() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -41,6 +47,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
       final savedDhikrIndex = prefs.getInt('zikirmatik_selected_index') ?? 0;
       final savedLaps = prefs.getInt('zikirmatik_laps') ?? 0;
       final savedHaptic = prefs.getInt('zikirmatik_haptic_mode') ?? 1;
+      final savedSoundMuted = prefs.getBool('zikirmatik_sound_muted') ?? false;
 
       if (mounted) {
         setState(() {
@@ -49,6 +56,8 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
           _selectedDhikrIndex = savedDhikrIndex.clamp(0, _dhikrList.length - 1);
           _completedLaps = savedLaps;
           _hapticMode = savedHaptic;
+          _isSoundMuted = savedSoundMuted;
+          AcousticAudioService.instance.isZikrSoundEnabled = !savedSoundMuted;
         });
         if (_chipScrollController.hasClients && _selectedDhikrIndex > 0) {
           _chipScrollController.animateTo(
@@ -69,6 +78,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
       await prefs.setInt('zikirmatik_selected_index', _selectedDhikrIndex);
       await prefs.setInt('zikirmatik_laps', _completedLaps);
       await prefs.setInt('zikirmatik_haptic_mode', _hapticMode);
+      await prefs.setBool('zikirmatik_sound_muted', _isSoundMuted);
     } catch (_) {}
   }
 
@@ -242,6 +252,17 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
         curve: Curves.easeOutCubic,
       ),
     );
+
+    _shimmerController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    );
+    _shimmerAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _shimmerController,
+        curve: Curves.easeInOutCubic,
+      ),
+    );
   }
 
   @override
@@ -249,10 +270,14 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
     _chipScrollController.dispose();
     _pulseController.dispose();
     _plusOneController.dispose();
+    _shimmerController.dispose();
     super.dispose();
   }
 
   void _increment() {
+    if (!_isSoundMuted) {
+      AcousticAudioService.instance.playKukaBeadSound();
+    }
     if (_hapticMode == 1) {
       HapticFeedback.selectionClick();
     } else if (_hapticMode == 2) {
@@ -262,6 +287,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
     }
     _pulseController.reverse().then((_) => _pulseController.forward());
     _plusOneController.forward(from: 0.0);
+    _shimmerController.forward(from: 0.0);
 
     setState(() {
       _count++; if (_count % 33 == 0 && _count != _target) { HapticFeedback.mediumImpact(); }
@@ -474,6 +500,24 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
         title: Text(_activeTab == 0 ? strings.actionZikr : strings.worshipTrackerTab),
         centerTitle: true,
         actions: [
+          // Ses Aç/Kapat Butonu (Kuka Ahşap Tesbih Sesi)
+          if (_activeTab == 0)
+            IconButton(
+              icon: Icon(
+                _isSoundMuted ? Icons.volume_off_rounded : Icons.volume_up_rounded,
+                color: _isSoundMuted ? Colors.white38 : const Color(0xFFFFDF7A),
+              ),
+              tooltip: _isSoundMuted
+                  ? (strings.language == AppLanguage.turkish ? 'Kuka Sesini Aç' : 'Unmute Sound')
+                  : (strings.language == AppLanguage.turkish ? 'Kuka Sesini Kapat' : 'Mute Sound'),
+              onPressed: () {
+                setState(() {
+                  _isSoundMuted = !_isSoundMuted;
+                  AcousticAudioService.instance.isZikrSoundEnabled = !_isSoundMuted;
+                });
+                _saveDhikrState();
+              },
+            ),
           // Özel zikir ekle butonu (Zikir sekmesinde aktif)
           if (_activeTab == 0)
             IconButton(
@@ -867,6 +911,63 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                           ),
                         ),
                       ],
+                    ),
+                  ),
+
+                  // Lüks Cam & Altın Işık Süzülmesi (Shimmer Light Sweep)
+                  SizedBox(
+                    width: 202,
+                    height: 202,
+                    child: IgnorePointer(
+                      child: AnimatedBuilder(
+                        animation: _shimmerAnimation,
+                        builder: (context, _) {
+                          final animValue = _shimmerAnimation.value;
+                          final isMilestone = (_count > 0 && (_count % 33 == 0 || _count == _target));
+                          final sweepIntensity = isMilestone ? 0.7 : 0.35;
+
+                          return Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: SweepGradient(
+                                center: Alignment.center,
+                                transform: GradientRotation(animValue * math.pi * 2),
+                                colors: [
+                                  Colors.transparent,
+                                  const Color(0xFFFFDF7A).withValues(alpha: 0.0),
+                                  const Color(0xFFFFDF7A).withValues(alpha: sweepIntensity),
+                                  Colors.white.withValues(alpha: isMilestone ? 0.75 : 0.45),
+                                  const Color(0xFFFFDF7A).withValues(alpha: sweepIntensity),
+                                  Colors.transparent,
+                                ],
+                                stops: const [0.0, 0.40, 0.48, 0.50, 0.52, 0.65],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+
+                  // Lüks Cam Yansıması (Curved Specular Arc)
+                  Positioned(
+                    top: 18,
+                    child: IgnorePointer(
+                      child: Container(
+                        width: 140,
+                        height: 52,
+                        decoration: BoxDecoration(
+                          borderRadius: const BorderRadius.all(Radius.elliptical(70, 26)),
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.white.withValues(alpha: 0.22),
+                              Colors.white.withValues(alpha: 0.0),
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ],

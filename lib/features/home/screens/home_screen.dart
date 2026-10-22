@@ -27,6 +27,7 @@ import '../../spiritual_healing/screens/mood_verse_sheet.dart';
 import '../../mosque_finder/screens/nearby_mosques_screen.dart';
 import '../../ai_assistant/screens/ai_assistant_screen.dart';
 import '../../elif_ba/screens/elif_ba_hub_screen.dart';
+import '../../../core/widgets/luxury_page_route.dart';
 
 /// Ana Ekran – Beyân lüks İslami kontrol merkezi.
 class HomeScreen extends ConsumerStatefulWidget {
@@ -103,7 +104,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 onOpenQibla: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const QiblaCompassScreen()),
+                    LuxuryPageRoute(page: const QiblaCompassScreen()),
                   );
                 },
                 onOpenZikr: () => ref.read(selectedTabProvider.notifier).state = 3,
@@ -112,21 +113,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 onOpenDuas: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const DuaLibraryScreen()),
+                    LuxuryPageRoute(page: const DuaLibraryScreen()),
                   );
                 },
                 onOpenCalendar: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const HijriCalendarScreen()),
+                    LuxuryPageRoute(page: const HijriCalendarScreen()),
                   );
                 },
                 onOpenRamadan: () {
                   Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const RamadanDashboardScreen()),
-                );
-              },
+                    context,
+                    LuxuryPageRoute(page: const RamadanDashboardScreen()),
+                  );
+                },
             ),
           ),
 
@@ -271,7 +272,7 @@ class _UpcomingReligiousDayBanner extends ConsumerWidget {
           HapticFeedback.lightImpact();
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const HijriCalendarScreen()),
+            LuxuryPageRoute(page: const HijriCalendarScreen()),
           );
         },
         child: Container(
@@ -359,8 +360,8 @@ class _LastReadQuranCard extends ConsumerWidget {
           );
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (_) => SurahDetailScreen(
+            LuxuryPageRoute(
+              page: SurahDetailScreen(
                 surah: targetSurah,
                 initialScrollToVerse: lastRead.verseNumber,
               ),
@@ -715,7 +716,7 @@ class _DailyFeaturedDuaCard extends ConsumerWidget {
         HapticFeedback.lightImpact();
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => const DuaLibraryScreen()),
+          LuxuryPageRoute(page: const DuaLibraryScreen()),
         );
       },
       child: Container(
@@ -831,7 +832,7 @@ class _SpotlightFeatureCards extends StatelessWidget {
                 HapticFeedback.lightImpact();
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const AiAssistantScreen()),
+                  LuxuryPageRoute(page: const AiAssistantScreen()),
                 );
               },
             ),
@@ -851,7 +852,7 @@ class _SpotlightFeatureCards extends StatelessWidget {
                 HapticFeedback.lightImpact();
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const ElifBaHubScreen()),
+                  LuxuryPageRoute(page: const ElifBaHubScreen()),
                 );
               },
             ),
@@ -1456,7 +1457,7 @@ class _NearbyMosquesCard extends ConsumerWidget {
             HapticFeedback.lightImpact();
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => const NearbyMosquesScreen()),
+              LuxuryPageRoute(page: const NearbyMosquesScreen()),
             );
           },
           child: Container(

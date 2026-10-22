@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/localization/app_strings.dart';
@@ -15,6 +16,7 @@ import '../models/surah.dart';
 import '../providers/quran_providers.dart';
 import '../providers/quran_reading_providers.dart';
 import '../screens/surah_detail_screen.dart';
+import '../../../core/widgets/luxury_page_route.dart';
 
 enum _QuranTab { surahs, juzs, versesAndDuas, favorites }
 enum _SurahFilter { all, meccan, medinan, famous }
@@ -47,8 +49,8 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
     HapticFeedback.lightImpact();
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => SurahDetailScreen(
+      LuxuryPageRoute(
+        page: SurahDetailScreen(
           surah: surah,
           initialScrollToVerse: verseNumber,
         ),
@@ -61,7 +63,7 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
     ref.read(duaSearchQueryProvider.notifier).state = query;
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => const DuaLibraryScreen()),
+      LuxuryPageRoute(page: const DuaLibraryScreen()),
     );
   }
 
@@ -526,6 +528,8 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
       padding: const EdgeInsets.only(bottom: 90, top: 2),
       physics: const BouncingScrollPhysics(),
       itemExtent: 74.0,
+      scrollCacheExtent: const ScrollCacheExtent.viewport(2.0),
+      addRepaintBoundaries: true,
       itemCount: filtered.length,
       itemBuilder: (context, index) {
         final surah = filtered[index];
@@ -701,7 +705,7 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
             HapticFeedback.mediumImpact();
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => const DuaLibraryScreen()),
+              LuxuryPageRoute(page: const DuaLibraryScreen()),
             );
           },
           child: Container(
