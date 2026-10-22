@@ -5,6 +5,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/verse.dart';
+import 'quran_download_service.dart';
 
 /// Kur'an tilavetinde kelime kelime milisaniyelik zamanlama segmenti.
 class WordSegment {
@@ -139,6 +140,22 @@ final List<QuranReciter> quranRecitersList = [
     baseUrl: 'https://download.quranicaudio.com/quran/sa3d_al-ghaamidi/complete/',
     quranComReciterId: null,
     usesPadding: true,
+  ),
+  const QuranReciter(
+    id: 'maher',
+    nameTr: 'Maher Al-Muaiqly',
+    nameAr: 'ماهر المعيقلي',
+    baseUrl: 'https://download.quranicaudio.com/qdc/maher_almuaiqly/murattal/',
+    quranComReciterId: 8,
+    usesPadding: false,
+  ),
+  const QuranReciter(
+    id: 'minshawi',
+    nameTr: 'Mohamed Siddiq El-Minshawi',
+    nameAr: 'محمد صديق المنشاوي',
+    baseUrl: 'https://download.quranicaudio.com/qdc/siddiq_minshawi/murattal/',
+    quranComReciterId: 9,
+    usesPadding: false,
   ),
 ];
 
@@ -311,6 +328,7 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
       );
 
       final reciter = state.selectedReciter;
+      final localFile = await QuranDownloadService.instance.getLocalFile(reciter.id, surahId);
       final audioUrl = reciter.getSurahAudioUrl(surahId);
 
       // Quran.com milisaniyelik kelime segmentlerini asenkron olarak getir ve önbelleğe al
@@ -327,7 +345,11 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
       }
 
       await _player.stop();
-      await _player.play(UrlSource(audioUrl));
+      if (localFile != null && await localFile.exists()) {
+        await _player.play(DeviceFileSource(localFile.path));
+      } else {
+        await _player.play(UrlSource(audioUrl));
+      }
       state = state.copyWith(isPlaying: true, isLoading: false);
     } catch (e) {
       debugPrint('QuranAudio playSurah hatası: $e');

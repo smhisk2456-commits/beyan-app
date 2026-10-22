@@ -12,6 +12,8 @@ import '../services/quran_audio_service.dart';
 import '../widgets/arabic_text_widget.dart';
 import '../widgets/verse_card_widget.dart';
 import '../widgets/quran_audio_player_bar.dart';
+import '../widgets/mushaf_page_view.dart';
+import '../services/quran_download_service.dart';
 
 /// Sure Detay Ekranı – Seçilen surenin tüm ayetlerini ve tilavetini sunar.
 class SurahDetailScreen extends ConsumerStatefulWidget {
@@ -33,6 +35,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
   final GlobalKey _targetVerseKey = GlobalKey();
   bool _showScrollToTop = false;
   bool _hasScrolledToInitialVerse = false;
+  bool _isMushafMode = false;
   int? _lastScrolledVerseNumber;
 
   @override
@@ -227,6 +230,76 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
     );
   }
 
+  Widget _buildDownloadButton(BuildContext context, QuranAudioState audioState, AppStrings strings) {
+    final reciter = audioState.selectedReciter;
+    final isDownloaded = ref.watch(quranDownloadsProvider).contains('${reciter.id}_${widget.surah.id}');
+
+    return IconButton(
+      icon: Icon(
+        isDownloaded ? Icons.download_done_rounded : Icons.download_for_offline_outlined,
+        color: isDownloaded ? const Color(0xFF81C784) : const Color(0xFFFFDF7A),
+      ),
+      tooltip: isDownloaded
+          ? (strings.language == AppLanguage.turkish ? 'Çevrimdışı Dinlemeye Hazır' : 'Downloaded for Offline')
+          : (strings.language == AppLanguage.turkish ? 'Çevrimdışı Dinlemek İçin İndir' : 'Download for Offline'),
+      onPressed: () async {
+        HapticFeedback.mediumImpact();
+        if (isDownloaded) {
+          final deleted = await ref.read(quranDownloadsProvider.notifier).delete(
+            reciterId: reciter.id,
+            surahId: widget.surah.id,
+          );
+          if (context.mounted && deleted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('${widget.surah.localizedName(strings.language.code)} çevrimdışı kaydı silindi.'),
+                duration: const Duration(seconds: 1),
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFFFFDF7A)),
+                  ),
+                  const SizedBox(width: 10),
+                  Text('${widget.surah.localizedName(strings.language.code)} (${reciter.nameTr}) indiriliyor...'),
+                ],
+              ),
+              duration: const Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          final success = await ref.read(quranDownloadsProvider.notifier).download(
+            reciterId: reciter.id,
+            surahId: widget.surah.id,
+            url: reciter.getSurahAudioUrl(widget.surah.id),
+          );
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  success
+                      ? '✓ ${widget.surah.localizedName(strings.language.code)} çevrimdışı dinleme için indirildi!'
+                      : 'İndirme başarısız oldu, lütfen internet bağlantınızı kontrol edin.',
+                ),
+                backgroundColor: success ? const Color(0xFF012E2B) : Colors.red[800],
+                duration: const Duration(seconds: 2),
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
+        }
+      },
+    );
+  }
+
   void _showReciterSheet(BuildContext context, AppStrings strings) {
     showModalBottomSheet(
       context: context,
@@ -255,6 +328,8 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                     const SizedBox(height: 10),
                     ...quranRecitersList.map((reciter) {
                       final isSel = audioState.selectedReciter.id == reciter.id;
+                      final isDownloaded = ref.watch(quranDownloadsProvider).contains('${reciter.id}_${widget.surah.id}');
+
                       return ListTile(
                         leading: Icon(
                           isSel ? Icons.radio_button_checked : Icons.radio_button_off,
@@ -267,9 +342,67 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                             fontWeight: isSel ? FontWeight.bold : FontWeight.normal,
                           ),
                         ),
-                        subtitle: Text(
-                          reciter.nameAr,
-                          style: const TextStyle(fontFamily: 'Amiri', color: Colors.white70),
+                        subtitle: Row(
+                          children: [
+                            Text(
+                              reciter.nameAr,
+                              style: const TextStyle(fontFamily: 'Amiri', color: Colors.white70),
+                            ),
+                            if (isDownloaded) ...[
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                                decoration: BoxDecoration(
+                                  color: Colors.green.withValues(alpha: 0.2),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: const Text(
+                                  'İndirildi',
+                                  style: TextStyle(fontSize: 10, color: Color(0xFF81C784), fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                        trailing: IconButton(
+                          icon: Icon(
+                            isDownloaded ? Icons.download_done_rounded : Icons.download_for_offline_outlined,
+                            color: isDownloaded ? const Color(0xFF81C784) : const Color(0xFFD4AF37),
+                            size: 22,
+                          ),
+                          tooltip: isDownloaded ? 'Çevrimdışı İndirildi' : 'Çevrimdışı İndir',
+                          onPressed: () async {
+                            HapticFeedback.lightImpact();
+                            if (isDownloaded) {
+                              await ref.read(quranDownloadsProvider.notifier).delete(
+                                reciterId: reciter.id,
+                                surahId: widget.surah.id,
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('${widget.surah.localizedName(strings.language.code)} (${reciter.nameTr}) indiriliyor...'),
+                                  duration: const Duration(seconds: 2),
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                              final ok = await ref.read(quranDownloadsProvider.notifier).download(
+                                reciterId: reciter.id,
+                                surahId: widget.surah.id,
+                                url: reciter.getSurahAudioUrl(widget.surah.id),
+                              );
+                              if (context.mounted && ok) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('✓ ${widget.surah.localizedName(strings.language.code)} çevrimdışı hazır!'),
+                                    backgroundColor: const Color(0xFF012E2B),
+                                    duration: const Duration(seconds: 2),
+                                    behavior: SnackBarBehavior.floating,
+                                  ),
+                                );
+                              }
+                            }
+                          },
                         ),
                         onTap: () {
                           ref.read(quranAudioProvider.notifier).setReciter(reciter);
@@ -368,6 +501,63 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
     QuranAudioState audioState,
     AppStrings strings,
   ) {
+    if (_isMushafMode) {
+      return Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        appBar: AppBar(
+          title: Text(
+            widget.surah.localizedName(strings.language.code),
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          centerTitle: true,
+          actions: [
+            // Ayet Listesi Görünümüne Geçiş
+            IconButton(
+              icon: const Icon(Icons.format_list_bulleted_rounded, color: Color(0xFFFFDF7A)),
+              tooltip: strings.language == AppLanguage.turkish ? 'Ayet Listesi Görünümüne Geç' : 'Switch to Verse List',
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                setState(() => _isMushafMode = false);
+              },
+            ),
+            // Çevrimdışı İndirme Butonu
+            _buildDownloadButton(context, audioState, strings),
+            // Kâri Seçimi
+            IconButton(
+              icon: const Icon(Icons.person_outline_rounded, color: Color(0xFFFFDF7A)),
+              tooltip: strings.reciterSelectionTooltip,
+              onPressed: () => _showReciterSheet(context, strings),
+            ),
+            // Tilavet Oynat/Durdur
+            IconButton(
+              icon: Icon(
+                isThisSurahPlaying ? Icons.pause_circle_filled_rounded : Icons.play_circle_fill_rounded,
+                color: const Color(0xFFFFDF7A),
+                size: 26,
+              ),
+              onPressed: () {
+                HapticFeedback.mediumImpact();
+                if (isThisSurahPlaying) {
+                  ref.read(quranAudioProvider.notifier).togglePlayPause();
+                } else {
+                  ref.read(quranAudioProvider.notifier).playSurah(
+                    widget.surah.id,
+                    widget.surah.localizedName(strings.language.code),
+                  );
+                }
+              },
+            ),
+          ],
+        ),
+        body: MushafPageView(
+          surah: widget.surah,
+          verses: verses,
+          initialVerseNumber: widget.initialScrollToVerse,
+          onSwitchToListMode: () => setState(() => _isMushafMode = false),
+        ),
+      );
+    }
+
     if (!_hasScrolledToInitialVerse &&
         widget.initialScrollToVerse != null &&
         widget.initialScrollToVerse! >= 1) {
@@ -384,6 +574,17 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
           pinned: true,
           backgroundColor: AppColors.teal,
           actions: [
+            // Orijinal Mushaf Sayfa Moduna Geçiş Butonu
+            IconButton(
+              icon: const Icon(Icons.auto_stories_rounded, color: Color(0xFFFFDF7A)),
+              tooltip: strings.language == AppLanguage.turkish ? 'Orijinal Mushaf Sayfa Modu' : 'Original Mushaf Page View',
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                setState(() => _isMushafMode = true);
+              },
+            ),
+            // Çevrimdışı İndirme Butonu
+            _buildDownloadButton(context, audioState, strings),
             // Canlı Takip (Karaoke / Takipçi) Modu Butonu
             IconButton(
               icon: Icon(

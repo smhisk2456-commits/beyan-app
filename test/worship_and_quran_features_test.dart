@@ -6,6 +6,8 @@ import 'package:islamic_app/features/prayer_times/models/calculation_settings_mo
 import 'package:islamic_app/features/prayer_times/models/city_model.dart';
 import 'package:islamic_app/features/ramadan/screens/ramadan_dashboard_screen.dart';
 import 'package:islamic_app/features/ramadan/models/khatam_tracker_model.dart';
+import 'package:islamic_app/features/quran/services/quran_download_service.dart';
+import 'package:islamic_app/features/widget_service/services/live_activity_service.dart';
 
 void main() {
   group('İbadet Takibi ve Zikir Model Testleri', () {
@@ -149,6 +151,22 @@ void main() {
         expect(reciter.nameTr.isNotEmpty, isTrue);
         expect(reciter.baseUrl.startsWith('http'), isTrue);
       }
+    });
+
+    test('QuranDownloadService ve reciters listesi Maher ve Minshawi içermelidir', () {
+      expect(QuranDownloadService.instance, isNotNull);
+      final reciterIds = quranRecitersList.map((r) => r.id).toList();
+      expect(reciterIds, contains('maher'));
+      expect(reciterIds, contains('minshawi'));
+      expect(quranRecitersList.length, greaterThanOrEqualTo(7));
+
+      final maher = quranRecitersList.firstWhere((r) => r.id == 'maher');
+      expect(maher.getSurahAudioUrl(1), contains('1.mp3'));
+    });
+
+    test('LiveActivityService isSupported platform kontrolü güvenli çalışmalıdır', () async {
+      final supported = await LiveActivityService().isSupported();
+      expect(supported, isA<bool>());
     });
 
     test('Hesaplama yöntemleri geçerli adhan parametreleri üretmeli', () {

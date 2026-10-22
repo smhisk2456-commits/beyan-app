@@ -34,6 +34,7 @@ class SettingsScreen extends ConsumerWidget {
     final strings = ref.watch(appStringsProvider);
     final currentLang = ref.watch(appLanguageProvider);
     final isLiveActivityEnabled = ref.watch(liveActivityEnabledProvider);
+    final isLiveActivitySupported = ref.watch(isLiveActivitySupportedProvider).valueOrNull ?? false;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
@@ -196,22 +197,24 @@ class SettingsScreen extends ConsumerWidget {
                 subtitle: strings.lockscreenWidgetsSubtitle,
                 onTap: () => showWidgetSettings(context),
               ),
-              _buildDivider(),
-              _buildTile(
-                icon: Icons.apple_rounded,
-                iconColor: const Color(0xFFFFDF7A),
-                title: strings.language == AppLanguage.turkish
-                    ? 'Dynamic Island & Canlı Etkinlik'
-                    : 'Dynamic Island & Live Activity',
-                subtitle: isLiveActivityEnabled
-                    ? (strings.language == AppLanguage.turkish
-                        ? 'Açık • Görünme zamanını ve ada ayarlarını özelleştir'
-                        : 'Enabled • Customize trigger time & island behavior')
-                    : (strings.language == AppLanguage.turkish
-                        ? 'Kapalı • Canlı etkinlikler devre dışı'
-                        : 'Disabled • Live activities turned off'),
-                onTap: () => LiveActivitySettingsSheet.show(context),
-              ),
+              if (isLiveActivitySupported) ...[
+                _buildDivider(),
+                _buildTile(
+                  icon: Icons.apple_rounded,
+                  iconColor: const Color(0xFFFFDF7A),
+                  title: strings.language == AppLanguage.turkish
+                      ? 'Dynamic Island & Canlı Etkinlik'
+                      : 'Dynamic Island & Live Activity',
+                  subtitle: isLiveActivityEnabled
+                      ? (strings.language == AppLanguage.turkish
+                          ? 'Açık • Görünme zamanını ve ada ayarlarını özelleştir'
+                          : 'Enabled • Customize trigger time & island behavior')
+                      : (strings.language == AppLanguage.turkish
+                          ? 'Kapalı • Canlı etkinlikler devre dışı'
+                          : 'Disabled • Live activities turned off'),
+                  onTap: () => LiveActivitySettingsSheet.show(context),
+                ),
+              ],
             ],
           ),
           const SizedBox(height: 18),

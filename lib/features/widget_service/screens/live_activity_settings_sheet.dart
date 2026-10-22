@@ -110,6 +110,10 @@ final liveActivityEnabledProvider =
   return LiveActivityEnabledNotifier();
 });
 
+final isLiveActivitySupportedProvider = FutureProvider<bool>((ref) async {
+  return LiveActivityService().isSupported();
+});
+
 class LiveActivityTriggerNotifier extends StateNotifier<int> {
   static const String key = 'live_activity_trigger_minutes';
 
