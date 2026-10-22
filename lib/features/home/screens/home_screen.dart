@@ -1153,6 +1153,23 @@ class _ActionCard extends StatelessWidget {
 class _IslamicAppBar extends ConsumerWidget {
   const _IslamicAppBar();
 
+  String _getSpiritualGreeting(AppStrings strings) {
+    final now = DateTime.now();
+    if (now.weekday == DateTime.friday) {
+      return strings.language == AppLanguage.turkish ? 'Cumanız Mübarek Olsun 🕊️' : 'Jummah Mubarak 🕊️';
+    }
+    final hour = now.hour;
+    if (hour >= 4 && hour < 11) {
+      return strings.language == AppLanguage.turkish ? 'Hayırlı Sabahlar 🌅' : 'Good Morning 🌅';
+    } else if (hour >= 11 && hour < 17) {
+      return strings.language == AppLanguage.turkish ? 'Hayırlı Günler 🌿' : 'Blessed Day 🌿';
+    } else if (hour >= 17 && hour < 21) {
+      return strings.language == AppLanguage.turkish ? 'Hayırlı Akşamlar 🌇' : 'Good Evening 🌇';
+    } else {
+      return strings.language == AppLanguage.turkish ? 'Hayırlı Geceler 🌙' : 'Peaceful Night 🌙';
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final strings = ref.watch(appStringsProvider);
@@ -1163,13 +1180,13 @@ class _IslamicAppBar extends ConsumerWidget {
       elevation: 0,
       backgroundColor: Theme.of(context).appBarTheme.backgroundColor ?? const Color(0xFF01201D),
       centerTitle: false,
-      toolbarHeight: 60,
+      toolbarHeight: 64,
       title: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 28,
-            height: 28,
+            width: 32,
+            height: 32,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
@@ -1186,21 +1203,37 @@ class _IslamicAppBar extends ConsumerWidget {
             child: ClipOval(
               child: Image.asset(
                 'assets/images/app_logo.png',
-                width: 28,
-                height: 28,
+                width: 32,
+                height: 32,
                 fit: BoxFit.cover,
               ),
             ),
           ),
           const SizedBox(width: 10),
-          const Text(
-            'Beyân',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 0.5,
-            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                'Beyân',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.4,
+                  height: 1.1,
+                ),
+              ),
+              Text(
+                _getSpiritualGreeting(strings),
+                style: const TextStyle(
+                  color: Color(0xFFFFDF7A),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.2,
+                ),
+              ),
+            ],
           ),
         ],
       ),

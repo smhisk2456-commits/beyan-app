@@ -1,4 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:islamic_app/features/zikr/models/worship_tracker_model.dart';
 import 'package:islamic_app/features/quran/providers/quran_reading_providers.dart';
 import 'package:islamic_app/features/quran/services/quran_audio_service.dart';
@@ -8,8 +10,11 @@ import 'package:islamic_app/features/ramadan/screens/ramadan_dashboard_screen.da
 import 'package:islamic_app/features/ramadan/models/khatam_tracker_model.dart';
 import 'package:islamic_app/features/quran/services/quran_download_service.dart';
 import 'package:islamic_app/features/widget_service/services/live_activity_service.dart';
+import 'package:islamic_app/features/dua/providers/dua_providers.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  SharedPreferences.setMockInitialValues({});
   group('İbadet Takibi ve Zikir Model Testleri', () {
     test('DailyWorshipEntry varsayılan olarak boş ve 0 tamamlanma oranına sahip olmalı', () {
       const entry = DailyWorshipEntry(dateKey: '2026-03-01');
@@ -231,6 +236,54 @@ void main() {
       expect(fullState.completedCount, 30);
       expect(fullState.percentage, 1.0);
       expect(fullState.isEntireQuranCompleted, isTrue);
+    });
+  });
+
+  group('Favoriler ve Kitap İmleri Testleri', () {
+    test('FavoriteSurahsNotifier favori sure ekleme ve kaldırma doğru çalışmalı', () async {
+      final container = ProviderContainer();
+      final notifier = container.read(favoriteSurahsProvider.notifier);
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+
+      expect(notifier.isFavorite(36), isFalse);
+      await notifier.toggleFavorite(36);
+      expect(notifier.isFavorite(36), isTrue);
+      expect(container.read(favoriteSurahsProvider), contains(36));
+
+      await notifier.toggleFavorite(36);
+      expect(notifier.isFavorite(36), isFalse);
+      expect(container.read(favoriteSurahsProvider), isNot(contains(36)));
+      container.dispose();
+    });
+
+    test('BookmarkedVersesNotifier ayet imi ekleme ve kaldırma doğru çalışmalı', () async {
+      final container = ProviderContainer();
+      final notifier = container.read(bookmarkedVersesProvider.notifier);
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+
+      expect(notifier.isBookmarked(2, 255), isFalse);
+      await notifier.toggleBookmark(2, 255);
+      expect(notifier.isBookmarked(2, 255), isTrue);
+      expect(container.read(bookmarkedVersesProvider), contains('2:255'));
+
+      await notifier.toggleBookmark(2, 255);
+      expect(notifier.isBookmarked(2, 255), isFalse);
+      container.dispose();
+    });
+
+    test('FavoriteDuasNotifier dua favori ekleme ve kaldırma doğru çalışmalı', () async {
+      final container = ProviderContainer();
+      final notifier = container.read(favoriteDuasProvider.notifier);
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+
+      expect(notifier.isFavorite('ayat_al_kursi'), isFalse);
+      await notifier.toggleFavorite('ayat_al_kursi');
+      expect(notifier.isFavorite('ayat_al_kursi'), isTrue);
+      expect(container.read(favoriteDuasProvider), contains('ayat_al_kursi'));
+
+      await notifier.toggleFavorite('ayat_al_kursi');
+      expect(notifier.isFavorite('ayat_al_kursi'), isFalse);
+      container.dispose();
     });
   });
 }

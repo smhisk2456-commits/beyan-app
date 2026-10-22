@@ -349,6 +349,7 @@ class _MushafPageViewState extends ConsumerState<MushafPageView> {
             physics: const BouncingScrollPhysics(),
             itemCount: totalPages,
             onPageChanged: (idx) {
+              HapticFeedback.selectionClick();
               setState(() {
                 _currentPageIndex = idx;
               });
@@ -360,7 +361,13 @@ class _MushafPageViewState extends ConsumerState<MushafPageView> {
                 padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF021B17) : const Color(0xFFFBF8F0),
+                    gradient: LinearGradient(
+                      colors: isDark
+                          ? const [Color(0xFF03221D), Color(0xFF011613)]
+                          : const [Color(0xFFFDFBF7), Color(0xFFF5EFE3)],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
                       color: const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.45 : 0.35),
@@ -476,7 +483,8 @@ class _MushafPageViewState extends ConsumerState<MushafPageView> {
                                                           style: TextStyle(
                                                             fontFamily: 'Amiri',
                                                             fontSize: _fontSize,
-                                                            height: 1.9,
+                                                            height: 2.15,
+                                                            letterSpacing: 0.2,
                                                             color: isDark
                                                                 ? const Color(0xFFFFE082)
                                                                 : const Color(0xFF012E2B),

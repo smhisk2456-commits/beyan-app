@@ -83,33 +83,98 @@ class _PrayerCard extends ConsumerWidget {
     required this.daily,
   });
 
+  List<Color> _getAtmosphericGradient(PrayerName? prayer) {
+    switch (prayer) {
+      case PrayerName.fajr:
+        return const [
+          Color(0xFF071928),
+          Color(0xFF0F2B36),
+          Color(0xFF1B3736),
+        ];
+      case PrayerName.sunrise:
+        return const [
+          Color(0xFF1C2C25),
+          Color(0xFF332714),
+          Color(0xFF453012),
+        ];
+      case PrayerName.dhuhr:
+        return const [
+          Color(0xFF023F36),
+          Color(0xFF012720),
+          Color(0xFF06473D),
+        ];
+      case PrayerName.asr:
+        return const [
+          Color(0xFF1B3224),
+          Color(0xFF2E2616),
+          Color(0xFF15261F),
+        ];
+      case PrayerName.maghrib:
+        return const [
+          Color(0xFF221426),
+          Color(0xFF2E171E),
+          Color(0xFF14121F),
+        ];
+      case PrayerName.isha:
+      default:
+        return const [
+          Color(0xFF061422),
+          Color(0xFF030A12),
+          Color(0xFF071826),
+        ];
+    }
+  }
+
+  Color _getAtmosphericGlow(PrayerName? prayer) {
+    switch (prayer) {
+      case PrayerName.fajr:
+        return const Color(0xFF26A69A);
+      case PrayerName.sunrise:
+        return const Color(0xFFFFB74D);
+      case PrayerName.dhuhr:
+        return const Color(0xFF00BFA5);
+      case PrayerName.asr:
+        return const Color(0xFFFFD54F);
+      case PrayerName.maghrib:
+        return const Color(0xFFFF7043);
+      case PrayerName.isha:
+      default:
+        return const Color(0xFF5C6BC0);
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final strings = ref.watch(appStringsProvider);
     final langCode = strings.language.code;
     final next = daily.nextPrayerEntry;
+    final now = DateTime.now();
+    final timeRemaining = next != null ? next.time.difference(now) : Duration.zero;
+    final isApproaching = timeRemaining.inMinutes < 15 && !timeRemaining.isNegative;
+
+    final gradientColors = _getAtmosphericGradient(next?.name);
+    final glowColor = _getAtmosphericGlow(next?.name);
 
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [
-            Color(0xFF033E35),
-            Color(0xFF01241F),
-          ],
+        gradient: LinearGradient(
+          colors: gradientColors,
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          stops: [0.0, 1.0],
+          stops: const [0.0, 0.5, 1.0],
         ),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: const Color(0xFFD4AF37).withValues(alpha: 0.35),
-          width: 1.2,
+          color: isApproaching
+              ? const Color(0xFFFFDF7A)
+              : const Color(0xFFD4AF37).withValues(alpha: 0.38),
+          width: isApproaching ? 1.6 : 1.2,
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF012E2B).withValues(alpha: 0.35),
-            blurRadius: 20,
+            color: (isApproaching ? const Color(0xFFFFDF7A) : glowColor).withValues(alpha: isApproaching ? 0.3 : 0.22),
+            blurRadius: isApproaching ? 28 : 20,
             offset: const Offset(0, 8),
           ),
         ],

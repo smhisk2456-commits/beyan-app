@@ -10,7 +10,7 @@ import '../data/verified_duas_data.dart';
 import '../models/dua_model.dart';
 import '../providers/dua_providers.dart';
 
-enum _DuaTab { categories, list }
+enum _DuaTab { categories, list, favorites }
 
 /// Beyân - Dua Kütüphanesi Ekranı
 /// 12 Kategorili Doğrulanmış Hadis ve Kur'an Duaları Külliyatı
@@ -262,6 +262,21 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
                             isDark: isDark,
                           ),
                         ),
+                        Expanded(
+                          child: _buildSegmentButton(
+                            label: '${strings.language == AppLanguage.turkish ? 'Favorilerim' : 'Favorites'} (${duas.where((d) => d.isFavorite).length})',
+                            icon: Icons.favorite_rounded,
+                            isActive: _activeTab == _DuaTab.favorites,
+                            onTap: () {
+                              HapticFeedback.selectionClick();
+                              ref.read(selectedDuaCategoryProvider.notifier).state = null;
+                              setState(() {
+                                _activeTab = _DuaTab.favorites;
+                              });
+                            },
+                            isDark: isDark,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -394,7 +409,23 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
     required bool isSearching,
     required double bottomPadding,
   }) {
-    // 1. Kategoriler Grid Görünümü (Arama yokken ve Kategoriler sekmesi aktifken)
+    // 1. Favoriler Görünümü
+    if (_activeTab == _DuaTab.favorites && !isSearching) {
+      final favoriteDuas = duas.where((d) => d.isFavorite).toList();
+      if (favoriteDuas.isEmpty) {
+        return _buildFavoritesEmptyState(isDark: isDark, strings: strings);
+      }
+      return ListView.builder(
+        physics: const BouncingScrollPhysics(),
+        padding: EdgeInsets.fromLTRB(16, 8, 16, bottomPadding),
+        itemCount: favoriteDuas.length,
+        itemBuilder: (context, index) {
+          return _DuaCardItem(dua: favoriteDuas[index], isDark: isDark);
+        },
+      );
+    }
+
+    // 2. Kategoriler Grid Görünümü (Arama yokken ve Kategoriler sekmesi aktifken)
     if (_activeTab == _DuaTab.categories && !isSearching && selectedCategory == null) {
       return _buildCategoriesGrid(
         isDark: isDark,
@@ -890,6 +921,84 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
         ),
         showCheckmark: false,
         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+      ),
+    );
+  }
+
+  Widget _buildFavoritesEmptyState({required bool isDark, required AppStrings strings}) {
+    return Center(
+      child: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.15 : 0.1),
+                border: Border.all(
+                  color: const Color(0xFFD4AF37).withValues(alpha: 0.5),
+                  width: 1.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
+                    blurRadius: 20,
+                    spreadRadius: 2,
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.favorite_rounded,
+                color: Color(0xFFFFDF7A),
+                size: 38,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              strings.language == AppLanguage.turkish ? 'Henüz Favori Duanız Yok' : 'No Favorite Duas Yet',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : const Color(0xFF012E2B),
+                letterSpacing: 0.2,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              strings.language == AppLanguage.turkish
+                  ? 'Gönlünüze ferahlık veren duaları kalp simgesine dokunarak buraya kaydedebilir, dilediğiniz an tek dokunuşla ulaşabilirsiniz.'
+                  : 'Save duas that bring peace to your heart by tapping the heart icon, and access them anytime here.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 13,
+                height: 1.5,
+                color: isDark ? Colors.white60 : Colors.black54,
+              ),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                setState(() => _activeTab = _DuaTab.categories);
+              },
+              icon: const Icon(Icons.auto_stories_rounded, size: 18, color: Color(0xFF012E2B)),
+              label: Text(
+                strings.language == AppLanguage.turkish ? 'Duaları Keşfet' : 'Explore Duas',
+                style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF012E2B)),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFFDF7A),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                elevation: 4,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

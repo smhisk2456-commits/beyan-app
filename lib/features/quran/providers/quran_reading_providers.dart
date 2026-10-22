@@ -155,3 +155,42 @@ final bookmarkedVersesProvider =
     StateNotifierProvider<BookmarkedVersesNotifier, Set<String>>((ref) {
   return BookmarkedVersesNotifier();
 });
+
+/// Favori Sureler Notifier (Sure ID seti)
+class FavoriteSurahsNotifier extends StateNotifier<Set<int>> {
+  static const _key = 'quran_favorite_surah_ids';
+
+  FavoriteSurahsNotifier() : super({}) {
+    _load();
+  }
+
+  Future<void> _load() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final list = prefs.getStringList(_key) ?? [];
+      state = list.map((e) => int.tryParse(e)).whereType<int>().toSet();
+    } catch (_) {}
+  }
+
+  Future<void> toggleFavorite(int surahId) async {
+    final updated = Set<int>.from(state);
+    if (updated.contains(surahId)) {
+      updated.remove(surahId);
+    } else {
+      updated.add(surahId);
+    }
+    state = updated;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList(_key, updated.map((e) => e.toString()).toList());
+    } catch (_) {}
+  }
+
+  bool isFavorite(int surahId) => state.contains(surahId);
+}
+
+final favoriteSurahsProvider =
+    StateNotifierProvider<FavoriteSurahsNotifier, Set<int>>((ref) {
+  return FavoriteSurahsNotifier();
+});
+

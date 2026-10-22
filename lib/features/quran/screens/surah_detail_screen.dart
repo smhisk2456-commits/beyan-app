@@ -501,6 +501,8 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
     QuranAudioState audioState,
     AppStrings strings,
   ) {
+    final isFavoriteSurah = ref.watch(favoriteSurahsProvider).contains(widget.surah.id);
+
     if (_isMushafMode) {
       return Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -511,6 +513,18 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
           ),
           centerTitle: true,
           actions: [
+            // Sureyi Favorilere Ekle / Çıkar
+            IconButton(
+              icon: Icon(
+                isFavoriteSurah ? Icons.star_rounded : Icons.star_outline_rounded,
+                color: isFavoriteSurah ? const Color(0xFFFFDF7A) : Colors.white70,
+              ),
+              tooltip: isFavoriteSurah ? 'Sureyi Favorilerden Çıkar' : 'Sureyi Favorilere Ekle',
+              onPressed: () {
+                HapticFeedback.mediumImpact();
+                ref.read(favoriteSurahsProvider.notifier).toggleFavorite(widget.surah.id);
+              },
+            ),
             // Ayet Listesi Görünümüne Geçiş
             IconButton(
               icon: const Icon(Icons.format_list_bulleted_rounded, color: Color(0xFFFFDF7A)),
@@ -574,6 +588,30 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
           pinned: true,
           backgroundColor: AppColors.teal,
           actions: [
+            // Sureyi Favorilere Ekle / Çıkar
+            IconButton(
+              icon: Icon(
+                isFavoriteSurah ? Icons.star_rounded : Icons.star_outline_rounded,
+                color: isFavoriteSurah ? const Color(0xFFFFDF7A) : Colors.white70,
+              ),
+              tooltip: isFavoriteSurah ? 'Sureyi Favorilerden Çıkar' : 'Sureyi Favorilere Ekle',
+              onPressed: () {
+                HapticFeedback.mediumImpact();
+                ref.read(favoriteSurahsProvider.notifier).toggleFavorite(widget.surah.id);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      !isFavoriteSurah
+                          ? '★ ${widget.surah.localizedName(strings.language.code)} favorilere eklendi'
+                          : '${widget.surah.localizedName(strings.language.code)} favorilerden çıkarıldı',
+                    ),
+                    backgroundColor: const Color(0xFF012E2B),
+                    behavior: SnackBarBehavior.floating,
+                    duration: const Duration(seconds: 1),
+                  ),
+                );
+              },
+            ),
             // Orijinal Mushaf Sayfa Moduna Geçiş Butonu
             IconButton(
               icon: const Icon(Icons.auto_stories_rounded, color: Color(0xFFFFDF7A)),

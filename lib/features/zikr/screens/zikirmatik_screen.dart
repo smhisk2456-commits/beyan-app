@@ -254,7 +254,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
 
   void _increment() {
     if (_hapticMode == 1) {
-      HapticFeedback.lightImpact();
+      HapticFeedback.selectionClick();
     } else if (_hapticMode == 2) {
       HapticFeedback.mediumImpact();
     } else if (_hapticMode == 3) {
@@ -264,9 +264,9 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
     _plusOneController.forward(from: 0.0);
 
     setState(() {
-      _count++;
+      _count++; if (_count % 33 == 0 && _count != _target) { HapticFeedback.mediumImpact(); }
       if (_target > 0 && _count >= _target) {
-        _completedLaps++;
+        _completedLaps++; Future.delayed(const Duration(milliseconds: 100), () => HapticFeedback.mediumImpact());
         HapticFeedback.heavyImpact();
 
         final prevDhikr = _dhikrList[_selectedDhikrIndex];
@@ -1864,7 +1864,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
 
   Widget _buildHabitItem(String title, String habitKey, bool isCompleted, IconData icon, bool isDark) {
     Future<void> handleToggle() async {
-      HapticFeedback.lightImpact();
+      HapticFeedback.selectionClick();
       final milestone = await ref.read(worshipTrackerProvider.notifier).toggleHabit(habitKey: habitKey);
       if (milestone != null && mounted) {
         _showCelebrationDialog(context, milestone);
