@@ -1,5 +1,3 @@
-import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
@@ -51,21 +49,19 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
 
       // 1. Konum servisleri açık mı kontrol et
       final isServiceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!isServiceEnabled) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('Cihaz konum servisi kapalı. Lütfen GPS\'i açın.'),
-              action: SnackBarAction(
-                label: 'Ayarları Aç',
-                textColor: const Color(0xFFFFDF7A),
-                onPressed: () => Geolocator.openLocationSettings(),
-              ),
-              backgroundColor: const Color(0xFF032D26),
-              duration: const Duration(seconds: 4),
+      if (!isServiceEnabled && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Cihaz konum servisi (GPS) kapalı. Lütfen GPS\'i açın.'),
+            action: SnackBarAction(
+              label: 'Ayarları Aç',
+              textColor: const Color(0xFFFFDF7A),
+              onPressed: () => Geolocator.openLocationSettings(),
             ),
-          );
-        }
+            backgroundColor: const Color(0xFF032D26),
+            duration: const Duration(seconds: 4),
+          ),
+        );
       }
 
       // 2. İzin kontrolü ve talep
@@ -74,73 +70,51 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
         perm = await Geolocator.requestPermission();
       }
 
-      if (perm == LocationPermission.deniedForever) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('Konum izni kalıcı reddedildi. Ayarlardan izin verin.'),
-              action: SnackBarAction(
-                label: 'Uygulama İzinleri',
-                textColor: const Color(0xFFFFDF7A),
-                onPressed: () => Geolocator.openAppSettings(),
-              ),
-              backgroundColor: const Color(0xFF032D26),
-              duration: const Duration(seconds: 5),
+      if (perm == LocationPermission.deniedForever && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Konum izni kalıcı reddedildi. Ayarlardan izin verin.'),
+            action: SnackBarAction(
+              label: 'Uygulama İzinleri',
+              textColor: const Color(0xFFFFDF7A),
+              onPressed: () => Geolocator.openAppSettings(),
             ),
-          );
-        }
+            backgroundColor: const Color(0xFF032D26),
+            duration: const Duration(seconds: 5),
+          ),
+        );
       }
 
-      // 3. Hızlı ve kesintisiz konum alma (Önce son bilinen, sonra Wi-Fi/Baz istasyonu destekli high/medium)
+      // 3. Canlı ve Yüksek Hassasiyetli GPS Konumunu Al (Stale/eski önbellek konumunu beklemeden gerçek GPS)
       if (perm == LocationPermission.always || perm == LocationPermission.whileInUse) {
         try {
-          final lastPos = await Geolocator.getLastKnownPosition();
-          if (lastPos != null) {
-            position = lastPos;
-          }
-        } catch (_) {}
-
-        if (position == null) {
+          position = await Geolocator.getCurrentPosition(
+            desiredAccuracy: LocationAccuracy.high,
+            timeLimit: const Duration(seconds: 8),
+          );
+        } catch (_) {
+          // Yüksek hassasiyet kapalı mekanlarda zaman aşımına uğrarsa orta hassasiyeti dene
           try {
-            // Kapalı mekanlarda uydunun kilitlenmesini beklemeden hızlı Wi-Fi/Hücresel konum alma
             position = await Geolocator.getCurrentPosition(
-              desiredAccuracy: LocationAccuracy.high,
-              timeLimit: const Duration(seconds: 6),
+              desiredAccuracy: LocationAccuracy.medium,
+              timeLimit: const Duration(seconds: 5),
             );
           } catch (_) {
+            // Canlı konum alınamazsa, yalnızca son 20 dakika içindeki taze önbellek konumunu kabul et
             try {
-              position = await Geolocator.getCurrentPosition(
-                desiredAccuracy: LocationAccuracy.medium,
-                timeLimit: const Duration(seconds: 4),
-              );
+              final lastPos = await Geolocator.getLastKnownPosition();
+              if (lastPos != null) {
+                final age = DateTime.now().difference(lastPos.timestamp);
+                if (age.inMinutes < 20) {
+                  position = lastPos;
+                }
+              }
             } catch (_) {}
           }
         }
       }
 
-      // 4. GPS kapalıysa veya ev içinde sinyal yoksa IP tabanlı anlık şehir tespiti
-      if (position == null) {
-        try {
-          final client = HttpClient()..connectionTimeout = const Duration(seconds: 3);
-          final req = await client.getUrl(Uri.parse('http://ip-api.com/json'));
-          final res = await req.close().timeout(const Duration(seconds: 3));
-          if (res.statusCode == HttpStatus.ok) {
-            final body = await res.transform(utf8.decoder).join();
-            final map = jsonDecode(body) as Map<String, dynamic>;
-            final lat = (map['lat'] as num?)?.toDouble();
-            final lon = (map['lon'] as num?)?.toDouble();
-            final city = map['city'] as String? ?? map['regionName'] as String?;
-            if (lat != null && lon != null) {
-              _userLat = lat;
-              _userLng = lon;
-              _userLocationTitle = '${city ?? "Mevcut Konum"} (Ağ Konumu 📡)';
-              _isGpsActive = true;
-            }
-          }
-          client.close();
-        } catch (_) {}
-      }
-
+      // 4. GPS uydusu sinyali yoksa ağ veya namaz servisinin kayıtlı konumunu kullan
       if (position != null) {
         _userLat = position.latitude;
         _userLng = position.longitude;
@@ -180,18 +154,20 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
           await prefs.setDouble('beyan_widget_lng', _userLng);
           await prefs.setString('beyan_widget_city', readableLocation);
         } catch (_) {}
-      } else if (!_isGpsActive) {
+      } else {
+        // Namaz vakti servisinin konumunu veya şehir bilgisini al
         final loc = await PrayerTimeService.instance.getCurrentLocation();
         _userLat = loc.latitude;
         _userLng = loc.longitude;
-        _userLocationTitle = '${loc.cityName} (Varsayılan)';
+        _userLocationTitle = '${loc.cityName} (${loc.isFromGPS ? "GPS Konumu 📍" : "Kayıtlı Şehir"})';
         _isGpsActive = loc.isFromGPS;
       }
 
+      // Çevredeki camileri ara (5000 metre yarıçap ile en yakın neighborhood camilerini hızlı getir)
       final mosques = await _service.findNearbyMosques(
         userLat: _userLat,
         userLng: _userLng,
-        radiusMeters: 10000,
+        radiusMeters: 5000,
       );
 
       if (mounted) {
@@ -395,6 +371,30 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
                       },
                       style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero),
                       child: const Text('İzin Ver', style: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold, fontSize: 11.5)),
+                    ),
+                  ],
+                ),
+              ),
+
+            // ── Çevrimdışı / Yedek Veri Bilgilendirmesi ─────────────────
+            if (!_isLoading && _allMosques.isNotEmpty && _allMosques.every((m) => m.isCuratedFallback))
+              Container(
+                margin: const EdgeInsets.fromLTRB(16, 0, 16, 6),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFD4AF37).withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFFFDF7A).withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.info_outline_rounded, color: Color(0xFFFFDF7A), size: 16),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'İnternetsiz modda seçkin tarihi camiler listeleniyor. Mahallenizdeki camiler için üstteki butondan Haritaları açabilirsiniz.',
+                        style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 11),
+                      ),
                     ),
                   ],
                 ),

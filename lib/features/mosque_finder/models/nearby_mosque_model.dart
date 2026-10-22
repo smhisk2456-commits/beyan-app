@@ -9,6 +9,7 @@ class NearbyMosque {
   final double distanceMeters;
   final String? address;
   final double bearingDegrees; // Kullanıcıdan camiye olan pusula açısı
+  final bool isCuratedFallback; // Çevrimdışı yedek veri mi?
 
   const NearbyMosque({
     required this.id,
@@ -18,6 +19,7 @@ class NearbyMosque {
     required this.distanceMeters,
     this.address,
     this.bearingDegrees = 0.0,
+    this.isCuratedFallback = false,
   });
 
   /// Formatlı mesafe metni (Örn: "450 m" veya "1.8 km")

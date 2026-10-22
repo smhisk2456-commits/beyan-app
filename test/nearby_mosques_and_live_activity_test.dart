@@ -112,6 +112,42 @@ void main() {
   });
 
   group('NearbyMosquesService Tests', () {
+    test('isMosqueCandidate identifies mosques and filters out non-Muslim worship places', () {
+      expect(NearbyMosquesService.isMosqueCandidate('Osman Ağa Cami', 'Kadıköy'), isTrue);
+      expect(NearbyMosquesService.isMosqueCandidate('Süleymaniye Camii', 'Fatih'), isTrue);
+      expect(NearbyMosquesService.isMosqueCandidate('Kocatepe Mescidi', 'Ankara'), isTrue);
+      expect(NearbyMosquesService.isMosqueCandidate('East London Mosque', 'London'), isTrue);
+      expect(NearbyMosquesService.isMosqueCandidate('Al-Haram Masjid', 'Mecca'), isTrue);
+
+      // Non-mosque places should be rejected
+      expect(NearbyMosquesService.isMosqueCandidate('Aya Triada Rum Ortodoks Kilisesi', 'Kadıköy'), isFalse);
+      expect(NearbyMosquesService.isMosqueCandidate('Hemdat Israel Sinagogu', 'Yeldeğirmeni'), isFalse);
+      expect(NearbyMosquesService.isMosqueCandidate('St. Pierre Church', 'Antakya'), isFalse);
+      expect(NearbyMosquesService.isMosqueCandidate('Surp Kevork Ermeni Kilisesi', 'Samatya'), isFalse);
+    });
+
+    test('NearbyMosque model respects isCuratedFallback property', () {
+      const fallbackMosque = NearbyMosque(
+        id: '1',
+        name: 'Süleymaniye Camii',
+        latitude: 41.0162,
+        longitude: 28.9644,
+        distanceMeters: 1200,
+        isCuratedFallback: true,
+      );
+      expect(fallbackMosque.isCuratedFallback, isTrue);
+
+      const liveMosque = NearbyMosque(
+        id: '2',
+        name: 'Mahalle Camii',
+        latitude: 41.0150,
+        longitude: 28.9630,
+        distanceMeters: 150,
+        isCuratedFallback: false,
+      );
+      expect(liveMosque.isCuratedFallback, isFalse);
+    });
+
     test('Service returns distance-sorted fallback mosques without network', () async {
       final service = NearbyMosquesService.instance;
       final mosques = await service.findNearbyMosques(

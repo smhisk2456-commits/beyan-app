@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 import 'package:url_launcher/url_launcher.dart';
-import '../../../core/utils/app_constants.dart';
 import '../models/nearby_mosque_model.dart';
 
 /// Yakındaki Camileri Arama ve Harita Navigasyon Servisi
@@ -11,18 +10,23 @@ class NearbyMosquesService {
   factory NearbyMosquesService() => instance;
   NearbyMosquesService._internal();
 
-  /// Verilen koordinatlar etrafındaki camileri bulur (Önce Google Places API, sonra hızlı Nominatim API, sonra Overpass, hata halinde yedek zengin veri)
+  /// Verilen koordinatlar etrafındaki camileri bulur.
+  /// Arama Sırası:
+  /// 1. Google Places API (yalnızca geçerli bir Google Maps API anahtarı sağlandıysa)
+  /// 2. OpenStreetMap Nominatim Bounded API (kesin koordinat sınırlı, hızlı ve yerel camiler)
+  /// 3. Komoot Photon POI API (hızlı OSM arama motoru yedeği)
+  /// 4. OpenStreetMap Overpass API (POST istekli harita sunucu yedeği)
+  /// 5. Çevrimdışı zengin cami veritabanı (internet olmadığında devreye girer)
   Future<List<NearbyMosque>> findNearbyMosques({
     required double userLat,
     required double userLng,
-    double radiusMeters = 8000,
+    double radiusMeters = 5000,
     String? googleApiKey,
   }) async {
-    // 1. Google Places API (Google Cloud'da Places API etkinse doğrudan resmi Google verisi çeker)
-    final key = googleApiKey ?? AppConstants.defaultGeminiApiKey;
-    if (key.isNotEmpty) {
+    // 1. Google Places API (Yalnızca geçerli bir Places anahtarı sağlandıysa)
+    if (googleApiKey != null && googleApiKey.trim().isNotEmpty && !googleApiKey.startsWith('AIzaSy')) {
       try {
-        final googleMosques = await _fetchFromGooglePlaces(userLat, userLng, radiusMeters, key);
+        final googleMosques = await _fetchFromGooglePlaces(userLat, userLng, radiusMeters, googleApiKey.trim());
         if (googleMosques.isNotEmpty) {
           googleMosques.sort((a, b) => a.distanceMeters.compareTo(b.distanceMeters));
           return googleMosques;
@@ -30,7 +34,7 @@ class NearbyMosquesService {
       } catch (_) {}
     }
 
-    // 2. OpenStreetMap Nominatim Arama API (Hızlı, güncel ve kesintisiz)
+    // 2. OpenStreetMap Nominatim Bounded Arama API (Hızlı, güncel ve kesin koordinat kutulu)
     try {
       final mosques = await _fetchFromNominatim(userLat, userLng, radiusMeters);
       if (mosques.isNotEmpty) {
@@ -39,7 +43,16 @@ class NearbyMosquesService {
       }
     } catch (_) {}
 
-    // 3. OpenStreetMap Overpass API (Alternatif yedek motor)
+    // 3. Komoot Photon POI API (Alternatif ultra-hızlı OSM cami arama motoru)
+    try {
+      final mosques = await _fetchFromPhoton(userLat, userLng, radiusMeters);
+      if (mosques.isNotEmpty) {
+        mosques.sort((a, b) => a.distanceMeters.compareTo(b.distanceMeters));
+        return mosques;
+      }
+    } catch (_) {}
+
+    // 4. OpenStreetMap Overpass API (POST sorgulu ayna sunucular)
     try {
       final mosques = await _fetchFromOverpass(userLat, userLng, radiusMeters);
       if (mosques.isNotEmpty) {
@@ -48,10 +61,37 @@ class NearbyMosquesService {
       }
     } catch (_) {}
 
-    // 4. Fallback: Çevredeki bilinen camileri filtrele ve mesafeye göre sırala
+    // 5. Fallback: İnternetsiz veya API yanıt vermediğinde çalışan seçkin camiler
     final fallbackList = _getCuratedFallbackMosques(userLat, userLng);
     fallbackList.sort((a, b) => a.distanceMeters.compareTo(b.distanceMeters));
     return fallbackList;
+  }
+
+  /// Bir yerin cami/mescid olup olmadığını filtreler, kilise ve havraları eler
+  static bool isMosqueCandidate(String name, String? addressOrDisplayName) {
+    final combined = '${name.toLowerCase()} ${addressOrDisplayName?.toLowerCase() ?? ''}';
+
+    // Gayrimüslim ibadethaneleri elenir
+    const excludeTerms = [
+      'kilise', 'kilisesi', 'church', 'sinagog', 'sinagogu', 'synagogue',
+      'havra', 'patrikhane', 'metropolit', 'şapel', 'chapel', 'monastery',
+      'manastır', 'katedral', 'cathedral'
+    ];
+    for (final term in excludeTerms) {
+      if (combined.contains(term)) return false;
+    }
+
+    // İslami ibadethane terimleri
+    const includeTerms = [
+      'cami', 'camii', 'mescid', 'mescidi', 'mosque', 'masjid', 'namazgâh',
+      'namazgah', 'külliye', 'kulliye', 'dergâh', 'dergah', 'tekke', 'ibadethane'
+    ];
+    for (final term in includeTerms) {
+      if (combined.contains(term)) return true;
+    }
+
+    // Başlıkta açıkça cami/mescit kelimesi varsa kabul et
+    return name.trim().isNotEmpty && !combined.contains('church') && !combined.contains('synagogue');
   }
 
   /// Google Places API (Nearby Search) ile resmi Google cami verilerini alma
@@ -61,13 +101,13 @@ class NearbyMosquesService {
     double radiusMeters,
     String apiKey,
   ) async {
-    final client = HttpClient()..connectionTimeout = const Duration(seconds: 6);
+    final client = HttpClient()..connectionTimeout = const Duration(seconds: 5);
     try {
       final uri = Uri.parse(
         'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=$lat,$lng&radius=$radiusMeters&type=mosque&language=tr&key=$apiKey',
       );
       final request = await client.getUrl(uri);
-      final response = await request.close().timeout(const Duration(seconds: 7));
+      final response = await request.close().timeout(const Duration(seconds: 6));
       if (response.statusCode != HttpStatus.ok) return [];
 
       final responseBody = await response.transform(utf8.decoder).join();
@@ -88,6 +128,8 @@ class NearbyMosquesService {
 
         final name = (item['name'] as String? ?? 'Cami').trim();
         final address = (item['vicinity'] as String? ?? item['formatted_address'] as String?)?.trim();
+        if (!isMosqueCandidate(name, address)) continue;
+
         final dist = NearbyMosque.calculateDistanceMeters(lat, lng, mLat, mLng);
         final bearing = NearbyMosque.calculateBearing(lat, lng, mLat, mLng);
         final placeId = (item['place_id'] as String?) ?? '$mLat,$mLng';
@@ -112,9 +154,11 @@ class NearbyMosquesService {
     }
   }
 
-  /// OpenStreetMap Nominatim Arama Sorgusu
+  /// OpenStreetMap Nominatim Bounded Arama Sorgusu (Kesin Sınırlı ve Hızlı)
   Future<List<NearbyMosque>> _fetchFromNominatim(double lat, double lng, double radiusMeters) async {
-    final deltaKm = radiusMeters / 1000.0;
+    // Arama yarıçapını 3.5 km - 5 km arasına sınırla (daha hızlı ve yerel sonuç için)
+    final effectiveRadius = math.min(radiusMeters, 5000.0);
+    final deltaKm = effectiveRadius / 1000.0;
     final deltaLat = deltaKm / 111.0;
     final cosLat = math.cos(lat * math.pi / 180.0);
     final deltaLng = deltaKm / (111.0 * (cosLat.abs() < 0.001 ? 1.0 : cosLat.abs()));
@@ -124,68 +168,158 @@ class NearbyMosquesService {
     final minLng = lng - deltaLng;
     final maxLng = lng + deltaLng;
 
-    final uri = Uri.parse(
-      'https://nominatim.openstreetmap.org/search?format=json&q=cami&limit=50&viewbox=$minLng,$maxLat,$maxLng,$minLat&bounded=0&addressdetails=1',
-    );
-
-    final client = HttpClient()..connectionTimeout = const Duration(seconds: 7);
+    final client = HttpClient()..connectionTimeout = const Duration(seconds: 5);
     try {
+      // 1. Türkçe odaklı cami sorgusu
+      final uriCami = Uri.parse(
+        'https://nominatim.openstreetmap.org/search?format=json&q=cami&limit=40&viewbox=$minLng,$maxLat,$maxLng,$minLat&bounded=1&addressdetails=1',
+      );
+      final request = await client.getUrl(uriCami);
+      request.headers.set('User-Agent', 'BeyanApp/1.0 (contact@beyanapp.com)');
+      final response = await request.close().timeout(const Duration(seconds: 6));
+
+      if (response.statusCode == HttpStatus.ok) {
+        final responseBody = await response.transform(utf8.decoder).join();
+        final list = jsonDecode(responseBody) as List<dynamic>? ?? [];
+        final mosques = _parseNominatimResults(list, lat, lng);
+        if (mosques.isNotEmpty) return mosques;
+      }
+    } catch (_) {
+    } finally {
+      client.close();
+    }
+
+    // 2. Yurt dışı veya uluslararası etiketli camiler için (mosque)
+    final client2 = HttpClient()..connectionTimeout = const Duration(seconds: 5);
+    try {
+      final uriMosque = Uri.parse(
+        'https://nominatim.openstreetmap.org/search?format=json&q=mosque&limit=40&viewbox=$minLng,$maxLat,$maxLng,$minLat&bounded=1&addressdetails=1',
+      );
+      final request = await client2.getUrl(uriMosque);
+      request.headers.set('User-Agent', 'BeyanApp/1.0 (contact@beyanapp.com)');
+      final response = await request.close().timeout(const Duration(seconds: 6));
+
+      if (response.statusCode == HttpStatus.ok) {
+        final responseBody = await response.transform(utf8.decoder).join();
+        final list = jsonDecode(responseBody) as List<dynamic>? ?? [];
+        final mosques = _parseNominatimResults(list, lat, lng);
+        if (mosques.isNotEmpty) return mosques;
+      }
+    } catch (_) {
+    } finally {
+      client2.close();
+    }
+
+    return [];
+  }
+
+  List<NearbyMosque> _parseNominatimResults(List<dynamic> list, double lat, double lng) {
+    final results = <NearbyMosque>[];
+    final seenIds = <String>{};
+
+    for (final el in list) {
+      if (el is! Map<String, dynamic>) continue;
+      final rawLat = el['lat'];
+      final rawLng = el['lon'];
+      if (rawLat == null || rawLng == null) continue;
+
+      final mLat = double.tryParse('$rawLat');
+      final mLng = double.tryParse('$rawLng');
+      if (mLat == null || mLng == null || (mLat == 0.0 && mLng == 0.0)) continue;
+
+      final rawName = (el['name'] as String? ?? '').trim();
+      final displayName = (el['display_name'] as String? ?? '').trim();
+      final name = rawName.isNotEmpty
+          ? rawName
+          : (displayName.split(',').first.trim().isNotEmpty ? displayName.split(',').first.trim() : 'Cami');
+
+      if (!isMosqueCandidate(name, displayName)) continue;
+
+      // Detaylı adres ayrıştırma
+      String? address;
+      final addrMap = el['address'] as Map<String, dynamic>?;
+      if (addrMap != null) {
+        final parts = <String>[];
+        if (addrMap['road'] != null) parts.add('${addrMap['road']}');
+        if (addrMap['neighbourhood'] != null) {
+          parts.add('${addrMap['neighbourhood']}');
+        } else if (addrMap['suburb'] != null) {
+          parts.add('${addrMap['suburb']}');
+        }
+        if (addrMap['city_district'] != null) {
+          parts.add('${addrMap['city_district']}');
+        } else if (addrMap['city'] != null) {
+          parts.add('${addrMap['city']}');
+        }
+        if (parts.isNotEmpty) address = parts.join(', ');
+      }
+      if (address == null || address.isEmpty) {
+        final parts = displayName.split(',');
+        if (parts.length > 1) {
+          address = parts.skip(1).take(2).map((s) => s.trim()).join(', ');
+        }
+      }
+
+      final dist = NearbyMosque.calculateDistanceMeters(lat, lng, mLat, mLng);
+      final bearing = NearbyMosque.calculateBearing(lat, lng, mLat, mLng);
+      final id = '${el['place_id'] ?? '${mLat.toStringAsFixed(4)},${mLng.toStringAsFixed(4)}'}';
+
+      if (seenIds.add(id)) {
+        results.add(
+          NearbyMosque(
+            id: id,
+            name: name,
+            latitude: mLat,
+            longitude: mLng,
+            distanceMeters: dist,
+            address: address,
+            bearingDegrees: bearing,
+          ),
+        );
+      }
+    }
+    return results;
+  }
+
+  /// Komoot Photon POI API Sorgusu (Ultra-hızlı OSM arama motoru)
+  Future<List<NearbyMosque>> _fetchFromPhoton(double lat, double lng, double radiusMeters) async {
+    final client = HttpClient()..connectionTimeout = const Duration(seconds: 4);
+    try {
+      final uri = Uri.parse('https://photon.komoot.io/api/?q=cami&lat=$lat&lon=$lng&limit=30');
       final request = await client.getUrl(uri);
-      request.headers.set('User-Agent', 'BeyanApp/1.0 (smhisk2456@gmail.com)');
-      final response = await request.close().timeout(const Duration(seconds: 8));
+      request.headers.set('User-Agent', 'BeyanApp/1.0 (contact@beyanapp.com)');
+      final response = await request.close().timeout(const Duration(seconds: 5));
 
       if (response.statusCode != HttpStatus.ok) return [];
 
-      final responseBody = await response.transform(utf8.decoder).join();
-      final list = jsonDecode(responseBody) as List<dynamic>? ?? [];
-
+      final body = await response.transform(utf8.decoder).join();
+      final data = jsonDecode(body) as Map<String, dynamic>;
+      final features = data['features'] as List<dynamic>? ?? [];
       final results = <NearbyMosque>[];
       final seenIds = <String>{};
 
-      for (final el in list) {
-        if (el is! Map<String, dynamic>) continue;
-        final rawLat = el['lat'];
-        final rawLng = el['lon'];
-        if (rawLat == null || rawLng == null) continue;
+      for (final f in features) {
+        if (f is! Map<String, dynamic>) continue;
+        final geom = f['geometry'] as Map<String, dynamic>?;
+        final coords = geom?['coordinates'] as List<dynamic>?;
+        if (coords == null || coords.length < 2) continue;
 
-        final mLat = double.tryParse('$rawLat');
-        final mLng = double.tryParse('$rawLng');
-        if (mLat == null || mLng == null || (mLat == 0.0 && mLng == 0.0)) continue;
+        final mLng = (coords[0] as num).toDouble();
+        final mLat = (coords[1] as num).toDouble();
+        final props = f['properties'] as Map<String, dynamic>? ?? {};
 
-        final rawName = (el['name'] as String? ?? '').trim();
-        final displayName = (el['display_name'] as String? ?? '').trim();
-        final name = rawName.isNotEmpty
-            ? rawName
-            : (displayName.split(',').first.trim().isNotEmpty ? displayName.split(',').first.trim() : 'Cami');
+        final name = (props['name'] as String? ?? 'Cami').trim();
+        final street = props['street'] as String?;
+        final district = props['district'] as String? ?? props['city'] as String?;
+        final address = street != null ? '$street, ${district ?? ''}'.trim() : district;
 
-        // Detaylı adres ayrıştırma
-        String? address;
-        final addrMap = el['address'] as Map<String, dynamic>?;
-        if (addrMap != null) {
-          final parts = <String>[];
-          if (addrMap['road'] != null) parts.add('${addrMap['road']}');
-          if (addrMap['neighbourhood'] != null) {
-            parts.add('${addrMap['neighbourhood']}');
-          } else if (addrMap['suburb'] != null) {
-            parts.add('${addrMap['suburb']}');
-          }
-          if (addrMap['city_district'] != null) {
-            parts.add('${addrMap['city_district']}');
-          } else if (addrMap['city'] != null) {
-            parts.add('${addrMap['city']}');
-          }
-          if (parts.isNotEmpty) address = parts.join(', ');
-        }
-        if (address == null || address.isEmpty) {
-          final parts = displayName.split(',');
-          if (parts.length > 1) {
-            address = parts.skip(1).take(2).map((s) => s.trim()).join(', ');
-          }
-        }
+        if (!isMosqueCandidate(name, address)) continue;
 
         final dist = NearbyMosque.calculateDistanceMeters(lat, lng, mLat, mLng);
+        if (dist > radiusMeters * 1.5) continue;
+
         final bearing = NearbyMosque.calculateBearing(lat, lng, mLat, mLng);
-        final id = '${el['place_id'] ?? '${mLat.toStringAsFixed(4)},${mLng.toStringAsFixed(4)}'}';
+        final id = '${props['osm_id'] ?? '${mLat.toStringAsFixed(4)},${mLng.toStringAsFixed(4)}'}';
 
         if (seenIds.add(id)) {
           results.add(
@@ -201,94 +335,85 @@ class NearbyMosquesService {
           );
         }
       }
-
       return results;
+    } catch (_) {
+      return [];
     } finally {
       client.close();
     }
   }
 
-  /// OpenStreetMap Overpass API sorgusu
+  /// OpenStreetMap Overpass API sorgusu (POST istekli ve ayna sunuculu)
   Future<List<NearbyMosque>> _fetchFromOverpass(double lat, double lng, double radius) async {
+    final queryRadius = math.min(radius, 3500.0).round();
     final query = '''
-[out:json][timeout:10];
+[out:json][timeout:5];
 (
-  node["amenity"="place_of_worship"]["religion"="muslim"](around:$radius,$lat,$lng);
-  way["amenity"="place_of_worship"]["religion"="muslim"](around:$radius,$lat,$lng);
-  relation["amenity"="place_of_worship"]["religion"="muslim"](around:$radius,$lat,$lng);
-  node["building"="mosque"](around:$radius,$lat,$lng);
-  way["building"="mosque"](around:$radius,$lat,$lng);
+  node["amenity"="place_of_worship"]["religion"="muslim"](around:$queryRadius,$lat,$lng);
+  way["amenity"="place_of_worship"]["religion"="muslim"](around:$queryRadius,$lat,$lng);
 );
-out center 45;
+out center 35;
 ''';
 
     final endpoints = [
-      'https://overpass-api.de/api/interpreter?data=${Uri.encodeComponent(query)}',
-      'https://overpass.kumi.systems/api/interpreter?data=${Uri.encodeComponent(query)}',
+      'https://overpass.kumi.systems/api/interpreter',
+      'https://overpass-api.de/api/interpreter',
+      'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
     ];
 
     for (final ep in endpoints) {
-      final client = HttpClient()..connectionTimeout = const Duration(seconds: 7);
+      final client = HttpClient()..connectionTimeout = const Duration(seconds: 4);
       try {
-        final request = await client.getUrl(Uri.parse(ep));
-        request.headers.set('User-Agent', 'BeyanApp/1.0 (smhisk2456@gmail.com)');
-        final response = await request.close().timeout(const Duration(seconds: 8));
+        final request = await client.postUrl(Uri.parse(ep));
+        request.headers.set('User-Agent', 'BeyanApp/1.0 (contact@beyanapp.com)');
+        request.headers.set('Content-Type', 'application/x-www-form-urlencoded');
+        request.write('data=${Uri.encodeQueryComponent(query)}');
 
-        if (response.statusCode != HttpStatus.ok) {
-          continue;
-        }
+        final response = await request.close().timeout(const Duration(seconds: 5));
+        if (response.statusCode != HttpStatus.ok) continue;
 
         final responseBody = await response.transform(utf8.decoder).join();
-        final data = jsonDecode(responseBody);
+        final data = jsonDecode(responseBody) as Map<String, dynamic>;
         final elements = data['elements'] as List<dynamic>? ?? [];
-
         final result = <NearbyMosque>[];
 
-      for (final el in elements) {
-        final tags = el['tags'] as Map<String, dynamic>? ?? {};
-        final name = tags['name'] as String? ?? tags['name:tr'] as String? ?? 'Cami / Mescid';
+        for (final el in elements) {
+          if (el is! Map<String, dynamic>) continue;
+          final tags = el['tags'] as Map<String, dynamic>? ?? {};
+          final name = tags['name'] as String? ?? tags['name:tr'] as String? ?? 'Cami';
 
-        double mLat = 0.0;
-        double mLng = 0.0;
+          double mLat = 0.0;
+          double mLng = 0.0;
+          if (el['lat'] != null && el['lon'] != null) {
+            mLat = (el['lat'] as num).toDouble();
+            mLng = (el['lon'] as num).toDouble();
+          } else if (el['center'] != null) {
+            mLat = (el['center']['lat'] as num).toDouble();
+            mLng = (el['center']['lon'] as num).toDouble();
+          }
+          if (mLat == 0.0 || mLng == 0.0) continue;
 
-        if (el['lat'] != null && el['lon'] != null) {
-          mLat = (el['lat'] as num).toDouble();
-        } else if (el['center'] != null) {
-          mLat = (el['center']['lat'] as num).toDouble();
+          final dist = NearbyMosque.calculateDistanceMeters(lat, lng, mLat, mLng);
+          final bearing = NearbyMosque.calculateBearing(lat, lng, mLat, mLng);
+          final street = tags['addr:street'] as String?;
+          final district = tags['addr:district'] as String? ?? tags['addr:city'] as String?;
+          final address = street != null ? '$street, ${district ?? ''}'.trim() : district;
+
+          result.add(
+            NearbyMosque(
+              id: '${el['id']}',
+              name: name,
+              latitude: mLat,
+              longitude: mLng,
+              distanceMeters: dist,
+              address: address,
+              bearingDegrees: bearing,
+            ),
+          );
         }
 
-        if (el['lon'] != null) {
-          mLng = (el['lon'] as num).toDouble();
-        } else if (el['center'] != null) {
-          mLng = (el['center']['lon'] as num).toDouble();
-        }
-
-        if (mLat == 0.0 || mLng == 0.0) continue;
-
-        final dist = NearbyMosque.calculateDistanceMeters(lat, lng, mLat, mLng);
-        final bearing = NearbyMosque.calculateBearing(lat, lng, mLat, mLng);
-        final street = tags['addr:street'] as String?;
-        final district = tags['addr:district'] as String? ?? tags['addr:city'] as String?;
-        final address = street != null ? '$street ${district ?? ''}'.trim() : district;
-
-        result.add(
-          NearbyMosque(
-            id: '${el['id']}',
-            name: name,
-            latitude: mLat,
-            longitude: mLng,
-            distanceMeters: dist,
-            address: address,
-            bearingDegrees: bearing,
-          ),
-        );
-      }
-
-        if (result.isNotEmpty) {
-          return result;
-        }
+        if (result.isNotEmpty) return result;
       } catch (_) {
-        // Hata durumunda bir sonraki aynayı/sunucuyu dene
       } finally {
         client.close();
       }
@@ -371,7 +496,7 @@ out center 45;
     }
   }
 
-  /// İnternet olmasa dahi çalışan zengin cami veritabanı
+  /// İnternet olmasa dahi çalışan zengin seçkin cami veritabanı (isCuratedFallback: true)
   List<NearbyMosque> _getCuratedFallbackMosques(double userLat, double userLng) {
     const rawList = [
       {'name': 'Süleymaniye Camii', 'lat': 41.0162, 'lng': 28.9644, 'addr': 'Fatih, İstanbul'},
@@ -382,15 +507,25 @@ out center 45;
       {'name': 'Fatih Camii', 'lat': 41.0197, 'lng': 28.9499, 'addr': 'Fatih, İstanbul'},
       {'name': 'Ortaköy Camii (Büyük Mecidiye)', 'lat': 41.0472, 'lng': 29.0270, 'addr': 'Beşiktaş, İstanbul'},
       {'name': 'Mihrimah Sultan Camii', 'lat': 41.0268, 'lng': 29.0155, 'addr': 'Üsküdar, İstanbul'},
+      {'name': 'Osman Ağa Camii', 'lat': 40.9908, 'lng': 29.0261, 'addr': 'Kadıköy, İstanbul'},
+      {'name': 'Şakirin Camii', 'lat': 41.0119, 'lng': 29.0287, 'addr': 'Karacaahmet, Üsküdar, İstanbul'},
       {'name': 'Kocatepe Camii', 'lat': 39.9167, 'lng': 32.8608, 'addr': 'Kızılay, Ankara'},
       {'name': 'Hacı Bayram Camii', 'lat': 39.9444, 'lng': 32.8581, 'addr': 'Ulus, Ankara'},
       {'name': 'Ahmet Hamdi Akseki Camii', 'lat': 39.9077, 'lng': 32.7601, 'addr': 'Çankaya, Ankara'},
+      {'name': 'Melike Hatun Camii', 'lat': 39.9372, 'lng': 32.8569, 'addr': 'Altındağ, Ankara'},
       {'name': 'İzmir Konak Camii (Yalı Camii)', 'lat': 38.4189, 'lng': 27.1287, 'addr': 'Konak, İzmir'},
+      {'name': 'Hisar Camii', 'lat': 38.4239, 'lng': 27.1325, 'addr': 'Kemeraltı, İzmir'},
       {'name': 'Bursa Ulu Camii', 'lat': 40.1834, 'lng': 29.0620, 'addr': 'Osmangazi, Bursa'},
+      {'name': 'Yeşil Camii', 'lat': 40.1816, 'lng': 29.0744, 'addr': 'Yıldırım, Bursa'},
       {'name': 'Selimiye Camii', 'lat': 41.6781, 'lng': 26.5594, 'addr': 'Merkez, Edirne'},
       {'name': 'Konya Mevlana Mescidi', 'lat': 37.8707, 'lng': 32.5050, 'addr': 'Karatay, Konya'},
+      {'name': 'Alaaddin Camii', 'lat': 37.8732, 'lng': 32.4931, 'addr': 'Meram, Konya'},
       {'name': 'Sabancı Merkez Camii', 'lat': 36.9914, 'lng': 35.3344, 'addr': 'Seyhan, Adana'},
+      {'name': 'Antalya Yivli Minare Camii', 'lat': 36.8866, 'lng': 30.7045, 'addr': 'Muratpaşa, Antalya'},
       {'name': 'Trabzon Ayasofya Camii', 'lat': 41.0028, 'lng': 39.6961, 'addr': 'Ortahisar, Trabzon'},
+      {'name': 'Gaziantep Kurtuluş Camii', 'lat': 37.0601, 'lng': 37.3789, 'addr': 'Şahinbey, Gaziantep'},
+      {'name': 'Diyarbakır Ulu Camii', 'lat': 37.9136, 'lng': 40.2372, 'addr': 'Sur, Diyarbakır'},
+      {'name': 'Eskişehir Reşadiye Camii', 'lat': 39.7719, 'lng': 30.5186, 'addr': 'Odunpazarı, Eskişehir'},
       {'name': 'Mescid-i Haram (Kâbe)', 'lat': 21.4225, 'lng': 39.8262, 'addr': 'Mekke-i Mükerreme'},
       {'name': 'Mescid-i Nebevi', 'lat': 24.4672, 'lng': 39.6111, 'addr': 'Medine-i Münevvere'},
       {'name': 'Mescid-i Aksâ', 'lat': 31.7761, 'lng': 35.2358, 'addr': 'Kudüs-ü Şerif'},
@@ -410,6 +545,7 @@ out center 45;
         distanceMeters: dist,
         address: item['addr'] as String,
         bearingDegrees: bearing,
+        isCuratedFallback: true,
       );
     }).toList();
   }
