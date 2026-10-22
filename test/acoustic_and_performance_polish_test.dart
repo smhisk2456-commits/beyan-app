@@ -52,13 +52,13 @@ void main() {
   });
 
   group('LuxuryPageRoute Testleri', () {
-    test('Lüks geçiş rotası 320ms açılış ve 260ms kapanış süresine sahip olmalı', () {
+    test('3B Lüks geçiş rotası 500ms açılış ve 360ms kapanış süresine sahip olmalı', () {
       final route = LuxuryPageRoute(
         page: const Scaffold(body: Text('Test')),
       );
 
-      expect(route.transitionDuration, const Duration(milliseconds: 320));
-      expect(route.reverseTransitionDuration, const Duration(milliseconds: 260));
+      expect(route.transitionDuration, const Duration(milliseconds: 500));
+      expect(route.reverseTransitionDuration, const Duration(milliseconds: 360));
     });
   });
 }

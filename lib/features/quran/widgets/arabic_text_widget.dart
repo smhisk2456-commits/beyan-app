@@ -5,18 +5,14 @@ import '../../../core/theme/app_theme.dart';
 
 /// Arapça metinler için merkezi tipografi widget'ı.
 ///
-/// Neden ayrı bir widget?
 /// - Amiri fontu zorunluluğunu tek noktada garanti eder.
-/// - `textDirection: TextDirection.rtl` her seferinde unutulmaz.
-/// - Satır yüksekliği (height: 2.0) harekeler için standarttır.
-/// - Tema değişimine karşı izole edilmiştir.
-/// - Canlı tilavet sırasında kelime kelime öne çıkarma (karaoke) destekler.
+/// - `textDirection: TextDirection.rtl` her seferinde korunur.
+/// - Canlı tilavet sırasında Apple Music Live Lyrics tarzı kelime içi harf harf (RTL) altın ışık akışı destekler.
 class ArabicText extends StatefulWidget {
   final String text;
   final double fontSize;
 
   /// Harekelerin üst/alt satıra taşmaması için geniş tutulur.
-  /// Varsayılan: 2.0 — küçülürse harekeler kesişebilir!
   final double lineHeight;
 
   final Color? color;
@@ -30,6 +26,9 @@ class ArabicText extends StatefulWidget {
 
   /// Canlı takipte öne çıkarılacak kelimenin 0 tabanlı indeksi.
   final int? highlightedWordIndex;
+
+  /// Aktif kelimenin içindeki harf harf ilerleme oranı (0.0 -> 1.0, Apple Music Live Lyrics akışı).
+  final double highlightedWordProgress;
 
   /// Ezber / Hafızlık modunda gizlenecek kelime indeksleri kümesi.
   final Set<int>? hiddenWordIndices;
@@ -49,6 +48,7 @@ class ArabicText extends StatefulWidget {
     this.overflow = TextOverflow.clip,
     this.isBismillah = false,
     this.highlightedWordIndex,
+    this.highlightedWordProgress = 1.0,
     this.hiddenWordIndices,
     this.onWordTap,
   });
@@ -97,7 +97,8 @@ class _ArabicTextState extends State<ArabicText> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.text != widget.text ||
         (oldWidget.onWordTap == null) != (widget.onWordTap == null) ||
-        oldWidget.hiddenWordIndices != widget.hiddenWordIndices) {
+        oldWidget.hiddenWordIndices != widget.hiddenWordIndices ||
+        (oldWidget.highlightedWordIndex == null) != (widget.highlightedWordIndex == null)) {
       _disposeRecognizers();
       _initWordsAndRecognizers();
     }
@@ -161,45 +162,116 @@ class _ArabicTextState extends State<ArabicText> {
         ? _words
         : widget.text.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
 
+    final activeIdx = widget.highlightedWordIndex != null && words.isNotEmpty
+        ? widget.highlightedWordIndex!.clamp(0, words.length - 1)
+        : null;
+
+    final litGold = isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF012E2B);
+    final completedColor = isDark ? BeyanColors.tone(0xFFFFE599) : BeyanColors.tone(0xFF0A443C);
+    final unlitColor = isDark ? Colors.white.withValues(alpha: 0.34) : Colors.black.withValues(alpha: 0.32);
+
     return Text.rich(
       TextSpan(
         children: [
           for (int i = 0; i < words.length; i++) ...[
             () {
               final isHidden = widget.hiddenWordIndices != null && widget.hiddenWordIndices!.contains(i);
-              return TextSpan(
-                text: isHidden ? ' [ ··· ] ' : words[i],
-                recognizer: _recognizers != null && i < _recognizers!.length ? _recognizers![i] : null,
-                style: isHidden
-                    ? TextStyle(
-                        fontFamily: 'Amiri',
-                        fontSize: widget.fontSize * 0.82,
-                        height: widget.lineHeight,
-                        fontWeight: FontWeight.bold,
-                        color: BeyanColors.tone(0xFFFFDF7A),
-                        backgroundColor: BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.35 : 0.22),
-                      )
-                    : TextStyle(
-                        fontFamily: 'Amiri',
-                        fontSize: widget.fontSize,
-                        height: widget.lineHeight,
-                        letterSpacing: 0.3,
-                        fontWeight: (widget.highlightedWordIndex == i)
-                            ? FontWeight.bold
-                            : widget.fontWeight,
-                        color: (widget.highlightedWordIndex == null)
-                            ? defaultColor
-                            : (widget.highlightedWordIndex == i
-                                ? (isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF012E2B))
-                                : (i < widget.highlightedWordIndex!
-                                    ? (isDark ? Colors.white.withValues(alpha: 0.95) : BeyanColors.tone(0xFF0A443C))
-                                    : (isDark ? Colors.white38 : Colors.black38))),
-                        backgroundColor: (widget.highlightedWordIndex == i)
-                            ? (isDark
-                                ? BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.42)
-                                : BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.75))
-                            : null,
+              if (isHidden) {
+                return TextSpan(
+                  text: ' [ ··· ] ',
+                  recognizer: _recognizers != null && i < _recognizers!.length ? _recognizers![i] : null,
+                  style: TextStyle(
+                    fontFamily: 'Amiri',
+                    fontSize: widget.fontSize * 0.82,
+                    height: widget.lineHeight,
+                    fontWeight: FontWeight.bold,
+                    color: BeyanColors.tone(0xFFFFDF7A),
+                    backgroundColor: BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.35 : 0.22),
+                  ),
+                );
+              }
+
+              // Apple Music Live Lyrics Tarzı Aktif Kelime: Sağdan Sola (RTL) Harf Harf Altın Işık Dolumu
+              if (activeIdx != null && i == activeIdx) {
+                final wp = widget.highlightedWordProgress.clamp(0.0, 1.0);
+                final leadStop = (wp - 0.12).clamp(0.0, 1.0);
+                final trailStop = (wp + 0.12).clamp(0.0, 1.0);
+
+                return WidgetSpan(
+                  alignment: PlaceholderAlignment.baseline,
+                  baseline: TextBaseline.alphabetic,
+                  child: GestureDetector(
+                    onTap: widget.onWordTap != null ? () => widget.onWordTap!(i) : null,
+                    child: Transform.translate(
+                      offset: const Offset(0, -1.2),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+                        decoration: BoxDecoration(
+                          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.18 : 0.22),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: ShaderMask(
+                          blendMode: BlendMode.srcIn,
+                          shaderCallback: (bounds) {
+                            return LinearGradient(
+                              // Arapça sağdan sola okunduğu için harf harf dolum sağdan sola akar
+                              begin: Alignment.centerRight,
+                              end: Alignment.centerLeft,
+                              colors: [
+                                isDark ? const Color(0xFFFFF6CC) : BeyanColors.tone(0xFF012E2B),
+                                litGold,
+                                unlitColor,
+                                unlitColor,
+                              ],
+                              stops: [0.0, leadStop, trailStop, 1.0],
+                            ).createShader(bounds);
+                          },
+                          child: Text(
+                            words[i],
+                            textDirection: TextDirection.rtl,
+                            style: TextStyle(
+                              fontFamily: 'Amiri',
+                              fontSize: widget.fontSize * 1.03,
+                              height: widget.lineHeight * 0.92,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              shadows: [
+                                Shadow(
+                                  color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.65),
+                                  blurRadius: 12,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ),
+                    ),
+                  ),
+                );
+              }
+
+              // Okunmuş veya Henüz Okunmamış Kelimeler
+              return TextSpan(
+                text: words[i],
+                recognizer: _recognizers != null && i < _recognizers!.length ? _recognizers![i] : null,
+                style: TextStyle(
+                  fontFamily: 'Amiri',
+                  fontSize: widget.fontSize,
+                  height: widget.lineHeight,
+                  letterSpacing: 0.3,
+                  fontWeight: (activeIdx != null && i < activeIdx) ? FontWeight.w600 : widget.fontWeight,
+                  color: activeIdx == null
+                      ? defaultColor
+                      : (i < activeIdx ? completedColor : unlitColor),
+                  shadows: (activeIdx != null && i < activeIdx && isDark)
+                      ? [
+                          Shadow(
+                            color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.25),
+                            blurRadius: 6,
+                          ),
+                        ]
+                      : null,
+                ),
               );
             }(),
             if (i < words.length - 1)

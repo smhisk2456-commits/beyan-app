@@ -57,13 +57,20 @@ class VerseCard extends ConsumerWidget {
     );
   }
 
+  /// Apple Music Live Lyrics tarzı Harf Harf (Character-by-Character) Okunuş Senkronizasyonu
   Widget _buildTransliterationText(
     BuildContext context,
     bool isDark,
     int? activeWordIndex,
+    double wordProgress,
+    double verseProgress,
   ) {
     final text = verse.transliteration;
     if (text == null || text.isEmpty) return const SizedBox.shrink();
+
+    final baseLitColor = isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF012E2B);
+    final completedColor = isDark ? BeyanColors.tone(0xFF80CBC4) : BeyanColors.tone(0xFF0A685A);
+    final unlitColor = isDark ? Colors.white.withValues(alpha: 0.30) : Colors.black.withValues(alpha: 0.28);
 
     if (activeWordIndex == null) {
       return Text(
@@ -71,7 +78,7 @@ class VerseCard extends ConsumerWidget {
         style: TextStyle(
           fontSize: 14.0,
           fontStyle: FontStyle.italic,
-          color: isDark ? BeyanColors.tone(0xFF80CBC4) : BeyanColors.tone(0xFF0A685A),
+          color: completedColor,
           height: 1.55,
         ),
         textAlign: TextAlign.left,
@@ -79,35 +86,175 @@ class VerseCard extends ConsumerWidget {
     }
 
     final words = text.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+    if (words.isEmpty) return const SizedBox.shrink();
     final clampedIndex = activeWordIndex.clamp(0, words.length - 1);
+    final wp = wordProgress.clamp(0.0, 1.0);
 
     return Text.rich(
       TextSpan(
         children: [
           for (int i = 0; i < words.length; i++) ...[
-            TextSpan(
-              text: words[i],
-              style: TextStyle(
-                fontSize: 14.0,
-                fontStyle: FontStyle.italic,
-                height: 1.55,
-                fontWeight: i == clampedIndex ? FontWeight.bold : FontWeight.normal,
-                color: i == clampedIndex
-                    ? (isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF012E2B))
-                    : (i < clampedIndex
-                        ? (isDark ? BeyanColors.tone(0xFF80CBC4) : BeyanColors.tone(0xFF0A685A))
-                        : (isDark ? Colors.white30 : Colors.black26)),
-                backgroundColor: i == clampedIndex
-                    ? (isDark
-                        ? BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35)
-                        : BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.65))
-                    : null,
-              ),
-            ),
+            if (i < clampedIndex)
+              TextSpan(
+                text: words[i],
+                style: TextStyle(
+                  fontSize: 14.0,
+                  fontStyle: FontStyle.italic,
+                  height: 1.55,
+                  fontWeight: FontWeight.w600,
+                  color: completedColor,
+                ),
+              )
+            else if (i > clampedIndex)
+              TextSpan(
+                text: words[i],
+                style: TextStyle(
+                  fontSize: 14.0,
+                  fontStyle: FontStyle.italic,
+                  height: 1.55,
+                  fontWeight: FontWeight.normal,
+                  color: unlitColor,
+                ),
+              )
+            else ...[
+              // Aktif kelimenin içindeki harfleri Apple Music Live Lyrics gibi harf harf aydınlat
+              ...() {
+                final word = words[i];
+                final len = word.length;
+                final exactPos = wp * len;
+                final litChars = exactPos.floor().clamp(0, len);
+                final frac = (exactPos - litChars).clamp(0.0, 1.0);
+
+                final spans = <InlineSpan>[];
+                if (litChars > 0) {
+                  spans.add(
+                    TextSpan(
+                      text: word.substring(0, litChars),
+                      style: TextStyle(
+                        fontSize: 14.5,
+                        fontStyle: FontStyle.italic,
+                        height: 1.55,
+                        fontWeight: FontWeight.bold,
+                        color: baseLitColor,
+                        shadows: [
+                          Shadow(
+                            color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.55),
+                            blurRadius: 8,
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+                if (litChars < len) {
+                  spans.add(
+                    TextSpan(
+                      text: word.substring(litChars, litChars + 1),
+                      style: TextStyle(
+                        fontSize: 14.5,
+                        fontStyle: FontStyle.italic,
+                        height: 1.55,
+                        fontWeight: FontWeight.bold,
+                        color: Color.lerp(unlitColor, baseLitColor, frac) ?? baseLitColor,
+                        shadows: [
+                          Shadow(
+                            color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.45 * frac),
+                            blurRadius: 6,
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                  if (litChars + 1 < len) {
+                    spans.add(
+                      TextSpan(
+                        text: word.substring(litChars + 1),
+                        style: TextStyle(
+                          fontSize: 14.0,
+                          fontStyle: FontStyle.italic,
+                          height: 1.55,
+                          fontWeight: FontWeight.w500,
+                          color: unlitColor,
+                        ),
+                      ),
+                    );
+                  }
+                }
+                return spans;
+              }(),
+            ],
             if (i < words.length - 1)
               const TextSpan(
                 text: ' ',
                 style: TextStyle(fontSize: 14.0, height: 1.55),
+              ),
+          ],
+        ],
+      ),
+      textAlign: TextAlign.left,
+    );
+  }
+
+  /// Meal metni için Apple Music tarzı harf harf (character-by-character) akan senkronizasyon
+  Widget _buildLiveSyncedMeaningText(
+    BuildContext context,
+    String meaning,
+    bool isDark,
+    bool isActivePlaying,
+    double verseProgress,
+  ) {
+    final defaultColor = isDark ? Colors.white70 : BeyanColors.tone(0xFF334E48);
+    if (!isActivePlaying || meaning.isEmpty) {
+      return Text(
+        meaning,
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              height: 1.6,
+              fontSize: 14.0,
+              color: defaultColor,
+            ),
+        textAlign: TextAlign.left,
+      );
+    }
+
+    final prog = verseProgress.clamp(0.0, 1.0);
+    final len = meaning.length;
+    final exactChar = prog * len;
+    final litCount = exactChar.floor().clamp(0, len);
+    final charFrac = (exactChar - litCount).clamp(0.0, 1.0);
+
+    final litColor = isDark ? Colors.white : BeyanColors.tone(0xFF012E2B);
+    final activeCharColor = isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFFD4AF37);
+    final dimColor = isDark ? Colors.white.withValues(alpha: 0.36) : Colors.black.withValues(alpha: 0.34);
+
+    return Text.rich(
+      TextSpan(
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              height: 1.6,
+              fontSize: 14.0,
+            ),
+        children: [
+          if (litCount > 0)
+            TextSpan(
+              text: meaning.substring(0, litCount),
+              style: TextStyle(
+                color: litColor,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          if (litCount < len) ...[
+            TextSpan(
+              text: meaning.substring(litCount, litCount + 1),
+              style: TextStyle(
+                color: Color.lerp(dimColor, activeCharColor, charFrac),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            if (litCount + 1 < len)
+              TextSpan(
+                text: meaning.substring(litCount + 1),
+                style: TextStyle(
+                  color: dimColor,
+                ),
               ),
           ],
         ],
@@ -142,6 +289,7 @@ class VerseCard extends ConsumerWidget {
         ? (audioState.isWordHighlightEnabled ? audioState.activeWordIndex : null)
         : null;
     final verseProgress = isPlaying ? audioState.verseProgress : 0.0;
+    final wordProgress = isPlaying ? audioState.wordProgress : 1.0;
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -429,13 +577,14 @@ class VerseCard extends ConsumerWidget {
                 const SizedBox(height: 14),
               ],
 
-              // ── Arapça Metin (Canlı Kelime Takibi & Ezber Maskesi & Dokun-Atla) ──
+              // ── Arapça Metin (Apple Music Tarzı Kelime & Harf Harf Akış & Ezber Maskesi & Dokun-Atla) ──
               ArabicText(
                 verse.arabicText,
                 fontSize: arabicFontSize,
                 lineHeight: 2.1,
                 textAlign: TextAlign.right,
                 highlightedWordIndex: activeWordIndex,
+                highlightedWordProgress: wordProgress,
                 hiddenWordIndices: hiddenIndices,
                 onWordTap: (wordIdx) {
                   if (memorizationState.isActive) {
@@ -456,21 +605,19 @@ class VerseCard extends ConsumerWidget {
               ),
               const SizedBox(height: 12),
 
-              // ── Türkçe Okunuş (Transliterasyon - Eşzamanlı Kelime Vurgulu) ─
+              // ── Türkçe Okunuş (Apple Music Live Lyrics Tarzı Harf Harf Akışlı) ─
               if (verse.transliteration != null && verse.transliteration!.isNotEmpty) ...[
-                _buildTransliterationText(context, isDark, activeWordIndex),
+                _buildTransliterationText(context, isDark, activeWordIndex, wordProgress, verseProgress),
                 const SizedBox(height: 10),
               ],
 
-              // ── Birincil Meal ───────────────────────────────────
-              Text(
+              // ── Birincil Meal (Canlı Okuma Sırasında Harf Harf Aydınlanan) ───
+              _buildLiveSyncedMeaningText(
+                context,
                 verse.localizedMeaning(strings.language.code),
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      height: 1.6,
-                      fontSize: 14.0,
-                      color: isDark ? Colors.white70 : BeyanColors.tone(0xFF334E48),
-                    ),
-                textAlign: TextAlign.left,
+                isDark,
+                isPlaying,
+                verseProgress,
               ),
 
               // ── Çift Mealli Karşılaştırma Kutusu ──────────────────

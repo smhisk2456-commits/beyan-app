@@ -170,6 +170,7 @@ class QuranAudioState {
   final int? activeVerseNumber;
   final int? activeWordIndex;
   final double verseProgress;
+  final double wordProgress;
   final bool isLiveTrackingEnabled;
   final bool isWordHighlightEnabled;
 
@@ -195,6 +196,7 @@ class QuranAudioState {
     this.activeVerseNumber,
     this.activeWordIndex,
     this.verseProgress = 0.0,
+    this.wordProgress = 0.0,
     this.isLiveTrackingEnabled = true,
     this.isWordHighlightEnabled = true,
     this.loopRepeatCount = 1,
@@ -217,6 +219,7 @@ class QuranAudioState {
     int? activeVerseNumber,
     int? activeWordIndex,
     double? verseProgress,
+    double? wordProgress,
     bool? isLiveTrackingEnabled,
     bool? isWordHighlightEnabled,
     int? loopRepeatCount,
@@ -244,6 +247,7 @@ class QuranAudioState {
       activeVerseNumber: (clearCurrentSurah || clearActiveVerse) ? null : (activeVerseNumber ?? this.activeVerseNumber),
       activeWordIndex: (clearCurrentSurah || clearActiveWord) ? null : (activeWordIndex ?? this.activeWordIndex),
       verseProgress: clearCurrentSurah ? 0.0 : (verseProgress ?? this.verseProgress),
+      wordProgress: (clearCurrentSurah || clearActiveWord) ? 0.0 : (wordProgress ?? this.wordProgress),
       isLiveTrackingEnabled: isLiveTrackingEnabled ?? this.isLiveTrackingEnabled,
       isWordHighlightEnabled: isWordHighlightEnabled ?? this.isWordHighlightEnabled,
       loopRepeatCount: loopRepeatCount ?? this.loopRepeatCount,
@@ -261,6 +265,9 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
   final AudioPlayer _player = AudioPlayer();
   final AudioPlayer _ambiencePlayer = AudioPlayer()..setReleaseMode(ReleaseMode.loop);
   Timer? _sleepTimer;
+  Timer? _smoothSyncTimer;
+  final Stopwatch _interpWatch = Stopwatch();
+  Duration _lastAnchorPosition = Duration.zero;
   StreamSubscription? _posSub;
   StreamSubscription? _durSub;
   StreamSubscription? _stateSub;
@@ -300,8 +307,37 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
     }
   }
 
+  void _startSmoothSyncTimer() {
+    _smoothSyncTimer?.cancel();
+    _interpWatch
+      ..reset()
+      ..start();
+    _smoothSyncTimer = Timer.periodic(const Duration(milliseconds: 33), (_) {
+      if (!state.isPlaying) return;
+      final interpMs = _lastAnchorPosition.inMilliseconds + _interpWatch.elapsedMilliseconds;
+      final totalMs = state.duration.inMilliseconds;
+      final clampedMs = totalMs > 0 ? interpMs.clamp(0, totalMs) : interpMs;
+      state = state.copyWith(position: Duration(milliseconds: clampedMs));
+      if (_currentVerses != null && _currentVerses!.isNotEmpty) {
+        updateActiveVerseByProgress(_currentVerses!);
+      }
+    });
+  }
+
+  void _stopSmoothSyncTimer() {
+    _smoothSyncTimer?.cancel();
+    _smoothSyncTimer = null;
+    _interpWatch.stop();
+  }
+
   void _initListeners() {
     _posSub = _player.onPositionChanged.listen((pos) {
+      _lastAnchorPosition = pos;
+      if (state.isPlaying) {
+        _interpWatch
+          ..reset()
+          ..start();
+      }
       state = state.copyWith(position: pos);
       if (_currentVerses != null && _currentVerses!.isNotEmpty) {
         updateActiveVerseByProgress(_currentVerses!);
@@ -316,10 +352,17 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
       final isPlaying = playerState == PlayerState.playing;
       final isCompleted = playerState == PlayerState.completed;
 
+      if (isPlaying) {
+        _startSmoothSyncTimer();
+      } else {
+        _stopSmoothSyncTimer();
+      }
+
       if (isCompleted && (state.loopRepeatCount > 1 || state.loopRepeatCount == -1)) {
         if (state.loopRepeatCount != -1 && state.currentLoopIteration >= state.loopRepeatCount) {
           state = state.copyWith(currentLoopIteration: 1);
         } else {
+          _lastAnchorPosition = Duration.zero;
           state = state.copyWith(
             currentLoopIteration: state.currentLoopIteration + 1,
             position: Duration.zero,
@@ -396,12 +439,14 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
       }
 
       await _player.stop();
+      _lastAnchorPosition = Duration.zero;
       if (localFile != null && await localFile.exists()) {
         await _player.play(DeviceFileSource(localFile.path));
       } else {
         await _player.play(UrlSource(audioUrl));
       }
       state = state.copyWith(isPlaying: true, isLoading: false);
+      _startSmoothSyncTimer();
     } catch (e) {
       debugPrint('QuranAudio playSurah hatası: $e');
       state = state.copyWith(isLoading: false, isPlaying: false);
@@ -410,11 +455,13 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
 
   Future<void> togglePlayPause() async {
     if (state.isPlaying) {
+      _stopSmoothSyncTimer();
       await _player.pause();
       state = state.copyWith(isPlaying: false);
     } else {
       await _player.resume();
       state = state.copyWith(isPlaying: true);
+      _startSmoothSyncTimer();
     }
   }
 
@@ -435,7 +482,7 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
     final cacheKey = '${reciter.id}_${state.currentSurahId}';
     final timings = _timingsCache[cacheKey];
 
-    // 1. ÖNCELİK: Quran.com Milisaniye Hassasiyetinde Gerçek Zamanlı Karaoke Senkronizasyonu
+    // 1. ÖNCELİK: Quran.com Milisaniye Hassasiyetinde Gerçek Zamanlı Karaoke & Harf Harf Akış Senkronizasyonu
     if (timings != null && timings.isNotEmpty) {
       VerseTiming? activeTiming;
       for (int i = 0; i < timings.length; i++) {
@@ -461,13 +508,16 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
       final elapsed = (currentMs - activeTiming.timestampFrom).clamp(0, dur > 0 ? dur : 1);
       final progress = dur > 0 ? (elapsed / dur).clamp(0.0, 1.0) : 0.0;
 
-      // Kelime bazlı milisaniyelik karaoke tespiti
+      // Kelime ve Kelime-İçi Harf Akış Oranı (wordProgress: 0.0 -> 1.0)
       int determinedWord = 0;
+      double determinedWordProg = 0.0;
       if (activeTiming.segments.isNotEmpty) {
         bool found = false;
         for (final seg in activeTiming.segments) {
           if (currentMs >= seg.startMs && currentMs < seg.endMs) {
             determinedWord = (seg.wordIndex - 1).clamp(0, 999);
+            final segDur = (seg.endMs - seg.startMs).clamp(1, 60000);
+            determinedWordProg = ((currentMs - seg.startMs) / segDur).clamp(0.0, 1.0);
             found = true;
             break;
           }
@@ -475,19 +525,23 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
         if (!found) {
           if (currentMs < activeTiming.segments.first.startMs) {
             determinedWord = (activeTiming.segments.first.wordIndex - 1).clamp(0, 999);
+            determinedWordProg = 0.0;
           } else {
             determinedWord = (activeTiming.segments.last.wordIndex - 1).clamp(0, 999);
+            determinedWordProg = 1.0;
           }
         }
       }
 
       if (state.activeVerseNumber != determinedVerse ||
           state.activeWordIndex != determinedWord ||
-          (state.verseProgress - progress).abs() > 0.02) {
+          (state.verseProgress - progress).abs() > 0.002 ||
+          (state.wordProgress - determinedWordProg).abs() > 0.01) {
         state = state.copyWith(
           activeVerseNumber: determinedVerse,
           activeWordIndex: determinedWord,
           verseProgress: progress,
+          wordProgress: determinedWordProg,
         );
       }
       return;
@@ -529,8 +583,9 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
     final verseElapsedMs = (currentMs - verseStartMs).clamp(0, verseDurationMs > 0 ? verseDurationMs : 1);
     final progress = verseDurationMs > 0 ? (verseElapsedMs / verseDurationMs).clamp(0.0, 1.0) : 0.0;
 
-    // Kelime kelime takip (Canlı Karaoke)
+    // Kelime kelime ve harf harf takip (Canlı Karaoke)
     int determinedWord = 0;
+    double determinedWordProg = 0.0;
     final activeVerse = verses[activeVerseIdx];
     final words = activeVerse.arabicText.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
     if (words.isNotEmpty) {
@@ -540,9 +595,11 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
         final targetWordWeight = progress * totalWordWeight;
         int wordAccum = 0;
         for (int w = 0; w < words.length; w++) {
+          final prevWordAccum = wordAccum;
           wordAccum += wordWeights[w];
           if (wordAccum >= targetWordWeight || w == words.length - 1) {
             determinedWord = w;
+            determinedWordProg = ((targetWordWeight - prevWordAccum) / wordWeights[w]).clamp(0.0, 1.0);
             break;
           }
         }
@@ -551,11 +608,13 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
 
     if (state.activeVerseNumber != determinedVerse ||
         state.activeWordIndex != determinedWord ||
-        (state.verseProgress - progress).abs() > 0.03) {
+        (state.verseProgress - progress).abs() > 0.002 ||
+        (state.wordProgress - determinedWordProg).abs() > 0.01) {
       state = state.copyWith(
         activeVerseNumber: determinedVerse,
         activeWordIndex: determinedWord,
         verseProgress: progress,
+        wordProgress: determinedWordProg,
       );
     }
   }
@@ -715,6 +774,12 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
   }
 
   Future<void> seek(Duration position) async {
+    _lastAnchorPosition = position;
+    if (state.isPlaying) {
+      _interpWatch
+        ..reset()
+        ..start();
+    }
     try {
       await _player.seek(position).timeout(const Duration(milliseconds: 300));
     } catch (_) {}
@@ -849,6 +914,8 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
   }
 
   Future<void> stop() async {
+    _stopSmoothSyncTimer();
+    _lastAnchorPosition = Duration.zero;
     try {
       await _player.stop();
     } catch (_) {}
@@ -860,6 +927,7 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
       clearActiveVerse: true,
       clearActiveWord: true,
       verseProgress: 0.0,
+      wordProgress: 0.0,
       position: Duration.zero,
       duration: Duration.zero,
     );
@@ -867,6 +935,7 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
 
   @override
   void dispose() {
+    _stopSmoothSyncTimer();
     _sleepTimer?.cancel();
     _posSub?.cancel();
     _durSub?.cancel();

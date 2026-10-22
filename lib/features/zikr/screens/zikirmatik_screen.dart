@@ -39,6 +39,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
   late final AnimationController _shimmerController;
   late final Animation<double> _shimmerAnimation;
   bool _isSoundMuted = false;
+  int _soundStyle = 0; // 0: Kadife Tık (Apple Taptic), 1: Kehribar Ahşap, 2: Sessiz
 
   Future<void> _loadSavedDhikrState() async {
     try {
@@ -49,6 +50,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
       final savedLaps = prefs.getInt('zikirmatik_laps') ?? 0;
       final savedHaptic = prefs.getInt('zikirmatik_haptic_mode') ?? 1;
       final savedSoundMuted = prefs.getBool('zikirmatik_sound_muted') ?? false;
+      final savedSoundStyle = prefs.getInt('zikirmatik_sound_style') ?? 0;
 
       if (mounted) {
         setState(() {
@@ -58,7 +60,9 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
           _completedLaps = savedLaps;
           _hapticMode = savedHaptic;
           _isSoundMuted = savedSoundMuted;
-          AcousticAudioService.instance.isZikrSoundEnabled = !savedSoundMuted;
+          _soundStyle = savedSoundMuted ? 2 : savedSoundStyle;
+          AcousticAudioService.instance.isZikrSoundEnabled = !savedSoundMuted && _soundStyle != 2;
+          AcousticAudioService.instance.zikrSoundStyle = _soundStyle;
         });
         if (_chipScrollController.hasClients && _selectedDhikrIndex > 0) {
           _chipScrollController.animateTo(
@@ -80,6 +84,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
       await prefs.setInt('zikirmatik_laps', _completedLaps);
       await prefs.setInt('zikirmatik_haptic_mode', _hapticMode);
       await prefs.setBool('zikirmatik_sound_muted', _isSoundMuted);
+      await prefs.setInt('zikirmatik_sound_style', _soundStyle);
     } catch (_) {}
   }
 
@@ -762,221 +767,306 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
 
           const SizedBox(height: 24),
 
-          // ── Lüks Sayaç Dokunma Alanı (Yükselme Animasyonu & Parçacık) ─
+          // ── Lüks Sayaç Dokunma Alanı (33'lü 3B Tesbih Dizisi, Altın Şok Dalgası & Cam Yansıması) ─
           ScaleTransition(
             scale: _scaleAnimation,
             child: GestureDetector(
               onTap: _increment,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  // Dış Altın Halkalı İlerleme Göstergesi
-                  SizedBox(
-                    width: 228,
-                    height: 228,
-                    child: CircularProgressIndicator(
-                      value: _target > 0 ? progress : 1.0,
-                      strokeWidth: 8,
-                      backgroundColor: isDark ? Colors.white12 : Colors.grey.shade200,
-                      valueColor: AlwaysStoppedAnimation<Color>(BeyanColors.tone(0xFFD4AF37)),
-                    ),
-                  ),
-
-                  // Lüks İç Sayaç Küresi
-                  Container(
-                    width: 202,
-                    height: 202,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: RadialGradient(
-                        colors: [BeyanColors.tone(0xFF04584C), BeyanColors.tone(0xFF012E2B), BeyanColors.tone(0xFF011512)],
-                        stops: const [0.0, 0.65, 1.0],
-                      ),
-                      border: Border.all(
-                        color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.7),
-                        width: 2.2,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.25),
-                          blurRadius: 30,
-                          spreadRadius: 2,
-                        ),
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.5),
-                          blurRadius: 18,
-                          offset: const Offset(0, 8),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // Yüzen +1 Parçacık Animasyonu
-                        SizedBox(
-                          height: 22,
-                          child: AnimatedBuilder(
-                            animation: _plusOneController,
-                            builder: (context, _) {
-                              if (_plusOneController.value == 0.0 || _plusOneController.value == 1.0) {
-                                return const SizedBox.shrink();
-                              }
-                              return Transform.translate(
-                                offset: _plusOneOffset.value,
-                                child: Opacity(
-                                  opacity: _plusOneOpacity.value,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
-                                    decoration: BoxDecoration(
-                                      color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35),
-                                      borderRadius: BorderRadius.circular(10),
-                                      border: Border.all(
-                                        color: BeyanColors.tone(0xFFFFDF7A),
-                                        width: 1,
-                                      ),
-                                    ),
-                                    child: Text(
-                                      '+1',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w900,
-                                        color: BeyanColors.tone(0xFFFFDF7A),
-                                        shadows: [
-                                          Shadow(color: BeyanColors.tone(0xFFD4AF37), blurRadius: 6),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-
-                        // Sayı Yükselme Animasyonu (Slide + Scale Pop)
-                        AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 180),
-                          transitionBuilder: (Widget child, Animation<double> animation) {
-                            return ScaleTransition(
-                              scale: Tween<double>(begin: 0.78, end: 1.0).animate(
-                                CurvedAnimation(parent: animation, curve: Curves.easeOutBack),
-                              ),
-                              child: FadeTransition(
-                                opacity: animation,
-                                child: SlideTransition(
-                                  position: Tween<Offset>(
-                                    begin: const Offset(0.0, 0.28),
-                                    end: Offset.zero,
-                                  ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic)),
-                                  child: child,
-                                ),
-                              ),
-                            );
-                          },
-                          child: Text(
-                            '$_count',
-                            key: ValueKey<int>(_count),
-                            style: TextStyle(
-                              fontSize: 54,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              letterSpacing: 1.5,
-                              shadows: [
-                                Shadow(color: BeyanColors.tone(0xFFD4AF37), blurRadius: 14),
-                              ],
-                            ),
-                          ),
-                        ),
-
-                        if (_target > 0)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 2),
-                            child: Text(
-                              '/ $_target',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: BeyanColors.tone(0xFFFFDF7A),
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-
-                        const SizedBox(height: 6),
-                        Text(
-                          strings.tapToCount,
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: Colors.white54,
-                            letterSpacing: 2.2,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Lüks Cam & Altın Işık Süzülmesi (Shimmer Light Sweep)
-                  SizedBox(
-                    width: 202,
-                    height: 202,
-                    child: IgnorePointer(
+              child: SizedBox(
+                width: 266,
+                height: 266,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // 1. Dokunuşta Dışa Yayılan 24K Altın Şok Dalgası (Aura Ripple)
+                    IgnorePointer(
                       child: AnimatedBuilder(
                         animation: _shimmerAnimation,
                         builder: (context, _) {
-                          final animValue = _shimmerAnimation.value;
-                          final isMilestone = (_count > 0 && (_count % 33 == 0 || _count == _target));
-                          final sweepIntensity = isMilestone ? 0.7 : 0.35;
-
+                          final v = _shimmerAnimation.value;
+                          if (v <= 0.01 || v >= 0.99) return const SizedBox.shrink();
+                          final rippleSize = 202.0 + (v * 64.0);
+                          final rippleOpacity = ((1.0 - v) * 0.75).clamp(0.0, 1.0);
                           return Container(
+                            width: rippleSize,
+                            height: rippleSize,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              gradient: SweepGradient(
-                                center: Alignment.center,
-                                transform: GradientRotation(animValue * math.pi * 2),
-                                colors: [
-                                  Colors.transparent,
-                                  BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.0),
-                                  BeyanColors.tone(0xFFFFDF7A).withValues(alpha: sweepIntensity),
-                                  Colors.white.withValues(alpha: isMilestone ? 0.75 : 0.45),
-                                  BeyanColors.tone(0xFFFFDF7A).withValues(alpha: sweepIntensity),
-                                  Colors.transparent,
-                                ],
-                                stops: const [0.0, 0.40, 0.48, 0.50, 0.52, 0.65],
+                              border: Border.all(
+                                color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: rippleOpacity),
+                                width: 2.5 * (1.0 - v) + 0.5,
                               ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: rippleOpacity * 0.45),
+                                  blurRadius: 18,
+                                  spreadRadius: 2,
+                                ),
+                              ],
                             ),
                           );
                         },
                       ),
                     ),
-                  ),
 
-                  // Lüks Cam Yansıması (Curved Specular Arc)
-                  Positioned(
-                    top: 18,
-                    child: IgnorePointer(
-                      child: Container(
-                        width: 140,
-                        height: 52,
-                        decoration: BoxDecoration(
-                          borderRadius: const BorderRadius.all(Radius.elliptical(70, 26)),
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Colors.white.withValues(alpha: 0.22),
-                              Colors.white.withValues(alpha: 0.0),
-                            ],
+                    // 2. 33'lü 3 Boyutlu Kehribar & Altın Tesbih Taneleri Halkası
+                    SizedBox(
+                      width: 252,
+                      height: 252,
+                      child: CustomPaint(
+                        painter: _TesbihBeadRingPainter(
+                          activeBeads: _count == 0 ? 0 : ((_count - 1) % 33) + 1,
+                          totalBeads: 33,
+                          goldLight: BeyanColors.tone(0xFFFFDF7A),
+                          goldDeep: BeyanColors.tone(0xFFD4AF37),
+                          unlitColor: isDark ? Colors.white.withValues(alpha: 0.14) : Colors.black.withValues(alpha: 0.12),
+                        ),
+                      ),
+                    ),
+
+                    // 3. Dış Altın Halkalı İlerleme Göstergesi
+                    SizedBox(
+                      width: 222,
+                      height: 222,
+                      child: CircularProgressIndicator(
+                        value: _target > 0 ? progress : 1.0,
+                        strokeWidth: 5.5,
+                        backgroundColor: isDark ? Colors.white10 : Colors.grey.shade200,
+                        valueColor: AlwaysStoppedAnimation<Color>(BeyanColors.tone(0xFFD4AF37)),
+                      ),
+                    ),
+
+                    // 4. Lüks İç Sayaç Küresi
+                    Container(
+                      width: 202,
+                      height: 202,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: RadialGradient(
+                          colors: [BeyanColors.tone(0xFF04584C), BeyanColors.tone(0xFF012E2B), BeyanColors.tone(0xFF011512)],
+                          stops: const [0.0, 0.65, 1.0],
+                        ),
+                        border: Border.all(
+                          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.85),
+                          width: 2.2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.28),
+                            blurRadius: 30,
+                            spreadRadius: 2,
+                          ),
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.5),
+                            blurRadius: 18,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: ClipOval(
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            // Küre İçinden Diyagonal Geçen 24K Altın Işık Yansıması (Her Dokunuşta Görünür)
+                            IgnorePointer(
+                              child: AnimatedBuilder(
+                                animation: _shimmerAnimation,
+                                builder: (context, _) {
+                                  final v = _shimmerAnimation.value;
+                                  if (v <= 0.01 || v >= 0.99) return const SizedBox.shrink();
+                                  final pos = -1.4 + (v * 2.8);
+                                  return Container(
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment(pos - 0.45, -1.0),
+                                        end: Alignment(pos + 0.45, 1.0),
+                                        colors: [
+                                          Colors.transparent,
+                                          BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.22 * (1.0 - v * 0.4)),
+                                          Colors.white.withValues(alpha: 0.36 * (1.0 - v * 0.4)),
+                                          BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.22 * (1.0 - v * 0.4)),
+                                          Colors.transparent,
+                                        ],
+                                        stops: const [0.0, 0.38, 0.50, 0.62, 1.0],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                // Yüzen +1 Parçacık Animasyonu
+                                SizedBox(
+                                  height: 22,
+                                  child: AnimatedBuilder(
+                                    animation: _plusOneController,
+                                    builder: (context, _) {
+                                      if (_plusOneController.value == 0.0 || _plusOneController.value == 1.0) {
+                                        return const SizedBox.shrink();
+                                      }
+                                      return Transform.translate(
+                                        offset: _plusOneOffset.value,
+                                        child: Opacity(
+                                          opacity: _plusOneOpacity.value,
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
+                                            decoration: BoxDecoration(
+                                              color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35),
+                                              borderRadius: BorderRadius.circular(10),
+                                              border: Border.all(
+                                                color: BeyanColors.tone(0xFFFFDF7A),
+                                                width: 1,
+                                              ),
+                                            ),
+                                            child: Text(
+                                              '+1',
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w900,
+                                                color: BeyanColors.tone(0xFFFFDF7A),
+                                                shadows: [
+                                                  Shadow(color: BeyanColors.tone(0xFFD4AF37), blurRadius: 6),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+
+                                // Sayı Yükselme Animasyonu (Slide + Scale Pop)
+                                AnimatedSwitcher(
+                                  duration: const Duration(milliseconds: 180),
+                                  transitionBuilder: (Widget child, Animation<double> animation) {
+                                    return ScaleTransition(
+                                      scale: Tween<double>(begin: 0.78, end: 1.0).animate(
+                                        CurvedAnimation(parent: animation, curve: Curves.easeOutBack),
+                                      ),
+                                      child: FadeTransition(
+                                        opacity: animation,
+                                        child: SlideTransition(
+                                          position: Tween<Offset>(
+                                            begin: const Offset(0.0, 0.28),
+                                            end: Offset.zero,
+                                          ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic)),
+                                          child: child,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: Text(
+                                    '$_count',
+                                    key: ValueKey<int>(_count),
+                                    style: TextStyle(
+                                      fontSize: 54,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                      letterSpacing: 1.5,
+                                      shadows: [
+                                        Shadow(color: BeyanColors.tone(0xFFD4AF37), blurRadius: 14),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+
+                                if (_target > 0)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 2),
+                                    child: Text(
+                                      '/ $_target',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: BeyanColors.tone(0xFFFFDF7A),
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+
+                                const SizedBox(height: 6),
+                                Text(
+                                  strings.tapToCount,
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.white54,
+                                    letterSpacing: 2.2,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    // 5. Lüks Cam & Altın Çember Işık Süzülmesi (Rotating Ring Shimmer)
+                    SizedBox(
+                      width: 202,
+                      height: 202,
+                      child: IgnorePointer(
+                        child: AnimatedBuilder(
+                          animation: _shimmerAnimation,
+                          builder: (context, _) {
+                            final animValue = _shimmerAnimation.value;
+                            final isMilestone = (_count > 0 && (_count % 33 == 0 || _count == _target));
+                            final sweepIntensity = isMilestone ? 0.75 : 0.42;
+
+                            return Container(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: SweepGradient(
+                                  center: Alignment.center,
+                                  transform: GradientRotation(animValue * math.pi * 2),
+                                  colors: [
+                                    Colors.transparent,
+                                    BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.0),
+                                    BeyanColors.tone(0xFFFFDF7A).withValues(alpha: sweepIntensity),
+                                    Colors.white.withValues(alpha: isMilestone ? 0.85 : 0.55),
+                                    BeyanColors.tone(0xFFFFDF7A).withValues(alpha: sweepIntensity),
+                                    Colors.transparent,
+                                  ],
+                                  stops: const [0.0, 0.40, 0.48, 0.50, 0.52, 0.65],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+
+                    // 6. Lüks Kavisli Cam Yansıması (Curved Specular Arc)
+                    Positioned(
+                      top: 38,
+                      child: IgnorePointer(
+                        child: Container(
+                          width: 136,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            borderRadius: const BorderRadius.all(Radius.elliptical(68, 24)),
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.white.withValues(alpha: 0.25),
+                                Colors.white.withValues(alpha: 0.0),
+                              ],
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
 
-          const SizedBox(height: 22),
+          const SizedBox(height: 18),
 
           // ── Geri Al ve Sıfırla Butonları ─────────────────────────
           Row(
@@ -1008,7 +1098,44 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
             ],
           ),
 
-          const SizedBox(height: 18),
+          const SizedBox(height: 14),
+
+          // ── Tesbih Sesi Stili Seçici (Kadife Tık / Kehribar / Sessiz) ──
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              color: isDark ? BeyanColors.tone(0xFF04201B) : Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.2)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  _soundStyle == 2 ? Icons.volume_off_rounded : Icons.volume_up_rounded,
+                  size: 16,
+                  color: BeyanColors.tone(0xFFFFDF7A),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  currentLang == AppLanguage.turkish ? 'Tesbih Sesi:' : 'Bead Sound:',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: isDark ? Colors.white70 : Colors.black87,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                _soundChip(0, currentLang == AppLanguage.turkish ? 'Kadife Tık' : 'Velvet Click', isDark),
+                const SizedBox(width: 4),
+                _soundChip(1, currentLang == AppLanguage.turkish ? 'Kehribar' : 'Amber Wood', isDark),
+                const SizedBox(width: 4),
+                _soundChip(2, currentLang == AppLanguage.turkish ? 'Sessiz' : 'Mute', isDark),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 8),
 
           // ── Titreşim / Dokunuş Hissi Seçici ──────────────────────
           Container(
@@ -1047,6 +1174,40 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _soundChip(int style, String label, bool isDark) {
+    final isSelected = _soundStyle == style;
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _soundStyle = style;
+          _isSoundMuted = (style == 2);
+          AcousticAudioService.instance.zikrSoundStyle = style;
+          AcousticAudioService.instance.isZikrSoundEnabled = (style != 2);
+        });
+        _saveDhikrState();
+        if (style != 2) {
+          AcousticAudioService.instance.playKukaBeadSound();
+        }
+      },
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        decoration: BoxDecoration(
+          color: isSelected ? BeyanColors.tone(0xFFD4AF37) : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 10.5,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+            color: isSelected ? Colors.black : (isDark ? Colors.white60 : Colors.black54),
+          ),
+        ),
       ),
     );
   }
@@ -2053,5 +2214,84 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
         ),
       ),
     );
+  }
+}
+
+/// 33'lü 3 Boyutlu Kehribar & 24K Altın Tesbih Taneleri Çemberi Çizicisi
+class _TesbihBeadRingPainter extends CustomPainter {
+  final int activeBeads;
+  final int totalBeads;
+  final Color goldLight;
+  final Color goldDeep;
+  final Color unlitColor;
+
+  _TesbihBeadRingPainter({
+    required this.activeBeads,
+    required this.totalBeads,
+    required this.goldLight,
+    required this.goldDeep,
+    required this.unlitColor,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final ringRadius = (size.width / 2) - 5.5;
+
+    // İnce tesbih ipi halkası
+    final cordPaint = Paint()
+      ..color = goldDeep.withValues(alpha: 0.25)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2;
+    canvas.drawCircle(center, ringRadius, cordPaint);
+
+    for (int i = 0; i < totalBeads; i++) {
+      // Üst merkezden (-pi/2) başlayarak saat yönünde 33 tane
+      final angle = -math.pi / 2 + (i * 2 * math.pi / totalBeads);
+      final beadCenter = Offset(
+        center.dx + ringRadius * math.cos(angle),
+        center.dy + ringRadius * math.sin(angle),
+      );
+
+      final isLit = i < activeBeads;
+      final isCurrentBead = i == activeBeads - 1;
+      final isImameOrMarker = (i == 0 || i == 10 || i == 21); // 11/22/33 nişangah taneleri
+      final beadRadius = isCurrentBead ? 5.8 : (isImameOrMarker ? 4.8 : 3.9);
+
+      if (isLit) {
+        // Aktif / Çekilmiş altın kehribar tane parlaması
+        if (isCurrentBead) {
+          final glowPaint = Paint()
+            ..color = goldLight.withValues(alpha: 0.55)
+            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
+          canvas.drawCircle(beadCenter, beadRadius + 2.5, glowPaint);
+        }
+
+        final gradPaint = Paint()
+          ..shader = RadialGradient(
+            center: const Alignment(-0.35, -0.35),
+            radius: 0.9,
+            colors: [
+              Colors.white,
+              goldLight,
+              goldDeep,
+            ],
+            stops: const [0.0, 0.45, 1.0],
+          ).createShader(Rect.fromCircle(center: beadCenter, radius: beadRadius));
+        canvas.drawCircle(beadCenter, beadRadius, gradPaint);
+      } else {
+        final unlitPaint = Paint()
+          ..color = unlitColor
+          ..style = PaintingStyle.fill;
+        canvas.drawCircle(beadCenter, beadRadius * 0.82, unlitPaint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _TesbihBeadRingPainter oldDelegate) {
+    return oldDelegate.activeBeads != activeBeads ||
+        oldDelegate.goldLight != goldLight ||
+        oldDelegate.unlitColor != unlitColor;
   }
 }

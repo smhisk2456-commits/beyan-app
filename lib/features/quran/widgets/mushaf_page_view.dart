@@ -110,6 +110,129 @@ class _MushafPageViewState extends ConsumerState<MushafPageView> {
     return pages;
   }
 
+  Widget _buildMushafVerseRichText({
+    required Verse verse,
+    required bool isDark,
+    required bool isActiveVerse,
+    required int? activeWordIndex,
+    required double wordProgress,
+  }) {
+    final defaultColor = isDark ? BeyanColors.tone(0xFFFFE082) : BeyanColors.tone(0xFF012E2B);
+    if (!isActiveVerse || activeWordIndex == null) {
+      return Text.rich(
+        TextSpan(
+          children: [
+            TextSpan(
+              text: verse.arabicText,
+              style: TextStyle(
+                fontFamily: 'Amiri',
+                fontSize: _fontSize,
+                height: 2.15,
+                letterSpacing: 0.2,
+                color: defaultColor,
+                fontWeight: isActiveVerse ? FontWeight.bold : FontWeight.w600,
+              ),
+            ),
+            TextSpan(
+              text: ' ﴿${verse.verseNumber}﴾ ',
+              style: TextStyle(
+                fontFamily: 'Amiri',
+                fontSize: _fontSize * 0.85,
+                color: BeyanColors.tone(0xFFD4AF37),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        textDirection: TextDirection.rtl,
+        textAlign: TextAlign.justify,
+      );
+    }
+
+    final words = verse.arabicText.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+    final clampedWordIdx = words.isNotEmpty ? activeWordIndex.clamp(0, words.length - 1) : 0;
+    final wp = wordProgress.clamp(0.0, 1.0);
+    final leadStop = (wp - 0.12).clamp(0.0, 1.0);
+    final trailStop = (wp + 0.12).clamp(0.0, 1.0);
+    final litGold = isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF012E2B);
+    final unlitColor = isDark ? Colors.white.withValues(alpha: 0.36) : Colors.black.withValues(alpha: 0.34);
+
+    return Text.rich(
+      TextSpan(
+        children: [
+          for (int i = 0; i < words.length; i++) ...[
+            if (i == clampedWordIdx)
+              WidgetSpan(
+                alignment: PlaceholderAlignment.baseline,
+                baseline: TextBaseline.alphabetic,
+                child: ShaderMask(
+                  blendMode: BlendMode.srcIn,
+                  shaderCallback: (bounds) {
+                    return LinearGradient(
+                      begin: Alignment.centerRight,
+                      end: Alignment.centerLeft,
+                      colors: [
+                        isDark ? const Color(0xFFFFF6CC) : BeyanColors.tone(0xFF012E2B),
+                        litGold,
+                        unlitColor,
+                        unlitColor,
+                      ],
+                      stops: [0.0, leadStop, trailStop, 1.0],
+                    ).createShader(bounds);
+                  },
+                  child: Text(
+                    words[i],
+                    textDirection: TextDirection.rtl,
+                    style: TextStyle(
+                      fontFamily: 'Amiri',
+                      fontSize: _fontSize * 1.04,
+                      height: 2.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      shadows: [
+                        Shadow(
+                          color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.6),
+                          blurRadius: 10,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              )
+            else
+              TextSpan(
+                text: words[i],
+                style: TextStyle(
+                  fontFamily: 'Amiri',
+                  fontSize: _fontSize,
+                  height: 2.15,
+                  letterSpacing: 0.2,
+                  color: i < clampedWordIdx ? defaultColor : unlitColor,
+                  fontWeight: i < clampedWordIdx ? FontWeight.bold : FontWeight.w500,
+                ),
+              ),
+            if (i < words.length - 1)
+              TextSpan(
+                text: ' ',
+                style: TextStyle(fontFamily: 'Amiri', fontSize: _fontSize, height: 2.15),
+              ),
+          ],
+          TextSpan(
+            text: ' ﴿${verse.verseNumber}﴾ ',
+            style: TextStyle(
+              fontFamily: 'Amiri',
+              fontSize: _fontSize * 0.85,
+              color: BeyanColors.tone(0xFFD4AF37),
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+      textDirection: TextDirection.rtl,
+      textAlign: TextAlign.justify,
+    );
+  }
+
   void _onVerseTap(Verse verse, AppStrings strings) {
     HapticFeedback.lightImpact();
     _showVerseDetailSheet(context, verse, strings);
@@ -520,44 +643,23 @@ class _MushafPageViewState extends ConsumerState<MushafPageView> {
                                               child: GestureDetector(
                                                 onTap: () => _onVerseTap(verse, strings),
                                                 child: Container(
-                                                  padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 1),
+                                                  padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
                                                   decoration: BoxDecoration(
                                                     color: (activeVerseNumber == verse.verseNumber)
-                                                        ? BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35)
+                                                        ? BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.14)
                                                         : Colors.transparent,
-                                                    borderRadius: BorderRadius.circular(6),
+                                                    borderRadius: BorderRadius.circular(8),
                                                   ),
-                                                  child: Text.rich(
-                                                    TextSpan(
-                                                      children: [
-                                                        TextSpan(
-                                                          text: verse.arabicText,
-                                                          style: TextStyle(
-                                                            fontFamily: 'Amiri',
-                                                            fontSize: _fontSize,
-                                                            height: 2.15,
-                                                            letterSpacing: 0.2,
-                                                            color: isDark
-                                                                ? BeyanColors.tone(0xFFFFE082)
-                                                                : BeyanColors.tone(0xFF012E2B),
-                                                            fontWeight: (activeVerseNumber == verse.verseNumber)
-                                                                ? FontWeight.bold
-                                                                : FontWeight.w600,
-                                                          ),
-                                                        ),
-                                                        TextSpan(
-                                                          text: ' ﴿${verse.verseNumber}﴾ ',
-                                                          style: TextStyle(
-                                                            fontFamily: 'Amiri',
-                                                            fontSize: _fontSize * 0.85,
-                                                            color: BeyanColors.tone(0xFFD4AF37),
-                                                            fontWeight: FontWeight.bold,
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    textDirection: TextDirection.rtl,
-                                                    textAlign: TextAlign.justify,
+                                                  child: _buildMushafVerseRichText(
+                                                    verse: verse,
+                                                    isDark: isDark,
+                                                    isActiveVerse: activeVerseNumber == verse.verseNumber,
+                                                    activeWordIndex: (activeVerseNumber == verse.verseNumber)
+                                                        ? audioState.activeWordIndex
+                                                        : null,
+                                                    wordProgress: (activeVerseNumber == verse.verseNumber)
+                                                        ? audioState.wordProgress
+                                                        : 1.0,
                                                   ),
                                                 ),
                                               ),
