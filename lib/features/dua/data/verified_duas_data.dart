@@ -161,7 +161,7 @@ final List<DuaItem> verifiedDuasList = [
   ),
   const DuaItem(
     id: 'gunluk_nazar_duasi',
-    category: DuaCategory.dailyLife,
+    category: DuaCategory.healingProtection,
     title: 'Nazar Duası (Göz Değmesine Karşı Kalem 51-52)',
     arabicText: 'وَإِن يَكَادُ الَّذِينَ كَفَرُوا لَيُزْلِقُونَكَ بِأَبْصَارِهِمْ لَمَّا سَمِعُوا الذِّكْرَ وَيَقُولُونَ إِنَّهُ لَمَجْنُونٌ ۝ وَمَا هُوَ إِلَّا ذِكْرٌ لِّلْعَالَمِينَ',
     transliteration: 'Ve in yekâdüllezîne keferû leyüzlikûneke bi-ebsârihim lemmâ semiü\'z-zikra ve yekûlûne innehû lemecnûn. Ve mâ hüve illâ zikrun li\'l-âlemîn.',
@@ -171,7 +171,7 @@ final List<DuaItem> verifiedDuasList = [
   ),
   const DuaItem(
     id: 'gunluk_ezan_duasi',
-    category: DuaCategory.dailyLife,
+    category: DuaCategory.prayer,
     title: 'Ezan Duası (Ezan Dinledikten Sonra)',
     arabicText: 'اللَّهُمَّ رَبَّ هَٰذِهِ الدَّعْوَةِ التَّامَّةِ، وَالصَّلَاةِ الْقَائِمَةِ، آتِ مُحَمَّدًا الْوَسِيلَةَ وَالْفَضِيلَةَ، وَابْعَثْهُ مَقَامًا مَحْمُودًا الَّذِي وَعَدْتَهُ',
     transliteration: 'Allâhümme Rabbe hâzihi\'d-da\'veti\'t-tâmmeh, ve\'s-salâti\'l-kâimeh, âti Muhammedenil-vesîlete ve\'l-fadîlete, veb\'ashü makâmen mahmûdenillezî va\'adteh.',
@@ -181,7 +181,7 @@ final List<DuaItem> verifiedDuasList = [
   ),
   const DuaItem(
     id: 'gunluk_subhaneke',
-    category: DuaCategory.dailyLife,
+    category: DuaCategory.prayer,
     title: 'Sübhaneke Duası (Namaz Açılış Duası)',
     arabicText: 'سُبْحَانَكَ اللَّهُمَّ وَبِحَمْدِكَ، وَتَبَارَكَ اسْمُكَ، وَتَعَالَى جَدُّكَ، وَلَا إِلَهَ غَيْرُكَ',
     transliteration: 'Sübhânekellâhümme ve bi-hamdik, ve tebârakesmük, ve teâlâ ceddük, ve lâ ilâhe ğayrük.',
@@ -191,7 +191,7 @@ final List<DuaItem> verifiedDuasList = [
   ),
   const DuaItem(
     id: 'gunluk_tahiyyat',
-    category: DuaCategory.dailyLife,
+    category: DuaCategory.prayer,
     title: 'Ettehiyyâtü (Tahiyyat Duası - Namaz Oturuşu)',
     arabicText: 'التَّحِيَّاتُ لِلَّهِ وَالصَّلَوَاتُ وَالطَّيِّبَاتُ، السَّلَامُ عَلَيْكَ أَيُّهَا النَّبِيُّ وَرَحْمَةُ اللَّهِ وَبَرَكَاتُهُ، السَّلَامُ عَلَيْنَا وَعَلَى عِبَادِ اللَّهِ الصَّالِحِينَ، أَشْهَدُ أَنْ لَا إِلَهَ إِلَّا اللَّهُ وَأَشْهَدُ أَنَّ مُحَمَّدًا عَبْدُهُ وَرَسُولُهُ',
     transliteration: 'Ettehiyyâtü lillâhi ve\'s-salavâtü ve\'t-tayyibât. Es-selâmü aleyke eyyühe\'n-Nebiyyü ve rahmetullâhi ve berekâtüh. Es-selâmü aleynâ ve alâ ibâdillâhi\'s-sâlihîn. Eşhedü en lâ ilâhe illallâh ve eşhedü enne Muhammeden abdühû ve rasûlüh.',
@@ -201,7 +201,7 @@ final List<DuaItem> verifiedDuasList = [
   ),
   const DuaItem(
     id: 'gunluk_salli_barik',
-    category: DuaCategory.dailyLife,
+    category: DuaCategory.prayer,
     title: 'Allâhümme Salli & Bârik (Salavat Duaları)',
     arabicText: 'اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ كَمَا صَلَّيْتَ عَلَى إِبْرَاهِيمَ وَعَلَى آلِ إِبْرَاهِيمَ إِنَّكَ حَمِيدٌ مَجِيدٌ ۝ اللَّهُمَّ بَارِكْ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ كَمَا بَارَكْتَ عَلَى إِبْرَاهِيمَ وَعَلَى آلِ إِبْرَاهِيمَ إِنَّكَ حَمِيدٌ مَجِيدٌ',
     transliteration: 'Allâhümme salli alâ Muhammedin ve alâ âli Muhammed, kemâ salleyte alâ İbrâhîme ve alâ âli İbrâhîm, inneke Hamîdün Mecîd. Allâhümme bârik alâ Muhammedin ve alâ âli Muhammed, kemâ bârakte alâ İbrâhîme ve alâ âli İbrâhîm, inneke Hamîdün Mecîd.',
@@ -211,7 +211,7 @@ final List<DuaItem> verifiedDuasList = [
   ),
   const DuaItem(
     id: 'gunluk_kunut',
-    category: DuaCategory.dailyLife,
+    category: DuaCategory.prayer,
     title: 'Kunut Duaları (Vitir Namazı Kunut 1 & 2)',
     arabicText: 'اللَّهُمَّ إِنَّا نَسْتَعِينُكَ وَنَسْتَغْفِرُكَ وَنَسْتَهْدِيكَ، وَنُؤْمِنُ بِكَ وَنَتُوبُ إِلَيْكَ، وَنَتَوَكَّلُ عَلَيْكَ وَنُثْنِي عَلَيْكَ الْخَيْرَ كُلَّهُ، نَشْكُرُكَ وَلَا نَكْفُرُكَ، وَنَخْلَعُ وَنَتْرُكُ مَنْ يَفْجُرُكَ ۝ اللَّهُمَّ إِيَّاكَ نَعْبُدُ وَلَكَ نُصَلِّي وَنَسْجُدُ، وَإِلَيْكَ نَسْعَى وَنَحْفِدُ، نَرْجُو رَحْمَتَكَ وَنَخْشَى عَذَابَكَ، إِنَّ عَذَابَكَ بِالْكُفَّارِ مُلْحِقٌ',
     transliteration: 'Allâhümme innâ nesteînüke ve nestağfirüke ve nestehdîk, ve nü\'minü bike ve netûbü ileyk, ve netevekkelü aleyke ve nüsnî aleyke\'l-hayra külleh, neşkürüke ve lâ nekfürük, ve nahleu ve netrükü men yefcürük. Allâhümme iyyâke na\'büdü ve leke nusallî ve nescüd, ve ileyke nes\'â ve nahfid, nercû rahmeteke ve nahşâ azâbek, inne azâbeke bi\'l-küffâri mülhık.',
@@ -357,7 +357,7 @@ final List<DuaItem> verifiedDuasList = [
   ),
   const DuaItem(
     id: 'sikinti_sifa_duasi',
-    category: DuaCategory.distress,
+    category: DuaCategory.healingProtection,
     title: 'Şifa Duası (Hastalık ve Ağrılara Karşı)',
     arabicText: 'اللَّهُمَّ رَبَّ النَّاسِ، أَذْهِبِ الْبَأْسَ، اشْفِ أَنْتَ الشَّافِي، لَا شِفَاءَ إِلَّا شِفَاؤُكَ، شِفَاءً لَا يُغَادِرُ سَقَمًا',
     transliteration: 'Allâhümme Rabbe\'n-nâs, ezhibi\'l-be\'s, işfi ente\'ş-Şâfî, lâ şifâe illâ şifâük, şifâen lâ yüğâdiru sekamâ.',
@@ -407,7 +407,7 @@ final List<DuaItem> verifiedDuasList = [
   ),
   const DuaItem(
     id: 'sikinti_korku_vesvese',
-    category: DuaCategory.distress,
+    category: DuaCategory.healingProtection,
     title: 'Korku, Endişe ve Vesvese Anında Dua',
     arabicText: 'أَعُوذُ بِكَلِمَاتِ اللَّهِ التَّامَّاتِ مِنْ غَضَبِهِ وَعِقَابِهِ وَشَرِّ عِبَادِهِ، وَمِنْ هَمَزَاتِ الشَّيَاطِينِ وَأَنْ يَحْضُرُونِ',
     transliteration: 'Eûzü bi-kelimâtillâhi\'t-tâmmâti min ğazabihî ve ikâbihî ve şerri ibâdih, ve min hemezâti\'ş-şeyâtîni ve en yahdurûn.',

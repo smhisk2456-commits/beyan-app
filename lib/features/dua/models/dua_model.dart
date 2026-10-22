@@ -1,27 +1,64 @@
+import 'package:flutter/material.dart';
 import '../data/dua_translations.dart';
 
 enum DuaCategory {
-  morning('Sabah Duaları', 'Morning', 'أذكار الصباح'),
-  evening('Akşam Duaları', 'Evening', 'أذكار المساء'),
-  dailyLife('Günlük Yaşam', 'Daily Life', 'أدعية الحياة اليومية'),
-  travel('Yolculuk', 'Travel', 'أدعية السفر'),
-  gratitudePatience('Şükür ve Sabır', 'Gratitude & Patience', 'الشكر والصبر'),
-  distress('Sıkıntı ve Ferahlık', 'Distress & Relief', 'تفريج الكروب'),
-  sleep('Uyku Öncesi ve Sonrası', 'Sleep', 'أذكار النوم'),
-  food('Yemek ve Nimet', 'Food & Blessings', 'أدعية الطعام'),
-  quranic('Kur\'an-ı Kerim Duaları', 'Quranic Duas', 'أدعية قرآنية'),
-  prophets('Peygamberlerin Duaları', 'Prophetic Duas', 'أدعية الأنبياء');
+  quranic('Kur\'an-ı Kerim Duaları', 'Quranic Duas', 'أدعية قرآنية', Icons.auto_stories_rounded, 'Âyetü\'l-Kürsî, Fâtiha, İnşirah, Lev Enzelnâ...'),
+  prayer('Namaz ve Ezan Duaları', 'Prayer & Adhan', 'أدعية الصلاة والأذان', Icons.mosque_rounded, 'Sübhaneke, Tahiyyat, Salli-Bârik, Kunut, Ezan...'),
+  healingProtection('Şifa ve Korunma (Nazar)', 'Healing & Protection', 'الشفاء والتحصين', Icons.health_and_safety_rounded, 'Nazar duası, Şifa duası, İhlâs, Felak, Nâs...'),
+  morning('Sabah Duaları', 'Morning', 'أذكار الصباح', Icons.wb_sunny_rounded, 'Sabaha erişme, Seyyidü\'l-İstiğfar, Afiyet niyazı...'),
+  evening('Akşam Duaları', 'Evening', 'أذكار المساء', Icons.nights_stay_rounded, 'Akşama giriş, Âmenerresûlü, Gece sığınma...'),
+  distress('Sıkıntı, Ferahlık ve Hacet', 'Distress & Relief', 'تفريج الكروب', Icons.spa_rounded, 'Hz. Yunus duası, Hacet, İstihare, Rabbi Yessir...'),
+  prophets('Peygamberlerin Duaları', 'Prophetic Duas', 'أدعية الأنبياء', Icons.menu_book_rounded, 'Hz. Musa, Hz. Eyyüb, Hz. Adem, Hz. Yusuf...'),
+  dailyLife('Günlük Yaşam ve Bereket', 'Daily Life & Blessings', 'الحياة اليومية والبركة', Icons.home_rounded, 'Ev, cami, abdest, Karınca bereket duası...'),
+  sleep('Uyku Öncesi ve Sonrası', 'Sleep', 'أذكار النوم', Icons.bed_rounded, 'Yatış duası, Berâ duası, Uyanma şükrü...'),
+  food('Yemek ve Nimet', 'Food & Blessings', 'أدعية الطعام', Icons.restaurant_rounded, 'Sofraya başlama, sofra duası, ikram şükrü...'),
+  travel('Yolculuk Duaları', 'Travel', 'أدعية السفر', Icons.explore_rounded, 'Vasıtaya biniş, seferde emniyet, dönüş duası...'),
+  gratitudePatience('Şükür ve Sabır', 'Gratitude & Patience', 'الشكر والصبر', Icons.favorite_rounded, 'Nimet şükrü, musibette sabır, Hasbiyallâh...');
 
   final String trName;
   final String enName;
   final String arName;
+  final IconData icon;
+  final String subtitleTr;
 
-  const DuaCategory(this.trName, this.enName, this.arName);
+  const DuaCategory(this.trName, this.enName, this.arName, this.icon, this.subtitleTr);
 
   String localizedName(String langCode) {
     if (langCode == 'en') return enName;
     if (langCode == 'ar') return arName;
     return trName;
+  }
+
+  String localizedSubtitle(String langCode) {
+    if (langCode == 'en') {
+      switch (this) {
+        case DuaCategory.quranic:
+          return 'Ayat al-Kursi, Al-Fatiha, Al-Inshirah...';
+        case DuaCategory.prayer:
+          return 'Subhanaka, Tashahhud, Salawat, Qunut, Adhan...';
+        case DuaCategory.healingProtection:
+          return 'Evil eye, healing, Al-Ikhlas, Al-Falaq, An-Nas...';
+        case DuaCategory.morning:
+          return 'Morning supplications, Sayyid al-Istighfar...';
+        case DuaCategory.evening:
+          return 'Evening remembrance, Amanar-Rasul...';
+        case DuaCategory.distress:
+          return 'Prophet Yunus dua, relief, Istikhara...';
+        case DuaCategory.prophets:
+          return 'Duas of Musa, Ayyub, Adam, Yusuf (pbut)...';
+        case DuaCategory.dailyLife:
+          return 'Home, mosque, wudu, blessing supplications...';
+        case DuaCategory.sleep:
+          return 'Before sleeping & waking remembrance...';
+        case DuaCategory.food:
+          return 'Before and after meals, blessings...';
+        case DuaCategory.travel:
+          return 'Boarding vehicles, safety during journey...';
+        case DuaCategory.gratitudePatience:
+          return 'Gratitude for blessings, patience in hardship...';
+      }
+    }
+    return subtitleTr;
   }
 }
 

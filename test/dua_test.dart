@@ -6,8 +6,8 @@ import 'package:islamic_app/features/dua/providers/dua_providers.dart';
 
 void main() {
   group('Dua Kütüphanesi Model ve Veri Testleri', () {
-    test('Tüm 10 kategori tanımlı ve en az 1 dua içermeli', () {
-      expect(DuaCategory.values.length, 10);
+    test('Tüm 12 kategori tanımlı ve en az 1 dua içermeli', () {
+      expect(DuaCategory.values.length, 12);
 
       for (final cat in DuaCategory.values) {
         final matches = verifiedDuasList.where((d) => d.category == cat).toList();

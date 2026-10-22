@@ -820,6 +820,29 @@ class AppStrings {
 
   // ── Dua Kütüphanesi ────────────────────────────────────────────
   String get duaLibraryTitle => _t('duaLibraryTitle', 'Dua Kütüphanesi', 'Dua Library', 'مكتبة الأدعية');
+  String get duaCategoriesTab => _t('duaCategoriesTab', 'Kategoriler', 'Categories', 'الفئات');
+  String get allDuasTab => _t('allDuasTab', 'Tüm Dualar', 'All Duas', 'جميع الأدعية');
+  String get backToCategories => _t('backToCategories', 'Tüm Kategorilere Dön', 'Back to Categories', 'العودة إلى الفئات');
+  String categoryDuaCount(int count) {
+    switch (language) {
+      case AppLanguage.turkish:
+        return '$count Dua';
+      case AppLanguage.english:
+        return '$count Duas';
+      case AppLanguage.arabic:
+        return '$count أدعية';
+      case AppLanguage.indonesian:
+        return '$count Doa';
+      case AppLanguage.french:
+        return '$count Invocations';
+      case AppLanguage.urdu:
+        return '$count دعائیں';
+      case AppLanguage.german:
+        return '$count Bittgebete';
+      case AppLanguage.russian:
+        return '$count Дуа';
+    }
+  }
   String get duaFilterTooltip => _t('duaFilterTooltip', 'Kategori Filtresi', 'Category Filter', 'تصفية الفئات');
   String get duaSearchHint => _t('duaSearchHint', 'Dua, anlam veya kaynak ara...', 'Search dua, meaning or reference...', 'ابحث عن دعاء أو معنى أو مصدر...');
     String allDuasWithCount(int count) {
