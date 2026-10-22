@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/localization/app_strings.dart';
 import '../services/quran_audio_service.dart';
+import 'sleep_and_ambience_sheet.dart';
 
 /// Kur'an-ı Kerim Dinleme Mini Oynatıcı Çubuğu
 class QuranAudioPlayerBar extends ConsumerWidget {
@@ -86,6 +87,53 @@ class QuranAudioPlayerBar extends ConsumerWidget {
                     ),
                   ],
                 ),
+              ),
+              // Döngü / Ezber Tekrar Modu (1x, 3x, 5x, 10x, ∞)
+              IconButton(
+                icon: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Icon(
+                      Icons.repeat_rounded,
+                      color: audioState.loopRepeatCount > 1 || audioState.loopRepeatCount == -1
+                          ? const Color(0xFFFFDF7A)
+                          : Colors.white60,
+                      size: 21,
+                    ),
+                    if (audioState.loopRepeatCount != 1)
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: Text(
+                          audioState.loopRepeatCount == -1 ? '∞' : '${audioState.loopRepeatCount}x',
+                          style: const TextStyle(
+                            fontSize: 8.5,
+                            color: Color(0xFFFFDF7A),
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                tooltip: strings.language == AppLanguage.turkish ? 'Ezber / Döngü Tekrarı' : 'Loop & Memorization Repeat',
+                onPressed: () {
+                  HapticFeedback.lightImpact();
+                  ref.read(quranAudioProvider.notifier).cycleLoopRepeat();
+                },
+              ),
+              // Manevi Ambiyans & Uyku Zamanlayıcısı
+              IconButton(
+                icon: Icon(
+                  audioState.activeAmbience != null || audioState.sleepTimerSecondsRemaining != null
+                      ? Icons.bedtime_rounded
+                      : Icons.bedtime_outlined,
+                  color: audioState.activeAmbience != null || audioState.sleepTimerSecondsRemaining != null
+                      ? const Color(0xFFFFDF7A)
+                      : Colors.white60,
+                  size: 20,
+                ),
+                tooltip: strings.language == AppLanguage.turkish ? 'Manevi Ambiyans & Uyku Modu' : 'Ambience & Sleep Timer',
+                onPressed: () => SleepAndAmbienceSheet.show(context),
               ),
               // 10 sn geri
               IconButton(

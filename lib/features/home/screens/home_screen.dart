@@ -27,6 +27,7 @@ import '../../spiritual_healing/screens/mood_verse_sheet.dart';
 import '../../mosque_finder/screens/nearby_mosques_screen.dart';
 import '../../ai_assistant/screens/ai_assistant_screen.dart';
 import '../../elif_ba/screens/elif_ba_hub_screen.dart';
+import '../../dua/screens/morning_evening_adhkar_screen.dart';
 import '../../../core/widgets/luxury_page_route.dart';
 
 /// Ana Ekran – Beyân lüks İslami kontrol merkezi.
@@ -134,6 +135,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           // ── Beyân AI & Sesli Elif-Bâ Öne Çıkan Kartları ────────
           const SliverToBoxAdapter(
             child: _SpotlightFeatureCards(),
+          ),
+
+          // ── 🌅 Sabah & Akşam Duaları Eşlikçisi (Hısnu'l-Müslim) ───
+          SliverToBoxAdapter(
+            child: _MorningEveningAdhkarBanner(atmosphere: atmosphere),
           ),
 
           // ── "Bugün Kalbin Nasıl Hissediyor?" (Ruh Haline Göre Âyet & Şifa) ───
@@ -858,6 +864,141 @@ class _SpotlightFeatureCards extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _MorningEveningAdhkarBanner extends StatelessWidget {
+  final DynamicPrayerAtmosphere? atmosphere;
+  const _MorningEveningAdhkarBanner({this.atmosphere});
+
+  @override
+  Widget build(BuildContext context) {
+    final hour = DateTime.now().hour;
+    final isMorning = hour >= 4 && hour < 15;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 6, 20, 6),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: () {
+            HapticFeedback.lightImpact();
+            Navigator.push(
+              context,
+              LuxuryPageRoute(page: MorningEveningAdhkarScreen(initialIsMorning: isMorning)),
+            );
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: isMorning
+                    ? (isDark
+                        ? [const Color(0xFF04483D), const Color(0xFF012C25)]
+                        : [const Color(0xFFE2F3ED), Colors.white])
+                    : (isDark
+                        ? [const Color(0xFF012E27), const Color(0xFF001915)]
+                        : [const Color(0xFFE7ECEB), Colors.white]),
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: const Color(0xFFD4AF37).withValues(alpha: 0.5),
+                width: 1.2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFFD4AF37).withValues(alpha: 0.08),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: const RadialGradient(
+                      colors: [Color(0xFFFFDF7A), Color(0xFFD4AF37)],
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+                        blurRadius: 10,
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    isMorning ? Icons.wb_sunny_rounded : Icons.nightlight_round,
+                    color: const Color(0xFF012E2B),
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            isMorning ? '🌅 Sabah Virdi' : '🌙 Akşam Virdi',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              color: isDark ? const Color(0xFFFFDF7A) : const Color(0xFF01362F),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFD4AF37).withValues(alpha: 0.25),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Text(
+                              'Hısnu\'l-Müslim',
+                              style: TextStyle(
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFFD4AF37),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        isMorning
+                            ? 'Güne ilahi muhafaza ve koruyucu dualarla başlayın (3 Dk)'
+                            : 'Günün yorgunluğunu akşam dualarıyla arındırın (3 Dk)',
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          color: isDark ? Colors.white70 : const Color(0xFF334E48),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 16,
+                  color: Color(0xFFD4AF37),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

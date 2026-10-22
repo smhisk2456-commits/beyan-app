@@ -14,6 +14,7 @@ import '../widgets/verse_card_widget.dart';
 import '../widgets/quran_audio_player_bar.dart';
 import '../widgets/mushaf_page_view.dart';
 import '../services/quran_download_service.dart';
+import '../widgets/sleep_and_ambience_sheet.dart';
 
 /// Sure Detay Ekranı – Seçilen surenin tüm ayetlerini ve tilavetini sunar.
 class SurahDetailScreen extends ConsumerStatefulWidget {
@@ -703,6 +704,55 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                   ref.read(quranAudioProvider.notifier).playSurah(widget.surah.id, widget.surah.localizedName(strings.language.code));
                 }
               },
+            ),
+            // 🙈 Ezber / Hafızlık Asistanı (Kelimeleri Gizle & Hatırla)
+            IconButton(
+              icon: Icon(
+                ref.watch(quranMemorizationProvider).isActive
+                    ? Icons.visibility_off_rounded
+                    : Icons.visibility_rounded,
+                color: ref.watch(quranMemorizationProvider).isActive
+                    ? const Color(0xFFFFDF7A)
+                    : Colors.white70,
+              ),
+              tooltip: ref.watch(quranMemorizationProvider).isActive
+                  ? (strings.language == AppLanguage.turkish ? 'Ezber Modunu Kapat' : 'Exit Memorization Mode')
+                  : (strings.language == AppLanguage.turkish ? 'Ezber Modu (Kelimeleri Gizle & Hatırla)' : 'Memorization Mode (Blur & Reveal)'),
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                ref.read(quranMemorizationProvider.notifier).toggleMode();
+              },
+            ),
+            // 📜 Çift Mealli Karşılaştırma Modu
+            IconButton(
+              icon: Icon(
+                ref.watch(comparativeMealProvider)
+                    ? Icons.compare_arrows_rounded
+                    : Icons.compare_arrows_outlined,
+                color: ref.watch(comparativeMealProvider)
+                    ? const Color(0xFFFFDF7A)
+                    : Colors.white70,
+              ),
+              tooltip: ref.watch(comparativeMealProvider)
+                  ? (strings.language == AppLanguage.turkish ? 'Çift Meali Kapat' : 'Disable Comparative Translation')
+                  : (strings.language == AppLanguage.turkish ? 'Çift Mealli Karşılaştırma Modu' : 'Comparative Translation Mode'),
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                ref.read(comparativeMealProvider.notifier).toggle();
+              },
+            ),
+            // 🎧 Manevi Ambiyans & Uyku Zamanlayıcısı
+            IconButton(
+              icon: Icon(
+                audioState.activeAmbience != null || audioState.sleepTimerSecondsRemaining != null
+                    ? Icons.bedtime_rounded
+                    : Icons.bedtime_outlined,
+                color: audioState.activeAmbience != null || audioState.sleepTimerSecondsRemaining != null
+                    ? const Color(0xFFFFDF7A)
+                    : Colors.white70,
+              ),
+              tooltip: strings.language == AppLanguage.turkish ? 'Manevi Ambiyans & Uyku Modu' : 'Spiritual Ambience & Sleep Mode',
+              onPressed: () => SleepAndAmbienceSheet.show(context),
             ),
             // Yazı Boyutu Butonu
             IconButton(

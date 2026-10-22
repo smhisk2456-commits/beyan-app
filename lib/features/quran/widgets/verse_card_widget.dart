@@ -125,17 +125,22 @@ class VerseCard extends ConsumerWidget {
     final isLastRead = lastRead?.surahId == verse.surahId && lastRead?.verseNumber == verse.verseNumber;
     final shouldHighlight = isLastRead || isHighlighted || isPlaying;
 
+    final memorizationState = ref.watch(quranMemorizationProvider);
+    final isComparativeMealEnabled = ref.watch(comparativeMealProvider);
+    final audioState = ref.watch(quranAudioProvider);
+    final isLoopingThisVerse = audioState.loopVerseNumber == verse.verseNumber;
+
+    final allWords = verse.arabicText.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+    final revealedSet = memorizationState.revealedWordsByVerse[verse.verseNumber] ?? <int>{};
+    final hiddenIndices = memorizationState.isActive
+        ? Set<int>.from(List.generate(allWords.length, (i) => i)).difference(revealedSet)
+        : null;
+
     // Yalnızca bu ayet çalıyorsa kelime indeksini ve ilerlemeyi dinle (performans optimizasyonu)
     final activeWordIndex = isPlaying
-        ? ref.watch(quranAudioProvider.select((s) =>
-            (s.activeVerseNumber == verse.verseNumber && s.isWordHighlightEnabled)
-                ? s.activeWordIndex
-                : null))
+        ? (audioState.isWordHighlightEnabled ? audioState.activeWordIndex : null)
         : null;
-    final verseProgress = isPlaying
-        ? ref.watch(quranAudioProvider.select((s) =>
-            s.activeVerseNumber == verse.verseNumber ? s.verseProgress : 0.0))
-        : 0.0;
+    final verseProgress = isPlaying ? audioState.verseProgress : 0.0;
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -324,6 +329,29 @@ class VerseCard extends ConsumerWidget {
                     },
                   ),
 
+                  // Âyet Tekrar Döngüsü Butonu (3x, 5x, 10x, ∞)
+                  IconButton(
+                    icon: Icon(
+                      isLoopingThisVerse ? Icons.repeat_one_on_rounded : Icons.repeat_one_rounded,
+                      size: 20,
+                      color: isLoopingThisVerse ? const Color(0xFFFFDF7A) : (isDark ? Colors.white60 : Colors.black45),
+                    ),
+                    tooltip: isLoopingThisVerse
+                        ? (strings.language == AppLanguage.turkish ? 'Âyet Tekrarını Kapat' : 'Stop Verse Loop')
+                        : (strings.language == AppLanguage.turkish ? 'Bu Âyeti Tekrarla' : 'Loop This Verse'),
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      if (isLoopingThisVerse) {
+                        ref.read(quranAudioProvider.notifier).setLoopVerse(null);
+                      } else {
+                        ref.read(quranAudioProvider.notifier).setLoopVerse(verse.verseNumber);
+                        if (audioState.loopRepeatCount <= 1) {
+                          ref.read(quranAudioProvider.notifier).setLoopRepeat(3);
+                        }
+                      }
+                    },
+                  ),
+
                   // Paylaş & Kopyala
                   IconButton(
                     icon: const Icon(Icons.share_outlined, size: 19, color: Color(0xFFD4AF37)),
@@ -332,6 +360,56 @@ class VerseCard extends ConsumerWidget {
                   ),
                 ],
               ),
+
+              // Ezber Modu Açıkken Ayet İlerleme Rozeti
+              if (memorizationState.isActive) ...[
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+                      width: 0.8,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.visibility_rounded, size: 14, color: Color(0xFFFFDF7A)),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Ezber Testi: ${revealedSet.length} / ${allWords.length} kelime açık',
+                        style: const TextStyle(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFFFFDF7A),
+                        ),
+                      ),
+                      const Spacer(),
+                      InkWell(
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          if (revealedSet.length >= allWords.length) {
+                            ref.read(quranMemorizationProvider.notifier).hideAllInVerse(verse.verseNumber);
+                          } else {
+                            ref.read(quranMemorizationProvider.notifier).revealAllInVerse(verse.verseNumber, allWords.length);
+                          }
+                        },
+                        child: Text(
+                          revealedSet.length >= allWords.length ? 'Hepsini Gizle' : 'Tümünü Aç',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFFFFDF7A),
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
 
               // Ayet İlerleme Çizgisi (Canlı Okunurken)
               if (isPlaying) ...[
@@ -350,14 +428,22 @@ class VerseCard extends ConsumerWidget {
                 const SizedBox(height: 14),
               ],
 
-              // ── Arapça Metin (Canlı Kelime Takibi & Dokun-Atla Destekli) ──
+              // ── Arapça Metin (Canlı Kelime Takibi & Ezber Maskesi & Dokun-Atla) ──
               ArabicText(
                 verse.arabicText,
                 fontSize: arabicFontSize,
                 lineHeight: 2.1,
                 textAlign: TextAlign.right,
                 highlightedWordIndex: activeWordIndex,
-                onWordTap: onWordTap,
+                hiddenWordIndices: hiddenIndices,
+                onWordTap: (wordIdx) {
+                  if (memorizationState.isActive) {
+                    HapticFeedback.lightImpact();
+                    ref.read(quranMemorizationProvider.notifier).revealWord(verse.verseNumber, wordIdx);
+                  } else if (onWordTap != null) {
+                    onWordTap!(wordIdx);
+                  }
+                },
               ),
               const SizedBox(height: 14),
 
@@ -375,7 +461,7 @@ class VerseCard extends ConsumerWidget {
                 const SizedBox(height: 10),
               ],
 
-              // ── Meal ──────────────────────────────────────────
+              // ── Birincil Meal ───────────────────────────────────
               Text(
                 verse.localizedMeaning(strings.language.code),
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -385,6 +471,55 @@ class VerseCard extends ConsumerWidget {
                     ),
                 textAlign: TextAlign.left,
               ),
+
+              // ── Çift Mealli Karşılaştırma Kutusu ──────────────────
+              if (isComparativeMealEnabled) ...[
+                const SizedBox(height: 10),
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF042B24) : const Color(0xFFE8F2EF),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: const Color(0xFFD4AF37).withValues(alpha: 0.35),
+                      width: 0.8,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.compare_arrows_rounded, size: 14, color: Color(0xFFD4AF37)),
+                          const SizedBox(width: 5),
+                          Text(
+                            strings.language == AppLanguage.turkish
+                                ? 'Saheeh International (İngilizce Karşılaştırmalı)'
+                                : 'Turkish Translation (Diyanet Comparative)',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFFD4AF37),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        strings.language == AppLanguage.turkish
+                            ? (verse.meaningEn ?? verse.turkishMeaning)
+                            : verse.turkishMeaning,
+                        style: TextStyle(
+                          fontSize: 13,
+                          height: 1.5,
+                          color: isDark ? Colors.white70 : Colors.black87,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ],
           ),
         ),

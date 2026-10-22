@@ -196,6 +196,25 @@ class WidgetService {
     await HomeWidget.saveWidgetData<int>('widget_applied_verse_number', appliedVerseNum);
     await HomeWidget.saveWidgetData<int>('widget_apply_nonce', applyNonce);
 
+    // Günün Duası & Âyeti Widget Verileri
+    final dailyDua = prefs.getString('widget_daily_dua_title') ?? 'Sübhanallâhi ve bihamdihî';
+    final dailyDuaArabic = prefs.getString('widget_daily_dua_arabic') ?? 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ';
+    final dailyDuaMeaning = prefs.getString('widget_daily_dua_meaning') ?? 'Allah\'ı hamd ile tesbih ederim.';
+    await HomeWidget.saveWidgetData<String>('widget_daily_dua_title', dailyDua);
+    await HomeWidget.saveWidgetData<String>('widget_daily_dua_arabic', dailyDuaArabic);
+    await HomeWidget.saveWidgetData<String>('widget_daily_dua_meaning', dailyDuaMeaning);
+
+    // Kompakt Vakit Sayacı Widget Verileri
+    final compactCountdown = '$nextPrayerName • $countdown';
+    await HomeWidget.saveWidgetData<String>('widget_compact_countdown', compactCountdown);
+
+    // Hızlı Zikirmatik Widget Verileri
+    final zikrCount = prefs.getInt('zikirmatik_count') ?? 0;
+    final zikrTarget = prefs.getInt('zikirmatik_target') ?? 33;
+    await HomeWidget.saveWidgetData<int>('widget_zikr_count', zikrCount);
+    await HomeWidget.saveWidgetData<int>('widget_zikr_target', zikrTarget);
+    await HomeWidget.saveWidgetData<String>('widget_zikr_title', 'Sübhanallâh');
+
     // Tüm vakitler
     for (final prayer in allPrayers) {
       await HomeWidget.saveWidgetData<String>('widget_${prayer.name.key}_time', _prayerService.formatTime(prayer.time));

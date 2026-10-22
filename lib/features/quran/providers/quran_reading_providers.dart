@@ -194,3 +194,90 @@ final favoriteSurahsProvider =
   return FavoriteSurahsNotifier();
 });
 
+/// 🙈 Kelimeleri Gizle & Hatırla (Ezber / Hafızlık Asistanı) Durumu
+class QuranMemorizationState {
+  final bool isActive;
+  final Map<int, Set<int>> revealedWordsByVerse; // verseNumber -> set of revealed word indices
+
+  const QuranMemorizationState({
+    this.isActive = false,
+    this.revealedWordsByVerse = const {},
+  });
+
+  QuranMemorizationState copyWith({
+    bool? isActive,
+    Map<int, Set<int>>? revealedWordsByVerse,
+  }) {
+    return QuranMemorizationState(
+      isActive: isActive ?? this.isActive,
+      revealedWordsByVerse: revealedWordsByVerse ?? this.revealedWordsByVerse,
+    );
+  }
+}
+
+class QuranMemorizationNotifier extends StateNotifier<QuranMemorizationState> {
+  QuranMemorizationNotifier() : super(const QuranMemorizationState());
+
+  void toggleMode() {
+    state = state.copyWith(isActive: !state.isActive);
+  }
+
+  void revealWord(int verseNumber, int wordIndex) {
+    final currentSet = Set<int>.from(state.revealedWordsByVerse[verseNumber] ?? {});
+    currentSet.add(wordIndex);
+    final updated = Map<int, Set<int>>.from(state.revealedWordsByVerse);
+    updated[verseNumber] = currentSet;
+    state = state.copyWith(revealedWordsByVerse: updated);
+  }
+
+  void revealAllInVerse(int verseNumber, int totalWords) {
+    final updated = Map<int, Set<int>>.from(state.revealedWordsByVerse);
+    updated[verseNumber] = Set<int>.from(List.generate(totalWords, (i) => i));
+    state = state.copyWith(revealedWordsByVerse: updated);
+  }
+
+  void hideAllInVerse(int verseNumber) {
+    final updated = Map<int, Set<int>>.from(state.revealedWordsByVerse);
+    updated.remove(verseNumber);
+    state = state.copyWith(revealedWordsByVerse: updated);
+  }
+
+  void resetAll() {
+    state = state.copyWith(revealedWordsByVerse: {});
+  }
+}
+
+final quranMemorizationProvider =
+    StateNotifierProvider<QuranMemorizationNotifier, QuranMemorizationState>((ref) {
+  return QuranMemorizationNotifier();
+});
+
+/// 📜 Çift Mealli Karşılaştırma Durumu
+class ComparativeMealNotifier extends StateNotifier<bool> {
+  static const _key = 'quran_comparative_meal_enabled';
+
+  ComparativeMealNotifier() : super(false) {
+    _load();
+  }
+
+  Future<void> _load() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      state = prefs.getBool(_key) ?? false;
+    } catch (_) {}
+  }
+
+  Future<void> toggle() async {
+    state = !state;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_key, state);
+    } catch (_) {}
+  }
+}
+
+final comparativeMealProvider =
+    StateNotifierProvider<ComparativeMealNotifier, bool>((ref) {
+  return ComparativeMealNotifier();
+});
+

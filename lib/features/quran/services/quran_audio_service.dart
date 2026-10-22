@@ -173,6 +173,17 @@ class QuranAudioState {
   final bool isLiveTrackingEnabled;
   final bool isWordHighlightEnabled;
 
+  // 🔁 Ezber & Döngü Modu (A-B Loop)
+  final int loopRepeatCount; // 1: normal, 3: 3x, 5: 5x, 10: 10x, -1: sonsuz
+  final int currentLoopIteration; // 1, 2, ...
+  final int? loopVerseNumber; // Tek âyet ezber tekrarı için
+
+  // 🎧 Uyku Öncesi & Manevi Ambiyans (Sleep & Calm)
+  final String? activeAmbience; // null, 'rain', 'ney', 'breeze'
+  final double ambienceVolume; // 0.0 - 1.0 (varsayılan 0.45)
+  final int? sleepTimerMinutes; // null, 15, 30, 45, 60
+  final int? sleepTimerSecondsRemaining;
+
   const QuranAudioState({
     this.isPlaying = false,
     this.isLoading = false,
@@ -186,6 +197,13 @@ class QuranAudioState {
     this.verseProgress = 0.0,
     this.isLiveTrackingEnabled = true,
     this.isWordHighlightEnabled = true,
+    this.loopRepeatCount = 1,
+    this.currentLoopIteration = 1,
+    this.loopVerseNumber,
+    this.activeAmbience,
+    this.ambienceVolume = 0.45,
+    this.sleepTimerMinutes,
+    this.sleepTimerSecondsRemaining,
   });
 
   QuranAudioState copyWith({
@@ -201,9 +219,19 @@ class QuranAudioState {
     double? verseProgress,
     bool? isLiveTrackingEnabled,
     bool? isWordHighlightEnabled,
+    int? loopRepeatCount,
+    int? currentLoopIteration,
+    int? loopVerseNumber,
+    String? activeAmbience,
+    double? ambienceVolume,
+    int? sleepTimerMinutes,
+    int? sleepTimerSecondsRemaining,
     bool clearCurrentSurah = false,
     bool clearActiveVerse = false,
     bool clearActiveWord = false,
+    bool clearLoopVerse = false,
+    bool clearAmbience = false,
+    bool clearSleepTimer = false,
   }) {
     return QuranAudioState(
       isPlaying: isPlaying ?? this.isPlaying,
@@ -218,12 +246,21 @@ class QuranAudioState {
       verseProgress: clearCurrentSurah ? 0.0 : (verseProgress ?? this.verseProgress),
       isLiveTrackingEnabled: isLiveTrackingEnabled ?? this.isLiveTrackingEnabled,
       isWordHighlightEnabled: isWordHighlightEnabled ?? this.isWordHighlightEnabled,
+      loopRepeatCount: loopRepeatCount ?? this.loopRepeatCount,
+      currentLoopIteration: currentLoopIteration ?? this.currentLoopIteration,
+      loopVerseNumber: clearLoopVerse ? null : (loopVerseNumber ?? this.loopVerseNumber),
+      activeAmbience: clearAmbience ? null : (activeAmbience ?? this.activeAmbience),
+      ambienceVolume: ambienceVolume ?? this.ambienceVolume,
+      sleepTimerMinutes: clearSleepTimer ? null : (sleepTimerMinutes ?? this.sleepTimerMinutes),
+      sleepTimerSecondsRemaining: clearSleepTimer ? null : (sleepTimerSecondsRemaining ?? this.sleepTimerSecondsRemaining),
     );
   }
 }
 
 class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
   final AudioPlayer _player = AudioPlayer();
+  final AudioPlayer _ambiencePlayer = AudioPlayer()..setReleaseMode(ReleaseMode.loop);
+  Timer? _sleepTimer;
   StreamSubscription? _posSub;
   StreamSubscription? _durSub;
   StreamSubscription? _stateSub;
@@ -278,6 +315,20 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
     _stateSub = _player.onPlayerStateChanged.listen((playerState) {
       final isPlaying = playerState == PlayerState.playing;
       final isCompleted = playerState == PlayerState.completed;
+
+      if (isCompleted && (state.loopRepeatCount > 1 || state.loopRepeatCount == -1)) {
+        if (state.loopRepeatCount != -1 && state.currentLoopIteration >= state.loopRepeatCount) {
+          state = state.copyWith(currentLoopIteration: 1);
+        } else {
+          state = state.copyWith(
+            currentLoopIteration: state.currentLoopIteration + 1,
+            position: Duration.zero,
+          );
+          _player.seek(Duration.zero).then((_) => _player.resume());
+          return;
+        }
+      }
+
       state = state.copyWith(
         isPlaying: isPlaying,
         isLoading: false,
@@ -677,6 +728,107 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
     await _player.seek(clamped);
   }
 
+  // ── Ezber & Döngü Modu (A-B Loop) ───────────────────────────
+  void cycleLoopRepeat() {
+    final next = switch (state.loopRepeatCount) {
+      1 => 3,
+      3 => 5,
+      5 => 10,
+      10 => -1,
+      _ => 1,
+    };
+    state = state.copyWith(loopRepeatCount: next, currentLoopIteration: 1);
+  }
+
+  void setLoopRepeat(int count) {
+    state = state.copyWith(loopRepeatCount: count, currentLoopIteration: 1);
+  }
+
+  void setLoopVerse(int? verseNumber) {
+    state = state.copyWith(
+      loopVerseNumber: verseNumber,
+      clearLoopVerse: verseNumber == null,
+      currentLoopIteration: 1,
+    );
+  }
+
+  // ── Manevi Ambiyans Sesleri (Rain, Ney, Breeze) ─────────────
+  Future<void> setAmbience(String? type) async {
+    if (type == state.activeAmbience) return;
+    try {
+      await _ambiencePlayer.stop();
+      if (type != null) {
+        final asset = switch (type) {
+          'rain' => 'audio/rain_ambience.wav',
+          'ney' => 'audio/ney_ambience.wav',
+          'breeze' => 'audio/breeze_ambience.wav',
+          _ => null,
+        };
+        if (asset != null) {
+          await _ambiencePlayer.setVolume(state.ambienceVolume);
+          await _ambiencePlayer.play(AssetSource(asset)).timeout(const Duration(seconds: 2));
+        }
+      }
+    } catch (_) {}
+    state = state.copyWith(
+      activeAmbience: type,
+      clearAmbience: type == null,
+    );
+  }
+
+  Future<void> setAmbienceVolume(double vol) async {
+    final clamped = vol.clamp(0.0, 1.0);
+    try {
+      await _ambiencePlayer.setVolume(clamped);
+    } catch (_) {}
+    state = state.copyWith(ambienceVolume: clamped);
+  }
+
+  // ── Otomatik Uyku Zamanlayıcısı (Sleep Timer & Fade-out) ─────
+  void startSleepTimer(int minutes) {
+    _sleepTimer?.cancel();
+    final totalSecs = minutes * 60;
+    state = state.copyWith(
+      sleepTimerMinutes: minutes,
+      sleepTimerSecondsRemaining: totalSecs,
+    );
+
+    _sleepTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
+      final current = state.sleepTimerSecondsRemaining ?? 0;
+      if (current <= 1) {
+        timer.cancel();
+        _sleepTimer = null;
+        await stop();
+        await setAmbience(null);
+        try {
+          await _player.setVolume(1.0);
+          await _ambiencePlayer.setVolume(state.ambienceVolume);
+        } catch (_) {}
+        state = state.copyWith(clearSleepTimer: true);
+      } else {
+        // Son 15 saniyede zarif fade-out
+        if (current <= 15) {
+          final fadeFactor = (current / 15.0).clamp(0.0, 1.0);
+          try {
+            await _player.setVolume(fadeFactor);
+            await _ambiencePlayer.setVolume(fadeFactor * state.ambienceVolume);
+          } catch (_) {}
+        }
+        state = state.copyWith(sleepTimerSecondsRemaining: current - 1);
+      }
+    });
+  }
+
+  void cancelSleepTimer() {
+    _sleepTimer?.cancel();
+    _sleepTimer = null;
+    try {
+      _player.setVolume(1.0);
+      _ambiencePlayer.setVolume(state.ambienceVolume);
+    } catch (_) {}
+    state = state.copyWith(clearSleepTimer: true);
+  }
+
   Future<void> stop() async {
     try {
       await _player.stop();
@@ -696,10 +848,12 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
 
   @override
   void dispose() {
+    _sleepTimer?.cancel();
     _posSub?.cancel();
     _durSub?.cancel();
     _stateSub?.cancel();
     _player.dispose();
+    _ambiencePlayer.dispose();
     super.dispose();
   }
 }

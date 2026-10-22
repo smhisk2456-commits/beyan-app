@@ -10,6 +10,8 @@ import '../../quran/widgets/quran_audio_player_bar.dart';
 import '../data/verified_duas_data.dart';
 import '../models/dua_model.dart';
 import '../providers/dua_providers.dart';
+import 'morning_evening_adhkar_screen.dart';
+import '../../../core/widgets/luxury_page_route.dart';
 
 enum _DuaTab { categories, list, favorites }
 
@@ -79,6 +81,17 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
         ),
         centerTitle: true,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.wb_sunny_outlined, color: Color(0xFFFFDF7A)),
+            tooltip: strings.language == AppLanguage.turkish ? 'Sabah & Akşam Duaları' : 'Morning & Evening Adhkar',
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              Navigator.push(
+                context,
+                LuxuryPageRoute(page: const MorningEveningAdhkarScreen()),
+              );
+            },
+          ),
           IconButton(
             icon: Icon(
               selectedCategory == null ? Icons.filter_alt_outlined : Icons.filter_alt,

@@ -30,7 +30,10 @@ class ArabicText extends StatefulWidget {
   /// Canlı takipte öne çıkarılacak kelimenin 0 tabanlı indeksi.
   final int? highlightedWordIndex;
 
-  /// Kelimeye tıklandığında tilavette o kelimeye atlama callback'i.
+  /// Ezber / Hafızlık modunda gizlenecek kelime indeksleri kümesi.
+  final Set<int>? hiddenWordIndices;
+
+  /// Kelimeye tıklandığında tilavette o kelimeye atlama veya kelimeyi açma callback'i.
   final void Function(int wordIndex)? onWordTap;
 
   const ArabicText(
@@ -45,6 +48,7 @@ class ArabicText extends StatefulWidget {
     this.overflow = TextOverflow.clip,
     this.isBismillah = false,
     this.highlightedWordIndex,
+    this.hiddenWordIndices,
     this.onWordTap,
   });
 
@@ -90,7 +94,9 @@ class _ArabicTextState extends State<ArabicText> {
   @override
   void didUpdateWidget(covariant ArabicText oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.text != widget.text || (oldWidget.onWordTap == null) != (widget.onWordTap == null)) {
+    if (oldWidget.text != widget.text ||
+        (oldWidget.onWordTap == null) != (widget.onWordTap == null) ||
+        oldWidget.hiddenWordIndices != widget.hiddenWordIndices) {
       _disposeRecognizers();
       _initWordsAndRecognizers();
     }
@@ -106,7 +112,9 @@ class _ArabicTextState extends State<ArabicText> {
   }
 
   void _initWordsAndRecognizers() {
-    if (widget.highlightedWordIndex != null || widget.onWordTap != null) {
+    if (widget.highlightedWordIndex != null ||
+        widget.onWordTap != null ||
+        widget.hiddenWordIndices != null) {
       _words = widget.text.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
       if (widget.onWordTap != null) {
         _recognizers = List.generate(_words.length, (i) {
@@ -129,8 +137,8 @@ class _ArabicTextState extends State<ArabicText> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final defaultColor = widget.color ?? (isDark ? AppColors.arabicTextDark : AppColors.arabicText);
 
-    // Canlı kelime takibi veya kelime dokunma yoksa standart ve hafif Text döndür
-    if (widget.highlightedWordIndex == null && widget.onWordTap == null) {
+    // Canlı kelime takibi, ezber modu veya kelime dokunma yoksa standart ve hafif Text döndür
+    if (widget.highlightedWordIndex == null && widget.onWordTap == null && widget.hiddenWordIndices == null) {
       return Text(
         widget.text,
         textDirection: TextDirection.rtl,
@@ -156,31 +164,43 @@ class _ArabicTextState extends State<ArabicText> {
       TextSpan(
         children: [
           for (int i = 0; i < words.length; i++) ...[
-            TextSpan(
-              text: words[i],
-              recognizer: _recognizers != null && i < _recognizers!.length ? _recognizers![i] : null,
-              style: TextStyle(
-                fontFamily: 'Amiri',
-                fontSize: widget.fontSize,
-                height: widget.lineHeight,
-                letterSpacing: 0.3,
-                fontWeight: (widget.highlightedWordIndex == i)
-                    ? FontWeight.bold
-                    : widget.fontWeight,
-                color: (widget.highlightedWordIndex == null)
-                    ? defaultColor
-                    : (widget.highlightedWordIndex == i
-                        ? (isDark ? const Color(0xFFFFDF7A) : const Color(0xFF012E2B))
-                        : (i < widget.highlightedWordIndex!
-                            ? (isDark ? Colors.white.withValues(alpha: 0.95) : const Color(0xFF0A443C))
-                            : (isDark ? Colors.white38 : Colors.black38))),
-                backgroundColor: (widget.highlightedWordIndex == i)
-                    ? (isDark
-                        ? const Color(0xFFD4AF37).withValues(alpha: 0.42)
-                        : const Color(0xFFFFDF7A).withValues(alpha: 0.75))
-                    : null,
-              ),
-            ),
+            () {
+              final isHidden = widget.hiddenWordIndices != null && widget.hiddenWordIndices!.contains(i);
+              return TextSpan(
+                text: isHidden ? ' [ ··· ] ' : words[i],
+                recognizer: _recognizers != null && i < _recognizers!.length ? _recognizers![i] : null,
+                style: isHidden
+                    ? TextStyle(
+                        fontFamily: 'Amiri',
+                        fontSize: widget.fontSize * 0.82,
+                        height: widget.lineHeight,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFFFFDF7A),
+                        backgroundColor: const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.35 : 0.22),
+                      )
+                    : TextStyle(
+                        fontFamily: 'Amiri',
+                        fontSize: widget.fontSize,
+                        height: widget.lineHeight,
+                        letterSpacing: 0.3,
+                        fontWeight: (widget.highlightedWordIndex == i)
+                            ? FontWeight.bold
+                            : widget.fontWeight,
+                        color: (widget.highlightedWordIndex == null)
+                            ? defaultColor
+                            : (widget.highlightedWordIndex == i
+                                ? (isDark ? const Color(0xFFFFDF7A) : const Color(0xFF012E2B))
+                                : (i < widget.highlightedWordIndex!
+                                    ? (isDark ? Colors.white.withValues(alpha: 0.95) : const Color(0xFF0A443C))
+                                    : (isDark ? Colors.white38 : Colors.black38))),
+                        backgroundColor: (widget.highlightedWordIndex == i)
+                            ? (isDark
+                                ? const Color(0xFFD4AF37).withValues(alpha: 0.42)
+                                : const Color(0xFFFFDF7A).withValues(alpha: 0.75))
+                            : null,
+                      ),
+              );
+            }(),
             if (i < words.length - 1)
               TextSpan(
                 text: ' ',
