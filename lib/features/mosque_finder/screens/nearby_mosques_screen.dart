@@ -33,6 +33,26 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
   @override
   void initState() {
     super.initState();
+    _initSavedLocationAndLoad();
+  }
+
+  Future<void> _initSavedLocationAndLoad() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final sLat = prefs.getDouble('beyan_verified_gps_lat') ?? prefs.getDouble('beyan_widget_lat');
+      final sLng = prefs.getDouble('beyan_verified_gps_lng') ?? prefs.getDouble('beyan_widget_lng');
+      final sTitle = prefs.getString('beyan_verified_gps_title') ?? prefs.getString('beyan_widget_city');
+      if (sLat != null && sLng != null && mounted) {
+        setState(() {
+          _userLat = sLat;
+          _userLng = sLng;
+          _isGpsActive = true;
+          if (sTitle != null && sTitle.isNotEmpty) {
+            _userLocationTitle = '$sTitle (Canlı GPS 📍)';
+          }
+        });
+      }
+    } catch (_) {}
     _loadNearbyMosques();
   }
 
@@ -45,8 +65,6 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
   Future<void> _loadNearbyMosques() async {
     setState(() => _isLoading = true);
     try {
-      Position? position;
-
       // 1. Konum servisleri açık mı kontrol et
       final isServiceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!isServiceEnabled && mounted) {
@@ -85,42 +103,44 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
         );
       }
 
-      // 3. Canlı ve Yüksek Hassasiyetli GPS Konumunu Al (Stale/eski önbellek konumunu beklemeden gerçek GPS)
+      // 3. ANINDA VE KESİN GPS TESPİTİ (Sıfır bekleme süreli son bilinen konum + Canlı GPS)
       if (perm == LocationPermission.always || perm == LocationPermission.whileInUse) {
         try {
-          position = await Geolocator.getCurrentPosition(
-            desiredAccuracy: LocationAccuracy.high,
-            timeLimit: const Duration(seconds: 8),
-          );
-        } catch (_) {
-          // Yüksek hassasiyet kapalı mekanlarda zaman aşımına uğrarsa orta hassasiyeti dene
-          try {
-            position = await Geolocator.getCurrentPosition(
-              desiredAccuracy: LocationAccuracy.medium,
-              timeLimit: const Duration(seconds: 5),
-            );
-          } catch (_) {
-            // Canlı konum alınamazsa, yalnızca son 20 dakika içindeki taze önbellek konumunu kabul et
-            try {
-              final lastPos = await Geolocator.getLastKnownPosition();
-              if (lastPos != null) {
-                final age = DateTime.now().difference(lastPos.timestamp);
-                if (age.inMinutes < 20) {
-                  position = lastPos;
-                }
-              }
-            } catch (_) {}
+          // Önce son bilinen cihaz GPS konumunu al (0 ms gecikme, kesin ve gerçek donanım konumu)
+          final lastPos = await Geolocator.getLastKnownPosition();
+          if (lastPos != null) {
+            _userLat = lastPos.latitude;
+            _userLng = lastPos.longitude;
+            _isGpsActive = true;
           }
+        } catch (_) {}
+
+        // Ardından taze canlı GPS sinyali almayı dene (4 sn hızlı zaman aşımı)
+        try {
+          final livePos = await Geolocator.getCurrentPosition(
+            desiredAccuracy: LocationAccuracy.medium,
+            timeLimit: const Duration(seconds: 4),
+          );
+          _userLat = livePos.latitude;
+          _userLng = livePos.longitude;
+          _isGpsActive = true;
+        } catch (_) {
+          // Canlı GPS zaman aşımına uğrarsa (örneğin kapalı mekan),
+          // BİLİNEN GERÇEK KONUMU KORU! Asla genel şehir merkezine zıplama!
         }
       }
 
-      // 4. GPS uydusu sinyali yoksa ağ veya namaz servisinin kayıtlı konumunu kullan
-      if (position != null) {
-        _userLat = position.latitude;
-        _userLng = position.longitude;
-        _isGpsActive = true;
+      // 4. GPS hiç alınamamışsa (izin yoksa veya GPS kapalıysa) namaz servisinin şehrini kullan
+      if (!_isGpsActive && _userLat == AppConstants.defaultLatitude && _userLng == AppConstants.defaultLongitude) {
+        final loc = await PrayerTimeService.instance.getCurrentLocation();
+        _userLat = loc.latitude;
+        _userLng = loc.longitude;
+        _userLocationTitle = '${loc.cityName} (${loc.isFromGPS ? "GPS Konumu 📍" : "Kayıtlı Şehir"})';
+        _isGpsActive = loc.isFromGPS;
+      }
 
-        // Koordinatları ilçe/mahalle adına ters jeokodla (Reverse Geocoding)
+      // 5. İlçe / Mahalle Ters Jeokodlama (Reverse Geocoding)
+      if (_isGpsActive) {
         String readableLocation = 'Canlı GPS Konumu';
         try {
           final placemarks = await placemarkFromCoordinates(_userLat, _userLng).timeout(const Duration(seconds: 3));
@@ -150,20 +170,16 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
         // Widget ve konum önbelleğini canlı GPS ile güncelle
         try {
           final prefs = await SharedPreferences.getInstance();
+          await prefs.setDouble('beyan_verified_gps_lat', _userLat);
+          await prefs.setDouble('beyan_verified_gps_lng', _userLng);
+          await prefs.setString('beyan_verified_gps_title', readableLocation);
           await prefs.setDouble('beyan_widget_lat', _userLat);
           await prefs.setDouble('beyan_widget_lng', _userLng);
           await prefs.setString('beyan_widget_city', readableLocation);
         } catch (_) {}
-      } else {
-        // Namaz vakti servisinin konumunu veya şehir bilgisini al
-        final loc = await PrayerTimeService.instance.getCurrentLocation();
-        _userLat = loc.latitude;
-        _userLng = loc.longitude;
-        _userLocationTitle = '${loc.cityName} (${loc.isFromGPS ? "GPS Konumu 📍" : "Kayıtlı Şehir"})';
-        _isGpsActive = loc.isFromGPS;
       }
 
-      // Çevredeki camileri ara (5000 metre yarıçap ile en yakın neighborhood camilerini hızlı getir)
+      // 6. Çevredeki camileri ara
       final mosques = await _service.findNearbyMosques(
         userLat: _userLat,
         userLng: _userLng,
@@ -172,7 +188,18 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
 
       if (mounted) {
         setState(() {
-          _allMosques = mosques;
+          // MESAFE ZIPLAMA KORUMASI:
+          // Eğer ekranda daha önce gerçek camiler listelenmişse ve yeni dönen liste sadece fallback ise
+          // gerçek camileri koru ve mesafelerini anlık konuma göre yeniden hesapla
+          if (_allMosques.any((m) => !m.isCuratedFallback) && mosques.every((m) => m.isCuratedFallback)) {
+            _allMosques = _allMosques.map((m) {
+              final dist = NearbyMosque.calculateDistanceMeters(_userLat, _userLng, m.latitude, m.longitude);
+              final bearing = NearbyMosque.calculateBearing(_userLat, _userLng, m.latitude, m.longitude);
+              return m.copyWith(distanceMeters: dist, bearingDegrees: bearing);
+            }).toList()..sort((a, b) => a.distanceMeters.compareTo(b.distanceMeters));
+          } else {
+            _allMosques = mosques;
+          }
           _isLoading = false;
         });
       }

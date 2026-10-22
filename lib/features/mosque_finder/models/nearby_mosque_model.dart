@@ -22,6 +22,50 @@ class NearbyMosque {
     this.isCuratedFallback = false,
   });
 
+  NearbyMosque copyWith({
+    String? id,
+    String? name,
+    double? latitude,
+    double? longitude,
+    double? distanceMeters,
+    String? address,
+    double? bearingDegrees,
+    bool? isCuratedFallback,
+  }) {
+    return NearbyMosque(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      distanceMeters: distanceMeters ?? this.distanceMeters,
+      address: address ?? this.address,
+      bearingDegrees: bearingDegrees ?? this.bearingDegrees,
+      isCuratedFallback: isCuratedFallback ?? this.isCuratedFallback,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'name': name,
+    'lat': latitude,
+    'lng': longitude,
+    'dist': distanceMeters,
+    'addr': address,
+    'bearing': bearingDegrees,
+    'isFallback': isCuratedFallback,
+  };
+
+  factory NearbyMosque.fromJson(Map<String, dynamic> json) => NearbyMosque(
+    id: json['id'] as String? ?? '',
+    name: json['name'] as String? ?? 'Cami',
+    latitude: (json['lat'] as num?)?.toDouble() ?? 0.0,
+    longitude: (json['lng'] as num?)?.toDouble() ?? 0.0,
+    distanceMeters: (json['dist'] as num?)?.toDouble() ?? 0.0,
+    address: json['addr'] as String?,
+    bearingDegrees: (json['bearing'] as num?)?.toDouble() ?? 0.0,
+    isCuratedFallback: json['isFallback'] as bool? ?? false,
+  );
+
   /// Formatlı mesafe metni (Örn: "450 m" veya "1.8 km")
   String get formattedDistance {
     if (distanceMeters < 1000) {

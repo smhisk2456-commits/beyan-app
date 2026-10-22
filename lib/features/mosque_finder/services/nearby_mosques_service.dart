@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/nearby_mosque_model.dart';
 
@@ -10,58 +11,186 @@ class NearbyMosquesService {
   factory NearbyMosquesService() => instance;
   NearbyMosquesService._internal();
 
+  static const String _prefCachedMosquesKey = 'beyan_cached_real_mosques';
+
+  // Gerçek yerel camilerin bellek içi önbelleği (kesintisiz stabilite için)
+  static final List<NearbyMosque> _inMemoryRealCache = [];
+  static DateTime? _lastNetworkFetch;
+  static double? _lastCachedLat;
+  static double? _lastCachedLng;
+  static DateTime? _lastNominatimCallTime;
+
+  /// Önbelleğe alınmış gerçek yerel camileri kullanıcı koordinatlarına göre yeniden hesaplar
+  List<NearbyMosque> _getCachedRealMosques(double userLat, double userLng, double radiusMeters) {
+    if (_inMemoryRealCache.isEmpty) return [];
+
+    final list = _inMemoryRealCache.map((m) {
+      final dist = NearbyMosque.calculateDistanceMeters(userLat, userLng, m.latitude, m.longitude);
+      final bearing = NearbyMosque.calculateBearing(userLat, userLng, m.latitude, m.longitude);
+      return m.copyWith(distanceMeters: dist, bearingDegrees: bearing);
+    }).where((m) => m.distanceMeters <= radiusMeters && !m.isCuratedFallback).toList();
+
+    list.sort((a, b) => a.distanceMeters.compareTo(b.distanceMeters));
+    return list;
+  }
+
+  /// Yeni bulunan gerçek camileri önbelleğe ekler ve mesafeleri günceller
+  void _saveToCache(List<NearbyMosque> newMosques, double userLat, double userLng) {
+    final realMosques = newMosques.where((m) => !m.isCuratedFallback).toList();
+    if (realMosques.isEmpty) return;
+
+    for (final nm in realMosques) {
+      final exists = _inMemoryRealCache.any((em) =>
+          em.id == nm.id ||
+          (em.name.toLowerCase() == nm.name.toLowerCase() &&
+              NearbyMosque.calculateDistanceMeters(em.latitude, em.longitude, nm.latitude, nm.longitude) < 60));
+      if (!exists) {
+        _inMemoryRealCache.add(nm);
+      }
+    }
+
+    _lastNetworkFetch = DateTime.now();
+    _lastCachedLat = userLat;
+    _lastCachedLng = userLng;
+
+    _persistCacheAsync();
+  }
+
+  /// Kalıcı depolamaya arka planda JSON olarak kaydet
+  Future<void> _persistCacheAsync() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final jsonList = _inMemoryRealCache.take(60).map((m) => m.toJson()).toList();
+      await prefs.setString(_prefCachedMosquesKey, jsonEncode(jsonList));
+    } catch (_) {}
+  }
+
+  /// Uygulama ilk açıldığında kalıcı önbellekten camileri yükle
+  Future<void> _loadCacheFromPrefs() async {
+    if (_inMemoryRealCache.isNotEmpty) return;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_prefCachedMosquesKey);
+      if (raw != null && raw.isNotEmpty) {
+        final decoded = jsonDecode(raw) as List<dynamic>? ?? [];
+        for (final item in decoded) {
+          if (item is Map<String, dynamic>) {
+            final m = NearbyMosque.fromJson(item);
+            if (!m.isCuratedFallback && !_inMemoryRealCache.any((x) => x.id == m.id)) {
+              _inMemoryRealCache.add(m);
+            }
+          }
+        }
+      }
+    } catch (_) {}
+  }
+
   /// Verilen koordinatlar etrafındaki camileri bulur.
   /// Arama Sırası:
-  /// 1. Google Places API (yalnızca geçerli bir Google Maps API anahtarı sağlandıysa)
-  /// 2. OpenStreetMap Nominatim Bounded API (kesin koordinat sınırlı, hızlı ve yerel camiler)
-  /// 3. Komoot Photon POI API (hızlı OSM arama motoru yedeği)
-  /// 4. OpenStreetMap Overpass API (POST istekli harita sunucu yedeği)
-  /// 5. Çevrimdışı zengin cami veritabanı (internet olmadığında devreye girer)
+  /// 1. Gerçek cami önbelleği kontrolü (peş peşe yenilemelerde mesafe zıplamasını ve 429'u önler)
+  /// 2. Google Places API (yalnızca geçerli bir Google Maps API anahtarı sağlandıysa)
+  /// 3. OpenStreetMap Nominatim Bounded API (kesin koordinat sınırlı, hızlı ve yerel camiler)
+  /// 4. Komoot Photon POI API (hızlı OSM arama motoru yedeği)
+  /// 5. OpenStreetMap Overpass API (POST istekli harita sunucu yedeği)
+  /// 6. Çevrimdışı zengin cami veritabanı (yalnızca hiçbir gerçek cami bulunamazsa)
   Future<List<NearbyMosque>> findNearbyMosques({
     required double userLat,
     required double userLng,
     double radiusMeters = 5000,
     String? googleApiKey,
+    bool forceRefresh = false,
   }) async {
+    // 0. Kalıcı önbelleği belleğe yükle
+    if (_inMemoryRealCache.isEmpty) {
+      await _loadCacheFromPrefs();
+    }
+
+    final localCached = _getCachedRealMosques(userLat, userLng, radiusMeters);
+
+    // KULLANICI "YENİLE" BUTONUNA BASTIĞINDA:
+    // Eğer son 15 saniye içinde aynı konum (<60m) taranmış ve gerçek camiler bulunmuşsa;
+    // Nominatim'in 429 hatası vermesini ve camilerin 4 km'ye zıplamasını engellemek için
+    // gerçek camilerin mesafesini anlık koordinata göre güncelleyip anında döneriz.
+    final hasRecentCache = _lastNetworkFetch != null &&
+        DateTime.now().difference(_lastNetworkFetch!).inSeconds < 15 &&
+        _lastCachedLat != null &&
+        _lastCachedLng != null &&
+        NearbyMosque.calculateDistanceMeters(userLat, userLng, _lastCachedLat!, _lastCachedLng!) < 60;
+
+    if (!forceRefresh && hasRecentCache && localCached.isNotEmpty) {
+      return localCached;
+    }
+
+    List<NearbyMosque> liveResults = [];
+
     // 1. Google Places API (Yalnızca geçerli bir Places anahtarı sağlandıysa)
     if (googleApiKey != null && googleApiKey.trim().isNotEmpty && !googleApiKey.startsWith('AIzaSy')) {
       try {
         final googleMosques = await _fetchFromGooglePlaces(userLat, userLng, radiusMeters, googleApiKey.trim());
         if (googleMosques.isNotEmpty) {
-          googleMosques.sort((a, b) => a.distanceMeters.compareTo(b.distanceMeters));
-          return googleMosques;
+          liveResults = googleMosques;
         }
       } catch (_) {}
     }
 
     // 2. OpenStreetMap Nominatim Bounded Arama API (Hızlı, güncel ve kesin koordinat kutulu)
-    try {
-      final mosques = await _fetchFromNominatim(userLat, userLng, radiusMeters);
-      if (mosques.isNotEmpty) {
-        mosques.sort((a, b) => a.distanceMeters.compareTo(b.distanceMeters));
-        return mosques;
-      }
-    } catch (_) {}
+    if (liveResults.isEmpty) {
+      try {
+        // Nominatim 1 saniyede 1 istek kuralı: peş peşe istekleri 800ms geciktir
+        if (_lastNominatimCallTime != null) {
+          final elapsed = DateTime.now().difference(_lastNominatimCallTime!).inMilliseconds;
+          if (elapsed < 1000) {
+            await Future.delayed(Duration(milliseconds: 1000 - elapsed));
+          }
+        }
+        _lastNominatimCallTime = DateTime.now();
+
+        final mosques = await _fetchFromNominatim(userLat, userLng, radiusMeters);
+        if (mosques.isNotEmpty) {
+          liveResults = mosques;
+        }
+      } catch (_) {}
+    }
 
     // 3. Komoot Photon POI API (Alternatif ultra-hızlı OSM cami arama motoru)
-    try {
-      final mosques = await _fetchFromPhoton(userLat, userLng, radiusMeters);
-      if (mosques.isNotEmpty) {
-        mosques.sort((a, b) => a.distanceMeters.compareTo(b.distanceMeters));
-        return mosques;
-      }
-    } catch (_) {}
+    if (liveResults.isEmpty) {
+      try {
+        final mosques = await _fetchFromPhoton(userLat, userLng, radiusMeters);
+        if (mosques.isNotEmpty) {
+          liveResults = mosques;
+        }
+      } catch (_) {}
+    }
 
     // 4. OpenStreetMap Overpass API (POST sorgulu ayna sunucular)
-    try {
-      final mosques = await _fetchFromOverpass(userLat, userLng, radiusMeters);
-      if (mosques.isNotEmpty) {
-        mosques.sort((a, b) => a.distanceMeters.compareTo(b.distanceMeters));
-        return mosques;
-      }
-    } catch (_) {}
+    if (liveResults.isEmpty) {
+      try {
+        final mosques = await _fetchFromOverpass(userLat, userLng, radiusMeters);
+        if (mosques.isNotEmpty) {
+          liveResults = mosques;
+        }
+      } catch (_) {}
+    }
 
-    // 5. Fallback: İnternetsiz veya API yanıt vermediğinde çalışan seçkin camiler
+    // 5. SONUÇLARI DEĞERLENDİRME & MESAFE ZIPLAMA KORUMASI:
+    if (liveResults.isNotEmpty) {
+      _saveToCache(liveResults, userLat, userLng);
+      final finalCombined = _getCachedRealMosques(userLat, userLng, radiusMeters);
+      if (finalCombined.isNotEmpty) {
+        return finalCombined;
+      }
+      liveResults.sort((a, b) => a.distanceMeters.compareTo(b.distanceMeters));
+      return liveResults;
+    }
+
+    // AĞ HATASI / 429 RATE LIMIT / ZAMAN AŞIMI DURUMUNDA:
+    // Eğer önbellekte daha önce bulunmuş gerçek yerel camiler varsa,
+    // ASLA 4 km uzaktaki seçkin cami listesine düşme! Gerçek camileri koru:
+    if (localCached.isNotEmpty) {
+      return localCached;
+    }
+
+    // 6. Yalnızca ilk açılışta ve hiçbir gerçek veri bulunamadıysa çalışan seçkin camiler
     final fallbackList = _getCuratedFallbackMosques(userLat, userLng);
     fallbackList.sort((a, b) => a.distanceMeters.compareTo(b.distanceMeters));
     return fallbackList;
@@ -316,7 +445,7 @@ class NearbyMosquesService {
         if (!isMosqueCandidate(name, address)) continue;
 
         final dist = NearbyMosque.calculateDistanceMeters(lat, lng, mLat, mLng);
-        if (dist > radiusMeters * 1.5) continue;
+        if (dist > radiusMeters) continue;
 
         final bearing = NearbyMosque.calculateBearing(lat, lng, mLat, mLng);
         final id = '${props['osm_id'] ?? '${mLat.toStringAsFixed(4)},${mLng.toStringAsFixed(4)}'}';

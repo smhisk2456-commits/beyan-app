@@ -148,6 +148,38 @@ void main() {
       expect(liveMosque.isCuratedFallback, isFalse);
     });
 
+    test('NearbyMosque copyWith, toJson and fromJson serialization works correctly', () {
+      const original = NearbyMosque(
+        id: 'osm_123',
+        name: 'Moda Camii',
+        latitude: 40.9850,
+        longitude: 29.0270,
+        distanceMeters: 250.0,
+        address: 'Caferağa, Kadıköy',
+        bearingDegrees: 180.0,
+        isCuratedFallback: false,
+      );
+
+      final updated = original.copyWith(
+        distanceMeters: 280.0,
+        bearingDegrees: 185.0,
+      );
+      expect(updated.id, original.id);
+      expect(updated.name, original.name);
+      expect(updated.distanceMeters, 280.0);
+      expect(updated.bearingDegrees, 185.0);
+
+      final json = updated.toJson();
+      expect(json['id'], 'osm_123');
+      expect(json['dist'], 280.0);
+
+      final restored = NearbyMosque.fromJson(json);
+      expect(restored.id, 'osm_123');
+      expect(restored.name, 'Moda Camii');
+      expect(restored.distanceMeters, 280.0);
+      expect(restored.isCuratedFallback, isFalse);
+    });
+
     test('Service returns distance-sorted fallback mosques without network', () async {
       final service = NearbyMosquesService.instance;
       final mosques = await service.findNearbyMosques(
@@ -159,6 +191,30 @@ void main() {
       for (int i = 0; i < mosques.length - 1; i++) {
         expect(mosques[i].distanceMeters, lessThanOrEqualTo(mosques[i + 1].distanceMeters));
       }
+    });
+
+    test('Peş peşe yenilemelerde (rapid refresh) önbellek mesafeleri anlık koordinata göre doğru günceller', () async {
+      final service = NearbyMosquesService.instance;
+
+      // 1. İlk sorgu
+      final firstResults = await service.findNearbyMosques(
+        userLat: 40.9900,
+        userLng: 29.0290,
+      );
+      expect(firstResults, isNotEmpty);
+      final firstClosestDist = firstResults.first.distanceMeters;
+
+      // 2. Kullanıcı sadece 10 metre yürüdüğünde ve anında yenilediğinde
+      final secondResults = await service.findNearbyMosques(
+        userLat: 40.9901,
+        userLng: 29.0291,
+      );
+      expect(secondResults, isNotEmpty);
+
+      // En yakın caminin mesafesi 4 km'ye zıplamamalı, 10-20 metre civarında sabit ve tutarlı kalmalı!
+      final secondClosestDist = secondResults.first.distanceMeters;
+      final diff = (secondClosestDist - firstClosestDist).abs();
+      expect(diff, lessThan(200), reason: 'Mesafe 4 km zıplamadan sabit kalmalıdır');
     });
   });
 }
