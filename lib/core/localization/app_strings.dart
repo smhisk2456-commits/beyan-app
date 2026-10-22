@@ -228,6 +228,21 @@ class AppStrings {
   String get searchResults => _t('searchResults', 'Arama Sonuçları', 'Search Results', 'نتائج البحث');
   String get noSurahFound => _t('noSurahFound', 'Sure bulunamadı', 'No surah found', 'لم يتم العثور على سورة');
   String get totalSurahs => _t('totalSurahs', '114 Sure', '114 Surahs', '١١٤ سورة');
+  String get tabSurahs => _t('tabSurahs', 'Sureler', 'Surahs', 'السور');
+  String get tabJuzs => _t('tabJuzs', 'Cüzler', 'Juz', 'الأجزاء');
+  String get tabImportantVerses => _t('tabImportantVerses', 'Önemli Âyet & Dualar', 'Important Verses & Duas', 'آيات وأدعية مهمة');
+  String get filterAllSurahs => _t('filterAllSurahs', 'Tümü', 'All', 'الكل');
+  String get filterMeccan => _t('filterMeccan', 'Mekkî', 'Meccan', 'مكية');
+  String get filterMedinan => _t('filterMedinan', 'Medenî', 'Medinan', 'مدنية');
+  String get filterFamousSurahs => _t('filterFamousSurahs', 'Meşhur Sureler', 'Famous Surahs', 'سور مشهورة');
+  String get searchQuranHint => _t('searchQuranHint', 'Sure veya dua ara... (yasin, ayetel kursi...)', 'Search surah or dua... (yasin, ayat al-kursi...)', 'ابحث عن سورة أو دعاء...');
+  String get searchInDuaLibrary => _t('searchInDuaLibrary', 'Dua Kütüphanesi\'nde Ara', 'Search in Dua Library', 'البحث في مكتبة الأدعية');
+  String get openDuaLibrary => _t('openDuaLibrary', 'Tüm Duaları Aç (12 Kategori, 40+ Dua)', 'Open All Duas (12 Categories, 40+)', 'فتح جميع الأدعية');
+  String get foundVersesAndDuas => _t('foundVersesAndDuas', 'Önemli Âyet ve Dualar', 'Important Verses & Duas', 'الآيات والأدعية');
+  String get foundSurahs => _t('foundSurahs', 'Eşleşen Sureler', 'Matching Surahs', 'السور المطابقة');
+  String get readInSurah => _t('readInSurah', 'Surede Gör', 'View in Surah', 'عرض في السورة');
+  String get pageRangeLabel => _t('pageRangeLabel', 'Sayfa', 'Page', 'صفحة');
+  String get juzLabel => _t('juzLabel', 'Cüz', 'Juz', 'الجزء');
     String surahBadge(int count) {
     switch (language) {
       case AppLanguage.turkish:

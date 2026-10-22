@@ -4,15 +4,25 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/localization/app_strings.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/common_widgets.dart' as app_widgets;
-import '../../quran/models/surah.dart';
-import '../../quran/providers/quran_providers.dart';
-import '../../quran/providers/quran_reading_providers.dart';
-import '../../quran/screens/surah_detail_screen.dart';
 import '../../home/widgets/surah_list_item.dart';
 import '../../monetization/widgets/banner_ad_widget.dart';
+import '../../ramadan/models/khatam_tracker_model.dart';
 import '../../settings/screens/settings_screen.dart';
+import '../../dua/screens/dua_library_screen.dart';
+import '../../dua/providers/dua_providers.dart';
+import '../models/quran_featured_verse.dart';
+import '../models/surah.dart';
+import '../providers/quran_providers.dart';
+import '../providers/quran_reading_providers.dart';
+import '../screens/surah_detail_screen.dart';
 
-/// Bağımsız sure listesi ekranı (Kur'an-ı Kerim Menü Sekmesi).
+enum _QuranTab { surahs, juzs, versesAndDuas }
+enum _SurahFilter { all, meccan, medinan, famous }
+
+/// Kur'an-ı Kerim Ekranı
+/// - 3 Ana Kategori: Sureler (114), Cüzler (30 Cüz), Önemli Âyet & Dualar
+/// - Akıllı Arama: Sureler + Âyetü'l-Kürsî ve diğer dualar + Dua Kütüphanesi Köprüsü
+/// - 120 FPS Donanım Hızlandırmalı Akıcı Kaydırma (itemExtent optimize)
 class SurahListScreen extends ConsumerStatefulWidget {
   const SurahListScreen({super.key});
 
@@ -22,6 +32,10 @@ class SurahListScreen extends ConsumerStatefulWidget {
 
 class _SurahListScreenState extends ConsumerState<SurahListScreen> {
   final _searchController = TextEditingController();
+  _QuranTab _selectedTab = _QuranTab.surahs;
+  _SurahFilter _selectedFilter = _SurahFilter.all;
+
+  static const _famousSurahIds = {1, 2, 18, 36, 48, 55, 56, 67, 78, 94, 112, 113, 114};
 
   @override
   void dispose() {
@@ -29,21 +43,47 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
     super.dispose();
   }
 
+  void _openSurahAtVerse(Surah surah, int verseNumber) {
+    HapticFeedback.lightImpact();
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => SurahDetailScreen(
+          surah: surah,
+          initialScrollToVerse: verseNumber,
+        ),
+      ),
+    );
+  }
+
+  void _openDuaLibraryWithQuery(String query) {
+    HapticFeedback.mediumImpact();
+    ref.read(duaSearchQueryProvider.notifier).state = query;
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const DuaLibraryScreen()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final surahsAsync = ref.watch(filteredSurahsProvider);
-    final allSurahs = ref.watch(allSurahsProvider).valueOrNull ?? [];
+    final allSurahsAsync = ref.watch(allSurahsProvider);
+    final allSurahs = allSurahsAsync.valueOrNull ?? [];
     final strings = ref.watch(appStringsProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final lastRead = ref.watch(lastReadProvider);
+    final searchQuery = _searchController.text.trim();
+    final isSearching = searchQuery.isNotEmpty;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text(strings.quranTitle),
+        title: Text(
+          strings.quranTitle,
+          style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 0.3),
+        ),
         centerTitle: true,
         actions: [
-          // Lüks Ayarlar Butonu
           IconButton(
             icon: const Icon(Icons.settings_outlined, color: Colors.white),
             tooltip: strings.settings,
@@ -56,31 +96,36 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
         children: [
           Column(
             children: [
-              // ── Arama Çubuğu ──────────────────────────────────────
+              // ── Arama Çubuğu ──────────────────────────────────────────────
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                padding: const EdgeInsets.fromLTRB(16, 10, 16, 6),
                 child: Container(
                   decoration: BoxDecoration(
                     color: isDark ? const Color(0xFF07201C) : Colors.white,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.3 : 0.25),
+                      color: const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.35 : 0.25),
                       width: 1,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
-                        blurRadius: 10,
-                        offset: const Offset(0, 3),
+                        color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
                       ),
                     ],
                   ),
                   child: TextField(
                     controller: _searchController,
-                    onChanged: (q) =>
-                        ref.read(surahSearchQueryProvider.notifier).state = q,
+                    onChanged: (q) {
+                      setState(() {});
+                    },
+                    style: TextStyle(
+                      fontSize: 14.5,
+                      color: isDark ? Colors.white : Colors.black87,
+                    ),
                     decoration: InputDecoration(
-                      hintText: strings.searchSurahPlaceholder,
+                      hintText: strings.searchQuranHint,
                       hintStyle: TextStyle(
                         fontSize: 13,
                         color: isDark ? Colors.white54 : AppColors.textHint,
@@ -95,13 +140,11 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
                               icon: const Icon(Icons.clear_rounded, size: 18),
                               onPressed: () {
                                 _searchController.clear();
-                                ref.read(surahSearchQueryProvider.notifier).state = '';
+                                setState(() {});
                               },
                             )
                           : null,
                       border: InputBorder.none,
-                      enabledBorder: InputBorder.none,
-                      focusedBorder: InputBorder.none,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 12,
@@ -111,12 +154,12 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
                 ),
               ),
 
-              // ── Kaldığım Yerden Devam Et Kartı ─────────────────────
-              if (lastRead != null && _searchController.text.isEmpty)
+              // ── Kaldığım Yerden Devam Et Kartı ─────────────────────────────
+              if (lastRead != null && !isSearching)
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                  padding: const EdgeInsets.fromLTRB(16, 2, 16, 6),
                   child: InkWell(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(14),
                     onTap: () {
                       HapticFeedback.lightImpact();
                       final targetSurah = allSurahs.firstWhere(
@@ -130,23 +173,15 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
                           verseCount: 7,
                         ),
                       );
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => SurahDetailScreen(
-                            surah: targetSurah,
-                            initialScrollToVerse: lastRead.verseNumber,
-                          ),
-                        ),
-                      );
+                      _openSurahAtVerse(targetSurah, lastRead.verseNumber);
                     },
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
                           colors: [Color(0xFF012E2B), Color(0xFF034A3E)],
                         ),
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(14),
                         border: Border.all(
                           color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
                           width: 1,
@@ -155,12 +190,12 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
                       child: Row(
                         children: [
                           Container(
-                            padding: const EdgeInsets.all(6),
+                            padding: const EdgeInsets.all(5),
                             decoration: BoxDecoration(
                               color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.bookmark_added_rounded, color: Color(0xFFFFDF7A), size: 18),
+                            child: const Icon(Icons.bookmark_added_rounded, color: Color(0xFFFFDF7A), size: 16),
                           ),
                           const SizedBox(width: 10),
                           Expanded(
@@ -170,78 +205,170 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
                                 Text(
                                   strings.resumeReading,
                                   style: const TextStyle(
-                                    fontSize: 12.5,
+                                    fontSize: 12,
                                     fontWeight: FontWeight.bold,
                                     color: Color(0xFFFFDF7A),
                                   ),
                                 ),
                                 Text(
                                   '${lastRead.surahName} • ${strings.verseNumberLabel(lastRead.verseNumber)}',
-                                  style: const TextStyle(fontSize: 11.5, color: Colors.white70),
+                                  style: const TextStyle(fontSize: 11, color: Colors.white70),
                                 ),
                               ],
                             ),
                           ),
-                          const Icon(Icons.arrow_forward_ios_rounded, color: Color(0xFFFFDF7A), size: 14),
+                          const Icon(Icons.arrow_forward_ios_rounded, color: Color(0xFFFFDF7A), size: 12),
                         ],
                       ),
                     ),
                   ),
                 ),
 
-              // ── Sure Listesi ──────────────────────────────────────
-              Expanded(
-                child: surahsAsync.when(
-                  loading: () => app_widgets.LoadingWidget(
-                    message: strings.versesLoading,
+              // ── 3 Ana Kategori Sekmesi (Sureler / Cüzler / Önemli Âyet & Dualar) ──
+              if (!isSearching)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 2, 16, 6),
+                  child: Container(
+                    padding: const EdgeInsets.all(3.5),
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF06221D) : const Color(0xFFE9F3EE),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.3 : 0.2),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: _buildCategoryTabButton(
+                            label: strings.tabSurahs,
+                            icon: Icons.auto_stories_rounded,
+                            isActive: _selectedTab == _QuranTab.surahs,
+                            onTap: () {
+                              HapticFeedback.selectionClick();
+                              setState(() {
+                                _selectedTab = _QuranTab.surahs;
+                              });
+                            },
+                            isDark: isDark,
+                          ),
+                        ),
+                        Expanded(
+                          child: _buildCategoryTabButton(
+                            label: '${strings.tabJuzs} (30)',
+                            icon: Icons.menu_book_rounded,
+                            isActive: _selectedTab == _QuranTab.juzs,
+                            onTap: () {
+                              HapticFeedback.selectionClick();
+                              setState(() {
+                                _selectedTab = _QuranTab.juzs;
+                              });
+                            },
+                            isDark: isDark,
+                          ),
+                        ),
+                        Expanded(
+                          child: _buildCategoryTabButton(
+                            label: strings.tabImportantVerses,
+                            icon: Icons.spa_rounded,
+                            isActive: _selectedTab == _QuranTab.versesAndDuas,
+                            onTap: () {
+                              HapticFeedback.selectionClick();
+                              setState(() {
+                                _selectedTab = _QuranTab.versesAndDuas;
+                              });
+                            },
+                            isDark: isDark,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
+                ),
+
+              // ── Sureler Alt Filtre Çipleri (Mekkî / Medenî / Meşhur) ─────────
+              if (!isSearching && _selectedTab == _QuranTab.surahs)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 2, 16, 6),
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    child: Row(
+                      children: [
+                        _buildFilterPill(
+                          label: strings.filterAllSurahs,
+                          isSelected: _selectedFilter == _SurahFilter.all,
+                          onTap: () => setState(() => _selectedFilter = _SurahFilter.all),
+                          isDark: isDark,
+                        ),
+                        const SizedBox(width: 6),
+                        _buildFilterPill(
+                          label: strings.filterMeccan,
+                          isSelected: _selectedFilter == _SurahFilter.meccan,
+                          onTap: () => setState(() => _selectedFilter = _SurahFilter.meccan),
+                          isDark: isDark,
+                        ),
+                        const SizedBox(width: 6),
+                        _buildFilterPill(
+                          label: strings.filterMedinan,
+                          isSelected: _selectedFilter == _SurahFilter.medinan,
+                          onTap: () => setState(() => _selectedFilter = _SurahFilter.medinan),
+                          isDark: isDark,
+                        ),
+                        const SizedBox(width: 6),
+                        _buildFilterPill(
+                          label: '✨ ${strings.filterFamousSurahs}',
+                          isSelected: _selectedFilter == _SurahFilter.famous,
+                          onTap: () => setState(() => _selectedFilter = _SurahFilter.famous),
+                          isDark: isDark,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+              // ── Ana İçerik Görünümü ────────────────────────────────────────
+              Expanded(
+                child: allSurahsAsync.when(
+                  loading: () => app_widgets.LoadingWidget(message: strings.versesLoading),
                   error: (e, _) => app_widgets.AppErrorWidget(
                     message: strings.versesLoadError,
-                    onRetry: () => ref.invalidate(filteredSurahsProvider),
+                    onRetry: () => ref.invalidate(allSurahsProvider),
                   ),
                   data: (surahs) {
-                    if (surahs.isEmpty) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.search_off_rounded,
-                                size: 48, color: AppColors.textHint),
-                            const SizedBox(height: 12),
-                            Text(
-                              strings.noSurahFound,
-                              style: Theme.of(context).textTheme.bodyLarge,
-                            ),
-                          ],
-                        ),
+                    // Arama Yapılıyorsa
+                    if (isSearching) {
+                      return _buildSearchResultsView(
+                        query: searchQuery,
+                        allSurahs: surahs,
+                        strings: strings,
+                        isDark: isDark,
                       );
                     }
 
-                    return ListView.separated(
-                      padding: const EdgeInsets.only(bottom: 90, top: 4),
-                      physics: const BouncingScrollPhysics(),
-                      itemCount: surahs.length,
-                      separatorBuilder: (_, __) => Divider(
-                        color: isDark ? const Color(0xFF133B34) : const Color(0xFFE2EBE8),
-                        height: 1,
-                        indent: 72,
-                        endIndent: 16,
-                      ),
-                      itemBuilder: (context, index) {
-                        final surah = surahs[index];
-                        return SurahListItem(
-                          surah: surah,
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => SurahDetailScreen(surah: surah),
-                              ),
-                            );
-                          },
+                    // Sekmeye Göre Gösterim
+                    switch (_selectedTab) {
+                      case _QuranTab.surahs:
+                        return _buildSurahsListView(
+                          allSurahs: surahs,
+                          filter: _selectedFilter,
+                          strings: strings,
+                          isDark: isDark,
                         );
-                      },
-                    );
+                      case _QuranTab.juzs:
+                        return _buildJuzsGridView(
+                          allSurahs: surahs,
+                          strings: strings,
+                          isDark: isDark,
+                        );
+                      case _QuranTab.versesAndDuas:
+                        return _buildFeaturedVersesAndDuasView(
+                          allSurahs: surahs,
+                          strings: strings,
+                          isDark: isDark,
+                        );
+                    }
                   },
                 ),
               ),
@@ -252,6 +379,717 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildCategoryTabButton({
+    required String label,
+    required IconData icon,
+    required bool isActive,
+    required VoidCallback onTap,
+    required bool isDark,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(vertical: 7),
+        decoration: BoxDecoration(
+          color: isActive
+              ? (isDark ? const Color(0xFF0F3E34) : Colors.white)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: isActive
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.05),
+                    blurRadius: 4,
+                    offset: const Offset(0, 1),
+                  ),
+                ]
+              : null,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 14,
+              color: isActive
+                  ? const Color(0xFFFFDF7A)
+                  : (isDark ? Colors.white60 : Colors.black54),
+            ),
+            const SizedBox(width: 4),
+            Flexible(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11.5,
+                  fontWeight: isActive ? FontWeight.bold : FontWeight.w600,
+                  color: isActive
+                      ? (isDark ? const Color(0xFFFFDF7A) : const Color(0xFF012E2B))
+                      : (isDark ? Colors.white60 : Colors.black54),
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilterPill({
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+    required bool isDark,
+  }) {
+    return InkWell(
+      onTap: () {
+        HapticFeedback.selectionClick();
+        onTap();
+      },
+      borderRadius: BorderRadius.circular(16),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? const Color(0xFFD4AF37)
+              : (isDark ? const Color(0xFF082621) : const Color(0xFFF1F6F4)),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected
+                ? const Color(0xFFFFDF7A)
+                : const Color(0xFFD4AF37).withValues(alpha: isDark ? 0.3 : 0.2),
+            width: 1,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 11.5,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+            color: isSelected
+                ? Colors.black87
+                : (isDark ? Colors.white70 : const Color(0xFF033E35)),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ── Sureler Listesi (Ultra Hızlı 120 FPS - itemExtent Optimize) ─────────────
+  Widget _buildSurahsListView({
+    required List<Surah> allSurahs,
+    required _SurahFilter filter,
+    required AppStrings strings,
+    required bool isDark,
+  }) {
+    final filtered = allSurahs.where((s) {
+      switch (filter) {
+        case _SurahFilter.all:
+          return true;
+        case _SurahFilter.meccan:
+          return s.isMeccan;
+        case _SurahFilter.medinan:
+          return !s.isMeccan;
+        case _SurahFilter.famous:
+          return _famousSurahIds.contains(s.id);
+      }
+    }).toList();
+
+    return ListView.builder(
+      padding: const EdgeInsets.only(bottom: 90, top: 2),
+      physics: const BouncingScrollPhysics(),
+      itemExtent: 74.0,
+      itemCount: filtered.length,
+      itemBuilder: (context, index) {
+        final surah = filtered[index];
+        return SurahListItem(
+          surah: surah,
+          langCode: strings.language.code,
+          onTap: () => _openSurahAtVerse(surah, 1),
+        );
+      },
+    );
+  }
+
+  // ── 30 Cüz Vitrini ──────────────────────────────────────────────────────────
+  Widget _buildJuzsGridView({
+    required List<Surah> allSurahs,
+    required AppStrings strings,
+    required bool isDark,
+  }) {
+    return ListView.builder(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 90),
+      itemCount: quranJuzList.length,
+      itemBuilder: (context, index) {
+        final juz = quranJuzList[index];
+        final matchingSurah = allSurahs.firstWhere(
+          (s) => s.nameTurkish.toLowerCase().contains(juz.startSurah.toLowerCase()) ||
+                 juz.startSurah.toLowerCase().contains(s.nameTurkish.toLowerCase()),
+          orElse: () => allSurahs.isNotEmpty ? allSurahs.first : const Surah(
+            id: 1,
+            nameArabic: 'الفاتحة',
+            nameTurkish: 'Fâtiha',
+            nameEnglish: 'Al-Fatiha',
+            revelationType: 'meccan',
+            verseCount: 7,
+          ),
+        );
+
+        return RepaintBoundary(
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 8),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF0D2823) : Colors.white,
+              borderRadius: BorderRadius.circular(15),
+              border: Border.all(
+                color: isDark ? const Color(0xFF133B34) : const Color(0xFFE5ECE9),
+                width: 1,
+              ),
+            ),
+            child: Material(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(15),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(15),
+                onTap: () => _openSurahAtVerse(matchingSurah, juz.startAyah),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  child: Row(
+                    children: [
+                      // Cüz Numarası Rozeti
+                      Container(
+                        width: 42,
+                        height: 42,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: const Color(0xFFD4AF37).withValues(alpha: 0.5),
+                            width: 1.2,
+                          ),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              strings.juzLabel,
+                              style: const TextStyle(
+                                fontSize: 9,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFFD4AF37),
+                              ),
+                            ),
+                            Text(
+                              '${juz.juzNumber}',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: isDark ? const Color(0xFFFFDF7A) : const Color(0xFF012E2B),
+                                height: 1.1,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+
+                      // Cüz Bilgileri
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${juz.juzNumber}. ${strings.juzLabel} • ${juz.startSurah}',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: isDark ? Colors.white : const Color(0xFF02362E),
+                              ),
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              '${strings.pageRangeLabel} ${juz.startPage} - ${juz.endPage} • ${juz.pageCount} ${strings.pageRangeLabel}',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: isDark ? Colors.white60 : AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Başlangıç Ayeti ve Oku Butonu
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              '${juz.startAyah}. Âyet',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFFD4AF37),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          const Icon(
+                            Icons.arrow_forward_ios_rounded,
+                            size: 12,
+                            color: Color(0xFFD4AF37),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // ── Önemli Âyet & Dualar Vitrini ──────────────────────────────────────────
+  Widget _buildFeaturedVersesAndDuasView({
+    required List<Surah> allSurahs,
+    required AppStrings strings,
+    required bool isDark,
+  }) {
+    return ListView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 90),
+      children: [
+        // ── Dua Kütüphanesi Tanıtım ve Doğrudan Geçiş Kartı ──────────────
+        InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () {
+            HapticFeedback.mediumImpact();
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const DuaLibraryScreen()),
+            );
+          },
+          child: Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: isDark
+                    ? [const Color(0xFF0D372E), const Color(0xFF06221D)]
+                    : [const Color(0xFFE2EFE9), const Color(0xFFF3F8F5)],
+              ),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: const Color(0xFFD4AF37).withValues(alpha: 0.5),
+                width: 1.2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: const Color(0xFFD4AF37).withValues(alpha: 0.5),
+                      width: 1,
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.auto_stories_rounded,
+                    color: Color(0xFFFFDF7A),
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        strings.openDuaLibrary,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? const Color(0xFFFFDF7A) : const Color(0xFF012E2B),
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        'Peygamber duaları, şifa, nazar, namaz, sabah-akşam külliyatı',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: isDark ? Colors.white70 : Colors.black54,
+                        ),
+                        maxLines: 2,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                const Icon(
+                  Icons.arrow_forward_rounded,
+                  color: Color(0xFFD4AF37),
+                  size: 20,
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+
+        // ── 13 Meşhur Âyet ve Kur'an Duası Kartları ─────────────────────────
+        ...featuredQuranicVersesList.map((verse) {
+          final targetSurah = allSurahs.firstWhere(
+            (s) => s.id == verse.surahId,
+            orElse: () => allSurahs.isNotEmpty ? allSurahs.first : const Surah(
+              id: 2,
+              nameArabic: 'البقرة',
+              nameTurkish: 'Bakara',
+              nameEnglish: 'Al-Baqarah',
+              revelationType: 'medinan',
+              verseCount: 286,
+            ),
+          );
+
+          return _buildFeaturedVerseCard(
+            verse: verse,
+            surah: targetSurah,
+            strings: strings,
+            isDark: isDark,
+          );
+        }),
+      ],
+    );
+  }
+
+  Widget _buildFeaturedVerseCard({
+    required QuranFeaturedVerse verse,
+    required Surah surah,
+    required AppStrings strings,
+    required bool isDark,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF0D2823) : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? const Color(0xFF133B34) : const Color(0xFFE5ECE9),
+          width: 1,
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () => _openSurahAtVerse(surah, verse.verseNumber),
+          child: Padding(
+            padding: const EdgeInsets.all(13),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFD4AF37).withValues(alpha: 0.16),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        '${verse.surahName} ${verse.verseRange}',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFFD4AF37),
+                        ),
+                      ),
+                    ),
+                    const Spacer(),
+                    TextButton.icon(
+                      onPressed: () => _openSurahAtVerse(surah, verse.verseNumber),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        visualDensity: VisualDensity.compact,
+                      ),
+                      icon: const Icon(Icons.menu_book_rounded, size: 14, color: Color(0xFFD4AF37)),
+                      label: Text(
+                        strings.readInSurah,
+                        style: const TextStyle(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFFD4AF37),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  verse.title,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : const Color(0xFF02362E),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  verse.subtitle,
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    color: isDark ? Colors.white60 : AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF071F1B) : const Color(0xFFF7FAF9),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    verse.arabicSnippet,
+                    textDirection: TextDirection.rtl,
+                    style: TextStyle(
+                      fontFamily: 'Amiri',
+                      fontSize: 15,
+                      color: isDark ? const Color(0xFFFFDF7A) : const Color(0xFF02362E),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  verse.turkishMeaning,
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    height: 1.3,
+                    color: isDark ? Colors.white70 : Colors.black87,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ── Akıllı Arama Sonuçları Görünümü ────────────────────────────────────────
+  Widget _buildSearchResultsView({
+    required String query,
+    required List<Surah> allSurahs,
+    required AppStrings strings,
+    required bool isDark,
+  }) {
+    final normQuery = QuranFeaturedVerse.normalize(query);
+
+    // 1. Eşleşen Sureler
+    final matchedSurahs = allSurahs.where((s) {
+      if (normQuery.isEmpty) return true;
+      final t = QuranFeaturedVerse.normalize(s.nameTurkish);
+      final e = QuranFeaturedVerse.normalize(s.nameEnglish);
+      final idStr = s.id.toString();
+      return t.contains(normQuery) || e.contains(normQuery) || s.nameArabic.contains(query) || idStr == query;
+    }).toList();
+
+    // 2. Eşleşen Önemli Âyet & Dualar (örn: 'aye' -> Âyetü'l-Kürsî!)
+    final matchedVerses = featuredQuranicVersesList.where((v) => v.matchesQuery(query)).toList();
+
+    if (matchedSurahs.isEmpty && matchedVerses.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.search_off_rounded, size: 52, color: AppColors.textHint),
+              const SizedBox(height: 12),
+              Text(
+                strings.noSurahFound,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white70 : Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Aradığınız dua veya ayet Kur\'an kütüphanesinde bulunamadıysa Dua Kütüphanesi\'nde arayabilirsiniz.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: isDark ? Colors.white54 : AppColors.textSecondary,
+                ),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: () => _openDuaLibraryWithQuery(query),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFD4AF37),
+                  foregroundColor: Colors.black,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                ),
+                icon: const Icon(Icons.menu_book_rounded, size: 18),
+                label: Text(
+                  '${strings.searchInDuaLibrary} ("$query")',
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return ListView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 90),
+      children: [
+        // ── Dua Kütüphanesinde Arama Hızlı Butonu ──────────────────────
+        Container(
+          margin: const EdgeInsets.only(bottom: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: const Color(0xFFD4AF37).withValues(alpha: 0.15),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: const Color(0xFFD4AF37).withValues(alpha: 0.35),
+              width: 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.auto_stories_rounded, color: Color(0xFFD4AF37), size: 18),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Dua Kütüphanesi\'nde "$query" ara (40+ Dua)',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFFD4AF37),
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () => _openDuaLibraryWithQuery(query),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  visualDensity: VisualDensity.compact,
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('Aç', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFD4AF37))),
+                    Icon(Icons.arrow_forward_rounded, size: 14, color: Color(0xFFD4AF37)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // ── Eşleşen Önemli Âyet & Dualar Bölümü ────────────────────────
+        if (matchedVerses.isNotEmpty) ...[
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Row(
+              children: [
+                const Icon(Icons.stars_rounded, color: Color(0xFFFFDF7A), size: 16),
+                const SizedBox(width: 6),
+                Text(
+                  '${strings.foundVersesAndDuas} (${matchedVerses.length})',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFFFFDF7A),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          ...matchedVerses.map((verse) {
+            final targetSurah = allSurahs.firstWhere(
+              (s) => s.id == verse.surahId,
+              orElse: () => allSurahs.isNotEmpty ? allSurahs.first : const Surah(
+                id: 2,
+                nameArabic: 'البقرة',
+                nameTurkish: 'Bakara',
+                nameEnglish: 'Al-Baqarah',
+                revelationType: 'medinan',
+                verseCount: 286,
+              ),
+            );
+            return _buildFeaturedVerseCard(
+              verse: verse,
+              surah: targetSurah,
+              strings: strings,
+              isDark: isDark,
+            );
+          }),
+          const SizedBox(height: 10),
+        ],
+
+        // ── Eşleşen Sureler Bölümü ────────────────────────────────────
+        if (matchedSurahs.isNotEmpty) ...[
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Row(
+              children: [
+                const Icon(Icons.format_list_bulleted_rounded, color: Color(0xFFD4AF37), size: 16),
+                const SizedBox(width: 6),
+                Text(
+                  '${strings.foundSurahs} (${matchedSurahs.length})',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white70 : const Color(0xFF02362E),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          ...matchedSurahs.map((surah) {
+            return SurahListItem(
+              surah: surah,
+              langCode: strings.language.code,
+              onTap: () => _openSurahAtVerse(surah, 1),
+            );
+          }),
+        ],
+      ],
     );
   }
 }

@@ -1,106 +1,103 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/localization/app_strings.dart';
 import '../../quran/models/surah.dart';
-import '../../quran/widgets/arabic_text_widget.dart';
 
-/// Sure listesinde bir satırı gösteren widget.
-///
-/// Sol taraf: Numaralı sekizgen + Dil bazlı isim + etiket
-/// Sağ taraf: Arapça isim (Amiri fontu)
-class SurahListItem extends ConsumerWidget {
+/// Sure listesinde bir satırı gösteren yüksek performanslı (120 FPS optimize) widget.
+class SurahListItem extends StatelessWidget {
   final Surah surah;
   final VoidCallback onTap;
+  final String langCode;
 
   const SurahListItem({
     super.key,
     required this.surah,
     required this.onTap,
+    this.langCode = 'tr',
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final strings = ref.watch(appStringsProvider);
-    final langCode = strings.language.code;
 
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF0D2823) : Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isDark ? const Color(0xFF133B34) : const Color(0xFFE8EEEC),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+    return RepaintBoundary(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 3.5),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF0D2823) : Colors.white,
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(
+            color: isDark ? const Color(0xFF133B34) : const Color(0xFFE5ECE9),
+            width: 1,
           ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(16),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-            child: Row(
-              children: [
-                // ── Numara Sekizgeni ──────────────────────────────
-                _SurahNumber(number: surah.id, isDark: isDark),
-                const SizedBox(width: 14),
+        ),
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(15),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(15),
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              child: Row(
+                children: [
+                  // ── Numara Rozeti (Hafif ve Geometrik) ─────────────
+                  _SurahNumber(number: surah.id, isDark: isDark),
+                  const SizedBox(width: 13),
 
-                // ── Dil Bazlı İsim + Bilgi Etiketleri ─────────────
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        surah.localizedName(langCode),
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: isDark ? Colors.white : const Color(0xFF11221F),
+                  // ── Dil Bazlı İsim + Bilgi Etiketleri ─────────────
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          surah.localizedName(langCode),
+                          style: TextStyle(
+                            fontSize: 15.5,
+                            fontWeight: FontWeight.w700,
+                            color: isDark ? Colors.white : const Color(0xFF11221F),
+                            letterSpacing: 0.1,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          _InfoChip(
-                            label: surah.localizedRevelation(langCode),
-                            color: surah.isMeccan
-                                ? const Color(0xFF0A685A)
-                                : const Color(0xFF996515),
-                            isDark: isDark,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            surah.localizedVerseCount(langCode),
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: isDark ? Colors.white54 : const Color(0xFF5B6E6A),
+                        const SizedBox(height: 3),
+                        Row(
+                          children: [
+                            _InfoChip(
+                              label: surah.localizedRevelation(langCode),
+                              color: surah.isMeccan
+                                  ? const Color(0xFF0A685A)
+                                  : const Color(0xFF996515),
+                              isDark: isDark,
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
+                            const SizedBox(width: 6),
+                            Text(
+                              surah.localizedVerseCount(langCode),
+                              style: TextStyle(
+                                fontSize: 11.5,
+                                color: isDark ? Colors.white54 : const Color(0xFF5B6E6A),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
 
-                // ── Sağ: Arapça İsim ─────────────────────────────
-                ArabicText(
-                  surah.nameArabic,
-                  fontSize: 22.0,
-                  lineHeight: 1.8,
-                  color: isDark ? const Color(0xFFFFE082) : const Color(0xFF033E35),
-                ),
-              ],
+                  // ── Sağ: Arapça İsim (Hafif Amiri Tipografisi) ──────
+                  Text(
+                    surah.nameArabic,
+                    textDirection: TextDirection.rtl,
+                    style: TextStyle(
+                      fontFamily: 'Amiri',
+                      fontSize: 20.0,
+                      height: 1.4,
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? const Color(0xFFFFE082) : const Color(0xFF033E35),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -109,7 +106,7 @@ class SurahListItem extends ConsumerWidget {
   }
 }
 
-/// Sure numarası – sekizgen daire içinde gösterilir.
+/// Sure numarası – hafif altın vurgulu köşeli rozet
 class _SurahNumber extends StatelessWidget {
   final int number;
   final bool isDark;
@@ -117,66 +114,31 @@ class _SurahNumber extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 42,
-      height: 42,
-      child: CustomPaint(
-        painter: _OctagonPainter(
-          fillColor: isDark
-              ? const Color(0xFFD4AF37).withValues(alpha: 0.12)
-              : const Color(0xFF033E35).withValues(alpha: 0.06),
-          strokeColor: const Color(0xFFD4AF37).withValues(alpha: 0.65),
+    return Container(
+      width: 38,
+      height: 38,
+      decoration: BoxDecoration(
+        color: isDark
+            ? const Color(0xFFD4AF37).withValues(alpha: 0.12)
+            : const Color(0xFF033E35).withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: const Color(0xFFD4AF37).withValues(alpha: 0.65),
+          width: 1.2,
         ),
-        child: Center(
-          child: Text(
-            '$number',
-            style: TextStyle(
-              fontSize: number > 99 ? 11 : 13,
-              fontWeight: FontWeight.bold,
-              color: isDark ? const Color(0xFFFFDF7A) : const Color(0xFF033E35),
-            ),
+      ),
+      child: Center(
+        child: Text(
+          '$number',
+          style: TextStyle(
+            fontSize: number > 99 ? 11 : 13,
+            fontWeight: FontWeight.bold,
+            color: isDark ? const Color(0xFFFFDF7A) : const Color(0xFF033E35),
           ),
         ),
       ),
     );
   }
-}
-
-/// Sekizgen şekil — dart:math.cos / sin ile.
-class _OctagonPainter extends CustomPainter {
-  final Color fillColor;
-  final Color strokeColor;
-  const _OctagonPainter({required this.fillColor, required this.strokeColor});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final cx = size.width / 2;
-    final cy = size.height / 2;
-    final r = (size.width / 2) - 2;
-
-    final path = Path();
-    const sides = 8;
-    for (int i = 0; i < sides; i++) {
-      // Sekizgen köşeleri: 22.5° offset ile düzgün hizalanır
-      final angle = (i * 2 * math.pi / sides) - (math.pi / sides);
-      final x = cx + r * math.cos(angle);
-      final y = cy + r * math.sin(angle);
-      i == 0 ? path.moveTo(x, y) : path.lineTo(x, y);
-    }
-    path.close();
-
-    canvas.drawPath(path, Paint()..color = fillColor);
-    canvas.drawPath(
-      path,
-      Paint()
-        ..color = strokeColor
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.2,
-    );
-  }
-
-  @override
-  bool shouldRepaint(_OctagonPainter old) => false;
 }
 
 /// Mekki/Medeni bilgi etiketi.
@@ -193,7 +155,7 @@ class _InfoChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 1.5),
       decoration: BoxDecoration(
         color: color.withValues(alpha: isDark ? 0.2 : 0.1),
         borderRadius: BorderRadius.circular(20),
@@ -201,7 +163,7 @@ class _InfoChip extends StatelessWidget {
       child: Text(
         label,
         style: TextStyle(
-          fontSize: 11,
+          fontSize: 10.5,
           fontWeight: FontWeight.w600,
           color: color,
         ),

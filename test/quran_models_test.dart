@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:islamic_app/features/quran/models/models.dart';
+import 'package:islamic_app/features/quran/models/quran_featured_verse.dart';
 
 /// Phase 2 – Model Unit Testleri
 void main() {
@@ -111,6 +112,37 @@ void main() {
       final d1 = DailyDua.fromMap(testMap);
       final d2 = DailyDua.fromMap(testMap);
       expect(d1, equals(d2));
+    });
+  });
+
+  // ── QuranFeaturedVerse Model Testleri ───────────────────────
+  group('QuranFeaturedVerse Model ve Arama Testleri', () {
+    test('featuredQuranicVersesList önemli ayetleri eksiksiz içermelidir', () {
+      expect(featuredQuranicVersesList.length, greaterThanOrEqualTo(10));
+      final ayetelKursi = featuredQuranicVersesList.firstWhere((v) => v.id == 'ayetel_kursi');
+      expect(ayetelKursi.surahId, 2);
+      expect(ayetelKursi.verseNumber, 255);
+      expect(ayetelKursi.title, contains('Kürsî'));
+    });
+
+    test('aye ve ayetel kursi araması Âyetü\'l-Kürsî\'yi doğru eşleştirmelidir', () {
+      final ayetelKursi = featuredQuranicVersesList.firstWhere((v) => v.id == 'ayetel_kursi');
+      expect(ayetelKursi.matchesQuery('aye'), isTrue);
+      expect(ayetelKursi.matchesQuery('ayet'), isTrue);
+      expect(ayetelKursi.matchesQuery('ayetel'), isTrue);
+      expect(ayetelKursi.matchesQuery('ayetel kursi'), isTrue);
+      expect(ayetelKursi.matchesQuery('kursi'), isTrue);
+      expect(ayetelKursi.matchesQuery('bakara 255'), isTrue);
+    });
+
+    test('nazar ve insirah aramaları ilgili ayetleri doğru bulmalıdır', () {
+      final nazar = featuredQuranicVersesList.firstWhere((v) => v.id == 'nazar_ayeti');
+      expect(nazar.matchesQuery('nazar'), isTrue);
+      expect(nazar.matchesQuery('ve in yekad'), isTrue);
+
+      final insirah = featuredQuranicVersesList.firstWhere((v) => v.id == 'insirah');
+      expect(insirah.matchesQuery('insirah'), isTrue);
+      expect(insirah.matchesQuery('elem nesrah'), isTrue);
     });
   });
 }
