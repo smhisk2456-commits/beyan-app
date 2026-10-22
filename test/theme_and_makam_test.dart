@@ -42,15 +42,26 @@ void main() {
       const initial = ThemeState(
         mode: ThemeMode.light,
         palette: AppThemePalette.emerald,
+        isDynamicPrayerTheme: false,
       );
 
       final updated = initial.copyWith(
         mode: ThemeMode.dark,
         palette: AppThemePalette.deepSapphire,
+        isDynamicPrayerTheme: true,
       );
 
       expect(updated.mode, ThemeMode.dark);
       expect(updated.palette, AppThemePalette.deepSapphire);
+      expect(updated.isDynamicPrayerTheme, isTrue);
+    });
+
+    test('Her palet için uyumlu prayerCardGradient ve prayerCardGlow tanımlı olmalı', () {
+      for (final palette in AppThemePalette.values) {
+        expect(palette.prayerCardGradient.length, 3);
+        expect(palette.prayerCardGlow, isNotNull);
+      }
+      expect(AppThemePalette.emerald.prayerCardGradient.first, const Color(0xFF02362E));
     });
   });
 

@@ -128,6 +128,50 @@ extension AppThemePaletteExtension on AppThemePalette {
     }
   }
 
+  /// Namaz vakti ana kartı için palete özel uyumlu lüks gradyan
+  List<Color> get prayerCardGradient {
+    switch (this) {
+      case AppThemePalette.emerald:
+        return const [
+          Color(0xFF02362E),
+          Color(0xFF01201B),
+          Color(0xFF03443A),
+        ];
+      case AppThemePalette.oledBlack:
+        return const [
+          Color(0xFF14171A),
+          Color(0xFF040506),
+          Color(0xFF181C20),
+        ];
+      case AppThemePalette.kaabaSlate:
+        return const [
+          Color(0xFF262B30),
+          Color(0xFF15181B),
+          Color(0xFF2D333A),
+        ];
+      case AppThemePalette.deepSapphire:
+        return const [
+          Color(0xFF0E2242),
+          Color(0xFF061326),
+          Color(0xFF142E57),
+        ];
+    }
+  }
+
+  /// Namaz vakti ana kartı için ışıltı rengi
+  Color get prayerCardGlow {
+    switch (this) {
+      case AppThemePalette.emerald:
+        return const Color(0xFF00BFA5);
+      case AppThemePalette.oledBlack:
+        return const Color(0xFFFFB800);
+      case AppThemePalette.kaabaSlate:
+        return const Color(0xFFC5A059);
+      case AppThemePalette.deepSapphire:
+        return const Color(0xFF5C6BC0);
+    }
+  }
+
   Color get lightBackground {
     switch (this) {
       case AppThemePalette.emerald:

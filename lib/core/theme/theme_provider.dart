@@ -8,19 +8,23 @@ import 'app_theme.dart';
 class ThemeState {
   final ThemeMode mode;
   final AppThemePalette palette;
+  final bool isDynamicPrayerTheme;
 
   const ThemeState({
     required this.mode,
     required this.palette,
+    this.isDynamicPrayerTheme = false,
   });
 
   ThemeState copyWith({
     ThemeMode? mode,
     AppThemePalette? palette,
+    bool? isDynamicPrayerTheme,
   }) {
     return ThemeState(
       mode: mode ?? this.mode,
       palette: palette ?? this.palette,
+      isDynamicPrayerTheme: isDynamicPrayerTheme ?? this.isDynamicPrayerTheme,
     );
   }
 }
@@ -29,11 +33,13 @@ class ThemeState {
 class ThemeNotifier extends StateNotifier<ThemeState> {
   static const String _keyThemeMode = 'beyan_theme_mode';
   static const String _keyThemePalette = 'beyan_theme_palette';
+  static const String _keyDynamicPrayerTheme = 'beyan_dynamic_prayer_theme';
 
   ThemeNotifier()
       : super(const ThemeState(
           mode: ThemeMode.system,
           palette: AppThemePalette.emerald,
+          isDynamicPrayerTheme: false,
         )) {
     _loadFromPrefs();
   }
@@ -43,6 +49,7 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
       final prefs = await SharedPreferences.getInstance();
       final modeStr = prefs.getString(_keyThemeMode);
       final paletteStr = prefs.getString(_keyThemePalette);
+      final dynamicPrayerTheme = prefs.getBool(_keyDynamicPrayerTheme) ?? false;
 
       ThemeMode mode = ThemeMode.system;
       if (modeStr == 'light') mode = ThemeMode.light;
@@ -56,7 +63,11 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
         );
       }
 
-      state = ThemeState(mode: mode, palette: palette);
+      state = ThemeState(
+        mode: mode,
+        palette: palette,
+        isDynamicPrayerTheme: dynamicPrayerTheme,
+      );
     } catch (_) {}
   }
 
@@ -73,6 +84,12 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
     state = state.copyWith(palette: palette);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_keyThemePalette, palette.name);
+  }
+
+  Future<void> setDynamicPrayerTheme(bool enabled) async {
+    state = state.copyWith(isDynamicPrayerTheme: enabled);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyDynamicPrayerTheme, enabled);
   }
 }
 

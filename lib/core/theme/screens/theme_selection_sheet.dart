@@ -178,6 +178,75 @@ class ThemeSelectionSheet extends ConsumerWidget {
               langCode: strings.language.code,
             );
           }),
+
+          const SizedBox(height: 14),
+
+          // Bölüm 3: Vakte Göre Canlı Tema (Tüm Ekran)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: isDark ? Colors.white.withValues(alpha: 0.04) : Colors.black.withValues(alpha: 0.03),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: themeState.isDynamicPrayerTheme
+                    ? themeState.palette.accentGold.withValues(alpha: 0.6)
+                    : (isDark ? Colors.white10 : Colors.black12),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: themeState.palette.accentGold.withValues(alpha: 0.18),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.auto_awesome_rounded,
+                    color: themeState.palette.accentGold,
+                    size: 19,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        strings.language == AppLanguage.turkish
+                            ? 'Vakte Göre Canlı Tema (Tüm Ekran)'
+                            : 'Dynamic Prayer Theme (Full Screen)',
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.bold,
+                          color: titleColor,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        strings.language == AppLanguage.turkish
+                            ? 'Namaz vaktine göre ana ekranın tümünü (arka plan ve kartları) tek bir bütün olarak uyarlar.'
+                            : 'Dynamically adapts the entire home screen as a single unified atmosphere based on prayer time.',
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          color: subtitleColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Switch(
+                  value: themeState.isDynamicPrayerTheme,
+                  activeThumbColor: themeState.palette.accentGold,
+                  activeTrackColor: themeState.palette.accentGold.withValues(alpha: 0.35),
+                  onChanged: (val) {
+                    HapticFeedback.selectionClick();
+                    themeNotifier.setDynamicPrayerTheme(val);
+                  },
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );

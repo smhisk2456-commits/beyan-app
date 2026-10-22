@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/localization/app_strings.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/theme_provider.dart';
+import '../models/dynamic_prayer_atmosphere.dart';
 import '../../../main.dart';
 import '../../prayer_times/models/prayer_time_model.dart';
 import '../../prayer_times/providers/prayer_time_providers.dart';
@@ -37,66 +39,90 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
-
+    final themeState = ref.watch(themeProvider);
     final strings = ref.watch(appStringsProvider);
     final prayerAsync = ref.watch(prayerTimesNotifierProvider);
     final lastRead = ref.watch(lastReadProvider);
     final allSurahs = ref.watch(allSurahsProvider).valueOrNull ?? [];
     final nextReligiousDay = HijriCalendarService.instance.getNextReligiousDay();
 
+    final nextPrayer = prayerAsync.valueOrNull?.nextPrayerEntry?.name;
+    final atmosphere = themeState.isDynamicPrayerTheme
+        ? DynamicPrayerAtmosphere.forPrayer(nextPrayer)
+        : null;
+
+    final scaffoldBg = atmosphere != null
+        ? atmosphere.backgroundGradient.first
+        : Theme.of(context).scaffoldBackgroundColor;
+
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: CustomScrollView(
-        physics: const BouncingScrollPhysics(),
-        slivers: [
-          // ── Lüks İslami AppBar ────────────────────────────────
-          const _IslamicAppBar(),
+      backgroundColor: scaffoldBg,
+      body: Container(
+        decoration: atmosphere != null
+            ? BoxDecoration(
+                gradient: LinearGradient(
+                  colors: atmosphere.backgroundGradient,
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+              )
+            : null,
+        child: CustomScrollView(
+          physics: const BouncingScrollPhysics(),
+          slivers: [
+            // ── Lüks İslami AppBar ────────────────────────────────
+            _IslamicAppBar(atmosphere: atmosphere),
 
-          // ── Yaklaşan Dini Gün / Kandil Bildirimi ────────────────
-          if (nextReligiousDay != null)
-            SliverToBoxAdapter(
-              child: _UpcomingReligiousDayBanner(day: nextReligiousDay),
-            ),
-
-          // ── Namaz Vakti Kartı (Zümrüt & Altın) ─────────────────
-          const SliverToBoxAdapter(child: PrayerCardWidget()),
-
-          // ── Son Okunan Kur'an'a Devam Etme Kartı ────────────────
-          if (lastRead != null)
-            SliverToBoxAdapter(
-              child: _LastReadQuranCard(
-                lastRead: lastRead,
-                allSurahs: allSurahs,
+            // ── Yaklaşan Dini Gün / Kandil Bildirimi ────────────────
+            if (nextReligiousDay != null)
+              SliverToBoxAdapter(
+                child: _UpcomingReligiousDayBanner(
+                  day: nextReligiousDay,
+                  atmosphere: atmosphere,
+                ),
               ),
-            ),
 
-          // ── Hızlı Erişim Butonları (Genişletilmiş İslami Matris) ───
-          SliverToBoxAdapter(
-            child: _QuickActionGrid(
-              onOpenPrayers: () => ref.read(selectedTabProvider.notifier).state = 1,
-              onOpenQibla: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const QiblaCompassScreen()),
-                );
-              },
-              onOpenZikr: () => ref.read(selectedTabProvider.notifier).state = 3,
-              onOpenWidget: () => ref.read(selectedTabProvider.notifier).state = 4,
-              onOpenQuran: () => ref.read(selectedTabProvider.notifier).state = 2,
-              onOpenDuas: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const DuaLibraryScreen()),
-                );
-              },
-              onOpenCalendar: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const HijriCalendarScreen()),
-                );
-              },
-              onOpenRamadan: () {
-                Navigator.push(
+            // ── Namaz Vakti Kartı (Zümrüt & Altın) ─────────────────
+            const SliverToBoxAdapter(child: PrayerCardWidget()),
+
+            // ── Son Okunan Kur'an'a Devam Etme Kartı ────────────────
+            if (lastRead != null)
+              SliverToBoxAdapter(
+                child: _LastReadQuranCard(
+                  lastRead: lastRead,
+                  allSurahs: allSurahs,
+                  atmosphere: atmosphere,
+                ),
+              ),
+
+            // ── Hızlı Erişim Butonları (Genişletilmiş İslami Matris) ───
+            SliverToBoxAdapter(
+              child: _QuickActionGrid(
+                atmosphere: atmosphere,
+                onOpenPrayers: () => ref.read(selectedTabProvider.notifier).state = 1,
+                onOpenQibla: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const QiblaCompassScreen()),
+                  );
+                },
+                onOpenZikr: () => ref.read(selectedTabProvider.notifier).state = 3,
+                onOpenWidget: () => ref.read(selectedTabProvider.notifier).state = 4,
+                onOpenQuran: () => ref.read(selectedTabProvider.notifier).state = 2,
+                onOpenDuas: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const DuaLibraryScreen()),
+                  );
+                },
+                onOpenCalendar: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const HijriCalendarScreen()),
+                  );
+                },
+                onOpenRamadan: () {
+                  Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => const RamadanDashboardScreen()),
                 );
@@ -215,8 +241,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           const SliverToBoxAdapter(child: SizedBox(height: 110)),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -225,8 +252,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
 class _UpcomingReligiousDayBanner extends ConsumerWidget {
   final dynamic day; // ReligiousDay
+  final DynamicPrayerAtmosphere? atmosphere;
 
-  const _UpcomingReligiousDayBanner({required this.day});
+  const _UpcomingReligiousDayBanner({required this.day, this.atmosphere});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -249,12 +277,14 @@ class _UpcomingReligiousDayBanner extends ConsumerWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF03312B), Color(0xFF01241F)],
+            gradient: LinearGradient(
+              colors: atmosphere != null
+                  ? atmosphere!.cardGradient
+                  : const [Color(0xFF03312B), Color(0xFF01241F)],
             ),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+              color: (atmosphere?.cardBorder ?? const Color(0xFFD4AF37)).withValues(alpha: 0.4),
               width: 1,
             ),
           ),
@@ -298,8 +328,13 @@ class _UpcomingReligiousDayBanner extends ConsumerWidget {
 class _LastReadQuranCard extends ConsumerWidget {
   final LastReadPosition lastRead;
   final List<Surah> allSurahs;
+  final DynamicPrayerAtmosphere? atmosphere;
 
-  const _LastReadQuranCard({required this.lastRead, required this.allSurahs});
+  const _LastReadQuranCard({
+    required this.lastRead,
+    required this.allSurahs,
+    this.atmosphere,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -335,8 +370,10 @@ class _LastReadQuranCard extends ConsumerWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF012E2B), Color(0xFF02463B)],
+            gradient: LinearGradient(
+              colors: atmosphere != null
+                  ? atmosphere!.cardGradient
+                  : const [Color(0xFF012E2B), Color(0xFF02463B)],
             ),
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
@@ -951,6 +988,7 @@ class _QuickActionGrid extends ConsumerWidget {
   final VoidCallback onOpenDuas;
   final VoidCallback onOpenCalendar;
   final VoidCallback onOpenRamadan;
+  final DynamicPrayerAtmosphere? atmosphere;
 
   const _QuickActionGrid({
     required this.onOpenPrayers,
@@ -961,6 +999,7 @@ class _QuickActionGrid extends ConsumerWidget {
     required this.onOpenDuas,
     required this.onOpenCalendar,
     required this.onOpenRamadan,
+    this.atmosphere,
   });
 
   @override
@@ -981,6 +1020,7 @@ class _QuickActionGrid extends ConsumerWidget {
                 subtitle: strings.actionPrayersSub,
                 onTap: onOpenPrayers,
                 isDark: isDark,
+                atmosphere: atmosphere,
               ),
               const SizedBox(width: 8),
               _ActionCard(
@@ -989,6 +1029,7 @@ class _QuickActionGrid extends ConsumerWidget {
                 subtitle: strings.actionQiblaSub,
                 onTap: onOpenQibla,
                 isDark: isDark,
+                atmosphere: atmosphere,
               ),
               const SizedBox(width: 8),
               _ActionCard(
@@ -997,6 +1038,7 @@ class _QuickActionGrid extends ConsumerWidget {
                 subtitle: strings.actionZikrSub,
                 onTap: onOpenZikr,
                 isDark: isDark,
+                atmosphere: atmosphere,
               ),
               const SizedBox(width: 8),
               _ActionCard(
@@ -1005,6 +1047,7 @@ class _QuickActionGrid extends ConsumerWidget {
                 subtitle: strings.actionWidgetSub,
                 onTap: onOpenWidget,
                 isDark: isDark,
+                atmosphere: atmosphere,
               ),
             ],
           ),
@@ -1018,6 +1061,7 @@ class _QuickActionGrid extends ConsumerWidget {
                 subtitle: strings.actionQuranSub,
                 onTap: onOpenQuran,
                 isDark: isDark,
+                atmosphere: atmosphere,
               ),
               const SizedBox(width: 8),
               _ActionCard(
@@ -1026,6 +1070,7 @@ class _QuickActionGrid extends ConsumerWidget {
                 subtitle: strings.actionDuasSub,
                 onTap: onOpenDuas,
                 isDark: isDark,
+                atmosphere: atmosphere,
               ),
               const SizedBox(width: 8),
               _ActionCard(
@@ -1034,6 +1079,7 @@ class _QuickActionGrid extends ConsumerWidget {
                 subtitle: strings.actionCalendarSub,
                 onTap: onOpenCalendar,
                 isDark: isDark,
+                atmosphere: atmosphere,
               ),
               const SizedBox(width: 8),
               _ActionCard(
@@ -1042,6 +1088,7 @@ class _QuickActionGrid extends ConsumerWidget {
                 subtitle: strings.actionRamadanSub,
                 onTap: onOpenRamadan,
                 isDark: isDark,
+                atmosphere: atmosphere,
               ),
             ],
           ),
@@ -1057,6 +1104,7 @@ class _ActionCard extends StatelessWidget {
   final String subtitle;
   final VoidCallback onTap;
   final bool isDark;
+  final DynamicPrayerAtmosphere? atmosphere;
 
   const _ActionCard({
     required this.icon,
@@ -1064,13 +1112,20 @@ class _ActionCard extends StatelessWidget {
     required this.subtitle,
     required this.onTap,
     required this.isDark,
+    this.atmosphere,
   });
 
   @override
   Widget build(BuildContext context) {
+    final bgColor = atmosphere?.actionCardBg ?? (isDark ? const Color(0xFF0D2823) : Colors.white);
+    final borderColor = atmosphere != null
+        ? atmosphere!.actionCardBorder.withValues(alpha: 0.6)
+        : (isDark ? const Color(0xFF133B34) : const Color(0xFFE2EBE8));
+    final iconColor = atmosphere?.accentGold ?? const Color(0xFFD4AF37);
+
     return Expanded(
       child: Material(
-        color: isDark ? const Color(0xFF0D2823) : Colors.white,
+        color: bgColor,
         borderRadius: BorderRadius.circular(16),
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
@@ -1083,9 +1138,7 @@ class _ActionCard extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: isDark
-                    ? const Color(0xFF133B34)
-                    : const Color(0xFFE2EBE8),
+                color: borderColor,
                 width: 1,
               ),
               boxShadow: [
@@ -1103,17 +1156,17 @@ class _ActionCard extends StatelessWidget {
                   width: 38,
                   height: 38,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF033E35).withValues(alpha: isDark ? 0.35 : 0.08),
+                    color: iconColor.withValues(alpha: isDark ? 0.18 : 0.1),
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+                      color: iconColor.withValues(alpha: 0.4),
                       width: 1,
                     ),
                   ),
                   child: Icon(
                     icon,
                     size: 19,
-                    color: const Color(0xFFD4AF37),
+                    color: iconColor,
                   ),
                 ),
                 const SizedBox(height: 6),
@@ -1151,7 +1204,8 @@ class _ActionCard extends StatelessWidget {
 // ════════════════════════════════════════════════════════════════
 
 class _IslamicAppBar extends ConsumerWidget {
-  const _IslamicAppBar();
+  final DynamicPrayerAtmosphere? atmosphere;
+  const _IslamicAppBar({this.atmosphere});
 
   String _getSpiritualGreeting(AppStrings strings) {
     final now = DateTime.now();
@@ -1178,7 +1232,7 @@ class _IslamicAppBar extends ConsumerWidget {
       floating: false,
       pinned: true,
       elevation: 0,
-      backgroundColor: Theme.of(context).appBarTheme.backgroundColor ?? const Color(0xFF01201D),
+      backgroundColor: atmosphere?.appBarColor ?? (Theme.of(context).appBarTheme.backgroundColor ?? const Color(0xFF01201D)),
       centerTitle: false,
       toolbarHeight: 64,
       title: Row(

@@ -3,6 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/localization/app_strings.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/theme_provider.dart';
+import '../models/dynamic_prayer_atmosphere.dart';
 import '../../prayer_times/models/prayer_time_model.dart';
 import '../../prayer_times/providers/prayer_time_providers.dart';
 import '../../calendar/services/hijri_calendar_service.dart';
@@ -83,68 +86,9 @@ class _PrayerCard extends ConsumerWidget {
     required this.daily,
   });
 
-  List<Color> _getAtmosphericGradient(PrayerName? prayer) {
-    switch (prayer) {
-      case PrayerName.fajr:
-        return const [
-          Color(0xFF071928),
-          Color(0xFF0F2B36),
-          Color(0xFF1B3736),
-        ];
-      case PrayerName.sunrise:
-        return const [
-          Color(0xFF1C2C25),
-          Color(0xFF332714),
-          Color(0xFF453012),
-        ];
-      case PrayerName.dhuhr:
-        return const [
-          Color(0xFF023F36),
-          Color(0xFF012720),
-          Color(0xFF06473D),
-        ];
-      case PrayerName.asr:
-        return const [
-          Color(0xFF1B3224),
-          Color(0xFF2E2616),
-          Color(0xFF15261F),
-        ];
-      case PrayerName.maghrib:
-        return const [
-          Color(0xFF221426),
-          Color(0xFF2E171E),
-          Color(0xFF14121F),
-        ];
-      case PrayerName.isha:
-      default:
-        return const [
-          Color(0xFF061422),
-          Color(0xFF030A12),
-          Color(0xFF071826),
-        ];
-    }
-  }
-
-  Color _getAtmosphericGlow(PrayerName? prayer) {
-    switch (prayer) {
-      case PrayerName.fajr:
-        return const Color(0xFF26A69A);
-      case PrayerName.sunrise:
-        return const Color(0xFFFFB74D);
-      case PrayerName.dhuhr:
-        return const Color(0xFF00BFA5);
-      case PrayerName.asr:
-        return const Color(0xFFFFD54F);
-      case PrayerName.maghrib:
-        return const Color(0xFFFF7043);
-      case PrayerName.isha:
-      default:
-        return const Color(0xFF5C6BC0);
-    }
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final themeState = ref.watch(themeProvider);
     final strings = ref.watch(appStringsProvider);
     final langCode = strings.language.code;
     final next = daily.nextPrayerEntry;
@@ -152,8 +96,25 @@ class _PrayerCard extends ConsumerWidget {
     final timeRemaining = next != null ? next.time.difference(now) : Duration.zero;
     final isApproaching = timeRemaining.inMinutes < 15 && !timeRemaining.isNegative;
 
-    final gradientColors = _getAtmosphericGradient(next?.name);
-    final glowColor = _getAtmosphericGlow(next?.name);
+    List<Color> gradientColors;
+    Color glowColor;
+    Color borderColor;
+
+    if (themeState.isDynamicPrayerTheme) {
+      final atmosphere = DynamicPrayerAtmosphere.forPrayer(next?.name);
+      gradientColors = atmosphere.cardGradient;
+      glowColor = atmosphere.glowColor;
+      borderColor = isApproaching
+          ? const Color(0xFFFFDF7A)
+          : atmosphere.cardBorder.withValues(alpha: 0.45);
+    } else {
+      // Saf ve Kusursuz Tema Uyumu (Seçilen palete %100 sadık kalarak orantısızlığı önler)
+      gradientColors = themeState.palette.prayerCardGradient;
+      glowColor = themeState.palette.prayerCardGlow;
+      borderColor = isApproaching
+          ? const Color(0xFFFFDF7A)
+          : themeState.palette.accentGold.withValues(alpha: 0.38);
+    }
 
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
@@ -166,9 +127,7 @@ class _PrayerCard extends ConsumerWidget {
         ),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: isApproaching
-              ? const Color(0xFFFFDF7A)
-              : const Color(0xFFD4AF37).withValues(alpha: 0.38),
+          color: borderColor,
           width: isApproaching ? 1.6 : 1.2,
         ),
         boxShadow: [
