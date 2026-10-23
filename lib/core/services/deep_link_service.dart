@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_widget/home_widget.dart';
 import '../../features/quran/repositories/quran_repository.dart';
 import '../../features/quran/screens/surah_detail_screen.dart';
+import '../widgets/luxury_page_route.dart';
 import '../../main.dart';
 
 /// WidgetKit, Live Activity ve Deep Link yönlendirme servisi.
@@ -53,12 +54,15 @@ class DeepLinkService {
   }
 
   Future<void> handleUri(WidgetRef ref, Uri uri) async {
-    if (_isHandling) return;
+    if (_isHandling) {
+      _pendingUri = uri; // Düşürmek yerine kuyruğa al
+      return;
+    }
     _isHandling = true;
 
     try {
       debugPrint('>>> DeepLinkService handleUri: $uri');
-      if (uri.scheme != 'beyan') {
+      if (uri.scheme != 'beyan' || uri.toString().length > 256) {
         _isHandling = false;
         return;
       }
@@ -71,15 +75,24 @@ class DeepLinkService {
         return;
       }
 
+      final host = uri.host.toLowerCase();
+      final isPrayer = host == 'prayer' || (host.isEmpty && uri.pathSegments.firstOrNull == 'prayer');
+      final isVerse = host == 'verse' || (host.isEmpty && uri.pathSegments.firstOrNull == 'verse');
+
+      if (!isPrayer && !isVerse) {
+        _isHandling = false;
+        return;
+      }
+
       // 1. Namaz vakitleri widget'ı: beyan://prayer
-      if (uri.host == 'prayer' || uri.path.contains('prayer')) {
+      if (isPrayer) {
         ref.read(selectedTabProvider.notifier).state = 1;
         Navigator.of(context).popUntil((route) => route.isFirst);
         return;
       }
 
       // 2. Ayet widget'ı: beyan://verse?surah=2&verse=153&ref=...
-      if (uri.host == 'verse' || uri.path.contains('verse')) {
+      if (isVerse) {
         final target = parseVerseTarget(uri);
         int? surahId = target.surahId;
         final verseNum = target.verseNum;
@@ -95,12 +108,15 @@ class DeepLinkService {
           final surah = await QuranRepository().getSurahById(surahId);
           if (surah != null && context.mounted) {
             ref.read(selectedTabProvider.notifier).state = 2; // Kur'an sekmesi
+            final safeVerse = (verseNum != null && verseNum >= 1 && verseNum <= surah.verseCount)
+                ? verseNum
+                : null;
             Navigator.of(context).popUntil((route) => route.isFirst);
             Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => SurahDetailScreen(
+              LuxuryPageRoute(
+                page: SurahDetailScreen(
                   surah: surah,
-                  initialScrollToVerse: verseNum,
+                  initialScrollToVerse: safeVerse,
                 ),
               ),
             );

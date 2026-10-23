@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 /// Uygulama genelinde kullanılan sabit değerler.
 abstract class AppConstants {
@@ -56,19 +55,10 @@ abstract class AppConstants {
   };
 
   // ── Gemini AI Geliştirici Anahtarı ─────────────────────────────
-  /// Geliştiricinin tüm kullanıcılar için sağladığı merkezi Gemini API anahtarı.
+  /// Güvenlik: İstemci kaynak koduna hardcoded API anahtarı gömülmez.
   /// Derleme anında enjekte etmek için:
   /// flutter build ipa --dart-define=GEMINI_API_KEY=AIzaSy...
-  static const String _defaultGeminiApiKeyB64 =
-      'QVEuQWI4Uk42SUlwTjdvMWVDT2VUOFJ6Qnd5MjN0V2VTWGk2bUpveENnQk9FYmo0bFdGVHc=';
-
   static String get defaultGeminiApiKey {
-    const envKey = String.fromEnvironment('GEMINI_API_KEY');
-    if (envKey.isNotEmpty) return envKey;
-    try {
-      return utf8.decode(base64Decode(_defaultGeminiApiKeyB64));
-    } catch (_) {
-      return '';
-    }
+    return const String.fromEnvironment('GEMINI_API_KEY', defaultValue: '');
   }
 }

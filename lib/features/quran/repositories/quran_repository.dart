@@ -32,16 +32,20 @@ class QuranRepository {
     return row != null ? Surah.fromMap(row) : null;
   }
 
+  static String _escapeLike(String s) =>
+      s.replaceAll(r'\', r'\\').replaceAll('%', r'\%').replaceAll('_', r'\_');
+
   /// Sure adına göre Türkçe, Arapça, İngilizce ve fonetik arama yapar (aksansız ve büyük/küçük harf duyarsız).
   Future<List<Surah>> searchSurahsByName(String query) async {
-    final cleanQuery = query.trim();
-    if (cleanQuery.isEmpty) return getAllSurahs();
+    final trimmed = query.trim();
+    if (trimmed.isEmpty) return getAllSurahs();
+    final cleanQuery = _escapeLike(trimmed.length > 64 ? trimmed.substring(0, 64) : trimmed);
 
     final normalized = _normalizeSearchKey(cleanQuery);
 
     final rows = await _db.query(
       table: 'surah',
-      where: 'search_key LIKE ? OR name_turkish LIKE ? OR name_arabic LIKE ? OR name_english LIKE ?',
+      where: "search_key LIKE ? ESCAPE '\\' OR name_turkish LIKE ? ESCAPE '\\' OR name_arabic LIKE ? ESCAPE '\\' OR name_english LIKE ? ESCAPE '\\'",
       whereArgs: ['%$normalized%', '%$cleanQuery%', '%$cleanQuery%', '%$cleanQuery%'],
       orderBy: 'id ASC',
     );
@@ -121,18 +125,20 @@ class QuranRepository {
 
   /// Arapça veya Türkçe metin içinde arama yapar.
   Future<List<Verse>> searchVerses(String query) async {
-    if (query.trim().isEmpty) return [];
+    final clean = query.trim();
+    if (clean.isEmpty) return [];
+    final escaped = _escapeLike(clean.length > 64 ? clean.substring(0, 64) : clean);
 
     final rows = await _db.rawQuery(
       '''
       SELECT v.*, s.name_turkish AS surah_name
       FROM verse v
       JOIN surah s ON v.surah_id = s.id
-      WHERE v.arabic_text LIKE ? OR v.turkish_meaning LIKE ?
+      WHERE v.arabic_text LIKE ? ESCAPE '\\' OR v.turkish_meaning LIKE ? ESCAPE '\\'
       ORDER BY v.surah_id ASC, v.verse_number ASC
       LIMIT 50
       ''',
-      ['%$query%', '%$query%'],
+      ['%$escaped%', '%$escaped%'],
     );
     return rows.map(Verse.fromMap).toList();
   }

@@ -190,17 +190,35 @@ class PrayerTimeService {
     final calcMethod = method ?? await getSavedCalculationMethod();
     final params = calcMethod.getAdhanParameters();
 
+    // Yüksek enlemler için (Kuzey Avrupa, İskandinavya vb.) HighLatitudeRule koruması:
+    if (loc.latitude.abs() > 48) {
+      params.highLatitudeRule = loc.latitude.abs() > 60
+          ? HighLatitudeRule.seventh_of_the_night
+          : HighLatitudeRule.twilight_angle;
+    }
+
     final dateComponents = DateComponents(
       targetDate.year,
       targetDate.month,
       targetDate.day,
     );
 
-    final prayerTimes = PrayerTimes(
-      coordinates,
-      dateComponents,
-      params,
-    );
+    PrayerTimes prayerTimes;
+    try {
+      prayerTimes = PrayerTimes(
+        coordinates,
+        dateComponents,
+        params,
+      );
+    } catch (_) {
+      // Kutup gecesi/gündüzü gibi ekstrem enlemlerde (enlem > 65°) çökmemesi için emniyetli enlem sınırlandırması:
+      final safeCoords = Coordinates(loc.latitude.clamp(-65.0, 65.0), loc.longitude);
+      prayerTimes = PrayerTimes(
+        safeCoords,
+        dateComponents,
+        params,
+      );
+    }
 
     final entries = _buildPrayerEntries(prayerTimes);
 

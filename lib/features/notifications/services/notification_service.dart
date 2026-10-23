@@ -511,37 +511,52 @@ class NotificationService {
   }
 
   bool _isSchedulingPrayers = false;
+  bool _rerunSchedulingPrayers = false;
 
   /// Önümüzdeki 3 günün namaz vakitlerini planlar (iOS 64 kota sınırına tam uyumlu).
+  /// Eşzamanlı çağrılarda çağrıyı düşürmek yerine rerun bayrağı ile son ayarları garanti eder.
   Future<void> scheduleUpcomingPrayers() async {
-    if (_isSchedulingPrayers) return;
+    if (_isSchedulingPrayers) {
+      _rerunSchedulingPrayers = true;
+      return;
+    }
     _isSchedulingPrayers = true;
     try {
-      final master = await isMasterEnabled();
-      if (!master) {
-        await cancelAllPrayerNotifications();
-        return;
-      }
+      do {
+        _rerunSchedulingPrayers = false;
+        await _executeScheduleUpcomingPrayers();
+      } while (_rerunSchedulingPrayers);
+    } finally {
+      _isSchedulingPrayers = false;
+    }
+  }
 
-      final earlyReminder = await isEarlyReminderEnabled();
-      final currentMakam = await getSelectedMakam();
-      final prayerService = PrayerTimeService();
-      final now = DateTime.now();
-      final prefs = await SharedPreferences.getInstance();
-      final langCode = prefs.getString('selected_app_language') ?? 'tr';
-
-      // Yalnızca namaz bildirimlerini temizle (Ayet bildirimlerine dokunma!)
+  Future<void> _executeScheduleUpcomingPrayers() async {
+    final master = await isMasterEnabled();
+    if (!master) {
       await cancelAllPrayerNotifications();
+      return;
+    }
 
-      // 3 gün boyunca planla (Maksimum 36 bildirim, iOS 64 limitine kesin uyum)
-      for (int dayOffset = 0; dayOffset < 3; dayOffset++) {
-        final targetDate = now.add(Duration(days: dayOffset));
-        try {
-          final daily = await prayerService.calculatePrayerTimes(date: targetDate);
-          for (int i = 0; i < daily.prayers.length; i++) {
-            final p = daily.prayers[i];
-            final enabled = await isPrayerEnabled(p.name);
-            if (!enabled) continue;
+    final earlyReminder = await isEarlyReminderEnabled();
+    final currentMakam = await getSelectedMakam();
+    final prayerService = PrayerTimeService();
+    final now = DateTime.now();
+    final prefs = await SharedPreferences.getInstance();
+    final langCode = prefs.getString('selected_app_language') ?? 'tr';
+
+    // Yalnızca namaz bildirimlerini temizle (Ayet bildirimlerine dokunma!)
+    await cancelAllPrayerNotifications();
+
+    // 3 gün boyunca planla (Maksimum 36 bildirim, iOS 64 limitine kesin uyum)
+    for (int dayOffset = 0; dayOffset < 3; dayOffset++) {
+      final targetDate = now.add(Duration(days: dayOffset));
+      try {
+        final daily = await prayerService.calculatePrayerTimes(date: targetDate);
+        for (int i = 0; i < daily.prayers.length; i++) {
+          final p = daily.prayers[i];
+          final enabled = await isPrayerEnabled(p.name);
+          if (!enabled) continue;
 
           // 1. Tam vakit bildirimi
           if (p.time.isAfter(now)) {
@@ -646,10 +661,7 @@ class NotificationService {
         debugPrint('Gün $dayOffset için namaz bildirimi planlanamadı: $e');
       }
     }
-  } finally {
-    _isSchedulingPrayers = false;
   }
-}
 
   /// Yalnızca namaz ve erken uyarı bildirimlerini iptal eder (Ayet bildirimlerini korur).
   /// Önceden planlanmış istekleri sorgulayıp sadece mevcut olanları iptal eder (2000 platform çağrısı yerine hafif filtreleme).
@@ -1035,11 +1047,17 @@ class NotificationService {
   }
 
   /// Yalnızca zamanlanmış ayet bildirimlerini iptal eder.
+  /// 1000 sıralı platform çağrısı yerine sadece bekleyenleri sorgulayıp iptal eder.
   Future<void> cancelAllVerseNotifications() async {
-    for (int id = 5000; id <= 5999; id++) {
-      try {
-        await _notifications.cancel(id: id);
-      } catch (_) {}
+    try {
+      final pending = await _notifications.pendingNotificationRequests();
+      for (final req in pending) {
+        if (req.id >= 5000 && req.id <= 5999) {
+          await _notifications.cancel(id: req.id);
+        }
+      }
+    } catch (e) {
+      debugPrint('[NotificationService] cancelAllVerseNotifications error: $e');
     }
   }
 

@@ -98,6 +98,8 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
       ],
     );
 
+    if (!mounted) return;
+
     state = state.copyWith(
       messages: [welcomeMessage],
       remainingQuestions: remaining,
@@ -253,10 +255,11 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
       try {
         client = HttpClient()..connectionTimeout = const Duration(seconds: 4);
         final url = Uri.parse(
-          'https://generativelanguage.googleapis.com/v1beta/models/$modelName:generateContent?key=$apiKey',
+          'https://generativelanguage.googleapis.com/v1beta/models/$modelName:generateContent',
         );
         final request = await client.postUrl(url);
         request.headers.contentType = ContentType.json;
+        request.headers.set('x-goog-api-key', apiKey);
         request.write(body);
         final response = await request.close().timeout(const Duration(seconds: 7));
 

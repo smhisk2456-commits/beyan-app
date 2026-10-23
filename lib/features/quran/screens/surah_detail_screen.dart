@@ -482,6 +482,12 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
       },
     );
 
+    final effectiveZenDark = _isZenMode
+        ? (_zenTheme == ZenReadingTheme.sepiaParchment
+            ? false
+            : (_zenTheme == ZenReadingTheme.oledBlack ? true : isDark))
+        : isDark;
+
     final zenBgColor = _isZenMode
         ? (_zenTheme == ZenReadingTheme.sepiaParchment
             ? const Color(0xFFF5EFE1)
@@ -490,14 +496,23 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                 : Theme.of(context).scaffoldBackgroundColor))
         : Theme.of(context).scaffoldBackgroundColor;
 
-    return Scaffold(
+    final zenThemeData = _isZenMode
+        ? AppTheme.buildTheme(effectivePalette, isDark: effectiveZenDark).copyWith(
+            scaffoldBackgroundColor: zenBgColor,
+            cardColor: _zenTheme == ZenReadingTheme.sepiaParchment
+                ? const Color(0xFFEFE7D5)
+                : (_zenTheme == ZenReadingTheme.oledBlack ? const Color(0xFF0A0A0A) : null),
+          )
+        : null;
+
+    final scaffold = Scaffold(
       backgroundColor: zenBgColor,
       body: Stack(
         children: [
           versesAsync.when(
             loading: () => _buildLoadingScaffold(context, strings),
             error: (e, _) => _buildErrorScaffold(context, e.toString(), strings),
-            data: (verses) => _buildContent(context, verses, isDark, isThisSurahPlaying, activeVerseNumber, strings),
+            data: (verses) => _buildContent(context, verses, effectiveZenDark, isThisSurahPlaying, activeVerseNumber, strings),
           ),
           // Alt Mini Tilavet Oynatıcısı (Zen modunda dikkati dağıtmamak için gizlenir)
           if (!_isZenMode)
@@ -565,6 +580,8 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
             )
           : null,
     );
+
+    return zenThemeData != null ? Theme(data: zenThemeData, child: scaffold) : scaffold;
   }
 
   Widget _buildLoadingScaffold(BuildContext context, AppStrings strings) {

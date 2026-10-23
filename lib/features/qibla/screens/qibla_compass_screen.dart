@@ -31,6 +31,7 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
   String _cityName = 'İstanbul';
   bool _loadingLocation = true;
   bool _hasCompassSensor = true;
+  bool _isFallbackLocation = false;
   bool _wasAligned = false;
   int? _lastProximityBucket;
 
@@ -84,6 +85,7 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
           _qiblaAngle = qibla.direction;
           _distanceKm = distance;
           _cityName = loc.cityName;
+          _isFallbackLocation = !loc.isFromGPS;
           _loadingLocation = false;
         });
       }
@@ -196,6 +198,39 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 child: Column(
                   children: [
+                    if (_isFallbackLocation) ...[
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.amber.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.amber.withValues(alpha: 0.5)),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.location_off_rounded, color: Colors.amber, size: 18),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                strings.language == AppLanguage.turkish
+                                    ? 'Konum izni alınamadı (Varsayılan İstanbul). Tam hassasiyet için konum iznini açın.'
+                                    : 'Location unavailable (Showing Istanbul). Enable GPS for precise Qibla.',
+                                style: const TextStyle(fontSize: 11, color: Colors.amber, fontWeight: FontWeight.w500),
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () => Geolocator.openAppSettings(),
+                              child: Text(
+                                strings.language == AppLanguage.turkish ? 'Aç' : 'Open',
+                                style: const TextStyle(color: Colors.amber, fontSize: 11, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+
                     // Şehir & Mesafe Bilgi Rozeti
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

@@ -389,17 +389,34 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
         _stopSmoothSyncTimer();
       }
 
-      if (isCompleted && (state.loopRepeatCount > 1 || state.loopRepeatCount == -1)) {
-        if (state.loopRepeatCount != -1 && state.currentLoopIteration >= state.loopRepeatCount) {
-          state = state.copyWith(currentLoopIteration: 1);
-        } else {
-          _lastAnchorPosition = Duration.zero;
+      if (isCompleted) {
+        final loopV = state.loopVerseNumber;
+        if (loopV != null && (state.loopRepeatCount == -1 || state.currentLoopIteration < state.loopRepeatCount)) {
           state = state.copyWith(
             currentLoopIteration: state.currentLoopIteration + 1,
-            position: Duration.zero,
+            activeVerseNumber: loopV,
+            activeWordIndex: 0,
+            verseProgress: 0.0,
+            wordProgress: 0.0,
           );
-          _player.seek(Duration.zero).then((_) => _player.resume());
+          if (_currentVerses != null && _currentVerses!.isNotEmpty) {
+            seekToVerse(loopV, _currentVerses!, surahName: state.currentSurahName).then((_) => _player.resume());
+          }
           return;
+        } else if (loopV == null && (state.loopRepeatCount > 1 || state.loopRepeatCount == -1)) {
+          if (state.loopRepeatCount != -1 && state.currentLoopIteration >= state.loopRepeatCount) {
+            state = state.copyWith(currentLoopIteration: 1);
+          } else {
+            _lastAnchorPosition = Duration.zero;
+            state = state.copyWith(
+              currentLoopIteration: state.currentLoopIteration + 1,
+              position: Duration.zero,
+            );
+            _player.seek(Duration.zero).then((_) => _player.resume());
+            return;
+          }
+        } else {
+          state = state.copyWith(currentLoopIteration: 1, clearLoopVerse: true);
         }
       }
 
