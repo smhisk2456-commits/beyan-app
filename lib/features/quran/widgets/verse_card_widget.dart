@@ -280,21 +280,36 @@ class VerseCard extends ConsumerWidget {
 
     final memorizationState = ref.watch(quranMemorizationProvider);
     final isComparativeMealEnabled = ref.watch(comparativeMealProvider);
-    final audioState = ref.watch(quranAudioProvider);
-    final isLoopingThisVerse = audioState.loopVerseNumber == verse.verseNumber;
+    final isLoopingThisVerse = ref.watch(
+      quranAudioProvider.select((s) => s.loopVerseNumber == verse.verseNumber),
+    );
 
-    final allWords = verse.arabicText.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+    final allWords = verse.words;
     final revealedSet = memorizationState.revealedWordsByVerse[verse.verseNumber] ?? <int>{};
     final hiddenIndices = memorizationState.isActive
         ? Set<int>.from(List.generate(allWords.length, (i) => i)).difference(revealedSet)
         : null;
 
-    // Yalnızca bu ayet çalıyorsa kelime indeksini ve ilerlemeyi dinle (performans optimizasyonu)
-    final activeWordIndex = isPlaying
-        ? (audioState.isWordHighlightEnabled ? audioState.activeWordIndex : null)
-        : null;
-    final verseProgress = isPlaying ? audioState.verseProgress : 0.0;
-    final wordProgress = isPlaying ? audioState.wordProgress : 1.0;
+    // SADECE ve SADECE bu ayet çalıyorsa ses akış ilerlemesini dinle (diğer tüm ayetler 30 FPS rebuild'den kurtulur!)
+    final int? activeWordIndex;
+    final double verseProgress;
+    final double wordProgress;
+    if (isPlaying) {
+      final activeAudio = ref.watch(
+        quranAudioProvider.select((s) => (
+          s.isWordHighlightEnabled ? s.activeWordIndex : null,
+          s.verseProgress,
+          s.wordProgress,
+        )),
+      );
+      activeWordIndex = activeAudio.$1;
+      verseProgress = activeAudio.$2;
+      wordProgress = activeAudio.$3;
+    } else {
+      activeWordIndex = null;
+      verseProgress = 0.0;
+      wordProgress = 1.0;
+    }
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -509,7 +524,7 @@ class VerseCard extends ConsumerWidget {
                         ref.read(quranAudioProvider.notifier).setLoopVerse(null);
                       } else {
                         ref.read(quranAudioProvider.notifier).setLoopVerse(verse.verseNumber);
-                        if (audioState.loopRepeatCount <= 1) {
+                        if (ref.read(quranAudioProvider).loopRepeatCount <= 1) {
                           ref.read(quranAudioProvider.notifier).setLoopRepeat(3);
                         }
                       }

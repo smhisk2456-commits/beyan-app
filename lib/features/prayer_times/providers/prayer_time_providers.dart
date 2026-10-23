@@ -32,27 +32,14 @@ final locationProvider = FutureProvider<LocationData>((ref) async {
 
 /// Bugünün namaz vakitlerini hesaplar ve döner.
 ///
-/// [locationProvider]'a bağlıdır; konum değişirse yeniden hesaplar.
+/// Tek gerçek doğruluk kaynağı olan [prayerTimesNotifierProvider]'a delege eder.
 final dailyPrayerTimesProvider = FutureProvider<DailyPrayerTimes>((ref) async {
-  final service = ref.watch(prayerTimeServiceProvider);
-  // Konumu al (GPS veya İstanbul)
-  final location = await ref.watch(locationProvider.future);
-
-  // Gece yarısı olunca yeni günün vakitlerini otomatik yeniden hesapla
-  final now = DateTime.now();
-  final tomorrowMidnight = DateTime(now.year, now.month, now.day + 1);
-  final timer = Timer(tomorrowMidnight.difference(now), () {
-    ref.invalidateSelf();
-  });
-  ref.onDispose(() => timer.cancel());
-
-  // Diyanet metoduyla hesapla
-  return service.calculatePrayerTimes(location: location);
+  return ref.watch(prayerTimesNotifierProvider.future);
 });
 
 /// Belirli bir tarih için namaz vakitlerini hesaplar.
 /// Ana ekranda haftalık görünüm için kullanılabilir.
-final prayerTimesForDateProvider = FutureProvider.family<
+final prayerTimesForDateProvider = FutureProvider.autoDispose.family<
   DailyPrayerTimes,
   DateTime
 >((ref, date) async {
@@ -66,16 +53,16 @@ final prayerTimesForDateProvider = FutureProvider.family<
 // ════════════════════════════════════════════════════════════════
 
 /// Sıradaki namaz vakti bilgisi – sadece ilgili alanları döner.
-final nextPrayerProvider = FutureProvider<PrayerEntry?>((ref) async {
-  final daily = await ref.watch(dailyPrayerTimesProvider.future);
+final nextPrayerProvider = FutureProvider.autoDispose<PrayerEntry?>((ref) async {
+  final daily = await ref.watch(prayerTimesNotifierProvider.future);
   return daily.nextPrayerEntry;
 });
 
 /// Namaz vakitleri ilerleme oranı (0.0 → 1.0).
 /// Mevcut vakitten sonraki vakite kadar geçen sürenin oranı.
 /// [StreamProvider] ile saniyede bir dinamik olarak güncellenir.
-final prayerProgressProvider = StreamProvider<double>((ref) async* {
-  final daily = await ref.watch(dailyPrayerTimesProvider.future);
+final prayerProgressProvider = StreamProvider.autoDispose<double>((ref) async* {
+  final daily = await ref.watch(prayerTimesNotifierProvider.future);
   final service = ref.watch(prayerTimeServiceProvider);
 
   yield service.getProgressToNextPrayer(daily);
@@ -91,8 +78,8 @@ final prayerProgressProvider = StreamProvider<double>((ref) async* {
 // ════════════════════════════════════════════════════════════════
 
 /// Sıradaki namaz vaktine kalan süreyi saniyede bir güncelleyen provider.
-final prayerCountdownProvider = StreamProvider<Duration>((ref) async* {
-  final daily = await ref.watch(dailyPrayerTimesProvider.future);
+final prayerCountdownProvider = StreamProvider.autoDispose<Duration>((ref) async* {
+  final daily = await ref.watch(prayerTimesNotifierProvider.future);
 
   yield daily.timeUntilNextPrayer;
 
@@ -103,8 +90,8 @@ final prayerCountdownProvider = StreamProvider<Duration>((ref) async* {
 });
 
 /// Countdown'ı formatlanmış string olarak döner (ör: "02:45" veya "1s 30dk").
-final countdownStringProvider = StreamProvider<String>((ref) async* {
-  final daily = await ref.watch(dailyPrayerTimesProvider.future);
+final countdownStringProvider = StreamProvider.autoDispose<String>((ref) async* {
+  final daily = await ref.watch(prayerTimesNotifierProvider.future);
   final service = ref.watch(prayerTimeServiceProvider);
   final lang = ref.watch(appLanguageProvider);
 
@@ -157,11 +144,13 @@ class PrayerTimesNotifier extends AsyncNotifier<DailyPrayerTimes> {
   }
 
   /// Konumu yenileyerek vakitleri yeniden hesaplar.
+  /// Önceki durumu koruyarak arayüzün iskelete düşüp titremesini önler.
   Future<void> refresh() async {
-    state = const AsyncLoading();
+    state = const AsyncLoading<DailyPrayerTimes>().copyWithPrevious(state);
     state = await AsyncValue.guard(() async {
       final service = ref.read(prayerTimeServiceProvider);
-      final location = await service.getCurrentLocation();
+      ref.invalidate(locationProvider);
+      final location = await ref.read(locationProvider.future);
       final daily = await service.calculatePrayerTimes(location: location);
       NotificationService.instance.scheduleUpcomingPrayers();
       WidgetService().updateAllWidgets();

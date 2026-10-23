@@ -510,33 +510,38 @@ class NotificationService {
     }
   }
 
+  bool _isSchedulingPrayers = false;
+
   /// Önümüzdeki 3 günün namaz vakitlerini planlar (iOS 64 kota sınırına tam uyumlu).
   Future<void> scheduleUpcomingPrayers() async {
-    final master = await isMasterEnabled();
-    if (!master) {
+    if (_isSchedulingPrayers) return;
+    _isSchedulingPrayers = true;
+    try {
+      final master = await isMasterEnabled();
+      if (!master) {
+        await cancelAllPrayerNotifications();
+        return;
+      }
+
+      final earlyReminder = await isEarlyReminderEnabled();
+      final currentMakam = await getSelectedMakam();
+      final prayerService = PrayerTimeService();
+      final now = DateTime.now();
+      final prefs = await SharedPreferences.getInstance();
+      final langCode = prefs.getString('selected_app_language') ?? 'tr';
+
+      // Yalnızca namaz bildirimlerini temizle (Ayet bildirimlerine dokunma!)
       await cancelAllPrayerNotifications();
-      return;
-    }
 
-    final earlyReminder = await isEarlyReminderEnabled();
-    final currentMakam = await getSelectedMakam();
-    final prayerService = PrayerTimeService();
-    final now = DateTime.now();
-    final prefs = await SharedPreferences.getInstance();
-    final langCode = prefs.getString('selected_app_language') ?? 'tr';
-
-    // Yalnızca namaz bildirimlerini temizle (Ayet bildirimlerine dokunma!)
-    await cancelAllPrayerNotifications();
-
-    // 3 gün boyunca planla (Maksimum 36 bildirim, iOS 64 limitine kesin uyum)
-    for (int dayOffset = 0; dayOffset < 3; dayOffset++) {
-      final targetDate = now.add(Duration(days: dayOffset));
-      try {
-        final daily = await prayerService.calculatePrayerTimes(date: targetDate);
-        for (int i = 0; i < daily.prayers.length; i++) {
-          final p = daily.prayers[i];
-          final enabled = await isPrayerEnabled(p.name);
-          if (!enabled) continue;
+      // 3 gün boyunca planla (Maksimum 36 bildirim, iOS 64 limitine kesin uyum)
+      for (int dayOffset = 0; dayOffset < 3; dayOffset++) {
+        final targetDate = now.add(Duration(days: dayOffset));
+        try {
+          final daily = await prayerService.calculatePrayerTimes(date: targetDate);
+          for (int i = 0; i < daily.prayers.length; i++) {
+            final p = daily.prayers[i];
+            final enabled = await isPrayerEnabled(p.name);
+            if (!enabled) continue;
 
           // 1. Tam vakit bildirimi
           if (p.time.isAfter(now)) {
@@ -641,19 +646,23 @@ class NotificationService {
         debugPrint('Gün $dayOffset için namaz bildirimi planlanamadı: $e');
       }
     }
+  } finally {
+    _isSchedulingPrayers = false;
   }
+}
 
   /// Yalnızca namaz ve erken uyarı bildirimlerini iptal eder (Ayet bildirimlerini korur).
+  /// Önceden planlanmış istekleri sorgulayıp sadece mevcut olanları iptal eder (2000 platform çağrısı yerine hafif filtreleme).
   Future<void> cancelAllPrayerNotifications() async {
-    for (int id = 1000; id <= 1999; id++) {
-      try {
-        await _notifications.cancel(id: id);
-      } catch (_) {}
-    }
-    for (int id = 2000; id <= 2999; id++) {
-      try {
-        await _notifications.cancel(id: id);
-      } catch (_) {}
+    try {
+      final pending = await _notifications.pendingNotificationRequests();
+      for (final req in pending) {
+        if ((req.id >= 1000 && req.id <= 1999) || (req.id >= 2000 && req.id <= 2999)) {
+          await _notifications.cancel(id: req.id);
+        }
+      }
+    } catch (e) {
+      debugPrint('[NotificationService] cancelAllPrayerNotifications error: $e');
     }
   }
 

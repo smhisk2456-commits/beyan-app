@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -29,6 +30,7 @@ class AdhanMakamSelectorSheet extends ConsumerStatefulWidget {
 class _AdhanMakamSelectorSheetState
     extends ConsumerState<AdhanMakamSelectorSheet> {
   final _audioService = AdhanAudioPlayerService.instance;
+  StreamSubscription<AdhanMakam?>? _playingSub;
   AdhanMakam _selectedMakam = AdhanMakam.istanbul;
   AdhanMakam? _playingMakam;
   bool _isLoading = true;
@@ -37,7 +39,7 @@ class _AdhanMakamSelectorSheetState
   void initState() {
     super.initState();
     _loadSelectedMakam();
-    _audioService.currentlyPlayingStream.listen((makam) {
+    _playingSub = _audioService.currentlyPlayingStream.listen((makam) {
       if (mounted) {
         setState(() => _playingMakam = makam);
       }
@@ -56,6 +58,7 @@ class _AdhanMakamSelectorSheetState
 
   @override
   void dispose() {
+    _playingSub?.cancel();
     _audioService.stop();
     super.dispose();
   }

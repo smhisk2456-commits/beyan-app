@@ -459,25 +459,28 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
     final versesAsync = ref.watch(versesBySurahProvider(widget.surah.id));
     final strings = ref.watch(appStringsProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final audioState = ref.watch(quranAudioProvider);
-    final isThisSurahPlaying = audioState.currentSurahId == widget.surah.id && audioState.isPlaying;
+    final isThisSurahPlaying = ref.watch(
+      quranAudioProvider.select((s) => s.currentSurahId == widget.surah.id && s.isPlaying),
+    );
+    final activeVerseNumber = ref.watch(
+      quranAudioProvider.select((s) => s.currentSurahId == widget.surah.id ? s.activeVerseNumber : null),
+    );
 
-    ref.listen<QuranAudioState>(quranAudioProvider, (prev, next) {
-      if (next.currentSurahId == widget.surah.id && next.isPlaying) {
-        final verses = versesAsync.valueOrNull;
-        if (verses != null && verses.isNotEmpty) {
-          if (prev?.currentSurahId != next.currentSurahId) {
-            ref.read(quranAudioProvider.notifier).setVerses(verses);
-          }
-
-          if (next.isLiveTrackingEnabled &&
-              next.activeVerseNumber != null &&
-              next.activeVerseNumber != prev?.activeVerseNumber) {
-            _scrollToVerseNumber(next.activeVerseNumber!, verses);
+    ref.listen<int?>(
+      quranAudioProvider.select(
+        (s) => (s.currentSurahId == widget.surah.id && s.isPlaying && s.isLiveTrackingEnabled)
+            ? s.activeVerseNumber
+            : null,
+      ),
+      (prev, next) {
+        if (next != null && next != prev) {
+          final verses = versesAsync.valueOrNull;
+          if (verses != null && verses.isNotEmpty) {
+            _scrollToVerseNumber(next, verses);
           }
         }
-      }
-    });
+      },
+    );
 
     final zenBgColor = _isZenMode
         ? (_zenTheme == ZenReadingTheme.sepiaParchment
@@ -494,7 +497,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
           versesAsync.when(
             loading: () => _buildLoadingScaffold(context, strings),
             error: (e, _) => _buildErrorScaffold(context, e.toString(), strings),
-            data: (verses) => _buildContent(context, verses, isDark, isThisSurahPlaying, audioState, strings),
+            data: (verses) => _buildContent(context, verses, isDark, isThisSurahPlaying, activeVerseNumber, strings),
           ),
           // Alt Mini Tilavet Oynatıcısı (Zen modunda dikkati dağıtmamak için gizlenir)
           if (!_isZenMode)
@@ -942,13 +945,12 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
     List<Verse> verses,
     bool isDark,
     bool isThisSurahPlaying,
-    QuranAudioState audioState,
+    int? activeVerseNumber,
     AppStrings strings,
   ) {
     final hasActiveToolBadge = ref.watch(quranMemorizationProvider).isActive ||
         ref.watch(comparativeMealProvider) ||
-        audioState.activeAmbience != null ||
-        audioState.sleepTimerSecondsRemaining != null;
+        ref.watch(quranAudioProvider.select((s) => s.activeAmbience != null || s.sleepTimerSecondsRemaining != null));
 
     if (_isMushafMode) {
       return Scaffold(
@@ -987,7 +989,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                   final sName = widget.surah.localizedName(strings.language.code);
                   if (widget.initialScrollToVerse != null &&
                       widget.initialScrollToVerse! > 1 &&
-                      audioState.currentSurahId != widget.surah.id) {
+                      ref.read(quranAudioProvider).currentSurahId != widget.surah.id) {
                     ref.read(quranAudioProvider.notifier).seekToVerse(
                           widget.initialScrollToVerse!,
                           verses,
@@ -1078,7 +1080,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                   final sName = widget.surah.localizedName(strings.language.code);
                   if (widget.initialScrollToVerse != null &&
                       widget.initialScrollToVerse! > 1 &&
-                      audioState.currentSurahId != widget.surah.id) {
+                      ref.read(quranAudioProvider).currentSurahId != widget.surah.id) {
                     ref.read(quranAudioProvider.notifier).seekToVerse(
                           widget.initialScrollToVerse!,
                           verses,
@@ -1174,7 +1176,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
             (context, index) {
               final verse = verses[index];
               final isTarget = widget.initialScrollToVerse == verse.verseNumber;
-              final isPlayingVerse = isThisSurahPlaying && audioState.activeVerseNumber == verse.verseNumber;
+              final isPlayingVerse = isThisSurahPlaying && activeVerseNumber == verse.verseNumber;
               final sName = widget.surah.localizedName(strings.language.code);
               return RepaintBoundary(
                 child: VerseCard(

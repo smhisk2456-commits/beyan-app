@@ -324,9 +324,13 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
       final interpMs = _lastAnchorPosition.inMilliseconds + _interpWatch.elapsedMilliseconds;
       final totalMs = state.duration.inMilliseconds;
       final clampedMs = totalMs > 0 ? interpMs.clamp(0, totalMs) : interpMs;
-      state = state.copyWith(position: Duration(milliseconds: clampedMs));
       if (_currentVerses != null && _currentVerses!.isNotEmpty) {
-        updateActiveVerseByProgress(_currentVerses!);
+        updateActiveVerseByProgress(_currentVerses!, currentMs: clampedMs);
+      } else {
+        final newSec = clampedMs ~/ 1000;
+        if (newSec != state.position.inSeconds) {
+          state = state.copyWith(position: Duration(milliseconds: clampedMs));
+        }
       }
     });
   }
@@ -518,10 +522,10 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
     state = state.copyWith(isWordHighlightEnabled: !state.isWordHighlightEnabled);
   }
 
-  void updateActiveVerseByProgress(List<Verse> verses) {
+  void updateActiveVerseByProgress(List<Verse> verses, {int? currentMs}) {
     if (verses.isEmpty) return;
 
-    final currentMs = state.position.inMilliseconds;
+    final effectiveMs = currentMs ?? state.position.inMilliseconds;
     final rawTotalMs = state.duration.inMilliseconds;
     final reciter = state.selectedReciter;
     final cacheKey = '${reciter.id}_${state.currentSurahId}';
@@ -532,7 +536,7 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
       VerseTiming? activeTiming;
       for (int i = 0; i < timings.length; i++) {
         final t = timings[i];
-        if (currentMs >= t.timestampFrom && currentMs < t.timestampTo) {
+        if (effectiveMs >= t.timestampFrom && effectiveMs < t.timestampTo) {
           activeTiming = t;
           break;
         }
@@ -541,7 +545,7 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
       if (activeTiming == null) {
         // İki ayet arasında kısa nefes boşluğundaysak bir önceki ayette veya sıradakinde kal
         for (int i = timings.length - 1; i >= 0; i--) {
-          if (currentMs >= timings[i].timestampFrom) {
+          if (effectiveMs >= timings[i].timestampFrom) {
             activeTiming = timings[i];
             break;
           }
@@ -553,37 +557,35 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
       final dur = activeTiming.duration > 0
           ? activeTiming.duration
           : (activeTiming.timestampTo - activeTiming.timestampFrom);
-      final elapsed = (currentMs - activeTiming.timestampFrom).clamp(0, dur > 0 ? dur : 1);
+      final elapsed = (effectiveMs - activeTiming.timestampFrom).clamp(0, dur > 0 ? dur : 1);
       final progress = dur > 0 ? (elapsed / dur).clamp(0.0, 1.0) : 0.0;
 
       // Kelime ve Kelime-İçi Harf Akış Oranı (wordProgress: 0.0 -> 1.0)
       int determinedWord = 0;
       double determinedWordProg = 0.0;
       final matchedVerseObj = verses.where((v) => v.verseNumber == determinedVerse).firstOrNull;
-      final localWordCount = matchedVerseObj != null
-          ? matchedVerseObj.arabicText.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length
-          : 0;
+      final localWordCount = matchedVerseObj != null ? matchedVerseObj.words.length : 0;
 
       if (activeTiming.segments.isNotEmpty) {
         WordSegment? activeSeg;
         for (int i = 0; i < activeTiming.segments.length; i++) {
           final seg = activeTiming.segments[i];
-          if (currentMs >= seg.startMs && currentMs < seg.endMs) {
+          if (effectiveMs >= seg.startMs && effectiveMs < seg.endMs) {
             activeSeg = seg;
             final segDur = (seg.endMs - seg.startMs).clamp(1, 60000);
-            determinedWordProg = ((currentMs - seg.startMs) / segDur).clamp(0.0, 1.0);
+            determinedWordProg = ((effectiveMs - seg.startMs) / segDur).clamp(0.0, 1.0);
             break;
           }
         }
 
         if (activeSeg == null) {
           // Kelimeler arası kısa nefes/vakıf boşluğundaysak: son geçilen kelimede kal (asla son kelimeye zıplama!)
-          if (currentMs < activeTiming.segments.first.startMs) {
+          if (effectiveMs < activeTiming.segments.first.startMs) {
             activeSeg = activeTiming.segments.first;
             determinedWordProg = 0.0;
           } else {
             for (int i = activeTiming.segments.length - 1; i >= 0; i--) {
-              if (currentMs >= activeTiming.segments[i].startMs) {
+              if (effectiveMs >= activeTiming.segments[i].startMs) {
                 activeSeg = activeTiming.segments[i];
                 determinedWordProg = 1.0;
                 break;
@@ -600,7 +602,7 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
         determinedWord = rawIdx;
       } else if (localWordCount > 0) {
         // Segment listesi boşsa harf ağırlığıyla akıcı kelime ve harf ilerlemesi hesapla
-        final words = matchedVerseObj!.arabicText.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+        final words = matchedVerseObj!.words;
         final wordWeights = words.map((w) => w.length + 2).toList();
         final totalWordWeight = wordWeights.fold<int>(0, (a, b) => a + b);
         if (totalWordWeight > 0) {
@@ -645,11 +647,14 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
         }
       }
 
+      final secChanged = (effectiveMs ~/ 1000) != state.position.inSeconds;
       if (state.activeVerseNumber != determinedVerse ||
           state.activeWordIndex != determinedWord ||
-          (state.verseProgress - progress).abs() > 0.002 ||
-          (state.wordProgress - determinedWordProg).abs() > 0.01) {
+          secChanged ||
+          (state.verseProgress - progress).abs() >= 0.008 ||
+          (state.wordProgress - determinedWordProg).abs() >= 0.02) {
         state = state.copyWith(
+          position: Duration(milliseconds: effectiveMs),
           activeVerseNumber: determinedVerse,
           activeWordIndex: determinedWord,
           verseProgress: progress,
@@ -669,7 +674,6 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
 
     if (totalWeight <= 0) return;
 
-    // Eğer stream henüz toplam süreyi (duration) bildirmediyse harf sayısına göre doğal tilavet süresi tahmin et
     final totalMs = rawTotalMs > 0 ? rawTotalMs : (totalWeight * 95).clamp(4000, 3600000);
 
     int accumulatedBefore = 0;
@@ -682,7 +686,7 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
       final prevAccum = accumulatedBefore;
       accumulatedBefore += weights[i];
       final currentVerseEndMs = ((accumulatedBefore / totalWeight) * totalMs).round();
-      if (currentMs <= currentVerseEndMs || i == verses.length - 1) {
+      if (effectiveMs <= currentVerseEndMs || i == verses.length - 1) {
         determinedVerse = verses[i].verseNumber;
         activeVerseIdx = i;
         verseStartMs = ((prevAccum / totalWeight) * totalMs).round();
@@ -691,16 +695,14 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
       }
     }
 
-    // Ayet içi ilerleme oranı (0.0 - 1.0)
     final verseDurationMs = verseEndMs - verseStartMs;
-    final verseElapsedMs = (currentMs - verseStartMs).clamp(0, verseDurationMs > 0 ? verseDurationMs : 1);
+    final verseElapsedMs = (effectiveMs - verseStartMs).clamp(0, verseDurationMs > 0 ? verseDurationMs : 1);
     final progress = verseDurationMs > 0 ? (verseElapsedMs / verseDurationMs).clamp(0.0, 1.0) : 0.0;
 
-    // Kelime kelime ve harf harf takip (Canlı Karaoke)
     int determinedWord = 0;
     double determinedWordProg = 0.0;
     final activeVerse = verses[activeVerseIdx];
-    final words = activeVerse.arabicText.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+    final words = activeVerse.words;
     if (words.isNotEmpty) {
       final wordWeights = words.map((w) => w.length + 2).toList();
       final totalWordWeight = wordWeights.fold<int>(0, (a, b) => a + b);
@@ -719,38 +721,14 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
       }
     }
 
-    // Tek Âyet Ezber Tekrarı (Yedek Oransal Modda da aktifse başa sar)
-    if (!_isLoopSeeking &&
-        state.loopVerseNumber != null &&
-        state.activeVerseNumber == state.loopVerseNumber &&
-        determinedVerse != state.loopVerseNumber) {
-      if (state.loopRepeatCount == -1 || state.currentLoopIteration < state.loopRepeatCount) {
-        _isLoopSeeking = true;
-        final targetV = state.loopVerseNumber!;
-        state = state.copyWith(
-          currentLoopIteration: state.currentLoopIteration + 1,
-          activeVerseNumber: targetV,
-          activeWordIndex: 0,
-          verseProgress: 0.0,
-          wordProgress: 0.0,
-        );
-        seekToVerse(targetV, verses, surahName: state.currentSurahName).whenComplete(() {
-          _isLoopSeeking = false;
-        });
-        return;
-      } else {
-        state = state.copyWith(
-          currentLoopIteration: 1,
-          clearLoopVerse: true,
-        );
-      }
-    }
-
+    final secChanged = (effectiveMs ~/ 1000) != state.position.inSeconds;
     if (state.activeVerseNumber != determinedVerse ||
         state.activeWordIndex != determinedWord ||
-        (state.verseProgress - progress).abs() > 0.002 ||
-        (state.wordProgress - determinedWordProg).abs() > 0.01) {
+        secChanged ||
+        (state.verseProgress - progress).abs() >= 0.008 ||
+        (state.wordProgress - determinedWordProg).abs() >= 0.02) {
       state = state.copyWith(
+        position: Duration(milliseconds: effectiveMs),
         activeVerseNumber: determinedVerse,
         activeWordIndex: determinedWord,
         verseProgress: progress,

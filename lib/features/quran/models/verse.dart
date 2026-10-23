@@ -110,6 +110,12 @@ class Verse {
 
   // ── Yardımcı Getter'lar ────────────────────────────────────
 
+  static final Expando<List<String>> _wordsCache = Expando<List<String>>();
+
+  /// Arapça kelimeleri bellek önbellekli olarak döner (her build'de RegExp çalıştırmaz).
+  List<String> get words =>
+      _wordsCache[this] ??= arabicText.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+
   /// "Sure:Ayet" formatında referans döner (ör: "2:255")
   String get reference => '$surahId:$verseNumber';
 

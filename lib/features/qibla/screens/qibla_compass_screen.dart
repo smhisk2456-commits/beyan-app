@@ -24,6 +24,8 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
   StreamSubscription<CompassEvent>? _compassSub;
 
   double? _heading;
+  double _smoothedHeading = 0.0;
+  bool _isAligned = false;
   double _qiblaAngle = 152.0; // Varsayılan İstanbul
   double _distanceKm = 2418.0;
   String _cityName = 'İstanbul';
@@ -102,28 +104,35 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
       final h = event.heading;
       if (h == null) return;
 
-      // Normalizasyon 0..360
-      final normalizedHeading = (h + 360) % 360;
+      final rawHeading = (h + 360) % 360;
+      if (_heading == null) {
+        _smoothedHeading = rawHeading;
+      } else {
+        // Dairesel low-pass filtre (0-360 geçişlerini sarsıntısız yumuşatır)
+        _smoothedHeading = _smoothedHeading + 0.30 * (((rawHeading - _smoothedHeading + 540) % 360) - 180);
+        _smoothedHeading = (_smoothedHeading + 360) % 360;
+      }
 
       // Kıble ile açı farkı (-180..180)
-      double diff = (_qiblaAngle - normalizedHeading + 360) % 360;
+      double diff = (_qiblaAngle - _smoothedHeading + 360) % 360;
       if (diff > 180) diff -= 360;
 
-      final isAligned = diff.abs() <= 3.0;
+      // Histerezisli kilitlenme: Kilitlenme <= 3.0°, kilit çözülmesi > 5.0° (haptik titreşim patlamasını önler)
+      final aligned = _wasAligned ? diff.abs() <= 5.0 : diff.abs() <= 3.0;
 
       // Yaklaşma haptik geri bildirimi (Kıbleye yaklaştıkça artan Apple Taptic tıkırtıları)
-      if (!isAligned && diff.abs() <= 15.0) {
+      if (!aligned && diff.abs() <= 15.0) {
         final bucket = (diff.abs() / 3.0).floor();
         if (_lastProximityBucket != bucket) {
           _lastProximityBucket = bucket;
           HapticFeedback.selectionClick();
         }
-      } else if (!isAligned) {
+      } else if (!aligned) {
         _lastProximityBucket = null;
       }
 
       // Kâbe yönüne tam oturup kilitlendiğinde tok çift Taptic Engine patlaması ("Klik!" hissi)
-      if (isAligned && !_wasAligned) {
+      if (aligned && !_wasAligned) {
         _lastProximityBucket = null;
         _lockPulseController.forward(from: 0.0);
         HapticFeedback.heavyImpact();
@@ -131,10 +140,11 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
           HapticFeedback.mediumImpact();
         });
       }
-      _wasAligned = isAligned;
+      _wasAligned = aligned;
 
       setState(() {
-        _heading = normalizedHeading;
+        _heading = _smoothedHeading;
+        _isAligned = aligned;
       });
     }, onError: (_) {
       if (mounted) setState(() => _hasCompassSensor = false);
@@ -149,7 +159,7 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
     final currentHeading = _heading ?? 0.0;
     double diff = (_qiblaAngle - currentHeading + 360) % 360;
     if (diff > 180) diff -= 360;
-    final isAligned = diff.abs() <= 3.5;
+    final isAligned = _isAligned;
 
     return Scaffold(
       backgroundColor: isDark ? BeyanColors.tone(0xFF011815) : BeyanColors.tone(0xFFF4F7F6),

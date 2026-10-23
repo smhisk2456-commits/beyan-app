@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -135,9 +136,18 @@ final effectivePaletteProvider = Provider<AppThemePalette>((ref) {
   AppThemePalette resolved = themeState.palette;
   if (themeState.isDynamicPrayerTheme) {
     final prayerAsync = ref.watch(prayerTimesNotifierProvider);
-    final nextPrayer = prayerAsync.valueOrNull?.nextPrayerEntry?.name;
+    final nextPrayerEntry = prayerAsync.valueOrNull?.nextPrayerEntry;
+    if (nextPrayerEntry != null) {
+      final timeUntil = nextPrayerEntry.timeUntil;
+      if (!timeUntil.isNegative) {
+        final timer = Timer(timeUntil + const Duration(seconds: 1), () {
+          ref.invalidateSelf();
+        });
+        ref.onDispose(() => timer.cancel());
+      }
+    }
     resolved = ThemeNotifier.paletteForPrayer(
-      nextPrayer,
+      nextPrayerEntry?.name,
       fallback: themeState.palette,
     );
   }

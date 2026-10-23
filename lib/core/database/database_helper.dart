@@ -19,12 +19,16 @@ class DatabaseHelper {
   DatabaseHelper._internal();
 
   Database? _database;
+  Future<Database>? _initFuture;
 
-  /// Veritabanı nesnesini döner; gerekirse önce başlatır.
+  /// Veritabanı nesnesini döner; eşzamanlı ilk açılış çağrılarında
+  /// yarış durumunu (race condition) önlemek için tek bir Future üzerinden başlatır.
   Future<Database> get database async {
     if (_database != null && _database!.isOpen) return _database!;
-    _database = await _initDatabase();
-    return _database!;
+    return _initFuture ??= _initDatabase().then((db) {
+      _database = db;
+      return db;
+    });
   }
 
   // ── Başlatma ───────────────────────────────────────────────────

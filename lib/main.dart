@@ -8,6 +8,7 @@ import 'core/theme/app_theme.dart';
 import 'core/theme/beyan_colors.dart';
 import 'core/theme/theme_provider.dart';
 import 'features/home/screens/home_screen.dart';
+import 'features/prayer_times/providers/prayer_time_providers.dart';
 import 'features/prayer_times/screens/prayer_times_screen.dart';
 import 'features/quran/screens/surah_list_screen.dart';
 import 'features/zikr/screens/zikirmatik_screen.dart';
@@ -191,9 +192,20 @@ class _MainNavigationState extends ConsumerState<MainNavigation>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      NotificationService.instance.scheduleUpcomingPrayers();
-      NotificationService.instance.scheduleDailyVerseNotifications();
-      WidgetService().updateAllWidgets();
+      // iOS uyku sonrası gün değişimi kontrolü:
+      // Eğer hafızadaki vakitler bugüne ait değilse hemen taze vakitleri hesapla
+      final currentDaily = ref.read(prayerTimesNotifierProvider).valueOrNull;
+      final now = DateTime.now();
+      if (currentDaily == null ||
+          currentDaily.date.year != now.year ||
+          currentDaily.date.month != now.month ||
+          currentDaily.date.day != now.day) {
+        ref.read(prayerTimesNotifierProvider.notifier).refresh();
+      } else {
+        NotificationService.instance.scheduleUpcomingPrayers();
+        NotificationService.instance.scheduleDailyVerseNotifications();
+        WidgetService().updateAllWidgets();
+      }
     }
   }
 
@@ -205,48 +217,34 @@ class _MainNavigationState extends ConsumerState<MainNavigation>
   @override
   Widget build(BuildContext context) {
     final selectedTab = ref.watch(selectedTabProvider);
-    final themeState = ref.watch(themeProvider);
     final effectivePalette = ref.watch(effectivePaletteProvider);
     BeyanColors.setPalette(effectivePalette);
-    final themeKey = ValueKey(
-      '${effectivePalette.name}_${themeState.mode.name}_${themeState.isDynamicPrayerTheme}',
-    );
 
-    return KeyedSubtree(
-      key: themeKey,
-      child: Scaffold(
-        extendBody: true,
-        body: RepaintBoundary(
-          child: IndexedStack(
-            index: selectedTab,
-            // ignore: prefer_const_constructors, prefer_const_literals_to_create_immutables
-            children: [
-              // ignore: prefer_const_constructors
-              HomeScreen(key: ValueKey('home_${effectivePalette.name}')),
-              // ignore: prefer_const_constructors
-              PrayerTimesScreen(key: ValueKey('prayers_${effectivePalette.name}')),
-              // ignore: prefer_const_constructors
-              SurahListScreen(key: ValueKey('surahs_${effectivePalette.name}')),
-              // ignore: prefer_const_constructors
-              ZikirmatikScreen(key: ValueKey('zikr_${effectivePalette.name}')),
-              // ignore: prefer_const_constructors
-              WidgetCenterScreen(key: ValueKey('widgets_${effectivePalette.name}')),
-            ],
-          ),
+    return Scaffold(
+      extendBody: true,
+      body: RepaintBoundary(
+        child: IndexedStack(
+          index: selectedTab,
+          children: const [
+            HomeScreen(),
+            PrayerTimesScreen(),
+            SurahListScreen(),
+            ZikirmatikScreen(),
+            WidgetCenterScreen(),
+          ],
         ),
-        bottomNavigationBar: RepaintBoundary(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AdhanAudioPlayerBar(key: ValueKey('adhan_bar_${effectivePalette.name}')),
-              QuranAudioPlayerBar(key: ValueKey('quran_bar_${effectivePalette.name}')),
-              LuxuryFloatingDock(
-                key: ValueKey('dock_${effectivePalette.name}'),
-                currentIndex: selectedTab,
-                onTap: (i) => ref.read(selectedTabProvider.notifier).state = i,
-              ),
-            ],
-          ),
+      ),
+      bottomNavigationBar: RepaintBoundary(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const AdhanAudioPlayerBar(),
+            const QuranAudioPlayerBar(),
+            LuxuryFloatingDock(
+              currentIndex: selectedTab,
+              onTap: (i) => ref.read(selectedTabProvider.notifier).state = i,
+            ),
+          ],
         ),
       ),
     );
