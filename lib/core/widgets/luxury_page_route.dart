@@ -1,128 +1,19 @@
-import 'dart:math' as math;
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
-import '../theme/beyan_colors.dart';
 
-/// 3B Kart Açılımı, Altın Çerçeve Morfu ve 24K Işık Huzmesi Geçişli Lüks Sayfa Rotası
-class LuxuryPageRoute<T> extends PageRouteBuilder<T> {
+/// Apple iOS yerel akıcı sağa kaydırma (interactive pop gesture / edge swipe to back)
+/// ve zarif Cupertino geçişli lüks sayfa rotası.
+class LuxuryPageRoute<T> extends CupertinoPageRoute<T> {
   final Widget page;
 
-  LuxuryPageRoute({required this.page, super.settings})
-      : super(
-          opaque: false,
-          barrierColor: Colors.black.withValues(alpha: 0.55),
-          pageBuilder: (context, animation, secondaryAnimation) => page,
-          transitionDuration: const Duration(milliseconds: 500),
-          reverseTransitionDuration: const Duration(milliseconds: 360),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            final curved = CurvedAnimation(
-              parent: animation,
-              curve: Curves.easeOutExpo,
-              reverseCurve: Curves.easeInCubic,
-            );
-
-            return AnimatedBuilder(
-              animation: curved,
-              builder: (context, _) {
-                final t = curved.value.clamp(0.0, 1.0);
-                final inv = 1.0 - t;
-
-                // 3B Karttan Tam Ekrana Yayılma (0.78 -> 1.0 ölçek + hafif 3B perspektif eğimi)
-                final scale = 0.78 + (0.22 * t);
-                final translateY = 64.0 * inv;
-                final tiltX = 0.09 * inv;
-                final radius = 34.0 * inv;
-                final borderOpacity = (math.sin(t * 3.14159) * 0.95).clamp(0.0, 1.0);
-
-                // Diyagonal 24K Altın Işık Huzmesi (Açılış esnasında ekranın üzerinden süzülür)
-                final sweepPos = -1.2 + (t * 2.6);
-
-                final matrix = Matrix4.identity()
-                  ..setEntry(3, 2, 0.0012)
-                  ..translateByDouble(0.0, translateY, 0.0, 1.0)
-                  ..scaleByDouble(scale, scale, 1.0, 1.0)
-                  ..rotateX(tiltX);
-
-                return FadeTransition(
-                  opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
-                    CurvedAnimation(
-                      parent: animation,
-                      curve: const Interval(0.0, 0.55, curve: Curves.easeOut),
-                    ),
-                  ),
-                  child: Transform(
-                    alignment: Alignment.center,
-                    transform: matrix,
-                    child: Container(
-                      decoration: radius > 0.5
-                          ? BoxDecoration(
-                              borderRadius: BorderRadius.circular(radius),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35 * borderOpacity),
-                                  blurRadius: 36,
-                                  spreadRadius: 4,
-                                ),
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.6 * t),
-                                  blurRadius: 28,
-                                  offset: const Offset(0, 14),
-                                ),
-                              ],
-                            )
-                          : null,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(radius),
-                        child: Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            child,
-
-                            // 24K Altın Işık Süzülmesi (Açılışta kartın üstünden geçen lüks parıltı)
-                            if (t > 0.02 && t < 0.97)
-                              IgnorePointer(
-                                child: DecoratedBox(
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      begin: Alignment(sweepPos - 0.55, -1.0),
-                                      end: Alignment(sweepPos + 0.55, 1.0),
-                                      colors: [
-                                        Colors.transparent,
-                                        BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.16 * inv),
-                                        BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.32 * inv),
-                                        Colors.white.withValues(alpha: 0.24 * inv),
-                                        BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.14 * inv),
-                                        Colors.transparent,
-                                      ],
-                                      stops: const [0.0, 0.35, 0.48, 0.52, 0.65, 1.0],
-                                    ),
-                                  ),
-                                ),
-                              ),
-
-                            // Açılış esnasında parlayan ince 24K altın kenarlık (Tam ekrana oturunca kaybolur)
-                            if (radius > 0.8)
-                              IgnorePointer(
-                                child: DecoratedBox(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(radius),
-                                    border: Border.all(
-                                      color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: borderOpacity),
-                                      width: 2.0 * inv + 0.5,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              },
-            );
-          },
-        );
+  LuxuryPageRoute({
+    required this.page,
+    super.settings,
+    super.maintainState = true,
+    super.fullscreenDialog = false,
+    super.allowSnapshotting = true,
+    super.barrierDismissible = false,
+  }) : super(builder: (_) => page);
 }
 
 /// Dokunulduğunda fiziksel yaylanma ve altın hale tepkisi veren lüks sarmalayıcı

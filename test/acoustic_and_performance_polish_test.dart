@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -41,13 +42,14 @@ void main() {
   });
 
   group('LuxuryPageRoute Testleri', () {
-    test('3B Lüks geçiş rotası 500ms açılış ve 360ms kapanış süresine sahip olmalı', () {
+    test('Lüks geçiş rotası iOS yerel CupertinoPageRoute ve sağa kaydırarak geri dönme desteğine sahip olmalı', () {
       final route = LuxuryPageRoute(
         page: const Scaffold(body: Text('Test')),
       );
 
-      expect(route.transitionDuration, const Duration(milliseconds: 500));
-      expect(route.reverseTransitionDuration, const Duration(milliseconds: 360));
+      expect(route, isA<CupertinoPageRoute>());
+      expect(route.fullscreenDialog, isFalse);
+      expect(route.maintainState, isTrue);
     });
   });
 
