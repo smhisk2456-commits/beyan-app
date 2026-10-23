@@ -7,7 +7,6 @@ import '../../../core/localization/app_strings.dart';
 import '../../../main.dart';
 import '../../quran/repositories/quran_repository.dart';
 import '../../quran/screens/surah_detail_screen.dart';
-import '../../verse_studio/screens/verse_card_studio_screen.dart';
 import '../models/mood_verse_model.dart';
 
 /// Ruh Haline Göre Âyet & Şifa Modal Bottom Sheet
@@ -275,26 +274,30 @@ class MoodVerseSheet extends ConsumerWidget {
                     // ── Eylem Butonları ────────────────────────────────────
                     Row(
                       children: [
-                        // 1. Hikaye & Duvar Kağıdı Yap Butonu
+                        // 1. Kur'an'da Oku Butonu
                         Expanded(
                           child: ElevatedButton.icon(
-                            onPressed: () {
-                              Navigator.pop(context);
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => VerseCardStudioScreen(
-                                    initialReference: data.surahRef,
-                                    initialArabic: data.arabicText,
-                                    initialMeaning: data.localizedTranslation(lang),
+                            onPressed: () async {
+                              final repo = QuranRepository();
+                              final surah = await repo.getSurahById(data.surahId);
+                              if (context.mounted && surah != null) {
+                                Navigator.pop(context);
+                                ref.read(selectedTabProvider.notifier).state = 2;
+                                Navigator.of(context).popUntil((route) => route.isFirst);
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => SurahDetailScreen(
+                                      surah: surah,
+                                      initialScrollToVerse: data.verseNumber,
+                                    ),
                                   ),
-                                ),
-                              );
+                                );
+                              }
                             },
-                            icon: const Icon(Icons.style_rounded, size: 18),
+                            icon: const Icon(Icons.menu_book_rounded, size: 20),
                             label: Text(
-                              strings.storyWallpaperButton,
-                              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                              strings.readInQuranTooltip,
+                              style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.bold),
                             ),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: BeyanColors.tone(0xFFD4AF37),
@@ -308,39 +311,7 @@ class MoodVerseSheet extends ConsumerWidget {
                         ),
                         const SizedBox(width: 10),
 
-                        // 2. Kur'an'da Oku Butonu
-                        IconButton.filled(
-                          onPressed: () async {
-                            final repo = QuranRepository();
-                            final surah = await repo.getSurahById(data.surahId);
-                            if (context.mounted && surah != null) {
-                              Navigator.pop(context);
-                              ref.read(selectedTabProvider.notifier).state = 2;
-                              Navigator.of(context).popUntil((route) => route.isFirst);
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (_) => SurahDetailScreen(
-                                    surah: surah,
-                                    initialScrollToVerse: data.verseNumber,
-                                  ),
-                                ),
-                              );
-                            }
-                          },
-                          icon: const Icon(Icons.menu_book_rounded, color: Colors.white),
-                          style: IconButton.styleFrom(
-                            backgroundColor: BeyanColors.tone(0xFF0F3E33),
-                            padding: const EdgeInsets.all(12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                              side: BorderSide(color: BeyanColors.tone(0xFF2DD4BF).withValues(alpha: 0.4)),
-                            ),
-                          ),
-                          tooltip: strings.readInQuranTooltip,
-                        ),
-                        const SizedBox(width: 6),
-
-                        // 3. Paylaş Butonu
+                        // 2. Paylaş Butonu
                         IconButton.filled(
                           onPressed: () {
                             SharePlus.instance.share(

@@ -8,14 +8,11 @@ import '../../../core/localization/language_selector_sheet.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/screens/theme_selection_sheet.dart';
 import '../../../core/theme/theme_provider.dart';
-import '../../bedside_clock/screens/bedside_clock_screen.dart';
 import '../../live_makkah/screens/mecca_medina_live_screen.dart';
 import '../../notifications/screens/notification_settings_sheet.dart';
 import '../../notifications/screens/adhan_makam_selector_sheet.dart';
 import '../../prayer_times/screens/calculation_method_sheet.dart';
 import '../../prayer_times/screens/city_selector_sheet.dart';
-import '../../notifications/models/short_verse_notification.dart';
-import '../../verse_studio/screens/verse_card_studio_screen.dart';
 import '../../widget_service/screens/widget_settings_dialog.dart';
 import '../../widget_service/screens/live_activity_settings_sheet.dart';
 import '../../mosque_finder/screens/nearby_mosques_screen.dart';
@@ -146,39 +143,6 @@ class SettingsScreen extends ConsumerWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const MeccaMedinaLiveScreen()),
-                  );
-                },
-              ),
-              _buildDivider(),
-              _buildTile(
-                icon: Icons.bedtime_rounded,
-                iconColor: BeyanColors.tone(0xFFFFD54F),
-                title: strings.bedsideClockTitle,
-                subtitle: strings.bedsideClockSubtitle,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const BedsideClockScreen()),
-                  );
-                },
-              ),
-              _buildDivider(),
-              _buildTile(
-                icon: Icons.style_rounded,
-                iconColor: const Color(0xFFF48FB1),
-                title: strings.verseStudioTitle,
-                subtitle: strings.verseStudioSubtitle,
-                onTap: () {
-                  final initial = ShortVerseNotification.pool.first;
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => VerseCardStudioScreen(
-                        initialReference: initial.localizedReference(strings.language.code),
-                        initialArabic: initial.arabicText,
-                        initialMeaning: initial.localizedText(strings.language.code),
-                      ),
-                    ),
                   );
                 },
               ),

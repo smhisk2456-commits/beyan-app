@@ -40,6 +40,9 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
   late final AnimationController _shimmerController;
   late final Animation<double> _shimmerAnimation;
 
+  late final AnimationController _countPopController;
+  late final Animation<double> _countPopScale;
+
   Future<void> _loadSavedDhikrState() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -260,6 +263,21 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
         curve: Curves.easeInOutCubic,
       ),
     );
+
+    _countPopController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 240),
+    );
+    _countPopScale = TweenSequence<double>([
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.0, end: 1.20).chain(CurveTween(curve: Curves.easeOutCubic)),
+        weight: 35,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.20, end: 1.0).chain(CurveTween(curve: Curves.easeOutBack)),
+        weight: 65,
+      ),
+    ]).animate(_countPopController);
   }
 
   @override
@@ -268,6 +286,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
     _pulseController.dispose();
     _plusOneController.dispose();
     _shimmerController.dispose();
+    _countPopController.dispose();
     super.dispose();
   }
 
@@ -282,6 +301,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
     _pulseController.reverse().then((_) => _pulseController.forward());
     _plusOneController.forward(from: 0.0);
     _shimmerController.forward(from: 0.0);
+    _countPopController.forward(from: 0.0);
 
     setState(() {
       _count++; if (_count % 33 == 0 && _count != _target) { HapticFeedback.mediumImpact(); }
@@ -782,37 +802,22 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                       ),
                     ),
 
-                    // 2. 33'lü 3 Boyutlu Kehribar & Altın Tesbih Taneleri Halkası
+                    // 2. Dış Altın Halkalı İlerleme Göstergesi
                     SizedBox(
-                      width: 252,
-                      height: 252,
-                      child: CustomPaint(
-                        painter: _TesbihBeadRingPainter(
-                          activeBeads: _count == 0 ? 0 : ((_count - 1) % 33) + 1,
-                          totalBeads: 33,
-                          goldLight: BeyanColors.tone(0xFFFFDF7A),
-                          goldDeep: BeyanColors.tone(0xFFD4AF37),
-                          unlitColor: isDark ? Colors.white.withValues(alpha: 0.14) : Colors.black.withValues(alpha: 0.12),
-                        ),
-                      ),
-                    ),
-
-                    // 3. Dış Altın Halkalı İlerleme Göstergesi
-                    SizedBox(
-                      width: 222,
-                      height: 222,
+                      width: 228,
+                      height: 228,
                       child: CircularProgressIndicator(
                         value: _target > 0 ? progress : 1.0,
-                        strokeWidth: 5.5,
+                        strokeWidth: 5.0,
                         backgroundColor: isDark ? Colors.white10 : Colors.grey.shade200,
                         valueColor: AlwaysStoppedAnimation<Color>(BeyanColors.tone(0xFFD4AF37)),
                       ),
                     ),
 
-                    // 4. Lüks İç Sayaç Küresi
+                    // 3. Lüks İç Sayaç Küresi
                     Container(
-                      width: 202,
-                      height: 202,
+                      width: 210,
+                      height: 210,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         gradient: RadialGradient(
@@ -912,37 +917,43 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                                   ),
                                 ),
 
-                                // Sayı Yükselme Animasyonu (Slide + Scale Pop)
-                                AnimatedSwitcher(
-                                  duration: const Duration(milliseconds: 180),
-                                  transitionBuilder: (Widget child, Animation<double> animation) {
-                                    return ScaleTransition(
-                                      scale: Tween<double>(begin: 0.78, end: 1.0).animate(
-                                        CurvedAnimation(parent: animation, curve: Curves.easeOutBack),
-                                      ),
-                                      child: FadeTransition(
-                                        opacity: animation,
-                                        child: SlideTransition(
-                                          position: Tween<Offset>(
-                                            begin: const Offset(0.0, 0.28),
-                                            end: Offset.zero,
-                                          ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic)),
+                                // Sayı Yükselme & Yaylanma Animasyonu (Rolling Slide + Scale Bounce)
+                                ScaleTransition(
+                                  scale: _countPopScale,
+                                  child: AnimatedSwitcher(
+                                    duration: const Duration(milliseconds: 220),
+                                    transitionBuilder: (Widget child, Animation<double> animation) {
+                                      final isCurrent = (child.key as ValueKey<int>?)?.value == _count;
+                                      return SlideTransition(
+                                        position: Tween<Offset>(
+                                          begin: isCurrent ? const Offset(0.0, 0.45) : Offset.zero,
+                                          end: isCurrent ? Offset.zero : const Offset(0.0, -0.45),
+                                        ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic)),
+                                        child: FadeTransition(
+                                          opacity: animation,
                                           child: child,
                                         ),
+                                      );
+                                    },
+                                    child: Text(
+                                      '$_count',
+                                      key: ValueKey<int>(_count),
+                                      style: TextStyle(
+                                        fontSize: 56,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                        letterSpacing: 1.5,
+                                        shadows: [
+                                          Shadow(
+                                            color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.7),
+                                            blurRadius: 18,
+                                          ),
+                                          Shadow(
+                                            color: BeyanColors.tone(0xFFD4AF37),
+                                            blurRadius: 12,
+                                          ),
+                                        ],
                                       ),
-                                    );
-                                  },
-                                  child: Text(
-                                    '$_count',
-                                    key: ValueKey<int>(_count),
-                                    style: TextStyle(
-                                      fontSize: 54,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                      letterSpacing: 1.5,
-                                      shadows: [
-                                        Shadow(color: BeyanColors.tone(0xFFD4AF37), blurRadius: 14),
-                                      ],
                                     ),
                                   ),
                                 ),
@@ -2116,84 +2127,5 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
         ),
       ),
     );
-  }
-}
-
-/// 33'lü 3 Boyutlu Kehribar & 24K Altın Tesbih Taneleri Çemberi Çizicisi
-class _TesbihBeadRingPainter extends CustomPainter {
-  final int activeBeads;
-  final int totalBeads;
-  final Color goldLight;
-  final Color goldDeep;
-  final Color unlitColor;
-
-  _TesbihBeadRingPainter({
-    required this.activeBeads,
-    required this.totalBeads,
-    required this.goldLight,
-    required this.goldDeep,
-    required this.unlitColor,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final ringRadius = (size.width / 2) - 5.5;
-
-    // İnce tesbih ipi halkası
-    final cordPaint = Paint()
-      ..color = goldDeep.withValues(alpha: 0.25)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.2;
-    canvas.drawCircle(center, ringRadius, cordPaint);
-
-    for (int i = 0; i < totalBeads; i++) {
-      // Üst merkezden (-pi/2) başlayarak saat yönünde 33 tane
-      final angle = -math.pi / 2 + (i * 2 * math.pi / totalBeads);
-      final beadCenter = Offset(
-        center.dx + ringRadius * math.cos(angle),
-        center.dy + ringRadius * math.sin(angle),
-      );
-
-      final isLit = i < activeBeads;
-      final isCurrentBead = i == activeBeads - 1;
-      final isImameOrMarker = (i == 0 || i == 10 || i == 21); // 11/22/33 nişangah taneleri
-      final beadRadius = isCurrentBead ? 5.8 : (isImameOrMarker ? 4.8 : 3.9);
-
-      if (isLit) {
-        // Aktif / Çekilmiş altın kehribar tane parlaması
-        if (isCurrentBead) {
-          final glowPaint = Paint()
-            ..color = goldLight.withValues(alpha: 0.55)
-            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
-          canvas.drawCircle(beadCenter, beadRadius + 2.5, glowPaint);
-        }
-
-        final gradPaint = Paint()
-          ..shader = RadialGradient(
-            center: const Alignment(-0.35, -0.35),
-            radius: 0.9,
-            colors: [
-              Colors.white,
-              goldLight,
-              goldDeep,
-            ],
-            stops: const [0.0, 0.45, 1.0],
-          ).createShader(Rect.fromCircle(center: beadCenter, radius: beadRadius));
-        canvas.drawCircle(beadCenter, beadRadius, gradPaint);
-      } else {
-        final unlitPaint = Paint()
-          ..color = unlitColor
-          ..style = PaintingStyle.fill;
-        canvas.drawCircle(beadCenter, beadRadius * 0.82, unlitPaint);
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _TesbihBeadRingPainter oldDelegate) {
-    return oldDelegate.activeBeads != activeBeads ||
-        oldDelegate.goldLight != goldLight ||
-        oldDelegate.unlitColor != unlitColor;
   }
 }
