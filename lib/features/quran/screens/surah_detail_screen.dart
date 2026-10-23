@@ -18,6 +18,13 @@ import '../widgets/mushaf_page_view.dart';
 import '../services/quran_download_service.dart';
 import '../widgets/sleep_and_ambience_sheet.dart';
 
+/// Kur'an Zen Okuma Zemini Temaları
+enum ZenReadingTheme {
+  standard,
+  sepiaParchment,
+  oledBlack,
+}
+
 /// Sure Detay Ekranı – Seçilen surenin tüm ayetlerini ve tilavetini sunar.
 class SurahDetailScreen extends ConsumerStatefulWidget {
   final Surah surah;
@@ -40,6 +47,8 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
   bool _showScrollToTop = false;
   bool _hasScrolledToInitialVerse = false;
   bool _isMushafMode = false;
+  bool _isZenMode = false;
+  ZenReadingTheme _zenTheme = ZenReadingTheme.standard;
   int? _lastScrolledVerseNumber;
 
   @override
@@ -470,8 +479,16 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
       }
     });
 
+    final zenBgColor = _isZenMode
+        ? (_zenTheme == ZenReadingTheme.sepiaParchment
+            ? const Color(0xFFF5EFE1)
+            : (_zenTheme == ZenReadingTheme.oledBlack
+                ? Colors.black
+                : Theme.of(context).scaffoldBackgroundColor))
+        : Theme.of(context).scaffoldBackgroundColor;
+
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: zenBgColor,
       body: Stack(
         children: [
           versesAsync.when(
@@ -479,16 +496,61 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
             error: (e, _) => _buildErrorScaffold(context, e.toString(), strings),
             data: (verses) => _buildContent(context, verses, isDark, isThisSurahPlaying, audioState, strings),
           ),
-          // Alt Mini Tilavet Oynatıcısı
-          const Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: QuranAudioPlayerBar(),
-          ),
+          // Alt Mini Tilavet Oynatıcısı (Zen modunda dikkati dağıtmamak için gizlenir)
+          if (!_isZenMode)
+            const Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: QuranAudioPlayerBar(),
+            ),
+          // Zen Modundan Çıkış ve Tema Değiştirme Kayan Hapı
+          if (_isZenMode)
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 8,
+              right: 16,
+              child: SafeArea(
+                child: InkWell(
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    setState(() => _isZenMode = false);
+                  },
+                  borderRadius: BorderRadius.circular(20),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.75),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: BeyanColors.tone(0xFFFFDF7A), width: 1.2),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.3),
+                          blurRadius: 10,
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.fullscreen_exit_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 16),
+                        const SizedBox(width: 6),
+                        Text(
+                          strings.language == AppLanguage.turkish ? 'Zen Çıkış' : 'Exit Zen',
+                          style: TextStyle(
+                            color: BeyanColors.tone(0xFFFFDF7A),
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
-      floatingActionButton: _showScrollToTop
+      floatingActionButton: (_showScrollToTop && !_isZenMode)
           ? Padding(
               padding: const EdgeInsets.only(bottom: 60),
               child: FloatingActionButton.small(
@@ -637,6 +699,52 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                       ),
                       const SizedBox(height: 16),
 
+                      // Zen Okuma Zemini Seçimi (Standart / Sepya Kâğıt / OLED Siyah)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.04),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.25),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.palette_outlined, color: BeyanColors.tone(0xFFFFDF7A), size: 18),
+                              const SizedBox(width: 8),
+                              Text(
+                                isTr ? 'Okuma Zemini:' : 'Reading Theme:',
+                                style: const TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.bold),
+                              ),
+                              const Spacer(),
+                              _buildZenThemePill(
+                                label: 'Standart',
+                                theme: ZenReadingTheme.standard,
+                                isSelected: _zenTheme == ZenReadingTheme.standard,
+                                onSelect: () => setState(() => _zenTheme = ZenReadingTheme.standard),
+                              ),
+                              const SizedBox(width: 5),
+                              _buildZenThemePill(
+                                label: 'Sepya 📜',
+                                theme: ZenReadingTheme.sepiaParchment,
+                                isSelected: _zenTheme == ZenReadingTheme.sepiaParchment,
+                                onSelect: () => setState(() => _zenTheme = ZenReadingTheme.sepiaParchment),
+                              ),
+                              const SizedBox(width: 5),
+                              _buildZenThemePill(
+                                label: 'OLED 🌙',
+                                theme: ZenReadingTheme.oledBlack,
+                                isSelected: _zenTheme == ZenReadingTheme.oledBlack,
+                                onSelect: () => setState(() => _zenTheme = ZenReadingTheme.oledBlack),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
                       // Anahtarlar (Switches)
                       _buildToolSwitchRow(
                         icon: Icons.visibility_off_rounded,
@@ -686,6 +794,44 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
           },
         );
       },
+    );
+  }
+
+  Widget _buildZenThemePill({
+    required String label,
+    required ZenReadingTheme theme,
+    required bool isSelected,
+    required VoidCallback onSelect,
+  }) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(10),
+      onTap: () {
+        HapticFeedback.selectionClick();
+        onSelect();
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? BeyanColors.tone(0xFFD4AF37)
+              : Colors.white.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: isSelected
+                ? BeyanColors.tone(0xFFFFDF7A)
+                : Colors.white12,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 10.5,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+            color: isSelected ? Colors.black : Colors.white70,
+          ),
+        ),
+      ),
     );
   }
 
@@ -953,6 +1099,20 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
               ),
               tooltip: strings.language == AppLanguage.turkish ? 'Okuma & Tilavet Araçları' : 'Reading & Audio Tools',
               onPressed: () => _showReadingToolsSheet(context, strings),
+            ),
+            // 4. Zen / Fokus Modu Butonu (Sinematik Mushaf)
+            IconButton(
+              icon: Icon(
+                _isZenMode ? Icons.fullscreen_exit_rounded : Icons.spa_rounded,
+                color: _isZenMode ? BeyanColors.tone(0xFFFFD54F) : BeyanColors.tone(0xFFFFDF7A),
+              ),
+              tooltip: _isZenMode
+                  ? (strings.language == AppLanguage.turkish ? 'Zen Modundan Çık' : 'Exit Zen Mode')
+                  : (strings.language == AppLanguage.turkish ? 'Zen / Odaklanma Modu' : 'Zen Focus Mode'),
+              onPressed: () {
+                HapticFeedback.mediumImpact();
+                setState(() => _isZenMode = !_isZenMode);
+              },
             ),
             const SizedBox(width: 4),
           ],

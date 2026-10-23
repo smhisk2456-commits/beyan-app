@@ -58,6 +58,7 @@ class AdhanAudioPlayerService with WidgetsBindingObserver {
 
   late final AudioPlayer _player;
   AdhanMakam? _currentlyPlaying;
+  Timer? _autoStopTimer;
 
   final _stateController = StreamController<AdhanMakam?>.broadcast();
   Stream<AdhanMakam?> get currentlyPlayingStream => _stateController.stream;
@@ -65,6 +66,7 @@ class AdhanAudioPlayerService with WidgetsBindingObserver {
 
   /// Seçili makamın sesini önizleme olarak çalar veya çalıyorsa durdurur.
   Future<void> togglePlayPreview(AdhanMakam makam) async {
+    _autoStopTimer?.cancel();
     if (makam == AdhanMakam.silent) {
       await stop();
       return;
@@ -90,6 +92,12 @@ class AdhanAudioPlayerService with WidgetsBindingObserver {
       final asset = makam.assetPath;
       if (asset.isNotEmpty) {
         await _player.play(AssetSource(asset));
+        // 10 saniyelik şık canlı makam önizlemesi sonrasında otomatik durdur
+        _autoStopTimer = Timer(const Duration(seconds: 10), () {
+          if (_currentlyPlaying == makam) {
+            stop();
+          }
+        });
       } else {
         await Future.delayed(const Duration(seconds: 1));
         await stop();
@@ -101,6 +109,7 @@ class AdhanAudioPlayerService with WidgetsBindingObserver {
   }
 
   Future<void> stop() async {
+    _autoStopTimer?.cancel();
     try {
       await _player.stop();
     } catch (_) {}

@@ -51,6 +51,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final allSurahs = ref.watch(allSurahsProvider).valueOrNull ?? [];
     final nextReligiousDay = HijriCalendarService.instance.getNextReligiousDay();
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isFriday = DateTime.now().weekday == DateTime.friday;
 
     final nextPrayer = prayerAsync.valueOrNull?.nextPrayerEntry?.name;
     final atmosphere = (themeState.isDynamicPrayerTheme && isDark)
@@ -76,6 +77,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           slivers: [
             // ── Lüks İslami AppBar ────────────────────────────────
             _IslamicAppBar(atmosphere: atmosphere),
+
+            // ── Cuma Tebriği & Kehf Sûresi Sünneti Kartı ────────────
+            if (isFriday)
+              SliverToBoxAdapter(
+                child: _FridayKahfBanner(
+                  allSurahs: allSurahs,
+                  atmosphere: atmosphere,
+                ),
+              ),
 
             // ── Yaklaşan Dini Gün / Kandil Bildirimi ────────────────
             if (nextReligiousDay != null)
@@ -334,6 +344,152 @@ class _UpcomingReligiousDayBanner extends ConsumerWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// ════════════════════════════════════════════════════════════════
+// Cuma Tebriği & Kehf Sûresi Sünneti Kartı
+// ════════════════════════════════════════════════════════════════
+
+class _FridayKahfBanner extends ConsumerWidget {
+  final List<Surah> allSurahs;
+  final DynamicPrayerAtmosphere? atmosphere;
+
+  const _FridayKahfBanner({required this.allSurahs, this.atmosphere});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final strings = ref.watch(appStringsProvider);
+    final lang = strings.language;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              BeyanColors.tone(0xFF02362F),
+              BeyanColors.tone(0xFF01201B),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.5),
+            width: 1.2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.15),
+              blurRadius: 14,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(9),
+              decoration: BoxDecoration(
+                color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.18),
+                shape: BoxShape.circle,
+                border: Border.all(color: BeyanColors.tone(0xFFFFDF7A), width: 1),
+              ),
+              child: const Text('🕌', style: TextStyle(fontSize: 18)),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        lang == AppLanguage.turkish
+                            ? 'Hayırlı Cumalar 🌙'
+                            : (lang == AppLanguage.arabic ? 'جمعة مباركة 🌙' : 'Jummah Mubarak 🌙'),
+                        style: TextStyle(
+                          color: BeyanColors.tone(0xFFFFDF7A),
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                        decoration: BoxDecoration(
+                          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.25),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          lang == AppLanguage.turkish ? 'Cuma Sünneti' : 'Sunnah',
+                          style: TextStyle(
+                            color: BeyanColors.tone(0xFFFFDF7A),
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    lang == AppLanguage.turkish
+                        ? 'Kehf Sûresi\'ni okumayı unutmayın'
+                        : (lang == AppLanguage.arabic
+                            ? 'قراءة سورة الكهف نور بين الجمعتين'
+                            : 'Don\'t forget to recite Surah Al-Kahf'),
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 11.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            ElevatedButton(
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                final kahfSurah = allSurahs.firstWhere(
+                  (s) => s.id == 18,
+                  orElse: () => const Surah(
+                    id: 18,
+                    nameArabic: 'الكهف',
+                    nameTurkish: 'Kehf',
+                    nameEnglish: 'The Cave',
+                    verseCount: 110,
+                    revelationType: 'meccan',
+                  ),
+                );
+                Navigator.push(
+                  context,
+                  LuxuryPageRoute(
+                    page: SurahDetailScreen(surah: kahfSurah),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: BeyanColors.tone(0xFFD4AF37),
+                foregroundColor: BeyanColors.tone(0xFF01201D),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: Text(
+                lang == AppLanguage.turkish ? 'Oku ➔' : (lang == AppLanguage.arabic ? 'اقرأ ➔' : 'Read ➔'),
+                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
         ),
       ),
     );

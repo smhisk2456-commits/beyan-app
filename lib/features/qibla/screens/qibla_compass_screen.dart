@@ -30,10 +30,28 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
   bool _loadingLocation = true;
   bool _hasCompassSensor = true;
   bool _wasAligned = false;
+  int? _lastProximityBucket;
+
+  late final AnimationController _lockPulseController;
+  late final Animation<double> _lockPulseScale;
 
   @override
   void initState() {
     super.initState();
+    _lockPulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+    _lockPulseScale = TweenSequence<double>([
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.0, end: 1.06).chain(CurveTween(curve: Curves.easeOutCubic)),
+        weight: 35,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.06, end: 1.0).chain(CurveTween(curve: Curves.easeOutBack)),
+        weight: 65,
+      ),
+    ]).animate(_lockPulseController);
     _initLocationAndQibla();
     _startCompass();
   }
@@ -41,6 +59,7 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
   @override
   void dispose() {
     _compassSub?.cancel();
+    _lockPulseController.dispose();
     super.dispose();
   }
 
@@ -90,11 +109,27 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
       double diff = (_qiblaAngle - normalizedHeading + 360) % 360;
       if (diff > 180) diff -= 360;
 
-      final isAligned = diff.abs() <= 3.5;
+      final isAligned = diff.abs() <= 3.0;
 
-      // Hizalandığında titreşim ver
+      // Yaklaşma haptik geri bildirimi (Kıbleye yaklaştıkça artan Apple Taptic tıkırtıları)
+      if (!isAligned && diff.abs() <= 15.0) {
+        final bucket = (diff.abs() / 3.0).floor();
+        if (_lastProximityBucket != bucket) {
+          _lastProximityBucket = bucket;
+          HapticFeedback.selectionClick();
+        }
+      } else if (!isAligned) {
+        _lastProximityBucket = null;
+      }
+
+      // Kâbe yönüne tam oturup kilitlendiğinde tok çift Taptic Engine patlaması ("Klik!" hissi)
       if (isAligned && !_wasAligned) {
+        _lastProximityBucket = null;
+        _lockPulseController.forward(from: 0.0);
         HapticFeedback.heavyImpact();
+        Future.delayed(const Duration(milliseconds: 75), () {
+          HapticFeedback.mediumImpact();
+        });
       }
       _wasAligned = isAligned;
 
@@ -230,10 +265,10 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
                       ),
                     ],
 
-                    // Hizalanma Durum Başlığı
+                    // Hizalanma Durum Başlığı (Kâbe'ye Kilitlenme Rozeti)
                     AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 11),
                       decoration: BoxDecoration(
                         color: isAligned
                             ? BeyanColors.tone(0xFF0F5A47)
@@ -243,14 +278,14 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
                           color: isAligned
                               ? BeyanColors.tone(0xFFFFDF7A)
                               : BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.25),
-                          width: isAligned ? 1.5 : 1,
+                          width: isAligned ? 2.0 : 1,
                         ),
                         boxShadow: isAligned
                             ? [
                                 BoxShadow(
-                                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.3),
-                                  blurRadius: 16,
-                                  spreadRadius: 2,
+                                  color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.45),
+                                  blurRadius: 20,
+                                  spreadRadius: 3,
                                 )
                               ]
                             : null,
@@ -259,14 +294,16 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
-                            isAligned ? Icons.check_circle_rounded : Icons.explore_rounded,
+                            isAligned ? Icons.lock_rounded : Icons.explore_rounded,
                             color: isAligned ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFFD4AF37),
                             size: 20,
                           ),
                           const SizedBox(width: 10),
                           Text(
                             isAligned
-                                ? strings.facingQibla
+                                ? (strings.language == AppLanguage.turkish
+                                    ? 'KIBLEYE KİLİTLENDİ (0°)'
+                                    : strings.facingQibla)
                                 : (diff > 0
                                     ? strings.turnRightDeg(diff.round())
                                     : strings.turnLeftDeg((-diff).round())),
@@ -274,6 +311,7 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
                               color: isAligned ? Colors.white : (isDark ? Colors.white : Colors.black87),
                               fontWeight: FontWeight.bold,
                               fontSize: 15,
+                              letterSpacing: isAligned ? 0.8 : 0,
                             ),
                           ),
                         ],
@@ -282,11 +320,13 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
 
                     const SizedBox(height: 30),
 
-                    // ── LÜKS DÖNEN PUSULA KADRANI ─────────────────
-                    SizedBox(
-                      width: 290,
-                      height: 290,
-                      child: Stack(
+                    // ── LÜKS DÖNEN PUSULA KADRANI (Kilitlenme Yaylanmalı) ─────
+                    ScaleTransition(
+                      scale: _lockPulseScale,
+                      child: SizedBox(
+                        width: 290,
+                        height: 290,
+                        child: Stack(
                         alignment: Alignment.center,
                         children: [
                           // Dış Parıltı Halkası
@@ -424,6 +464,7 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
                         ],
                       ),
                     ),
+                  ),
 
                     const SizedBox(height: 32),
 

@@ -88,9 +88,13 @@ void main() {
 
   group('AdhanMakam Testleri', () {
     test('Tüm ezan makamları ve ses kaynakları doğru tanımlanmış olmalı', () {
-      expect(AdhanMakam.values.length, 6);
+      expect(AdhanMakam.values.length, 10);
 
+      expect(AdhanMakam.saba.soundResourceName, 'adhan_istanbul');
+      expect(AdhanMakam.rast.soundResourceName, 'adhan_mecca');
       expect(AdhanMakam.istanbul.soundResourceName, 'adhan_istanbul');
+      expect(AdhanMakam.segah.soundResourceName, 'adhan_mecca');
+      expect(AdhanMakam.ussak.soundResourceName, 'adhan_istanbul');
       expect(AdhanMakam.mecca.soundResourceName, 'adhan_mecca');
       expect(AdhanMakam.medina.soundResourceName, 'adhan_medina');
       expect(AdhanMakam.tekbir.soundResourceName, 'adhan_tekbir');
@@ -114,16 +118,25 @@ void main() {
     });
 
     test('Yerel asset yolları doğru formatta olmalı', () {
+      expect(AdhanMakam.saba.assetPath, 'audio/adhan_istanbul.mp3');
+      expect(AdhanMakam.rast.assetPath, 'audio/adhan_mecca.mp3');
+      expect(AdhanMakam.segah.assetPath, 'audio/adhan_medina.mp3');
+      expect(AdhanMakam.ussak.assetPath, 'audio/adhan_istanbul.mp3');
       expect(AdhanMakam.istanbul.assetPath, 'audio/adhan_istanbul.mp3');
       expect(AdhanMakam.mecca.assetPath, 'audio/adhan_mecca.mp3');
       expect(AdhanMakam.medina.assetPath, 'audio/adhan_medina.mp3');
       expect(AdhanMakam.tekbir.assetPath, 'audio/adhan_tekbir.mp3');
       expect(AdhanMakam.silent.assetPath, isEmpty);
+      expect(AdhanMakam.bell.assetPath, isEmpty);
     });
 
     test('Mecca ve Medina PRO makam olmalı, diğerleri ücretsiz olmalı', () {
       expect(AdhanMakam.mecca.isPro, isTrue);
       expect(AdhanMakam.medina.isPro, isTrue);
+      expect(AdhanMakam.saba.isPro, isFalse);
+      expect(AdhanMakam.rast.isPro, isFalse);
+      expect(AdhanMakam.segah.isPro, isFalse);
+      expect(AdhanMakam.ussak.isPro, isFalse);
       expect(AdhanMakam.istanbul.isPro, isFalse);
       expect(AdhanMakam.tekbir.isPro, isFalse);
       expect(AdhanMakam.bell.isPro, isFalse);

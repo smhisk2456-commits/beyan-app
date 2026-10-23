@@ -229,14 +229,35 @@ class _AdhanMakamSelectorSheetState
                   children: [
                     Row(
                       children: [
-                        Text(
-                          makam.localizedTitle(strings.language.code),
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            color: isDark ? Colors.white : AppColors.textPrimary,
+                        Flexible(
+                          child: Text(
+                            makam.localizedTitle(strings.language.code),
+                            style: TextStyle(
+                              fontSize: 14.5,
+                              fontWeight: FontWeight.bold,
+                              color: isDark ? Colors.white : AppColors.textPrimary,
+                            ),
                           ),
                         ),
+                        if (makam.vakitTag != null) ...[
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                            decoration: BoxDecoration(
+                              color: gold.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(color: gold.withValues(alpha: 0.4), width: 0.8),
+                            ),
+                            child: Text(
+                              makam.vakitTag!,
+                              style: TextStyle(
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.bold,
+                                color: gold,
+                              ),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                     const SizedBox(height: 2),
@@ -257,14 +278,32 @@ class _AdhanMakamSelectorSheetState
                   tooltip: isPlaying ? strings.stopAudio : strings.listenAudio,
                   icon: AnimatedSwitcher(
                     duration: const Duration(milliseconds: 200),
-                    child: Icon(
-                      isPlaying ? Icons.stop_circle_rounded : Icons.play_circle_outline_rounded,
+                    child: Container(
                       key: ValueKey(isPlaying),
-                      color: isPlaying ? Colors.amber : gold,
-                      size: 28,
+                      padding: const EdgeInsets.all(4),
+                      decoration: isPlaying
+                          ? BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.amber.withValues(alpha: 0.2),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.amber.withValues(alpha: 0.4),
+                                  blurRadius: 8,
+                                ),
+                              ],
+                            )
+                          : null,
+                      child: Icon(
+                        isPlaying ? Icons.stop_circle_rounded : Icons.play_circle_outline_rounded,
+                        color: isPlaying ? Colors.amber : gold,
+                        size: 28,
+                      ),
                     ),
                   ),
-                  onPressed: () => _audioService.togglePlayPreview(makam),
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    _audioService.togglePlayPreview(makam);
+                  },
                 ),
 
               // Seçili Onayı
