@@ -123,7 +123,8 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
                 Text(
                   '• Sorduğunuz dini ve fıkhi sorular cevap üretimi amacıyla üçüncü taraf yapay zeka modeline (Google Gemini) iletilir.\n'
                   '• Lütfen kişisel, gizli veya kimliğinizi ele verebilecek hassas verileri paylaşmayınız.\n'
-                  '• Üretilen yanıtlar ilmi ve manevi rehberlik amaçlıdır; kesin fetva ve nihai hüküm yerine geçmez.',
+                  '• Üretilen yanıtlar ilmi ve manevi rehberlik amaçlıdır; kesin fetva ve nihai hüküm yerine geçmez.\n'
+                  '• Ayrıntılı bilgi için Gizlilik Politikamızı inceleyebilir, onay tercihinizi dilediğiniz an Ayarlar üzerinden güncelleyebilirsiniz.',
                   style: TextStyle(color: Colors.white.withValues(alpha: 0.85), fontSize: 12.5, height: 1.45),
                 ),
               ],
@@ -264,7 +265,9 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
           ),
         ],
       ),
-    );
+    ).then((_) {
+      keyController.dispose();
+    });
   }
 
   void _showQuotaExceededDialog() {
@@ -411,36 +414,146 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          // ── Quota & Status Banner ────────────────────────
-          _buildQuotaBanner(
-            isPremium,
-            aiState.remainingQuestions,
-            aiState.hasCustomApiKey,
-            aiState.hasDeveloperGlobalKey,
-          ),
+      body: !aiState.hasAnyActiveKey
+          ? _buildUnavailableComingSoonView(context, isDark)
+          : Column(
+              children: [
+                // ── Quota & Status Banner ────────────────────────
+                _buildQuotaBanner(
+                  isPremium,
+                  aiState.remainingQuestions,
+                  aiState.hasCustomApiKey,
+                  aiState.hasDeveloperGlobalKey,
+                ),
 
-          // ── Mesaj Akışı ──────────────────────────────────
-          Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
-              itemCount: aiState.messages.length + (aiState.isThinking ? 1 : 0),
-              itemBuilder: (context, index) {
-                if (index < aiState.messages.length) {
-                  final msg = aiState.messages[index];
-                  return _buildMessageBubble(msg, isDark);
-                } else {
-                  return _buildThinkingBubble(isDark);
-                }
-              },
+                // ── Mesaj Akışı ──────────────────────────────────
+                Expanded(
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
+                    itemCount: aiState.messages.length + (aiState.isThinking ? 1 : 0),
+                    itemBuilder: (context, index) {
+                      if (index < aiState.messages.length) {
+                        final msg = aiState.messages[index];
+                        return _buildMessageBubble(msg, isDark);
+                      } else {
+                        return _buildThinkingBubble(isDark);
+                      }
+                    },
+                  ),
+                ),
+
+                // ── Giriş Alanı ──────────────────────────────────
+                _buildInputBar(isDark),
+              ],
             ),
-          ),
+    );
+  }
 
-          // ── Giriş Alanı ──────────────────────────────────
-          _buildInputBar(isDark),
-        ],
+  Widget _buildUnavailableComingSoonView(BuildContext context, bool isDark) {
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 88,
+              height: 88,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [BeyanColors.tone(0xFFFFDF7A), BeyanColors.tone(0xFFB8860B)],
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.35),
+                    blurRadius: 24,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Center(
+                child: Icon(Icons.auto_awesome_rounded, size: 44, color: BeyanColors.tone(0xFF01201B)),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Beyân AI Çok Yakında',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                letterSpacing: -0.5,
+                color: isDark ? Colors.white : BeyanColors.tone(0xFF01201B),
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Kur\'an-ı Kerim ayetleri, sahih hadisler ve muteber tefsirler ışığında manevi rehberlik asistanımız bir sonraki sürümümüzde hizmetinizde olacaktır.',
+              style: TextStyle(
+                fontSize: 14.5,
+                height: 1.55,
+                color: isDark ? Colors.white70 : Colors.black87,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 28),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: isDark ? BeyanColors.tone(0xFF032B24) : BeyanColors.tone(0xFFE8F4F0),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.5),
+                  width: 1,
+                ),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.vpn_key_rounded, size: 18, color: BeyanColors.tone(0xFFFFDF7A)),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Geliştirici & Test Erişimi',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : BeyanColors.tone(0xFF01201B),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Kendi Google Gemini API anahtarınızı tanımlayarak asistanı beklemeden canlı olarak test edebilirsiniz.',
+                    style: TextStyle(
+                      fontSize: 12,
+                      height: 1.4,
+                      color: isDark ? Colors.white60 : Colors.black54,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: BeyanColors.tone(0xFFFFDF7A),
+                        foregroundColor: BeyanColors.tone(0xFF01201B),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                      ),
+                      onPressed: () => _showApiKeyDialog(context),
+                      icon: const Icon(Icons.key_rounded, size: 18),
+                      label: const Text('API Anahtarı Tanımla', style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

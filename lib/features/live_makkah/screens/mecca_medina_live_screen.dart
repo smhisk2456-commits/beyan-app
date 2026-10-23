@@ -1,7 +1,4 @@
 import 'package:islamic_app/core/theme/beyan_colors.dart';
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -30,8 +27,8 @@ class _MeccaMedinaLiveScreenState extends ConsumerState<MeccaMedinaLiveScreen>
   static const String _makkahHandle = '@SaudiQuranTv';
   static const String _madinahHandle = '@SaudiSunnahTv';
 
-  String _makkahVideoId = _makkahDefaultVideoId;
-  String _madinahVideoId = _madinahDefaultVideoId;
+  final String _makkahVideoId = _makkahDefaultVideoId;
+  final String _madinahVideoId = _madinahDefaultVideoId;
 
   late final WebViewController _makkahController;
   late final WebViewController _madinahController;
@@ -63,15 +60,9 @@ class _MeccaMedinaLiveScreenState extends ConsumerState<MeccaMedinaLiveScreen>
     });
 
     _initControllers();
-    _fetchLiveVideoIds();
   }
 
-  static const String _browserUserAgent =
-      'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1';
-
   /// Gömülü oynatıcı için uygulamaya ait geçerli bir HTTPS origin.
-  /// YouTube, origin/referrer olarak youtube.com taklit eden gömmeleri
-  /// "Hata 152-4" ile reddeder; bu yüzden kendi origin'imizi kullanıyoruz.
   static const String _embedOrigin = 'https://beyan.app';
 
   // Gömülü oynatıcı hata verirse otomatik olarak mobil izleme sayfasına geçildi mi?
@@ -97,7 +88,6 @@ class _MeccaMedinaLiveScreenState extends ConsumerState<MeccaMedinaLiveScreen>
     controller = WebViewController.fromPlatformCreationParams(params)
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(Colors.black)
-      ..setUserAgent(_browserUserAgent)
       ..addJavaScriptChannel(
         'BeyanPlayer',
         onMessageReceived: (message) {
@@ -119,10 +109,9 @@ class _MeccaMedinaLiveScreenState extends ConsumerState<MeccaMedinaLiveScreen>
             onFinished();
           },
           onNavigationRequest: (request) {
-            // Uygulama dışına (youtube://, App Store vb.) yönlendirmeleri engelle
             final uri = Uri.tryParse(request.url);
             if (uri == null) return NavigationDecision.prevent;
-            if (uri.scheme == 'https' || uri.scheme == 'http' || uri.scheme == 'about') {
+            if (uri.scheme == 'https' || uri.scheme == 'about') {
               return NavigationDecision.navigate;
             }
             return NavigationDecision.prevent;
@@ -216,50 +205,11 @@ class _MeccaMedinaLiveScreenState extends ConsumerState<MeccaMedinaLiveScreen>
     controller.loadHtmlString(html, baseUrl: _embedOrigin);
   }
 
-  /// Yedek mod: YouTube mobil izleme sayfasını doğrudan uygulama içinde oynatır.
+  /// Yedek mod: YouTube resmi gömülü oynatıcısını doğrudan yükler.
   void _loadWatchPage(WebViewController controller, String videoId) {
     controller.loadRequest(
-      Uri.parse('https://m.youtube.com/watch?v=$videoId&autoplay=1&playsinline=1'),
-      headers: const {'Referer': 'https://m.youtube.com/'},
+      Uri.parse('https://www.youtube-nocookie.com/embed/$videoId?autoplay=1&playsinline=1&rel=0'),
     );
-  }
-
-  /// Kanalın /live sayfasındaki canonical bağlantıdan güncel canlı yayın ID'sini çözer.
-  Future<String?> _resolveLiveVideoId(HttpClient client, String handle) async {
-    try {
-      final req = await client.getUrl(Uri.parse('https://www.youtube.com/$handle/live'));
-      req.followRedirects = true;
-      req.headers.set('Accept-Language', 'en-US,en;q=0.8');
-      req.headers.set('Cookie', 'CONSENT=YES+1');
-      final res = await req.close().timeout(const Duration(seconds: 10));
-      final body = await utf8.decoder.bind(res).join();
-      final canonical = RegExp(
-        r'<link rel="canonical" href="https://www\.youtube\.com/watch\?v=([a-zA-Z0-9_-]{11})"',
-      ).firstMatch(body);
-      if (canonical != null) return canonical.group(1);
-    } catch (_) {}
-    return null;
-  }
-
-  Future<void> _fetchLiveVideoIds() async {
-    final client = HttpClient()..userAgent = _browserUserAgent;
-    try {
-      final makkahId = await _resolveLiveVideoId(client, _makkahHandle);
-      if (makkahId != null && makkahId != _makkahVideoId && mounted) {
-        _makkahVideoId = makkahId;
-        _makkahFallbackUsed = false;
-        _loadStream(_makkahController, _makkahVideoId);
-      }
-
-      final madinahId = await _resolveLiveVideoId(client, _madinahHandle);
-      if (madinahId != null && madinahId != _madinahVideoId && mounted) {
-        _madinahVideoId = madinahId;
-        _madinahFallbackUsed = false;
-        _loadStream(_madinahController, _madinahVideoId);
-      }
-    } finally {
-      client.close();
-    }
   }
 
   void _reloadCurrentStream() {

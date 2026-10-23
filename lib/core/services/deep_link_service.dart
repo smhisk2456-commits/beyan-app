@@ -87,7 +87,6 @@ class DeepLinkService {
       // 1. Namaz vakitleri widget'ı: beyan://prayer
       if (isPrayer) {
         ref.read(selectedTabProvider.notifier).state = 1;
-        Navigator.of(context).popUntil((route) => route.isFirst);
         return;
       }
 
@@ -111,7 +110,6 @@ class DeepLinkService {
             final safeVerse = (verseNum != null && verseNum >= 1 && verseNum <= surah.verseCount)
                 ? verseNum
                 : null;
-            Navigator.of(context).popUntil((route) => route.isFirst);
             Navigator.of(context).push(
               LuxuryPageRoute(
                 page: SurahDetailScreen(
@@ -127,7 +125,6 @@ class DeepLinkService {
         // Genel Kur'an sekmesine yönlendir
         if (context.mounted) {
           ref.read(selectedTabProvider.notifier).state = 2;
-          Navigator.of(context).popUntil((route) => route.isFirst);
         }
       }
     } catch (e) {

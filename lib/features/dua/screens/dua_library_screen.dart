@@ -1471,8 +1471,9 @@ _LinkedSurahInfo? _getLinkedSurah(DuaItem dua) {
       return const _LinkedSurahInfo(7, 'A\'râf', fromVerse: 23, toVerse: 23);
     case 'peygamber_4': // Yûsuf 101
       return const _LinkedSurahInfo(12, 'Yûsuf', fromVerse: 101, toVerse: 101);
-    case 'kuran_3': // İbrâhîm 41
-    case 'namaz_rabbena_agfirli':
+    case 'kuran_3': // İsrâ 24
+      return const _LinkedSurahInfo(17, 'İsrâ', fromVerse: 24, toVerse: 24);
+    case 'namaz_rabbena_agfirli': // İbrâhîm 41
       return const _LinkedSurahInfo(14, 'İbrâhîm', fromVerse: 41, toVerse: 41);
     case 'kuran_5': // İbrâhîm 40
       return const _LinkedSurahInfo(14, 'İbrâhîm', fromVerse: 40, toVerse: 40);

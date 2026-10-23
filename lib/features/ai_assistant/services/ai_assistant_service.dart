@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/utils/app_constants.dart';
 import '../models/ai_message.dart';
@@ -67,13 +68,35 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
   static const String _prefKeyGeminiKey = 'beyan_gemini_api_key';
   static const int freeDailyLimit = 999;
 
+  static const _secureStorage = FlutterSecureStorage(
+    iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock_this_device),
+    aOptions: AndroidOptions(resetOnError: true),
+  );
+
   AiAssistantNotifier() : super(const AiAssistantState(remainingQuestions: 999, dailyLimit: 999)) {
     _loadInitialState();
   }
 
   Future<void> _loadInitialState() async {
-    final prefs = await SharedPreferences.getInstance();
-    final savedApiKey = prefs.getString(_prefKeyGeminiKey);
+    String? savedApiKey;
+    try {
+      savedApiKey = await _secureStorage.read(key: _prefKeyGeminiKey);
+    } catch (_) {}
+
+    // Güvenli anahtarlık boşsa SharedPreferences yedeğini oku ve Keychain'e taşı
+    if (savedApiKey == null || savedApiKey.isEmpty) {
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        savedApiKey = prefs.getString(_prefKeyGeminiKey);
+        if (savedApiKey != null && savedApiKey.isNotEmpty) {
+          try {
+            await _secureStorage.write(key: _prefKeyGeminiKey, value: savedApiKey);
+            await prefs.remove(_prefKeyGeminiKey);
+          } catch (_) {}
+        }
+      } catch (_) {}
+    }
+
     final remaining = await getRemainingQuota(false);
 
     final welcomeMessage = AiMessage(
@@ -109,13 +132,27 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
   }
 
   Future<void> setGeminiApiKey(String? key) async {
-    final prefs = await SharedPreferences.getInstance();
     final clean = key?.trim();
+    try {
+      if (clean == null || clean.isEmpty) {
+        await _secureStorage.delete(key: _prefKeyGeminiKey);
+      } else {
+        await _secureStorage.write(key: _prefKeyGeminiKey, value: clean);
+      }
+    } catch (_) {}
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      if (clean == null || clean.isEmpty) {
+        await prefs.remove(_prefKeyGeminiKey);
+      } else {
+        await prefs.setString(_prefKeyGeminiKey, clean);
+      }
+    } catch (_) {}
+
     if (clean == null || clean.isEmpty) {
-      await prefs.remove(_prefKeyGeminiKey);
       state = state.copyWith(clearApiKey: true);
     } else {
-      await prefs.setString(_prefKeyGeminiKey, clean);
       state = state.copyWith(geminiApiKey: clean);
     }
   }

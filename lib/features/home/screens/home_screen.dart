@@ -27,6 +27,7 @@ import '../../spiritual_healing/models/mood_verse_model.dart';
 import '../../spiritual_healing/screens/mood_verse_sheet.dart';
 import '../../mosque_finder/screens/nearby_mosques_screen.dart';
 import '../../ai_assistant/screens/ai_assistant_screen.dart';
+import '../../ai_assistant/services/ai_assistant_service.dart';
 import '../../elif_ba/screens/elif_ba_hub_screen.dart';
 import '../../dua/screens/morning_evening_adhkar_screen.dart';
 import '../../../core/widgets/luxury_page_route.dart';
@@ -981,12 +982,13 @@ class _DailyFeaturedDuaCard extends ConsumerWidget {
 // Öne Çıkan Lüks Özellik Kartları (Beyân AI & Sesli Elif-Bâ)
 // ════════════════════════════════════════════════════════════════
 
-class _SpotlightFeatureCards extends StatelessWidget {
+class _SpotlightFeatureCards extends ConsumerWidget {
   const _SpotlightFeatureCards();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final hasKey = ref.watch(aiAssistantProvider).hasAnyActiveKey;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 6, 20, 10),
@@ -997,7 +999,7 @@ class _SpotlightFeatureCards extends StatelessWidget {
             child: _SpotlightCard(
               title: 'Beyân AI',
               subtitle: 'Manevi Rehber & Tefsir',
-              badge: 'YENİ ✨',
+              badge: hasKey ? 'YENİ ✨' : 'YAKINDA ⏳',
               icon: Icons.auto_awesome_rounded,
               gradientColors: isDark
                   ? [BeyanColors.tone(0xFF04382F), BeyanColors.tone(0xFF021F1A)]

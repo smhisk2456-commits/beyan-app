@@ -1,5 +1,5 @@
 /// Comprehensive Multilingual Localizations for Verified Duas
-/// Provides English and Arabic titles, translations, and references for all 46 verified duas.
+/// Provides English and Arabic titles, translations, and references for all 80 verified duas and prayers.
 class DuaTranslationEntry {
   final String titleEn;
   final String titleAr;
@@ -333,12 +333,12 @@ const Map<String, DuaTranslationEntry> kDuaTranslations = {
     referenceAr: 'سورة آل عمران ٨',
   ),
   'kuran_3': DuaTranslationEntry(
-    titleEn: 'Forgiveness for Parents & Believers',
-    titleAr: 'دعاء إبراهيم بالمغفرة للوالدين وللمؤمنين',
-    meaningEn: 'Our Lord, forgive me and my parents and the believers the Day the account is established.',
-    meaningAr: 'ربنا اغفر لي ولوالدي وللمؤمنين يوم يقوم الحساب.',
-    referenceEn: 'Surah Ibrahim 14:41',
-    referenceAr: 'سورة إبراهيم ٤١',
+    titleEn: 'Prayer of Mercy for Parents',
+    titleAr: 'دعاء البر والرحمة بالوالدين',
+    meaningEn: 'My Lord, have mercy upon them as they brought me up when I was small.',
+    meaningAr: 'رب ارحمهما كما ربياني صغيرا.',
+    referenceEn: 'Surah Al-Isra 17:24',
+    referenceAr: 'سورة الإسراء، الآية ٢٤',
   ),
   'kuran_4': DuaTranslationEntry(
     titleEn: 'Righteous Spouses & Offspring',

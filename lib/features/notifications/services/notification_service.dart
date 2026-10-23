@@ -211,8 +211,8 @@ class NotificationService {
 
       _isInitialized = true;
 
-      // Uygulama açılışında izinleri kontrol et ve gerekirse iste
-      await requestPermissions();
+      // Kılavuz 5.1.1 (F4/PI): Açılışta izin yağmuru yapmamak için izinler
+      // kullanıcının bildirim ayarlarını açtığı veya ezanı etkinleştirdiği anda bağlamsal olarak istenir.
 
       // Günün ayeti bildirimlerini arka planda kontrol et/planla
       await scheduleDailyVerseNotifications();

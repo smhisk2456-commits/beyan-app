@@ -63,17 +63,24 @@ class DuaRepository {
     return rows.isNotEmpty ? DailyDua.fromMap(rows.first) : null;
   }
 
+  /// Veritabanı LIKE araması için özel karakterleri kaçar (\, %, _).
+  static String escapeLike(String s) =>
+      s.replaceAll(r'\', r'\\').replaceAll('%', r'\%').replaceAll('_', r'\_');
+
   /// Toplam dua sayısını döner.
   Future<int> getDuaCount() => _db.count('daily_dua');
 
   /// Türkçe anlam veya referans alanında arama yapar.
   Future<List<DailyDua>> searchDuas(String query) async {
-    if (query.trim().isEmpty) return getAllDuas();
+    final clean = query.trim();
+    if (clean.isEmpty) return getAllDuas();
 
+    final capped = clean.length > 64 ? clean.substring(0, 64) : clean;
+    final cleanQuery = escapeLike(capped);
     final rows = await _db.query(
       table: 'daily_dua',
-      where: 'turkish_meaning LIKE ? OR reference LIKE ? OR arabic_text LIKE ?',
-      whereArgs: ['%$query%', '%$query%', '%$query%'],
+      where: "turkish_meaning LIKE ? ESCAPE '\\' OR reference LIKE ? ESCAPE '\\' OR arabic_text LIKE ? ESCAPE '\\'",
+      whereArgs: ['%$cleanQuery%', '%$cleanQuery%', '%$cleanQuery%'],
     );
     return rows.map(DailyDua.fromMap).toList();
   }

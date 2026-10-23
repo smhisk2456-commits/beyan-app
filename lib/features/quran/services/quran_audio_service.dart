@@ -284,6 +284,9 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
   int? _stopAfterVerse;
   int? get stopAfterVerse => _stopAfterVerse;
 
+  @visibleForTesting
+  void setStopAfterVerse(int? v) => _stopAfterVerse = v;
+
   void setVerses(List<Verse> verses) {
     final isNewSurahList = _currentVerses == null ||
         _currentVerses!.isEmpty ||
@@ -479,6 +482,7 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
   Future<void> playSurah(int surahId, String surahName, {int? initialVerseNumber}) async {
     try {
       _pendingSeekMs = null;
+      _stopAfterVerse = null; // Normal sure tilaveti başlatıldığında eski ayet durdurma sınırını temizle
       state = state.copyWith(
         isLoading: true,
         currentSurahId: surahId,
@@ -721,6 +725,13 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
       }
     }
 
+    // Belirli bir ayet aralığı çalınıyorsa (örn: Dua kartı) ve hedef ayet bittiyse durdur (çevrimdışı / diğer kâriler)
+    if (_stopAfterVerse != null && determinedVerse > _stopAfterVerse!) {
+      _stopAfterVerse = null;
+      stop();
+      return;
+    }
+
     final verseDurationMs = verseEndMs - verseStartMs;
     final verseElapsedMs = (effectiveMs - verseStartMs).clamp(0, verseDurationMs > 0 ? verseDurationMs : 1);
     final progress = verseDurationMs > 0 ? (verseElapsedMs / verseDurationMs).clamp(0.0, 1.0) : 0.0;
@@ -957,8 +968,8 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
     required int to,
     required String surahName,
   }) async {
-    _stopAfterVerse = to;
     await seekToVerse(from, verses, surahName: surahName);
+    _stopAfterVerse = to;
   }
 
   Future<void> seek(Duration position) async {
@@ -1109,6 +1120,7 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
       await _player.stop();
     } catch (_) {}
     _currentVerses = null;
+    if (!mounted) return;
     state = state.copyWith(
       isPlaying: false,
       isLoading: false,
