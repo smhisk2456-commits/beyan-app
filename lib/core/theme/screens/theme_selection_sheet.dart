@@ -21,12 +21,13 @@ class ThemeSelectionSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeState = ref.watch(themeProvider);
+    final effectivePalette = ref.watch(effectivePaletteProvider);
     final themeNotifier = ref.read(themeProvider.notifier);
     final strings = ref.watch(appStringsProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final sheetBg = isDark
-        ? themeState.palette.darkSurface
+        ? effectivePalette.darkSurface
         : Colors.white;
 
     final titleColor = isDark ? Colors.white : AppColors.textPrimary;
@@ -170,7 +171,7 @@ class ThemeSelectionSheet extends ConsumerWidget {
               const SizedBox(height: 12),
 
               ...AppThemePalette.values.map((palette) {
-                final isSelected = themeState.palette == palette;
+                final isSelected = !themeState.isDynamicPrayerTheme && themeState.palette == palette;
                 return _buildPaletteTile(
                   context: context,
                   palette: palette,

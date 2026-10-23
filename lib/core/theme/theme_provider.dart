@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../features/prayer_times/models/prayer_time_model.dart';
+import '../../features/prayer_times/providers/prayer_time_providers.dart';
 import 'app_theme.dart';
 import 'beyan_colors.dart';
 
@@ -44,6 +46,27 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
         )) {
     BeyanColors.setPalette(AppThemePalette.emerald);
     _loadFromPrefs();
+  }
+
+  /// Namaz vaktine karşılık gelen birleşik uygulama paleti.
+  static AppThemePalette paletteForPrayer(
+    PrayerName? nextPrayer, {
+    AppThemePalette fallback = AppThemePalette.emerald,
+  }) {
+    switch (nextPrayer) {
+      case PrayerName.fajr:
+      case PrayerName.isha:
+        return AppThemePalette.deepSapphire;
+      case PrayerName.sunrise:
+      case PrayerName.asr:
+        return AppThemePalette.desertMocha;
+      case PrayerName.maghrib:
+        return AppThemePalette.amethystNight;
+      case PrayerName.dhuhr:
+        return AppThemePalette.emerald;
+      case null:
+        return fallback;
+    }
   }
 
   Future<void> _loadFromPrefs() async {
@@ -101,4 +124,23 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
 /// Tema durumu sağlayıcısı
 final themeProvider = StateNotifierProvider<ThemeNotifier, ThemeState>((ref) {
   return ThemeNotifier();
+});
+
+/// Uygulamanın TÜM ekranlarında, alt barda ve kartlarında kullanılan
+/// tek ve birleşik aktif renk paleti sağlayıcısı.
+/// "Vakte Göre Canlı Tema" açık olduğunda bile tüm sekmeler ve alt bar
+/// aynı paleti kullanarak parçalı renk oluşumunu %100 engeller.
+final effectivePaletteProvider = Provider<AppThemePalette>((ref) {
+  final themeState = ref.watch(themeProvider);
+  AppThemePalette resolved = themeState.palette;
+  if (themeState.isDynamicPrayerTheme) {
+    final prayerAsync = ref.watch(prayerTimesNotifierProvider);
+    final nextPrayer = prayerAsync.valueOrNull?.nextPrayerEntry?.name;
+    resolved = ThemeNotifier.paletteForPrayer(
+      nextPrayer,
+      fallback: themeState.palette,
+    );
+  }
+  BeyanColors.setPalette(resolved);
+  return resolved;
 });

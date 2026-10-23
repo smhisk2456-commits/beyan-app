@@ -19,8 +19,8 @@ class LuxuryFloatingDock extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final strings = ref.watch(appStringsProvider);
-    final themeState = ref.watch(themeProvider);
-    BeyanColors.setPalette(themeState.palette);
+    final effectivePalette = ref.watch(effectivePaletteProvider);
+    BeyanColors.setPalette(effectivePalette);
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),

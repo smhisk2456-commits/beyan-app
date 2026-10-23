@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/localization/app_strings.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../../../core/utils/app_constants.dart';
 import '../widget_service.dart';
 import '../../monetization/providers/premium_provider.dart';
@@ -1263,6 +1264,8 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final effectivePalette = ref.watch(effectivePaletteProvider);
+    BeyanColors.setPalette(effectivePalette);
     final strings = ref.watch(appStringsProvider);
 
     return Scaffold(

@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -125,7 +126,7 @@ class _VerseCardStudioScreenState extends ConsumerState<VerseCardStudioScreen> {
     final langCode = strings.language.code;
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF032620),
+      backgroundColor: BeyanColors.tone(0xFF032620),
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
@@ -298,7 +299,7 @@ class _VerseCardStudioScreenState extends ConsumerState<VerseCardStudioScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF04241F),
+        backgroundColor: BeyanColors.tone(0xFF04241F),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
         title: Text(
           strings.writeYourOwnVerseTitle,
@@ -406,7 +407,7 @@ class _VerseCardStudioScreenState extends ConsumerState<VerseCardStudioScreen> {
   Widget build(BuildContext context) {
     final strings = ref.watch(appStringsProvider);
     return Scaffold(
-      backgroundColor: const Color(0xFF011815),
+      backgroundColor: BeyanColors.tone(0xFF011815),
       appBar: _isPreviewMode
           ? null
           : AppBar(
@@ -418,13 +419,13 @@ class _VerseCardStudioScreenState extends ConsumerState<VerseCardStudioScreen> {
               actions: [
                 // Rastgele Âyet Düğmesi
                 IconButton(
-                  icon: const Icon(Icons.casino_rounded, color: Color(0xFFFFDF7A)),
+                  icon: Icon(Icons.casino_rounded, color: BeyanColors.tone(0xFFFFDF7A)),
                   tooltip: strings.randomVerseTooltip,
                   onPressed: _randomizeVerse,
                 ),
                 // Paylaş
                 IconButton(
-                  icon: const Icon(Icons.share_rounded, color: Color(0xFFFFDF7A)),
+                  icon: Icon(Icons.share_rounded, color: BeyanColors.tone(0xFFFFDF7A)),
                   tooltip: strings.shareTooltip,
                   onPressed: _isSaving ? null : _captureAndShare,
                 ),
@@ -450,9 +451,9 @@ class _VerseCardStudioScreenState extends ConsumerState<VerseCardStudioScreen> {
                           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                         ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF03332B),
-                          foregroundColor: const Color(0xFFFFDF7A),
-                          side: const BorderSide(color: Color(0xFFD4AF37), width: 1),
+                          backgroundColor: BeyanColors.tone(0xFF03332B),
+                          foregroundColor: BeyanColors.tone(0xFFFFDF7A),
+                          side: BorderSide(color: BeyanColors.tone(0xFFD4AF37), width: 1),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                         ),
@@ -676,11 +677,11 @@ class _VerseCardStudioScreenState extends ConsumerState<VerseCardStudioScreen> {
     final langCode = strings.language.code;
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-      decoration: const BoxDecoration(
-        color: Color(0xFF032621),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: BeyanColors.tone(0xFF032621),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         border: Border(
-          top: BorderSide(color: Color(0xFFD4AF37), width: 1.2),
+          top: BorderSide(color: BeyanColors.tone(0xFFD4AF37), width: 1.2),
         ),
       ),
       child: Column(

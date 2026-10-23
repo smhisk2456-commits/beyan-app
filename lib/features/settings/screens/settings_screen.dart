@@ -5,7 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../core/localization/app_strings.dart';
 import '../../../core/localization/language_selector_sheet.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/screens/theme_selection_sheet.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../../bedside_clock/screens/bedside_clock_screen.dart';
 import '../../live_makkah/screens/mecca_medina_live_screen.dart';
 import '../../notifications/screens/notification_settings_sheet.dart';
@@ -32,6 +34,8 @@ class SettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final effectivePalette = ref.watch(effectivePaletteProvider);
+    BeyanColors.setPalette(effectivePalette);
     final strings = ref.watch(appStringsProvider);
     final currentLang = ref.watch(appLanguageProvider);
     final isLiveActivityEnabled = ref.watch(liveActivityEnabledProvider);
@@ -39,8 +43,9 @@ class SettingsScreen extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: isDark ? effectivePalette.darkBackground : effectivePalette.lightBackground,
       appBar: AppBar(
+        backgroundColor: isDark ? effectivePalette.darkSurface : effectivePalette.primaryColor,
         title: Text(
           strings.settings,
           style: const TextStyle(fontWeight: FontWeight.bold),

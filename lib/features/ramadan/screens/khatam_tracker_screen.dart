@@ -187,7 +187,7 @@ class KhatamTrackerScreen extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color: isDone
-                      ? const Color(0xFF2E7D32)
+                      ? BeyanColors.tone(0xFF2E7D32)
                       : (isDark ? Colors.white12 : Colors.grey.shade200),
                   width: isDone ? 1.4 : 1,
                 ),
@@ -206,9 +206,9 @@ class KhatamTrackerScreen extends ConsumerWidget {
                   height: 38,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: isDone ? const Color(0xFF2E7D32) : gold.withValues(alpha: 0.15),
+                    color: isDone ? BeyanColors.tone(0xFF2E7D32) : gold.withValues(alpha: 0.15),
                     border: Border.all(
-                      color: isDone ? Colors.green.shade400 : gold,
+                      color: isDone ? BeyanColors.tone(0xFF66BB6A) : gold,
                       width: 1,
                     ),
                   ),
@@ -247,10 +247,10 @@ class KhatamTrackerScreen extends ConsumerWidget {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: isDone ? const Color(0xFF2E7D32) : Colors.transparent,
+                      color: isDone ? BeyanColors.tone(0xFF2E7D32) : Colors.transparent,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: isDone ? const Color(0xFF2E7D32) : gold.withValues(alpha: 0.6),
+                        color: isDone ? BeyanColors.tone(0xFF2E7D32) : gold.withValues(alpha: 0.6),
                         width: 1,
                       ),
                     ),

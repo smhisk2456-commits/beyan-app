@@ -2,10 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:islamic_app/core/services/acoustic_audio_service.dart';
+import 'package:islamic_app/core/theme/app_theme.dart';
+import 'package:islamic_app/core/theme/beyan_colors.dart';
+import 'package:islamic_app/core/theme/theme_provider.dart';
 import 'package:islamic_app/core/widgets/luxury_page_route.dart';
 import 'package:islamic_app/features/dua/data/verified_duas_data.dart';
 import 'package:islamic_app/features/dua/models/dua_model.dart';
 import 'package:islamic_app/features/dua/providers/dua_providers.dart';
+import 'package:islamic_app/features/home/models/dynamic_prayer_atmosphere.dart';
+import 'package:islamic_app/features/prayer_times/models/prayer_time_model.dart';
 import 'package:islamic_app/features/quran/services/quran_audio_service.dart';
 import 'package:islamic_app/features/quran/widgets/arabic_text_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -143,6 +148,69 @@ void main() {
       final favorites = container.read(favoriteDuasProvider);
       expect(favorites.length, 1);
       expect(favorites.contains(firstDua.id), isTrue);
+    });
+  });
+
+  group('Tema Geçişleri ve Birleşik Palet (effectivePaletteProvider) Testleri', () {
+    test('Seçilen her tema paleti tüm yeşil referans tonlarını kendi renk uzayına dönüştürmeli', () {
+      const greenSamples = [
+        0xFF012E2B, // LuxuryFloatingDock üst ton
+        0xFF021B17, // LuxuryFloatingDock alt ton
+        0xFF071B18, // Koyu arka plan
+        0xFF0D2823, // AppBar / yüzey
+        0xFF133630, // Kart yüzeyi
+        0xFF2E7D32, // Hatim tamamlandı yeşili
+      ];
+
+      for (final palette in AppThemePalette.values) {
+        if (palette == AppThemePalette.emerald) continue;
+        BeyanColors.setPalette(palette);
+
+        for (final hex in greenSamples) {
+          final transformed = BeyanColors.tone(hex);
+          final hsl = HSLColor.fromColor(transformed);
+          // Zümrüt dışındaki hiçbir temada yeşil ton (120..180 yüksek doygunluk) kalmamalı
+          final isStillEmeraldGreen = hsl.hue >= 120 && hsl.hue <= 180 && hsl.saturation > 0.15;
+          expect(
+            isStillEmeraldGreen,
+            isFalse,
+            reason: '$palette temasında 0x${hex.toRadixString(16)} hala yeşil kaldı: $hsl',
+          );
+        }
+      }
+
+      BeyanColors.setPalette(AppThemePalette.emerald);
+    });
+
+    test('effectivePaletteProvider ve DynamicPrayerAtmosphere tüm ekranları tek palet altında birleştirmeli', () async {
+      SharedPreferences.setMockInitialValues({});
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      // 1. Manuel palet seçildiğinde effectivePaletteProvider ve BeyanColors senkronize olmalı
+      for (final palette in AppThemePalette.values) {
+        await container.read(themeProvider.notifier).setPalette(palette);
+        final effective = container.read(effectivePaletteProvider);
+        expect(effective, palette);
+        expect(BeyanColors.palette, palette);
+
+        final darkTheme = AppTheme.buildTheme(effective, isDark: true);
+        expect(darkTheme.scaffoldBackgroundColor, palette.darkBackground);
+        expect(darkTheme.appBarTheme.backgroundColor, palette.darkSurface);
+        expect(darkTheme.cardTheme.color, palette.darkCard);
+      }
+
+      // 2. Dinamik namaz vakti atmosferi, ilgili vaktin paleti ile birebir aynı renkleri üretmeli
+      for (final prayer in PrayerName.values) {
+        final expectedPalette = ThemeNotifier.paletteForPrayer(prayer);
+        final atmosphere = DynamicPrayerAtmosphere.forPrayer(prayer);
+        expect(atmosphere.backgroundGradient.first, expectedPalette.darkBackground);
+        expect(atmosphere.appBarColor, expectedPalette.darkSurface);
+        expect(atmosphere.actionCardBg, expectedPalette.darkSurface);
+        expect(atmosphere.cardGradient, expectedPalette.prayerCardGradient);
+      }
+
+      BeyanColors.setPalette(AppThemePalette.emerald);
     });
   });
 }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/localization/app_strings.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../../../core/utils/app_constants.dart';
 import '../models/prayer_time_model.dart';
 import '../providers/prayer_time_providers.dart';
@@ -19,12 +20,16 @@ class PrayerTimesScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final effectivePalette = ref.watch(effectivePaletteProvider);
+    BeyanColors.setPalette(effectivePalette);
     final prayerAsync = ref.watch(prayerTimesNotifierProvider);
     final strings = ref.watch(appStringsProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: isDark ? effectivePalette.darkBackground : effectivePalette.lightBackground,
       appBar: AppBar(
+        backgroundColor: isDark ? effectivePalette.darkSurface : effectivePalette.primaryColor,
         title: Text(strings.tabPrayers),
         actions: [
           // Şehir / Konum Seçici Buton
@@ -107,22 +112,29 @@ class _PrayerTimesContent extends ConsumerWidget {
 }
 
 /// Konum ve tarih bilgisi kartı.
-class _LocationDateCard extends StatelessWidget {
+class _LocationDateCard extends ConsumerWidget {
   final DailyPrayerTimes daily;
   final AppStrings strings;
   const _LocationDateCard({required this.daily, required this.strings});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final effectivePalette = ref.watch(effectivePaletteProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final now = DateTime.now();
     final dateStr = '${now.day} ${_monthName(now.month, strings.language)} ${now.year}';
 
     return Card(
+      color: isDark ? effectivePalette.darkCard : effectivePalette.lightCard,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            Icon(Icons.location_on_rounded, color: AppColors.teal, size: 20),
+            Icon(
+              Icons.location_on_rounded,
+              color: isDark ? BeyanColors.tone(0xFFFFDF7A) : AppColors.primary,
+              size: 20,
+            ),
             const SizedBox(width: 8),
             Expanded(
               child: Column(
@@ -146,7 +158,7 @@ class _LocationDateCard extends StatelessWidget {
               daily.latitude == AppConstants.defaultLatitude
                   ? Icons.location_city_rounded
                   : Icons.gps_fixed_rounded,
-              color: AppColors.textHint,
+              color: isDark ? Colors.white54 : AppColors.textHint,
               size: 16,
             ),
           ],
@@ -185,21 +197,26 @@ class _NextPrayerBanner extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final effectivePalette = ref.watch(effectivePaletteProvider);
     final next = daily.nextPrayerEntry;
     final service = _PrayerTimeServiceHelper();
 
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [AppColors.tealDark, AppColors.primary],
+          colors: effectivePalette.prayerCardGradient,
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: effectivePalette.accentGold.withValues(alpha: 0.4),
+          width: 1.2,
+        ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.teal.withValues(alpha: 0.3),
-            blurRadius: 12,
+            color: effectivePalette.prayerCardGlow.withValues(alpha: 0.22),
+            blurRadius: 16,
             offset: const Offset(0, 6),
           ),
         ],
@@ -524,18 +541,22 @@ class _PrayerTimeCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final effectivePalette = ref.watch(effectivePaletteProvider);
     final strings = ref.watch(appStringsProvider);
     final helper = _PrayerTimeServiceHelper();
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final nextAccentColor = isDark ? BeyanColors.tone(0xFFFFDF7A) : AppColors.primary;
 
-    // Aktif/sıradaki vakit için farklı stil
+    // Aktif/sıradaki vakit için yüksek kontrastlı ve palet uyumlu stil
     Color cardColor;
     if (isNext) {
-      cardColor = AppColors.teal.withValues(alpha: isDark ? 0.25 : 0.12);
+      cardColor = isDark
+          ? BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.16)
+          : AppColors.primary.withValues(alpha: 0.10);
     } else if (isCurrent) {
-      cardColor = AppColors.gold.withValues(alpha: isDark ? 0.2 : 0.1);
+      cardColor = AppColors.gold.withValues(alpha: isDark ? 0.12 : 0.08);
     } else {
-      cardColor = Theme.of(context).cardColor;
+      cardColor = isDark ? effectivePalette.darkCard : effectivePalette.lightCard;
     }
 
     return AnimatedContainer(
@@ -545,14 +566,19 @@ class _PrayerTimeCard extends ConsumerWidget {
         color: cardColor,
         borderRadius: BorderRadius.circular(14),
         border: isNext
-            ? Border.all(color: AppColors.teal.withValues(alpha: 0.5), width: 1.5)
+            ? Border.all(color: nextAccentColor.withValues(alpha: 0.7), width: 1.5)
             : isCurrent
-                ? Border.all(color: AppColors.gold.withValues(alpha: 0.5), width: 1)
-                : null,
+                ? Border.all(color: AppColors.gold.withValues(alpha: 0.45), width: 1)
+                : Border.all(
+                    color: isDark
+                        ? effectivePalette.accentGold.withValues(alpha: 0.18)
+                        : Colors.black.withValues(alpha: 0.06),
+                    width: 1,
+                  ),
         boxShadow: isNext
             ? [
                 BoxShadow(
-                  color: AppColors.teal.withValues(alpha: 0.15),
+                  color: nextAccentColor.withValues(alpha: 0.15),
                   blurRadius: 8,
                   offset: const Offset(0, 3),
                 ),
@@ -576,7 +602,9 @@ class _PrayerTimeCard extends ConsumerWidget {
                     color: _iconBgColor(isDark),
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: isNext ? AppColors.teal : (isCurrent ? AppColors.gold : Colors.grey.withValues(alpha: 0.3)),
+                      color: isNext
+                          ? nextAccentColor
+                          : (isCurrent ? AppColors.gold : (isDark ? Colors.white24 : Colors.grey.withValues(alpha: 0.3))),
                       width: 1,
                     ),
                   ),
@@ -586,7 +614,8 @@ class _PrayerTimeCard extends ConsumerWidget {
                       style: TextStyle(
                         fontFamily: 'Amiri',
                         fontSize: 14,
-                        color: _iconTextColor(),
+                        fontWeight: isNext || isCurrent ? FontWeight.bold : FontWeight.normal,
+                        color: _iconTextColor(isDark, nextAccentColor),
                         height: 1.6,
                       ),
                       textDirection: TextDirection.rtl,
@@ -607,7 +636,9 @@ class _PrayerTimeCard extends ConsumerWidget {
                               entry.name.localizedName(strings.language.code),
                               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                 fontWeight: isNext ? FontWeight.bold : FontWeight.w600,
-                                color: isNext ? AppColors.teal : null,
+                                color: isNext
+                                    ? nextAccentColor
+                                    : (isDark ? Colors.white : AppColors.textPrimary),
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -618,14 +649,14 @@ class _PrayerTimeCard extends ConsumerWidget {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
-                                color: AppColors.gold.withValues(alpha: 0.2),
+                                color: AppColors.gold.withValues(alpha: 0.22),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
                                 strings.currentPrayer,
                                 style: TextStyle(
                                   fontSize: 10,
-                                  color: AppColors.gold,
+                                  color: isDark ? BeyanColors.tone(0xFFFFDF7A) : AppColors.goldDark,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -634,14 +665,16 @@ class _PrayerTimeCard extends ConsumerWidget {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
-                                color: AppColors.teal.withValues(alpha: 0.2),
+                                color: isDark
+                                    ? BeyanColors.tone(0xFFD4AF37)
+                                    : AppColors.primary.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
                                 strings.nextPrayer,
                                 style: TextStyle(
                                   fontSize: 10,
-                                  color: AppColors.teal,
+                                  color: isDark ? Colors.black : AppColors.primary,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -687,10 +720,10 @@ class _PrayerTimeCard extends ConsumerWidget {
                   helper.fmt(entry.time),
                   style: TextStyle(
                     fontSize: 20,
-                    fontWeight: isNext ? FontWeight.bold : FontWeight.w300,
+                    fontWeight: isNext ? FontWeight.bold : FontWeight.w400,
                     color: isNext
-                        ? AppColors.teal
-                        : Theme.of(context).textTheme.bodyLarge?.color,
+                        ? nextAccentColor
+                        : (isDark ? Colors.white : AppColors.textPrimary),
                     fontFeatures: const [FontFeature.tabularFigures()],
                   ),
                 ),
@@ -703,15 +736,19 @@ class _PrayerTimeCard extends ConsumerWidget {
   }
 
   Color _iconBgColor(bool isDark) {
-    if (isNext) return AppColors.teal.withValues(alpha: 0.2);
+    if (isNext) {
+      return isDark
+          ? BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.24)
+          : AppColors.primary.withValues(alpha: 0.15);
+    }
     if (isCurrent) return AppColors.gold.withValues(alpha: 0.2);
     return isDark ? Colors.white10 : Colors.grey.shade100;
   }
 
-  Color _iconTextColor() {
-    if (isNext) return AppColors.teal;
-    if (isCurrent) return AppColors.gold;
-    return AppColors.textSecondary;
+  Color _iconTextColor(bool isDark, Color nextAccentColor) {
+    if (isNext) return nextAccentColor;
+    if (isCurrent) return isDark ? BeyanColors.tone(0xFFFFDF7A) : AppColors.goldDark;
+    return isDark ? Colors.white70 : AppColors.textSecondary;
   }
 }
 

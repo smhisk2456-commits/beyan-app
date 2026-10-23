@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/localization/app_strings.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../../../core/widgets/common_widgets.dart' as app_widgets;
 import '../../home/widgets/surah_list_item.dart';
 import '../../monetization/widgets/banner_ad_widget.dart';
@@ -70,6 +71,8 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final effectivePalette = ref.watch(effectivePaletteProvider);
+    BeyanColors.setPalette(effectivePalette);
     final allSurahsAsync = ref.watch(allSurahsProvider);
     final allSurahs = allSurahsAsync.valueOrNull ?? [];
     final strings = ref.watch(appStringsProvider);
@@ -79,8 +82,9 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
     final isSearching = searchQuery.isNotEmpty;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: isDark ? effectivePalette.darkBackground : effectivePalette.lightBackground,
       appBar: AppBar(
+        backgroundColor: isDark ? effectivePalette.darkSurface : effectivePalette.primaryColor,
         title: Text(
           strings.quranTitle,
           style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 0.3),

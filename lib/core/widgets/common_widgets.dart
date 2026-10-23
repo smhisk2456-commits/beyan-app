@@ -13,7 +13,7 @@ class LoadingWidget extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           CircularProgressIndicator(
-            color: AppColors.teal,
+            color: AppColors.gold,
             strokeWidth: 3,
           ),
           if (message != null) ...[

@@ -123,7 +123,8 @@ class IslamicApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final currentLang = ref.watch(appLanguageProvider);
     final themeState = ref.watch(themeProvider);
-    BeyanColors.setPalette(themeState.palette);
+    final effectivePalette = ref.watch(effectivePaletteProvider);
+    BeyanColors.setPalette(effectivePalette);
 
     return MaterialApp(
       navigatorKey: DeepLinkService.navigatorKey,
@@ -145,8 +146,9 @@ class IslamicApp extends ConsumerWidget {
         Locale('de'),
         Locale('ru'),
       ],
-      theme: AppTheme.buildTheme(themeState.palette, isDark: false),
-      darkTheme: AppTheme.buildTheme(themeState.palette, isDark: true),
+      themeAnimationDuration: Duration.zero,
+      theme: AppTheme.buildTheme(effectivePalette, isDark: false),
+      darkTheme: AppTheme.buildTheme(effectivePalette, isDark: true),
       themeMode: themeState.mode,
       home: const SplashScreen(),
     );
@@ -204,9 +206,10 @@ class _MainNavigationState extends ConsumerState<MainNavigation>
   Widget build(BuildContext context) {
     final selectedTab = ref.watch(selectedTabProvider);
     final themeState = ref.watch(themeProvider);
-    BeyanColors.setPalette(themeState.palette);
+    final effectivePalette = ref.watch(effectivePaletteProvider);
+    BeyanColors.setPalette(effectivePalette);
     final themeKey = ValueKey(
-      '${themeState.palette.name}_${themeState.mode.name}_${themeState.isDynamicPrayerTheme}',
+      '${effectivePalette.name}_${themeState.mode.name}_${themeState.isDynamicPrayerTheme}',
     );
 
     return KeyedSubtree(
@@ -219,15 +222,15 @@ class _MainNavigationState extends ConsumerState<MainNavigation>
             // ignore: prefer_const_constructors, prefer_const_literals_to_create_immutables
             children: [
               // ignore: prefer_const_constructors
-              HomeScreen(key: ValueKey('home_${themeState.palette.name}')),
+              HomeScreen(key: ValueKey('home_${effectivePalette.name}')),
               // ignore: prefer_const_constructors
-              PrayerTimesScreen(key: ValueKey('prayers_${themeState.palette.name}')),
+              PrayerTimesScreen(key: ValueKey('prayers_${effectivePalette.name}')),
               // ignore: prefer_const_constructors
-              SurahListScreen(key: ValueKey('surahs_${themeState.palette.name}')),
+              SurahListScreen(key: ValueKey('surahs_${effectivePalette.name}')),
               // ignore: prefer_const_constructors
-              ZikirmatikScreen(key: ValueKey('zikr_${themeState.palette.name}')),
+              ZikirmatikScreen(key: ValueKey('zikr_${effectivePalette.name}')),
               // ignore: prefer_const_constructors
-              WidgetCenterScreen(key: ValueKey('widgets_${themeState.palette.name}')),
+              WidgetCenterScreen(key: ValueKey('widgets_${effectivePalette.name}')),
             ],
           ),
         ),
@@ -235,10 +238,10 @@ class _MainNavigationState extends ConsumerState<MainNavigation>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              AdhanAudioPlayerBar(key: ValueKey('adhan_bar_${themeState.palette.name}')),
-              QuranAudioPlayerBar(key: ValueKey('quran_bar_${themeState.palette.name}')),
+              AdhanAudioPlayerBar(key: ValueKey('adhan_bar_${effectivePalette.name}')),
+              QuranAudioPlayerBar(key: ValueKey('quran_bar_${effectivePalette.name}')),
               LuxuryFloatingDock(
-                key: ValueKey('dock_${themeState.palette.name}'),
+                key: ValueKey('dock_${effectivePalette.name}'),
                 currentIndex: selectedTab,
                 onTap: (i) => ref.read(selectedTabProvider.notifier).state = i,
               ),

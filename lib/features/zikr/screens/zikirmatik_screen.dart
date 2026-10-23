@@ -6,6 +6,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/localization/app_strings.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../../settings/screens/settings_screen.dart';
 import '../../monetization/widgets/banner_ad_widget.dart';
 import '../models/worship_tracker_model.dart';
@@ -496,13 +498,16 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
 
   @override
   Widget build(BuildContext context) {
+    final effectivePalette = ref.watch(effectivePaletteProvider);
+    BeyanColors.setPalette(effectivePalette);
     final strings = ref.watch(appStringsProvider);
     final currentLang = ref.watch(appLanguageProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: isDark ? effectivePalette.darkBackground : effectivePalette.lightBackground,
       appBar: AppBar(
+        backgroundColor: isDark ? effectivePalette.darkSurface : effectivePalette.primaryColor,
         title: Text(_activeTab == 0 ? strings.actionZikr : strings.worshipTrackerTab),
         centerTitle: true,
         actions: [

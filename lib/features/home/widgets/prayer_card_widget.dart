@@ -6,7 +6,6 @@ import 'package:intl/intl.dart';
 import '../../../core/localization/app_strings.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/theme_provider.dart';
-import '../models/dynamic_prayer_atmosphere.dart';
 import '../../prayer_times/models/prayer_time_model.dart';
 import '../../prayer_times/providers/prayer_time_providers.dart';
 import '../../calendar/services/hijri_calendar_service.dart';
@@ -89,7 +88,8 @@ class _PrayerCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final themeState = ref.watch(themeProvider);
+    final effectivePalette = ref.watch(effectivePaletteProvider);
+    BeyanColors.setPalette(effectivePalette);
     final strings = ref.watch(appStringsProvider);
     final langCode = strings.language.code;
     final next = daily.nextPrayerEntry;
@@ -97,25 +97,12 @@ class _PrayerCard extends ConsumerWidget {
     final timeRemaining = next != null ? next.time.difference(now) : Duration.zero;
     final isApproaching = timeRemaining.inMinutes < 15 && !timeRemaining.isNegative;
 
-    List<Color> gradientColors;
-    Color glowColor;
-    Color borderColor;
-
-    if (themeState.isDynamicPrayerTheme) {
-      final atmosphere = DynamicPrayerAtmosphere.forPrayer(next?.name);
-      gradientColors = atmosphere.cardGradient;
-      glowColor = atmosphere.glowColor;
-      borderColor = isApproaching
-          ? BeyanColors.tone(0xFFFFDF7A)
-          : atmosphere.cardBorder.withValues(alpha: 0.45);
-    } else {
-      // Saf ve Kusursuz Tema Uyumu (Seçilen palete %100 sadık kalarak orantısızlığı önler)
-      gradientColors = themeState.palette.prayerCardGradient;
-      glowColor = themeState.palette.prayerCardGlow;
-      borderColor = isApproaching
-          ? BeyanColors.tone(0xFFFFDF7A)
-          : themeState.palette.accentGold.withValues(alpha: 0.38);
-    }
+    // Tüm ekran ve alt bar ile %100 aynı birleşik palet gradyanı
+    final List<Color> gradientColors = effectivePalette.prayerCardGradient;
+    final Color glowColor = effectivePalette.prayerCardGlow;
+    final Color borderColor = isApproaching
+        ? BeyanColors.tone(0xFFFFDF7A)
+        : effectivePalette.accentGold.withValues(alpha: 0.42);
 
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),

@@ -43,42 +43,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final themeState = ref.watch(themeProvider);
+    final effectivePalette = ref.watch(effectivePaletteProvider);
+    BeyanColors.setPalette(effectivePalette);
     final strings = ref.watch(appStringsProvider);
     final prayerAsync = ref.watch(prayerTimesNotifierProvider);
     final lastRead = ref.watch(lastReadProvider);
     final allSurahs = ref.watch(allSurahsProvider).valueOrNull ?? [];
     final nextReligiousDay = HijriCalendarService.instance.getNextReligiousDay();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final nextPrayer = prayerAsync.valueOrNull?.nextPrayerEntry?.name;
-    final atmosphere = themeState.isDynamicPrayerTheme
+    final atmosphere = (themeState.isDynamicPrayerTheme && isDark)
         ? DynamicPrayerAtmosphere.forPrayer(nextPrayer)
         : null;
 
-    if (themeState.isDynamicPrayerTheme) {
-      switch (nextPrayer) {
-        case PrayerName.fajr:
-        case PrayerName.isha:
-          BeyanColors.setPalette(AppThemePalette.deepSapphire);
-          break;
-        case PrayerName.sunrise:
-        case PrayerName.asr:
-          BeyanColors.setPalette(AppThemePalette.desertMocha);
-          break;
-        case PrayerName.maghrib:
-          BeyanColors.setPalette(AppThemePalette.amethystNight);
-          break;
-        case PrayerName.dhuhr:
-        default:
-          BeyanColors.setPalette(themeState.palette);
-          break;
-      }
-    } else {
-      BeyanColors.setPalette(themeState.palette);
-    }
-
-    final scaffoldBg = atmosphere != null
-        ? atmosphere.backgroundGradient.first
-        : Theme.of(context).scaffoldBackgroundColor;
+    final scaffoldBg = isDark ? effectivePalette.darkBackground : effectivePalette.lightBackground;
 
     return Scaffold(
       backgroundColor: scaffoldBg,

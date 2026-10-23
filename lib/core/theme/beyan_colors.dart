@@ -82,8 +82,7 @@ class BeyanColors {
   /// Uyarlanacak zümrüt/yeşil ton ailesi mi?
   static bool isGreenFamily(double h, double s, double l) {
     if (s < 0.08) return false;
-    if (h >= 135 && h <= 185) return true;
-    if (h >= 118 && h < 135 && l < 0.30) return true;
+    if (h >= 115 && h <= 190) return true;
     return false;
   }
 
