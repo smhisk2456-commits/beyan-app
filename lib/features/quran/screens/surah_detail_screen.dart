@@ -1,4 +1,5 @@
 import 'package:islamic_app/core/theme/beyan_colors.dart';
+import 'package:islamic_app/core/theme/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -35,6 +36,7 @@ class SurahDetailScreen extends ConsumerStatefulWidget {
 class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
   final ScrollController _scrollController = ScrollController();
   final GlobalKey _targetVerseKey = GlobalKey();
+  final GlobalKey _playingVerseKey = GlobalKey();
   bool _showScrollToTop = false;
   bool _hasScrolledToInitialVerse = false;
   bool _isMushafMode = false;
@@ -53,6 +55,17 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || !_scrollController.hasClients) return;
 
+      final playingCtx = _playingVerseKey.currentContext;
+      if (playingCtx != null && playingCtx.mounted) {
+        Scrollable.ensureVisible(
+          playingCtx,
+          alignment: 0.20,
+          duration: const Duration(milliseconds: 420),
+          curve: Curves.easeOutCubic,
+        );
+        return;
+      }
+
       final targetIndex = verses.indexWhere((v) => v.verseNumber == verseNumber);
       if (targetIndex < 0) return;
 
@@ -70,11 +83,19 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
       }
 
       final targetScroll = (estimatedOffset - 40.0).clamp(0.0, maxScroll);
-      _scrollController.animateTo(
-        targetScroll,
-        duration: const Duration(milliseconds: 450),
-        curve: Curves.easeOutCubic,
-      );
+      _scrollController.jumpTo(targetScroll);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final ctx = _playingVerseKey.currentContext;
+        if (ctx != null && ctx.mounted) {
+          Scrollable.ensureVisible(
+            ctx,
+            alignment: 0.20,
+            duration: const Duration(milliseconds: 350),
+            curve: Curves.easeOutCubic,
+          );
+        }
+      });
     });
   }
 
@@ -424,6 +445,8 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final effectivePalette = ref.watch(effectivePaletteProvider);
+    BeyanColors.setPalette(effectivePalette);
     final versesAsync = ref.watch(versesBySurahProvider(widget.surah.id));
     final strings = ref.watch(appStringsProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -815,10 +838,18 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                   ref.read(quranAudioProvider.notifier).togglePlayPause();
                 } else {
                   ref.read(quranAudioProvider.notifier).setVerses(verses);
-                  ref.read(quranAudioProvider.notifier).playSurah(
-                    widget.surah.id,
-                    widget.surah.localizedName(strings.language.code),
-                  );
+                  final sName = widget.surah.localizedName(strings.language.code);
+                  if (widget.initialScrollToVerse != null &&
+                      widget.initialScrollToVerse! > 1 &&
+                      audioState.currentSurahId != widget.surah.id) {
+                    ref.read(quranAudioProvider.notifier).seekToVerse(
+                          widget.initialScrollToVerse!,
+                          verses,
+                          surahName: sName,
+                        );
+                  } else {
+                    ref.read(quranAudioProvider.notifier).playSurah(widget.surah.id, sName);
+                  }
                 }
               },
             ),
@@ -858,7 +889,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
         SliverAppBar(
           expandedHeight: 210,
           pinned: true,
-          backgroundColor: AppColors.teal,
+          backgroundColor: isDark ? BeyanColors.tone(0xFF01201B) : AppColors.teal,
           title: Text(
             widget.surah.localizedName(strings.language.code),
             style: const TextStyle(
@@ -898,7 +929,18 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                   ref.read(quranAudioProvider.notifier).togglePlayPause();
                 } else {
                   ref.read(quranAudioProvider.notifier).setVerses(verses);
-                  ref.read(quranAudioProvider.notifier).playSurah(widget.surah.id, widget.surah.localizedName(strings.language.code));
+                  final sName = widget.surah.localizedName(strings.language.code);
+                  if (widget.initialScrollToVerse != null &&
+                      widget.initialScrollToVerse! > 1 &&
+                      audioState.currentSurahId != widget.surah.id) {
+                    ref.read(quranAudioProvider.notifier).seekToVerse(
+                          widget.initialScrollToVerse!,
+                          verses,
+                          surahName: sName,
+                        );
+                  } else {
+                    ref.read(quranAudioProvider.notifier).playSurah(widget.surah.id, sName);
+                  }
                 }
               },
             ),
@@ -919,7 +961,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: isDark
-                      ? [BeyanColors.tone(0xFF00695C), const Color(0xFF0D1B2A)]
+                      ? [BeyanColors.tone(0xFF064E43), BeyanColors.tone(0xFF011B18)]
                       : [AppColors.tealDark, AppColors.primary],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -973,10 +1015,12 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
               final verse = verses[index];
               final isTarget = widget.initialScrollToVerse == verse.verseNumber;
               final isPlayingVerse = isThisSurahPlaying && audioState.activeVerseNumber == verse.verseNumber;
+              final sName = widget.surah.localizedName(strings.language.code);
               return RepaintBoundary(
                 child: VerseCard(
-                  key: isTarget ? _targetVerseKey : null,
+                  key: isPlayingVerse ? _playingVerseKey : (isTarget ? _targetVerseKey : ValueKey('v_${verse.id}')),
                   verse: verse,
+                  surahName: sName,
                   isHighlighted: isTarget,
                   isPlaying: isPlayingVerse,
                   onWordTap: (wordIdx) {
@@ -985,7 +1029,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                           verse.verseNumber,
                           wordIdx,
                           verses,
-                          surahName: widget.surah.localizedName(strings.language.code),
+                          surahName: sName,
                         );
                   },
                   onTap: () {
@@ -993,7 +1037,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                     ref.read(quranAudioProvider.notifier).seekToVerse(
                           verse.verseNumber,
                           verses,
-                          surahName: widget.surah.localizedName(strings.language.code),
+                          surahName: sName,
                         );
                   },
                 ),

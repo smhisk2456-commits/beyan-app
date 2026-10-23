@@ -280,6 +280,7 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
   }
 
   bool _isLoopSeeking = false;
+  int? _pendingSeekMs;
 
   void setVerses(List<Verse> verses) {
     final isNewSurahList = _currentVerses == null ||
@@ -338,6 +339,15 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
 
   void _initListeners() {
     _posSub = _player.onPositionChanged.listen((pos) {
+      if (_pendingSeekMs != null) {
+        final target = _pendingSeekMs!;
+        if ((pos.inMilliseconds - target).abs() > 1500) {
+          _player.seek(Duration(milliseconds: target));
+          return;
+        } else {
+          _pendingSeekMs = null;
+        }
+      }
       _lastAnchorPosition = pos;
       if (state.isPlaying) {
         _interpWatch
@@ -352,6 +362,17 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
 
     _durSub = _player.onDurationChanged.listen((dur) {
       state = state.copyWith(duration: dur);
+      if (_pendingSeekMs != null && dur.inMilliseconds > 0) {
+        final target = _pendingSeekMs!.clamp(0, dur.inMilliseconds);
+        _pendingSeekMs = null;
+        _lastAnchorPosition = Duration(milliseconds: target);
+        if (state.isPlaying) {
+          _interpWatch
+            ..reset()
+            ..start();
+        }
+        _player.seek(Duration(milliseconds: target));
+      }
     });
 
     _stateSub = _player.onPlayerStateChanged.listen((playerState) {
@@ -419,12 +440,30 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
     return null;
   }
 
-  Future<void> playSurah(int surahId, String surahName) async {
+  Future<List<VerseTiming>?> _ensureVerseTimings(QuranReciter reciter, int surahId) async {
+    final cacheKey = '${reciter.id}_$surahId';
+    if (_timingsCache.containsKey(cacheKey)) {
+      return _timingsCache[cacheKey];
+    }
+    if (reciter.quranComReciterId == null) return null;
+    final timings = await _fetchVerseTimings(reciter.quranComReciterId!, surahId);
+    if (timings != null && timings.isNotEmpty) {
+      _timingsCache[cacheKey] = timings;
+    }
+    return _timingsCache[cacheKey];
+  }
+
+  Future<void> playSurah(int surahId, String surahName, {int? initialVerseNumber}) async {
     try {
+      _pendingSeekMs = null;
       state = state.copyWith(
         isLoading: true,
         currentSurahId: surahId,
         currentSurahName: surahName,
+        activeVerseNumber: initialVerseNumber ?? 1,
+        activeWordIndex: 0,
+        verseProgress: 0.0,
+        wordProgress: 0.0,
       );
 
       final reciter = state.selectedReciter;
@@ -483,7 +522,7 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
     if (verses.isEmpty) return;
 
     final currentMs = state.position.inMilliseconds;
-    final totalMs = state.duration.inMilliseconds;
+    final rawTotalMs = state.duration.inMilliseconds;
     final reciter = state.selectedReciter;
     final cacheKey = '${reciter.id}_${state.currentSurahId}';
     final timings = _timingsCache[cacheKey];
@@ -500,11 +539,14 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
       }
 
       if (activeTiming == null) {
-        if (currentMs < timings.first.timestampFrom) {
-          activeTiming = timings.first;
-        } else {
-          activeTiming = timings.last;
+        // İki ayet arasında kısa nefes boşluğundaysak bir önceki ayette veya sıradakinde kal
+        for (int i = timings.length - 1; i >= 0; i--) {
+          if (currentMs >= timings[i].timestampFrom) {
+            activeTiming = timings[i];
+            break;
+          }
         }
+        activeTiming ??= timings.first;
       }
 
       final determinedVerse = activeTiming.verseNumber;
@@ -517,24 +559,61 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
       // Kelime ve Kelime-İçi Harf Akış Oranı (wordProgress: 0.0 -> 1.0)
       int determinedWord = 0;
       double determinedWordProg = 0.0;
+      final matchedVerseObj = verses.where((v) => v.verseNumber == determinedVerse).firstOrNull;
+      final localWordCount = matchedVerseObj != null
+          ? matchedVerseObj.arabicText.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length
+          : 0;
+
       if (activeTiming.segments.isNotEmpty) {
-        bool found = false;
-        for (final seg in activeTiming.segments) {
+        WordSegment? activeSeg;
+        for (int i = 0; i < activeTiming.segments.length; i++) {
+          final seg = activeTiming.segments[i];
           if (currentMs >= seg.startMs && currentMs < seg.endMs) {
-            determinedWord = (seg.wordIndex - 1).clamp(0, 999);
+            activeSeg = seg;
             final segDur = (seg.endMs - seg.startMs).clamp(1, 60000);
             determinedWordProg = ((currentMs - seg.startMs) / segDur).clamp(0.0, 1.0);
-            found = true;
             break;
           }
         }
-        if (!found) {
+
+        if (activeSeg == null) {
+          // Kelimeler arası kısa nefes/vakıf boşluğundaysak: son geçilen kelimede kal (asla son kelimeye zıplama!)
           if (currentMs < activeTiming.segments.first.startMs) {
-            determinedWord = (activeTiming.segments.first.wordIndex - 1).clamp(0, 999);
+            activeSeg = activeTiming.segments.first;
             determinedWordProg = 0.0;
           } else {
-            determinedWord = (activeTiming.segments.last.wordIndex - 1).clamp(0, 999);
-            determinedWordProg = 1.0;
+            for (int i = activeTiming.segments.length - 1; i >= 0; i--) {
+              if (currentMs >= activeTiming.segments[i].startMs) {
+                activeSeg = activeTiming.segments[i];
+                determinedWordProg = 1.0;
+                break;
+              }
+            }
+            activeSeg ??= activeTiming.segments.last;
+          }
+        }
+
+        int rawIdx = (activeSeg.wordIndex - 1).clamp(0, 999);
+        if (localWordCount > 0 && rawIdx >= localWordCount) {
+          rawIdx = localWordCount - 1;
+        }
+        determinedWord = rawIdx;
+      } else if (localWordCount > 0) {
+        // Segment listesi boşsa harf ağırlığıyla akıcı kelime ve harf ilerlemesi hesapla
+        final words = matchedVerseObj!.arabicText.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+        final wordWeights = words.map((w) => w.length + 2).toList();
+        final totalWordWeight = wordWeights.fold<int>(0, (a, b) => a + b);
+        if (totalWordWeight > 0) {
+          final targetWordWeight = progress * totalWordWeight;
+          int wordAccum = 0;
+          for (int w = 0; w < words.length; w++) {
+            final prevWordAccum = wordAccum;
+            wordAccum += wordWeights[w];
+            if (wordAccum >= targetWordWeight || w == words.length - 1) {
+              determinedWord = w;
+              determinedWordProg = ((targetWordWeight - prevWordAccum) / wordWeights[w]).clamp(0.0, 1.0);
+              break;
+            }
           }
         }
       }
@@ -580,9 +659,7 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
       return;
     }
 
-    // 2. YEDEK (OFFLINE / DİĞER KÂRİLER): Harf Ağırlığı Oransal Hesaplama
-    if (totalMs <= 0) return;
-
+    // 2. YEDEK (OFFLINE / DİĞER KÂRİLER VEYA TIMINGS YÜKLENİRKEN): Harf Ağırlığı Oransal Hesaplama
     int totalWeight = 0;
     final weights = verses.map((v) {
       final w = v.arabicText.length + 10;
@@ -591,6 +668,9 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
     }).toList();
 
     if (totalWeight <= 0) return;
+
+    // Eğer stream henüz toplam süreyi (duration) bildirmediyse harf sayısına göre doğal tilavet süresi tahmin et
+    final totalMs = rawTotalMs > 0 ? rawTotalMs : (totalWeight * 95).clamp(4000, 3600000);
 
     int accumulatedBefore = 0;
     int determinedVerse = verses.first.verseNumber;
@@ -686,14 +766,24 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
     String? surahName,
   }) async {
     if (verses.isEmpty) return;
+    setVerses(verses);
 
     final surahId = verses.first.surahId;
     if (state.currentSurahId != surahId || !state.isPlaying) {
-      await playSurah(surahId, surahName ?? 'Surah $surahId');
+      await playSurah(
+        surahId,
+        surahName ?? 'Surah $surahId',
+        initialVerseNumber: verseNumber,
+      );
     }
 
-    final cacheKey = '${state.selectedReciter.id}_$surahId';
-    final timings = _timingsCache[cacheKey];
+    state = state.copyWith(
+      activeVerseNumber: verseNumber,
+      activeWordIndex: wordIndex,
+      wordProgress: 0.0,
+    );
+
+    final timings = await _ensureVerseTimings(state.selectedReciter, surahId);
 
     // 1. Quran.com Milisaniye Hassasiyetinde Kelimeye Atlama
     if (timings != null && timings.isNotEmpty) {
@@ -722,10 +812,13 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
             targetMs = targetTiming.segments[wordIndex].startMs;
           }
         }
+        _pendingSeekMs = targetMs > 0 ? targetMs : null;
         await seek(Duration(milliseconds: targetMs));
         state = state.copyWith(
+          position: Duration(milliseconds: targetMs),
           activeVerseNumber: verseNumber,
           activeWordIndex: wordIndex,
+          wordProgress: 0.0,
         );
         return;
       }
@@ -769,36 +862,53 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
         wordFraction = totalWordWeight > 0 ? (accumWordBefore / totalWordWeight) : 0.0;
       }
 
-      final targetMs = (verseStartMs + (wordFraction * verseDurationMs)).round();
-      await seek(Duration(milliseconds: targetMs.clamp(0, totalMs)));
+      final targetMs = (verseStartMs + (wordFraction * verseDurationMs)).round().clamp(0, totalMs);
+      _pendingSeekMs = targetMs > 0 ? targetMs : null;
+      await seek(Duration(milliseconds: targetMs));
+      state = state.copyWith(position: Duration(milliseconds: targetMs));
     }
 
     state = state.copyWith(
       activeVerseNumber: verseNumber,
       activeWordIndex: wordIndex,
+      wordProgress: 0.0,
     );
   }
 
   Future<void> seekToVerse(int verseNumber, List<Verse> verses, {String? surahName}) async {
     if (verses.isEmpty) return;
+    setVerses(verses);
 
     final surahId = verses.first.surahId;
     if (state.currentSurahId != surahId || !state.isPlaying) {
-      await playSurah(surahId, surahName ?? 'Surah $surahId');
+      await playSurah(
+        surahId,
+        surahName ?? 'Surah $surahId',
+        initialVerseNumber: verseNumber,
+      );
     }
 
-    final cacheKey = '${state.selectedReciter.id}_$surahId';
-    final timings = _timingsCache[cacheKey];
+    state = state.copyWith(
+      activeVerseNumber: verseNumber,
+      activeWordIndex: 0,
+      verseProgress: 0.0,
+      wordProgress: 0.0,
+    );
+
+    final timings = await _ensureVerseTimings(state.selectedReciter, surahId);
 
     // 1. Quran.com Milisaniye Hassasiyetinde Ayete Atlama
     if (timings != null && timings.isNotEmpty) {
       for (final t in timings) {
         if (t.verseNumber == verseNumber) {
+          _pendingSeekMs = t.timestampFrom > 0 ? t.timestampFrom : null;
           await seek(Duration(milliseconds: t.timestampFrom));
           state = state.copyWith(
+            position: Duration(milliseconds: t.timestampFrom),
             activeVerseNumber: verseNumber,
             activeWordIndex: 0,
             verseProgress: 0.0,
+            wordProgress: 0.0,
           );
           return;
         }
@@ -824,12 +934,15 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
     final totalMs = state.duration.inMilliseconds;
     if (totalMs > 0 && totalWeight > 0) {
       final startMs = ((accumulatedBefore / totalWeight) * totalMs).round();
+      _pendingSeekMs = startMs > 0 ? startMs : null;
       await seek(Duration(milliseconds: startMs));
+      state = state.copyWith(position: Duration(milliseconds: startMs));
     }
     state = state.copyWith(
       activeVerseNumber: verseNumber,
       activeWordIndex: 0,
       verseProgress: 0.0,
+      wordProgress: 0.0,
     );
   }
 

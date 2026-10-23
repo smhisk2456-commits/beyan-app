@@ -1,4 +1,5 @@
 import 'package:islamic_app/core/theme/beyan_colors.dart';
+import 'package:islamic_app/core/theme/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -28,6 +29,16 @@ class DuaLibraryScreen extends ConsumerStatefulWidget {
 class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
   final TextEditingController _searchController = TextEditingController();
   _DuaTab _activeTab = _DuaTab.categories;
+
+  @override
+  void initState() {
+    super.initState();
+    final initialQuery = ref.read(duaSearchQueryProvider).trim();
+    if (initialQuery.isNotEmpty) {
+      _searchController.text = initialQuery;
+      _activeTab = _DuaTab.list;
+    }
+  }
 
   static const _popularPills = [
     ('Âyetü\'l-Kürsî', '✨'),
@@ -66,6 +77,8 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final effectivePalette = ref.watch(effectivePaletteProvider);
+    BeyanColors.setPalette(effectivePalette);
     final strings = ref.watch(appStringsProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final selectedCategory = ref.watch(selectedDuaCategoryProvider);

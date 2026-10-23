@@ -1,4 +1,5 @@
 import 'package:islamic_app/core/theme/beyan_colors.dart';
+import 'package:islamic_app/core/theme/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,6 +12,7 @@ import '../services/quran_audio_service.dart';
 /// Tek bir ayeti tam olarak gösteren lüks kart widget'ı.
 class VerseCard extends ConsumerWidget {
   final Verse verse;
+  final String? surahName;
   final bool showSurahReference;
   final bool isHighlighted;
   final bool isPlaying;
@@ -20,6 +22,7 @@ class VerseCard extends ConsumerWidget {
   const VerseCard({
     super.key,
     required this.verse,
+    this.surahName,
     this.showSurahReference = false,
     this.isHighlighted = false,
     this.isPlaying = false,
@@ -265,6 +268,8 @@ class VerseCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final effectivePalette = ref.watch(effectivePaletteProvider);
+    BeyanColors.setPalette(effectivePalette);
     final strings = ref.watch(appStringsProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final arabicFontSize = ref.watch(arabicFontSizeProvider);
@@ -319,138 +324,142 @@ class VerseCard extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // ── Ayet Header & İşlem Butonları ─────────────────
+              // ── Ayet Header & İşlem Butonları (Taşma Korumalı Düzen) ──────
               Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // Daire içinde ayet numarası
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: isPlaying
-                          ? BeyanColors.tone(0xFFFFDF7A)
-                          : BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.2 : 0.1),
-                      border: Border.all(
-                        color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.6),
-                        width: 1,
-                      ),
-                    ),
-                    child: Center(
-                      child: Text(
-                        '${verse.verseNumber}',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          color: isPlaying
-                              ? BeyanColors.tone(0xFF012E2B)
-                              : (isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF033E35)),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-
-                  if (isPlaying) ...[
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      margin: const EdgeInsets.only(right: 6),
-                      decoration: BoxDecoration(
-                        color: BeyanColors.tone(0xFFFFDF7A),
-                        borderRadius: BorderRadius.circular(8),
-                        boxShadow: [
-                          BoxShadow(
-                            color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.35),
-                            blurRadius: 6,
-                            spreadRadius: 1,
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.graphic_eq_rounded, size: 12, color: BeyanColors.tone(0xFF012E2B)),
-                          const SizedBox(width: 4),
-                          Text(
-                            strings.language == AppLanguage.turkish
-                                ? 'Okunuyor'
-                                : (strings.language == AppLanguage.arabic ? 'يتلى الآن' : 'Playing'),
-                            style: TextStyle(
-                              fontSize: 9.5,
-                              fontWeight: FontWeight.bold,
-                              color: BeyanColors.tone(0xFF012E2B),
+                  Expanded(
+                    child: Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 6,
+                      runSpacing: 4,
+                      children: [
+                        // Daire içinde ayet numarası
+                        Container(
+                          width: 34,
+                          height: 34,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: isPlaying
+                                ? BeyanColors.tone(0xFFFFDF7A)
+                                : BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.2 : 0.1),
+                            border: Border.all(
+                              color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.6),
+                              width: 1,
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                    if (activeWordIndex != null)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                        margin: const EdgeInsets.only(right: 6),
-                        decoration: BoxDecoration(
-                          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.22),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.6),
-                            width: 0.8,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.auto_stories_rounded, size: 11, color: BeyanColors.tone(0xFFFFDF7A)),
-                            const SizedBox(width: 3.5),
-                            Text(
-                              strings.wordTrackingBadge,
+                          child: Center(
+                            child: Text(
+                              '${verse.verseNumber}',
                               style: TextStyle(
-                                fontSize: 9.2,
-                                fontWeight: FontWeight.w600,
-                                color: BeyanColors.tone(0xFFFFDF7A),
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.bold,
+                                color: isPlaying
+                                    ? BeyanColors.tone(0xFF012E2B)
+                                    : (isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF033E35)),
                               ),
                             ),
-                          ],
+                          ),
                         ),
-                      ),
-                  ],
 
-                  if (isLastRead)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: BeyanColors.tone(0xFFD4AF37),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        strings.lastReadBadge,
-                        style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.bold, color: Colors.black),
-                      ),
-                    ),
+                        // Referans Etiketi
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.2 : 0.1),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            verse.reference,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: BeyanColors.tone(0xFFD4AF37),
+                            ),
+                          ),
+                        ),
 
-                  const Spacer(),
+                        if (isPlaying)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: BeyanColors.tone(0xFFFFDF7A),
+                              borderRadius: BorderRadius.circular(8),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.35),
+                                  blurRadius: 6,
+                                  spreadRadius: 1,
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.graphic_eq_rounded, size: 11.5, color: BeyanColors.tone(0xFF012E2B)),
+                                const SizedBox(width: 3.5),
+                                Text(
+                                  strings.language == AppLanguage.turkish
+                                      ? 'Canlı Takip'
+                                      : (strings.language == AppLanguage.arabic ? 'يتلى الآن' : 'Live Sync'),
+                                  style: TextStyle(
+                                    fontSize: 9.5,
+                                    fontWeight: FontWeight.bold,
+                                    color: BeyanColors.tone(0xFF012E2B),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
 
-                  // Referans Etiketi
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.2 : 0.1),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      verse.reference,
-                      style: TextStyle(
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w600,
-                        color: BeyanColors.tone(0xFFD4AF37),
-                      ),
+                        if (isLastRead && !isPlaying)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: BeyanColors.tone(0xFFD4AF37),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              strings.lastReadBadge,
+                              style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.bold, color: Colors.black),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
 
-                  // Kaldığım Yer Olarak İşaretle
+                  // 1. Bu Âyeti Sesli Oku / Duraklat Butonu
+                  if (onTap != null)
+                    IconButton(
+                      visualDensity: VisualDensity.compact,
+                      padding: const EdgeInsets.all(4),
+                      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                      icon: Icon(
+                        isPlaying ? Icons.pause_circle_filled_rounded : Icons.play_circle_outline_rounded,
+                        size: 21,
+                        color: isPlaying ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFFD4AF37),
+                      ),
+                      tooltip: isPlaying
+                          ? (strings.language == AppLanguage.turkish ? 'Duraklat' : 'Pause')
+                          : (strings.language == AppLanguage.turkish ? 'Bu Âyetten Okumayı Başlat' : 'Play From This Verse'),
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        if (isPlaying) {
+                          ref.read(quranAudioProvider.notifier).togglePlayPause();
+                        } else {
+                          onTap!();
+                        }
+                      },
+                    ),
+
+                  // 2. Kaldığım Yer Olarak İşaretle
                   IconButton(
+                    visualDensity: VisualDensity.compact,
+                    padding: const EdgeInsets.all(4),
+                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                     icon: Icon(
                       isLastRead ? Icons.bookmark_added_rounded : Icons.bookmark_add_outlined,
-                      size: 20,
+                      size: 19,
                       color: isLastRead ? BeyanColors.tone(0xFFFFDF7A) : (isDark ? Colors.white60 : Colors.black45),
                     ),
                     tooltip: strings.saveAsLastRead,
@@ -458,17 +467,20 @@ class VerseCard extends ConsumerWidget {
                       HapticFeedback.lightImpact();
                       ref.read(lastReadProvider.notifier).savePosition(
                             surahId: verse.surahId,
-                            surahName: strings.surahNumberBadge(verse.surahId),
+                            surahName: surahName ?? strings.surahNumberBadge(verse.surahId),
                             verseNumber: verse.verseNumber,
                           );
                     },
                   ),
 
-                  // Favori Yer İmi
+                  // 3. Favori Yer İmi
                   IconButton(
+                    visualDensity: VisualDensity.compact,
+                    padding: const EdgeInsets.all(4),
+                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                     icon: Icon(
                       isBookmarked ? Icons.star_rounded : Icons.star_border_rounded,
-                      size: 20,
+                      size: 19,
                       color: isBookmarked ? BeyanColors.tone(0xFFFFDF7A) : (isDark ? Colors.white60 : Colors.black45),
                     ),
                     tooltip: isBookmarked ? strings.removeBookmark : strings.addBookmark,
@@ -478,11 +490,14 @@ class VerseCard extends ConsumerWidget {
                     },
                   ),
 
-                  // Âyet Tekrar Döngüsü Butonu (3x, 5x, 10x, ∞)
+                  // 4. Âyet Tekrar Döngüsü Butonu (3x, 5x, 10x, ∞)
                   IconButton(
+                    visualDensity: VisualDensity.compact,
+                    padding: const EdgeInsets.all(4),
+                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                     icon: Icon(
                       isLoopingThisVerse ? Icons.repeat_one_on_rounded : Icons.repeat_one_rounded,
-                      size: 20,
+                      size: 19,
                       color: isLoopingThisVerse ? BeyanColors.tone(0xFFFFDF7A) : (isDark ? Colors.white60 : Colors.black45),
                     ),
                     tooltip: isLoopingThisVerse
@@ -501,9 +516,12 @@ class VerseCard extends ConsumerWidget {
                     },
                   ),
 
-                  // Paylaş & Kopyala
+                  // 5. Paylaş & Kopyala
                   IconButton(
-                    icon: Icon(Icons.share_outlined, size: 19, color: BeyanColors.tone(0xFFD4AF37)),
+                    visualDensity: VisualDensity.compact,
+                    padding: const EdgeInsets.all(4),
+                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                    icon: Icon(Icons.share_outlined, size: 18, color: BeyanColors.tone(0xFFD4AF37)),
                     tooltip: strings.shareVerse,
                     onPressed: () => _shareVerse(context, strings),
                   ),
