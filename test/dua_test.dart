@@ -68,6 +68,29 @@ void main() {
 
       final insirah = verifiedDuasList.where((d) => d.id == 'kuran_insirah').toList();
       expect(insirah.isNotEmpty, isTrue);
+
+      // Yeni eklenen namaz sureleri & duaları
+      final kevser = verifiedDuasList.where((d) => d.id == 'kuran_kevser').toList();
+      expect(kevser.isNotEmpty, isTrue);
+      expect(kevser.first.title.contains('Kevser'), isTrue);
+      expect(kevser.first.arabicText.contains('الْكَوْثَرَ'), isTrue);
+      expect(kevser.first.transliteration.contains('İnnâ a\'taynâke\'l-kevser'), isTrue);
+
+      final ihlas = verifiedDuasList.where((d) => d.id == 'kuran_ihlas').toList();
+      expect(ihlas.isNotEmpty, isTrue);
+
+      final felak = verifiedDuasList.where((d) => d.id == 'kuran_felak').toList();
+      expect(felak.isNotEmpty, isTrue);
+
+      final nas = verifiedDuasList.where((d) => d.id == 'kuran_nas').toList();
+      expect(nas.isNotEmpty, isTrue);
+
+      final amentu = verifiedDuasList.where((d) => d.id == 'namaz_amentu').toList();
+      expect(amentu.isNotEmpty, isTrue);
+      expect(amentu.first.transliteration.contains('Âmentü billâhi'), isTrue);
+
+      final rabbena = verifiedDuasList.where((d) => d.id == 'namaz_rabbena_agfirli').toList();
+      expect(rabbena.isNotEmpty, isTrue);
     });
 
     test('Arama normalizasyonu ayetel kursi, nazar duası, subhaneke gibi sorguları doğru bulmalı', () {

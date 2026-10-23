@@ -42,9 +42,16 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
 
   static const _popularPills = [
     ('Âyetü\'l-Kürsî', '✨'),
-    ('Nazar Duası', '🧿'),
+    ('Kevser', '🌊'),
+    ('İhlâs', '💎'),
+    ('Felak & Nâs', '🛡️'),
     ('Sübhaneke', '🤲'),
+    ('Nazar Duası', '🧿'),
     ('İnşirah', '🕊️'),
+    ('Âmentü', '⭐'),
+    ('Kâfirûn', '📜'),
+    ('Asr Suresi', '⏳'),
+    ('Kadir Suresi', '🌙'),
     ('Şifa Duası', '🌿'),
     ('Rabbi Yessir', '📖'),
     ('Ezan Duası', '🕌'),
@@ -1248,29 +1255,108 @@ class _DuaCardItem extends ConsumerWidget {
                 textDirection: TextDirection.rtl,
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
 
-            // Okunuşu
+            // Türkçe Okunuşu (Belirgin Sayfa Kartı Formatı)
             if (dua.transliteration.isNotEmpty) ...[
-              Text(
-                dua.transliteration,
-                style: TextStyle(
-                  fontSize: 12.5,
-                  height: 1.45,
-                  fontStyle: FontStyle.italic,
-                  color: isDark ? Colors.white70 : Colors.black87,
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? BeyanColors.tone(0xFF0B2D26).withValues(alpha: 0.55)
+                      : BeyanColors.tone(0xFFF4F8F6),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.28 : 0.22),
+                    width: 0.8,
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.record_voice_over_rounded,
+                          size: 13.5,
+                          color: BeyanColors.tone(0xFFD4AF37),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          strings.language.code == 'tr' ? 'Türkçe Okunuşu' : strings.transliterationLabel,
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.3,
+                            color: BeyanColors.tone(0xFFD4AF37),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    SelectableText(
+                      dua.transliteration,
+                      style: TextStyle(
+                        fontSize: 14.5,
+                        height: 1.6,
+                        fontWeight: FontWeight.w500,
+                        color: isDark ? Colors.white.withValues(alpha: 0.95) : const Color(0xFF1E293B),
+                        letterSpacing: 0.1,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
             ],
 
-            // Anlamı
-            Text(
-              dua.localizedMeaning(strings.language.code),
-              style: TextStyle(
-                fontSize: 13.5,
-                height: 1.5,
-                color: isDark ? Colors.white.withValues(alpha: 0.9) : const Color(0xFF222222),
+            // Anlamı (Meali)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              decoration: BoxDecoration(
+                color: isDark
+                    ? Colors.black.withValues(alpha: 0.22)
+                    : const Color(0xFFFAFCFA),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.08),
+                  width: 0.8,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.translate_rounded,
+                        size: 13.5,
+                        color: isDark ? Colors.white60 : Colors.black54,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        strings.language.code == 'tr' ? 'Anlamı (Meali)' : strings.meaningLabel,
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.3,
+                          color: isDark ? Colors.white70 : Colors.black54,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  SelectableText(
+                    dua.localizedMeaning(strings.language.code),
+                    style: TextStyle(
+                      fontSize: 13.5,
+                      height: 1.55,
+                      color: isDark ? Colors.white.withValues(alpha: 0.88) : const Color(0xFF334155),
+                    ),
+                  ),
+                ],
               ),
             ),
 
@@ -1374,10 +1460,35 @@ _LinkedSurahInfo? _getLinkedSurah(DuaItem dua) {
       return const _LinkedSurahInfo(25, 'Furkân');
     case 'kuran_lev_enzelna': // Haşr 21-24
       return const _LinkedSurahInfo(59, 'Haşr');
+    case 'kuran_duha':
+      return const _LinkedSurahInfo(93, 'Duhâ');
     case 'kuran_insirah': // İnşirâh Suresi
       return const _LinkedSurahInfo(94, 'İnşirâh');
+    case 'kuran_kadr':
+      return const _LinkedSurahInfo(97, 'Kadir');
+    case 'kuran_asr':
+      return const _LinkedSurahInfo(103, 'Asr');
+    case 'kuran_fil':
+      return const _LinkedSurahInfo(105, 'Fîl');
+    case 'kuran_kureys':
+      return const _LinkedSurahInfo(106, 'Kureyş');
+    case 'kuran_maun':
+      return const _LinkedSurahInfo(107, 'Mâûn');
+    case 'kuran_kevser':
+      return const _LinkedSurahInfo(108, 'Kevser');
+    case 'kuran_kafirun':
+      return const _LinkedSurahInfo(109, 'Kâfirûn');
+    case 'kuran_nasr':
+      return const _LinkedSurahInfo(110, 'Nasr');
+    case 'kuran_tebbet':
+      return const _LinkedSurahInfo(111, 'Tebbet');
+    case 'kuran_ihlas':
     case 'aksam_4': // İhlâs, Felak, Nas
       return const _LinkedSurahInfo(112, 'İhlâs');
+    case 'kuran_felak':
+      return const _LinkedSurahInfo(113, 'Felak');
+    case 'kuran_nas':
+      return const _LinkedSurahInfo(114, 'Nâs');
     default:
       return null;
   }
