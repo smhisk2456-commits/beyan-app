@@ -147,15 +147,12 @@ class PrayerTimesNotifier extends AsyncNotifier<DailyPrayerTimes> {
   /// Önceki durumu koruyarak arayüzün iskelete düşüp titremesini önler.
   Future<void> refresh() async {
     state = const AsyncLoading<DailyPrayerTimes>().copyWithPrevious(state);
-    state = await AsyncValue.guard(() async {
-      final service = ref.read(prayerTimeServiceProvider);
-      ref.invalidate(locationProvider);
-      final location = await ref.read(locationProvider.future);
-      final daily = await service.calculatePrayerTimes(location: location);
+    ref.invalidate(locationProvider); // build() yeni konumla zaten yeniden çalışacak
+    try {
+      await future; // Notifier'ın kendi yeniden kurulumunu bekle
       NotificationService.instance.scheduleUpcomingPrayers();
       WidgetService().updateAllWidgets();
-      return daily;
-    });
+    } catch (_) {}
   }
 }
 

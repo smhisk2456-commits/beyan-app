@@ -169,22 +169,35 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
     final activeKey = state.effectiveApiKey;
     if (activeKey != null && activeKey.isNotEmpty) {
       aiReply = await _callGeminiApi(query, activeKey, history: state.messages);
+      aiReply ??= AiMessage(
+        id: 'ai_fallback_${DateTime.now().millisecondsSinceEpoch}',
+        text: 'Şu anda yapay zeka sunucusuna bağlanırken geçici bir yoğunluk yaşandı. '
+            'Lütfen internet bağlantınızı kontrol edip sorunuzu birkaç saniye sonra tekrar iletiniz.',
+        isUser: false,
+        timestamp: DateTime.now(),
+        references: const [
+          'Beyân AI Manevi Rehber & Tefsir Asistanı',
+        ],
+        suggestedFollowUps: const [
+          'Soruyu tekrar ilet',
+        ],
+      );
+    } else {
+      aiReply = AiMessage(
+        id: 'ai_nokey_${DateTime.now().millisecondsSinceEpoch}',
+        text: 'Beyân AI asistanı şu anda yapılandırılmamış durumda. '
+            'Sağ üstteki anahtar simgesine dokunarak kendi Google Gemini API anahtarınızı tanımlayabilir '
+            'veya resmi sunucu güncellemesini bekleyebilirsiniz.',
+        isUser: false,
+        timestamp: DateTime.now(),
+        references: const [
+          'Beyân AI Altyapı Bilgilendirmesi',
+        ],
+        suggestedFollowUps: const [
+          'Gemini API anahtarı nasıl alınır?',
+        ],
+      );
     }
-
-    // 2. Canlı API bağlantısı kurulamazsa veya geçici kesinti olursa net bilgilendirme mesajı
-    aiReply ??= AiMessage(
-      id: 'ai_${DateTime.now().millisecondsSinceEpoch}',
-      text: 'Şu anda yapay zeka sunucusuna bağlanırken geçici bir yoğunluk veya kesinti yaşandı. '
-          'Lütfen internet bağlantınızı kontrol edip sorunuzu birkaç saniye sonra tekrar iletiniz.',
-      isUser: false,
-      timestamp: DateTime.now(),
-      references: const [
-        'Beyân AI Manevi Rehber & Tefsir Asistanı',
-      ],
-      suggestedFollowUps: const [
-        'Soruyu tekrar ilet',
-      ],
-    );
 
     state = state.copyWith(
       messages: [...state.messages, aiReply],
@@ -199,13 +212,16 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
     String apiKey, {
     List<AiMessage> history = const [],
   }) async {
-    // gemini-3.5-flash ve gemini-3.6-flash, düşünme yükü olmadan ultra hızlı (1-3 saniye) yanıt üretir.
-    // gemini-3.8-flash gibi ağır akıl yürütme modelleri dakikalarca beklettiği için kaldırıldı.
     final candidateModels = ['gemini-3.5-flash', 'gemini-3.6-flash'];
 
-    // Son konuşma geçmişini Gemini çoklu tur sohbet formatında hazırla
+    // Son konuşma geçmişini Gemini çoklu tur sohbet formatında hazırla (hata mesajlarını hariç tut)
     final contents = <Map<String, dynamic>>[];
-    final validHistory = history.where((m) => m.id != 'welcome_1').toList();
+    final validHistory = history
+        .where((m) =>
+            m.id != 'welcome_1' &&
+            !m.id.startsWith('ai_fallback_') &&
+            !m.id.startsWith('ai_nokey_'))
+        .toList();
     final takeCount = validHistory.length > 8 ? 8 : validHistory.length;
     final recent = validHistory.sublist(validHistory.length - takeCount);
 
@@ -253,7 +269,7 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
     for (final modelName in candidateModels) {
       HttpClient? client;
       try {
-        client = HttpClient()..connectionTimeout = const Duration(seconds: 4);
+        client = HttpClient()..connectionTimeout = const Duration(seconds: 10);
         final url = Uri.parse(
           'https://generativelanguage.googleapis.com/v1beta/models/$modelName:generateContent',
         );
@@ -261,13 +277,13 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
         request.headers.contentType = ContentType.json;
         request.headers.set('x-goog-api-key', apiKey);
         request.write(body);
-        final response = await request.close().timeout(const Duration(seconds: 7));
+        final response = await request.close().timeout(const Duration(seconds: 25));
 
         if (response.statusCode == 200) {
           final responseBody = await response
               .transform(utf8.decoder)
               .join()
-              .timeout(const Duration(seconds: 7));
+              .timeout(const Duration(seconds: 25));
           final decoded = jsonDecode(responseBody) as Map<String, dynamic>;
           final candidates = decoded['candidates'] as List<dynamic>?;
           if (candidates != null && candidates.isNotEmpty) {

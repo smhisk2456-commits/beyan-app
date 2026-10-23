@@ -254,6 +254,23 @@ class NotificationService {
     }
   }
 
+  /// Android 14+ (API 34+) exact alarm iznini kontrol eder; izin yoksa inexact fallback moduna geçer.
+  Future<AndroidScheduleMode> _resolveAndroidScheduleMode() async {
+    if (!Platform.isAndroid) {
+      return AndroidScheduleMode.exactAllowWhileIdle;
+    }
+    try {
+      final android = _notifications.resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>();
+      final canExact = await android?.canScheduleExactNotifications() ?? true;
+      return canExact
+          ? AndroidScheduleMode.exactAllowWhileIdle
+          : AndroidScheduleMode.inexactAllowWhileIdle;
+    } catch (_) {
+      return AndroidScheduleMode.inexactAllowWhileIdle;
+    }
+  }
+
   /// Kullanıcıdan bildirim izni talep eder (iOS ve Android).
   Future<bool> requestPermissions() async {
     try {
@@ -544,6 +561,7 @@ class NotificationService {
     final now = DateTime.now();
     final prefs = await SharedPreferences.getInstance();
     final langCode = prefs.getString('selected_app_language') ?? 'tr';
+    final scheduleMode = await _resolveAndroidScheduleMode();
 
     // Yalnızca namaz bildirimlerini temizle (Ayet bildirimlerine dokunma!)
     await cancelAllPrayerNotifications();
@@ -616,7 +634,7 @@ class NotificationService {
                   interruptionLevel: InterruptionLevel.timeSensitive,
                 ),
               ),
-              androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+              androidScheduleMode: scheduleMode,
             );
           }
 
@@ -652,7 +670,7 @@ class NotificationService {
                     interruptionLevel: InterruptionLevel.timeSensitive,
                   ),
                 ),
-                androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+                androidScheduleMode: scheduleMode,
               );
             }
           }
@@ -850,6 +868,7 @@ class NotificationService {
     final minute = await getVerseNotifMinute();
     final freq = await getVerseNotifFrequency();
     final langCode = prefs.getString('selected_app_language') ?? 'tr';
+    final scheduleMode = await _resolveAndroidScheduleMode();
     
     // Mükerrerliği önleyen ve son 60 bildirimi hafızada tutan eşsiz ayet havuzu
     final batchSize = freq == 'morning_evening'
@@ -895,7 +914,7 @@ class NotificationService {
                   interruptionLevel: InterruptionLevel.timeSensitive,
                 ),
               ),
-              androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+              androidScheduleMode: scheduleMode,
             );
             notifCount++;
           }
@@ -944,7 +963,7 @@ class NotificationService {
                   interruptionLevel: InterruptionLevel.timeSensitive,
                 ),
               ),
-              androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+              androidScheduleMode: scheduleMode,
             );
             notifCount++;
           }
@@ -997,7 +1016,7 @@ class NotificationService {
               presentSound: true,
             ),
           ),
-          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+          androidScheduleMode: scheduleMode,
         );
       }
 
@@ -1039,7 +1058,7 @@ class NotificationService {
                 presentSound: true,
               ),
             ),
-            androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+            androidScheduleMode: scheduleMode,
           );
         }
       }

@@ -134,6 +134,11 @@ class DeepLinkService {
       debugPrint('DeepLinkService yönlendirme hatası: $e');
     } finally {
       _isHandling = false;
+      final next = _pendingUri;
+      if (next != null && navigatorKey.currentContext != null) {
+        _pendingUri = null;
+        scheduleMicrotask(() => handleUri(ref, next));
+      }
     }
   }
 

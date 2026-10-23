@@ -2,6 +2,7 @@ import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../monetization/providers/premium_provider.dart';
 import '../models/ai_message.dart';
@@ -43,6 +44,16 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
     final text = presetText ?? _controller.text;
     if (text.trim().isEmpty) return;
 
+    // Apple İnceleme Kılavuzu 5.1.2: Kullanıcı verisi üçüncü taraf yapay zekaya (Google Gemini) gitmeden önce açık onay al
+    final prefs = await SharedPreferences.getInstance();
+    final hasAccepted = prefs.getBool('beyan_ai_consent_accepted') ?? false;
+    if (!hasAccepted) {
+      if (!mounted) return;
+      final accepted = await _showAiConsentDialog();
+      if (!accepted) return;
+      await prefs.setBool('beyan_ai_consent_accepted', true);
+    }
+
     final isPremium = ref.read(premiumProvider).isPremium;
     final canAsk = await ref.read(aiAssistantProvider.notifier).canAskQuestion(isPremium);
 
@@ -72,6 +83,69 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
         _showQuotaExceededDialog();
       }
     }
+  }
+
+  Future<bool> _showAiConsentDialog() async {
+    return await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (ctx) => AlertDialog(
+            backgroundColor: BeyanColors.tone(0xFF022B24),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+              side: BorderSide(color: BeyanColors.tone(0xFFFFDF7A), width: 1.2),
+            ),
+            title: Row(
+              children: [
+                Icon(Icons.security_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 24),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Beyân AI & Gizlilik Bildirimi',
+                    style: TextStyle(
+                      color: BeyanColors.tone(0xFFFFDF7A),
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Beyân AI Manevi Rehber & Tefsir Asistanı, sorularınızı yanıtlamak amacıyla Google Gemini yapay zeka altyapısını kullanır.',
+                  style: TextStyle(color: Colors.white, fontSize: 13.5, height: 1.5),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  '• Sorduğunuz dini ve fıkhi sorular cevap üretimi amacıyla üçüncü taraf yapay zeka modeline (Google Gemini) iletilir.\n'
+                  '• Lütfen kişisel, gizli veya kimliğinizi ele verebilecek hassas verileri paylaşmayınız.\n'
+                  '• Üretilen yanıtlar ilmi ve manevi rehberlik amaçlıdır; kesin fetva ve nihai hüküm yerine geçmez.',
+                  style: TextStyle(color: Colors.white.withValues(alpha: 0.85), fontSize: 12.5, height: 1.45),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Vazgeç', style: TextStyle(color: Colors.white60)),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: BeyanColors.tone(0xFFFFDF7A),
+                  foregroundColor: const Color(0xFF012E2B),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('Anladım ve Kabul Ediyorum', style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
+        ) ??
+        false;
   }
 
   void _showApiKeyDialog(BuildContext context) {

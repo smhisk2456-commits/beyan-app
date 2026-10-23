@@ -11,6 +11,9 @@ class AdService {
 
   bool _isInitialized = false;
 
+  /// v1.0 sürümünde reklamlar tamamen kapalıdır (reklamsız manevi deneyim).
+  static const bool kAdsEnabled = false;
+
   /// Kullanıcının reklamsız deneyim hakkı var mı?
   /// Premium üyelik sahibi olan kullanıcılara hiçbir reklam gösterilmez.
   bool isAdFree = false;
@@ -21,11 +24,10 @@ class AdService {
   }
 
   /// AdMob SDK'sını başlatır.
-  /// Eğer kullanıcı Premium aboneyse AdMob SDK başlatılmaz, veri ve pil tasarrufu sağlanır.
+  /// Eğer kullanıcı Premium aboneyse veya reklamlar devre dışıysa AdMob SDK başlatılmaz.
   Future<void> initialize() async {
-    if (_isInitialized) return;
-    if (isAdFree) {
-      debugPrint('[AdService] Kullanıcı Premium üye: %100 Reklamsız Deneyim aktif, AdMob SDK başlatılmadı.');
+    if (_isInitialized || isAdFree || !kAdsEnabled) {
+      debugPrint('[AdService] Reklamlar kapalı: %100 Reklamsız Deneyim aktif, AdMob SDK başlatılmadı.');
       return;
     }
     try {

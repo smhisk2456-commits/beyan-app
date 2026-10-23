@@ -39,23 +39,25 @@ class MainActivity : FlutterActivity() {
         }
 
         // ── Flutter Screen Awake MethodChannel ──────────────────
-        MethodChannel(
-            flutterEngine.dartExecutor.binaryMessenger,
-            SCREEN_CHANNEL
-        ).setMethodCallHandler { call, result ->
-            when (call.method) {
-                "setKeepScreenOn" -> {
-                    val enabled = call.argument<Boolean>("enabled") ?: false
-                    runOnUiThread {
-                        if (enabled) {
-                            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-                        } else {
-                            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        listOf(SCREEN_CHANNEL, "com.smhisk60.beyan/screen").forEach { channelName ->
+            MethodChannel(
+                flutterEngine.dartExecutor.binaryMessenger,
+                channelName
+            ).setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "setKeepScreenOn" -> {
+                        val enabled = call.argument<Boolean>("enabled") ?: false
+                        runOnUiThread {
+                            if (enabled) {
+                                window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                            } else {
+                                window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                            }
                         }
+                        result.success(true)
                     }
-                    result.success(true)
+                    else -> result.notImplemented()
                 }
-                else -> result.notImplemented()
             }
         }
     }

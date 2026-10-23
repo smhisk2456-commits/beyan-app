@@ -67,6 +67,17 @@ String _normalizeForSearch(String text) {
   return s.replaceAll(RegExp(r'\s+'), ' ').trim();
 }
 
+final _harakatRegex = RegExp(r'[\u064B-\u065F\u0670\u06D6-\u06ED\u0640]');
+
+/// Arapça hareke ve imla farklılıklarını (elif çeşitleri, te merbuta vb.) temizleyip normalleştirir
+String _normalizeArabic(String text) {
+  var s = text.replaceAll(_harakatRegex, '');
+  s = s.replaceAll(RegExp(r'[إأآٱ]'), 'ا');
+  s = s.replaceAll('ى', 'ي');
+  s = s.replaceAll('ة', 'ه');
+  return s.replaceAll(RegExp(r'\s+'), ' ').trim();
+}
+
 /// Filtrelenmiş dua listesi
 final filteredDuasListProvider = Provider<List<DuaItem>>((ref) {
   final favorites = ref.watch(favoriteDuasProvider);
@@ -82,17 +93,23 @@ final filteredDuasListProvider = Provider<List<DuaItem>>((ref) {
     }
     // Arama sorgusu
     if (query.isNotEmpty) {
-      // 1. Doğrudan Arapça metin eşleşmesi
-      if (item.arabicText.contains(query)) {
-        return true;
+      // 1. Doğrudan veya normalleştirilmiş Arapça eşleşmesi (Metin, Başlık ve Meal)
+      final normArQuery = _normalizeArabic(query);
+      if (normArQuery.isNotEmpty) {
+        final arPool = _normalizeArabic(
+          '${item.arabicText} ${item.localizedTitle('ar')} ${item.localizedMeaning('ar')}',
+        );
+        if (arPool.contains(normArQuery)) {
+          return true;
+        }
       }
 
       final normQuery = _normalizeForSearch(query);
       if (normQuery.isEmpty) return true;
 
-      // 2. Normalleştirilmiş arama havuzu (Başlık, Okunuş, Anlam, İngilizce, Kaynak, Fazilet)
+      // 2. Normalleştirilmiş arama havuzu (Başlık, Okunuş, Anlam, İngilizce, Arapça, Kaynak, Fazilet)
       final combined = _normalizeForSearch(
-        '${item.title} ${item.localizedTitle('en')} ${item.transliteration} ${item.turkishMeaning} ${item.localizedMeaning('en')} ${item.reference} ${item.virtueExplanation ?? ''}',
+        '${item.title} ${item.localizedTitle('en')} ${item.localizedTitle('ar')} ${item.transliteration} ${item.turkishMeaning} ${item.localizedMeaning('en')} ${item.reference} ${item.virtueExplanation ?? ''}',
       );
 
       // Doğrudan alt metin eşleşmesi

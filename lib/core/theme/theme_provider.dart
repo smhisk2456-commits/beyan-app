@@ -138,9 +138,9 @@ final effectivePaletteProvider = Provider<AppThemePalette>((ref) {
     final prayerAsync = ref.watch(prayerTimesNotifierProvider);
     final nextPrayerEntry = prayerAsync.valueOrNull?.nextPrayerEntry;
     if (nextPrayerEntry != null) {
-      final timeUntil = nextPrayerEntry.timeUntil;
-      if (!timeUntil.isNegative) {
-        final timer = Timer(timeUntil + const Duration(seconds: 1), () {
+      final timeDiff = nextPrayerEntry.time.difference(DateTime.now());
+      if (timeDiff > Duration.zero) {
+        final timer = Timer(timeDiff + const Duration(seconds: 1), () {
           ref.invalidateSelf();
         });
         ref.onDispose(() => timer.cancel());

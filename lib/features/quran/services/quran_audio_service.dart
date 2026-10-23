@@ -281,6 +281,7 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
 
   bool _isLoopSeeking = false;
   int? _pendingSeekMs;
+  int? _stopAfterVerse;
 
   void setVerses(List<Verse> verses) {
     final isNewSurahList = _currentVerses == null ||
@@ -637,6 +638,13 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
         }
       }
 
+      // Belirli bir ayet aralığı çalınıyorsa (örn: Dua kartı) ve hedef ayet bittiyse durdur
+      if (_stopAfterVerse != null && determinedVerse > _stopAfterVerse!) {
+        _stopAfterVerse = null;
+        stop();
+        return;
+      }
+
       // Tek Âyet Ezber Tekrarı (loopVerseNumber aktifse ve sonraki âyete geçildiyse başa sar)
       if (!_isLoopSeeking &&
           state.loopVerseNumber != null &&
@@ -941,6 +949,17 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
     );
   }
 
+  /// Belirli bir ayet aralığını (örn: Dua kartları için Bakara 255 veya Haşr 21-24) dinletir
+  Future<void> playVerseRange(
+    List<Verse> verses, {
+    required int from,
+    required int to,
+    required String surahName,
+  }) async {
+    _stopAfterVerse = to;
+    await seekToVerse(from, verses, surahName: surahName);
+  }
+
   Future<void> seek(Duration position) async {
     _lastAnchorPosition = position;
     if (state.isPlaying) {
@@ -1082,6 +1101,7 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
   }
 
   Future<void> stop() async {
+    _stopAfterVerse = null;
     _stopSmoothSyncTimer();
     _lastAnchorPosition = Duration.zero;
     try {

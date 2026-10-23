@@ -28,6 +28,9 @@ class DatabaseHelper {
     return _initFuture ??= _initDatabase().then((db) {
       _database = db;
       return db;
+    }).catchError((Object e) {
+      _initFuture = null; // Başarısız olursa bir sonraki çağrıda tekrar denesin
+      throw e;
     });
   }
 
@@ -144,8 +147,13 @@ class DatabaseHelper {
     return results.isNotEmpty ? results.first : null;
   }
 
+  static const Set<String> _allowedTables = {'surah', 'verse', 'daily_dua'};
+
   /// Bir tablodaki toplam kayıt sayısını döner.
   Future<int> count(String table, {String? where, List<dynamic>? whereArgs}) async {
+    if (!_allowedTables.contains(table.toLowerCase())) {
+      throw ArgumentError('Geçersiz tablo adı: $table');
+    }
     final db = await database;
     final result = await db.rawQuery(
       'SELECT COUNT(*) as count FROM $table ${where != null ? "WHERE $where" : ""}',

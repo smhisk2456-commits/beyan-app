@@ -8,6 +8,7 @@ import '../../../core/localization/app_strings.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../monetization/widgets/banner_ad_widget.dart';
 import '../../quran/services/quran_audio_service.dart';
+import '../../quran/providers/quran_providers.dart';
 import '../../quran/widgets/quran_audio_player_bar.dart';
 import '../data/verified_duas_data.dart';
 import '../models/dua_model.dart';
@@ -91,7 +92,8 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
     final selectedCategory = ref.watch(selectedDuaCategoryProvider);
     final duas = ref.watch(filteredDuasListProvider);
     final isSearching = _searchController.text.trim().isNotEmpty;
-    final bottomAudioPadding = ref.watch(quranAudioProvider).currentSurahId != null ? 100.0 : 24.0;
+    final hasActiveAudio = ref.watch(quranAudioProvider.select((s) => s.currentSurahId != null));
+    final bottomAudioPadding = hasActiveAudio ? 100.0 : 24.0;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -361,7 +363,7 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
               ),
 
               // Alt banner reklam (Tilavet çubuğu açık değilken görünür)
-              if (ref.watch(quranAudioProvider).currentSurahId == null)
+              if (!hasActiveAudio)
                 const BannerAdWidget(),
             ],
           ),
@@ -1157,9 +1159,15 @@ class _DuaCardItem extends ConsumerWidget {
                 if (linked != null)
                   Consumer(
                     builder: (context, ref, _) {
-                      final audioState = ref.watch(quranAudioProvider);
-                      final isCurrent = audioState.currentSurahId == linked.id;
-                      final isPlaying = isCurrent && audioState.isPlaying;
+                      final isCurrent = ref.watch(quranAudioProvider.select((s) {
+                        if (s.currentSurahId != linked.id) return false;
+                        if (linked.fromVerse == null) return true;
+                        final active = s.activeVerseNumber;
+                        if (active == null) return false;
+                        return active >= linked.fromVerse! &&
+                            (linked.toVerse == null || active <= linked.toVerse!);
+                      }));
+                      final isPlaying = isCurrent && ref.watch(quranAudioProvider.select((s) => s.isPlaying));
                       return Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -1178,12 +1186,21 @@ class _DuaCardItem extends ConsumerWidget {
                                 : (isCurrent
                                     ? strings.resumeRecitation
                                     : strings.listenSurahRecitation(linked.nameTurkish)),
-                            onPressed: () {
+                            onPressed: () async {
                               HapticFeedback.mediumImpact();
+                              final audio = ref.read(quranAudioProvider.notifier);
                               if (isCurrent) {
-                                ref.read(quranAudioProvider.notifier).togglePlayPause();
+                                audio.togglePlayPause();
+                              } else if (linked.isFullSurah) {
+                                audio.playSurah(linked.id, linked.nameTurkish);
                               } else {
-                                ref.read(quranAudioProvider.notifier).playSurah(linked.id, linked.nameTurkish);
+                                final verses = await ref.read(versesBySurahProvider(linked.id).future);
+                                await audio.playVerseRange(
+                                  verses,
+                                  from: linked.fromVerse!,
+                                  to: linked.toVerse ?? linked.fromVerse!,
+                                  surahName: linked.nameTurkish,
+                                );
                               }
                             },
                           ),
@@ -1428,7 +1445,11 @@ class _DuaCardItem extends ConsumerWidget {
 class _LinkedSurahInfo {
   final int id;
   final String nameTurkish;
-  const _LinkedSurahInfo(this.id, this.nameTurkish);
+  final int? fromVerse;
+  final int? toVerse;
+  const _LinkedSurahInfo(this.id, this.nameTurkish, {this.fromVerse, this.toVerse});
+
+  bool get isFullSurah => fromVerse == null;
 }
 
 _LinkedSurahInfo? _getLinkedSurah(DuaItem dua) {
@@ -1437,29 +1458,36 @@ _LinkedSurahInfo? _getLinkedSurah(DuaItem dua) {
       return const _LinkedSurahInfo(1, 'Fâtiha');
     case 'uyku_3': // Âyetü'l-Kürsî (Bakara 255)
     case 'kuran_ayetel_kursi':
+      return const _LinkedSurahInfo(2, 'Bakara', fromVerse: 255, toVerse: 255);
     case 'aksam_3': // Âmenerresûlü (Bakara 285-286)
+      return const _LinkedSurahInfo(2, 'Bakara', fromVerse: 285, toVerse: 286);
     case 'kuran_1': // Rabbena Âtina (Bakara 201)
-      return const _LinkedSurahInfo(2, 'Bakara');
+      return const _LinkedSurahInfo(2, 'Bakara', fromVerse: 201, toVerse: 201);
     case 'kuran_2': // Âl-i İmrân 8
+      return const _LinkedSurahInfo(3, 'Âl-i İmrân', fromVerse: 8, toVerse: 8);
     case 'peygamber_5': // Âl-i İmrân 38
-      return const _LinkedSurahInfo(3, 'Âl-i İmrân');
+      return const _LinkedSurahInfo(3, 'Âl-i İmrân', fromVerse: 38, toVerse: 38);
     case 'peygamber_3': // A'râf 23
-      return const _LinkedSurahInfo(7, 'A\'râf');
+      return const _LinkedSurahInfo(7, 'A\'râf', fromVerse: 23, toVerse: 23);
     case 'peygamber_4': // Yûsuf 101
-      return const _LinkedSurahInfo(12, 'Yûsuf');
+      return const _LinkedSurahInfo(12, 'Yûsuf', fromVerse: 101, toVerse: 101);
     case 'kuran_3': // İbrâhîm 41
+    case 'namaz_rabbena_agfirli':
+      return const _LinkedSurahInfo(14, 'İbrâhîm', fromVerse: 41, toVerse: 41);
     case 'kuran_5': // İbrâhîm 40
-      return const _LinkedSurahInfo(14, 'İbrâhîm');
+      return const _LinkedSurahInfo(14, 'İbrâhîm', fromVerse: 40, toVerse: 40);
     case 'kuran_6': // Tâhâ 114
+      return const _LinkedSurahInfo(20, 'Tâhâ', fromVerse: 114, toVerse: 114);
     case 'peygamber_1': // Tâhâ 25-28
-      return const _LinkedSurahInfo(20, 'Tâhâ');
+      return const _LinkedSurahInfo(20, 'Tâhâ', fromVerse: 25, toVerse: 28);
     case 'sikinti_1': // Enbiyâ 87 (Hz. Yûnus)
+      return const _LinkedSurahInfo(21, 'Enbiyâ', fromVerse: 87, toVerse: 87);
     case 'peygamber_2': // Enbiyâ 83 (Hz. Eyyûb)
-      return const _LinkedSurahInfo(21, 'Enbiyâ');
+      return const _LinkedSurahInfo(21, 'Enbiyâ', fromVerse: 83, toVerse: 83);
     case 'kuran_4': // Furkân 74
-      return const _LinkedSurahInfo(25, 'Furkân');
+      return const _LinkedSurahInfo(25, 'Furkân', fromVerse: 74, toVerse: 74);
     case 'kuran_lev_enzelna': // Haşr 21-24
-      return const _LinkedSurahInfo(59, 'Haşr');
+      return const _LinkedSurahInfo(59, 'Haşr', fromVerse: 21, toVerse: 24);
     case 'kuran_duha':
       return const _LinkedSurahInfo(93, 'Duhâ');
     case 'kuran_insirah': // İnşirâh Suresi

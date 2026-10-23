@@ -46,21 +46,23 @@ struct BeyanPrayerAttributes: ActivityAttributes {
             return
         }
 
-        let channel = FlutterMethodChannel(
-            name: "com.example.islamic_app/screen",
-            binaryMessenger: controller.binaryMessenger
-        )
-
-        channel.setMethodCallHandler { (call: FlutterMethodCall, result: @escaping FlutterResult) in
-            switch call.method {
-            case "setKeepScreenOn":
-                let enabled = (call.arguments as? [String: Any])?["enabled"] as? Bool ?? false
-                DispatchQueue.main.async {
-                    UIApplication.shared.isIdleTimerDisabled = enabled
+        let channelNames = ["com.smhisk60.beyan/screen", "com.example.islamic_app/screen"]
+        for channelName in channelNames {
+            let channel = FlutterMethodChannel(
+                name: channelName,
+                binaryMessenger: controller.binaryMessenger
+            )
+            channel.setMethodCallHandler { (call: FlutterMethodCall, result: @escaping FlutterResult) in
+                switch call.method {
+                case "setKeepScreenOn":
+                    let enabled = (call.arguments as? [String: Any])?["enabled"] as? Bool ?? false
+                    DispatchQueue.main.async {
+                        UIApplication.shared.isIdleTimerDisabled = enabled
+                    }
+                    result(true)
+                default:
+                    result(FlutterMethodNotImplemented)
                 }
-                result(true)
-            default:
-                result(FlutterMethodNotImplemented)
             }
         }
     }

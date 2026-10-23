@@ -113,10 +113,6 @@ class _MeccaMedinaLiveScreenState extends ConsumerState<MeccaMedinaLiveScreen>
         NavigationDelegate(
           onPageFinished: (url) {
             onFinished();
-            // Mobil izleme sayfasında YouTube üst menüsünü ve öneri alanlarını gizle
-            if (url.contains('m.youtube.com/watch')) {
-              controller.runJavaScript(_watchPageCleanupJs).catchError((_) {});
-            }
           },
           onWebResourceError: (error) {
             debugPrint('$name stream error: ${error.description}');
@@ -135,21 +131,6 @@ class _MeccaMedinaLiveScreenState extends ConsumerState<MeccaMedinaLiveScreen>
       );
     return controller;
   }
-
-  static const String _watchPageCleanupJs = '''
-(function() {
-  var css = 'ytm-mobile-topbar-renderer, header, .mobile-topbar-header, ytm-pivot-bar-renderer,'
-    + ' ytm-item-section-renderer, ytm-comment-section-renderer, .related-chips-slot-wrapper,'
-    + ' ytm-engagement-panel, ytm-slim-video-metadata-section-renderer { display:none !important; }'
-    + ' body, html, ytm-app { background:#000 !important; }'
-    + ' #player-container-id, .player-container { position:fixed !important; top:0 !important; left:0 !important;'
-    + ' width:100vw !important; height:100vh !important; z-index:9999 !important; }'
-    + ' video { object-fit: contain !important; }';
-  var s = document.createElement('style'); s.innerHTML = css; document.head.appendChild(s);
-  var v = document.querySelector('video');
-  if (v) { v.setAttribute('playsinline', ''); if (v.play) { v.play().catch(function(){}); } }
-})();
-''';
 
   void _initControllers() {
     _makkahController = _createController(

@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:islamic_app/features/dua/data/dua_translations.dart';
 import 'package:islamic_app/features/dua/data/verified_duas_data.dart';
 import 'package:islamic_app/features/dua/models/dua_model.dart';
 import 'package:islamic_app/features/dua/providers/dua_providers.dart';
@@ -121,6 +122,41 @@ void main() {
       container.read(duaSearchQueryProvider.notifier).state = 'rabbi yessir';
       results = container.read(filteredDuasListProvider);
       expect(results.any((d) => d.id == 'sikinti_rabbi_yessir'), isTrue);
+    });
+
+    test('Dua ID\'leri benzersiz olmalı, okunuşları dolu olmalı ve çeviri tablosunda bulunmalı', () {
+      final ids = verifiedDuasList.map((d) => d.id).toList();
+      expect(ids.toSet().length, ids.length, reason: 'Mükerrer dua ID olmamalı');
+
+      for (final dua in verifiedDuasList) {
+        expect(dua.transliteration.trim().isNotEmpty, isTrue, reason: '${dua.id} okunuşu boş olamaz');
+        expect(kDuaTranslations.containsKey(dua.id), isTrue, reason: '${dua.id} çeviri tablosunda bulunmalı');
+      }
+    });
+
+    test('Harekesiz Arapça arama duaları doğru bulmalı', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      // Harekesiz "الكرسي"
+      container.read(duaSearchQueryProvider.notifier).state = 'الكرسي';
+      var results = container.read(filteredDuasListProvider);
+      expect(results.any((d) => d.id == 'kuran_ayetel_kursi'), isTrue);
+
+      // Harekesiz "الكوثر"
+      container.read(duaSearchQueryProvider.notifier).state = 'الكوثر';
+      results = container.read(filteredDuasListProvider);
+      expect(results.any((d) => d.id == 'kuran_kevser'), isTrue);
+    });
+
+    test('Âmenerresûlü 285 ve 286. ayetleri, Lev Enzelnâ 21-24. ayetleri tam içermeli', () {
+      final amenerrasul = verifiedDuasList.firstWhere((d) => d.id == 'aksam_3');
+      expect(amenerrasul.arabicText.contains('لَا يُكَلِّفُ') || amenerrasul.arabicText.contains('لَا يُكَلِّفُ'), isTrue);
+      expect(amenerrasul.arabicText.contains('الْكَافِرِينَ'), isTrue);
+
+      final levEnzelna = verifiedDuasList.firstWhere((d) => d.id == 'kuran_lev_enzelna');
+      expect(levEnzelna.arabicText.contains('لَوْ أَنْزَلْنَا'), isTrue);
+      expect(levEnzelna.reference.contains('21-24'), isTrue);
     });
   });
 }
