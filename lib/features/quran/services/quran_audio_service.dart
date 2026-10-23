@@ -282,6 +282,7 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
   bool _isLoopSeeking = false;
   int? _pendingSeekMs;
   int? _stopAfterVerse;
+  int? get stopAfterVerse => _stopAfterVerse;
 
   void setVerses(List<Verse> verses) {
     final isNewSurahList = _currentVerses == null ||
