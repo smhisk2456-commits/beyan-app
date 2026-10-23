@@ -19,62 +19,24 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('AcousticAudioService Testleri', () {
-    test('Varsayılan ses ayarları aktif olmalı ve singleton doğru çalışmalı', () {
+    test('Varsayılan sayfa çevirme dokunsal geri bildirim ayarı aktif olmalı ve singleton doğru çalışmalı', () {
       final service1 = AcousticAudioService.instance;
       final service2 = AcousticAudioService();
 
       expect(identical(service1, service2), isTrue);
-      expect(service1.isZikrSoundEnabled, isTrue);
       expect(service1.isPageFlipSoundEnabled, isTrue);
-      expect(service1.zikrSoundStyle, 0);
     });
 
-    test('Zikir ses stilleri (0: Kadife Tık, 1: Kehribar, 2: Sessiz) doğru geçiş yapmalı', () async {
+    test('Sayfa çevirme geri bildirimi açma ve kapama kontrolleri doğru güncellenmeli', () async {
       final service = AcousticAudioService.instance;
-
-      service.zikrSoundStyle = 1;
-      expect(service.zikrSoundStyle, 1);
-
-      service.zikrSoundStyle = 2;
-      expect(service.zikrSoundStyle, 2);
-      await expectLater(service.playKukaBeadSound(), completes);
-
-      service.zikrSoundStyle = 0;
-      expect(service.zikrSoundStyle, 0);
-    });
-
-    test('Ses açma ve kapama kontrolleri doğru güncellenmeli', () {
-      final service = AcousticAudioService.instance;
-
-      service.isZikrSoundEnabled = false;
-      expect(service.isZikrSoundEnabled, isFalse);
-
-      service.isZikrSoundEnabled = true;
-      expect(service.isZikrSoundEnabled, isTrue);
 
       service.isPageFlipSoundEnabled = false;
       expect(service.isPageFlipSoundEnabled, isFalse);
+      await expectLater(service.playParchmentPageFlip(), completes);
 
       service.isPageFlipSoundEnabled = true;
       expect(service.isPageFlipSoundEnabled, isTrue);
-    });
-
-    test('playKukaBeadSound ses kapalıyken işlem yapmadan dönmeli', () async {
-      final service = AcousticAudioService.instance;
-      service.isZikrSoundEnabled = false;
-
-      // Hata fırlatmadan sessizce tamamlanmalı
-      await expectLater(service.playKukaBeadSound(), completes);
-      service.isZikrSoundEnabled = true;
-    });
-
-    test('playParchmentPageFlip ses kapalıyken işlem yapmadan dönmeli', () async {
-      final service = AcousticAudioService.instance;
-      service.isPageFlipSoundEnabled = false;
-
-      // Hata fırlatmadan sessizce tamamlanmalı
       await expectLater(service.playParchmentPageFlip(), completes);
-      service.isPageFlipSoundEnabled = true;
     });
   });
 

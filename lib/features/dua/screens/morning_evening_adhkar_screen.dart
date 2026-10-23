@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/localization/app_strings.dart';
-import '../../../core/services/acoustic_audio_service.dart';
 import '../models/morning_evening_adhkar_model.dart';
 
 /// Sabah & Akşam Duaları Eşlikçisi (Hısnu'l-Müslim Akışı)
@@ -69,7 +68,6 @@ class _MorningEveningAdhkarScreenState extends ConsumerState<MorningEveningAdhka
     if (_currentIndex >= list.length) return;
     final item = list[_currentIndex];
 
-    AcousticAudioService.instance.playKukaBeadSound();
     HapticFeedback.selectionClick();
 
     setState(() {

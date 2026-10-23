@@ -1,7 +1,6 @@
 import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import '../../../core/services/acoustic_audio_service.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -40,8 +39,6 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
 
   late final AnimationController _shimmerController;
   late final Animation<double> _shimmerAnimation;
-  bool _isSoundMuted = false;
-  int _soundStyle = 0; // 0: Kadife Tık (Apple Taptic), 1: Kehribar Ahşap, 2: Sessiz
 
   Future<void> _loadSavedDhikrState() async {
     try {
@@ -51,8 +48,6 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
       final savedDhikrIndex = prefs.getInt('zikirmatik_selected_index') ?? 0;
       final savedLaps = prefs.getInt('zikirmatik_laps') ?? 0;
       final savedHaptic = prefs.getInt('zikirmatik_haptic_mode') ?? 1;
-      final savedSoundMuted = prefs.getBool('zikirmatik_sound_muted') ?? false;
-      final savedSoundStyle = prefs.getInt('zikirmatik_sound_style') ?? 0;
 
       if (mounted) {
         setState(() {
@@ -61,10 +56,6 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
           _selectedDhikrIndex = savedDhikrIndex.clamp(0, _dhikrList.length - 1);
           _completedLaps = savedLaps;
           _hapticMode = savedHaptic;
-          _isSoundMuted = savedSoundMuted;
-          _soundStyle = savedSoundMuted ? 2 : savedSoundStyle;
-          AcousticAudioService.instance.isZikrSoundEnabled = !savedSoundMuted && _soundStyle != 2;
-          AcousticAudioService.instance.zikrSoundStyle = _soundStyle;
         });
         if (_chipScrollController.hasClients && _selectedDhikrIndex > 0) {
           _chipScrollController.animateTo(
@@ -85,8 +76,6 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
       await prefs.setInt('zikirmatik_selected_index', _selectedDhikrIndex);
       await prefs.setInt('zikirmatik_laps', _completedLaps);
       await prefs.setInt('zikirmatik_haptic_mode', _hapticMode);
-      await prefs.setBool('zikirmatik_sound_muted', _isSoundMuted);
-      await prefs.setInt('zikirmatik_sound_style', _soundStyle);
     } catch (_) {}
   }
 
@@ -283,9 +272,6 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
   }
 
   void _increment() {
-    if (!_isSoundMuted) {
-      AcousticAudioService.instance.playKukaBeadSound();
-    }
     if (_hapticMode == 1) {
       HapticFeedback.selectionClick();
     } else if (_hapticMode == 2) {
@@ -511,24 +497,6 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
         title: Text(_activeTab == 0 ? strings.actionZikr : strings.worshipTrackerTab),
         centerTitle: true,
         actions: [
-          // Ses Aç/Kapat Butonu (Kuka Ahşap Tesbih Sesi)
-          if (_activeTab == 0)
-            IconButton(
-              icon: Icon(
-                _isSoundMuted ? Icons.volume_off_rounded : Icons.volume_up_rounded,
-                color: _isSoundMuted ? Colors.white38 : BeyanColors.tone(0xFFFFDF7A),
-              ),
-              tooltip: _isSoundMuted
-                  ? (strings.language == AppLanguage.turkish ? 'Kuka Sesini Aç' : 'Unmute Sound')
-                  : (strings.language == AppLanguage.turkish ? 'Kuka Sesini Kapat' : 'Mute Sound'),
-              onPressed: () {
-                setState(() {
-                  _isSoundMuted = !_isSoundMuted;
-                  AcousticAudioService.instance.isZikrSoundEnabled = !_isSoundMuted;
-                });
-                _saveDhikrState();
-              },
-            ),
           // Özel zikir ekle butonu (Zikir sekmesinde aktif)
           if (_activeTab == 0)
             IconButton(
@@ -1105,43 +1073,6 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
 
           const SizedBox(height: 14),
 
-          // ── Tesbih Sesi Stili Seçici (Kadife Tık / Kehribar / Sessiz) ──
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            decoration: BoxDecoration(
-              color: isDark ? BeyanColors.tone(0xFF04201B) : Colors.grey.shade100,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.2)),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  _soundStyle == 2 ? Icons.volume_off_rounded : Icons.volume_up_rounded,
-                  size: 16,
-                  color: BeyanColors.tone(0xFFFFDF7A),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  currentLang == AppLanguage.turkish ? 'Tesbih Sesi:' : 'Bead Sound:',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: isDark ? Colors.white70 : Colors.black87,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                _soundChip(0, currentLang == AppLanguage.turkish ? 'Kadife Tık' : 'Velvet Click', isDark),
-                const SizedBox(width: 4),
-                _soundChip(1, currentLang == AppLanguage.turkish ? 'Kehribar' : 'Amber Wood', isDark),
-                const SizedBox(width: 4),
-                _soundChip(2, currentLang == AppLanguage.turkish ? 'Sessiz' : 'Mute', isDark),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 8),
-
           // ── Titreşim / Dokunuş Hissi Seçici ──────────────────────
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -1179,40 +1110,6 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _soundChip(int style, String label, bool isDark) {
-    final isSelected = _soundStyle == style;
-    return InkWell(
-      onTap: () {
-        setState(() {
-          _soundStyle = style;
-          _isSoundMuted = (style == 2);
-          AcousticAudioService.instance.zikrSoundStyle = style;
-          AcousticAudioService.instance.isZikrSoundEnabled = (style != 2);
-        });
-        _saveDhikrState();
-        if (style != 2) {
-          AcousticAudioService.instance.playKukaBeadSound();
-        }
-      },
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-        decoration: BoxDecoration(
-          color: isSelected ? BeyanColors.tone(0xFFD4AF37) : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 10.5,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-            color: isSelected ? Colors.black : (isDark ? Colors.white60 : Colors.black54),
-          ),
-        ),
       ),
     );
   }
