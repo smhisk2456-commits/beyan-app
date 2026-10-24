@@ -1,5 +1,4 @@
 import 'package:islamic_app/core/theme/beyan_colors.dart';
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -988,42 +987,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                       ),
                     ),
 
-                    // 5. Lüks Cam & Altın Çember Işık Süzülmesi (Rotating Ring Shimmer)
-                    SizedBox(
-                      width: 202,
-                      height: 202,
-                      child: IgnorePointer(
-                        child: AnimatedBuilder(
-                          animation: _shimmerAnimation,
-                          builder: (context, _) {
-                            final animValue = _shimmerAnimation.value;
-                            final isMilestone = (_count > 0 && (_count % 33 == 0 || _count == _target));
-                            final sweepIntensity = isMilestone ? 0.75 : 0.42;
-
-                            return Container(
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                gradient: SweepGradient(
-                                  center: Alignment.center,
-                                  transform: GradientRotation(animValue * math.pi * 2),
-                                  colors: [
-                                    Colors.transparent,
-                                    BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.0),
-                                    BeyanColors.tone(0xFFFFDF7A).withValues(alpha: sweepIntensity),
-                                    Colors.white.withValues(alpha: isMilestone ? 0.85 : 0.55),
-                                    BeyanColors.tone(0xFFFFDF7A).withValues(alpha: sweepIntensity),
-                                    Colors.transparent,
-                                  ],
-                                  stops: const [0.0, 0.40, 0.48, 0.50, 0.52, 0.65],
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-
-                    // 6. Lüks Kavisli Cam Yansıması (Curved Specular Arc)
+                    // 5. Lüks Kavisli Cam Yansıması (Curved Specular Arc)
                     Positioned(
                       top: 38,
                       child: IgnorePointer(
