@@ -529,14 +529,41 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
       _lastAnchorPosition = Duration.zero;
       if (localFile != null && await localFile.exists()) {
         await _player.play(DeviceFileSource(localFile.path));
+        state = state.copyWith(isPlaying: true, isLoading: false);
+        _startSmoothSyncTimer();
       } else {
+        // Çevrimdışı koruması: İnternet yoksa "çalıyor" görünmemeli
+        final online = await _hasInternetConnection();
+        if (!online) {
+          _stopSmoothSyncTimer();
+          state = state.copyWith(isPlaying: false, isLoading: false);
+          debugPrint('[QuranAudio] Çevrimdışı: İnternet bağlantısı yok ve sure indirilmemiş.');
+          return;
+        }
         await _player.play(UrlSource(audioUrl));
+        state = state.copyWith(isPlaying: true, isLoading: false);
+        _startSmoothSyncTimer();
       }
-      state = state.copyWith(isPlaying: true, isLoading: false);
-      _startSmoothSyncTimer();
     } catch (e) {
       debugPrint('QuranAudio playSurah hatası: $e');
+      _stopSmoothSyncTimer();
       state = state.copyWith(isLoading: false, isPlaying: false);
+    }
+  }
+
+  Future<bool> _hasInternetConnection() async {
+    if (kIsWeb) return true;
+    if (Platform.environment.containsKey('FLUTTER_TEST')) return true;
+    try {
+      final res = await InternetAddress.lookup('dns.google').timeout(const Duration(seconds: 2));
+      return res.isNotEmpty && res[0].rawAddress.isNotEmpty;
+    } catch (_) {
+      try {
+        final res2 = await InternetAddress.lookup('example.com').timeout(const Duration(seconds: 2));
+        return res2.isNotEmpty && res2[0].rawAddress.isNotEmpty;
+      } catch (_) {
+        return false;
+      }
     }
   }
 
@@ -546,9 +573,26 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
       await _player.pause();
       state = state.copyWith(isPlaying: false);
     } else {
-      await _player.resume();
-      state = state.copyWith(isPlaying: true);
-      _startSmoothSyncTimer();
+      if (state.currentSurahId != null) {
+        final reciter = state.selectedReciter;
+        final localFile = await QuranDownloadService.instance.getLocalFile(reciter.id, state.currentSurahId!);
+        if (localFile == null || !await localFile.exists()) {
+          final online = await _hasInternetConnection();
+          if (!online) {
+            _stopSmoothSyncTimer();
+            state = state.copyWith(isPlaying: false, isLoading: false);
+            return;
+          }
+        }
+      }
+      try {
+        await _player.resume();
+        state = state.copyWith(isPlaying: true);
+        _startSmoothSyncTimer();
+      } catch (e) {
+        _stopSmoothSyncTimer();
+        state = state.copyWith(isPlaying: false);
+      }
     }
   }
 

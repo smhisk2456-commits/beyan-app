@@ -184,22 +184,23 @@ void main() {
       expect(fromJson.suggestedFollowUps, ['Huzur duaları']);
     });
 
-    test('AiAssistantNotifier test modunda sınırsız soru kotası sağlamalı', () async {
+    test('AiAssistantNotifier günlük soru kotasını doğru yönetmeli ve tüketmeli', () async {
+      SharedPreferences.setMockInitialValues({});
       final notifier = AiAssistantNotifier();
 
-      // Test modunda ücretsiz kullanıcılar için de sınırsız kota (999) sağlanmalı
+      // Ücretsiz kullanıcı için başlangıç kotası 5 olmalı
       final remainingInitial = await notifier.getRemainingQuota(false);
-      expect(remainingInitial, 999);
+      expect(remainingInitial, 5);
       expect(await notifier.canAskQuestion(false), isTrue);
 
-      // Soru sorulabilir ve kota engeline takılmaz
+      // Soru sorulduğunda kota 1 azalmalı
       final res1 = await notifier.askQuestion('Kalp huzuru için ne yapmalıyım?', isPremium: false);
       expect(res1, isTrue);
 
       final remainingAfter1 = await notifier.getRemainingQuota(false);
-      expect(remainingAfter1, 999);
+      expect(remainingAfter1, 4);
 
-      // Premium kullanıcı için de sınırsız kota dönmeli
+      // Premium kullanıcı için sınırsız kota (999) dönmeli
       final premiumQuota = await notifier.getRemainingQuota(true);
       expect(premiumQuota, 999);
       expect(await notifier.canAskQuestion(true), isTrue);

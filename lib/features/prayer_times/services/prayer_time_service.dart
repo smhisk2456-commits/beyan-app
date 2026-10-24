@@ -140,6 +140,56 @@ class PrayerTimeService {
     } catch (_) {}
   }
 
+  /// Widget ve arka plan görevleri için donanım GPS çipini uyandırmadan
+  /// önbellekteki doğrulanmış konumu döner. Pil tüketimini ve konum izin pencerelerini önler.
+  Future<LocationData> getCachedOrFastLocation() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final manualCityName = prefs.getString(_prefManualCityKey);
+      if (manualCityName != null && manualCityName.isNotEmpty) {
+        final found = predefinedCitiesList.firstWhere(
+          (c) => c.name.toLowerCase() == manualCityName.toLowerCase(),
+          orElse: () => predefinedCitiesList.first,
+        );
+        return LocationData(
+          latitude: found.latitude,
+          longitude: found.longitude,
+          cityName: found.name,
+          isFromGPS: false,
+        );
+      }
+
+      // Kaydedilmiş doğrulanmış GPS koordinatını oku (en hızlı ve sıfır pil tüketimi)
+      final savedLat = prefs.getDouble('beyan_verified_gps_lat');
+      final savedLng = prefs.getDouble('beyan_verified_gps_lng');
+      if (savedLat != null && savedLng != null && !_isEmulatorOrInvalidLocation(savedLat, savedLng)) {
+        return LocationData(
+          latitude: savedLat,
+          longitude: savedLng,
+          cityName: prefs.getString('beyan_verified_gps_title') ?? 'Mevcut Konum',
+          isFromGPS: true,
+        );
+      }
+
+      // Cihazın son bilinen konumunu al (donanım GPS'i açmaz)
+      try {
+        final lastKnown = await Geolocator.getLastKnownPosition();
+        if (lastKnown != null && !_isEmulatorOrInvalidLocation(lastKnown.latitude, lastKnown.longitude)) {
+          return LocationData(
+            latitude: lastKnown.latitude,
+            longitude: lastKnown.longitude,
+            cityName: 'Mevcut Konum',
+            isFromGPS: true,
+          );
+        }
+      } catch (_) {}
+
+      return _defaultLocation('Önbellek konumu');
+    } catch (_) {
+      return _defaultLocation('Önbellek hatası');
+    }
+  }
+
   /// Geçersiz veya bozuk koordinatları tespit eder.
   /// Null Island (0,0) ve dünya koordinat sınırları (-90..90, -180..180) dışını filtreler.
   /// Gerçek kullanıcıların (Amerika, Avrupa vb.) veya App Store inceleme ekibinin

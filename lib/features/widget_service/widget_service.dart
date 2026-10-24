@@ -51,8 +51,8 @@ class WidgetService {
       final langCode = prefs.getString('selected_app_language') ?? 'tr';
       final lang = AppLanguage.fromCode(langCode);
 
-      // 1. Namaz Vakitleri
-      final location = await _prayerService.getCurrentLocation();
+      // 1. Namaz Vakitleri (Widget için donanım GPS yerine önbellek/hızlı konumu kullan)
+      final location = await _prayerService.getCachedOrFastLocation();
       final daily = await _prayerService.calculatePrayerTimes(location: location);
       final next = daily.nextPrayerEntry;
       final countdown = _prayerService.formatCountdown(daily.timeUntilNextPrayer, lang: lang);

@@ -1,6 +1,7 @@
 import 'package:adhan/adhan.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:geomag/geomag.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:islamic_app/features/prayer_times/models/prayer_time_model.dart';
 import 'package:islamic_app/features/notifications/services/notification_service.dart';
@@ -10,6 +11,14 @@ void main() {
   SharedPreferences.setMockInitialValues({});
 
   group('Kıble ve Pusula Testleri', () {
+    test('İstanbul için manyetik sapma (declination) WMM modeliyle doğru hesaplanmalı', () {
+      final geoMag = GeoMag();
+      final result = geoMag.calculate(41.0082, 28.9784);
+      // İstanbul'da manyetik sapma Doğu yönünde yaklaşık +5.5° ile +7.5° arasındadır
+      expect(result.dec, greaterThan(5.0));
+      expect(result.dec, lessThan(8.0));
+    });
+
     test('İstanbul için Kıble açısı yaklaşık 152 derece olmalı', () {
       final istanbul = Coordinates(41.0082, 28.9784);
       final qibla = Qibla(istanbul);

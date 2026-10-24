@@ -66,14 +66,14 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
   static const String _prefKeyCount = 'beyan_ai_daily_count';
   static const String _prefKeyDate = 'beyan_ai_daily_date';
   static const String _prefKeyGeminiKey = 'beyan_gemini_api_key';
-  static const int freeDailyLimit = 999;
+  static const int freeDailyLimit = 5; // Günlük 5 ücretsiz soru kotası
 
   static const _secureStorage = FlutterSecureStorage(
     iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock_this_device),
     aOptions: AndroidOptions(resetOnError: true),
   );
 
-  AiAssistantNotifier() : super(const AiAssistantState(remainingQuestions: 999, dailyLimit: 999)) {
+  AiAssistantNotifier() : super(const AiAssistantState(remainingQuestions: freeDailyLimit, dailyLimit: freeDailyLimit)) {
     _loadInitialState();
   }
 
@@ -97,7 +97,9 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
       } catch (_) {}
     }
 
+    if (!mounted) return;
     final remaining = await getRemainingQuota(false);
+    if (!mounted) return;
 
     final welcomeMessage = AiMessage(
       id: 'welcome_1',
@@ -155,20 +157,44 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
   }
 
   Future<int> getRemainingQuota(bool isPremium) async {
-    // Test ve geliştirme süresince limitsiz soru sorma hakkı
-    return 999;
+    // Özel API anahtarı veya Premium üyelik varsa sınırsız kullanım
+    if (isPremium) return 999;
+    if (mounted && state.hasCustomApiKey) {
+      return 999;
+    }
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final todayStr = DateTime.now().toIso8601String().substring(0, 10);
+      final lastDate = prefs.getString(_prefKeyDate);
+      if (lastDate != todayStr) {
+        // Yeni gün: kota sıfırlanır
+        return freeDailyLimit;
+      }
+      final count = prefs.getInt(_prefKeyCount) ?? 0;
+      final remaining = freeDailyLimit - count;
+      return remaining < 0 ? 0 : remaining;
+    } catch (_) {
+      return freeDailyLimit;
+    }
   }
 
   Future<bool> canAskQuestion(bool isPremium) async {
-    // Test ve geliştirme süresince limitsiz
-    return true;
+    if (isPremium) return true;
+    if (mounted && state.hasCustomApiKey) return true;
+    final remaining = await getRemainingQuota(isPremium);
+    return remaining > 0;
   }
 
   Future<void> _incrementQuotaUsage() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final todayStr = DateTime.now().toIso8601String().substring(0, 10);
-      final count = prefs.getInt(_prefKeyCount) ?? 0;
+      final lastDate = prefs.getString(_prefKeyDate);
+      int count = 0;
+      if (lastDate == todayStr) {
+        count = prefs.getInt(_prefKeyCount) ?? 0;
+      }
       await prefs.setString(_prefKeyDate, todayStr);
       await prefs.setInt(_prefKeyCount, count + 1);
     } catch (_) {}
@@ -177,6 +203,15 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
   Future<bool> askQuestion(String question, {required bool isPremium}) async {
     final query = question.trim();
     if (query.isEmpty) return false;
+
+    // Günlük kota kontrolü
+    final allowed = await canAskQuestion(isPremium);
+    if (!allowed) {
+      state = state.copyWith(
+        errorMessage: 'Günlük ücretsiz 5 soru limitinize ulaştınız. Yarın tekrar sorabilir veya Ayarlar\'dan kendi ücretsiz Gemini API anahtarınızı ekleyebilirsiniz.',
+      );
+      return false;
+    }
 
     // Add user message
     final userMsg = AiMessage(

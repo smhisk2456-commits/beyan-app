@@ -13,11 +13,37 @@ class QuranDownloadService {
 
   static Future<Directory> _getAudioDirectory() async {
     if (_audioDir != null && await _audioDir!.exists()) return _audioDir!;
-    final appDir = await getApplicationDocumentsDirectory();
-    final dir = Directory(p.join(appDir.path, 'quran_audio'));
+    // iOS iCloud yedekleme kuralı (Apple App Store Guideline 5.1.1):
+    // İndirilebilir medya dosyaları getApplicationDocumentsDirectory'ye konulmamalı,
+    // iCloud yedeğine girmeyen getApplicationSupportDirectory altında tutulmalıdır.
+    Directory baseDir;
+    try {
+      baseDir = await getApplicationSupportDirectory();
+    } catch (_) {
+      baseDir = await getApplicationDocumentsDirectory();
+    }
+    final dir = Directory(p.join(baseDir.path, 'quran_audio'));
     if (!await dir.exists()) {
       await dir.create(recursive: true);
     }
+
+    // Eski belgeler dizininden (Documents) yeni destek dizinine sessiz taşıma (varsa)
+    try {
+      final legacyDir = Directory(p.join((await getApplicationDocumentsDirectory()).path, 'quran_audio'));
+      if (await legacyDir.exists() && legacyDir.path != dir.path) {
+        final legacyFiles = await legacyDir.list().toList();
+        for (final item in legacyFiles) {
+          if (item is File) {
+            final target = File(p.join(dir.path, p.basename(item.path)));
+            if (!await target.exists()) {
+              await item.copy(target.path);
+            }
+            await item.delete();
+          }
+        }
+      }
+    } catch (_) {}
+
     _audioDir = dir;
     return dir;
   }
@@ -28,7 +54,7 @@ class QuranDownloadService {
     try {
       final dir = await _getAudioDirectory();
       final file = File(p.join(dir.path, _fileName(reciterId, surahId)));
-      if (await file.exists() && await file.length() > 5000) {
+      if (await file.exists() && await file.length() >= 15000) {
         return file;
       }
     } catch (_) {}
@@ -62,15 +88,32 @@ class QuranDownloadService {
       var received = 0;
       final sink = tempFile.openWrite();
 
-      await for (final chunk in response) {
-        sink.add(chunk);
-        received += chunk.length;
-        if (contentLength > 0 && onProgress != null) {
-          onProgress((received / contentLength).clamp(0.0, 1.0));
+      try {
+        await for (final chunk in response) {
+          sink.add(chunk);
+          received += chunk.length;
+          if (contentLength > 0 && onProgress != null) {
+            onProgress((received / contentLength).clamp(0.0, 1.0));
+          }
         }
+        await sink.flush();
+      } finally {
+        await sink.close();
       }
-      await sink.flush();
-      await sink.close();
+
+      // ── Tamamlanma ve Bütünlük Kontrolü ─────────────────────────────────
+      // 1. Content-Length bildirilmişse ve eksik indirilmişse yarım dosyayı sil
+      if (contentLength > 0 && received != contentLength) {
+        debugPrint('[QuranDownloadService] Eksik indirme algılandı: $received / $contentLength byte.');
+        if (await tempFile.exists()) await tempFile.delete();
+        return false;
+      }
+      // 2. Çok küçük / bozuk dosya kontrolü (en kısa sure bile ~15 KB üzerindedir)
+      if (received < 15000) {
+        debugPrint('[QuranDownloadService] Geçersiz dosya boyutu: $received byte.');
+        if (await tempFile.exists()) await tempFile.delete();
+        return false;
+      }
 
       if (await targetFile.exists()) {
         await targetFile.delete();
@@ -79,6 +122,11 @@ class QuranDownloadService {
       return true;
     } catch (e) {
       debugPrint('[QuranDownloadService] Error downloading ($reciterId, $surahId): $e');
+      try {
+        final dir = await _getAudioDirectory();
+        final tempFile = File(p.join(dir.path, '${_fileName(reciterId, surahId)}.tmp'));
+        if (await tempFile.exists()) await tempFile.delete();
+      } catch (_) {}
       return false;
     } finally {
       client.close();

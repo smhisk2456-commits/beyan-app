@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:geomag/geomag.dart';
 import '../../../core/localization/app_strings.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../prayer_times/services/prayer_time_service.dart';
@@ -29,6 +30,7 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
   double _qiblaAngle = 152.0; // Varsayılan İstanbul
   double _distanceKm = 2418.0;
   String _cityName = 'İstanbul';
+  double _magneticDeclination = 0.0; // Coğrafi manyetik sapma açısı (WMM)
   bool _loadingLocation = true;
   bool _hasCompassSensor = true;
   bool _isFallbackLocation = false;
@@ -80,12 +82,21 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
           ) /
           1000.0;
 
+      // Dünya Manyetik Modeli (WMM) ile gerçek coğrafi sapma açısını hesapla
+      double declination = 0.0;
+      try {
+        final geoMag = GeoMag();
+        final magResult = geoMag.calculate(loc.latitude, loc.longitude);
+        declination = magResult.dec;
+      } catch (_) {}
+
       if (mounted) {
         setState(() {
           _qiblaAngle = qibla.direction;
           _distanceKm = distance;
           _cityName = loc.cityName;
           _isFallbackLocation = !loc.isFromGPS;
+          _magneticDeclination = declination;
           _loadingLocation = false;
         });
       }
@@ -106,12 +117,14 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
       final h = event.heading;
       if (h == null) return;
 
-      final rawHeading = (h + 360) % 360;
+      // Manyetik Sapma (Magnetic Declination) düzeltmesi:
+      // Telefonun manyetik pusula başlığını Coğrafi Gerçek Kuzey'e dönüştürür (Adhan kıble açısıyla tam uyum)
+      final trueHeading = (h + _magneticDeclination + 360) % 360;
       if (_heading == null) {
-        _smoothedHeading = rawHeading;
+        _smoothedHeading = trueHeading;
       } else {
         // Dairesel low-pass filtre (0-360 geçişlerini sarsıntısız yumuşatır)
-        _smoothedHeading = _smoothedHeading + 0.30 * (((rawHeading - _smoothedHeading + 540) % 360) - 180);
+        _smoothedHeading = _smoothedHeading + 0.30 * (((trueHeading - _smoothedHeading + 540) % 360) - 180);
         _smoothedHeading = (_smoothedHeading + 360) % 360;
       }
 
@@ -284,7 +297,39 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
                       ),
                     ),
 
-                    const SizedBox(height: 20),
+                    if (_magneticDeclination.abs() > 0.01) ...[
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.15 : 0.08),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.25),
+                            width: 0.8,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.explore_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 13),
+                            const SizedBox(width: 5),
+                            Text(
+                              strings.language == AppLanguage.turkish
+                                  ? 'Manyetik Sapma: ${_magneticDeclination >= 0 ? '+' : ''}${_magneticDeclination.toStringAsFixed(1)}° (Gerçek Kuzey)'
+                                  : 'True North Declination: ${_magneticDeclination >= 0 ? '+' : ''}${_magneticDeclination.toStringAsFixed(1)}°',
+                              style: TextStyle(
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w600,
+                                color: isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF034A3E),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+
+                    const SizedBox(height: 18),
 
                     if (!_hasCompassSensor) ...[
                       Container(

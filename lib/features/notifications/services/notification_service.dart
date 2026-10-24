@@ -530,7 +530,7 @@ class NotificationService {
   bool _isSchedulingPrayers = false;
   bool _rerunSchedulingPrayers = false;
 
-  /// Önümüzdeki 3 günün namaz vakitlerini planlar (iOS 64 kota sınırına tam uyumlu).
+  /// Önümüzdeki 5-7 günün namaz vakitlerini planlar (iOS 64 bildirim limitine tam uyumlu).
   /// Eşzamanlı çağrılarda çağrıyı düşürmek yerine rerun bayrağı ile son ayarları garanti eder.
   Future<void> scheduleUpcomingPrayers() async {
     if (_isSchedulingPrayers) {
@@ -566,8 +566,14 @@ class NotificationService {
     // Yalnızca namaz bildirimlerini temizle (Ayet bildirimlerine dokunma!)
     await cancelAllPrayerNotifications();
 
-    // 3 gün boyunca planla (Maksimum 36 bildirim, iOS 64 limitine kesin uyum)
-    for (int dayOffset = 0; dayOffset < 3; dayOffset++) {
+    // iOS 64 yerel bildirim sınırı ve kesintisiz namaz takibi:
+    // Erken hatırlatma açıksa: Günlük 10 bildirim -> 5 gün (50 bildirim <= 64 limit)
+    // Erken hatırlatma kapalıysa: Günlük 5 bildirim -> 7 gün (35 bildirim <= 64 limit)
+    // Android ve diğer platformlarda: 7 tam gün
+    final isIOS = !kIsWeb && Platform.isIOS;
+    final int daysToSchedule = isIOS ? (earlyReminder ? 5 : 7) : 7;
+
+    for (int dayOffset = 0; dayOffset < daysToSchedule; dayOffset++) {
       final targetDate = now.add(Duration(days: dayOffset));
       try {
         final daily = await prayerService.calculatePrayerTimes(date: targetDate);
