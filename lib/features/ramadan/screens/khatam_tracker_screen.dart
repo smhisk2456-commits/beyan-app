@@ -156,19 +156,28 @@ class KhatamTrackerScreen extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                '30 Cüz Listesi',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: isDark ? Colors.white : BeyanColors.tone(0xFF033E35),
+              Flexible(
+                child: Text(
+                  '30 Cüz Listesi',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : BeyanColors.tone(0xFF033E35),
+                  ),
                 ),
               ),
-              Text(
-                'Okuduğunuz cüze dokunun',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: isDark ? Colors.white60 : Colors.black54,
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  'Okuduğunuz cüze dokunun',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isDark ? Colors.white60 : Colors.black54,
+                  ),
                 ),
               ),
             ],

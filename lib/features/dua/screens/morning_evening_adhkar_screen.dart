@@ -433,13 +433,18 @@ class _MorningEveningAdhkarScreenState extends ConsumerState<MorningEveningAdhka
                           fontSize: 12,
                         ),
                       ),
-                      const Spacer(),
-                      Text(
-                        item.source,
-                        style: TextStyle(
-                          fontSize: 10.5,
-                          fontStyle: FontStyle.italic,
-                          color: isDark ? Colors.white60 : Colors.black54,
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          item.source,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.end,
+                          style: TextStyle(
+                            fontSize: 10.5,
+                            fontStyle: FontStyle.italic,
+                            color: isDark ? Colors.white60 : Colors.black54,
+                          ),
                         ),
                       ),
                     ],

@@ -422,14 +422,18 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
                   : (isDark ? Colors.white60 : Colors.black54),
             ),
             const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12.5,
-                fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
-                color: isActive
-                    ? (isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF012E2B))
-                    : (isDark ? Colors.white60 : Colors.black54),
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
+                  color: isActive
+                      ? (isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF012E2B))
+                      : (isDark ? Colors.white60 : Colors.black54),
+                ),
               ),
             ),
           ],

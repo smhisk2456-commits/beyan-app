@@ -159,12 +159,16 @@ class HijriCalendarScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              Text(
-                strings.upcomingSacredDays,
-                style: const TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.2,
+              Expanded(
+                child: Text(
+                  strings.upcomingSacredDays,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.2,
+                  ),
                 ),
               ),
             ],

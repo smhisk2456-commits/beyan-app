@@ -60,8 +60,10 @@ class _ThematicTopicDetailScreenState extends ConsumerState<ThematicTopicDetailS
     final audioNotifier = ref.read(quranAudioProvider.notifier);
     final audioState = ref.read(quranAudioProvider);
 
-    // Eğer bu sure şu an çalıyorsa durdur/başlat
-    if (audioState.currentSurahId == verse.surahId && audioState.isPlaying) {
+    // Eğer bu sure ve âyet şu an çalıyorsa durdur/başlat
+    if (audioState.currentSurahId == verse.surahId &&
+        audioState.isPlaying &&
+        audioState.activeVerseNumber == verse.verseNumber) {
       audioNotifier.togglePlayPause();
       setState(() => _currentlyPlayingVerseIndex = null);
       return;
@@ -69,13 +71,13 @@ class _ThematicTopicDetailScreenState extends ConsumerState<ThematicTopicDetailS
 
     setState(() => _currentlyPlayingVerseIndex = index);
 
-    // Sure ayetlerini getir ve o ayete atla
+    // Sure ayetlerini getir ve yalnızca bu seçili ayeti tekil aralık olarak çal
     final verses = await ref.read(quranRepositoryProvider).getVersesBySurah(verse.surahId);
     if (mounted) {
-      audioNotifier.setVerses(verses);
-      audioNotifier.seekToVerse(
-        verse.verseNumber,
+      audioNotifier.playVerseRange(
         verses,
+        from: verse.verseNumber,
+        to: verse.verseNumber,
         surahName: verse.surahNameTr,
       );
     }
@@ -83,8 +85,7 @@ class _ThematicTopicDetailScreenState extends ConsumerState<ThematicTopicDetailS
 
   void _copyVerse(ThematicVerseEntry verse, AppStrings strings) {
     HapticFeedback.lightImpact();
-    final text = 'Bismillâhirrahmânirrahîm\n\n'
-        '${verse.arabicText}\n\n'
+    final text = '${verse.arabicText}\n\n'
         '${verse.turkishMeaning}\n\n'
         '— ${verse.reference} (${widget.topic.titleTr})\n\n'
         'Beyân Kur\'an ve İbadet Uygulaması';
@@ -120,7 +121,10 @@ class _ThematicTopicDetailScreenState extends ConsumerState<ThematicTopicDetailS
     BeyanColors.setPalette(effectivePalette);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final strings = ref.watch(appStringsProvider);
-    final audioState = ref.watch(quranAudioProvider);
+    // Yüksek FPS için yalnızca gerekli audio state parçalarını izle (tüm audioState değil)
+    final isPlayingAny = ref.watch(quranAudioProvider.select((s) => s.isPlaying));
+    final currentSurahId = ref.watch(quranAudioProvider.select((s) => s.currentSurahId));
+    final activeVerseNumber = ref.watch(quranAudioProvider.select((s) => s.activeVerseNumber));
     final topic = widget.topic;
     final topicColor = Color(topic.primaryColorHex);
 
@@ -362,9 +366,9 @@ class _ThematicTopicDetailScreenState extends ConsumerState<ThematicTopicDetailS
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
                       final verse = topic.verses[index];
-                      final isPlayingThis = (audioState.currentSurahId == verse.surahId &&
-                          audioState.isPlaying &&
-                          (_currentlyPlayingVerseIndex == index || audioState.activeVerseNumber == verse.verseNumber));
+                      final isPlayingThis = (currentSurahId == verse.surahId &&
+                          isPlayingAny &&
+                          (_currentlyPlayingVerseIndex == index || activeVerseNumber == verse.verseNumber));
 
                       return _buildThematicVerseCard(
                         context: context,
@@ -466,23 +470,33 @@ class _ThematicTopicDetailScreenState extends ConsumerState<ThematicTopicDetailS
                 ),
                 const SizedBox(width: 8),
                 // Sure ve Âyet Adı
-                Text(
-                  '${verse.surahNameTr} Suresi',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    color: isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF034A3E),
+                Expanded(
+                  child: Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          '${verse.surahNameTr} Suresi',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF034A3E),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Text(
+                        ' • ${verse.verseNumber}. Âyet',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? Colors.white60 : Colors.black54,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                Text(
-                  ' • ${verse.verseNumber}. Âyet',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: isDark ? Colors.white60 : Colors.black54,
-                  ),
-                ),
-                const Spacer(),
+                const SizedBox(width: 8),
                 Text(
                   verse.surahNameAr,
                   style: TextStyle(
@@ -569,8 +583,12 @@ class _ThematicTopicDetailScreenState extends ConsumerState<ThematicTopicDetailS
 
           // ── Alt İşlem Düğmeleri (Dinle, Mushaf'ta Aç, Kopyala, Paylaş) ──────
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            child: Row(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 8,
+              runSpacing: 4,
               children: [
                 // 1. Dinle / Durdur
                 TextButton.icon(
@@ -581,7 +599,9 @@ class _ThematicTopicDetailScreenState extends ConsumerState<ThematicTopicDetailS
                     size: 20,
                   ),
                   label: Text(
-                    isPlaying ? 'Çalıyor' : 'Dinle',
+                    isPlaying
+                        ? (strings.language == AppLanguage.turkish ? 'Çalıyor' : 'Playing')
+                        : (strings.language == AppLanguage.turkish ? 'Dinle' : 'Listen'),
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
@@ -590,14 +610,12 @@ class _ThematicTopicDetailScreenState extends ConsumerState<ThematicTopicDetailS
                   ),
                 ),
 
-                const Spacer(),
-
                 // 2. Mushaf'ta Aç
                 TextButton.icon(
                   onPressed: () => _openInMushaf(verse),
                   icon: Icon(Icons.menu_book_rounded, color: BeyanColors.tone(0xFFD4AF37), size: 17),
                   label: Text(
-                    'Mushaf\'ta Aç',
+                    strings.language == AppLanguage.turkish ? 'Mushaf\'ta Aç' : 'In Mushaf',
                     style: TextStyle(
                       fontSize: 11.5,
                       fontWeight: FontWeight.w600,
@@ -606,20 +624,25 @@ class _ThematicTopicDetailScreenState extends ConsumerState<ThematicTopicDetailS
                   ),
                 ),
 
-                // 3. Kopyala
-                IconButton(
-                  icon: const Icon(Icons.copy_rounded, size: 17),
-                  color: isDark ? Colors.white60 : Colors.black54,
-                  tooltip: 'Kopyala',
-                  onPressed: () => _copyVerse(verse, strings),
-                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // 3. Kopyala
+                    IconButton(
+                      icon: const Icon(Icons.copy_rounded, size: 17),
+                      color: isDark ? Colors.white60 : Colors.black54,
+                      tooltip: strings.language == AppLanguage.turkish ? 'Kopyala' : 'Copy',
+                      onPressed: () => _copyVerse(verse, strings),
+                    ),
 
-                // 4. Paylaş
-                IconButton(
-                  icon: const Icon(Icons.share_rounded, size: 17),
-                  color: isDark ? Colors.white60 : Colors.black54,
-                  tooltip: 'Paylaş',
-                  onPressed: () => _shareVerse(verse),
+                    // 4. Paylaş
+                    IconButton(
+                      icon: const Icon(Icons.share_rounded, size: 17),
+                      color: isDark ? Colors.white60 : Colors.black54,
+                      tooltip: strings.language == AppLanguage.turkish ? 'Paylaş' : 'Share',
+                      onPressed: () => _shareVerse(verse),
+                    ),
+                  ],
                 ),
               ],
             ),

@@ -141,13 +141,10 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
       }
     } catch (_) {}
 
+    // Eski düz metin SharedPreferences kalıntısı varsa tamamen temizle (asla düz metin saklama)
     try {
       final prefs = await SharedPreferences.getInstance();
-      if (clean == null || clean.isEmpty) {
-        await prefs.remove(_prefKeyGeminiKey);
-      } else {
-        await prefs.setString(_prefKeyGeminiKey, clean);
-      }
+      await prefs.remove(_prefKeyGeminiKey);
     } catch (_) {}
 
     if (clean == null || clean.isEmpty) {

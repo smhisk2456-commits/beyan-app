@@ -1058,30 +1058,33 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
               borderRadius: BorderRadius.circular(14),
               border: Border.all(color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.2)),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
+            child: Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                Icon(
-                  _hapticMode == 0 ? Icons.vibration_outlined : Icons.vibration_rounded,
-                  size: 16,
-                  color: BeyanColors.tone(0xFFFFDF7A),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      _hapticMode == 0 ? Icons.vibration_outlined : Icons.vibration_rounded,
+                      size: 16,
+                      color: BeyanColors.tone(0xFFFFDF7A),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      strings.hapticTitle,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: isDark ? Colors.white70 : Colors.black87,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  strings.hapticTitle,
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: isDark ? Colors.white70 : Colors.black87,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(width: 10),
                 _hapticChip(1, strings.hapticLight, isDark),
-                const SizedBox(width: 4),
                 _hapticChip(2, strings.hapticMedium, isDark),
-                const SizedBox(width: 4),
                 _hapticChip(3, strings.hapticHeavy, isDark),
-                const SizedBox(width: 4),
                 _hapticChip(0, strings.hapticOff, isDark),
               ],
             ),

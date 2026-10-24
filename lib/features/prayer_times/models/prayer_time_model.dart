@@ -272,6 +272,9 @@ class DailyPrayerTimes {
   /// adhan nesnesi – ileri sorgulamalar için
   final PrayerTimes prayerTimes;
 
+  /// Yarının astronomik kesin İmsak (Fajr) vakti (opsiyonel – Yatsı sonrası kesin hesaplama için)
+  final DateTime? tomorrowFajr;
+
   const DailyPrayerTimes({
     required this.date,
     required this.locationName,
@@ -279,6 +282,7 @@ class DailyPrayerTimes {
     required this.longitude,
     required this.prayers,
     required this.prayerTimes,
+    this.tomorrowFajr,
   });
 
   // ── Kolaylık Getter'ları ──────────────────────────────────
@@ -302,10 +306,10 @@ class DailyPrayerTimes {
         return p;
       }
     }
-    // Tüm vakitler geçmiş -> Yarının İmsak vakti
+    // Tüm vakitler geçmiş -> Yarının İmsak vakti (kesin astronomik veya +24s emniyeti)
     return PrayerEntry(
       name: PrayerName.fajr,
-      time: fajr.time.add(const Duration(days: 1)),
+      time: tomorrowFajr ?? fajr.time.add(const Duration(days: 1)),
     );
   }
 

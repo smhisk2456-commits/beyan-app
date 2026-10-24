@@ -182,6 +182,9 @@ class _MainNavigationState extends ConsumerState<MainNavigation>
   bool _isInteractiveDragging = false;
   double _dragProgress = 0.0;
 
+  final List<GlobalKey> _tabKeys = List.generate(5, (_) => GlobalKey());
+  Widget _tab(int i) => KeyedSubtree(key: _tabKeys[i], child: _tabs[i]);
+
   static const List<Widget> _tabs = [
     HomeScreen(key: PageStorageKey('tab_home')),
     PrayerTimesScreen(key: PageStorageKey('tab_prayer')),
@@ -403,18 +406,30 @@ class _MainNavigationState extends ConsumerState<MainNavigation>
               fit: StackFit.expand,
               children: [
                 // 1. Tüm sekmelerin durumunu (scroll, timer vb.) koruyan ana katman
-                for (int i = 0; i < _tabs.length; i++)
-                  if (!isTransitioning)
+                if (!isTransitioning)
+                  for (int i = 0; i < _tabs.length; i++)
                     Offstage(
                       offstage: i != _currentTab,
                       child: TickerMode(
                         enabled: i == _currentTab,
-                        child: _tabs[i],
+                        child: _tab(i),
                       ),
                     ),
 
                 // 2. Geçiş Anında: Arka Plandaki Sekme (iOS Parallaks ve Scrim Efekti)
                 if (isTransitioning) ...[
+                  // Geçişe katılmayan diğer 3 sekmenin de ağaçta state'ini koruyarak kalması:
+                  for (int i = 0; i < _tabs.length; i++)
+                    if (i != (_isBackTransition ? _targetTab : _currentTab) &&
+                        i != (_isBackTransition ? _currentTab : _targetTab))
+                      Offstage(
+                        offstage: true,
+                        child: TickerMode(
+                          enabled: false,
+                          child: _tab(i),
+                        ),
+                      ),
+
                   Builder(
                     builder: (context) {
                       final bottomIndex = _isBackTransition ? _targetTab : _currentTab;
@@ -430,7 +445,7 @@ class _MainNavigationState extends ConsumerState<MainNavigation>
                         child: Stack(
                           fit: StackFit.expand,
                           children: [
-                            _tabs[bottomIndex],
+                            _tab(bottomIndex),
                             if (scrimOpacity > 0.01)
                               IgnorePointer(
                                 child: Container(
@@ -466,7 +481,7 @@ class _MainNavigationState extends ConsumerState<MainNavigation>
                               ),
                             ],
                           ),
-                          child: _tabs[topIndex],
+                          child: _tab(topIndex),
                         ),
                       );
                     },

@@ -222,6 +222,33 @@ class PrayerTimeService {
 
     final entries = _buildPrayerEntries(prayerTimes);
 
+    // Yarının astronomik kesin İmsak (Fajr) vaktini hesapla (Yatsı sonrası ve Sahur geri sayımı için)
+    DateTime? tomorrowFajr;
+    final tomorrowDate = targetDate.add(const Duration(days: 1));
+    final tomorrowDateComponents = DateComponents(
+      tomorrowDate.year,
+      tomorrowDate.month,
+      tomorrowDate.day,
+    );
+    try {
+      final tomorrowPrayerTimes = PrayerTimes(
+        coordinates,
+        tomorrowDateComponents,
+        params,
+      );
+      tomorrowFajr = tomorrowPrayerTimes.fajr;
+    } catch (_) {
+      try {
+        final safeCoords = Coordinates(loc.latitude.clamp(-65.0, 65.0), loc.longitude);
+        final tomorrowPrayerTimes = PrayerTimes(
+          safeCoords,
+          tomorrowDateComponents,
+          params,
+        );
+        tomorrowFajr = tomorrowPrayerTimes.fajr;
+      } catch (_) {}
+    }
+
     return DailyPrayerTimes(
       date: targetDate,
       locationName: loc.cityName,
@@ -229,6 +256,7 @@ class PrayerTimeService {
       longitude: loc.longitude,
       prayers: entries,
       prayerTimes: prayerTimes,
+      tomorrowFajr: tomorrowFajr,
     );
   }
 

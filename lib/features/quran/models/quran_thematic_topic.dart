@@ -57,7 +57,9 @@ class QuranThematicTopic {
     if (normalize(titleTr).contains(q) || normalize(titleEn).contains(q)) return true;
     if (normalize(subtitleTr).contains(q) || normalize(contemplationNote).contains(q)) return true;
     for (final kw in searchKeywords) {
-      if (normalize(kw).contains(q) || q.contains(normalize(kw))) return true;
+      final nKw = normalize(kw);
+      if (nKw == q) return true;
+      if (nKw.length >= 3 && q.length >= 3 && (nKw.contains(q) || q.contains(nKw))) return true;
     }
     for (final v in verses) {
       if (normalize(v.turkishMeaning).contains(q) || normalize(v.surahNameTr).contains(q) || normalize(v.insight).contains(q)) {
@@ -239,7 +241,7 @@ final List<QuranThematicTopic> quranThematicTopicsList = [
     primaryColorHex: 0xFF8B5CF6,
     category: 'zorluk_sifa',
     contemplationNote: 'Allah\'ın rahmeti gazabını geçmiştir. Ne kadar hata yapılırsa yapılsın, samimi bir tevbe kapısı son nefese kadar ardına kadar açıktır.',
-    searchKeywords: ['tevbe', 'bagislanma', 'af', 'rahmet', 'magfiret', 'gunah', 'mercy', 'forgiveness'],
+    searchKeywords: ['tevbe', 'bagislanma', 'affet', 'rahmet', 'magfiret', 'gunah', 'mercy', 'forgiveness'],
     verses: [
       ThematicVerseEntry(
         surahId: 39,
@@ -329,7 +331,7 @@ final List<QuranThematicTopic> quranThematicTopicsList = [
     primaryColorHex: 0xFFF97316,
     category: 'ahlak_aile',
     contemplationNote: 'Kur\'an, Allah\'a kulluktan hemen sonra anne-babaya iyiliği emreder. Onlara kol kanat germek cennet kapılarını aralar.',
-    searchKeywords: ['anne', 'baba', 'aile', 'evlat', 'es', 'merhamet', 'parents', 'family'],
+    searchKeywords: ['anne', 'baba', 'aile', 'evlat', 'esler', 'merhamet', 'parents', 'family'],
     verses: [
       ThematicVerseEntry(
         surahId: 17,

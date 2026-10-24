@@ -151,6 +151,7 @@ class RamadanDashboardScreen extends ConsumerWidget {
             child: _LiveIftarCountdown(
               imsakTime: imsakTime,
               iftarTime: iftarTime,
+              tomorrowFajr: prayerData?.tomorrowFajr,
             ),
           ),
           const SizedBox(height: 20),
@@ -680,10 +681,12 @@ class RamadanDashboardScreen extends ConsumerWidget {
 class _LiveIftarCountdown extends ConsumerStatefulWidget {
   final DateTime? imsakTime;
   final DateTime? iftarTime;
+  final DateTime? tomorrowFajr;
 
   const _LiveIftarCountdown({
     required this.imsakTime,
     required this.iftarTime,
+    this.tomorrowFajr,
   });
 
   @override
@@ -728,7 +731,7 @@ class _LiveIftarCountdownState extends ConsumerState<_LiveIftarCountdown> {
         countdownTitle = strings.remainingUntilIftar;
         countdown = iftarTime.difference(now);
       } else {
-        final tomorrowImsak = imsakTime.add(const Duration(days: 1));
+        final tomorrowImsak = widget.tomorrowFajr ?? imsakTime.add(const Duration(days: 1));
         isWaitingForIftar = false;
         countdownTitle = strings.remainingUntilTomorrowSuhoor;
         countdown = tomorrowImsak.difference(now);
@@ -775,13 +778,17 @@ class _LiveIftarCountdownState extends ConsumerState<_LiveIftarCountdown> {
                 size: 20,
               ),
               const SizedBox(width: 8),
-              Text(
-                countdownTitle,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: BeyanColors.tone(0xFFFFDF7A),
-                  letterSpacing: 0.3,
+              Flexible(
+                child: Text(
+                  countdownTitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: BeyanColors.tone(0xFFFFDF7A),
+                    letterSpacing: 0.3,
+                  ),
                 ),
               ),
             ],

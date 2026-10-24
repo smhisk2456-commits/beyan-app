@@ -839,6 +839,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
 
   Future<void> _loadSavedPreferences() async {
     final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
     setState(() {
       _selectedQuoteCategory = prefs.getString('widget_quote_category') ?? 'all';
       _verseViewMode = prefs.getString('widget_verse_view') ?? 'meal_only';
@@ -894,6 +895,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
   Future<void> _savePreference(String key, String value, Function(String) updater) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(key, value);
+    if (!mounted) return;
     setState(() {
       updater(value);
       if (key == 'widget_quote_category') {
@@ -996,6 +998,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
       await HomeWidget.saveWidgetData<int>('widget_applied_verse_number', verseNum);
     }
 
+    if (!mounted) return;
     setState(() {
       _appliedVerseRef = refText;
     });
@@ -1044,6 +1047,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
       await HomeWidget.saveWidgetData<int>('widget_applied_verse_number', verseNum);
     }
 
+    if (!mounted) return;
     setState(() {
       _isPinned = true;
       _appliedVerseRef = refText;
@@ -1062,6 +1066,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
     await prefs.setBool('widget_is_pinned', false);
     await HomeWidget.saveWidgetData<bool>('widget_is_pinned', false);
 
+    if (!mounted) return;
     setState(() {
       _isPinned = false;
     });

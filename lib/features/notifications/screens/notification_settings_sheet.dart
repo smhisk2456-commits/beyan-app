@@ -209,6 +209,7 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
     if (val && !_hasPermission) {
       await _requestOrOpenSettings();
     }
+    if (!mounted) return;
     setState(() => _masterEnabled = val);
     await _service.setMasterEnabled(val);
   }
