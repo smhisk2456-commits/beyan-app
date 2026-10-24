@@ -18,6 +18,9 @@ import '../models/surah.dart';
 import '../providers/quran_providers.dart';
 import '../providers/quran_reading_providers.dart';
 import '../screens/surah_detail_screen.dart';
+import '../models/quran_thematic_topic.dart';
+import 'thematic_atlas_screen.dart';
+import 'thematic_topic_detail_screen.dart';
 import '../../../core/widgets/luxury_page_route.dart';
 import '../../../main.dart';
 
@@ -234,6 +237,108 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
                             ),
                           ),
                           Icon(Icons.arrow_forward_ios_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 12),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+              // ── Tematik Kur'an Fihristi & Kavram Atlası Öne Çıkan Kartı ──
+              if (!isSearching)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 2, 16, 6),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(14),
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      Navigator.push(
+                        context,
+                        LuxuryPageRoute(page: const ThematicAtlasScreen()),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: isDark
+                              ? [BeyanColors.tone(0xFF032B25), BeyanColors.tone(0xFF011814)]
+                              : [const Color(0xFFFBF8ED), const Color(0xFFF1EAD8)],
+                        ),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.45 : 0.35),
+                          width: 1.2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.18),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.4)),
+                            ),
+                            child: Icon(Icons.explore_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 20),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Text(
+                                      strings.language == AppLanguage.turkish
+                                          ? 'Tematik Kur\'an Fihristi'
+                                          : 'Thematic Quran Atlas',
+                                      style: TextStyle(
+                                        fontSize: 12.5,
+                                        fontWeight: FontWeight.bold,
+                                        color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                                      decoration: BoxDecoration(
+                                        color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.2),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Text(
+                                        '12 Konu',
+                                        style: TextStyle(
+                                          fontSize: 9.5,
+                                          fontWeight: FontWeight.bold,
+                                          color: BeyanColors.tone(0xFFFFDF7A),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  strings.language == AppLanguage.turkish
+                                      ? 'Sabır, Rızık, Şifa, Aile, Tevbe ve Yaşam Âyetleri'
+                                      : 'Patience, Healing, Sustenance & Family Verses',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: isDark ? Colors.white60 : const Color(0xFF64748B),
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(Icons.arrow_forward_ios_rounded, color: BeyanColors.tone(0xFFD4AF37), size: 13),
                         ],
                       ),
                     ),
@@ -964,7 +1069,10 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
     // 2. Eşleşen Önemli Âyet & Dualar (örn: 'aye' -> Âyetü'l-Kürsî!)
     final matchedVerses = featuredQuranicVersesList.where((v) => v.matchesQuery(query)).toList();
 
-    if (matchedSurahs.isEmpty && matchedVerses.isEmpty) {
+    // 3. Eşleşen Tematik Kur'an Kavramları (örn: 'sabır', 'şifa', 'rızık', 'aile')
+    final matchedTopics = quranThematicTopicsList.where((t) => t.matchesQuery(query)).toList();
+
+    if (matchedSurahs.isEmpty && matchedVerses.isEmpty && matchedTopics.isEmpty) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -1058,6 +1166,72 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
             ],
           ),
         ),
+
+        // ── Eşleşen Tematik Kur'an Kavramları & Yaşam Atlası ──────────
+        if (matchedTopics.isNotEmpty) ...[
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Row(
+              children: [
+                Icon(Icons.explore_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 16),
+                const SizedBox(width: 6),
+                Text(
+                  'Tematik Kur\'an Atlası (${matchedTopics.length} Konu)',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: BeyanColors.tone(0xFFFFDF7A),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          for (final topic in matchedTopics)
+            Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              decoration: BoxDecoration(
+                color: isDark ? BeyanColors.tone(0xFF032620) : Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.35 : 0.25),
+                ),
+              ),
+              child: ListTile(
+                dense: true,
+                leading: Container(
+                  padding: const EdgeInsets.all(7),
+                  decoration: BoxDecoration(
+                    color: Color(topic.primaryColorHex).withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(topic.icon, color: Color(topic.primaryColorHex), size: 18),
+                ),
+                title: Text(
+                  topic.titleTr,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
+                ),
+                subtitle: Text(
+                  '${topic.verses.length} Âyet • ${topic.subtitleTr}',
+                  style: TextStyle(fontSize: 11, color: isDark ? Colors.white60 : Colors.black54),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                trailing: Icon(Icons.arrow_forward_ios_rounded, size: 12, color: BeyanColors.tone(0xFFD4AF37)),
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  Navigator.push(
+                    context,
+                    LuxuryPageRoute(page: ThematicTopicDetailScreen(topic: topic)),
+                  );
+                },
+              ),
+            ),
+          const SizedBox(height: 8),
+        ],
 
         // ── Eşleşen Önemli Âyet & Dualar Bölümü ────────────────────────
         if (matchedVerses.isNotEmpty) ...[

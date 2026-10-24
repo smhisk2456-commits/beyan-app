@@ -30,6 +30,7 @@ import '../../ai_assistant/screens/ai_assistant_screen.dart';
 import '../../ai_assistant/services/ai_assistant_service.dart';
 import '../../elif_ba/screens/elif_ba_hub_screen.dart';
 import '../../dua/screens/morning_evening_adhkar_screen.dart';
+import '../../quran/screens/thematic_atlas_screen.dart';
 import '../../../core/widgets/luxury_page_route.dart';
 
 /// Ana Ekran – Beyân lüks İslami kontrol merkezi.
@@ -163,6 +164,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           SliverToBoxAdapter(
             // ignore: prefer_const_constructors
             child: _SpiritualMoodsSection(),
+          ),
+
+          // ── 📖 Tematik Kur'an Fihristi & Kavram Atlası ───────────────────
+          SliverToBoxAdapter(
+            child: _ThematicAtlasHomeBanner(atmosphere: atmosphere),
           ),
 
           // ── Yakındaki Camiler & Harita Navigasyonu ───────────
@@ -1866,6 +1872,135 @@ class _NearbyMosquesCard extends ConsumerWidget {
                   color: BeyanColors.tone(0xFF34D399),
                 ),
               ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ThematicAtlasHomeBanner extends StatelessWidget {
+  final DynamicPrayerAtmosphere? atmosphere;
+
+  const _ThematicAtlasHomeBanner({this.atmosphere});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 10, 20, 6),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: LinearGradient(
+            colors: isDark
+                ? [BeyanColors.tone(0xFF022B24), BeyanColors.tone(0xFF011814)]
+                : [const Color(0xFFFBF8ED), const Color(0xFFF2EAD8)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          border: Border.all(
+            color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.45 : 0.35),
+            width: 1.2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(20),
+            onTap: () {
+              HapticFeedback.lightImpact();
+              Navigator.push(
+                context,
+                LuxuryPageRoute(page: const ThematicAtlasScreen()),
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              child: Row(
+                children: [
+                  Container(
+                    width: 46,
+                    height: 46,
+                    decoration: BoxDecoration(
+                      color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.18),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.5),
+                        width: 1.2,
+                      ),
+                    ),
+                    child: Icon(
+                      Icons.explore_rounded,
+                      color: BeyanColors.tone(0xFFFFDF7A),
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              'Tematik Kur\'an Fihristi',
+                              style: TextStyle(
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.bold,
+                                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.22),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.4),
+                                ),
+                              ),
+                              child: Text(
+                                '12 Konu',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: BeyanColors.tone(0xFFFFDF7A),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          'Sabır, Rızık, Şifa, Aile, Tevbe ve Yaşam Âyetleri',
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            color: isDark ? Colors.white60 : const Color(0xFF64748B),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    size: 14,
+                    color: BeyanColors.tone(0xFFD4AF37),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
