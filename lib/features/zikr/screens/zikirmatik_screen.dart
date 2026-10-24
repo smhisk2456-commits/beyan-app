@@ -297,7 +297,9 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
     } else if (_hapticMode == 3) {
       HapticFeedback.heavyImpact();
     }
-    _pulseController.reverse().then((_) => _pulseController.forward());
+    _pulseController.reverse().then((_) {
+      if (mounted) _pulseController.forward();
+    });
     _plusOneController.forward(from: 0.0);
     _shimmerController.forward(from: 0.0);
     _countPopController.forward(from: 0.0);

@@ -325,7 +325,7 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
       ..reset()
       ..start();
     _smoothSyncTimer = Timer.periodic(const Duration(milliseconds: 33), (_) {
-      if (!state.isPlaying) return;
+      if (!mounted || !state.isPlaying) return;
       final interpMs = _lastAnchorPosition.inMilliseconds + _interpWatch.elapsedMilliseconds;
       final totalMs = state.duration.inMilliseconds;
       final clampedMs = totalMs > 0 ? interpMs.clamp(0, totalMs) : interpMs;
@@ -348,6 +348,7 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
 
   void _initListeners() {
     _posSub = _player.onPositionChanged.listen((pos) {
+      if (!mounted) return;
       if (_pendingSeekMs != null) {
         final target = _pendingSeekMs!;
         if ((pos.inMilliseconds - target).abs() > 1500) {
@@ -370,6 +371,7 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
     });
 
     _durSub = _player.onDurationChanged.listen((dur) {
+      if (!mounted) return;
       state = state.copyWith(duration: dur);
       if (_pendingSeekMs != null && dur.inMilliseconds > 0) {
         final target = _pendingSeekMs!.clamp(0, dur.inMilliseconds);
@@ -385,6 +387,7 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
     });
 
     _stateSub = _player.onPlayerStateChanged.listen((playerState) {
+      if (!mounted) return;
       final isPlaying = playerState == PlayerState.playing;
       final isCompleted = playerState == PlayerState.completed;
 
