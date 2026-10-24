@@ -271,6 +271,7 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
   StreamSubscription? _posSub;
   StreamSubscription? _durSub;
   StreamSubscription? _stateSub;
+  StreamSubscription? _ambienceCompleteSub;
   List<Verse>? _currentVerses;
 
   QuranAudioNotifier()
@@ -300,20 +301,23 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
 
   Future<void> _initAudioSession() async {
     try {
-      await _player.setAudioContext(
-        AudioContext(
-          iOS: AudioContextIOS(
-            category: AVAudioSessionCategory.playback,
-          ),
-          android: const AudioContextAndroid(
-            isSpeakerphoneOn: false,
-            stayAwake: true,
-            contentType: AndroidContentType.music,
-            usageType: AndroidUsageType.media,
-            audioFocus: AndroidAudioFocus.gain,
-          ),
+      final audioContext = AudioContext(
+        iOS: AudioContextIOS(
+          category: AVAudioSessionCategory.playback,
+          options: const {
+            AVAudioSessionOptions.mixWithOthers,
+          },
+        ),
+        android: const AudioContextAndroid(
+          isSpeakerphoneOn: false,
+          stayAwake: true,
+          contentType: AndroidContentType.music,
+          usageType: AndroidUsageType.media,
+          audioFocus: AndroidAudioFocus.gain,
         ),
       );
+      await _player.setAudioContext(audioContext);
+      await _ambiencePlayer.setAudioContext(audioContext);
     } catch (e) {
       debugPrint('QuranAudioNotifier audio context hatası: $e');
     }
@@ -433,6 +437,14 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
         isLoading: false,
         position: isCompleted ? Duration.zero : null,
       );
+    });
+
+    _ambienceCompleteSub = _ambiencePlayer.onPlayerComplete.listen((_) {
+      if (!mounted) return;
+      if (state.activeAmbience != null) {
+        _ambiencePlayer.seek(Duration.zero);
+        _ambiencePlayer.resume();
+      }
     });
   }
 
@@ -1022,16 +1034,16 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
   // ── Gerçek Doğa & Huzur Ambiyans Sesleri (Yağmur/Orman, Deniz Dalgası, Esinti, Gece) ─────────────
   static const Map<String, String> _ambienceAssets = {
     'rain': 'audio/real_rain_forest.mp3',
-    'waves': 'audio/real_sea_waves.wav',
+    'waves': 'audio/real_sea_waves.mp3',
     'breeze': 'audio/real_gentle_wind.mp3',
-    'night': 'audio/real_night_peace.wav',
+    'night': 'audio/real_night_peace.mp3',
     // Geriye dönük uyumluluk:
-    'ney': 'audio/real_sea_waves.wav',
+    'ney': 'audio/real_sea_waves.mp3',
   };
 
   static const Map<String, String> _ambienceRemoteUrls = {
-    'rain': 'https://upload.wikimedia.org/wikipedia/commons/2/24/Bourne_woods_Birdsong_and_rain_2020-06-17_0742.mp3',
-    'waves': 'https://upload.wikimedia.org/wikipedia/commons/8/84/Sea_waves.wav',
+    'rain': 'https://upload.wikimedia.org/wikipedia/commons/4/41/Rain_against_the_window.ogg',
+    'waves': 'https://upload.wikimedia.org/wikipedia/commons/f/f1/Oceanwavescrushing.ogg',
     'breeze': 'https://upload.wikimedia.org/wikipedia/commons/a/a3/Bourne_woods_windy_2020-05-05_0757.mp3',
     'night': 'https://upload.wikimedia.org/wikipedia/commons/5/5f/Night_original_format.wav',
   };
@@ -1144,6 +1156,7 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
     _posSub?.cancel();
     _durSub?.cancel();
     _stateSub?.cancel();
+    _ambienceCompleteSub?.cancel();
     _player.dispose();
     _ambiencePlayer.dispose();
     super.dispose();
