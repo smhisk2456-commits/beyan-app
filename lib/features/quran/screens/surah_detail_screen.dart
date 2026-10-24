@@ -973,6 +973,14 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
       return Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
+            tooltip: strings.language == AppLanguage.turkish ? 'Geri Dön' : 'Back',
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              Navigator.of(context).maybePop();
+            },
+          ),
           title: Text(
             widget.surah.localizedName(strings.language.code),
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
@@ -1055,6 +1063,14 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
           expandedHeight: 210,
           pinned: true,
           backgroundColor: isDark ? BeyanColors.tone(0xFF01201B) : AppColors.teal,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
+            tooltip: strings.language == AppLanguage.turkish ? 'Geri Dön' : 'Back',
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              Navigator.of(context).maybePop();
+            },
+          ),
           title: Text(
             widget.surah.localizedName(strings.language.code),
             style: const TextStyle(

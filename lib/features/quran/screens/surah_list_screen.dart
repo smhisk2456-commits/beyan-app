@@ -19,6 +19,7 @@ import '../providers/quran_providers.dart';
 import '../providers/quran_reading_providers.dart';
 import '../screens/surah_detail_screen.dart';
 import '../../../core/widgets/luxury_page_route.dart';
+import '../../../main.dart';
 
 enum _QuranTab { surahs, juzs, versesAndDuas, favorites }
 enum _SurahFilter { all, meccan, medinan, famous }
@@ -85,6 +86,14 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
       backgroundColor: isDark ? effectivePalette.darkBackground : effectivePalette.lightBackground,
       appBar: AppBar(
         backgroundColor: isDark ? effectivePalette.darkSurface : effectivePalette.primaryColor,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
+          tooltip: strings.language == AppLanguage.turkish ? 'Ana Sayfaya Dön' : 'Back to Home',
+          onPressed: () {
+            HapticFeedback.lightImpact();
+            ref.read(selectedTabProvider.notifier).state = 0;
+          },
+        ),
         title: Text(
           strings.quranTitle,
           style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 0.3),

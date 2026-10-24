@@ -484,20 +484,36 @@ class _MushafPageViewState extends ConsumerState<MushafPageView> {
 
         // ── Ana Mushaf Sayfası (Parmak Hareketine Duyarlı 3B Gerçek Sayfa Çevirme) ────────────
         Expanded(
-          child: PageView.builder(
-            controller: _pageController,
-            physics: const BouncingScrollPhysics(),
-            itemCount: totalPages,
-            onPageChanged: (idx) {
-              AcousticAudioService.instance.playParchmentPageFlip();
-              setState(() {
-                _currentPageIndex = idx;
-              });
-            },
-            itemBuilder: (context, pageIndex) {
-              final pageVerses = _pages[pageIndex];
-              final pageShowBismillah =
-                  pageIndex == 0 && widget.surah.id != 9 && widget.surah.id != 1;
+          child: Container(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            child: Stack(
+              children: [
+                NotificationListener<ScrollNotification>(
+                  onNotification: (notification) {
+                    if (_currentPageIndex == 0 &&
+                        notification is OverscrollNotification &&
+                        notification.overscroll < -20) {
+                      HapticFeedback.lightImpact();
+                      Navigator.of(context).maybePop();
+                      return true;
+                    }
+                    return false;
+                  },
+                  child: PageView.builder(
+                    controller: _pageController,
+                    physics: const BouncingScrollPhysics(),
+                    clipBehavior: Clip.hardEdge,
+                    itemCount: totalPages,
+                    onPageChanged: (idx) {
+                      AcousticAudioService.instance.playParchmentPageFlip();
+                      setState(() {
+                        _currentPageIndex = idx;
+                      });
+                    },
+                    itemBuilder: (context, pageIndex) {
+                      final pageVerses = _pages[pageIndex];
+                      final pageShowBismillah =
+                          pageIndex == 0 && widget.surah.id != 9 && widget.surah.id != 1;
 
               final pageCard = Padding(
                 padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
@@ -729,6 +745,11 @@ class _MushafPageViewState extends ConsumerState<MushafPageView> {
                   if (delta.abs() < 0.001) return child!;
 
                   final absDelta = delta.abs();
+                  // Tamamen ekran dışına çıkmış sayfayı derhal budayarak (culling) kenarda artık görüntü kalmasını önle
+                  if (absDelta >= 0.999) {
+                    return const SizedBox.shrink();
+                  }
+
                   final isTurningAway = delta > 0;
                   final rotationY = delta * 0.62; // 3B perspektif açısı
                   final scale = 1.0 - (absDelta * 0.045);
@@ -738,37 +759,40 @@ class _MushafPageViewState extends ConsumerState<MushafPageView> {
                     ..rotateY(rotationY)
                     ..scaleByDouble(scale, scale, 1.0, 1.0);
 
-                  return Transform(
-                    alignment: isTurningAway ? Alignment.centerLeft : Alignment.centerRight,
-                    transform: matrix,
-                    child: Stack(
-                      children: [
-                        child!,
-                        // Parmakla çevrilirken oluşan dinamik kağıt kıvrımı ve gölgesi
-                        Positioned.fill(
-                          child: IgnorePointer(
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
-                              child: DecoratedBox(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20),
-                                  gradient: LinearGradient(
-                                    begin: isTurningAway ? Alignment.centerRight : Alignment.centerLeft,
-                                    end: isTurningAway ? Alignment.centerLeft : Alignment.centerRight,
-                                    stops: const [0.0, 0.25, 0.65, 1.0],
-                                    colors: [
-                                      Colors.black.withValues(alpha: (absDelta * 0.42).clamp(0.0, 0.42)),
-                                      BeyanColors.tone(0xFFFFDF7A).withValues(alpha: (absDelta * 0.14).clamp(0.0, 0.14)),
-                                      Colors.transparent,
-                                      Colors.black.withValues(alpha: (absDelta * 0.22).clamp(0.0, 0.22)),
-                                    ],
+                  // 3B kıvrılan sayfanın yan marjinlere taşmasını ClipRect ile mutlak şekilde sınırla
+                  return ClipRect(
+                    child: Transform(
+                      alignment: isTurningAway ? Alignment.centerLeft : Alignment.centerRight,
+                      transform: matrix,
+                      child: Stack(
+                        children: [
+                          child!,
+                          // Parmakla çevrilirken oluşan dinamik kağıt kıvrımı ve gölgesi
+                          Positioned.fill(
+                            child: IgnorePointer(
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+                                child: DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(20),
+                                    gradient: LinearGradient(
+                                      begin: isTurningAway ? Alignment.centerRight : Alignment.centerLeft,
+                                      end: isTurningAway ? Alignment.centerLeft : Alignment.centerRight,
+                                      stops: const [0.0, 0.25, 0.65, 1.0],
+                                      colors: [
+                                        Colors.black.withValues(alpha: (absDelta * 0.42).clamp(0.0, 0.42)),
+                                        BeyanColors.tone(0xFFFFDF7A).withValues(alpha: (absDelta * 0.14).clamp(0.0, 0.14)),
+                                        Colors.transparent,
+                                        Colors.black.withValues(alpha: (absDelta * 0.22).clamp(0.0, 0.22)),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   );
                 },
@@ -776,6 +800,26 @@ class _MushafPageViewState extends ConsumerState<MushafPageView> {
             },
           ),
         ),
+        // iOS Sol Kenardan Sağa Kaydırarak Geri Dönme (Interactive Edge Swipe Pop)
+        Positioned(
+          top: 0,
+          bottom: 0,
+          left: 0,
+          width: 28,
+          child: GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onHorizontalDragUpdate: (details) {
+              if (details.primaryDelta != null && details.primaryDelta! > 12) {
+                HapticFeedback.lightImpact();
+                Navigator.of(context).maybePop();
+              }
+            },
+          ),
+        ),
+      ],
+    ),
+  ),
+),
 
         // ── Alt Sayfa Kontrol Çubuğu (Önceki/Sonraki Sayfa) ──────────────────
         Container(
