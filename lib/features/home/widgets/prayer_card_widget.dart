@@ -11,6 +11,7 @@ import '../../prayer_times/providers/prayer_time_providers.dart';
 import '../../calendar/services/hijri_calendar_service.dart';
 import '../../prayer_times/screens/prayer_guide_sheet.dart';
 import '../../mosque_finder/screens/nearby_mosques_screen.dart';
+import '../../../core/widgets/luxury_page_route.dart';
 
 /// Ana ekranın üst kısmında yer alan lüks zümrüt & altın namaz vakti kartı.
 class PrayerCardWidget extends ConsumerWidget {
@@ -356,7 +357,7 @@ class _LocationRow extends StatelessWidget {
             HapticFeedback.lightImpact();
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => const NearbyMosquesScreen()),
+              LuxuryPageRoute(page: const NearbyMosquesScreen()),
             );
           },
           child: Row(

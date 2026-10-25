@@ -6,6 +6,7 @@ import '../../../core/localization/app_strings.dart';
 import '../../../main.dart';
 import '../../quran/repositories/quran_repository.dart';
 import '../../quran/screens/surah_detail_screen.dart';
+import '../../../core/widgets/luxury_page_route.dart';
 import '../models/prayer_how_to_model.dart';
 import '../models/prayer_time_model.dart';
 
@@ -801,8 +802,8 @@ class PrayerGuideSheet extends ConsumerWidget {
       // Kök ekrana dön ve Kur'an Detay Sayfasını Aç
       Navigator.of(context).popUntil((route) => route.isFirst);
       Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => SurahDetailScreen(
+        LuxuryPageRoute(
+          page: SurahDetailScreen(
             surah: surah,
             initialScrollToVerse: verseNumber,
           ),

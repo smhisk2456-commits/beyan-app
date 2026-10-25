@@ -183,7 +183,7 @@ class _MainNavigationState extends ConsumerState<MainNavigation>
   double _dragProgress = 0.0;
 
   final List<GlobalKey> _tabKeys = List.generate(5, (_) => GlobalKey());
-  Widget _tab(int i) => KeyedSubtree(key: _tabKeys[i], child: _tabs[i]);
+  Widget _tab(int i) => RepaintBoundary(key: _tabKeys[i], child: _tabs[i]);
 
   static const List<Widget> _tabs = [
     HomeScreen(key: PageStorageKey('tab_home')),
@@ -280,17 +280,19 @@ class _MainNavigationState extends ConsumerState<MainNavigation>
     });
   }
 
-  void _onEdgeDragUpdate(DragUpdateDetails details, double screenWidth) {
+  void _onEdgeDragUpdate(DragUpdateDetails details, double screenWidth, {bool isRtl = false}) {
     if (!_isInteractiveDragging) return;
-    final delta = details.primaryDelta ?? 0;
+    final rawDelta = details.primaryDelta ?? 0;
+    final delta = isRtl ? -rawDelta : rawDelta;
     setState(() {
       _dragProgress = (_dragProgress + (delta / screenWidth)).clamp(0.0, 1.0);
     });
   }
 
-  void _onEdgeDragEnd(DragEndDetails details) {
+  void _onEdgeDragEnd(DragEndDetails details, {bool isRtl = false}) {
     if (!_isInteractiveDragging) return;
-    final velocity = details.primaryVelocity ?? 0;
+    final rawVelocity = details.primaryVelocity ?? 0;
+    final velocity = isRtl ? -rawVelocity : rawVelocity;
     final shouldPop = _dragProgress > 0.28 || velocity > 320;
 
     if (shouldPop) {
@@ -432,6 +434,8 @@ class _MainNavigationState extends ConsumerState<MainNavigation>
 
                   Builder(
                     builder: (context) {
+                      final isRtl = Directionality.of(context) == TextDirection.rtl;
+                      final sign = isRtl ? -1.0 : 1.0;
                       final bottomIndex = _isBackTransition ? _targetTab : _currentTab;
                       final bottomOffsetFactor = _isBackTransition
                           ? -0.25 * (1.0 - progress)
@@ -441,7 +445,7 @@ class _MainNavigationState extends ConsumerState<MainNavigation>
                           : (0.22 * progress).clamp(0.0, 0.22);
 
                       return Transform.translate(
-                        offset: Offset(bottomOffsetFactor * screenWidth, 0),
+                        offset: Offset(sign * bottomOffsetFactor * screenWidth, 0),
                         child: Stack(
                           fit: StackFit.expand,
                           children: [
@@ -461,13 +465,15 @@ class _MainNavigationState extends ConsumerState<MainNavigation>
                   // 3. Geçiş Anında: Ön Plandaki Sekme (iOS Sağa Kayma ve Sol Kenar Gölgesi)
                   Builder(
                     builder: (context) {
+                      final isRtl = Directionality.of(context) == TextDirection.rtl;
+                      final sign = isRtl ? -1.0 : 1.0;
                       final topIndex = _isBackTransition ? _currentTab : _targetTab;
                       final topOffsetFactor = _isBackTransition
                           ? progress
                           : (1.0 - progress);
 
                       return Transform.translate(
-                        offset: Offset(topOffsetFactor * screenWidth, 0),
+                        offset: Offset(sign * topOffsetFactor * screenWidth, 0),
                         child: DecoratedBox(
                           decoration: BoxDecoration(
                             boxShadow: [
@@ -477,7 +483,7 @@ class _MainNavigationState extends ConsumerState<MainNavigation>
                                 ),
                                 blurRadius: 22,
                                 spreadRadius: 1,
-                                offset: const Offset(-8, 0),
+                                offset: Offset(sign * -8, 0),
                               ),
                             ],
                           ),
@@ -490,17 +496,23 @@ class _MainNavigationState extends ConsumerState<MainNavigation>
 
                 // 4. Apple iOS Kenardan Sağa Çekerek Geri Dönme Dokunma Alanı (Edge Swipe Recognizer)
                 if (_currentTab != 0)
-                  Positioned(
-                    top: 0,
-                    bottom: 0,
-                    left: 0,
-                    width: 36,
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.translucent,
-                      onHorizontalDragStart: _onEdgeDragStart,
-                      onHorizontalDragUpdate: (d) => _onEdgeDragUpdate(d, screenWidth),
-                      onHorizontalDragEnd: _onEdgeDragEnd,
-                    ),
+                  Builder(
+                    builder: (context) {
+                      final isRtl = Directionality.of(context) == TextDirection.rtl;
+                      return Positioned(
+                        top: 0,
+                        bottom: 0,
+                        left: isRtl ? null : 0,
+                        right: isRtl ? 0 : null,
+                        width: 36,
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.translucent,
+                          onHorizontalDragStart: _onEdgeDragStart,
+                          onHorizontalDragUpdate: (d) => _onEdgeDragUpdate(d, screenWidth, isRtl: isRtl),
+                          onHorizontalDragEnd: (d) => _onEdgeDragEnd(d, isRtl: isRtl),
+                        ),
+                      );
+                    },
                   ),
               ],
             );

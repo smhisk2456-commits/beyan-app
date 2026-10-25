@@ -76,7 +76,7 @@ class QuranDownloadService {
     try {
       final dir = await _getAudioDirectory();
       final targetFile = File(p.join(dir.path, _fileName(reciterId, surahId)));
-      final tempFile = File('${targetFile.path}.tmp');
+      final tempFile = File('${targetFile.path}.${DateTime.now().microsecondsSinceEpoch}.tmp');
 
       final request = await client.getUrl(Uri.parse(url));
       final response = await request.close().timeout(const Duration(seconds: 30));
@@ -89,7 +89,7 @@ class QuranDownloadService {
       final sink = tempFile.openWrite();
 
       try {
-        await for (final chunk in response) {
+        await for (final chunk in response.timeout(const Duration(seconds: 45))) {
           sink.add(chunk);
           received += chunk.length;
           if (contentLength > 0 && onProgress != null) {
@@ -124,8 +124,13 @@ class QuranDownloadService {
       debugPrint('[QuranDownloadService] Error downloading ($reciterId, $surahId): $e');
       try {
         final dir = await _getAudioDirectory();
-        final tempFile = File(p.join(dir.path, '${_fileName(reciterId, surahId)}.tmp'));
-        if (await tempFile.exists()) await tempFile.delete();
+        // Temizle: Olası eski/geçici .tmp dosyaları
+        final list = dir.listSync();
+        for (final f in list) {
+          if (f is File && f.path.contains('${_fileName(reciterId, surahId)}.') && f.path.endsWith('.tmp')) {
+            f.deleteSync();
+          }
+        }
       } catch (_) {}
       return false;
     } finally {

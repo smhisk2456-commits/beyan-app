@@ -8,6 +8,7 @@ import '../../../core/localization/app_strings.dart';
 import '../../monetization/widgets/banner_ad_widget.dart';
 import '../../prayer_times/providers/prayer_time_providers.dart';
 import '../../widget_service/screens/widget_center_screen.dart';
+import '../../../core/widgets/luxury_page_route.dart';
 import '../models/khatam_tracker_model.dart';
 import 'khatam_tracker_screen.dart';
 
@@ -403,7 +404,7 @@ class RamadanDashboardScreen extends ConsumerWidget {
                         HapticFeedback.lightImpact();
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const KhatamTrackerScreen()),
+                          LuxuryPageRoute(page: const KhatamTrackerScreen()),
                         );
                       },
                       borderRadius: BorderRadius.circular(14),
@@ -454,7 +455,7 @@ class RamadanDashboardScreen extends ConsumerWidget {
               HapticFeedback.lightImpact();
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const WidgetCenterScreen()),
+                LuxuryPageRoute(page: const WidgetCenterScreen()),
               );
             },
             borderRadius: BorderRadius.circular(20),

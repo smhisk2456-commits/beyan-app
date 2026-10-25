@@ -7,6 +7,7 @@ import '../../../core/localization/app_strings.dart';
 import '../../../main.dart';
 import '../../quran/repositories/quran_repository.dart';
 import '../../quran/screens/surah_detail_screen.dart';
+import '../../../core/widgets/luxury_page_route.dart';
 import '../models/mood_verse_model.dart';
 
 /// Ruh Haline Göre Âyet & Şifa Modal Bottom Sheet
@@ -285,8 +286,8 @@ class MoodVerseSheet extends ConsumerWidget {
                                 ref.read(selectedTabProvider.notifier).state = 2;
                                 Navigator.of(context).popUntil((route) => route.isFirst);
                                 Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (_) => SurahDetailScreen(
+                                  LuxuryPageRoute(
+                                    page: SurahDetailScreen(
                                       surah: surah,
                                       initialScrollToVerse: data.verseNumber,
                                     ),

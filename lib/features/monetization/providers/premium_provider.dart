@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/premium_product.dart';
 import '../services/premium_service.dart';
@@ -40,6 +41,7 @@ class PremiumState {
 
 class PremiumNotifier extends StateNotifier<PremiumState> {
   final PremiumService _service;
+  StreamSubscription<bool>? _statusSubscription;
 
   PremiumNotifier(this._service)
       : super(PremiumState(
@@ -49,7 +51,8 @@ class PremiumNotifier extends StateNotifier<PremiumState> {
           trialDaysRemaining: _service.trialDaysRemaining,
           hasWidgetAccess: _service.hasWidgetAccess,
         )) {
-    _service.premiumStatusStream.listen((isPrem) {
+    _statusSubscription = _service.premiumStatusStream.listen((isPrem) {
+      if (!mounted) return;
       state = state.copyWith(
         isPremium: isPrem,
         activeTier: _service.activeTier,
@@ -58,6 +61,12 @@ class PremiumNotifier extends StateNotifier<PremiumState> {
         hasWidgetAccess: _service.hasWidgetAccess,
       );
     });
+  }
+
+  @override
+  void dispose() {
+    _statusSubscription?.cancel();
+    super.dispose();
   }
 
   Future<void> activateFreeTrial() async {

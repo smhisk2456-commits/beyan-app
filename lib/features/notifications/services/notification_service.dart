@@ -567,14 +567,16 @@ class NotificationService {
     await cancelAllPrayerNotifications();
 
     // iOS 64 yerel bildirim sınırı ve kesintisiz namaz takibi:
-    // Erken hatırlatma açıksa: Günlük 10 bildirim -> 5 gün (50 bildirim <= 64 limit)
-    // Erken hatırlatma kapalıysa: Günlük 5 bildirim -> 7 gün (35 bildirim <= 64 limit)
+    // Ayet bildirimlerine 14-24 slot rezerve edilir (Namaz + Ayet toplamı <= 64):
+    // Erken hatırlatma açıksa: Günlük 10 bildirim -> 4 gün (40 bildirim; 40 + 24 <= 64 limit)
+    // Erken hatırlatma kapalıysa: Günlük 5 bildirim -> 7 gün (35 bildirim; 35 + 24 <= 59 limit)
     // Android ve diğer platformlarda: 7 tam gün
     final isIOS = !kIsWeb && Platform.isIOS;
-    final int daysToSchedule = isIOS ? (earlyReminder ? 5 : 7) : 7;
+    final int daysToSchedule = isIOS ? (earlyReminder ? 4 : 7) : 7;
 
     for (int dayOffset = 0; dayOffset < daysToSchedule; dayOffset++) {
-      final targetDate = now.add(Duration(days: dayOffset));
+      // DST (Yaz/Kış Saati) kaymalarını önleyen takvim günü hesabı:
+      final targetDate = DateTime(now.year, now.month, now.day + dayOffset);
       try {
         final daily = await prayerService.calculatePrayerTimes(date: targetDate);
         for (int i = 0; i < daily.prayers.length; i++) {
@@ -981,8 +983,11 @@ class NotificationService {
     }
 
     // ── Günlük veya Sabah & Akşam Planlaması ─────────────────────────────────
-    for (int dayOffset = 0; dayOffset < 14; dayOffset++) {
-      final targetDate = now.add(Duration(days: dayOffset));
+    // iOS 64 bildirim bütçesi: sabah-akşam modunda 7 gün = 14 bildirim; tek vakit modunda 14 gün = 14 bildirim
+    final isIOS = !kIsWeb && Platform.isIOS;
+    final int maxVerseDays = isIOS ? (freq == 'morning_evening' ? 7 : 14) : 14;
+    for (int dayOffset = 0; dayOffset < maxVerseDays; dayOffset++) {
+      final targetDate = DateTime(now.year, now.month, now.day + dayOffset);
       final verseIndex = (freq == 'morning_evening' ? dayOffset * 2 : dayOffset) % batch.length;
       final verse = batch[verseIndex];
 

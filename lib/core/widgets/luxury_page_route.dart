@@ -11,9 +11,9 @@ class LuxuryPageRoute<T> extends CupertinoPageRoute<T> {
     super.settings,
     super.maintainState = true,
     super.fullscreenDialog = false,
-    super.allowSnapshotting = true,
+    super.allowSnapshotting = false,
     super.barrierDismissible = false,
-  }) : super(builder: (_) => page);
+  }) : super(builder: (_) => RepaintBoundary(child: page));
 }
 
 /// Dokunulduğunda fiziksel yaylanma ve altın hale tepkisi veren lüks sarmalayıcı

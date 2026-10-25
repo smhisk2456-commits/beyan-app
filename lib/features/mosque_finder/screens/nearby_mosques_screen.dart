@@ -62,6 +62,7 @@ class _NearbyMosquesScreenState extends State<NearbyMosquesScreen> {
         });
       }
     } catch (_) {}
+    if (!mounted) return;
     _loadNearbyMosques();
   }
 

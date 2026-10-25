@@ -16,6 +16,7 @@ import '../../prayer_times/screens/city_selector_sheet.dart';
 import '../../widget_service/screens/widget_settings_dialog.dart';
 import '../../widget_service/screens/live_activity_settings_sheet.dart';
 import '../../mosque_finder/screens/nearby_mosques_screen.dart';
+import '../../../core/widgets/luxury_page_route.dart';
 
 /// Lüks & Kapsamlı Ayarlar Ekranı (Settings Hub)
 class SettingsScreen extends ConsumerWidget {
@@ -25,7 +26,7 @@ class SettingsScreen extends ConsumerWidget {
     HapticFeedback.lightImpact();
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => const SettingsScreen()),
+      LuxuryPageRoute(page: const SettingsScreen()),
     );
   }
 
@@ -142,7 +143,7 @@ class SettingsScreen extends ConsumerWidget {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const MeccaMedinaLiveScreen()),
+                    LuxuryPageRoute(page: const MeccaMedinaLiveScreen()),
                   );
                 },
               ),
@@ -155,7 +156,7 @@ class SettingsScreen extends ConsumerWidget {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const NearbyMosquesScreen()),
+                    LuxuryPageRoute(page: const NearbyMosquesScreen()),
                   );
                 },
               ),

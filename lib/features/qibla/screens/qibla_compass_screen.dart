@@ -1,7 +1,9 @@
 import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'dart:async';
+import 'dart:io' show Platform;
 import 'dart:math' as math;
 import 'package:adhan/adhan.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_compass/flutter_compass.dart';
@@ -118,8 +120,11 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
       if (h == null) return;
 
       // Manyetik Sapma (Magnetic Declination) düzeltmesi:
-      // Telefonun manyetik pusula başlığını Coğrafi Gerçek Kuzey'e dönüştürür (Adhan kıble açısıyla tam uyum)
-      final trueHeading = (h + _magneticDeclination + 360) % 360;
+      // iOS CoreLocation 'CLHeading.trueHeading' ile donanım/GPS seviyesinde gerçek kuzeyi verir.
+      // Android sensörden ham Manyetik Kuzey (azimuth) döndürür; bu yüzden WMM sapması yalnızca Android'de eklenir.
+      final isAndroid = !kIsWeb && Platform.isAndroid;
+      final headingOffset = isAndroid ? _magneticDeclination : 0.0;
+      final trueHeading = (h + headingOffset + 360) % 360;
       if (_heading == null) {
         _smoothedHeading = trueHeading;
       } else {
@@ -411,58 +416,61 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
                     const SizedBox(height: 30),
 
                     // ── LÜKS DÖNEN PUSULA KADRANI (Kilitlenme Yaylanmalı) ─────
-                    ScaleTransition(
-                      scale: _lockPulseScale,
-                      child: SizedBox(
-                        width: 290,
-                        height: 290,
-                        child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          // Dış Parıltı Halkası
-                          AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
-                            width: 290,
-                            height: 290,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              gradient: RadialGradient(
-                                colors: [
-                                  isAligned
-                                      ? BeyanColors.tone(0xFF034A3E).withValues(alpha: 0.9)
-                                      : (isDark ? BeyanColors.tone(0xFF052B25) : Colors.white),
-                                  isDark ? BeyanColors.tone(0xFF011A16) : Colors.grey.shade100,
-                                ],
-                              ),
-                              border: Border.all(
-                                color: isAligned
-                                    ? BeyanColors.tone(0xFFFFDF7A)
-                                    : BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.5),
-                                width: isAligned ? 3 : 2,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: isAligned
-                                      ? BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.45)
-                                      : Colors.black.withValues(alpha: 0.2),
-                                  blurRadius: isAligned ? 24 : 14,
-                                  spreadRadius: isAligned ? 4 : 1,
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        final dialSize = math.min(290.0, constraints.maxWidth - 20);
+                        return ScaleTransition(
+                          scale: _lockPulseScale,
+                          child: SizedBox(
+                            width: dialSize,
+                            height: dialSize,
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                // Dış Parıltı Halkası
+                                AnimatedContainer(
+                                  duration: const Duration(milliseconds: 300),
+                                  width: dialSize,
+                                  height: dialSize,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    gradient: RadialGradient(
+                                      colors: [
+                                        isAligned
+                                            ? BeyanColors.tone(0xFF034A3E).withValues(alpha: 0.9)
+                                            : (isDark ? BeyanColors.tone(0xFF052B25) : Colors.white),
+                                        isDark ? BeyanColors.tone(0xFF011A16) : Colors.grey.shade100,
+                                      ],
+                                    ),
+                                    border: Border.all(
+                                      color: isAligned
+                                          ? BeyanColors.tone(0xFFFFDF7A)
+                                          : BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.5),
+                                      width: isAligned ? 3 : 2,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: isAligned
+                                            ? BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.45)
+                                            : Colors.black.withValues(alpha: 0.2),
+                                        blurRadius: isAligned ? 24 : 14,
+                                        spreadRadius: isAligned ? 4 : 1,
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ],
-                            ),
-                          ),
 
-                          // Dönen Pusula Diski (Cihaz yönüne göre ters döner: -heading)
-                          Transform.rotate(
-                            angle: -currentHeading * (math.pi / 180),
-                            child: CustomPaint(
-                              size: const Size(280, 280),
-                              painter: _CompassDialPainter(
-                                isDark: isDark,
-                                isTurkish: strings.language == AppLanguage.turkish,
-                              ),
-                            ),
-                          ),
+                                // Dönen Pusula Diski (Cihaz yönüne göre ters döner: -heading)
+                                Transform.rotate(
+                                  angle: -currentHeading * (math.pi / 180),
+                                  child: CustomPaint(
+                                    size: Size(dialSize - 10, dialSize - 10),
+                                    painter: _CompassDialPainter(
+                                      isDark: isDark,
+                                      isTurkish: strings.language == AppLanguage.turkish,
+                                    ),
+                                  ),
+                                ),
 
                           // Kâbe İbresi ve İkonu (Diske göre Kıble açısında durur: _qiblaAngle - currentHeading)
                           Transform.rotate(
@@ -554,7 +562,9 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
                         ],
                       ),
                     ),
-                  ),
+                  );
+                },
+              ),
 
                     const SizedBox(height: 32),
 

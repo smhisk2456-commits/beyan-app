@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/luxury_page_route.dart';
 import '../models/elif_ba_lesson.dart';
 import '../models/elif_ba_letter.dart';
 import '../services/elif_ba_progress_service.dart';
@@ -284,7 +285,7 @@ class _ElifBaHubScreenState extends ConsumerState<ElifBaHubScreen> with SingleTi
     HapticFeedback.lightImpact();
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => ElifBaLessonQuizScreen(lesson: lesson)),
+      LuxuryPageRoute(page: ElifBaLessonQuizScreen(lesson: lesson)),
     );
   }
 
