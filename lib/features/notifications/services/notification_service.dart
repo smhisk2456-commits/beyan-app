@@ -250,7 +250,7 @@ class NotificationService {
       return status.isGranted || status.isProvisional || status.isLimited;
     } catch (e) {
       debugPrint('hasPermission kontrol hatası: $e');
-      return true;
+      return false;
     }
   }
 

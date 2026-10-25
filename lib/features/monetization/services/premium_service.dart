@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/premium_product.dart';
@@ -18,6 +19,11 @@ class PremiumService {
   static const String keyHasSeenOnboardingPaywall = 'beyan_seen_onboarding_paywall';
   static const String keyIntegrityHash = 'beyan_premium_integrity_token';
   static const String _integritySalt = 'B3y4n_Pr3m1um_S3cur1ty_S4lt_2026';
+
+  static const _secureStorage = FlutterSecureStorage(
+    iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock_this_device),
+    aOptions: AndroidOptions(resetOnError: true),
+  );
 
   final InAppPurchase _iap = InAppPurchase.instance;
   StreamSubscription<List<PurchaseDetails>>? _subscription;
@@ -178,12 +184,29 @@ class PremiumService {
     }
   }
 
+  /// Gelecekte ücretli paywall aktifleştiğinde mağaza makbuzunu (StoreKit App Receipt / Google Play Purchase Token)
+  /// sunucu tarafında doğrulamak için mimari arayüzü.
+  /// (Not: Beyân v1.0 sürümünde kullanıcı deneyimi için tüm özellikler ücretsizdir;
+  /// ileride sunucu doğrulaması devreye alındığında doğrudan bu metot üzerinden makbuz postalanır).
+  Future<bool> verifyReceiptWithServer(PurchaseDetails purchase) async {
+    final serverData = purchase.verificationData.serverVerificationData;
+    if (serverData.isEmpty) return false;
+    // v1.0 sürümünde yerel test; gelecekte sunucu verifyReceipt endpoint'ine POST edilir
+    return true;
+  }
+
   /// Satın alma akışındaki güncellemeleri işler.
   Future<void> _handlePurchaseUpdates(List<PurchaseDetails> purchases) async {
     for (final purchase in purchases) {
       if (purchase.status == PurchaseStatus.purchased ||
           purchase.status == PurchaseStatus.restored) {
-        // Satın alma doğrulandı
+        // Satın alma mağaza / sunucu doğrulaması
+        final isValid = await verifyReceiptWithServer(purchase);
+        if (!isValid) {
+          debugPrint('[Güvenlik] Satın alma makbuzu doğrulanamadı.');
+          continue;
+        }
+
         PremiumTier tier = PremiumTier.yearly;
         for (final t in PremiumTier.values) {
           if (t.productId == purchase.productID) {
@@ -214,10 +237,21 @@ class PremiumService {
     await prefs.setBool(keyIsPremium, premium);
     if (tier != null) {
       await prefs.setString(keyTier, tier.name);
-      await prefs.setString(keyIntegrityHash, _computeIntegrityHash(true, tier.name));
+      final hash = _computeIntegrityHash(true, tier.name);
+      await prefs.setString(keyIntegrityHash, hash);
+      try {
+        await _secureStorage.write(key: keyIsPremium, value: 'true');
+        await _secureStorage.write(key: keyTier, value: tier.name);
+        await _secureStorage.write(key: keyIntegrityHash, value: hash);
+      } catch (_) {}
     } else {
       await prefs.remove(keyTier);
       await prefs.remove(keyIntegrityHash);
+      try {
+        await _secureStorage.delete(key: keyIsPremium);
+        await _secureStorage.delete(key: keyTier);
+        await _secureStorage.delete(key: keyIntegrityHash);
+      } catch (_) {}
     }
     AdService.instance.updateAdFreeStatus(premium);
     _changeController.add(premium);

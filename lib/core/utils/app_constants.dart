@@ -54,10 +54,15 @@ abstract class AppConstants {
     'isha': 'Yatsı',
   };
 
-  // ── Gemini AI Geliştirici Anahtarı ─────────────────────────────
-  /// Güvenlik: İstemci kaynak koduna hardcoded API anahtarı gömülmez.
-  /// Derleme anında enjekte etmek için:
-  /// flutter build ipa --dart-define=GEMINI_API_KEY=AIzaSy...
+  // ── Gemini AI Geliştirici Anahtarı Güvenlik Mimarisi ─────────────
+  /// Güvenlik Kuralı: İstemci kaynak koduna veya derleme ikilisine (binary)
+  /// merkezi geliştirici API anahtarı gömülmez (kod tahrifatı/reverse engineering koruması).
+  ///
+  /// Beyân AI iki güvenli kanaldan çalışır:
+  /// 1. Kullanıcının kendi Google AI Studio'dan aldığı kişisel anahtar (FlutterSecureStorage ile şifreli saklanır).
+  /// 2. Kurumsal dağıtım için kimlik doğrulayıcı güvenli proxy / vekil sunucu.
+  ///
+  /// Yalnızca yerel test/debug ortamında `--dart-define=GEMINI_API_KEY=...` ile geçici deneme yapılabilir.
   static String get defaultGeminiApiKey {
     return const String.fromEnvironment('GEMINI_API_KEY', defaultValue: '');
   }

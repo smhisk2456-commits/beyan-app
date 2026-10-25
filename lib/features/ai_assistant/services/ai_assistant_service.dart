@@ -213,6 +213,9 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
       return false;
     }
 
+    // Önceki sohbet geçmişini kaydet (mevcut soruyu API'ye mükerrer göndermemek için)
+    final previousHistory = List<AiMessage>.from(state.messages);
+
     // Add user message
     final userMsg = AiMessage(
       id: 'usr_${DateTime.now().millisecondsSinceEpoch}',
@@ -237,7 +240,7 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
     AiMessage? aiReply;
     final activeKey = state.effectiveApiKey;
     if (activeKey != null && activeKey.isNotEmpty) {
-      aiReply = await _callGeminiApi(query, activeKey, history: state.messages);
+      aiReply = await _callGeminiApi(query, activeKey, history: previousHistory);
       aiReply ??= AiMessage(
         id: 'ai_fallback_${DateTime.now().millisecondsSinceEpoch}',
         text: 'Şu anda yapay zeka sunucusuna bağlanırken geçici bir yoğunluk yaşandı. '
@@ -281,7 +284,7 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
     String apiKey, {
     List<AiMessage> history = const [],
   }) async {
-    final candidateModels = ['gemini-3.5-flash', 'gemini-3.6-flash'];
+    final candidateModels = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
 
     // Son konuşma geçmişini Gemini çoklu tur sohbet formatında hazırla (hata mesajlarını hariç tut)
     final contents = <Map<String, dynamic>>[];
@@ -293,6 +296,11 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
         .toList();
     final takeCount = validHistory.length > 8 ? 8 : validHistory.length;
     final recent = validHistory.sublist(validHistory.length - takeCount);
+
+    // Eğer geçmişin son mesajı zaten mevcut soruyla aynıysa mükerrer eklemeyi engelle
+    if (recent.isNotEmpty && recent.last.isUser && recent.last.text.trim() == query.trim()) {
+      recent.removeLast();
+    }
 
     for (final msg in recent) {
       contents.add({
