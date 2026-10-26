@@ -58,3 +58,10 @@ app.*.map.json
 tools/upload*.py
 app_store_screenshots/
 
+
+# Android Local & Gradle Cache
+.gradle/
+**/android/.gradle/
+**/android/local.properties
+**/android/app/upload-keystore.jks
+**/android/key.properties
