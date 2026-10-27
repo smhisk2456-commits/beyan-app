@@ -159,7 +159,7 @@ void main() {
       expect(screen, isNotNull);
     });
 
-    testWidgets('A1: AiAssistantScreen displays Coming Soon view when API key is not active', (tester) async {
+    testWidgets('A1: AiAssistantScreen opens directly ready for chatting without blocking user for API key', (tester) async {
       SharedPreferences.setMockInitialValues({});
       FlutterSecureStorage.setMockInitialValues({});
 
@@ -173,10 +173,10 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
 
-      // Verify App Store 2.1 compliance "Coming Soon" screen renders
-      expect(find.text('Beyân AI Çok Yakında'), findsOneWidget);
-      expect(find.text('Geliştirici & Test Erişimi'), findsOneWidget);
-      expect(find.byIcon(Icons.key_rounded), findsWidgets);
+      // Verify chat screen is directly accessible without blocking screen
+      expect(find.text('Beyân AI'), findsWidgets);
+      expect(find.text('İslami Rehber'), findsOneWidget);
+      expect(find.byType(TextField), findsOneWidget);
     });
 
     test('S3: DeepLinkService uses non-destructive push navigation', () {

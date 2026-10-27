@@ -815,14 +815,18 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                       ),
                     ),
 
-                    // 3. Lüks İç Sayaç Küresi
+                    // 3. Lüks İç Sayaç Küresi (Mat Zümrüt & Saf Altın İpeksi Yüzey - Yansıma Arındırılmış)
                     Container(
                       width: 210,
                       height: 210,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         gradient: RadialGradient(
-                          colors: [BeyanColors.tone(0xFF04584C), BeyanColors.tone(0xFF012E2B), BeyanColors.tone(0xFF011512)],
+                          colors: [
+                            BeyanColors.tone(0xFF054C41),
+                            BeyanColors.tone(0xFF02312A),
+                            BeyanColors.tone(0xFF011A16),
+                          ],
                           stops: const [0.0, 0.65, 1.0],
                         ),
                         border: Border.all(
@@ -846,29 +850,45 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                         child: Stack(
                           alignment: Alignment.center,
                           children: [
-                            // Küre İçinden Diyagonal Geçen 24K Altın Işık Yansıması (Her Dokunuşta Görünür)
+                            // 4. Yeni Manevi Nefes & Altın Aura Dalga Animasyonu (Zarif Halka Şok Dalgası)
                             IgnorePointer(
                               child: AnimatedBuilder(
                                 animation: _shimmerAnimation,
                                 builder: (context, _) {
                                   final v = _shimmerAnimation.value;
                                   if (v <= 0.01 || v >= 0.99) return const SizedBox.shrink();
-                                  final pos = -1.4 + (v * 2.8);
-                                  return Container(
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        begin: Alignment(pos - 0.45, -1.0),
-                                        end: Alignment(pos + 0.45, 1.0),
-                                        colors: [
-                                          Colors.transparent,
-                                          BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.22 * (1.0 - v * 0.4)),
-                                          Colors.white.withValues(alpha: 0.36 * (1.0 - v * 0.4)),
-                                          BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.22 * (1.0 - v * 0.4)),
-                                          Colors.transparent,
-                                        ],
-                                        stops: const [0.0, 0.38, 0.50, 0.62, 1.0],
+                                  final coreSize = 50.0 + (v * 155.0);
+                                  final waveOpacity = ((1.0 - v) * 0.85).clamp(0.0, 1.0);
+                                  return Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      // Merkez Nurlu Parıltı (Soft Ambient Glow)
+                                      Container(
+                                        width: 140,
+                                        height: 140,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          gradient: RadialGradient(
+                                            colors: [
+                                              BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.30 * (1.0 - v)),
+                                              Colors.transparent,
+                                            ],
+                                          ),
+                                        ),
                                       ),
-                                    ),
+                                      // Genişleyen Eşmerkezli Altın Halka Dalgası
+                                      Container(
+                                        width: coreSize,
+                                        height: coreSize,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: waveOpacity),
+                                            width: 1.8 * (1.0 - v) + 0.6,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   );
                                 },
                               ),
@@ -985,28 +1005,6 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                               ],
                             ),
                           ],
-                        ),
-                      ),
-                    ),
-
-                    // 5. Lüks Kavisli Cam Yansıması (Curved Specular Arc)
-                    Positioned(
-                      top: 38,
-                      child: IgnorePointer(
-                        child: Container(
-                          width: 136,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            borderRadius: const BorderRadius.all(Radius.elliptical(68, 24)),
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                Colors.white.withValues(alpha: 0.25),
-                                Colors.white.withValues(alpha: 0.0),
-                              ],
-                            ),
-                          ),
                         ),
                       ),
                     ),

@@ -158,5 +158,14 @@ void main() {
       expect(levEnzelna.arabicText.contains('لَوْ أَنْزَلْنَا'), isTrue);
       expect(levEnzelna.reference.contains('21-24'), isTrue);
     });
+
+    test('Felak & Nâs araması hem Felak hem de Nâs surelerini başarıyla listelemeli', () {
+      final container = ProviderContainer();
+      container.read(duaSearchQueryProvider.notifier).state = 'Felak & Nâs';
+      final results = container.read(filteredDuasListProvider);
+      final ids = results.map((d) => d.id).toSet();
+      expect(ids.contains('kuran_felak'), isTrue, reason: 'Felak Suresi sonuçlar arasında olmalı');
+      expect(ids.contains('kuran_nas'), isTrue, reason: 'Nâs Suresi sonuçlar arasında olmalı');
+    });
   });
 }

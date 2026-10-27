@@ -43,7 +43,7 @@ class PrayerRecommendedSurah {
 }
 
 /// Namaz Rehberi & Rekat Bilgisi Modal Bottom Sheet
-class PrayerGuideSheet extends ConsumerWidget {
+class PrayerGuideSheet extends ConsumerStatefulWidget {
   final PrayerName prayerName;
   final DateTime? prayerTime;
 
@@ -72,7 +72,16 @@ class PrayerGuideSheet extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PrayerGuideSheet> createState() => _PrayerGuideSheetState();
+}
+
+class _PrayerGuideSheetState extends ConsumerState<PrayerGuideSheet> {
+  bool _isHowToExpanded = false;
+  bool _isZammiSurahsExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final prayerName = widget.prayerName;
     final strings = ref.watch(appStringsProvider);
     final lang = strings.language;
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -206,27 +215,40 @@ class PrayerGuideSheet extends ConsumerWidget {
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(18, 14, 18, 24),
                 children: [
-                  // ── 0. Namaz Nasıl Kılınır? (Adım Adım) ─────────────
-                  _buildSectionHeader(
+                  // ── 0. Namaz Nasıl Kılınır? (Çentikli Açılır/Kapanır) ─────────────
+                  _buildCollapsibleSectionHeader(
                     icon: Icons.self_improvement_rounded,
                     title: _howToTitle(lang),
+                    subtitle: PrayerHowToGuide.exampleCaption(prayerName, lang),
                     badge: _howToBadge(lang, howToSteps.length),
+                    isExpanded: _isHowToExpanded,
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      setState(() {
+                        _isHowToExpanded = !_isHowToExpanded;
+                      });
+                    },
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    PrayerHowToGuide.exampleCaption(prayerName, lang),
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.7),
-                      fontSize: 11.5,
-                      height: 1.4,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  ...howToSteps.asMap().entries.map(
-                        (e) => _buildHowToStepCard(e.key + 1, e.value, lang),
+                  AnimatedCrossFade(
+                    firstChild: const SizedBox.shrink(),
+                    secondChild: Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ...howToSteps.asMap().entries.map(
+                                (e) => _buildHowToStepCard(e.key + 1, e.value, lang),
+                              ),
+                        ],
                       ),
+                    ),
+                    crossFadeState: _isHowToExpanded
+                        ? CrossFadeState.showSecond
+                        : CrossFadeState.showFirst,
+                    duration: const Duration(milliseconds: 260),
+                  ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 18),
 
                   // ── 1. Rekat Dağılımı ve Kılınış Düzeni ─────────────
                   _buildSectionHeader(
@@ -236,7 +258,7 @@ class PrayerGuideSheet extends ConsumerWidget {
                   const SizedBox(height: 8),
                   ...steps.map((step) => _buildStepCard(step, isDark)),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 18),
 
                   // ── 2. Bu Vakte Özel Faziletli Sûre ve Âyetler ──────
                   if (featuredSurahs.isNotEmpty) ...[
@@ -247,26 +269,39 @@ class PrayerGuideSheet extends ConsumerWidget {
                     ),
                     const SizedBox(height: 8),
                     ...featuredSurahs.map((item) => _buildSurahCard(context, ref, item, isFeatured: true)),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 18),
                   ],
 
-                  // ── 3. Namaz Sûreleri (Zamm-ı Sûreler) ───────────────
-                  _buildSectionHeader(
+                  // ── 3. Namaz Sûreleri (Zamm-ı Sûreler - Çentikli Açılır/Kapanır) ───────────────
+                  _buildCollapsibleSectionHeader(
                     icon: Icons.menu_book_rounded,
                     title: strings.surahsRecitedInPrayerTitle,
+                    subtitle: strings.prayerSurahTapHint,
                     badge: strings.tenShortSurahsBadge,
+                    isExpanded: _isZammiSurahsExpanded,
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      setState(() {
+                        _isZammiSurahsExpanded = !_isZammiSurahsExpanded;
+                      });
+                    },
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    strings.prayerSurahTapHint,
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.65),
-                      fontSize: 11.5,
-                      height: 1.4,
+                  AnimatedCrossFade(
+                    firstChild: const SizedBox.shrink(),
+                    secondChild: Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ...generalSurahs.map((item) => _buildSurahCard(context, ref, item)),
+                        ],
+                      ),
                     ),
+                    crossFadeState: _isZammiSurahsExpanded
+                        ? CrossFadeState.showSecond
+                        : CrossFadeState.showFirst,
+                    duration: const Duration(milliseconds: 260),
                   ),
-                  const SizedBox(height: 10),
-                  ...generalSurahs.map((item) => _buildSurahCard(context, ref, item)),
                 ],
               ),
             ),
@@ -317,6 +352,114 @@ class PrayerGuideSheet extends ConsumerWidget {
             ),
           ),
       ],
+    );
+  }
+
+  Widget _buildCollapsibleSectionHeader({
+    required IconData icon,
+    required String title,
+    String? subtitle,
+    String? badge,
+    required bool isExpanded,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: isExpanded ? 0.08 : 0.04),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isExpanded
+                ? BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.5)
+                : Colors.white12,
+            width: 1.0,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(7),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.15),
+              ),
+              child: Icon(icon, size: 18, color: BeyanColors.tone(0xFFFFDF7A)),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      color: BeyanColors.tone(0xFFFFDF7A),
+                      fontSize: 14.5,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                  if (subtitle != null) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.6),
+                        fontSize: 11,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            if (badge != null) ...[
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.4),
+                    width: 0.8,
+                  ),
+                ),
+                child: Text(
+                  badge,
+                  style: TextStyle(
+                    color: BeyanColors.tone(0xFFFFDF7A),
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+            ],
+            // Çentik (Açılır / Kapanır Ok Animasyonu)
+            AnimatedRotation(
+              turns: isExpanded ? 0.5 : 0.0,
+              duration: const Duration(milliseconds: 240),
+              curve: Curves.easeInOutCubic,
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withValues(alpha: 0.08),
+                ),
+                child: Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  size: 20,
+                  color: BeyanColors.tone(0xFFFFDF7A),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

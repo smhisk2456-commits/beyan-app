@@ -62,8 +62,8 @@ String _normalizeForSearch(String text) {
        .replaceAll('ş', 's').replaceAll('Ş', 's')
        .replaceAll('ö', 'o').replaceAll('Ö', 'o')
        .replaceAll('ç', 'c').replaceAll('Ç', 'c');
-  // Noktalama, kesme ve tire işaretlerini boşluğa çevir
-  s = s.replaceAll(RegExp(r"['’`\-_/()\[\]\.,:;!?\n\r]"), ' ');
+  // Noktalama, bağlaç simgeleri, kesme ve tire işaretlerini boşluğa çevir
+  s = s.replaceAll(RegExp(r"['’`\-_/()\[\]\.,:;!?\n\r&+#%*~^]"), ' ');
   return s.replaceAll(RegExp(r'\s+'), ' ').trim();
 }
 
@@ -117,10 +117,35 @@ final filteredDuasListProvider = Provider<List<DuaItem>>((ref) {
         return true;
       }
 
-      // Kelime bazlı tam kapsama (örn: "nazar duası", "sınav zihin")
+      // Kelime bazlı akıllı arama (örn: "nazar duası", "felak & nas", "sınav zihin")
+      const stopWords = {'ve', 'ile', 'veya', 'and', 'or', 'de', 'da'};
       final queryWords = normQuery.split(' ').where((w) => w.isNotEmpty).toList();
-      if (queryWords.length > 1 && queryWords.every((w) => combined.contains(w))) {
-        return true;
+      final contentWords = queryWords.where((w) => !stopWords.contains(w)).toList();
+
+      if (contentWords.isNotEmpty) {
+        // Eğer sorgu '&', '/', 've', 'veya' gibi birleştirici bağlaçlar içeriyorsa (örn. Felak & Nâs),
+        // kelimelerden herhangi birini içeren sureler de listelenir.
+        final isUnionSearch = query.contains('&') ||
+            query.contains('/') ||
+            query.contains('+') ||
+            query.toLowerCase().contains(' ve ') ||
+            query.toLowerCase().contains(' veya ');
+
+        if (isUnionSearch) {
+          if (contentWords.any((w) => combined.contains(w))) {
+            return true;
+          }
+        }
+
+        // Genel çok kelimeli aramalarda tüm anahtar kelimelerin bulunması gerekir
+        if (contentWords.length > 1 && contentWords.every((w) => combined.contains(w))) {
+          return true;
+        }
+
+        // Tek kelimelik anlamlı aramalarda doğrudan eşleşme
+        if (contentWords.length == 1 && combined.contains(contentWords.first)) {
+          return true;
+        }
       }
 
       return false;

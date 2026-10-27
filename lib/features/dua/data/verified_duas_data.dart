@@ -669,7 +669,7 @@ final List<DuaItem> verifiedDuasList = [
     transliteration: 'Bismillâhirrahmânirrahîm.\nKul eûzü bi-Rabbi\'l-felak. Min şerri mâ halak. Ve min şerri ğâsikın izâ vekab. Ve min şerri\'n-neffâsâti fi\'l-ukad. Ve min şerri hâsidin izâ hased.',
     turkishMeaning: 'Rahmân ve Rahîm olan Allah\'ın adıyla.\nDe ki: Yarattığı şeylerin şerrinden, karanlığı çöktüğü zaman gecenin şerrinden, düğümlere üfürenlerin (büyücülerin) şerrinden ve haset ettiği vakit hasetçinin şerrinden sabahın Rabbine sığınırım.',
     reference: 'Felak Suresi (113:1-5)',
-    virtueExplanation: 'Muavvizeteyn (iki sığınma suresi) biridir. Nazar, haset, büyü ve tüm görünür/görünmez kötülüklere karşı en güçlü manevi kalkandır.',
+    virtueExplanation: 'Muavvizeteyn (Nâs suresi ile birlikte iki sığınma suresidir). Felak & Nâs birlikte okunarak nazar, haset, büyü ve tüm görünür/görünmez kötülüklere karşı en güçlü manevi kalkandır.',
   ),
   const DuaItem(
     id: 'kuran_nas',
@@ -679,7 +679,7 @@ final List<DuaItem> verifiedDuasList = [
     transliteration: 'Bismillâhirrahmânirrahîm.\nKul eûzü bi-Rabbi\'n-nâs. Meliki\'n-nâs. İlâhi\'n-nâs. Min şerri\'l-vesvâsi\'l-hannâs. Ellezî yüvesvisü fî sudûri\'n-nâs. Mine\'l-cinneti ve\'n-nâs.',
     turkishMeaning: 'Rahmân ve Rahîm olan Allah\'ın adıyla.\nDe ki: İnsanların kalplerine vesvese sokan, pusuya yatıp sinen o sinsi vesvesecinin şerrinden; cinlerden ve insanlardan olan vesvesecilerin şerrinden insanların Rabbine, insanların hükümdarına ve insanların ilahına sığınırım.',
     reference: 'Nâs Suresi (114:1-6)',
-    virtueExplanation: 'Vesvese, kuruntu, korku ve içsel darlıklara karşı okunması emredilen son derece tesirli sığınma suresidir.',
+    virtueExplanation: 'Muavvizeteyn (Felak suresi ile birlikte iki sığınma suresidir). Felak & Nâs birlikte vesvese, kuruntu, korku, nazar ve içsel darlıklara karşı okunması emredilen tesirli sığınma suresidir.',
   ),
   const DuaItem(
     id: 'kuran_kafirun',
