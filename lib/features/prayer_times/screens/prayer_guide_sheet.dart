@@ -9,6 +9,7 @@ import '../../quran/screens/surah_detail_screen.dart';
 import '../../../core/widgets/luxury_page_route.dart';
 import '../models/prayer_how_to_model.dart';
 import '../models/prayer_time_model.dart';
+import 'wudu_guide_sheet.dart';
 
 /// Namaz Rekat Adımı Modeli
 class PrayerRakatStep {
@@ -215,6 +216,11 @@ class _PrayerGuideSheetState extends ConsumerState<PrayerGuideSheet> {
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(18, 14, 18, 24),
                 children: [
+                  // ── 💧 Abdest Rehberi Hızlı Erişim Kartı ─────────────
+                  _buildWuduQuickAccessCard(context),
+
+                  const SizedBox(height: 12),
+
                   // ── 0. Namaz Nasıl Kılınır? (Çentikli Açılır/Kapanır) ─────────────
                   _buildCollapsibleSectionHeader(
                     icon: Icons.self_improvement_rounded,
@@ -304,6 +310,106 @@ class _PrayerGuideSheetState extends ConsumerState<PrayerGuideSheet> {
                   ),
                 ],
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWuduQuickAccessCard(BuildContext context) {
+    return InkWell(
+      onTap: () {
+        HapticFeedback.lightImpact();
+        WuduGuideSheet.show(context);
+      },
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              BeyanColors.tone(0xFF034A3E),
+              BeyanColors.tone(0xFF012B24),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.45),
+            width: 1.0,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: BeyanColors.tone(0xFF034A3E).withValues(alpha: 0.25),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.15),
+                border: Border.all(
+                  color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.5),
+                  width: 1,
+                ),
+              ),
+              child: const Text('💧', style: TextStyle(fontSize: 16)),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        'Abdest Nasıl Alınır?',
+                        style: TextStyle(
+                          color: BeyanColors.tone(0xFFFFDF7A),
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                        decoration: BoxDecoration(
+                          color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          'YENİ',
+                          style: TextStyle(
+                            color: BeyanColors.tone(0xFFFFDF7A),
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  const Text(
+                    'Namaz, boy abdesti (gusül) ve teyemmüm rehberi',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios_rounded,
+              color: BeyanColors.tone(0xFFFFDF7A),
+              size: 14,
             ),
           ],
         ),

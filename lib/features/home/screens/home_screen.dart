@@ -27,11 +27,13 @@ import '../../spiritual_healing/models/mood_verse_model.dart';
 import '../../spiritual_healing/screens/mood_verse_sheet.dart';
 import '../../mosque_finder/screens/nearby_mosques_screen.dart';
 import '../../ai_assistant/screens/ai_assistant_screen.dart';
-import '../../ai_assistant/services/ai_assistant_service.dart';
 import '../../elif_ba/screens/elif_ba_hub_screen.dart';
 import '../../dua/screens/morning_evening_adhkar_screen.dart';
 import '../../quran/screens/thematic_atlas_screen.dart';
 import '../../../core/widgets/luxury_page_route.dart';
+import 'package:share_plus/share_plus.dart';
+import '../../prayer_times/screens/wudu_guide_sheet.dart';
+import '../../zikr/screens/zikirmatik_screen.dart';
 
 /// Ana Ekran – Beyân lüks İslami kontrol merkezi.
 class HomeScreen extends ConsumerStatefulWidget {
@@ -53,7 +55,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final allSurahs = ref.watch(allSurahsProvider).valueOrNull ?? [];
     final nextReligiousDay = HijriCalendarService.instance.getNextReligiousDay();
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final isFriday = DateTime.now().weekday == DateTime.friday;
+    final now = DateTime.now();
+    // Cuma atmosferi: Perşembe akşamı (17:00'den itibaren cuma gecesi) ve Cuma gününün tamamında aktiftir
+    final isFriday = (now.weekday == DateTime.thursday && now.hour >= 17) ||
+                     (now.weekday == DateTime.friday);
 
     final nextPrayer = prayerAsync.valueOrNull?.nextPrayerEntry?.name;
     final atmosphere = (themeState.isDynamicPrayerTheme && isDark)
@@ -373,128 +378,262 @@ class _FridayKahfBanner extends ConsumerWidget {
     final lang = strings.language;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 6),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              BeyanColors.tone(0xFF02362F),
-              BeyanColors.tone(0xFF01201B),
+              BeyanColors.tone(0xFF023F36),
+              BeyanColors.tone(0xFF01241E),
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(22),
           border: Border.all(
-            color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.5),
-            width: 1.2,
+            color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.6),
+            width: 1.4,
           ),
           boxShadow: [
             BoxShadow(
-              color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.15),
-              blurRadius: 14,
-              offset: const Offset(0, 4),
+              color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.18),
+              blurRadius: 18,
+              offset: const Offset(0, 5),
             ),
           ],
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              padding: const EdgeInsets.all(9),
-              decoration: BoxDecoration(
-                color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.18),
-                shape: BoxShape.circle,
-                border: Border.all(color: BeyanColors.tone(0xFFFFDF7A), width: 1),
-              ),
-              child: const Text('🕌', style: TextStyle(fontSize: 18)),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+            // Üst Satır: Rozet + Başlık + Cuma İkonu
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.20),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: BeyanColors.tone(0xFFFFDF7A), width: 1.2),
+                  ),
+                  child: const Text('🕌', style: TextStyle(fontSize: 20)),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Row(
+                        children: [
+                          Text(
+                            lang == AppLanguage.turkish
+                                ? 'Hayırlı Cumalar 🌙'
+                                : (lang == AppLanguage.arabic ? 'جمعة مباركة 🌙' : 'Jummah Mubarak 🌙'),
+                            style: TextStyle(
+                              color: BeyanColors.tone(0xFFFFDF7A),
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.3,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.25),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              lang == AppLanguage.turkish ? 'MÜBAREK VAKİT' : 'SUNNAH',
+                              style: TextStyle(
+                                color: BeyanColors.tone(0xFFFFDF7A),
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 2),
                       Text(
                         lang == AppLanguage.turkish
-                            ? 'Hayırlı Cumalar 🌙'
-                            : (lang == AppLanguage.arabic ? 'جمعة مباركة 🌙' : 'Jummah Mubarak 🌙'),
-                        style: TextStyle(
-                          color: BeyanColors.tone(0xFFFFDF7A),
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-                        decoration: BoxDecoration(
-                          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.25),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          lang == AppLanguage.turkish ? 'Cuma Sünneti' : 'Sunnah',
-                          style: TextStyle(
-                            color: BeyanColors.tone(0xFFFFDF7A),
-                            fontSize: 9.5,
-                            fontWeight: FontWeight.bold,
-                          ),
+                            ? 'Cuma, üzerine güneşin doğduğu en hayırlı gündür.'
+                            : 'Friday is the best day upon which the sun has risen.',
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 11.5,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 3),
-                  Text(
-                    lang == AppLanguage.turkish
-                        ? 'Kehf Sûresi\'ni okumayı unutmayın'
-                        : (lang == AppLanguage.arabic
-                            ? 'قراءة سورة الكهف نور بين الجمعتين'
-                            : 'Don\'t forget to recite Surah Al-Kahf'),
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 11.5,
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 12),
+
+            // Fazilet & Tavsiye Kutusu
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.white10),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.auto_awesome_rounded, size: 16, color: BeyanColors.tone(0xFFFFDF7A)),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      lang == AppLanguage.turkish
+                          ? 'Cuma Sünnetleri: Kehf Sûresi tilaveti, bolca Salavât-ı Şerîfe ve Cuma guslü.'
+                          : 'Sunnahs of Friday: Reciting Surah Al-Kahf, abundant Salawat, and Ghusl.',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.85),
+                        fontSize: 11.5,
+                        height: 1.35,
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: 8),
-            ElevatedButton(
-              onPressed: () {
-                HapticFeedback.lightImpact();
-                final kahfSurah = allSurahs.firstWhere(
-                  (s) => s.id == 18,
-                  orElse: () => const Surah(
-                    id: 18,
-                    nameArabic: 'الكهف',
-                    nameTurkish: 'Kehf',
-                    nameEnglish: 'The Cave',
-                    verseCount: 110,
-                    revelationType: 'meccan',
+
+            const SizedBox(height: 12),
+
+            // Aksiyon Butonları (Kehf Oku, Salavat, Tebrik Paylaş, Cuma Guslü)
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                // 1. Kehf Suresi Oku
+                ElevatedButton.icon(
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    final kahfSurah = allSurahs.firstWhere(
+                      (s) => s.id == 18,
+                      orElse: () => const Surah(
+                        id: 18,
+                        nameArabic: 'الكهف',
+                        nameTurkish: 'Kehf',
+                        nameEnglish: 'The Cave',
+                        verseCount: 110,
+                        revelationType: 'meccan',
+                      ),
+                    );
+                    Navigator.push(
+                      context,
+                      LuxuryPageRoute(
+                        page: SurahDetailScreen(surah: kahfSurah),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.menu_book_rounded, size: 15),
+                  label: Text(
+                    lang == AppLanguage.turkish ? 'Kehf Sûresi (18)' : 'Surah Al-Kahf',
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                   ),
-                );
-                Navigator.push(
-                  context,
-                  LuxuryPageRoute(
-                    page: SurahDetailScreen(surah: kahfSurah),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: BeyanColors.tone(0xFFD4AF37),
+                    foregroundColor: BeyanColors.tone(0xFF01201D),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: BeyanColors.tone(0xFFD4AF37),
-                foregroundColor: BeyanColors.tone(0xFF01201D),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
                 ),
-              ),
-              child: Text(
-                lang == AppLanguage.turkish ? 'Oku ➔' : (lang == AppLanguage.arabic ? 'اقرأ ➔' : 'Read ➔'),
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-              ),
+
+                // 2. Salavât Getir
+                OutlinedButton.icon(
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    Navigator.push(
+                      context,
+                      LuxuryPageRoute(
+                        page: const ZikirmatikScreen(),
+                      ),
+                    );
+                  },
+                  icon: const Text('📿', style: TextStyle(fontSize: 13)),
+                  label: Text(
+                    lang == AppLanguage.turkish ? 'Salavât Sayacı' : 'Salawat',
+                    style: TextStyle(
+                      color: BeyanColors.tone(0xFFFFDF7A),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.6)),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+
+                // 3. Cuma Tebriği Paylaş
+                OutlinedButton.icon(
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    SharePlus.instance.share(
+                      ShareParams(
+                        text: 'Hayırlı Cumalar! 🌙\n\n'
+                            '"Üzerine güneşin doğduğu en hayırlı gün Cuma günüdür." (Müslim, Cum‘a 18)\n\n'
+                            'Cumanız mübarek, dualarınız ve ibadetleriniz kabul olsun.\n\n'
+                            '— Beyân: Namaz Vakitleri & Kur\'an ile paylaşıldı.',
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.share_rounded, size: 14, color: Colors.white70),
+                  label: Text(
+                    lang == AppLanguage.turkish ? 'Tebrik Paylaş' : 'Share Greeting',
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 12,
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Colors.white24),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+
+                // 4. Cuma Guslü ve Abdest
+                OutlinedButton.icon(
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    WuduGuideSheet.show(context, 1);
+                  },
+                  icon: const Text('💧', style: TextStyle(fontSize: 13)),
+                  label: Text(
+                    lang == AppLanguage.turkish ? 'Cuma Guslü' : 'Ghusl',
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 12,
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Colors.white24),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -994,50 +1133,68 @@ class _SpotlightFeatureCards extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final hasKey = ref.watch(aiAssistantProvider).hasAnyActiveKey;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 6, 20, 10),
-      child: Row(
+      child: Column(
         children: [
-          // Beyân AI Manevi Rehber Kartı
-          Expanded(
-            child: _SpotlightCard(
-              title: 'Beyân AI',
-              subtitle: 'Manevi Rehber & Tefsir',
-              badge: hasKey ? 'YENİ ✨' : 'YAKINDA ⏳',
-              icon: Icons.auto_awesome_rounded,
-              gradientColors: isDark
-                  ? [BeyanColors.tone(0xFF04382F), BeyanColors.tone(0xFF021F1A)]
-                  : [BeyanColors.tone(0xFFE8F6F0), Colors.white],
-              onTap: () {
-                HapticFeedback.lightImpact();
-                Navigator.push(
-                  context,
-                  LuxuryPageRoute(page: const AiAssistantScreen()),
-                );
-              },
-            ),
+          Row(
+            children: [
+              // Beyân AI Manevi Rehber Kartı
+              Expanded(
+                child: _SpotlightCard(
+                  title: 'Beyân AI',
+                  subtitle: 'Manevi Rehber & Tefsir',
+                  badge: 'AKTİF ✨',
+                  icon: Icons.auto_awesome_rounded,
+                  gradientColors: isDark
+                      ? [BeyanColors.tone(0xFF04382F), BeyanColors.tone(0xFF021F1A)]
+                      : [BeyanColors.tone(0xFFE8F6F0), Colors.white],
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    Navigator.push(
+                      context,
+                      LuxuryPageRoute(page: const AiAssistantScreen()),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(width: 10),
+              // Sesli Elif-Bâ Kartı
+              Expanded(
+                child: _SpotlightCard(
+                  title: 'Sesli Elif-Bâ',
+                  subtitle: 'Çocuk & Başlangıç Talimi',
+                  badge: 'EĞLENCELİ 🎯',
+                  icon: Icons.menu_book_rounded,
+                  gradientColors: isDark
+                      ? [BeyanColors.tone(0xFF0C3D32), BeyanColors.tone(0xFF031E18)]
+                      : [const Color(0xFFFBF4DF), Colors.white],
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    Navigator.push(
+                      context,
+                      LuxuryPageRoute(page: const ElifBaHubScreen()),
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 10),
-          // Sesli Elif-Bâ Kartı
-          Expanded(
-            child: _SpotlightCard(
-              title: 'Sesli Elif-Bâ',
-              subtitle: 'Çocuk & Başlangıç Talimi',
-              badge: 'EĞLENCELİ 🎯',
-              icon: Icons.menu_book_rounded,
-              gradientColors: isDark
-                  ? [BeyanColors.tone(0xFF0C3D32), BeyanColors.tone(0xFF031E18)]
-                  : [const Color(0xFFFBF4DF), Colors.white],
-              onTap: () {
-                HapticFeedback.lightImpact();
-                Navigator.push(
-                  context,
-                  LuxuryPageRoute(page: const ElifBaHubScreen()),
-                );
-              },
-            ),
+          const SizedBox(height: 10),
+          // Abdest Rehberi Kartı (Namaz, Gusül, Teyemmüm)
+          _SpotlightCard(
+            title: 'Abdest Rehberi',
+            subtitle: 'Namaz Abdesti, Gusül (Boy Abdesti) & Teyemmüm',
+            badge: 'GÖRSEL REHBER 💧',
+            icon: Icons.water_drop_rounded,
+            gradientColors: isDark
+                ? [BeyanColors.tone(0xFF034A3E), BeyanColors.tone(0xFF01241E)]
+                : [const Color(0xFFE2F3F0), Colors.white],
+            onTap: () {
+              HapticFeedback.lightImpact();
+              WuduGuideSheet.show(context);
+            },
           ),
         ],
       ),
