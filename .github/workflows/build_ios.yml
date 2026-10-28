@@ -30,7 +30,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          cache: true
+          cache: false
 
       - name: Disable Swift Package Manager (AdMob CocoaPods Compatibility)
         run: flutter config --no-enable-swift-package-manager
