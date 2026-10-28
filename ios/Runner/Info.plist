@@ -23,6 +23,17 @@
     <false/>
     <key>CFBundleDevelopmentRegion</key>
     <string>tr</string>
+    <key>CFBundleLocalizations</key>
+    <array>
+        <string>tr</string>
+        <string>en</string>
+        <string>ar</string>
+        <string>ur</string>
+        <string>de</string>
+        <string>fr</string>
+        <string>ru</string>
+        <string>id</string>
+    </array>
     <key>CFBundleDisplayName</key>
     <string>Beyân</string>
     <key>CFBundleExecutable</key>
