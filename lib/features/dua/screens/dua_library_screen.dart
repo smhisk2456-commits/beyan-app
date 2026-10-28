@@ -15,6 +15,8 @@ import '../models/dua_model.dart';
 import '../providers/dua_providers.dart';
 import 'morning_evening_adhkar_screen.dart';
 import '../../../core/widgets/luxury_page_route.dart';
+import '../widgets/dua_audio_download_sheet.dart';
+import '../../quran/services/quran_download_service.dart';
 
 enum _DuaTab { categories, list, favorites }
 
@@ -104,6 +106,14 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
         ),
         centerTitle: true,
         actions: [
+          IconButton(
+            icon: Icon(Icons.cloud_download_outlined, color: BeyanColors.tone(0xFFFFDF7A)),
+            tooltip: 'Tüm Dua Seslerini İndir',
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              DuaAudioDownloadSheet.show(context);
+            },
+          ),
           IconButton(
             icon: Icon(Icons.wb_sunny_outlined, color: BeyanColors.tone(0xFFFFDF7A)),
             tooltip: strings.language == AppLanguage.turkish ? 'Sabah & Akşam Duaları' : 'Morning & Evening Adhkar',
@@ -252,7 +262,12 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
                   }).toList(),
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 6),
+
+              // ── Tek Tıkla Tüm Dua Seslerini İndirme Kartı ──
+              _buildDuaDownloadBanner(context, isDark),
+
+              const SizedBox(height: 4),
 
               // ── Görünüm Modu Değiştirici (Kategoriler / Tüm Dualar) ────────
               if (!isSearching)
@@ -379,6 +394,111 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildDuaDownloadBanner(BuildContext context, bool isDark) {
+    final downloadedKeys = ref.watch(quranDownloadsProvider);
+    final reciter = ref.watch(quranAudioProvider).selectedReciter;
+    final downloadedCount = kDuaAudioSurahIds.where((id) {
+      return downloadedKeys.contains('${reciter.id}_$id');
+    }).length;
+    final isAllDownloaded = downloadedCount == kDuaAudioSurahIds.length;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => DuaAudioDownloadSheet.show(context),
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: isDark
+                    ? [
+                        BeyanColors.tone(0xFF0F3A32).withValues(alpha: 0.8),
+                        BeyanColors.tone(0xFF07241F).withValues(alpha: 0.9),
+                      ]
+                    : [
+                        BeyanColors.tone(0xFFE5F3EE),
+                        BeyanColors.tone(0xFFD6EAE3),
+                      ],
+              ),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isAllDownloaded
+                    ? const Color(0xFF4CAF50).withValues(alpha: 0.4)
+                    : BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.35 : 0.25),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: (isAllDownloaded ? const Color(0xFF4CAF50) : BeyanColors.tone(0xFFD4AF37)).withValues(alpha: 0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    isAllDownloaded ? Icons.check_circle_outline_rounded : Icons.cloud_download_outlined,
+                    size: 18,
+                    color: isAllDownloaded ? const Color(0xFF4CAF50) : BeyanColors.tone(0xFFFFDF7A),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Dua & Namaz Sûreleri Sesleri',
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w700,
+                          color: isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF07453B),
+                        ),
+                      ),
+                      const SizedBox(height: 1),
+                      Text(
+                        isAllDownloaded
+                            ? 'Tüm dua ve namaz sûreleri internetsiz dinlemeye hazır (25/25)'
+                            : 'Tek tıkla 25 dua sûresini internetsiz dinlemek için indir ($downloadedCount/25)',
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          color: isDark ? Colors.white70 : Colors.black87,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: isAllDownloaded
+                        ? const Color(0xFF4CAF50).withValues(alpha: 0.15)
+                        : BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    isAllDownloaded ? 'HAZIR ✓' : 'İNDİR ➔',
+                    style: TextStyle(
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.bold,
+                      color: isAllDownloaded ? const Color(0xFF4CAF50) : BeyanColors.tone(0xFFFFDF7A),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

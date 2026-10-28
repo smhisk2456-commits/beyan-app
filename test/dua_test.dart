@@ -4,6 +4,7 @@ import 'package:islamic_app/features/dua/data/dua_translations.dart';
 import 'package:islamic_app/features/dua/data/verified_duas_data.dart';
 import 'package:islamic_app/features/dua/models/dua_model.dart';
 import 'package:islamic_app/features/dua/providers/dua_providers.dart';
+import 'package:islamic_app/features/dua/widgets/dua_audio_download_sheet.dart';
 
 void main() {
   group('Dua Kütüphanesi Model ve Veri Testleri', () {
@@ -166,6 +167,19 @@ void main() {
       final ids = results.map((d) => d.id).toSet();
       expect(ids.contains('kuran_felak'), isTrue, reason: 'Felak Suresi sonuçlar arasında olmalı');
       expect(ids.contains('kuran_nas'), isTrue, reason: 'Nâs Suresi sonuçlar arasında olmalı');
+    });
+
+    test('Dua sesleri indirme paketi 25 benzersiz ve geçerli sûre kimliğini içermeli', () {
+      expect(kDuaAudioSurahIds.length, equals(25));
+      expect(kDuaAudioSurahIds.toSet().length, equals(25), reason: 'Sûre ID\'leri tekil olmalı');
+      for (final id in kDuaAudioSurahIds) {
+        expect(id >= 1 && id <= 114, isTrue, reason: 'Geçerli Kur\'an sûre aralığında (1-114) olmalı');
+      }
+      expect(kDuaAudioSurahIds.contains(1), isTrue); // Fatiha
+      expect(kDuaAudioSurahIds.contains(2), isTrue); // Bakara
+      expect(kDuaAudioSurahIds.contains(112), isTrue); // Ihlas
+      expect(kDuaAudioSurahIds.contains(113), isTrue); // Felak
+      expect(kDuaAudioSurahIds.contains(114), isTrue); // Nas
     });
   });
 }
