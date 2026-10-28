@@ -7,7 +7,6 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../models/dynamic_prayer_atmosphere.dart';
 import '../../../main.dart';
-import '../../prayer_times/models/prayer_time_model.dart';
 import '../../prayer_times/providers/prayer_time_providers.dart';
 import '../../qibla/screens/qibla_compass_screen.dart';
 import '../../monetization/widgets/banner_ad_widget.dart';
@@ -49,7 +48,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final themeState = ref.watch(themeProvider);
     final effectivePalette = ref.watch(effectivePaletteProvider);
     BeyanColors.setPalette(effectivePalette);
-    final strings = ref.watch(appStringsProvider);
     final prayerAsync = ref.watch(prayerTimesNotifierProvider);
     final lastRead = ref.watch(lastReadProvider);
     final allSurahs = ref.watch(allSurahsProvider).valueOrNull ?? [];
@@ -117,20 +115,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
 
-            // ── Hızlı Erişim Butonları (Genişletilmiş İslami Matris) ───
+            // ── Hızlı Erişim Butonları (Tek Sıra 4 Odaklı Araç) ───
             SliverToBoxAdapter(
               child: _QuickActionGrid(
                 atmosphere: atmosphere,
-                onOpenPrayers: () => ref.read(selectedTabProvider.notifier).state = 1,
                 onOpenQibla: () {
                   Navigator.push(
                     context,
                     LuxuryPageRoute(page: const QiblaCompassScreen()),
                   );
                 },
-                onOpenZikr: () => ref.read(selectedTabProvider.notifier).state = 3,
-                onOpenWidget: () => ref.read(selectedTabProvider.notifier).state = 4,
-                onOpenQuran: () => ref.read(selectedTabProvider.notifier).state = 2,
                 onOpenDuas: () {
                   Navigator.push(
                     context,
@@ -149,140 +143,39 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     LuxuryPageRoute(page: const RamadanDashboardScreen()),
                   );
                 },
-            ),
-          ),
-
-          // ── Beyân AI & Sesli Elif-Bâ Öne Çıkan Kartları ────────
-          // ignore: prefer_const_constructors
-          SliverToBoxAdapter(
-            // ignore: prefer_const_constructors
-            child: _SpotlightFeatureCards(),
-          ),
-
-          // ── 🌅 Sabah & Akşam Duaları Eşlikçisi (Hısnu'l-Müslim) ───
-          SliverToBoxAdapter(
-            child: _MorningEveningAdhkarBanner(atmosphere: atmosphere),
-          ),
-
-          // ── "Bugün Kalbin Nasıl Hissediyor?" (Ruh Haline Göre Âyet & Şifa) ───
-          // ignore: prefer_const_constructors
-          SliverToBoxAdapter(
-            // ignore: prefer_const_constructors
-            child: _SpiritualMoodsSection(),
-          ),
-
-          // ── 📖 Tematik Kur'an Fihristi & Kavram Atlası ───────────────────
-          SliverToBoxAdapter(
-            child: _ThematicAtlasHomeBanner(atmosphere: atmosphere),
-          ),
-
-          // ── Yakındaki Camiler & Harita Navigasyonu ───────────
-          // ignore: prefer_const_constructors
-          SliverToBoxAdapter(
-            // ignore: prefer_const_constructors
-            child: _NearbyMosquesCard(),
-          ),
-
-          // ── Günlük Vakitler & Rekat Bilgileri Başlığı ─────────
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
-              child: Row(
-                children: [
-                  Container(
-                    width: 4,
-                    height: 18,
-                    decoration: BoxDecoration(
-                      color: BeyanColors.tone(0xFFD4AF37),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    strings.tabPrayers,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.3,
-                    ),
-                  ),
-                  const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.3),
-                      ),
-                    ),
-                    child: Text(
-                      strings.diyanetMethod,
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: BeyanColors.tone(0xFFD4AF37),
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
               ),
             ),
-          ),
 
-          // ── Günlük Vakit Kartları (Rekat Bilgileri ile) ────────
-          prayerAsync.when(
-            loading: () => SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(32),
-                child: Center(
-                  child: CircularProgressIndicator(color: BeyanColors.tone(0xFFD4AF37)),
-                ),
-              ),
+            // ── Keşfet & İslami Rehber Hub (2x3 Bento Grid) ────────
+            SliverToBoxAdapter(
+              child: _SpiritualLifeHub(atmosphere: atmosphere),
             ),
-            error: (e, _) => SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                child: Text(
-                  strings.prayerTimesLoadError(e),
-                  style: const TextStyle(color: Colors.redAccent),
-                ),
-              ),
-            ),
-            data: (daily) => SliverToBoxAdapter(
-              child: _DailyPrayersCardList(daily: daily),
-            ),
-          ),
 
-          // ── Günün Ayeti (Zarif & Kompakt Kart) ────────────────
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 10),
-              child: _DailyVerseCompactCard(),
-            ),
-          ),
-
-          // ── Günün Doğrulanmış Duası Kartı ──────────────────────
-          // ignore: prefer_const_constructors
-          SliverToBoxAdapter(
+            // ── "Bugün Kalbin Nasıl Hissediyor?" (Ruh Haline Göre Âyet & Şifa) ───
             // ignore: prefer_const_constructors
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
+            SliverToBoxAdapter(
               // ignore: prefer_const_constructors
-              child: _DailyFeaturedDuaCard(),
+              child: _SpiritualMoodsSection(),
             ),
-          ),
 
-          // ── Saygılı Alt Banner Reklam (Premium'da otomatik gizlenir) ──
-          const SliverToBoxAdapter(
-            child: BannerAdWidget(),
-          ),
+            // ── Günün Manevi İlhamı (Âyet & Doğrulanmış Dua) ────────
+            const SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(20, 6, 20, 10),
+                child: _DailyInspirationCard(),
+              ),
+            ),
 
-          // Alt boşluk (Yüzen lüks dock için ferah alan)
-          const SliverToBoxAdapter(child: SizedBox(height: 110)),
-        ],
+            // ── Saygılı Alt Banner Reklam (Premium'da otomatik gizlenir) ──
+            const SliverToBoxAdapter(
+              child: BannerAdWidget(),
+            ),
+
+            // Alt boşluk (Yüzen lüks dock için ferah alan)
+            const SliverToBoxAdapter(child: SizedBox(height: 110)),
+          ],
+        ),
       ),
-    ),
   );
 }
 }
@@ -750,164 +643,307 @@ class _LastReadQuranCard extends ConsumerWidget {
 }
 
 // ════════════════════════════════════════════════════════════════
-// Günün Vakitleri ve Rekat Detayları Listesi
+// Keşfet & İslami Yaşam Hub (2x3 Bento Grid)
 // ════════════════════════════════════════════════════════════════
 
-class _DailyPrayersCardList extends ConsumerWidget {
-  final DailyPrayerTimes daily;
-  const _DailyPrayersCardList({required this.daily});
+class _SpiritualLifeHub extends ConsumerWidget {
+  final DynamicPrayerAtmosphere? atmosphere;
+  const _SpiritualLifeHub({this.atmosphere});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final strings = ref.watch(appStringsProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    final prayerService = ref.watch(prayerTimeServiceProvider);
-    final prayers = daily.prayers;
-    final nextPrayer = daily.nextPrayerEntry;
-
-    final rekatMap = {
-      PrayerName.fajr: strings.rakatFajr,
-      PrayerName.sunrise: strings.rakatSunrise,
-      PrayerName.dhuhr: strings.rakatDhuhr,
-      PrayerName.asr: strings.rakatAsr,
-      PrayerName.maghrib: strings.rakatMaghrib,
-      PrayerName.isha: strings.rakatIsha,
-    };
+    final hour = DateTime.now().hour;
+    final isMorning = hour >= 4 && hour < 15;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Container(
-        decoration: BoxDecoration(
-          color: isDark ? BeyanColors.tone(0xFF071F1B) : Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.3 : 0.2),
-            width: 1,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
-              blurRadius: 14,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(20),
-          child: Column(
-            children: prayers.map((p) {
-              final isNext = nextPrayer?.name == p.name;
-              final rekatText = rekatMap[p.name] ?? '';
-              final timeStr = prayerService.formatTime(p.time);
-              final localizedName = p.name.localizedName(strings.language.code);
-
-              return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.fromLTRB(20, 10, 20, 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Bölüm Başlığı
+          Row(
+            children: [
+              Container(
+                width: 3.5,
+                height: 16,
                 decoration: BoxDecoration(
-                  color: isNext
-                      ? BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.12 : 0.08)
-                      : Colors.transparent,
-                  border: Border(
-                    bottom: BorderSide(
-                      color: isDark ? Colors.white10 : Colors.grey.shade200,
-                      width: 0.8,
-                    ),
+                  color: BeyanColors.tone(0xFFD4AF37),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Keşfet & İslami Yaşam',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.2,
+                  color: isDark ? Colors.white : BeyanColors.tone(0xFF012E2B),
+                ),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                decoration: BoxDecoration(
+                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  '6 Rehber',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    color: BeyanColors.tone(0xFFFFDF7A),
                   ),
                 ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 38,
-                      height: 38,
-                      decoration: BoxDecoration(
-                        color: isNext
-                            ? BeyanColors.tone(0xFFD4AF37)
-                            : (isDark ? BeyanColors.tone(0xFF0F322C) : Colors.grey.shade100),
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: isNext
-                              ? BeyanColors.tone(0xFFFFDF7A)
-                              : BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.2),
-                          width: 1,
-                        ),
-                      ),
-                      child: Center(
-                        child: Text(
-                          p.name.arabic,
-                          style: TextStyle(
-                            fontFamily: 'Amiri',
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: isNext
-                                ? Colors.black87
-                                : (isDark ? BeyanColors.tone(0xFFFFDF7A) : AppColors.teal),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
 
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                localizedName,
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: isNext ? FontWeight.bold : FontWeight.w600,
-                                  color: isDark ? Colors.white : Colors.black87,
-                                ),
-                              ),
-                              if (isNext) ...[
-                                const SizedBox(width: 8),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: BeyanColors.tone(0xFFD4AF37),
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: Text(
-                                    strings.nextPrayerLabel,
-                                    style: const TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            rekatText,
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: isDark ? Colors.white60 : AppColors.textSecondary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    Text(
-                      timeStr,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: isNext ? FontWeight.w800 : FontWeight.w600,
-                        color: isNext
-                            ? BeyanColors.tone(0xFFD4AF37)
-                            : (isDark ? Colors.white : Colors.black87),
-                      ),
-                    ),
-                  ],
+          // 2x3 Kompakt Bento Matrisi
+          // 1. Sıra: Beyân AI + Sesli Elif-Bâ
+          Row(
+            children: [
+              Expanded(
+                child: _HubCard(
+                  title: 'Beyân AI',
+                  subtitle: 'Manevi Rehber & Tefsir',
+                  badge: 'YAPAY ZEKA ✨',
+                  icon: Icons.auto_awesome_rounded,
+                  isDark: isDark,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      LuxuryPageRoute(page: const AiAssistantScreen()),
+                    );
+                  },
                 ),
-              );
-            }).toList(),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _HubCard(
+                  title: 'Sesli Elif-Bâ',
+                  subtitle: 'Çocuk & Başlangıç',
+                  badge: 'SESLİ 🎯',
+                  icon: Icons.menu_book_rounded,
+                  isDark: isDark,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      LuxuryPageRoute(page: const ElifBaHubScreen()),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+
+          // 2. Sıra: Abdest Rehberi + Tematik Kur'an Fihristi
+          Row(
+            children: [
+              Expanded(
+                child: _HubCard(
+                  title: 'Abdest Rehberi',
+                  subtitle: 'Namaz, Gusül & Teyemmüm',
+                  badge: 'GÖRSEL 💧',
+                  icon: Icons.water_drop_rounded,
+                  isDark: isDark,
+                  onTap: () => WuduGuideSheet.show(context),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _HubCard(
+                  title: 'Tematik Kur\'an',
+                  subtitle: '12 Konu & Hayat Âyetleri',
+                  badge: 'FİHRİST 📖',
+                  icon: Icons.explore_rounded,
+                  isDark: isDark,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      LuxuryPageRoute(page: const ThematicAtlasScreen()),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+
+          // 3. Sıra: Sabah/Akşam Virdi + Yakındaki Camiler
+          Row(
+            children: [
+              Expanded(
+                child: _HubCard(
+                  title: isMorning ? 'Sabah Virdi' : 'Akşam Virdi',
+                  subtitle: isMorning ? 'Koruyucu Dualar (3 Dk)' : 'Akşam Duaları (3 Dk)',
+                  badge: isMorning ? 'SABAH 🌅' : 'AKŞAM 🌙',
+                  icon: isMorning ? Icons.wb_sunny_rounded : Icons.nightlight_round,
+                  isDark: isDark,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      LuxuryPageRoute(page: MorningEveningAdhkarScreen(initialIsMorning: isMorning)),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _HubCard(
+                  title: 'Yakındaki Camiler',
+                  subtitle: 'En Yakın Mescidler & GPS',
+                  badge: 'HARİTA 📍',
+                  icon: Icons.mosque_rounded,
+                  isDark: isDark,
+                  accentColor: const Color(0xFF34D399),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      LuxuryPageRoute(page: const NearbyMosquesScreen()),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HubCard extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final String badge;
+  final IconData icon;
+  final VoidCallback onTap;
+  final bool isDark;
+  final Color? accentColor;
+
+  const _HubCard({
+    required this.title,
+    required this.subtitle,
+    required this.badge,
+    required this.icon,
+    required this.onTap,
+    required this.isDark,
+    this.accentColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final gold = BeyanColors.tone(0xFFFFDF7A);
+    final primaryAccent = accentColor ?? BeyanColors.tone(0xFFD4AF37);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.lightImpact();
+          onTap();
+        },
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: isDark
+                  ? [
+                      BeyanColors.tone(0xFF062923),
+                      BeyanColors.tone(0xFF031A16),
+                    ]
+                  : [
+                      const Color(0xFFF6FAF8),
+                      Colors.white,
+                    ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: primaryAccent.withValues(alpha: isDark ? 0.35 : 0.25),
+              width: 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: primaryAccent.withValues(alpha: 0.18),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: primaryAccent.withValues(alpha: 0.4),
+                        width: 1,
+                      ),
+                    ),
+                    child: Center(
+                      child: Icon(icon, color: primaryAccent, size: 17),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: primaryAccent.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: primaryAccent.withValues(alpha: 0.3),
+                        width: 0.8,
+                      ),
+                    ),
+                    child: Text(
+                      badge,
+                      style: TextStyle(
+                        fontSize: 8.5,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? gold : BeyanColors.tone(0xFF01362F),
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : BeyanColors.tone(0xFF052B24),
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                subtitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 10.5,
+                  color: isDark ? Colors.white60 : Colors.black54,
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -916,21 +952,30 @@ class _DailyPrayersCardList extends ConsumerWidget {
 }
 
 // ════════════════════════════════════════════════════════════════
-// Günün Ayeti Kompakt Lüks Kartı
+// Günün Manevi İlhamı (Âyet & Doğrulanmış Dua Birleşik Lüks Kart)
 // ════════════════════════════════════════════════════════════════
 
-class _DailyVerseCompactCard extends ConsumerWidget {
+class _DailyInspirationCard extends ConsumerStatefulWidget {
+  const _DailyInspirationCard();
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+  ConsumerState<_DailyInspirationCard> createState() => _DailyInspirationCardState();
+}
+
+class _DailyInspirationCardState extends ConsumerState<_DailyInspirationCard> {
+  int _tabIndex = 0; // 0: Âyet-i Kerîme, 1: Günün Duası
+
+  @override
+  Widget build(BuildContext context) {
     final strings = ref.watch(appStringsProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final now = DateTime.now();
     final dayOfYear = now.difference(DateTime(now.year, 1, 1)).inDays;
     final todayVerseIndex = (now.year * 365 + dayOfYear) % ShortVerseNotification.pool.length;
     final verse = ShortVerseNotification.pool[todayVerseIndex];
+    final dua = ref.watch(dailyFeaturedDuaProvider);
 
     return Container(
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
@@ -941,7 +986,7 @@ class _DailyVerseCompactCard extends ConsumerWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(22),
         border: Border.all(
           color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35),
           width: 1,
@@ -957,520 +1002,263 @@ class _DailyVerseCompactCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  Icons.menu_book_rounded,
-                  color: BeyanColors.tone(0xFFFFDF7A),
-                  size: 16,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                strings.dailyVerseTitle,
-                style: TextStyle(
-                  color: BeyanColors.tone(0xFFFFDF7A),
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13,
+          // Segmented Tab Switcher (Âyet-i Kerîme / Günün Duası)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 12, 14, 8),
+            child: Container(
+              padding: const EdgeInsets.all(3),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.25),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.25),
+                  width: 0.8,
                 ),
               ),
-              const Spacer(),
-              Text(
-                verse.localizedReference(strings.language.code),
-                style: const TextStyle(
-                  color: Colors.white70,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(
-            verse.arabicText,
-            style: const TextStyle(
-              fontFamily: 'Amiri',
-              fontSize: 17,
-              height: 1.6,
-              color: Colors.white,
-            ),
-            textDirection: TextDirection.rtl,
-          ),
-          const SizedBox(height: 6),
-          Text(
-            verse.localizedText(strings.language.code),
-            style: TextStyle(
-              fontSize: 12,
-              height: 1.45,
-              color: Colors.white.withValues(alpha: 0.8),
-              fontStyle: FontStyle.italic,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ════════════════════════════════════════════════════════════════
-// Günün Doğrulanmış Duası Kartı
-// ════════════════════════════════════════════════════════════════
-
-class _DailyFeaturedDuaCard extends ConsumerWidget {
-  const _DailyFeaturedDuaCard();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final dua = ref.watch(dailyFeaturedDuaProvider);
-    final strings = ref.watch(appStringsProvider);
-
-    return InkWell(
-      borderRadius: BorderRadius.circular(20),
-      onTap: () {
-        HapticFeedback.lightImpact();
-        Navigator.push(
-          context,
-          LuxuryPageRoute(page: const DuaLibraryScreen()),
-        );
-      },
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [BeyanColors.tone(0xFF02362F), BeyanColors.tone(0xFF012620)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35),
-            width: 1,
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    Icons.favorite_outline_rounded,
-                    color: BeyanColors.tone(0xFFFFDF7A),
-                    size: 16,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  strings.dailyDuaTitle,
-                  style: TextStyle(
-                    color: BeyanColors.tone(0xFFFFDF7A),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
-                  ),
-                ),
-                const Spacer(),
-                Text(
-                  strings.allDuasLink,
-                  style: const TextStyle(color: Colors.white70, fontSize: 11),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Text(
-              dua.arabicText,
-              style: const TextStyle(
-                fontFamily: 'Amiri',
-                fontSize: 17,
-                height: 1.6,
-                color: Colors.white,
-              ),
-              textDirection: TextDirection.rtl,
-            ),
-            const SizedBox(height: 6),
-            Text(
-              dua.localizedMeaning(strings.language.code),
-              style: TextStyle(
-                fontSize: 12,
-                height: 1.4,
-                color: Colors.white.withValues(alpha: 0.85),
-                fontStyle: FontStyle.italic,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              dua.localizedReference(strings.language.code),
-              style: TextStyle(
-                color: BeyanColors.tone(0xFFD4AF37),
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ════════════════════════════════════════════════════════════════
-// Öne Çıkan Lüks Özellik Kartları (Beyân AI & Sesli Elif-Bâ)
-// ════════════════════════════════════════════════════════════════
-
-class _SpotlightFeatureCards extends ConsumerWidget {
-  const _SpotlightFeatureCards();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 6, 20, 10),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              // Beyân AI Manevi Rehber Kartı
-              Expanded(
-                child: _SpotlightCard(
-                  title: 'Beyân AI',
-                  subtitle: 'Manevi Rehber & Tefsir',
-                  badge: 'AKTİF ✨',
-                  icon: Icons.auto_awesome_rounded,
-                  gradientColors: isDark
-                      ? [BeyanColors.tone(0xFF04382F), BeyanColors.tone(0xFF021F1A)]
-                      : [BeyanColors.tone(0xFFE8F6F0), Colors.white],
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    Navigator.push(
-                      context,
-                      LuxuryPageRoute(page: const AiAssistantScreen()),
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(width: 10),
-              // Sesli Elif-Bâ Kartı
-              Expanded(
-                child: _SpotlightCard(
-                  title: 'Sesli Elif-Bâ',
-                  subtitle: 'Çocuk & Başlangıç Talimi',
-                  badge: 'EĞLENCELİ 🎯',
-                  icon: Icons.menu_book_rounded,
-                  gradientColors: isDark
-                      ? [BeyanColors.tone(0xFF0C3D32), BeyanColors.tone(0xFF031E18)]
-                      : [const Color(0xFFFBF4DF), Colors.white],
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    Navigator.push(
-                      context,
-                      LuxuryPageRoute(page: const ElifBaHubScreen()),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          // Abdest Rehberi Kartı (Namaz, Gusül, Teyemmüm)
-          _SpotlightCard(
-            title: 'Abdest Rehberi',
-            subtitle: 'Namaz Abdesti, Gusül (Boy Abdesti) & Teyemmüm',
-            badge: 'GÖRSEL REHBER 💧',
-            icon: Icons.water_drop_rounded,
-            gradientColors: isDark
-                ? [BeyanColors.tone(0xFF034A3E), BeyanColors.tone(0xFF01241E)]
-                : [const Color(0xFFE2F3F0), Colors.white],
-            onTap: () {
-              HapticFeedback.lightImpact();
-              WuduGuideSheet.show(context);
-            },
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MorningEveningAdhkarBanner extends StatelessWidget {
-  final DynamicPrayerAtmosphere? atmosphere;
-  const _MorningEveningAdhkarBanner({this.atmosphere});
-
-  @override
-  Widget build(BuildContext context) {
-    final hour = DateTime.now().hour;
-    final isMorning = hour >= 4 && hour < 15;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 6, 20, 6),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(20),
-          onTap: () {
-            HapticFeedback.lightImpact();
-            Navigator.push(
-              context,
-              LuxuryPageRoute(page: MorningEveningAdhkarScreen(initialIsMorning: isMorning)),
-            );
-          },
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: isMorning
-                    ? (isDark
-                        ? [BeyanColors.tone(0xFF04483D), BeyanColors.tone(0xFF012C25)]
-                        : [BeyanColors.tone(0xFFE2F3ED), Colors.white])
-                    : (isDark
-                        ? [BeyanColors.tone(0xFF012E27), BeyanColors.tone(0xFF001915)]
-                        : [BeyanColors.tone(0xFFE7ECEB), Colors.white]),
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.5),
-                width: 1.2,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.08),
-                  blurRadius: 10,
-                  offset: const Offset(0, 3),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: RadialGradient(
-                      colors: [BeyanColors.tone(0xFFFFDF7A), BeyanColors.tone(0xFFD4AF37)],
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.4),
-                        blurRadius: 10,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(9),
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        setState(() => _tabIndex = 0);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 7),
+                        decoration: BoxDecoration(
+                          color: _tabIndex == 0 ? BeyanColors.tone(0xFFD4AF37) : Colors.transparent,
+                          borderRadius: BorderRadius.circular(9),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.menu_book_rounded,
+                              size: 14,
+                              color: _tabIndex == 0 ? Colors.black87 : BeyanColors.tone(0xFFFFDF7A),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              strings.dailyVerseTitle,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: _tabIndex == 0 ? Colors.black87 : Colors.white70,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ],
+                    ),
                   ),
-                  child: Icon(
-                    isMorning ? Icons.wb_sunny_rounded : Icons.nightlight_round,
-                    color: BeyanColors.tone(0xFF012E2B),
-                    size: 24,
+                  Expanded(
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(9),
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        setState(() => _tabIndex = 1);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 7),
+                        decoration: BoxDecoration(
+                          color: _tabIndex == 1 ? BeyanColors.tone(0xFFD4AF37) : Colors.transparent,
+                          borderRadius: BorderRadius.circular(9),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.favorite_rounded,
+                              size: 14,
+                              color: _tabIndex == 1 ? Colors.black87 : BeyanColors.tone(0xFFFFDF7A),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              strings.dailyDuaTitle,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: _tabIndex == 1 ? Colors.black87 : Colors.white70,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
+                ],
+              ),
+            ),
+          ),
+
+          // İçerik: Tab 0 (Günün Ayeti) veya Tab 1 (Günün Duası)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+            child: _tabIndex == 0
+                ? Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Text(
+                        verse.arabicText,
+                        style: const TextStyle(
+                          fontFamily: 'Amiri',
+                          fontSize: 17,
+                          height: 1.6,
+                          color: Colors.white,
+                        ),
+                        textDirection: TextDirection.rtl,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        verse.localizedText(strings.language.code),
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          height: 1.45,
+                          color: Colors.white.withValues(alpha: 0.9),
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            isMorning ? '🌅 Sabah Virdi' : '🌙 Akşam Virdi',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              color: isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF01362F),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
-                              color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.25),
+                              color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.18),
                               borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35),
+                                width: 0.8,
+                              ),
                             ),
                             child: Text(
-                              'Hısnu\'l-Müslim',
+                              verse.localizedReference(strings.language.code),
                               style: TextStyle(
-                                fontSize: 9.5,
-                                fontWeight: FontWeight.bold,
-                                color: BeyanColors.tone(0xFFD4AF37),
+                                color: BeyanColors.tone(0xFFFFDF7A),
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
                               ),
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () {
+                              HapticFeedback.lightImpact();
+                              ref.read(selectedTabProvider.notifier).state = 2; // Kur'an Sekmesi
+                            },
+                            child: Row(
+                              children: [
+                                Text(
+                                  strings.tabQuran,
+                                  style: TextStyle(
+                                    color: BeyanColors.tone(0xFFFFDF7A),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                Icon(Icons.arrow_forward_rounded, size: 13, color: BeyanColors.tone(0xFFFFDF7A)),
+                              ],
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 3),
+                    ],
+                  )
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Text(
-                        isMorning
-                            ? 'Güne ilahi muhafaza ve koruyucu dualarla başlayın (3 Dk)'
-                            : 'Günün yorgunluğunu akşam dualarıyla arındırın (3 Dk)',
-                        style: TextStyle(
-                          fontSize: 11.5,
-                          color: isDark ? Colors.white70 : BeyanColors.tone(0xFF334E48),
+                        dua.arabicText,
+                        style: const TextStyle(
+                          fontFamily: 'Amiri',
+                          fontSize: 17,
+                          height: 1.6,
+                          color: Colors.white,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                        textDirection: TextDirection.rtl,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        dua.localizedMeaning(strings.language.code),
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          height: 1.45,
+                          color: Colors.white.withValues(alpha: 0.9),
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.18),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35),
+                                width: 0.8,
+                              ),
+                            ),
+                            child: Text(
+                              dua.localizedReference(strings.language.code),
+                              style: TextStyle(
+                                color: BeyanColors.tone(0xFFFFDF7A),
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () {
+                              HapticFeedback.lightImpact();
+                              Navigator.push(
+                                context,
+                                LuxuryPageRoute(page: const DuaLibraryScreen()),
+                              );
+                            },
+                            child: Row(
+                              children: [
+                                Text(
+                                  strings.allDuasLink,
+                                  style: TextStyle(
+                                    color: BeyanColors.tone(0xFFFFDF7A),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                Icon(Icons.arrow_forward_rounded, size: 13, color: BeyanColors.tone(0xFFFFDF7A)),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ),
-                Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  size: 16,
-                  color: BeyanColors.tone(0xFFD4AF37),
-                ),
-              ],
-            ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SpotlightCard extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final String badge;
-  final IconData icon;
-  final List<Color> gradientColors;
-  final VoidCallback onTap;
-
-  const _SpotlightCard({
-    required this.title,
-    required this.subtitle,
-    required this.badge,
-    required this.icon,
-    required this.gradientColors,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(18),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: gradientColors,
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.45),
-            width: 1.2,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    gradient: RadialGradient(
-                      colors: [BeyanColors.tone(0xFFFFDF7A), BeyanColors.tone(0xFFB8860B)],
-                    ),
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.3),
-                        blurRadius: 6,
-                      ),
-                    ],
-                  ),
-                  child: Center(
-                    child: Icon(icon, color: BeyanColors.tone(0xFF01201B), size: 18),
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: BeyanColors.tone(0xFFFFDF7A),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    badge,
-                    style: TextStyle(
-                      fontSize: 8.5,
-                      fontWeight: FontWeight.bold,
-                      color: BeyanColors.tone(0xFF012E2B),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: isDark ? Colors.white : Colors.black87,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              subtitle,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 11,
-                color: isDark ? Colors.white60 : Colors.black54,
-              ),
-            ),
-          ],
-        ),
+        ],
       ),
     );
   }
 }
 
 // ════════════════════════════════════════════════════════════════
-// Hızlı Erişim Butonları Grid (Çift Sıra İslami Matris)
+// Hızlı Erişim Butonları (Kompakt Tek Sıra - 4 Odaklı Araç)
 // ════════════════════════════════════════════════════════════════
 
 class _QuickActionGrid extends ConsumerWidget {
-  final VoidCallback onOpenPrayers;
   final VoidCallback onOpenQibla;
-  final VoidCallback onOpenZikr;
-  final VoidCallback onOpenWidget;
-  final VoidCallback onOpenQuran;
   final VoidCallback onOpenDuas;
   final VoidCallback onOpenCalendar;
   final VoidCallback onOpenRamadan;
   final DynamicPrayerAtmosphere? atmosphere;
 
   const _QuickActionGrid({
-    required this.onOpenPrayers,
     required this.onOpenQibla,
-    required this.onOpenZikr,
-    required this.onOpenWidget,
-    required this.onOpenQuran,
     required this.onOpenDuas,
     required this.onOpenCalendar,
     required this.onOpenRamadan,
@@ -1483,89 +1271,43 @@ class _QuickActionGrid extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      child: Column(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
+      child: Row(
         children: [
-          // 1. Sıra
-          Row(
-            children: [
-              _ActionCard(
-                icon: Icons.access_time_filled_rounded,
-                title: strings.tabPrayers,
-                subtitle: strings.actionPrayersSub,
-                onTap: onOpenPrayers,
-                isDark: isDark,
-                atmosphere: atmosphere,
-              ),
-              const SizedBox(width: 8),
-              _ActionCard(
-                icon: Icons.explore_rounded,
-                title: strings.actionQibla,
-                subtitle: strings.actionQiblaSub,
-                onTap: onOpenQibla,
-                isDark: isDark,
-                atmosphere: atmosphere,
-              ),
-              const SizedBox(width: 8),
-              _ActionCard(
-                icon: Icons.fingerprint_rounded,
-                title: strings.actionZikr,
-                subtitle: strings.actionZikrSub,
-                onTap: onOpenZikr,
-                isDark: isDark,
-                atmosphere: atmosphere,
-              ),
-              const SizedBox(width: 8),
-              _ActionCard(
-                icon: Icons.widgets_rounded,
-                title: strings.actionWidget,
-                subtitle: strings.actionWidgetSub,
-                onTap: onOpenWidget,
-                isDark: isDark,
-                atmosphere: atmosphere,
-              ),
-            ],
+          _ActionCard(
+            icon: Icons.explore_rounded,
+            title: strings.actionQibla,
+            subtitle: strings.actionQiblaSub,
+            onTap: onOpenQibla,
+            isDark: isDark,
+            atmosphere: atmosphere,
           ),
-          const SizedBox(height: 8),
-          // 2. Sıra (Kur'an, Dualar, Hicri Takvim, Ramazan)
-          Row(
-            children: [
-              _ActionCard(
-                icon: Icons.menu_book_rounded,
-                title: strings.tabQuran,
-                subtitle: strings.actionQuranSub,
-                onTap: onOpenQuran,
-                isDark: isDark,
-                atmosphere: atmosphere,
-              ),
-              const SizedBox(width: 8),
-              _ActionCard(
-                icon: Icons.auto_stories_rounded,
-                title: strings.actionDuas,
-                subtitle: strings.actionDuasSub,
-                onTap: onOpenDuas,
-                isDark: isDark,
-                atmosphere: atmosphere,
-              ),
-              const SizedBox(width: 8),
-              _ActionCard(
-                icon: Icons.calendar_month_rounded,
-                title: strings.actionCalendar,
-                subtitle: strings.actionCalendarSub,
-                onTap: onOpenCalendar,
-                isDark: isDark,
-                atmosphere: atmosphere,
-              ),
-              const SizedBox(width: 8),
-              _ActionCard(
-                icon: Icons.nights_stay_rounded,
-                title: strings.actionRamadan,
-                subtitle: strings.actionRamadanSub,
-                onTap: onOpenRamadan,
-                isDark: isDark,
-                atmosphere: atmosphere,
-              ),
-            ],
+          const SizedBox(width: 8),
+          _ActionCard(
+            icon: Icons.auto_stories_rounded,
+            title: strings.actionDuas,
+            subtitle: strings.actionDuasSub,
+            onTap: onOpenDuas,
+            isDark: isDark,
+            atmosphere: atmosphere,
+          ),
+          const SizedBox(width: 8),
+          _ActionCard(
+            icon: Icons.calendar_month_rounded,
+            title: strings.actionCalendar,
+            subtitle: strings.actionCalendarSub,
+            onTap: onOpenCalendar,
+            isDark: isDark,
+            atmosphere: atmosphere,
+          ),
+          const SizedBox(width: 8),
+          _ActionCard(
+            icon: Icons.nights_stay_rounded,
+            title: strings.actionRamadan,
+            subtitle: strings.actionRamadanSub,
+            onTap: onOpenRamadan,
+            isDark: isDark,
+            atmosphere: atmosphere,
           ),
         ],
       ),
@@ -1908,261 +1650,3 @@ class _SpiritualMoodsSection extends ConsumerWidget {
     );
   }
 }
-
-// ════════════════════════════════════════════════════════════════
-// Yakındaki Camiler Hızlı Erişim Kartı
-// ════════════════════════════════════════════════════════════════
-
-class _NearbyMosquesCard extends ConsumerWidget {
-  const _NearbyMosquesCard();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final strings = ref.watch(appStringsProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 10, 20, 6),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(20),
-          onTap: () {
-            HapticFeedback.lightImpact();
-            Navigator.push(
-              context,
-              LuxuryPageRoute(page: const NearbyMosquesScreen()),
-            );
-          },
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: isDark
-                    ? [BeyanColors.tone(0xFF02322C), BeyanColors.tone(0xFF01201D)]
-                    : [BeyanColors.tone(0xFFF0FDF4), BeyanColors.tone(0xFFDCFCE7)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: BeyanColors.tone(0xFF34D399).withValues(alpha: isDark ? 0.4 : 0.6),
-                width: 1.1,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
-                  blurRadius: 10,
-                  offset: const Offset(0, 3),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 42,
-                  height: 42,
-                  decoration: BoxDecoration(
-                    color: BeyanColors.tone(0xFF34D399).withValues(alpha: 0.18),
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: BeyanColors.tone(0xFF34D399).withValues(alpha: 0.5),
-                    ),
-                  ),
-                  child: Center(
-                    child: Icon(
-                      Icons.mosque_rounded,
-                      color: BeyanColors.tone(0xFF34D399),
-                      size: 22,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 13),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            strings.nearbyMosques,
-                            style: TextStyle(
-                              color: isDark ? Colors.white : BeyanColors.tone(0xFF064E3B),
-                              fontSize: 14.5,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: BeyanColors.tone(0xFF34D399).withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              strings.gpsAndMap,
-                              style: TextStyle(
-                                color: BeyanColors.tone(0xFF059669),
-                                fontSize: 9.5,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        strings.nearbyMosquesSubtitle,
-                        style: TextStyle(
-                          color: isDark ? Colors.white60 : BeyanColors.tone(0xFF047857),
-                          fontSize: 11.5,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-                Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  size: 14,
-                  color: BeyanColors.tone(0xFF34D399),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ThematicAtlasHomeBanner extends StatelessWidget {
-  final DynamicPrayerAtmosphere? atmosphere;
-
-  const _ThematicAtlasHomeBanner({this.atmosphere});
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 10, 20, 6),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          gradient: LinearGradient(
-            colors: isDark
-                ? [BeyanColors.tone(0xFF022B24), BeyanColors.tone(0xFF011814)]
-                : [const Color(0xFFFBF8ED), const Color(0xFFF2EAD8)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          border: Border.all(
-            color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.45 : 0.35),
-            width: 1.2,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(20),
-            onTap: () {
-              HapticFeedback.lightImpact();
-              Navigator.push(
-                context,
-                LuxuryPageRoute(page: const ThematicAtlasScreen()),
-              );
-            },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              child: Row(
-                children: [
-                  Container(
-                    width: 46,
-                    height: 46,
-                    decoration: BoxDecoration(
-                      color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.18),
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.5),
-                        width: 1.2,
-                      ),
-                    ),
-                    child: Icon(
-                      Icons.explore_rounded,
-                      color: BeyanColors.tone(0xFFFFDF7A),
-                      size: 24,
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              'Tematik Kur\'an Fihristi',
-                              style: TextStyle(
-                                fontSize: 13.5,
-                                fontWeight: FontWeight.bold,
-                                color: isDark ? Colors.white : const Color(0xFF0F172A),
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.22),
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(
-                                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.4),
-                                ),
-                              ),
-                              child: Text(
-                                '12 Konu',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                  color: BeyanColors.tone(0xFFFFDF7A),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          'Sabır, Rızık, Şifa, Aile, Tevbe ve Yaşam Âyetleri',
-                          style: TextStyle(
-                            fontSize: 11.5,
-                            color: isDark ? Colors.white60 : const Color(0xFF64748B),
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                  Icon(
-                    Icons.arrow_forward_ios_rounded,
-                    size: 14,
-                    color: BeyanColors.tone(0xFFD4AF37),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
