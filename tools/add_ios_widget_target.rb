@@ -69,7 +69,7 @@ widget.build_configurations.each do |config|
   s['PRODUCT_BUNDLE_IDENTIFIER']      = "#{app_bundle_id}.BeyanWidget"
   s['INFOPLIST_FILE']                 = 'IslamicAppWidget/Info.plist'
   s['GENERATE_INFOPLIST_FILE']        = 'NO'
-  s['MARKETING_VERSION']              = '1.0.8'
+  s['MARKETING_VERSION']              = '1.0.9'
   s['CURRENT_PROJECT_VERSION']        = '1'
   s['SWIFT_VERSION']                  = '5.0'
   s['IPHONEOS_DEPLOYMENT_TARGET']     = '16.0'

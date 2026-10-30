@@ -87,7 +87,7 @@ jobs:
 
       - name: Build iOS Release IPA
         run: |
-          flutter build ipa --release --export-options-plist=ios/ExportOptions.plist --build-name=1.0.8 --build-number=${{ github.run_number }}
+          flutter build ipa --release --export-options-plist=ios/ExportOptions.plist --build-name=1.0.9 --build-number=${{ github.run_number }}
 
       - name: Upload IPA Artifact
         uses: actions/upload-artifact@v4

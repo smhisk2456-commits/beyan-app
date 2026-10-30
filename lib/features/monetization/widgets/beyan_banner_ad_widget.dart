@@ -68,7 +68,19 @@ class _BeyanBannerAdWidgetState extends ConsumerState<BeyanBannerAdWidget> {
       request: const AdRequest(),
       listener: BannerAdListener(
         onAdLoaded: (ad) {
-          debugPrint('BeyanBannerAdWidget başarıyla yüklendi (fallback: $isFallback).');
+          final isPrem = ref.read(premiumProvider).isPremium;
+          if (isPrem) {
+            ad.dispose();
+            _bannerAd = null;
+            if (mounted) {
+              setState(() {
+                _isLoaded = false;
+                _isLoading = false;
+              });
+            }
+            return;
+          }
+          debugPrint('BeyanBannerAdWidget basariyla yuklendi (fallback: $isFallback).');
           if (mounted) {
             setState(() {
               _isLoaded = true;
@@ -77,7 +89,19 @@ class _BeyanBannerAdWidgetState extends ConsumerState<BeyanBannerAdWidget> {
           }
         },
         onAdFailedToLoad: (ad, error) {
-          debugPrint('BeyanBannerAdWidget yüklenemedi (fallback: $isFallback): $error');
+          final isPrem = ref.read(premiumProvider).isPremium;
+          if (isPrem) {
+            ad.dispose();
+            _bannerAd = null;
+            if (mounted) {
+              setState(() {
+                _isLoaded = false;
+                _isLoading = false;
+              });
+            }
+            return;
+          }
+          debugPrint('BeyanBannerAdWidget yuklenemedi (fallback: $isFallback): $error');
           ad.dispose();
           _bannerAd = null;
           if (mounted) {
