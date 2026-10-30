@@ -16,7 +16,11 @@ class ThemeSelectionSheet extends ConsumerWidget {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      enableDrag: true,
+      isDismissible: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.65),
       builder: (ctx) => const ThemeSelectionSheet(),
     );
   }
@@ -45,33 +49,59 @@ class ThemeSelectionSheet extends ConsumerWidget {
         decoration: BoxDecoration(
           color: sheetBg,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          border: Border.all(
+            color: effectivePalette.accentGold.withValues(alpha: 0.25),
+            width: 1.2,
+          ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.35),
+              color: Colors.black.withValues(alpha: 0.45),
               blurRadius: 30,
               offset: const Offset(0, -10),
             ),
           ],
         ),
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Çekme çubuğu
-              Center(
-                child: Container(
-                  width: 44,
-                  height: 5,
-                  decoration: BoxDecoration(
-                    color: isDark ? Colors.white24 : Colors.black12,
-                    borderRadius: BorderRadius.circular(2.5),
+        padding: const EdgeInsets.fromLTRB(20, 10, 20, 24),
+        child: NotificationListener<ScrollUpdateNotification>(
+          onNotification: (notification) {
+            if (notification.metrics.pixels <= 0 &&
+                notification.scrollDelta != null &&
+                notification.scrollDelta! < -10) {
+              Navigator.pop(context);
+              return true;
+            }
+            return false;
+          },
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Çekme Tutamağı (Aşağı kaydırarak veya dokunarak kapatma)
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onVerticalDragUpdate: (details) {
+                    if (details.primaryDelta != null && details.primaryDelta! > 6) {
+                      Navigator.pop(context);
+                    }
+                  },
+                  onTap: () => Navigator.pop(context),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Center(
+                      child: Container(
+                        width: 48,
+                        height: 5,
+                        decoration: BoxDecoration(
+                          color: isDark ? Colors.white38 : Colors.black26,
+                          borderRadius: BorderRadius.circular(2.5),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 18),
+                const SizedBox(height: 4),
 
               // Başlık
               Row(
@@ -112,9 +142,15 @@ class ThemeSelectionSheet extends ConsumerWidget {
                       ],
                     ),
                   ),
+                  IconButton(
+                    icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 30),
+                    color: isDark ? Colors.white70 : Colors.black54,
+                    tooltip: 'Kapat',
+                    onPressed: () => Navigator.pop(context),
+                  ),
                 ],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
 
               // Bölüm 1: Karanlık Mod Seçici
               Text(
@@ -272,6 +308,7 @@ class ThemeSelectionSheet extends ConsumerWidget {
               ),
             ],
           ),
+        ),
         ),
       ),
     );

@@ -44,7 +44,11 @@ class DuaAudioDownloadSheet extends ConsumerStatefulWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      enableDrag: true,
+      isDismissible: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.65),
       builder: (_) => const DuaAudioDownloadSheet(),
     );
   }
@@ -101,18 +105,30 @@ class _DuaAudioDownloadSheetState extends ConsumerState<DuaAudioDownloadSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Drag Handle
-              Center(
-                child: Container(
-                  width: 44,
-                  height: 4.5,
-                  decoration: BoxDecoration(
-                    color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.5),
-                    borderRadius: BorderRadius.circular(3),
+              // Drag Handle (Aşağı kaydırarak veya dokunarak kapatma)
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onVerticalDragUpdate: (details) {
+                  if (details.primaryDelta != null && details.primaryDelta! > 6) {
+                    Navigator.pop(context);
+                  }
+                },
+                onTap: () => Navigator.pop(context),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: Center(
+                    child: Container(
+                      width: 48,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.5),
+                        borderRadius: BorderRadius.circular(2.5),
+                      ),
+                    ),
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
 
               // Başlık Alanı
               Row(

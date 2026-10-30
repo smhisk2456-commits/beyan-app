@@ -1201,9 +1201,13 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
 
     showModalBottomSheet(
       context: context,
+      enableDrag: true,
+      isDismissible: true,
+      useSafeArea: true,
       backgroundColor: isDark ? BeyanColors.tone(0xFF07211C) : Colors.white,
+      barrierColor: Colors.black.withValues(alpha: 0.65),
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       builder: (ctx) => SafeArea(
         child: Padding(
@@ -1212,17 +1216,29 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade400,
-                    borderRadius: BorderRadius.circular(2),
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onVerticalDragUpdate: (details) {
+                  if (details.primaryDelta != null && details.primaryDelta! > 6) {
+                    Navigator.pop(ctx);
+                  }
+                },
+                onTap: () => Navigator.pop(ctx),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Center(
+                    child: Container(
+                      width: 48,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: isDark ? Colors.white38 : Colors.grey.shade400,
+                        borderRadius: BorderRadius.circular(2.5),
+                      ),
+                    ),
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: Text(

@@ -35,18 +35,30 @@ class _WidgetSettingsDialogState extends ConsumerState<WidgetSettingsDialog> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Drag handle
-          Center(
-            child: Container(
-              width: 44,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.white24,
-                borderRadius: BorderRadius.circular(2),
+          // Drag handle (Aşağı kaydırarak veya dokunarak kapatma)
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onVerticalDragUpdate: (details) {
+              if (details.primaryDelta != null && details.primaryDelta! > 6) {
+                Navigator.pop(context);
+              }
+            },
+            onTap: () => Navigator.pop(context),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Center(
+                child: Container(
+                  width: 48,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: Colors.white38,
+                    borderRadius: BorderRadius.circular(2.5),
+                  ),
+                ),
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
 
           // Başlık
           Row(
@@ -272,6 +284,10 @@ void showWidgetSettings(BuildContext context) {
     context: context,
     backgroundColor: Colors.transparent,
     isScrollControlled: true,
+    enableDrag: true,
+    isDismissible: true,
+    useSafeArea: true,
+    barrierColor: Colors.black.withValues(alpha: 0.65),
     builder: (ctx) => const WidgetSettingsDialog(),
   );
 }

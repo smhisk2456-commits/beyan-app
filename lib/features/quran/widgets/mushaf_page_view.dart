@@ -246,6 +246,10 @@ class _MushafPageViewState extends ConsumerState<MushafPageView> {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
+      enableDrag: true,
+      isDismissible: true,
+      useSafeArea: true,
+      barrierColor: Colors.black.withValues(alpha: 0.65),
       builder: (ctx) {
         return Container(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 30),
@@ -261,17 +265,29 @@ class _MushafPageViewState extends ConsumerState<MushafPageView> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Center(
-                child: Container(
-                  width: 44,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.white24,
-                    borderRadius: BorderRadius.circular(2),
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onVerticalDragUpdate: (details) {
+                  if (details.primaryDelta != null && details.primaryDelta! > 6) {
+                    Navigator.pop(ctx);
+                  }
+                },
+                onTap: () => Navigator.pop(ctx),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Center(
+                    child: Container(
+                      width: 48,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: Colors.white38,
+                        borderRadius: BorderRadius.circular(2.5),
+                      ),
+                    ),
                   ),
                 ),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 8),
               Row(
                 children: [
                   Container(

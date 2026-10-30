@@ -185,9 +185,13 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
   void _showFontSizeSheet(BuildContext context, AppStrings strings) {
     showModalBottomSheet(
       context: context,
+      enableDrag: true,
+      isDismissible: true,
+      useSafeArea: true,
       backgroundColor: BeyanColors.tone(0xFF032B25),
+      barrierColor: Colors.black.withValues(alpha: 0.65),
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (ctx) {
         return Consumer(
@@ -199,12 +203,26 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Container(
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: Colors.white24,
-                        borderRadius: BorderRadius.circular(2),
+                    GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onVerticalDragUpdate: (details) {
+                        if (details.primaryDelta != null && details.primaryDelta! > 6) {
+                          Navigator.pop(context);
+                        }
+                      },
+                      onTap: () => Navigator.pop(context),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Center(
+                          child: Container(
+                            width: 48,
+                            height: 5,
+                            decoration: BoxDecoration(
+                              color: Colors.white38,
+                              borderRadius: BorderRadius.circular(2.5),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 14),
@@ -335,9 +353,13 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
   void _showReciterSheet(BuildContext context, AppStrings strings) {
     showModalBottomSheet(
       context: context,
+      enableDrag: true,
+      isDismissible: true,
+      useSafeArea: true,
       backgroundColor: BeyanColors.tone(0xFF032B25),
+      barrierColor: Colors.black.withValues(alpha: 0.65),
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (ctx) {
         return Consumer(
@@ -345,10 +367,33 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
             final audioState = ref.watch(quranAudioProvider);
             return SafeArea(
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16),
+                padding: const EdgeInsets.symmetric(vertical: 12),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onVerticalDragUpdate: (details) {
+                        if (details.primaryDelta != null && details.primaryDelta! > 6) {
+                          Navigator.pop(context);
+                        }
+                      },
+                      onTap: () => Navigator.pop(context),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Center(
+                          child: Container(
+                            width: 48,
+                            height: 5,
+                            decoration: BoxDecoration(
+                              color: Colors.white38,
+                              borderRadius: BorderRadius.circular(2.5),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
                     Text(
                       strings.reciterSelectionTitle,
                       style: TextStyle(
@@ -606,6 +651,10 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
+      enableDrag: true,
+      isDismissible: true,
+      useSafeArea: true,
+      barrierColor: Colors.black.withValues(alpha: 0.65),
       builder: (ctx) {
         return Consumer(
           builder: (context, ref, _) {
@@ -632,13 +681,25 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Center(
-                        child: Container(
-                          width: 42,
-                          height: 4,
-                          decoration: BoxDecoration(
-                            color: Colors.white24,
-                            borderRadius: BorderRadius.circular(2),
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onVerticalDragUpdate: (details) {
+                          if (details.primaryDelta != null && details.primaryDelta! > 6) {
+                            Navigator.pop(context);
+                          }
+                        },
+                        onTap: () => Navigator.pop(context),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 6),
+                          child: Center(
+                            child: Container(
+                              width: 48,
+                              height: 5,
+                              decoration: BoxDecoration(
+                                color: Colors.white38,
+                                borderRadius: BorderRadius.circular(2.5),
+                              ),
+                            ),
                           ),
                         ),
                       ),

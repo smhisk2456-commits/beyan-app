@@ -28,52 +28,83 @@ class LanguageSelectorSheet extends ConsumerWidget {
               width: 1,
             ),
           ),
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Drag handle
-                Center(
-                  child: Container(
-                    width: 44,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: Colors.white24,
-                      borderRadius: BorderRadius.circular(2),
+          padding: const EdgeInsets.fromLTRB(20, 10, 20, 24),
+          child: NotificationListener<ScrollUpdateNotification>(
+            onNotification: (notification) {
+              if (notification.metrics.pixels <= 0 &&
+                  notification.scrollDelta != null &&
+                  notification.scrollDelta! < -10) {
+                Navigator.pop(context);
+                return true;
+              }
+              return false;
+            },
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Sürükleme Tutamağı (Aşağı kaydırarak veya dokunarak kapatma)
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onVerticalDragUpdate: (details) {
+                      if (details.primaryDelta != null && details.primaryDelta! > 6) {
+                        Navigator.pop(context);
+                      }
+                    },
+                    onTap: () => Navigator.pop(context),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Center(
+                        child: Container(
+                          width: 48,
+                          height: 5,
+                          decoration: BoxDecoration(
+                            color: Colors.white38,
+                            borderRadius: BorderRadius.circular(2.5),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 18),
+                  const SizedBox(height: 4),
 
-                // Başlık
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.15),
-                        shape: BoxShape.circle,
+                  // Başlık
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.15),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.language_rounded,
+                          color: BeyanColors.tone(0xFFD4AF37),
+                          size: 20,
+                        ),
                       ),
-                      child: Icon(
-                        Icons.language_rounded,
-                        color: BeyanColors.tone(0xFFD4AF37),
-                        size: 20,
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          strings.languageSelect,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.white : BeyanColors.tone(0xFF033E35),
+                          ),
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      strings.languageSelect,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : BeyanColors.tone(0xFF033E35),
+                      IconButton(
+                        icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 28),
+                        color: Colors.white70,
+                        tooltip: 'Kapat',
+                        onPressed: () => Navigator.pop(context),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
 
                 // Dil Seçenekleri
                 ...AppLanguage.values.map((lang) {
@@ -156,6 +187,7 @@ class LanguageSelectorSheet extends ConsumerWidget {
               ],
             ),
           ),
+          ),
         ),
       ),
     );
@@ -168,6 +200,10 @@ void showLanguageSelectorSheet(BuildContext context) {
     context: context,
     backgroundColor: Colors.transparent,
     isScrollControlled: true,
+    enableDrag: true,
+    isDismissible: true,
+    useSafeArea: true,
+    barrierColor: Colors.black.withValues(alpha: 0.65),
     builder: (ctx) => const LanguageSelectorSheet(),
   );
 }

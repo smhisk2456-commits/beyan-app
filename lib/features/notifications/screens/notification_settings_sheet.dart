@@ -19,7 +19,11 @@ class NotificationSettingsSheet extends ConsumerStatefulWidget {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      enableDrag: true,
+      isDismissible: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.65),
       builder: (ctx) => const NotificationSettingsSheet(),
     );
   }
@@ -324,25 +328,47 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                 child: CircularProgressIndicator(color: BeyanColors.tone(0xFFD4AF37)),
               ),
             )
-          : SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(20, 14, 20, 32),
-              physics: const BouncingScrollPhysics(),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Sürükleme Çubuğu
-                  Center(
-                    child: Container(
-                      width: 44,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: isDark ? Colors.white24 : Colors.grey.shade300,
-                        borderRadius: BorderRadius.circular(2),
+          : NotificationListener<ScrollUpdateNotification>(
+              onNotification: (notification) {
+                if (notification.metrics.pixels <= 0 &&
+                    notification.scrollDelta != null &&
+                    notification.scrollDelta! < -10) {
+                  Navigator.pop(context);
+                  return true;
+                }
+                return false;
+              },
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(20, 10, 20, 32),
+                physics: const BouncingScrollPhysics(),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Sürükleme Tutamağı (Aşağı kaydırarak veya dokunarak kapatma)
+                    GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onVerticalDragUpdate: (details) {
+                        if (details.primaryDelta != null && details.primaryDelta! > 6) {
+                          Navigator.pop(context);
+                        }
+                      },
+                      onTap: () => Navigator.pop(context),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Center(
+                          child: Container(
+                            width: 48,
+                            height: 5,
+                            decoration: BoxDecoration(
+                              color: isDark ? Colors.white38 : Colors.grey.shade400,
+                              borderRadius: BorderRadius.circular(2.5),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 18),
+                    const SizedBox(height: 4),
 
                   // Başlık & İkon
                   Row(
@@ -385,6 +411,12 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                             ),
                           ],
                         ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 30),
+                        color: isDark ? Colors.white70 : Colors.black54,
+                        tooltip: 'Kapat',
+                        onPressed: () => Navigator.pop(context),
                       ),
                     ],
                   ),
@@ -1109,6 +1141,7 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                   ),
                 ],
               ),
+            ),
             ),
     );
   }

@@ -582,9 +582,13 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
   void _showSourcesDialog(BuildContext context) {
     showModalBottomSheet(
       context: context,
+      enableDrag: true,
+      isDismissible: true,
+      useSafeArea: true,
       backgroundColor: BeyanColors.tone(0xFF022B24),
+      barrierColor: Colors.black.withValues(alpha: 0.65),
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       builder: (ctx) {
         return Padding(
@@ -593,17 +597,29 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.white24,
-                    borderRadius: BorderRadius.circular(2),
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onVerticalDragUpdate: (details) {
+                  if (details.primaryDelta != null && details.primaryDelta! > 6) {
+                    Navigator.pop(ctx);
+                  }
+                },
+                onTap: () => Navigator.pop(ctx),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Center(
+                    child: Container(
+                      width: 48,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: Colors.white38,
+                        borderRadius: BorderRadius.circular(2.5),
+                      ),
+                    ),
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
               Row(
                 children: [
                   Icon(Icons.verified_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 24),

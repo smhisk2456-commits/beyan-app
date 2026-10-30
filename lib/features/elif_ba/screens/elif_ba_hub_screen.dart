@@ -39,7 +39,11 @@ class _ElifBaHubScreenState extends ConsumerState<ElifBaHubScreen> with SingleTi
 
     showModalBottomSheet(
       context: context,
+      enableDrag: true,
+      isDismissible: true,
+      useSafeArea: true,
       backgroundColor: isDark ? BeyanColors.tone(0xFF022B24) : Colors.white,
+      barrierColor: Colors.black.withValues(alpha: 0.65),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
@@ -50,16 +54,30 @@ class _ElifBaHubScreenState extends ConsumerState<ElifBaHubScreen> with SingleTi
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Drag handle
-                Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.white24,
-                    borderRadius: BorderRadius.circular(2),
+                // Drag handle (Aşağı kaydırarak veya dokunarak kapatma)
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onVerticalDragUpdate: (details) {
+                    if (details.primaryDelta != null && details.primaryDelta! > 6) {
+                      Navigator.pop(context);
+                    }
+                  },
+                  onTap: () => Navigator.pop(context),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Center(
+                      child: Container(
+                        width: 48,
+                        height: 5,
+                        decoration: BoxDecoration(
+                          color: isDark ? Colors.white38 : Colors.grey.shade400,
+                          borderRadius: BorderRadius.circular(2.5),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 10),
 
                 // Large Letter Display (Tap to speak)
                 InkWell(

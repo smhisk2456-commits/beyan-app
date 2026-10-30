@@ -17,6 +17,9 @@ class PremiumPaywallSheet extends ConsumerStatefulWidget {
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      enableDrag: true,
+      isDismissible: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
       barrierColor: Colors.black.withValues(alpha: 0.65),
       builder: (_) => const PremiumPaywallSheet(),
@@ -65,25 +68,57 @@ class _PremiumPaywallSheetState extends ConsumerState<PremiumPaywallSheet> {
           ),
         ],
       ),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20, 14, 20, 32),
-        physics: const BouncingScrollPhysics(),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Sürükleme Çubuğu
-            Center(
-              child: Container(
-                width: 44,
-                height: 5,
-                decoration: BoxDecoration(
-                  color: isDark ? Colors.white24 : Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(2.5),
-                ),
+      child: NotificationListener<ScrollUpdateNotification>(
+        onNotification: (notification) {
+          if (notification.metrics.pixels <= 0 &&
+              notification.scrollDelta != null &&
+              notification.scrollDelta! < -10) {
+            Navigator.pop(context);
+            return true;
+          }
+          return false;
+        },
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 10, 20, 32),
+          physics: const BouncingScrollPhysics(),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Sürükleme Tutamağı ve Kapatma Butonu
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const SizedBox(width: 40),
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onVerticalDragUpdate: (details) {
+                      if (details.primaryDelta != null && details.primaryDelta! > 6) {
+                        Navigator.pop(context);
+                      }
+                    },
+                    onTap: () => Navigator.pop(context),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Container(
+                        width: 48,
+                        height: 5,
+                        decoration: BoxDecoration(
+                          color: isDark ? Colors.white38 : Colors.grey.shade400,
+                          borderRadius: BorderRadius.circular(2.5),
+                        ),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 28),
+                    color: isDark ? Colors.white70 : Colors.black54,
+                    tooltip: 'Kapat',
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 20),
+              const SizedBox(height: 10),
 
             // Taç İkonu (Geliştirici testi için çift tıklamayla mock açıp kapama)
             Center(
@@ -533,6 +568,7 @@ class _PremiumPaywallSheetState extends ConsumerState<PremiumPaywallSheet> {
             ),
           ],
         ),
+      ),
       ),
     );
   }

@@ -24,7 +24,11 @@ class MoodVerseSheet extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      enableDrag: true,
+      isDismissible: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.65),
       builder: (_) => MoodVerseSheet(data: data),
     );
   }
@@ -57,17 +61,30 @@ class MoodVerseSheet extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Drag Handle
-            const SizedBox(height: 12),
-            Container(
-              width: 44,
-              height: 4.5,
-              decoration: BoxDecoration(
-                color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.4),
-                borderRadius: BorderRadius.circular(3),
+            // Drag Handle (Aşağı kaydırarak veya dokunarak kapatma)
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onVerticalDragUpdate: (details) {
+                if (details.primaryDelta != null && details.primaryDelta! > 6) {
+                  Navigator.pop(context);
+                }
+              },
+              onTap: () => Navigator.pop(context),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Center(
+                  child: Container(
+                    width: 48,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.45),
+                      borderRadius: BorderRadius.circular(2.5),
+                    ),
+                  ),
+                ),
               ),
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 6),
 
             // Header (Mood Emoji + Title + Close)
             Padding(

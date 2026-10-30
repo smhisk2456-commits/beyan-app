@@ -17,7 +17,11 @@ class CitySelectorSheet extends StatefulWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      enableDrag: true,
+      isDismissible: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.65),
       builder: (_) => CitySelectorSheet(ref: ref),
     );
   }
@@ -54,25 +58,52 @@ class _CitySelectorSheetState extends State<CitySelectorSheet> {
       ),
       child: Column(
         children: [
-          const SizedBox(height: 12),
-          Container(
-            width: 44,
-            height: 4,
-            decoration: BoxDecoration(
-              color: Colors.white24,
-              borderRadius: BorderRadius.circular(2),
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onVerticalDragUpdate: (details) {
+              if (details.primaryDelta != null && details.primaryDelta! > 6) {
+                Navigator.pop(context);
+              }
+            },
+            onTap: () => Navigator.pop(context),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Center(
+                child: Container(
+                  width: 48,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: Colors.white38,
+                    borderRadius: BorderRadius.circular(2.5),
+                  ),
+                ),
+              ),
             ),
           ),
-          const SizedBox(height: 16),
-          Text(
-            strings.cityLocationTitle,
-            style: TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.bold,
-              color: BeyanColors.tone(0xFFFFDF7A),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    strings.cityLocationTitle,
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                      color: BeyanColors.tone(0xFFFFDF7A),
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 28),
+                  color: Colors.white70,
+                  tooltip: 'Kapat',
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 8),
 
           // Otomatik GPS seçeneği
           Padding(
@@ -134,8 +165,18 @@ class _CitySelectorSheetState extends State<CitySelectorSheet> {
 
           // Şehir Listesi
           Expanded(
-            child: ListView.separated(
-              physics: const BouncingScrollPhysics(),
+            child: NotificationListener<ScrollUpdateNotification>(
+              onNotification: (notification) {
+                if (notification.metrics.pixels <= 0 &&
+                    notification.scrollDelta != null &&
+                    notification.scrollDelta! < -10) {
+                  Navigator.pop(context);
+                  return true;
+                }
+                return false;
+              },
+              child: ListView.separated(
+                physics: const BouncingScrollPhysics(),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               itemCount: filtered.length,
               separatorBuilder: (_, __) => const Divider(color: Colors.white10, height: 1),
@@ -159,6 +200,7 @@ class _CitySelectorSheetState extends State<CitySelectorSheet> {
                   },
                 );
               },
+            ),
             ),
           ),
         ],

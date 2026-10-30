@@ -128,6 +128,10 @@ class _VerseCardStudioScreenState extends ConsumerState<VerseCardStudioScreen> {
       context: context,
       backgroundColor: BeyanColors.tone(0xFF032620),
       isScrollControlled: true,
+      enableDrag: true,
+      isDismissible: true,
+      useSafeArea: true,
+      barrierColor: Colors.black.withValues(alpha: 0.65),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
@@ -145,14 +149,27 @@ class _VerseCardStudioScreenState extends ConsumerState<VerseCardStudioScreen> {
           builder: (context, scrollController) {
             return Column(
               children: [
-                // Tutamaç
-                Container(
-                  margin: const EdgeInsets.symmetric(vertical: 12),
-                  width: 44,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.white24,
-                    borderRadius: BorderRadius.circular(2),
+                // Tutamaç (Aşağı kaydırarak veya dokunarak kapatma)
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onVerticalDragUpdate: (details) {
+                    if (details.primaryDelta != null && details.primaryDelta! > 6) {
+                      Navigator.pop(ctx);
+                    }
+                  },
+                  onTap: () => Navigator.pop(ctx),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Center(
+                      child: Container(
+                        width: 48,
+                        height: 5,
+                        decoration: BoxDecoration(
+                          color: Colors.white38,
+                          borderRadius: BorderRadius.circular(2.5),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
                 Padding(

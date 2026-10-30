@@ -20,7 +20,11 @@ class AdhanMakamSelectorSheet extends ConsumerStatefulWidget {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      enableDrag: true,
+      isDismissible: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.65),
       builder: (ctx) => const AdhanMakamSelectorSheet(),
     );
   }
@@ -74,88 +78,124 @@ class _AdhanMakamSelectorSheetState
     final gold = themeState.palette.accentGold;
     final bg = isDark ? themeState.palette.darkSurface : Colors.white;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.35),
-            blurRadius: 30,
-            offset: const Offset(0, -10),
-          ),
-        ],
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.85,
       ),
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Çekme çubuğu
-          Center(
-            child: Container(
-              width: 44,
-              height: 5,
-              decoration: BoxDecoration(
-                color: isDark ? Colors.white24 : Colors.black12,
-                borderRadius: BorderRadius.circular(2.5),
+      child: Container(
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          border: Border.all(
+            color: gold.withValues(alpha: 0.25),
+            width: 1.2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.45),
+              blurRadius: 30,
+              offset: const Offset(0, -10),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.fromLTRB(20, 10, 20, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Sürükleme Tutamağı (Aşağı kaydırarak veya dokunarak animasyonla kapatma)
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onVerticalDragUpdate: (details) {
+                if (details.primaryDelta != null && details.primaryDelta! > 6) {
+                  Navigator.pop(context);
+                }
+              },
+              onTap: () => Navigator.pop(context),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Center(
+                  child: Container(
+                    width: 48,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.white38 : Colors.black26,
+                      borderRadius: BorderRadius.circular(2.5),
+                    ),
+                  ),
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 18),
+            const SizedBox(height: 4),
 
-          // Başlık
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: gold.withValues(alpha: 0.18),
-                  shape: BoxShape.circle,
+            // Başlık & Kapatma Butonu
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: gold.withValues(alpha: 0.18),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.music_note_rounded, color: gold, size: 22),
                 ),
-                child: Icon(Icons.music_note_rounded, color: gold, size: 22),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      strings.adhanMakamsAndAudio,
-                      style: TextStyle(
-                        fontFamily: 'Amiri',
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : AppColors.textPrimary,
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        strings.adhanMakamsAndAudio,
+                        style: TextStyle(
+                          fontFamily: 'Amiri',
+                          fontSize: 21,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : AppColors.textPrimary,
+                        ),
                       ),
-                    ),
-                    Text(
-                      strings.adhanMakamsDesc,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: isDark ? Colors.white70 : AppColors.textSecondary,
+                      Text(
+                        strings.adhanMakamsDesc,
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          color: isDark ? Colors.white70 : AppColors.textSecondary,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
+                IconButton(
+                  icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 30),
+                  color: isDark ? Colors.white70 : Colors.black54,
+                  tooltip: 'Kapat',
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
 
-          if (_isLoading)
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.all(32.0),
-                child: CircularProgressIndicator(),
-              ),
-            )
-          else
-            Flexible(
-              child: ListView(
-                shrinkWrap: true,
-                physics: const BouncingScrollPhysics(),
-                children: AdhanMakam.values.map((makam) {
+            if (_isLoading)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(32.0),
+                  child: CircularProgressIndicator(),
+                ),
+              )
+            else
+              Flexible(
+                child: NotificationListener<ScrollUpdateNotification>(
+                  onNotification: (notification) {
+                    if (notification.metrics.pixels <= 0 &&
+                        notification.scrollDelta != null &&
+                        notification.scrollDelta! < -10) {
+                      Navigator.pop(context);
+                      return true;
+                    }
+                    return false;
+                  },
+                  child: ListView(
+                    shrinkWrap: true,
+                    physics: const BouncingScrollPhysics(),
+                    children: AdhanMakam.values.map((makam) {
                   final isSelected = _selectedMakam == makam;
                   final isPlaying = _playingMakam == makam;
 
@@ -169,9 +209,11 @@ class _AdhanMakamSelectorSheetState
                   );
                 }).toList(),
               ),
+                ),
             ),
         ],
       ),
+    ),
     );
   }
 

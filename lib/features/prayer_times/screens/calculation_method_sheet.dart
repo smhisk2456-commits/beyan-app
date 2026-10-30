@@ -17,7 +17,11 @@ class CalculationMethodSheet extends StatefulWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      enableDrag: true,
+      isDismissible: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.65),
       builder: (_) => CalculationMethodSheet(ref: ref),
     );
   }
@@ -55,29 +59,63 @@ class _CalculationMethodSheetState extends State<CalculationMethodSheet> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 44,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.white24,
-                borderRadius: BorderRadius.circular(2),
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onVerticalDragUpdate: (details) {
+                if (details.primaryDelta != null && details.primaryDelta! > 6) {
+                  Navigator.pop(context);
+                }
+              },
+              onTap: () => Navigator.pop(context),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Center(
+                  child: Container(
+                    width: 48,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: Colors.white38,
+                      borderRadius: BorderRadius.circular(2.5),
+                    ),
+                  ),
+                ),
               ),
             ),
-            const SizedBox(height: 16),
-            Text(
-              strings.calculationMethodTitle,
-              style: TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.bold,
-                color: BeyanColors.tone(0xFFFFDF7A),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          strings.calculationMethodTitle,
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                            color: BeyanColors.tone(0xFFFFDF7A),
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          strings.calculationMethodDesc,
+                          style: const TextStyle(color: Colors.white60, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 28),
+                    color: Colors.white70,
+                    tooltip: 'Kapat',
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
               ),
             ),
+            const SizedBox(height: 8),
             const SizedBox(height: 6),
-            Text(
-              strings.calculationMethodDesc,
-              style: const TextStyle(color: Colors.white60, fontSize: 12),
-            ),
-            const SizedBox(height: 14),
             ...PrayerCalculationMethod.values.map((method) {
               final isSelected = _currentMethod == method;
               return ListTile(
