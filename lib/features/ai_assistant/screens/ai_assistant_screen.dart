@@ -368,6 +368,10 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<bool>(premiumProvider.select((s) => s.isPremium), (prev, isPrem) {
+      ref.read(aiAssistantProvider.notifier).refreshQuota(isPrem);
+    });
+
     final aiState = ref.watch(aiAssistantProvider);
     final premiumState = ref.watch(premiumProvider);
     final isPremium = premiumState.isPremium;

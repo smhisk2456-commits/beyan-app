@@ -21,13 +21,14 @@ class AdService {
   /// Premium durumuna göre reklamsız deneyimi günceller.
   void updateAdFreeStatus(bool premium) {
     isAdFree = premium;
+    if (!premium && !_isInitialized && kAdsEnabled) {
+      initialize();
+    }
   }
 
   /// AdMob SDK'sını başlatır ve İslami / Aile dostu filtreleri uygular.
-  /// Eğer kullanıcı Premium aboneyse veya reklamlar devre dışıysa AdMob SDK başlatılmaz.
   Future<void> initialize() async {
-    if (_isInitialized || isAdFree || !kAdsEnabled) {
-      debugPrint('[AdService] Reklamlar kapalı: %100 Reklamsız Deneyim aktif, AdMob SDK başlatılmadı.');
+    if (_isInitialized || !kAdsEnabled) {
       return;
     }
     try {
@@ -53,16 +54,13 @@ class AdService {
 
   /// Resmi Google Test Banner Ad Unit ID'si
   String get testBannerAdUnitId {
-    if (isAdFree) return '';
     if (Platform.isAndroid) return androidTestBannerId;
     if (Platform.isIOS) return iosTestBannerId;
     return '';
   }
 
   /// Platforma göre Banner Reklam Birimi Kimliği (Ad Unit ID).
-  /// Not: Geliştirme ve test aşamasında Google'ın resmi test kimlikleri kullanılır.
   String get bannerAdUnitId {
-    if (isAdFree) return '';
     if (kDebugMode) {
       return testBannerAdUnitId;
     }

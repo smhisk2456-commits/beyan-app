@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../features/monetization/providers/premium_provider.dart';
 import '../../features/prayer_times/models/prayer_time_model.dart';
 import '../../features/prayer_times/providers/prayer_time_providers.dart';
 import 'app_theme.dart';
@@ -143,8 +144,15 @@ final themeProvider = StateNotifierProvider<ThemeNotifier, ThemeState>((ref) {
 /// aynı paleti kullanarak parçalı renk oluşumunu %100 engeller.
 final effectivePaletteProvider = Provider<AppThemePalette>((ref) {
   final themeState = ref.watch(themeProvider);
+  final isPremium = ref.watch(premiumProvider).isPremium;
   AppThemePalette resolved = themeState.palette;
-  if (themeState.isDynamicPrayerTheme) {
+
+  // Ücretsiz kullanıcılar için lüks Pro temaları ve dinamik temayı engelle
+  if (!isPremium) {
+    if (resolved != AppThemePalette.emerald && resolved != AppThemePalette.oledBlack) {
+      resolved = AppThemePalette.emerald;
+    }
+  } else if (themeState.isDynamicPrayerTheme) {
     final prayerAsync = ref.watch(prayerTimesNotifierProvider);
     final nextPrayerEntry = prayerAsync.valueOrNull?.nextPrayerEntry;
     if (nextPrayerEntry != null) {
