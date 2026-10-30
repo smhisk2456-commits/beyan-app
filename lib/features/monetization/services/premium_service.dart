@@ -286,8 +286,16 @@ class PremiumService {
 
   /// Geliştirici ve test modu için Premium'u açıp kapatma (TestFlight ve Geliştirici testleri)
   Future<void> toggleDevPremium() async {
-    final next = !_isPremium;
-    await _setPremium(next, tier: next ? PremiumTier.lifetime : null);
+    final currentlyActive = isPremium;
+    final next = !currentlyActive;
+    final prefs = await SharedPreferences.getInstance();
+    if (next) {
+      await _setPremium(true, tier: PremiumTier.lifetime);
+    } else {
+      _trialStartDate = null;
+      await prefs.remove(keyWidgetTrialStart);
+      await _setPremium(false, tier: null);
+    }
   }
 
   void dispose() {

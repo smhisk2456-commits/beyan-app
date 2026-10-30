@@ -65,8 +65,8 @@ class SettingsScreen extends ConsumerWidget {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: isPremium
-                        ? [BeyanColors.tone(0xFF063A31), BeyanColors.tone(0xFF021D18)]
-                        : [BeyanColors.tone(0xFF2C2204), BeyanColors.tone(0xFF141001)],
+                        ? [effectivePalette.darkCard, effectivePalette.darkSurface]
+                        : [BeyanColors.tone(0xFF2C2204), effectivePalette.darkBackground],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),

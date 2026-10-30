@@ -115,9 +115,15 @@ extension AppThemePaletteExtension on AppThemePalette {
     return _t(0xFF071B18);
   }
 
-  Color get darkSurface => _t(0xFF0D2823);
+  Color get darkSurface {
+    if (this == AppThemePalette.oledBlack) return const Color(0xFF070707);
+    return _t(0xFF0D2823);
+  }
 
-  Color get darkCard => _t(0xFF133630);
+  Color get darkCard {
+    if (this == AppThemePalette.oledBlack) return const Color(0xFF111111);
+    return _t(0xFF133630);
+  }
 
   /// Namaz vakti ana kartı için palete özel uyumlu lüks gradyan
   List<Color> get prayerCardGradient => [

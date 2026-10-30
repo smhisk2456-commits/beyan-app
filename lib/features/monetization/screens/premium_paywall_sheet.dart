@@ -30,15 +30,21 @@ class PremiumPaywallSheet extends ConsumerStatefulWidget {
 
 class _PremiumPaywallSheetState extends ConsumerState<PremiumPaywallSheet> {
   PremiumTier _selectedTier = PremiumTier.yearly;
+  bool _showPackagesEvenIfPro = false;
 
   @override
   Widget build(BuildContext context) {
     final strings = ref.watch(appStringsProvider);
-    final themeState = ref.watch(themeProvider);
+    final effectivePalette = ref.watch(effectivePaletteProvider);
+    BeyanColors.setPalette(effectivePalette);
     final premiumState = ref.watch(premiumProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final gold = themeState.palette.accentGold;
-    final bg = isDark ? themeState.palette.darkSurface : Colors.white;
+    final gold = effectivePalette.accentGold;
+    final bg = isDark
+        ? (effectivePalette == AppThemePalette.oledBlack
+            ? const Color(0xFF000000)
+            : effectivePalette.darkBackground)
+        : Colors.white;
 
     return Container(
       constraints: BoxConstraints(
@@ -189,45 +195,94 @@ class _PremiumPaywallSheetState extends ConsumerState<PremiumPaywallSheet> {
             ),
             const SizedBox(height: 24),
 
-            // Eğer zaten Premium ise bilgi kartı göster
+            // Eğer zaten Premium ise bilgi ve yönetim kartı göster
             if (premiumState.isPremium) ...[
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [BeyanColors.tone(0xFF033E35), BeyanColors.tone(0xFF071F1B)],
+                    colors: [effectivePalette.darkCard, effectivePalette.darkSurface],
                   ),
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(18),
                   border: Border.all(color: gold, width: 1.2),
                 ),
-                child: Row(
+                child: Column(
                   children: [
-                    Icon(Icons.check_circle_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 28),
-                    const SizedBox(width: 14),
-                    const Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Üyeliğiniz Aktif',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15,
+                    Row(
+                      children: [
+                        Icon(Icons.check_circle_rounded, color: effectivePalette.accentGoldLight, size: 28),
+                        const SizedBox(width: 14),
+                        const Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Üyeliğiniz Aktif 👑',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                ),
+                              ),
+                              Text(
+                                'Reklamlar kaldırıldı ve tüm lüks özelliklerin kilidi açıldı.',
+                                style: TextStyle(color: Colors.white70, fontSize: 11.5),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () {
+                              setState(() => _showPackagesEvenIfPro = !_showPackagesEvenIfPro);
+                            },
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: gold,
+                              side: BorderSide(color: gold.withValues(alpha: 0.5)),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                            ),
+                            child: Text(
+                              _showPackagesEvenIfPro ? 'Paketleri Gizle' : 'Paketleri İncele',
+                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
                             ),
                           ),
-                          Text(
-                            'Reklamlar kaldırıldı ve tüm özelliklerin kilidi açıldı.',
-                            style: TextStyle(color: Colors.white70, fontSize: 11),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              HapticFeedback.mediumImpact();
+                              await ref.read(premiumProvider.notifier).toggleDevPremium();
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white.withValues(alpha: 0.12),
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                            ),
+                            child: const Text(
+                              'Ücretsiz Moda Geç',
+                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                            ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 16),
-            ] else ...[
+            ],
+
+            // Paket Seçim Kartları (Ücretsiz kullanıcılarda veya "Paketleri İncele" dendiğinde görünür)
+            if (!premiumState.isPremium || _showPackagesEvenIfPro) ...[
               // Paket Seçim Kartları: Yıllık ve Ömür Boyu Öncelikli
               Column(
                 children: const [
@@ -385,6 +440,20 @@ class _PremiumPaywallSheetState extends ConsumerState<PremiumPaywallSheet> {
                         ),
                 ),
               ),
+              if (!premiumState.isPremium) ...[
+                const SizedBox(height: 8),
+                TextButton.icon(
+                  onPressed: () async {
+                    HapticFeedback.mediumImpact();
+                    await ref.read(premiumProvider.notifier).toggleDevPremium();
+                  },
+                  icon: Icon(Icons.workspace_premium_rounded, size: 16, color: gold),
+                  label: Text(
+                    'Pro Modunu Aç (Geliştirici / Test Modu)',
+                    style: TextStyle(color: gold, fontSize: 12, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ],
               const SizedBox(height: 12),
             ],
 
