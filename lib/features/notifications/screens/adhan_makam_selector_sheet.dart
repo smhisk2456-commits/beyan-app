@@ -4,10 +4,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/localization/app_strings.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/beyan_colors.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../models/adhan_makam.dart';
 import '../services/adhan_audio_player_service.dart';
 import '../services/notification_service.dart';
+import '../../monetization/providers/premium_provider.dart';
+import '../../monetization/screens/premium_paywall_sheet.dart';
 
 /// Ezan Makamları Seçim ve Önizleme Dinleme Ekranı
 class AdhanMakamSelectorSheet extends ConsumerStatefulWidget {
@@ -192,6 +195,12 @@ class _AdhanMakamSelectorSheetState
       padding: const EdgeInsets.only(bottom: 10),
       child: InkWell(
         onTap: () async {
+          final isPremium = ref.read(premiumProvider).isPremium;
+          if (makam.isPro && !isPremium) {
+            HapticFeedback.heavyImpact();
+            PremiumPaywallSheet.show(context);
+            return;
+          }
           HapticFeedback.selectionClick();
           setState(() => _selectedMakam = makam);
           await NotificationService.instance.setSelectedMakam(makam);
@@ -258,6 +267,35 @@ class _AdhanMakamSelectorSheetState
                                 fontWeight: FontWeight.bold,
                                 color: gold,
                               ),
+                            ),
+                          ),
+                        ],
+                        if (makam.isPro) ...[
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [BeyanColors.tone(0xFFFFDF7A), BeyanColors.tone(0xFFD4AF37)],
+                              ),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (!ref.watch(premiumProvider).isPremium) ...[
+                                  Icon(Icons.lock_rounded, size: 9, color: BeyanColors.tone(0xFF071F1B)),
+                                  const SizedBox(width: 2),
+                                ],
+                                Text(
+                                  'PRO',
+                                  style: TextStyle(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.bold,
+                                    color: BeyanColors.tone(0xFF071F1B),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],

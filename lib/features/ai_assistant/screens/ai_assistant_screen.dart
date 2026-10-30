@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../monetization/providers/premium_provider.dart';
+import '../../monetization/screens/premium_paywall_sheet.dart';
 import '../models/ai_message.dart';
 import '../services/ai_assistant_service.dart';
 
@@ -289,28 +290,65 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
             ),
           ],
         ),
-        content: const Text(
-          'Beyân AI Manevi Rehber & Tefsir Asistanı\'na kendi ücretsiz Gemini API anahtarınızı tanımlayarak en yüksek hızda ve kesintisiz yanıtlar alabilirsiniz.',
-          style: TextStyle(color: Colors.white, fontSize: 14, height: 1.5),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Günlük 3 ücretsiz soru hakkınız tamamlandı. Soru sınırını tamamen kaldırmak için Beyân Pro\'ya geçebilir veya kendi ücretsiz Gemini API anahtarınızı tanımlayabilirsiniz.',
+              style: TextStyle(color: Colors.white, fontSize: 14, height: 1.5),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: BeyanColors.tone(0xFF0F5A47).withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.workspace_premium_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 20),
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Text(
+                      'Beyân Pro ile sınırsız soru-cevap ve reklamsız deneyim.',
+                      style: TextStyle(color: Colors.white70, fontSize: 11),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             child: const Text('Kapat', style: TextStyle(color: Colors.white60)),
           ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              _showApiKeyDialog(context);
+            },
+            child: Text(
+              'API Anahtarı 🔑',
+              style: TextStyle(color: BeyanColors.tone(0xFFFFDF7A), fontSize: 12),
+            ),
+          ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: BeyanColors.tone(0xFFD4AF37),
+              backgroundColor: BeyanColors.tone(0xFFFFDF7A),
               foregroundColor: BeyanColors.tone(0xFF01201B),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             ),
             onPressed: () {
               Navigator.pop(ctx);
-              _showApiKeyDialog(context);
+              PremiumPaywallSheet.show(context);
             },
             child: const Text(
-              'API Anahtarı Tanımla 🔑',
+              'Pro\'ya Geç 👑',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
           ),

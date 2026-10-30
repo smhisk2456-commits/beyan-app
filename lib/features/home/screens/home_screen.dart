@@ -9,7 +9,6 @@ import '../models/dynamic_prayer_atmosphere.dart';
 import '../../../main.dart';
 import '../../prayer_times/providers/prayer_time_providers.dart';
 import '../../qibla/screens/qibla_compass_screen.dart';
-import '../../monetization/widgets/banner_ad_widget.dart';
 import '../../dua/screens/dua_library_screen.dart';
 import '../../dua/providers/dua_providers.dart';
 import '../../calendar/screens/hijri_calendar_screen.dart';
@@ -168,13 +167,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ),
 
-            // ── Saygılı Alt Banner Reklam (Premium'da otomatik gizlenir) ──
-            const SliverToBoxAdapter(
-              child: BannerAdWidget(),
-            ),
-
-            // Alt boşluk (Yüzen lüks dock için ferah alan)
-            const SliverToBoxAdapter(child: SizedBox(height: 110)),
+            // Alt boşluk (Yüzen lüks dock ve banner için ferah alan)
+            const SliverToBoxAdapter(child: SizedBox(height: 120)),
           ],
         ),
       ),
