@@ -281,3 +281,41 @@ final comparativeMealProvider =
   return ComparativeMealNotifier();
 });
 
+/// 📖 Türkçe Okunuş (Transkripsiyon) Açık/Kapalı Durumu
+class TransliterationNotifier extends StateNotifier<bool> {
+  static const _key = 'quran_transliteration_enabled';
+
+  TransliterationNotifier() : super(true) {
+    _load();
+  }
+
+  Future<void> _load() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      state = prefs.getBool(_key) ?? true;
+    } catch (_) {}
+  }
+
+  Future<void> toggle() async {
+    state = !state;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_key, state);
+    } catch (_) {}
+  }
+
+  Future<void> setEnabled(bool enabled) async {
+    state = enabled;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_key, state);
+    } catch (_) {}
+  }
+}
+
+final transliterationProvider =
+    StateNotifierProvider<TransliterationNotifier, bool>((ref) {
+  return TransliterationNotifier();
+});
+
+

@@ -639,7 +639,7 @@ class VerseCard extends ConsumerWidget {
               const SizedBox(height: 12),
 
               // ── Türkçe Okunuş (Apple Music Live Lyrics Tarzı Harf Harf Akışlı) ─
-              if (verse.transliteration != null && verse.transliteration!.isNotEmpty) ...[
+              if (ref.watch(transliterationProvider) && verse.transliteration != null && verse.transliteration!.isNotEmpty) ...[
                 _buildTransliterationText(context, isDark, activeWordIndex, wordProgress, verseProgress),
                 const SizedBox(height: 10),
               ],

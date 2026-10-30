@@ -26,6 +26,7 @@ import 'features/quran/widgets/quran_audio_player_bar.dart';
 import 'features/notifications/widgets/adhan_audio_player_bar.dart';
 import 'core/widgets/luxury_floating_dock.dart';
 import 'core/services/deep_link_service.dart';
+import 'features/monetization/widgets/beyan_banner_ad_widget.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -522,6 +523,7 @@ class _MainNavigationState extends ConsumerState<MainNavigation>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              const BeyanBannerAdWidget(),
               const AdhanAudioPlayerBar(),
               const QuranAudioPlayerBar(),
               LuxuryFloatingDock(

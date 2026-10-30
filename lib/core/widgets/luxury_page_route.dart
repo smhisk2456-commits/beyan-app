@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
 /// Apple iOS yerel akıcı sağa kaydırma (interactive pop gesture / edge swipe to back)
-/// ve zarif Cupertino geçişli lüks sayfa rotası.
+/// ve 120Hz ProMotion uyumlu Cupertino geçişli sayfa rotası.
 class LuxuryPageRoute<T> extends CupertinoPageRoute<T> {
   final Widget page;
 
@@ -11,7 +11,7 @@ class LuxuryPageRoute<T> extends CupertinoPageRoute<T> {
     super.settings,
     super.maintainState = true,
     super.fullscreenDialog = false,
-    super.allowSnapshotting = false,
+    super.allowSnapshotting = true,
     super.barrierDismissible = false,
   }) : super(builder: (_) => RepaintBoundary(child: page));
 }

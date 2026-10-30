@@ -787,6 +787,16 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                         },
                       ),
                       _buildToolSwitchRow(
+                        icon: Icons.translate_rounded,
+                        title: isTr ? 'Türkçe Okunuş (Transkripsiyon)' : 'Latin Pronunciation',
+                        subtitle: isTr ? 'Arapça bilmeyenler için ayetlerin Türkçe okunuşunu gösterir' : 'Shows pronunciation of verses in Latin script',
+                        value: ref.watch(transliterationProvider),
+                        onChanged: (_) {
+                          HapticFeedback.lightImpact();
+                          ref.read(transliterationProvider.notifier).toggle();
+                        },
+                      ),
+                      _buildToolSwitchRow(
                         icon: Icons.auto_stories_rounded,
                         title: isTr ? 'Canlı Âyet Takibi (Otomatik Kaydırma)' : 'Live Verse Auto-Scroll',
                         subtitle: isTr ? 'Tilavet esnasında okunan âyete otomatik kaydırır' : 'Automatically scrolls to active verse',

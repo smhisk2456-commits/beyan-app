@@ -23,7 +23,7 @@ class AdService {
     isAdFree = premium;
   }
 
-  /// AdMob SDK'sını başlatır.
+  /// AdMob SDK'sını başlatır ve İslami / Aile dostu filtreleri uygular.
   /// Eğer kullanıcı Premium aboneyse veya reklamlar devre dışıysa AdMob SDK başlatılmaz.
   Future<void> initialize() async {
     if (_isInitialized || isAdFree || !kAdsEnabled) {
@@ -31,9 +31,18 @@ class AdService {
       return;
     }
     try {
+      // 🛡️ Manevi Koruma & Aile Güvenliği Filtreleri:
+      // Google AdMob seviyesinde yetişkin (+18), kumar, flört vb. hassas kategorileri tamamen engeller.
+      final configuration = RequestConfiguration(
+        maxAdContentRating: MaxAdContentRating.g, // "G" = General Audiences (Yalnızca Genel İzleyici / Çocuk & Aile)
+        tagForChildDirectedTreatment: TagForChildDirectedTreatment.yes,
+        tagForUnderAgeOfConsent: TagForUnderAgeOfConsent.yes,
+      );
+      await MobileAds.instance.updateRequestConfiguration(configuration);
+
       await MobileAds.instance.initialize();
       _isInitialized = true;
-      debugPrint('AdMob SDK başarıyla başlatıldı.');
+      debugPrint('AdMob SDK başarıyla başlatıldı (Manevi & Aile Dostu Filtre: G Seviyesi Aktif).');
     } catch (e) {
       debugPrint('AdMob başlatma hatası: $e');
     }

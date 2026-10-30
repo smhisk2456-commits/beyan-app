@@ -33,15 +33,26 @@ class PremiumService {
   DateTime? _trialStartDate;
   final _changeController = StreamController<bool>.broadcast();
 
-  // v1.0 için tüm özellikler (widgetlar, ezan makamları, temalar, yapay zeka) tamamen ücretsizdir.
-  bool get isPremium => true;
+  // Gerçek satın alma veya 3 günlük ücretsiz deneme durumuna göre yetki kontrolü
+  bool get isPremium => _isPremium || isTrialActive;
   PremiumTier? get activeTier => _activeTier;
   DateTime? get trialStartDate => _trialStartDate;
   Stream<bool> get premiumStatusStream => _changeController.stream;
 
-  bool get isTrialActive => true;
-  int get trialDaysRemaining => 999;
-  bool get hasWidgetAccess => true;
+  bool get isTrialActive {
+    if (_trialStartDate == null) return true;
+    final elapsed = DateTime.now().difference(_trialStartDate!);
+    return elapsed.inDays < 3;
+  }
+
+  int get trialDaysRemaining {
+    if (_trialStartDate == null) return 3;
+    final elapsed = DateTime.now().difference(_trialStartDate!);
+    final remaining = 3 - elapsed.inDays;
+    return remaining > 0 ? remaining : 0;
+  }
+
+  bool get hasWidgetAccess => isPremium;
 
   List<ProductDetails> _products = [];
   List<ProductDetails> get products => _products;
