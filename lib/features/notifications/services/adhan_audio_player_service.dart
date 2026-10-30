@@ -3,6 +3,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/services/now_playing_service.dart';
 import '../models/adhan_makam.dart';
 
 /// Ezan Makamları Ses Çalar Servisi
@@ -92,6 +93,14 @@ class AdhanAudioPlayerService with WidgetsBindingObserver {
       final asset = makam.assetPath;
       if (asset.isNotEmpty) {
         await _player.play(AssetSource(asset));
+        NowPlayingService.instance.updateNowPlaying(
+          title: makam.name,
+          artist: makam.description,
+          albumTitle: 'Beyân • Ezan Makamları',
+          durationSeconds: 10,
+          positionSeconds: 0,
+          isPlaying: true,
+        );
         // 10 saniyelik şık canlı makam önizlemesi sonrasında otomatik durdur
         _autoStopTimer = Timer(const Duration(seconds: 10), () {
           if (_currentlyPlaying == makam) {
@@ -109,6 +118,7 @@ class AdhanAudioPlayerService with WidgetsBindingObserver {
   }
 
   Future<void> stop() async {
+    NowPlayingService.instance.clearNowPlaying();
     _autoStopTimer?.cancel();
     try {
       await _player.stop();

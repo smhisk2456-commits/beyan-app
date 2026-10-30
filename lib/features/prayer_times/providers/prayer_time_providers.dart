@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geolocator/geolocator.dart';
 import '../../../core/localization/app_strings.dart';
 import '../../notifications/services/notification_service.dart';
 import '../../widget_service/widget_service.dart';
@@ -122,8 +123,34 @@ class PrayerTimesNotifier extends AsyncNotifier<DailyPrayerTimes> {
     ref.onDispose(() => _midnightTimer?.cancel());
 
     final service = ref.watch(prayerTimeServiceProvider);
-    final location = await ref.watch(locationProvider.future);
+    
+    // Cold Boot (Pürüzsüz Başlatma) Optimizasyonu:
+    // İlk render karesinde donanım GPS beklemeden önbellekteki son doğrulanmış konumu 
+    // veya seçili şehri anında milisaniyeler içinde kullan (Sıfır bekleme / titreme).
+    final location = await service.getCachedOrFastLocation();
+
+    // Arka planda donanım GPS izni halihazırda varsa ve konum değiştiyse pürüzsüzce güncelle
+    unawaited(_syncLiveLocationIfNeeded(service));
+
     return service.calculatePrayerTimes(location: location);
+  }
+
+  /// Arka planda izinliyse GPS kontrolü yapar, kullanıcı yeni bir şehre seyahat ettiyse
+  /// arayüzü titretmeden sessizce senkronize eder.
+  Future<void> _syncLiveLocationIfNeeded(PrayerTimeService service) async {
+    try {
+      final perm = await Geolocator.checkPermission();
+      if (perm == LocationPermission.always || perm == LocationPermission.whileInUse) {
+        final liveLoc = await service.getCurrentLocation();
+        final currentTimes = state.valueOrNull;
+        if (currentTimes != null &&
+            ((currentTimes.latitude - liveLoc.latitude).abs() > 0.05 ||
+             (currentTimes.longitude - liveLoc.longitude).abs() > 0.05)) {
+          final updatedTimes = await service.calculatePrayerTimes(location: liveLoc);
+          state = AsyncData(updatedTimes);
+        }
+      }
+    } catch (_) {}
   }
 
   /// Gece yarısında vakitleri yeniden hesaplamak için timer kurar.

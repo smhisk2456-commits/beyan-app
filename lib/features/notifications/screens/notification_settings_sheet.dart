@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../../core/localization/app_strings.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/beyan_soft_permission_dialog.dart';
 import '../../prayer_times/models/prayer_time_model.dart';
 import '../models/adhan_makam.dart';
 import '../services/notification_service.dart';
@@ -111,6 +112,13 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
   }
 
   Future<void> _requestOrOpenSettings() async {
+    if (!_hasPermission && mounted) {
+      final proceed = await BeyanSoftPermissionDialog.show(
+        context,
+        type: BeyanSoftPermissionType.notification,
+      );
+      if (!proceed) return;
+    }
     final granted = await _service.requestPermissions();
     if (!granted) {
       await openAppSettings();
@@ -123,6 +131,10 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
 
   Future<void> _toggleVerse(bool val) async {
     HapticFeedback.lightImpact();
+    if (val && !_hasPermission) {
+      await _requestOrOpenSettings();
+    }
+    if (!mounted) return;
     setState(() => _verseEnabled = val);
     await _service.setVerseNotifEnabled(val);
   }

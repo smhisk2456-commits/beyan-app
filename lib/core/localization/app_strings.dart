@@ -1272,6 +1272,24 @@ class AppStrings {
   String get preparingImage => _t('preparingImage', 'Görsel Hazırlanıyor...', 'Preparing Image...', 'جاري تجهيز الصورة...');
   String get shareAsWallpaperStory => _t('shareAsWallpaperStory', 'Duvar Kağıdı / Hikaye Olarak Paylaş', 'Share as Wallpaper / Story', 'مشاركة كخلفية أو قصة');
   String get shareError => _t('shareError', 'Paylaşım hatası', 'Share error', 'خطأ في المشاركة');
+
+
+  // ── Kibar İzin Öncesi Bilgilendirme (Soft-Ask Dialogs) ──
+  String get softLocationTitle => _t('softLocationTitle', 'Hassas Vakit Hesabı İçin Konum İzni', 'Location Permission for Precise Prayer Times', 'إذن الموقع لحساب دقيق لأوقات الصلاة');
+  String get softLocationDesc => _t('softLocationDesc', 'Bulunduğunuz şehrin enlem ve boylamına göre namaz vakitlerinin ve kıble açısının dakikası dakikasına doğru hesaplanabilmesi için konumunuza ihtiyaç duyulmaktadır.', 'Your location is needed to calculate prayer times and Qibla direction precisely down to the minute.', 'يلزم موقعك لحساب أوقات الصلاة واتجاه القبلة بدقة متناهية.');
+  String get softLocationPoint1 => _t('softLocationPoint1', 'Diyanet ve küresel hesaplama kriterlerine tam uyum', 'Full alignment with Diyanet and global calculation standards', 'التوافق التام مع معايير حساب أوقات الصلاة المعتمدة');
+  String get softLocationPoint2 => _t('softLocationPoint2', 'Kıble pusulası için milimetrik Kâbe doğrultusu', 'Millimeter accuracy for the Qibla compass towards the Kaaba', 'دقة بالغة لبوصلة القبلة نحو الكعبة المشرفة');
+  String get softLocationPoint3 => _t('softLocationPoint3', 'Gizliliğinize hürmeten konumunuz asla kaydedilmez', 'Your location stays strictly on your device and is never stored', 'احتراماً لخصوصيتك، بيانات موقعك لا تغادر جهازك أبداً');
+  String get softLocationAllowAction => _t('softLocationAllowAction', 'Konuma İzin Ver', 'Allow Location', 'السماح بالموقع');
+  String get softLocationManualAction => _t('softLocationManualAction', 'Şehri Elle Seçeceğim', 'Choose City Manually', 'سأختار المدينة يدوياً');
+
+  String get softNotificationTitle => _t('softNotificationTitle', 'Ezan ve Vakit Bildirimleri', 'Adhan & Prayer Notifications', 'تنبيهات الأذان والصلوات');
+  String get softNotificationDesc => _t('softNotificationDesc', 'Vakit girdiğinde ezan sesiyle haberdar olmak, kerahet vaktini kaçırmamak ve günün ayetiyle tefekkür edebilmek için bildirim iznine ihtiyaç duyulmaktadır.', 'Notifications keep you reminded at adhan time with authentic makams and daily Quran verses.', 'تساعدك الإشعارات في معرفة دخول وقت الصلاة بأجمل المقامات وآيات القرآن اليومية.');
+  String get softNotificationPoint1 => _t('softNotificationPoint1', 'Mekke, Medine ve İstanbul makamlarıyla ezan sesi', 'Peaceful adhan recitations from Mecca, Medina, and Istanbul', 'أذان عذب بمقامات مكة المكرمة والمدينة المنورة وإسطنبول');
+  String get softNotificationPoint2 => _t('softNotificationPoint2', 'Vakit girmeden 15 dakika önce zarif hatırlatıcı', 'Gentle reminders 15 minutes before the next prayer', 'تنبيه لطيف قبل دخول الوقت بـ ١٥ دقيقة للاستعداد');
+  String get softNotificationPoint3 => _t('softNotificationPoint3', 'Kilit ekranında günün ayet ve hadis tefekkürü', 'Daily verse reflection directly on your lock screen', 'تأملات يومية لآيات القرآن الكريم على شاشة القفل');
+  String get softNotificationAllowAction => _t('softNotificationAllowAction', 'Bildirimleri Etkinleştir', 'Enable Notifications', 'تفعيل الإشعارات');
+  String get softNotificationLaterAction => _t('softNotificationLaterAction', 'Şimdilik Geç', 'Not Now', 'ليس الآن');
 }
 
 

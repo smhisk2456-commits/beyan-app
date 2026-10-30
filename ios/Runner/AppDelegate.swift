@@ -1,6 +1,8 @@
 import UIKit
 import Flutter
 import UserNotifications
+import MediaPlayer
+import AVFoundation
 #if canImport(ActivityKit)
 import ActivityKit
 #endif
@@ -34,6 +36,7 @@ struct BeyanPrayerAttributes: ActivityAttributes {
 
         setupLiveActivityChannel()
         setupScreenChannel()
+        setupNowPlayingChannel()
 
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)
     }
@@ -207,5 +210,117 @@ struct BeyanPrayerAttributes: ActivityAttributes {
         } else {
             result(FlutterError(code: "UNSUPPORTED", message: "Live Activities require iOS 16.1+", details: nil))
         }
+    }
+
+    // ── Kilit Ekranı ve Control Center Medya Kartı (Now Playing) ──
+    private var nowPlayingChannel: FlutterMethodChannel?
+    private var remoteCommandsConfigured = false
+
+    private func setupNowPlayingChannel() {
+        guard let controller = window?.rootViewController as? FlutterViewController else {
+            DispatchQueue.main.async { [weak self] in
+                self?.setupNowPlayingChannel()
+            }
+            return
+        }
+
+        let channel = FlutterMethodChannel(
+            name: "com.smhisk60.beyan/now_playing",
+            binaryMessenger: controller.binaryMessenger
+        )
+        self.nowPlayingChannel = channel
+
+        channel.setMethodCallHandler { [weak self] (call: FlutterMethodCall, result: @escaping FlutterResult) in
+            switch call.method {
+            case "updateNowPlaying":
+                guard let args = call.arguments as? [String: Any] else {
+                    result(false)
+                    return
+                }
+                self?.handleUpdateNowPlaying(args: args)
+                result(true)
+            case "clearNowPlaying":
+                MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
+                result(true)
+            default:
+                result(FlutterMethodNotImplemented)
+            }
+        }
+
+        setupRemoteCommands()
+    }
+
+    private func setupRemoteCommands() {
+        guard !remoteCommandsConfigured else { return }
+        remoteCommandsConfigured = true
+
+        let commandCenter = MPRemoteCommandCenter.shared()
+
+        commandCenter.playCommand.isEnabled = true
+        commandCenter.playCommand.addTarget { [weak self] _ in
+            self?.nowPlayingChannel?.invokeMethod("onRemotePlay", arguments: nil)
+            return .success
+        }
+
+        commandCenter.pauseCommand.isEnabled = true
+        commandCenter.pauseCommand.addTarget { [weak self] _ in
+            self?.nowPlayingChannel?.invokeMethod("onRemotePause", arguments: nil)
+            return .success
+        }
+
+        commandCenter.togglePlayPauseCommand.isEnabled = true
+        commandCenter.togglePlayPauseCommand.addTarget { [weak self] _ in
+            self?.nowPlayingChannel?.invokeMethod("onRemoteTogglePlayPause", arguments: nil)
+            return .success
+        }
+
+        commandCenter.nextTrackCommand.isEnabled = true
+        commandCenter.nextTrackCommand.addTarget { [weak self] _ in
+            self?.nowPlayingChannel?.invokeMethod("onRemoteNext", arguments: nil)
+            return .success
+        }
+
+        commandCenter.previousTrackCommand.isEnabled = true
+        commandCenter.previousTrackCommand.addTarget { [weak self] _ in
+            self?.nowPlayingChannel?.invokeMethod("onRemotePrevious", arguments: nil)
+            return .success
+        }
+
+        commandCenter.changePlaybackPositionCommand.isEnabled = true
+        commandCenter.changePlaybackPositionCommand.addTarget { [weak self] event in
+            if let posEvent = event as? MPChangePlaybackPositionCommandEvent {
+                self?.nowPlayingChannel?.invokeMethod("onRemoteSeek", arguments: ["positionSeconds": posEvent.positionTime])
+                return .success
+            }
+            return .commandFailed
+        }
+    }
+
+    private func handleUpdateNowPlaying(args: [String: Any]) {
+        var info = [String: Any]()
+        if let title = args["title"] as? String {
+            info[MPMediaItemPropertyTitle] = title
+        }
+        if let artist = args["artist"] as? String {
+            info[MPMediaItemPropertyArtist] = artist
+        }
+        if let albumTitle = args["albumTitle"] as? String {
+            info[MPMediaItemPropertyAlbumTitle] = albumTitle
+        }
+        if let duration = args["durationSeconds"] as? Double, duration > 0 {
+            info[MPMediaItemPropertyPlaybackDuration] = duration
+        }
+        if let position = args["positionSeconds"] as? Double {
+            info[MPNowPlayingInfoPropertyElapsedPlaybackTime] = position
+        }
+        let isPlaying = args["isPlaying"] as? Bool ?? true
+        info[MPNowPlayingInfoPropertyPlaybackRate] = isPlaying ? 1.0 : 0.0
+
+        if let icon = UIImage(named: "AppIcon") ?? UIImage(named: "AppIcon60x60") {
+            let artwork = MPMediaItemArtwork(boundsSize: icon.size) { _ in icon }
+            info[MPMediaItemPropertyArtwork] = artwork
+        }
+
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = info
     }
 }

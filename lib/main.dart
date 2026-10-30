@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'core/localization/app_strings.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/beyan_colors.dart';
@@ -10,6 +12,7 @@ import 'core/theme/theme_provider.dart';
 import 'features/home/screens/home_screen.dart';
 import 'features/prayer_times/providers/prayer_time_providers.dart';
 import 'features/prayer_times/screens/prayer_times_screen.dart';
+import 'features/quran/providers/quran_reading_providers.dart';
 import 'features/quran/screens/surah_list_screen.dart';
 import 'features/zikr/screens/zikirmatik_screen.dart';
 import 'features/widget_service/widget_service.dart';
@@ -53,29 +56,21 @@ void main() async {
   // İnternet olmasa da çevrimdışı (offline) yerel fontları kullan:
   GoogleFonts.config.allowRuntimeFetching = false;
 
-  // Tarih formatları (Tüm desteklenen diller için)
-  for (final loc in [
-    'tr',
-    'tr_TR',
-    'en',
-    'en_US',
-    'ar',
-    'ar_SA',
-    'id',
-    'id_ID',
-    'fr',
-    'fr_FR',
-    'de',
-    'de_DE',
-    'ru',
-    'ru_RU',
-    'ur',
-    'ur_PK'
-  ]) {
-    try {
-      await initializeDateFormatting(loc, null);
-    } catch (_) {}
-  }
+  // SharedPreferences önbelleğini soğuk başlatma anında ısıt (Cold Boot Optimization)
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    LastReadNotifier.prewarm(prefs);
+  } catch (_) {}
+
+  // Tarih formatları: Tüm dilleri paralel ve asenkron olarak arka planda yükle
+  unawaited(Future.wait([
+    'tr', 'tr_TR', 'en', 'en_US', 'ar', 'ar_SA',
+    'id', 'id_ID', 'fr', 'fr_FR', 'de', 'de_DE',
+    'ru', 'ru_RU', 'ur', 'ur_PK'
+  ].map((loc) => initializeDateFormatting(loc, null).catchError((_) {}))));
+  try {
+    await initializeDateFormatting('tr_TR', null);
+  } catch (_) {}
 
   // Native servisleri arka planda (non-blocking ve izole) başlat:
   Future.microtask(() async {

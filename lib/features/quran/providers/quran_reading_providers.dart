@@ -39,7 +39,24 @@ class LastReadNotifier extends StateNotifier<LastReadPosition?> {
   static const _verseNumKey = 'quran_last_read_verse_num';
   static const _timeKey = 'quran_last_read_time';
 
-  LastReadNotifier() : super(null) {
+  static LastReadPosition? _cachedPosition;
+
+  /// Soğuk başlatmada (cold-boot) son okunan yeri anında sağlamak için önbellek ısıtma
+  static void prewarm(SharedPreferences prefs) {
+    try {
+      final surahId = prefs.getInt(_surahIdKey);
+      if (surahId != null) {
+        _cachedPosition = LastReadPosition(
+          surahId: surahId,
+          surahName: prefs.getString(_surahNameKey) ?? 'Fâtiha',
+          verseNumber: prefs.getInt(_verseNumKey) ?? 1,
+          timestamp: DateTime.tryParse(prefs.getString(_timeKey) ?? '') ?? DateTime.now(),
+        );
+      }
+    } catch (_) {}
+  }
+
+  LastReadNotifier() : super(_cachedPosition) {
     _load();
   }
 
@@ -48,12 +65,14 @@ class LastReadNotifier extends StateNotifier<LastReadPosition?> {
       final prefs = await SharedPreferences.getInstance();
       final surahId = prefs.getInt(_surahIdKey);
       if (surahId != null) {
-        state = LastReadPosition(
+        final pos = LastReadPosition(
           surahId: surahId,
           surahName: prefs.getString(_surahNameKey) ?? 'Fâtiha',
           verseNumber: prefs.getInt(_verseNumKey) ?? 1,
           timestamp: DateTime.tryParse(prefs.getString(_timeKey) ?? '') ?? DateTime.now(),
         );
+        _cachedPosition = pos;
+        state = pos;
       }
     } catch (_) {}
   }
@@ -64,12 +83,14 @@ class LastReadNotifier extends StateNotifier<LastReadPosition?> {
     required int verseNumber,
   }) async {
     final now = DateTime.now();
-    state = LastReadPosition(
+    final pos = LastReadPosition(
       surahId: surahId,
       surahName: surahName,
       verseNumber: verseNumber,
       timestamp: now,
     );
+    _cachedPosition = pos;
+    state = pos;
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setInt(_surahIdKey, surahId);

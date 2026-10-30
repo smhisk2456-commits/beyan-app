@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/services/now_playing_service.dart';
 import '../models/verse.dart';
 import 'quran_download_service.dart';
 
@@ -304,9 +305,6 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
       final audioContext = AudioContext(
         iOS: AudioContextIOS(
           category: AVAudioSessionCategory.playback,
-          options: const {
-            AVAudioSessionOptions.mixWithOthers,
-          },
         ),
         android: const AudioContextAndroid(
           isSpeakerphoneOn: false,
@@ -351,6 +349,14 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
   }
 
   void _initListeners() {
+    // iOS Kilit Ekranı & Control Center Uzaktan Kumanda Dinleyicileri
+    NowPlayingService.instance.onPlay = () => togglePlayPause();
+    NowPlayingService.instance.onPause = () => togglePlayPause();
+    NowPlayingService.instance.onTogglePlayPause = () => togglePlayPause();
+    NowPlayingService.instance.onNext = () => playNextSurah();
+    NowPlayingService.instance.onPrevious = () => playPreviousSurah();
+    NowPlayingService.instance.onSeek = (posSec) => seek(Duration(milliseconds: (posSec * 1000).toInt()));
+
     _posSub = _player.onPositionChanged.listen((pos) {
       if (!mounted) return;
       if (_pendingSeekMs != null) {
@@ -368,15 +374,20 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
           ..reset()
           ..start();
       }
+      final secChanged = pos.inSeconds != state.position.inSeconds;
       state = state.copyWith(position: pos);
       if (_currentVerses != null && _currentVerses!.isNotEmpty) {
         updateActiveVerseByProgress(_currentVerses!);
+      }
+      if (secChanged && pos.inSeconds % 5 == 0) {
+        _syncNowPlaying();
       }
     });
 
     _durSub = _player.onDurationChanged.listen((dur) {
       if (!mounted) return;
       state = state.copyWith(duration: dur);
+      _syncNowPlaying();
       if (_pendingSeekMs != null && dur.inMilliseconds > 0) {
         final target = _pendingSeekMs!.clamp(0, dur.inMilliseconds);
         _pendingSeekMs = null;
@@ -402,6 +413,7 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
       }
 
       if (isCompleted) {
+        NowPlayingService.instance.clearNowPlaying();
         final loopV = state.loopVerseNumber;
         if (loopV != null && (state.loopRepeatCount == -1 || state.currentLoopIteration < state.loopRepeatCount)) {
           state = state.copyWith(
@@ -437,6 +449,10 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
         isLoading: false,
         position: isCompleted ? Duration.zero : null,
       );
+
+      if (!isCompleted) {
+        _syncNowPlaying(overridePlaying: isPlaying);
+      }
     });
 
     _ambienceCompleteSub = _ambiencePlayer.onPlayerComplete.listen((_) {
@@ -1171,7 +1187,42 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
     state = state.copyWith(clearSleepTimer: true);
   }
 
+  /// iOS Kilit Ekranı ve Denetim Merkezi (Now Playing) ile bilgileri eşitler
+  void _syncNowPlaying({bool? overridePlaying}) {
+    final surahName = state.currentSurahName;
+    if (surahName == null || state.currentSurahId == null) return;
+    final isPlaying = overridePlaying ?? state.isPlaying;
+    final surahTitle = surahName.contains('Sûre') || surahName.contains('Sure')
+        ? surahName
+        : '$surahName Sûresi';
+    NowPlayingService.instance.updateNowPlaying(
+      title: surahTitle,
+      artist: state.selectedReciter.nameTr,
+      albumTitle: 'Beyân • Kur\'ân-ı Kerîm',
+      durationSeconds: state.duration.inSeconds.toDouble(),
+      positionSeconds: state.position.inSeconds.toDouble(),
+      isPlaying: isPlaying,
+    );
+  }
+
+  /// Kilit ekranından veya kumandadan sonraki sureye geçiş
+  Future<void> playNextSurah() async {
+    final curId = state.currentSurahId;
+    if (curId != null && curId < 114) {
+      await playSurah(curId + 1, 'Sure ${curId + 1}');
+    }
+  }
+
+  /// Kilit ekranından veya kumandadan önceki sureye geçiş
+  Future<void> playPreviousSurah() async {
+    final curId = state.currentSurahId;
+    if (curId != null && curId > 1) {
+      await playSurah(curId - 1, 'Sure ${curId - 1}');
+    }
+  }
+
   Future<void> stop() async {
+    NowPlayingService.instance.clearNowPlaying();
     _stopAfterVerse = null;
     _stopSmoothSyncTimer();
     _lastAnchorPosition = Duration.zero;
@@ -1195,6 +1246,7 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
 
   @override
   void dispose() {
+    NowPlayingService.instance.clearNowPlaying();
     _stopSmoothSyncTimer();
     _sleepTimer?.cancel();
     _posSub?.cancel();

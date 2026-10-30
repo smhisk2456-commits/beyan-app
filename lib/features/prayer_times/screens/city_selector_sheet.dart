@@ -2,7 +2,9 @@ import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geolocator/geolocator.dart';
 import '../../../core/localization/app_strings.dart';
+import '../../../core/widgets/beyan_soft_permission_dialog.dart';
 import '../models/city_model.dart';
 import '../providers/prayer_time_providers.dart';
 import '../services/prayer_time_service.dart';
@@ -132,6 +134,16 @@ class _CitySelectorSheetState extends State<CitySelectorSheet> {
               ),
               onTap: () async {
                 HapticFeedback.lightImpact();
+                final perm = await Geolocator.checkPermission();
+                if (perm == LocationPermission.denied) {
+                  if (context.mounted) {
+                    final proceed = await BeyanSoftPermissionDialog.show(
+                      context,
+                      type: BeyanSoftPermissionType.location,
+                    );
+                    if (!proceed) return;
+                  }
+                }
                 await PrayerTimeService.instance.saveManualCity(null);
                 widget.ref.read(prayerTimesNotifierProvider.notifier).refresh();
                 if (context.mounted) Navigator.pop(context);
