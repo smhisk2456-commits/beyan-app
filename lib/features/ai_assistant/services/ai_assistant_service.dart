@@ -66,7 +66,7 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
   static const String _prefKeyCount = 'beyan_ai_daily_count';
   static const String _prefKeyDate = 'beyan_ai_daily_date';
   static const String _prefKeyGeminiKey = 'beyan_gemini_api_key';
-  static const int freeDailyLimit = 5; // Günlük 5 ücretsiz soru kotası
+  static const int freeDailyLimit = 3; // Günlük 3 ücretsiz soru kotası
 
   static const _secureStorage = FlutterSecureStorage(
     iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock_this_device),
@@ -75,6 +75,11 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
 
   AiAssistantNotifier() : super(const AiAssistantState(remainingQuestions: freeDailyLimit, dailyLimit: freeDailyLimit)) {
     _loadInitialState();
+  }
+
+  Future<void> refreshQuota(bool isPremium) async {
+    final remaining = await getRemainingQuota(isPremium);
+    state = state.copyWith(remainingQuestions: remaining, dailyLimit: isPremium ? 999 : freeDailyLimit);
   }
 
   Future<void> _loadInitialState() async {

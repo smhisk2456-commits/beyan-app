@@ -120,6 +120,16 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_keyDynamicPrayerTheme, enabled);
   }
+
+  /// Ücretsiz modda kilitli temaları emniyetli şekilde standart Zümrüt temasına sıfırlar
+  Future<void> ensureFreeTheme() async {
+    if (state.palette != AppThemePalette.emerald && state.palette != AppThemePalette.oledBlack) {
+      await setPalette(AppThemePalette.emerald);
+    }
+    if (state.isDynamicPrayerTheme) {
+      await setDynamicPrayerTheme(false);
+    }
+  }
 }
 
 /// Tema durumu sağlayıcısı

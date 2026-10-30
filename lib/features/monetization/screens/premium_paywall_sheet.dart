@@ -259,6 +259,7 @@ class _PremiumPaywallSheetState extends ConsumerState<PremiumPaywallSheet> {
                             onPressed: () async {
                               HapticFeedback.mediumImpact();
                               await ref.read(premiumProvider.notifier).toggleDevPremium();
+                              await ref.read(themeProvider.notifier).ensureFreeTheme();
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.white.withValues(alpha: 0.12),
@@ -356,13 +357,42 @@ class _PremiumPaywallSheetState extends ConsumerState<PremiumPaywallSheet> {
                                   ],
                                 ),
                                 const SizedBox(height: 2),
-                                Text(
-                                  tier.subtitle,
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    color: isDark ? Colors.white60 : AppColors.textSecondary,
+                                if (tier == PremiumTier.yearly)
+                                  RichText(
+                                    text: TextSpan(
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: isDark ? Colors.white60 : AppColors.textSecondary,
+                                      ),
+                                      children: [
+                                        const TextSpan(text: 'Ayda '),
+                                        TextSpan(
+                                          text: '₺49,99',
+                                          style: TextStyle(
+                                            decoration: TextDecoration.lineThrough,
+                                            decorationColor: isDark ? Colors.white38 : Colors.grey,
+                                            color: isDark ? Colors.white38 : Colors.grey,
+                                          ),
+                                        ),
+                                        TextSpan(
+                                          text: ' yerine ₺19,99',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: gold,
+                                          ),
+                                        ),
+                                        const TextSpan(text: ' (3 Gün Ücretsiz)'),
+                                      ],
+                                    ),
+                                  )
+                                else
+                                  Text(
+                                    tier.subtitle,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: isDark ? Colors.white60 : AppColors.textSecondary,
+                                    ),
                                   ),
-                                ),
                               ],
                             ),
                           ),

@@ -4,6 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../app_theme.dart';
 import '../theme_provider.dart';
 import '../../localization/app_strings.dart';
+import '../beyan_colors.dart';
+import '../../../features/monetization/providers/premium_provider.dart';
+import '../../../features/monetization/screens/premium_paywall_sheet.dart';
 
 /// Kullanıcının tema modu ve 4 lüks renk paletini seçtiği modern alt sayfa.
 class ThemeSelectionSheet extends ConsumerWidget {
@@ -25,6 +28,7 @@ class ThemeSelectionSheet extends ConsumerWidget {
     final themeNotifier = ref.read(themeProvider.notifier);
     final strings = ref.watch(appStringsProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isPremium = ref.watch(premiumProvider).isPremium;
 
     final sheetBg = isDark
         ? effectivePalette.darkSurface
@@ -172,12 +176,19 @@ class ThemeSelectionSheet extends ConsumerWidget {
 
               ...AppThemePalette.values.map((palette) {
                 final isSelected = !themeState.isDynamicPrayerTheme && themeState.palette == palette;
+                final isProTheme = palette != AppThemePalette.emerald && palette != AppThemePalette.oledBlack;
+                final isLocked = isProTheme && !isPremium;
                 return _buildPaletteTile(
                   context: context,
                   palette: palette,
                   isSelected: isSelected,
-                  isLocked: false,
+                  isLocked: isLocked,
                   onTap: () {
+                    if (isLocked) {
+                      HapticFeedback.heavyImpact();
+                      PremiumPaywallSheet.show(context);
+                      return;
+                    }
                     HapticFeedback.selectionClick();
                     themeNotifier.setPalette(palette);
                   },
@@ -247,6 +258,11 @@ class ThemeSelectionSheet extends ConsumerWidget {
                       activeThumbColor: themeState.palette.accentGold,
                       activeTrackColor: themeState.palette.accentGold.withValues(alpha: 0.35),
                       onChanged: (val) {
+                        if (val && !isPremium) {
+                          HapticFeedback.heavyImpact();
+                          PremiumPaywallSheet.show(context);
+                          return;
+                        }
                         HapticFeedback.selectionClick();
                         themeNotifier.setDynamicPrayerTheme(val);
                       },
@@ -413,8 +429,33 @@ class ThemeSelectionSheet extends ConsumerWidget {
                 ),
               ),
 
-              // Seçili İkonu
-              if (isSelected)
+              // Kilit / Seçili Durumu
+              if (isLocked)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [BeyanColors.tone(0xFFFFDF7A), BeyanColors.tone(0xFFD4AF37)],
+                    ),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.lock_rounded, size: 10, color: BeyanColors.tone(0xFF071F1B)),
+                      const SizedBox(width: 3),
+                      Text(
+                        'PRO',
+                        style: TextStyle(
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.bold,
+                          color: BeyanColors.tone(0xFF071F1B),
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              else if (isSelected)
                 Container(
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(

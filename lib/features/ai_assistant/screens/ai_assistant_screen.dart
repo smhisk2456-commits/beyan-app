@@ -22,6 +22,15 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
   final FocusNode _focusNode = FocusNode();
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final isPremium = ref.read(premiumProvider).isPremium;
+      ref.read(aiAssistantProvider.notifier).refreshQuota(isPremium);
+    });
+  }
+
+  @override
   void dispose() {
     _controller.dispose();
     _scrollController.dispose();
@@ -483,8 +492,87 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
     bool hasCustomApiKey,
     bool hasDeveloperGlobalKey,
   ) {
-    // v1.0 sürümünde tüm özellikler ücretsizdir; kısıtlama veya ticari banner gösterilmez.
-    return const SizedBox.shrink();
+    if (isPremium) {
+      return Container(
+        margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: BeyanColors.tone(0xFF0F5A47).withValues(alpha: 0.25),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.35)),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.workspace_premium_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 18),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Beyân Pro: Sınırsız Soru & Tefsir Asistanı',
+                style: TextStyle(
+                  color: BeyanColors.tone(0xFFFFDF7A),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.auto_awesome_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 16),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'Kalan Ücretsiz Soru: $remaining / 3',
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+                fontSize: 12,
+              ),
+            ),
+          ),
+          InkWell(
+            onTap: () => PremiumPaywallSheet.show(context),
+            borderRadius: BorderRadius.circular(8),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [BeyanColors.tone(0xFFFFDF7A), BeyanColors.tone(0xFFD4AF37)],
+                ),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.workspace_premium_rounded, size: 12, color: BeyanColors.tone(0xFF071F1B)),
+                  const SizedBox(width: 3),
+                  Text(
+                    'Sınırsız Yap 👑',
+                    style: TextStyle(
+                      color: BeyanColors.tone(0xFF071F1B),
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showSourcesDialog(BuildContext context) {
