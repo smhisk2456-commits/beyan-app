@@ -28,8 +28,8 @@ class PremiumService {
   final InAppPurchase _iap = InAppPurchase.instance;
   StreamSubscription<List<PurchaseDetails>>? _subscription;
 
-  bool _isPremium = true;
-  PremiumTier? _activeTier = PremiumTier.lifetime;
+  bool _isPremium = false;
+  PremiumTier? _activeTier;
   DateTime? _trialStartDate;
   final _changeController = StreamController<bool>.broadcast();
 
@@ -40,13 +40,13 @@ class PremiumService {
   Stream<bool> get premiumStatusStream => _changeController.stream;
 
   bool get isTrialActive {
-    if (_trialStartDate == null) return true;
+    if (_trialStartDate == null) return false;
     final elapsed = DateTime.now().difference(_trialStartDate!);
     return elapsed.inDays < 3;
   }
 
   int get trialDaysRemaining {
-    if (_trialStartDate == null) return 3;
+    if (_trialStartDate == null) return 0;
     final elapsed = DateTime.now().difference(_trialStartDate!);
     final remaining = 3 - elapsed.inDays;
     return remaining > 0 ? remaining : 0;
@@ -90,10 +90,6 @@ class PremiumService {
     final trialStr = prefs.getString(keyWidgetTrialStart);
     if (trialStr != null) {
       _trialStartDate = DateTime.tryParse(trialStr);
-    } else {
-      final now = DateTime.now();
-      _trialStartDate = now;
-      await prefs.setString(keyWidgetTrialStart, now.toIso8601String());
     }
 
     // Reklamsız deneyim durumunu senkronize et
@@ -288,12 +284,8 @@ class PremiumService {
     await prefs.setBool(keyHasSeenOnboardingPaywall, true);
   }
 
-  /// Geliştirici ve test modu için Premium'u açıp kapatma (Yalnızca kDebugMode!)
+  /// Geliştirici ve test modu için Premium'u açıp kapatma (TestFlight ve Geliştirici testleri)
   Future<void> toggleDevPremium() async {
-    if (!kDebugMode) {
-      debugPrint('[Güvenlik Engeli] toggleDevPremium yalnızca Debug modunda çalıştırılabilir.');
-      return;
-    }
     final next = !_isPremium;
     await _setPremium(next, tier: next ? PremiumTier.lifetime : null);
   }

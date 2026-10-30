@@ -12,12 +12,12 @@ class PremiumState {
   final bool hasWidgetAccess;
 
   const PremiumState({
-    this.isPremium = true,
-    this.activeTier = PremiumTier.lifetime,
+    this.isPremium = false,
+    this.activeTier,
     this.isLoading = false,
-    this.isTrialActive = true,
-    this.trialDaysRemaining = 999,
-    this.hasWidgetAccess = true,
+    this.isTrialActive = false,
+    this.trialDaysRemaining = 0,
+    this.hasWidgetAccess = false,
   });
 
   PremiumState copyWith({

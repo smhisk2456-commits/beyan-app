@@ -13,8 +13,14 @@ class PremiumPaywallSheet extends ConsumerStatefulWidget {
   const PremiumPaywallSheet({super.key});
 
   static Future<void> show(BuildContext context) async {
-    // v1.0 sürümünde tüm özellikler ücretsizdir; paywall gösterilmez.
-    return;
+    HapticFeedback.lightImpact();
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.65),
+      builder: (_) => const PremiumPaywallSheet(),
+    );
   }
 
   @override

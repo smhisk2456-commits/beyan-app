@@ -17,6 +17,8 @@ import '../../widget_service/screens/widget_settings_dialog.dart';
 import '../../widget_service/screens/live_activity_settings_sheet.dart';
 import '../../mosque_finder/screens/nearby_mosques_screen.dart';
 import '../../../core/widgets/luxury_page_route.dart';
+import '../../monetization/providers/premium_provider.dart';
+import '../../monetization/screens/premium_paywall_sheet.dart';
 
 /// Lüks & Kapsamlı Ayarlar Ekranı (Settings Hub)
 class SettingsScreen extends ConsumerWidget {
@@ -54,6 +56,136 @@ class SettingsScreen extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         physics: const BouncingScrollPhysics(),
         children: [
+          // ── Beyân Pro Kartı ─────────────────────────────────────
+          Consumer(
+            builder: (context, ref, _) {
+              final isPremium = ref.watch(premiumProvider).isPremium;
+              return Container(
+                margin: const EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: isPremium
+                        ? [BeyanColors.tone(0xFF063A31), BeyanColors.tone(0xFF021D18)]
+                        : [BeyanColors.tone(0xFF2C2204), BeyanColors.tone(0xFF141001)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(22),
+                  border: Border.all(
+                    color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: isPremium ? 0.45 : 0.75),
+                    width: 1.4,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: isPremium
+                          ? BeyanColors.tone(0xFF033E35).withValues(alpha: 0.35)
+                          : BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.25),
+                      blurRadius: 18,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(22),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(22),
+                    onTap: () => PremiumPaywallSheet.show(context),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 52,
+                            height: 52,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: LinearGradient(
+                                colors: [
+                                  BeyanColors.tone(0xFFFFDF7A),
+                                  BeyanColors.tone(0xFFD4AF37),
+                                  BeyanColors.tone(0xFF997A15),
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.4),
+                                  blurRadius: 12,
+                                ),
+                              ],
+                            ),
+                            child: Icon(
+                              Icons.workspace_premium_rounded,
+                              color: BeyanColors.tone(0xFF071F1B),
+                              size: 28,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Text(
+                                      isPremium ? 'Beyân Pro Aktif 👑' : "Beyân Pro'ya Geçin",
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                    if (!isPremium) ...[
+                                      const SizedBox(width: 8),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: BeyanColors.tone(0xFFFFDF7A),
+                                          borderRadius: BorderRadius.circular(6),
+                                        ),
+                                        child: Text(
+                                          'PRO',
+                                          style: TextStyle(
+                                            color: BeyanColors.tone(0xFF071F1B),
+                                            fontSize: 9,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  isPremium
+                                      ? 'Tüm lüks temalar, makamlar ve reklamsız deneyim aktif.'
+                                      : "Reklamsız deneyim, özel makamlar, kilitli widget'lar ve lüks temalar.",
+                                  style: const TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 12,
+                                    height: 1.3,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Icon(
+                            Icons.arrow_forward_ios_rounded,
+                            color: BeyanColors.tone(0xFFFFDF7A),
+                            size: 16,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+
           // ── 1. Görünüm & Dil Bölümü ─────────────────────────────
           _buildSectionHeader(strings.appearanceSection),
           _buildCard(

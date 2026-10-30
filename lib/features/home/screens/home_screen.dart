@@ -33,6 +33,8 @@ import '../../../core/widgets/luxury_page_route.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../prayer_times/screens/wudu_guide_sheet.dart';
 import '../../zikr/screens/zikirmatik_screen.dart';
+import '../../monetization/providers/premium_provider.dart';
+import '../../monetization/screens/premium_paywall_sheet.dart';
 
 /// Ana Ekran – Beyân lüks İslami kontrol merkezi.
 class HomeScreen extends ConsumerStatefulWidget {
@@ -1509,13 +1511,66 @@ class _IslamicAppBar extends ConsumerWidget {
         ],
       ),
       actions: [
+        // Lüks Beyân Pro Butonu
+        Center(
+          child: GestureDetector(
+            onTap: () => PremiumPaywallSheet.show(context),
+            child: Container(
+              margin: const EdgeInsets.symmetric(vertical: 14),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: ref.watch(premiumProvider).isPremium
+                      ? [BeyanColors.tone(0xFF0D5E50), BeyanColors.tone(0xFF063A31)]
+                      : [BeyanColors.tone(0xFFFFDF7A), BeyanColors.tone(0xFFD4AF37)],
+                ),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: BeyanColors.tone(0xFFFFDF7A),
+                  width: 1,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35),
+                    blurRadius: 8,
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.workspace_premium_rounded,
+                    color: ref.watch(premiumProvider).isPremium
+                        ? BeyanColors.tone(0xFFFFDF7A)
+                        : BeyanColors.tone(0xFF071F1B),
+                    size: 16,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    'PRO',
+                    style: TextStyle(
+                      color: ref.watch(premiumProvider).isPremium
+                          ? Colors.white
+                          : BeyanColors.tone(0xFF071F1B),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 11,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 4),
         // Lüks Ayarlar Butonu (Tek & Ferah)
         IconButton(
           icon: const Icon(Icons.settings_outlined, color: Colors.white),
           tooltip: strings.settings,
           onPressed: () => SettingsScreen.show(context),
         ),
-        const SizedBox(width: 6),
+        const SizedBox(width: 8),
       ],
     );
   }

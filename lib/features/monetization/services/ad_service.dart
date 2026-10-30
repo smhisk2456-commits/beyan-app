@@ -11,8 +11,8 @@ class AdService {
 
   bool _isInitialized = false;
 
-  /// v1.0 sürümünde reklamlar tamamen kapalıdır (reklamsız manevi deneyim).
-  static const bool kAdsEnabled = false;
+  /// Beyân reklam sistemi (Manevi & Aile Dostu G Seviyesi)
+  static const bool kAdsEnabled = true;
 
   /// Kullanıcının reklamsız deneyim hakkı var mı?
   /// Premium üyelik sahibi olan kullanıcılara hiçbir reklam gösterilmez.
