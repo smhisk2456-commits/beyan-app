@@ -587,6 +587,9 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
     if (state.isPlaying) {
       _stopSmoothSyncTimer();
       await _player.pause();
+      try {
+        await _ambiencePlayer.pause();
+      } catch (_) {}
       state = state.copyWith(isPlaying: false);
     } else {
       if (state.currentSurahId != null) {
@@ -603,6 +606,9 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
       }
       try {
         await _player.resume();
+        if (state.activeAmbience != null) {
+          await _ambiencePlayer.resume();
+        }
         state = state.copyWith(isPlaying: true);
         _startSmoothSyncTimer();
       } catch (e) {
@@ -1101,37 +1107,31 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
     'ney': 'audio/real_sea_waves.mp3',
   };
 
-  static const Map<String, String> _ambienceRemoteUrls = {
-    'rain': 'https://upload.wikimedia.org/wikipedia/commons/4/41/Rain_against_the_window.ogg',
-    'waves': 'https://upload.wikimedia.org/wikipedia/commons/f/f1/Oceanwavescrushing.ogg',
-    'breeze': 'https://upload.wikimedia.org/wikipedia/commons/a/a3/Bourne_woods_windy_2020-05-05_0757.mp3',
-    'night': 'https://upload.wikimedia.org/wikipedia/commons/5/5f/Night_original_format.wav',
-  };
-
   Future<void> setAmbience(String? type) async {
+    if (type == null) {
+      state = state.copyWith(clearAmbience: true);
+      try {
+        await _ambiencePlayer.stop();
+      } catch (_) {}
+      return;
+    }
+
     if (type == state.activeAmbience) return;
+
     state = state.copyWith(
       activeAmbience: type,
-      clearAmbience: type == null,
     );
     try {
       await _ambiencePlayer.stop();
-      if (type != null) {
-        final asset = _ambienceAssets[type];
+      final asset = _ambienceAssets[type];
+      if (asset != null) {
         await _ambiencePlayer.setReleaseMode(ReleaseMode.loop);
         await _ambiencePlayer.setVolume(state.ambienceVolume);
-        if (asset != null) {
-          try {
-            await _ambiencePlayer.play(AssetSource(asset)).timeout(const Duration(seconds: 3));
-            return;
-          } catch (_) {}
-        }
-        final remoteUrl = _ambienceRemoteUrls[type];
-        if (remoteUrl != null) {
-          await _ambiencePlayer.play(UrlSource(remoteUrl)).timeout(const Duration(seconds: 6));
-        }
+        await _ambiencePlayer.play(AssetSource(asset));
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('Ambience player error: $e');
+    }
   }
 
   Future<void> setAmbienceVolume(double vol) async {
@@ -1228,6 +1228,7 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
     _lastAnchorPosition = Duration.zero;
     try {
       await _player.stop();
+      await _ambiencePlayer.stop();
     } catch (_) {}
     _currentVerses = null;
     if (!mounted) return;
@@ -1237,6 +1238,7 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
       clearCurrentSurah: true,
       clearActiveVerse: true,
       clearActiveWord: true,
+      clearAmbience: true,
       verseProgress: 0.0,
       wordProgress: 0.0,
       position: Duration.zero,
@@ -1253,6 +1255,9 @@ class QuranAudioNotifier extends StateNotifier<QuranAudioState> {
     _durSub?.cancel();
     _stateSub?.cancel();
     _ambienceCompleteSub?.cancel();
+    try {
+      _ambiencePlayer.stop();
+    } catch (_) {}
     _player.dispose();
     _ambiencePlayer.dispose();
     super.dispose();

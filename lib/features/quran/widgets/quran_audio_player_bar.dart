@@ -143,7 +143,7 @@ class QuranAudioPlayerBar extends ConsumerWidget {
                   size: 19,
                 ),
                 tooltip: strings.language == AppLanguage.turkish ? 'Manevi Ambiyans & Uyku Modu' : 'Ambience & Sleep Timer',
-                onPressed: () => SleepAndAmbienceSheet.show(context),
+                onPressed: () => SleepAndAmbienceSheet.show(context, ref),
               ),
               // 10 sn geri
               IconButton(

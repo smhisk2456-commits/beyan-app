@@ -9,8 +9,8 @@ import '../services/quran_audio_service.dart';
 class SleepAndAmbienceSheet extends ConsumerWidget {
   const SleepAndAmbienceSheet({super.key});
 
-  static Future<void> show(BuildContext context) {
-    return showModalBottomSheet(
+  static Future<void> show(BuildContext context, [WidgetRef? ref]) async {
+    await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       enableDrag: true,
@@ -20,6 +20,13 @@ class SleepAndAmbienceSheet extends ConsumerWidget {
       barrierColor: Colors.black.withValues(alpha: 0.65),
       builder: (_) => const SleepAndAmbienceSheet(),
     );
+    // Sekme/Modal kapatıldığında Kur'an tilaveti çalmıyorsa ambiyans sesini anında durdur
+    if (ref != null) {
+      final audioState = ref.read(quranAudioProvider);
+      if (!audioState.isPlaying && audioState.activeAmbience != null) {
+        await ref.read(quranAudioProvider.notifier).setAmbience(null);
+      }
+    }
   }
 
   String _formatSeconds(int totalSecs) {
@@ -153,7 +160,11 @@ class SleepAndAmbienceSheet extends ConsumerWidget {
                 isSelected: audioState.activeAmbience == 'rain',
                 onTap: () {
                   HapticFeedback.lightImpact();
-                  audioNotifier.setAmbience('rain');
+                  if (audioState.activeAmbience == 'rain') {
+                    audioNotifier.setAmbience(null);
+                  } else {
+                    audioNotifier.setAmbience('rain');
+                  }
                 },
               ),
               const SizedBox(width: 6),
@@ -163,7 +174,11 @@ class SleepAndAmbienceSheet extends ConsumerWidget {
                 isSelected: audioState.activeAmbience == 'waves',
                 onTap: () {
                   HapticFeedback.lightImpact();
-                  audioNotifier.setAmbience('waves');
+                  if (audioState.activeAmbience == 'waves') {
+                    audioNotifier.setAmbience(null);
+                  } else {
+                    audioNotifier.setAmbience('waves');
+                  }
                 },
               ),
               const SizedBox(width: 6),
@@ -173,7 +188,11 @@ class SleepAndAmbienceSheet extends ConsumerWidget {
                 isSelected: audioState.activeAmbience == 'breeze',
                 onTap: () {
                   HapticFeedback.lightImpact();
-                  audioNotifier.setAmbience('breeze');
+                  if (audioState.activeAmbience == 'breeze') {
+                    audioNotifier.setAmbience(null);
+                  } else {
+                    audioNotifier.setAmbience('breeze');
+                  }
                 },
               ),
               const SizedBox(width: 6),
@@ -183,7 +202,11 @@ class SleepAndAmbienceSheet extends ConsumerWidget {
                 isSelected: audioState.activeAmbience == 'night',
                 onTap: () {
                   HapticFeedback.lightImpact();
-                  audioNotifier.setAmbience('night');
+                  if (audioState.activeAmbience == 'night') {
+                    audioNotifier.setAmbience(null);
+                  } else {
+                    audioNotifier.setAmbience('night');
+                  }
                 },
               ),
             ],

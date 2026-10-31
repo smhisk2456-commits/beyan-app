@@ -772,7 +772,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                                   audioState.sleepTimerSecondsRemaining != null,
                               onTap: () {
                                 Navigator.pop(ctx);
-                                SleepAndAmbienceSheet.show(context);
+                                SleepAndAmbienceSheet.show(context, ref);
                               },
                             ),
                           ),
