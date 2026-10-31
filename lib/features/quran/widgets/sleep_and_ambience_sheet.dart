@@ -216,13 +216,36 @@ class SleepAndAmbienceSheet extends ConsumerWidget {
           if (audioState.activeAmbience != null) ...[
             const SizedBox(height: 14),
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Icon(Icons.volume_down_rounded, color: Colors.white60, size: 18),
+                Text(
+                  strings.language == AppLanguage.turkish
+                      ? 'Doğa Sesi Düzeyi'
+                      : 'Ambience Volume',
+                  style: const TextStyle(fontSize: 11.5, color: Colors.white70),
+                ),
+                Text(
+                  '%${(audioState.ambienceVolume * 100).round()}',
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.bold,
+                    color: BeyanColors.tone(0xFFFFDF7A),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                GestureDetector(
+                  onTap: () => audioNotifier.setAmbienceVolume(0.2),
+                  child: const Icon(Icons.volume_down_rounded, color: Colors.white60, size: 20),
+                ),
                 Expanded(
                   child: SliderTheme(
                     data: SliderTheme.of(context).copyWith(
-                      trackHeight: 3,
-                      thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+                      trackHeight: 3.5,
+                      thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 7),
                       activeTrackColor: BeyanColors.tone(0xFFD4AF37),
                       inactiveTrackColor: Colors.white24,
                       thumbColor: BeyanColors.tone(0xFFFFDF7A),
@@ -235,7 +258,10 @@ class SleepAndAmbienceSheet extends ConsumerWidget {
                     ),
                   ),
                 ),
-                const Icon(Icons.volume_up_rounded, color: Colors.white60, size: 18),
+                GestureDetector(
+                  onTap: () => audioNotifier.setAmbienceVolume(1.0),
+                  child: const Icon(Icons.volume_up_rounded, color: Colors.white60, size: 20),
+                ),
               ],
             ),
           ],

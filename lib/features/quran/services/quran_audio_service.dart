@@ -182,7 +182,7 @@ class QuranAudioState {
 
   // 🎧 Uyku Öncesi & Manevi Ambiyans (Sleep & Calm)
   final String? activeAmbience; // null, 'rain', 'ney', 'breeze'
-  final double ambienceVolume; // 0.0 - 1.0 (varsayılan 0.45)
+  final double ambienceVolume; // 0.0 - 1.0 (varsayılan 0.85)
   final int? sleepTimerMinutes; // null, 15, 30, 45, 60
   final int? sleepTimerSecondsRemaining;
 
@@ -204,7 +204,7 @@ class QuranAudioState {
     this.currentLoopIteration = 1,
     this.loopVerseNumber,
     this.activeAmbience,
-    this.ambienceVolume = 0.45,
+    this.ambienceVolume = 0.85,
     this.sleepTimerMinutes,
     this.sleepTimerSecondsRemaining,
   });

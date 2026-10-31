@@ -1,7 +1,7 @@
 name: islamic_app
 description: Offline Islamic App - Prayer Times & Quran Reader
 publish_to: 'none'
-version: 1.1.2+1
+version: 1.1.3+1
 
 environment:
   sdk: '>=3.3.0 <4.0.0'
