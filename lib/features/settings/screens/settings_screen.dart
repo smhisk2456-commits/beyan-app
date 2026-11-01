@@ -129,14 +129,7 @@ class SettingsScreen extends ConsumerWidget {
                               children: [
                                 Row(
                                   children: [
-                                    Text(
-                                      isPremium ? 'Beyân Pro Aktif 👑' : "Beyân Pro'ya Geçin",
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
-                                      ),
-                                    ),
+                                    Flexible(child: Text(isPremium ? 'Beyân Pro Aktif' : "Beyân Pro'ya Geçin", maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16))),
                                     if (!isPremium) ...[
                                       const SizedBox(width: 8),
                                       Container(

@@ -88,27 +88,35 @@ class HijriCalendarScreen extends ConsumerWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        strings.diyanetTakvimi,
-                        style: TextStyle(
-                          color: BeyanColors.tone(0xFFFFDF7A),
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
+                    Flexible(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          strings.diyanetTakvimi,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: BeyanColors.tone(0xFFFFDF7A),
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
                     if (adjustment != 0)
-                      Text(
-                        strings.adjustmentDaysLabel(adjustment),
-                        style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 11,
+                      Flexible(
+                        child: Text(
+                          strings.adjustmentDaysLabel(adjustment),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 11,
+                          ),
                         ),
                       ),
                   ],
@@ -287,26 +295,33 @@ class _ReligiousDayCard extends ConsumerWidget {
             child: Center(
               child: isToday
                   ? const Icon(Icons.star_rounded, color: Colors.black87, size: 26)
-                  : Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          '$days',
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            color: BeyanColors.tone(0xFFD4AF37),
-                          ),
+                  : Padding(
+                      padding: const EdgeInsets.all(2.0),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              '$days',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: BeyanColors.tone(0xFFD4AF37),
+                              ),
+                            ),
+                            Text(
+                              strings.daysRemainingUnit,
+                              style: TextStyle(
+                                fontSize: 8.5,
+                                fontWeight: FontWeight.w700,
+                                color: BeyanColors.tone(0xFFD4AF37),
+                              ),
+                            ),
+                          ],
                         ),
-                        Text(
-                          strings.daysRemainingUnit,
-                          style: TextStyle(
-                            fontSize: 9,
-                            fontWeight: FontWeight.w700,
-                            color: BeyanColors.tone(0xFFD4AF37),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
             ),
           ),

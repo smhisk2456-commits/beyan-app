@@ -145,6 +145,7 @@ class _PrayerCard extends ConsumerWidget {
                   children: [
                     // Sol: Namaz adları & Rekat bilgisi
                     Expanded(
+                      flex: 6,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -184,48 +185,46 @@ class _PrayerCard extends ConsumerWidget {
                             const SizedBox(height: 8),
                             GestureDetector(
                               onTap: () => PrayerGuideSheet.show(context, ref, next.name, next.time),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
-                                decoration: BoxDecoration(
-                                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.18),
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(
-                                    color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.45),
-                                    width: 1,
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: Alignment.centerLeft,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
+                                  decoration: BoxDecoration(
+                                    color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.18),
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                      color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.45),
+                                      width: 1,
+                                    ),
                                   ),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.mosque_outlined,
-                                      size: 13,
-                                      color: BeyanColors.tone(0xFFFFDF7A),
-                                    ),
-                                    const SizedBox(width: 5),
-                                    Flexible(
-                                      child: FittedBox(
-                                        fit: BoxFit.scaleDown,
-                                        alignment: Alignment.centerLeft,
-                                        child: Text(
-                                          next.name.localizedRakat(langCode),
-                                          style: TextStyle(
-                                            color: BeyanColors.tone(0xFFFFDF7A),
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w600,
-                                            letterSpacing: 0.2,
-                                          ),
-                                          maxLines: 1,
-                                        ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.mosque_outlined,
+                                        size: 13,
+                                        color: BeyanColors.tone(0xFFFFDF7A),
                                       ),
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Icon(
-                                      Icons.info_outline_rounded,
-                                      size: 11,
-                                      color: BeyanColors.tone(0xFFFFDF7A),
-                                    ),
-                                  ],
+                                      const SizedBox(width: 5),
+                                      Text(
+                                        next.name.localizedRakat(langCode),
+                                        style: TextStyle(
+                                          color: BeyanColors.tone(0xFFFFDF7A),
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600,
+                                          letterSpacing: 0.2,
+                                        ),
+                                        maxLines: 1,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Icon(
+                                        Icons.info_outline_rounded,
+                                        size: 11,
+                                        color: BeyanColors.tone(0xFFFFDF7A),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
@@ -234,34 +233,43 @@ class _PrayerCard extends ConsumerWidget {
                       ),
                     ),
 
+                    const SizedBox(width: 8),
+
                     // Sağ: Saat + Countdown
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          next != null ? _fmt(next.time) : '--:--',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 36,
-                            fontWeight: FontWeight.w300,
-                            fontFeatures: [FontFeature.tabularFigures()],
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Consumer(
-                          builder: (context, ref, _) {
-                            final countdownAsync = ref.watch(countdownStringProvider);
-                            final strings = ref.watch(appStringsProvider);
-                            return countdownAsync.when(
-                              data: (s) => _CountdownBadge(
-                                text: '$s ${strings.remainingTime}',
+                    Expanded(
+                      flex: 5,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                              next != null ? _fmt(next.time) : '--:--',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 36,
+                                fontWeight: FontWeight.w300,
+                                fontFeatures: [FontFeature.tabularFigures()],
                               ),
-                              loading: () => const SizedBox.shrink(),
-                              error: (_, __) => const SizedBox.shrink(),
-                            );
-                          },
-                        ),
-                      ],
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Consumer(
+                            builder: (context, ref, _) {
+                              final countdownAsync = ref.watch(countdownStringProvider);
+                              final strings = ref.watch(appStringsProvider);
+                              return countdownAsync.when(
+                                data: (s) => _CountdownBadge(
+                                  text: '$s ${strings.remainingTime}',
+                                ),
+                                loading: () => const SizedBox.shrink(),
+                                error: (_, __) => const SizedBox.shrink(),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -356,6 +364,7 @@ class _LocationRow extends StatelessWidget {
     return Row(
       children: [
         Expanded(
+          flex: 6,
           child: GestureDetector(
             onTap: () {
               HapticFeedback.lightImpact();
@@ -365,54 +374,61 @@ class _LocationRow extends StatelessWidget {
               );
             },
             child: Row(
-              mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.location_on_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 13.5),
-                const SizedBox(width: 4),
-                Flexible(
+                Icon(Icons.location_on_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 13),
+                const SizedBox(width: 3),
+                Expanded(
                   child: Text(
                     locationName,
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 12.5,
+                      fontSize: 12,
                       fontWeight: FontWeight.w600,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const SizedBox(width: 5),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
-                  decoration: BoxDecoration(
-                    color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.22),
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.35), width: 0.8),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.mosque_rounded, size: 9.5, color: BeyanColors.tone(0xFFFFDF7A)),
-                      const SizedBox(width: 3),
-                      Text(
-                        strings.mosquesPill,
-                        style: TextStyle(
-                          color: BeyanColors.tone(0xFFFFDF7A),
-                          fontSize: 9.5,
-                          fontWeight: FontWeight.bold,
-                        ),
+                const SizedBox(width: 3),
+                Flexible(
+                  flex: 0,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                      decoration: BoxDecoration(
+                        color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.22),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.35), width: 0.8),
                       ),
-                    ],
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.mosque_rounded, size: 9.5, color: BeyanColors.tone(0xFFFFDF7A)),
+                          const SizedBox(width: 3),
+                          Text(
+                            strings.mosquesPill,
+                            maxLines: 1,
+                            style: TextStyle(
+                              color: BeyanColors.tone(0xFFFFDF7A),
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ],
             ),
           ),
         ),
-        const SizedBox(width: 6),
+        const SizedBox(width: 4),
         Flexible(
+          flex: 4,
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             decoration: BoxDecoration(
               color: Colors.black.withValues(alpha: 0.25),
               borderRadius: BorderRadius.circular(10),
@@ -445,28 +461,32 @@ class _CountdownBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-      decoration: BoxDecoration(
-        color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.18),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.4), width: 1),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.timer_outlined, size: 13, color: BeyanColors.tone(0xFFFFDF7A)),
-          const SizedBox(width: 5),
-          Text(
-            text,
-            style: TextStyle(
-              color: BeyanColors.tone(0xFFFFDF7A),
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              fontFeatures: const [FontFeature.tabularFigures()],
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      alignment: Alignment.centerRight,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+        decoration: BoxDecoration(
+          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.18),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.4), width: 1),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.timer_outlined, size: 13, color: BeyanColors.tone(0xFFFFDF7A)),
+            const SizedBox(width: 5),
+            Text(
+              text,
+              style: TextStyle(
+                color: BeyanColors.tone(0xFFFFDF7A),
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -539,21 +559,26 @@ class _ProgressBar extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 6,
-                    height: 6,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: BeyanColors.tone(0xFFD4AF37),
+              Flexible(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: BeyanColors.tone(0xFFD4AF37),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 5),
-                  Text(fromLabel, style: const TextStyle(color: Colors.white70, fontSize: 11.5, fontWeight: FontWeight.w500)),
-                ],
+                    const SizedBox(width: 5),
+                    Flexible(
+                      child: Text(fromLabel, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white70, fontSize: 11.5, fontWeight: FontWeight.w500)),
+                    ),
+                  ],
+                ),
               ),
+              const SizedBox(width: 6),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
                 decoration: BoxDecoration(
@@ -573,20 +598,26 @@ class _ProgressBar extends StatelessWidget {
                   ),
                 ),
               ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(toLabel, style: TextStyle(color: BeyanColors.tone(0xFFFFDF7A), fontSize: 11.5, fontWeight: FontWeight.w600)),
-                  const SizedBox(width: 5),
-                  Container(
-                    width: 6,
-                    height: 6,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.5),
+              const SizedBox(width: 6),
+              Flexible(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Flexible(
+                      child: Text(toLabel, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: BeyanColors.tone(0xFFFFDF7A), fontSize: 11.5, fontWeight: FontWeight.w600)),
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 5),
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.5),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -614,15 +645,22 @@ class _MiniPrayerRow extends StatelessWidget {
           bottomRight: Radius.circular(24),
         ),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: daily.prayers
             .where((p) => p.name != PrayerName.sunrise)
-            .map((p) => _MiniPrayerItem(
-                  entry: p,
-                  isActive: p.name == nextName,
-                  langCode: langCode,
+            .map((p) => Expanded(
+                  child: Center(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: _MiniPrayerItem(
+                        entry: p,
+                        isActive: p.name == nextName,
+                        langCode: langCode,
+                      ),
+                    ),
+                  ),
                 ))
             .toList(),
       ),

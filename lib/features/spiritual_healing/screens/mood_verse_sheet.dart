@@ -104,9 +104,10 @@ class MoodVerseSheet extends ConsumerWidget {
                       ),
                     ),
                     child: Center(
-                      child: Text(
-                        data.emoji,
-                        style: const TextStyle(fontSize: 22),
+                      child: Icon(
+                        Icons.spa_rounded,
+                        color: data.accentColor,
+                        size: 22,
                       ),
                     ),
                   ),

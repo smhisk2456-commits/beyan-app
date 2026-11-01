@@ -76,6 +76,8 @@ class WidgetService {
       }
       final prayerScheduleJson = jsonEncode(scheduleList);
       await HomeWidget.saveWidgetData<String>('widget_prayer_schedule_json', prayerScheduleJson);
+      await HomeWidget.saveWidgetData<double>('beyan_widget_lat', location.latitude);
+      await HomeWidget.saveWidgetData<double>('beyan_widget_lng', location.longitude);
 
       // 2. Seçili kategoriye ve görünüme göre duygusal ayet havuzu oluştur
       final quoteCat = prefs.getString('widget_quote_category') ?? 'all';

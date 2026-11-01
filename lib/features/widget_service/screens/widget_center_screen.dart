@@ -1955,7 +1955,8 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                InkWell(
+                Flexible(
+                  child: InkWell(
                   borderRadius: BorderRadius.circular(12),
                   onTap: () {
                     HapticFeedback.selectionClick();
@@ -1975,17 +1976,22 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                       children: [
                         Icon(Icons.shuffle_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 14),
                         const SizedBox(width: 5),
-                        Text(
-                          strings.previewAnotherVerse,
-                          style: TextStyle(
-                            color: BeyanColors.tone(0xFFFFDF7A),
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.bold,
+                        Flexible(
+                          child: Text(
+                            strings.previewAnotherVerse,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: BeyanColors.tone(0xFFFFDF7A),
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
+                ),
                 ),
                 const SizedBox(width: 8),
                 InkWell(
@@ -2518,36 +2524,46 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
     required String value,
     required VoidCallback onTap,
   }) {
-    return ListTile(
-      dense: true,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-      title: Text(
-        title,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  value,
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 13,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 4),
+              const Icon(
+                Icons.arrow_forward_ios_rounded,
+                color: Colors.white38,
+                size: 13,
+              ),
+            ],
+          ),
         ),
       ),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            value,
-            style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 13,
-            ),
-          ),
-          const SizedBox(width: 4),
-          const Icon(
-            Icons.arrow_forward_ios_rounded,
-            color: Colors.white38,
-            size: 13,
-          ),
-        ],
-      ),
-      onTap: onTap,
     );
   }
 
@@ -2570,38 +2586,57 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
           color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35),
         ),
       ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        leading: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.15),
-            shape: BoxShape.circle,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () {
+            HapticFeedback.lightImpact();
+            NotificationSettingsSheet.show(context, initialTab: 1);
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.notifications_active_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 20),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        strings.verseNotifTitle,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        strings.language == AppLanguage.turkish
+                            ? 'Kilit ekranı ayet bildirim saatini ve sıklığını ayarla'
+                            : 'Set lock screen verse alert times and frequency',
+                        style: const TextStyle(
+                          color: Colors.white60,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(Icons.arrow_forward_ios_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 14),
+              ],
+            ),
           ),
-          child: Icon(Icons.notifications_active_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 20),
         ),
-        title: Text(
-          strings.verseNotifTitle,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        subtitle: Text(
-          strings.language == AppLanguage.turkish
-              ? 'Kilit ekranı ayet bildirim saatini ve sıklığını ayarla'
-              : 'Set lock screen verse alert times and frequency',
-          style: const TextStyle(
-            color: Colors.white60,
-            fontSize: 11,
-          ),
-        ),
-        trailing: Icon(Icons.arrow_forward_ios_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 14),
-        onTap: () {
-          HapticFeedback.lightImpact();
-          NotificationSettingsSheet.show(context, initialTab: 1);
-        },
       ),
     );
   }

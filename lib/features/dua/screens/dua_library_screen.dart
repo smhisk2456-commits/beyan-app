@@ -399,6 +399,9 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
   }
 
   Widget _buildDuaDownloadBanner(BuildContext context, bool isDark) {
+    if (MediaQuery.sizeOf(context).height < 620) {
+      return const SizedBox.shrink();
+    }
     final downloadedKeys = ref.watch(quranDownloadsProvider);
     final reciter = ref.watch(quranAudioProvider).selectedReciter;
     final downloadedCount = kDuaAudioSurahIds.where((id) {
@@ -541,18 +544,20 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
                   ? BeyanColors.tone(0xFFFFDF7A)
                   : (isDark ? Colors.white60 : Colors.black54),
             ),
-            const SizedBox(width: 6),
+            const SizedBox(width: 4),
             Flexible(
-              child: Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 12.5,
-                  fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
-                  color: isActive
-                      ? (isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF012E2B))
-                      : (isDark ? Colors.white60 : Colors.black54),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
+                    color: isActive
+                        ? (isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF012E2B))
+                        : (isDark ? Colors.white60 : Colors.black54),
+                  ),
                 ),
               ),
             ),
@@ -712,11 +717,13 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
     return GridView.builder(
       physics: const BouncingScrollPhysics(),
       padding: EdgeInsets.fromLTRB(16, 8, 16, bottomPadding),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
-        childAspectRatio: 1.02,
+        childAspectRatio: (MediaQuery.textScalerOf(context).scale(1.0) > 1.1 || MediaQuery.sizeOf(context).width < 360)
+            ? 0.88
+            : 1.02,
       ),
       itemCount: DuaCategory.values.length,
       itemBuilder: (context, index) {
@@ -754,6 +761,7 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Container(
                         width: 36,
@@ -772,19 +780,24 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
                           color: BeyanColors.tone(0xFFFFDF7A),
                         ),
                       ),
-                      const Spacer(),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          strings.categoryDuaCount(count),
-                          style: TextStyle(
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.bold,
-                            color: BeyanColors.tone(0xFFD4AF37),
+                      const SizedBox(width: 4),
+                      Flexible(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              strings.categoryDuaCount(count),
+                              style: TextStyle(
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.bold,
+                                color: BeyanColors.tone(0xFFD4AF37),
+                              ),
+                            ),
                           ),
                         ),
                       ),

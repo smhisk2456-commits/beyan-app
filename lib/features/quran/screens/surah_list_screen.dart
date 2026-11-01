@@ -295,14 +295,18 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
                               children: [
                                 Row(
                                   children: [
-                                    Text(
-                                      strings.language == AppLanguage.turkish
-                                          ? 'Tematik Kur\'an Fihristi'
-                                          : 'Thematic Quran Atlas',
-                                      style: TextStyle(
-                                        fontSize: 12.5,
-                                        fontWeight: FontWeight.bold,
-                                        color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                    Flexible(
+                                      child: Text(
+                                        strings.language == AppLanguage.turkish
+                                            ? 'Tematik Kur\'an Fihristi'
+                                            : 'Thematic Quran Atlas',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 12.5,
+                                          fontWeight: FontWeight.bold,
+                                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                        ),
                                       ),
                                     ),
                                     const SizedBox(width: 6),

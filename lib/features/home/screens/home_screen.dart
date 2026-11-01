@@ -1182,25 +1182,30 @@ class _DailyInspirationCardState extends ConsumerState<_DailyInspirationCard> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.18),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35),
-                                width: 0.8,
+                          Flexible(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.18),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35),
+                                  width: 0.8,
+                                ),
                               ),
-                            ),
-                            child: Text(
-                              verse.localizedReference(strings.language.code),
-                              style: TextStyle(
-                                color: BeyanColors.tone(0xFFFFDF7A),
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
+                              child: Text(
+                                verse.localizedReference(strings.language.code),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: BeyanColors.tone(0xFFFFDF7A),
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
                           ),
+                          const SizedBox(width: 8),
                           InkWell(
                             onTap: () {
                               HapticFeedback.lightImpact();
@@ -1748,8 +1753,12 @@ class _SpiritualMoodsSection extends ConsumerWidget {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text(item.emoji, style: const TextStyle(fontSize: 16)),
-                            const SizedBox(width: 6),
+                            Icon(
+                              Icons.spa_rounded,
+                              size: 13,
+                              color: item.accentColor,
+                            ),
+                            const SizedBox(width: 5),
                             Text(
                               item.localizedTitle(lang),
                               style: TextStyle(

@@ -233,45 +233,54 @@ class _NextPrayerBanner extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 7,
-                    height: 7,
-                    decoration: BoxDecoration(
-                      color: BeyanColors.tone(0xFFFFDF7A),
-                      shape: BoxShape.circle,
+              Flexible(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 7,
+                      height: 7,
+                      decoration: BoxDecoration(
+                        color: BeyanColors.tone(0xFFFFDF7A),
+                        shape: BoxShape.circle,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    strings.nextPrayer,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.white70,
-                      letterSpacing: 0.5,
-                      fontWeight: FontWeight.w600,
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: Text(
+                        strings.nextPrayer,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Colors.white70,
+                          letterSpacing: 0.5,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               if (next != null && next.name.rakatTotal > 0)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
-                  decoration: BoxDecoration(
-                    color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.25),
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(
-                      color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.4),
-                      width: 1,
+                Flexible(
+                  flex: 0,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+                    decoration: BoxDecoration(
+                      color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.25),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.4),
+                        width: 1,
+                      ),
                     ),
-                  ),
-                  child: Text(
-                    strings.rakatsCount(next.name.rakatTotal),
-                    style: TextStyle(
-                      color: BeyanColors.tone(0xFFFFDF7A),
-                      fontSize: 10.5,
-                      fontWeight: FontWeight.bold,
+                    child: Text(
+                      strings.rakatsCount(next.name.rakatTotal),
+                      style: TextStyle(
+                        color: BeyanColors.tone(0xFFFFDF7A),
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
@@ -283,6 +292,7 @@ class _NextPrayerBanner extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Expanded(
+                flex: 5,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -290,9 +300,11 @@ class _NextPrayerBanner extends ConsumerWidget {
                       next?.name.localizedName(strings.language.code) ?? '--',
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 30,
+                        fontSize: 28,
                         fontWeight: FontWeight.bold,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     // Arapça isim
                     Text(
@@ -300,59 +312,78 @@ class _NextPrayerBanner extends ConsumerWidget {
                       style: const TextStyle(
                         fontFamily: 'Amiri',
                         color: Colors.white60,
-                        fontSize: 17,
+                        fontSize: 16,
                         height: 1.4,
                       ),
                       textDirection: TextDirection.rtl,
+                      maxLines: 1,
                     ),
                   ],
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 8),
               // Vakit saati
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    next != null ? service.fmt(next.time) : '--:--',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 28,
-                      fontWeight: FontWeight.w300,
-                      fontFeatures: [FontFeature.tabularFigures()],
+              Expanded(
+                flex: 4,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        next != null ? service.fmt(next.time) : '--:--',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 28,
+                          fontWeight: FontWeight.w300,
+                          fontFeatures: [FontFeature.tabularFigures()],
+                        ),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  // Gerçek zamanlı countdown (İzole edilmiş Consumer ve RepaintBoundary)
-                  RepaintBoundary(
-                    child: Consumer(
-                      builder: (context, ref, _) {
-                        final countdownAsync = ref.watch(countdownStringProvider);
-                        final s = ref.watch(appStringsProvider);
-                        return countdownAsync.when(
-                          data: (str) => Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withValues(alpha: 0.25),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              '⏱ $str ${s.remainingTime}',
-                              style: TextStyle(
-                                color: BeyanColors.tone(0xFFFFDF7A),
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                fontFeatures: const [FontFeature.tabularFigures()],
+                    const SizedBox(height: 4),
+                    // Gerçek zamanlı countdown (İzole edilmiş Consumer ve RepaintBoundary)
+                    RepaintBoundary(
+                      child: Consumer(
+                        builder: (context, ref, _) {
+                          final countdownAsync = ref.watch(countdownStringProvider);
+                          final s = ref.watch(appStringsProvider);
+                          return countdownAsync.when(
+                            data: (str) => FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerRight,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withValues(alpha: 0.25),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.timer_outlined, size: 12, color: BeyanColors.tone(0xFFFFDF7A)),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      '$str ${s.remainingTime}',
+                                      style: TextStyle(
+                                        color: BeyanColors.tone(0xFFFFDF7A),
+                                        fontSize: 11.5,
+                                        fontWeight: FontWeight.w600,
+                                        fontFeatures: const [FontFeature.tabularFigures()],
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                          loading: () => const SizedBox.shrink(),
-                          error: (_, __) => const SizedBox.shrink(),
-                        );
-                      },
+                            loading: () => const SizedBox.shrink(),
+                            error: (_, __) => const SizedBox.shrink(),
+                          );
+                        },
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),
@@ -462,24 +493,31 @@ class _NextPrayerBanner extends ConsumerWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: 6,
-                                height: 6,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: BeyanColors.tone(0xFFD4AF37),
+                          Flexible(
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: 6,
+                                  height: 6,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: BeyanColors.tone(0xFFD4AF37),
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(width: 5),
-                              Text(
-                                daily.localizedCurrentPrayerName(strings.language.code),
-                                style: const TextStyle(color: Colors.white70, fontSize: 11.5, fontWeight: FontWeight.w500),
-                              ),
-                            ],
+                                const SizedBox(width: 5),
+                                Flexible(
+                                  child: Text(
+                                    daily.localizedCurrentPrayerName(strings.language.code),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(color: Colors.white70, fontSize: 11.5, fontWeight: FontWeight.w500),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
+                          const SizedBox(width: 6),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
                             decoration: BoxDecoration(
@@ -499,23 +537,31 @@ class _NextPrayerBanner extends ConsumerWidget {
                               ),
                             ),
                           ),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                next?.name.localizedName(strings.language.code) ?? '',
-                                style: TextStyle(color: BeyanColors.tone(0xFFFFDF7A), fontSize: 11.5, fontWeight: FontWeight.w600),
-                              ),
-                              const SizedBox(width: 5),
-                              Container(
-                                width: 6,
-                                height: 6,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.5),
+                          const SizedBox(width: 6),
+                          Flexible(
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    next?.name.localizedName(strings.language.code) ?? '',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(color: BeyanColors.tone(0xFFFFDF7A), fontSize: 11.5, fontWeight: FontWeight.w600),
+                                  ),
                                 ),
-                              ),
-                            ],
+                                const SizedBox(width: 5),
+                                Container(
+                                  width: 6,
+                                  height: 6,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.5),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
@@ -648,41 +694,55 @@ class _PrayerTimeCard extends ConsumerWidget {
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          if (isCurrent)
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: AppColors.gold.withValues(alpha: 0.22),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                strings.currentPrayer,
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: isDark ? BeyanColors.tone(0xFFFFDF7A) : AppColors.goldDark,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            )
-                          else if (isNext)
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: isDark
-                                    ? BeyanColors.tone(0xFFD4AF37)
-                                    : AppColors.primary.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                strings.nextPrayer,
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: isDark ? Colors.black : AppColors.primary,
-                                  fontWeight: FontWeight.bold,
+                          if (isCurrent) ...[
+                            const SizedBox(width: 6),
+                            Flexible(
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.gold.withValues(alpha: 0.22),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    strings.currentPrayer,
+                                    maxLines: 1,
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: isDark ? BeyanColors.tone(0xFFFFDF7A) : AppColors.goldDark,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
+                          ] else if (isNext) ...[
+                            const SizedBox(width: 6),
+                            Flexible(
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: isDark
+                                        ? BeyanColors.tone(0xFFD4AF37)
+                                        : AppColors.primary.withValues(alpha: 0.15),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    strings.nextPrayer,
+                                    maxLines: 1,
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: isDark ? Colors.black : AppColors.primary,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                       const SizedBox(height: 3),
@@ -818,12 +878,16 @@ class _NafilePrayersBannerCard extends ConsumerWidget {
                 children: [
                   Row(
                     children: [
-                      Text(
-                        'Önemli & Nafile Namazlar',
-                        style: TextStyle(
-                          color: gold,
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
+                      Flexible(
+                        child: Text(
+                          'Önemli & Nafile Namazlar',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: gold,
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 6),
@@ -834,7 +898,7 @@ class _NafilePrayersBannerCard extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
-                          'YENİ ✨',
+                          'YENİ',
                           style: TextStyle(
                             color: BeyanColors.tone(0xFF01201B),
                             fontSize: 9,

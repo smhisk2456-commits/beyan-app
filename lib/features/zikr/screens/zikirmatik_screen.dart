@@ -684,27 +684,36 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
 
           // ── Hedef Seçimi (33, 99, 100, Serbest) ───────────────────
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _targetButton(33),
-              const SizedBox(width: 8),
-              _targetButton(99),
-              const SizedBox(width: 8),
-              _targetButton(100),
-              const SizedBox(width: 8),
-              _targetButton(0, label: '∞'),
-              const Spacer(),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _targetButton(33),
+                  const SizedBox(width: 6),
+                  _targetButton(99),
+                  const SizedBox(width: 6),
+                  _targetButton(100),
+                  const SizedBox(width: 6),
+                  _targetButton(0, label: '∞'),
+                ],
+              ),
               if (_completedLaps > 0)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.18),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.5)),
-                  ),
-                  child: Text(
-                    strings.lapsText(_completedLaps),
-                    style: TextStyle(color: BeyanColors.tone(0xFFFFDF7A), fontSize: 12, fontWeight: FontWeight.bold),
+                Flexible(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.18),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.5)),
+                    ),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        strings.lapsText(_completedLaps),
+                        style: TextStyle(color: BeyanColors.tone(0xFFFFDF7A), fontSize: 11, fontWeight: FontWeight.bold),
+                      ),
+                    ),
                   ),
                 ),
             ],
@@ -839,8 +848,10 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
           const SizedBox(height: 18),
 
           // ── Geri Al ve Sıfırla Butonları ─────────────────────────
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 12,
+            runSpacing: 8,
             children: [
               OutlinedButton.icon(
                 onPressed: _undo,
@@ -849,11 +860,10 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                 style: OutlinedButton.styleFrom(
                   foregroundColor: Colors.white70,
                   side: const BorderSide(color: Colors.white24),
-                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 ),
               ),
-              const SizedBox(width: 14),
               OutlinedButton.icon(
                 onPressed: _confirmReset,
                 icon: const Icon(Icons.refresh_rounded, size: 18),
@@ -861,7 +871,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                 style: OutlinedButton.styleFrom(
                   foregroundColor: BeyanColors.tone(0xFFD4AF37),
                   side: BorderSide(color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.5)),
-                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 ),
               ),
@@ -872,7 +882,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
 
           // ── Titreşim / Dokunuş Hissi Seçici ──────────────────────
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             decoration: BoxDecoration(
               color: isDark ? BeyanColors.tone(0xFF04201B) : Colors.grey.shade100,
               borderRadius: BorderRadius.circular(14),
@@ -882,25 +892,29 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
               spacing: 6,
               runSpacing: 6,
               crossAxisAlignment: WrapCrossAlignment.center,
+              alignment: WrapAlignment.center,
               children: [
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      _hapticMode == 0 ? Icons.vibration_outlined : Icons.vibration_rounded,
-                      size: 16,
-                      color: BeyanColors.tone(0xFFFFDF7A),
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      strings.hapticTitle,
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: isDark ? Colors.white70 : Colors.black87,
-                        fontWeight: FontWeight.w600,
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        _hapticMode == 0 ? Icons.vibration_outlined : Icons.vibration_rounded,
+                        size: 16,
+                        color: BeyanColors.tone(0xFFFFDF7A),
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 4),
+                      Text(
+                        strings.hapticTitle,
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          color: isDark ? Colors.white70 : Colors.black87,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 _hapticChip(1, strings.hapticLight, isDark),
                 _hapticChip(2, strings.hapticMedium, isDark),
