@@ -164,6 +164,42 @@ enum WidgetLocalization {
         }
     }
 
+    static func targetPrayerHeader(for kind: PrayerKind) -> String {
+        let lang = currentLanguage
+        let name = prayerName(for: kind)
+        switch lang {
+        case "en": return "UNTIL \(name.uppercased())"
+        case "id": return "MENUJU \(name.uppercased())"
+        case "ar": return "حتى صلاة \(name)"
+        case "fr": return "JUSQU'À \(name.uppercased())"
+        case "de": return "BIS \(name.uppercased())"
+        case "ru": return "ДО \(name.uppercased())"
+        case "ur": return "\(name) تک"
+        default:   return "\(name.uppercased()) VAKTİNE"
+        }
+    }
+
+    static func prayerAdhanLabel(for kind: PrayerKind) -> String {
+        let lang = currentLanguage
+        let name = prayerName(for: kind)
+        if kind == .gunes {
+            switch lang {
+            case "en": return "Sunrise"
+            case "ar": return "شروق الشمس"
+            case "id": return "Terbit Fajar"
+            default:   return "Güneş Doğuşu"
+            }
+        }
+        switch lang {
+        case "en": return "\(name) Adhan"
+        case "ar": return "أذان \(name)"
+        case "id": return "Adzan \(name)"
+        case "fr": return "Adhan de \(name)"
+        case "de": return "\(name) Adhan"
+        default:   return "\(name) Ezanı"
+        }
+    }
+
     static func prayerTimeLabel(prayer: String, time: String) -> String {
         let lang = currentLanguage
         switch lang {
@@ -471,33 +507,36 @@ struct PrayerRectangularView: View {
     let entry: PrayerEntry
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            // Üst Satır: Lüks "SIRADAKİ NAMAZ" Başlığı (Geçmiş vakit yerine net odak)
-            HStack(spacing: 4.5) {
-                Image(systemName: "sparkles")
-                    .font(.system(size: 9, weight: .bold))
-                Text(WidgetLocalization.nextPrayerTitle.uppercased())
-                    .font(.system(size: 10, weight: .bold))
-                    .tracking(0.9)
-                    .opacity(0.88)
-            }
-
-            // Orta Satır: Sıradaki Vakit ve Ezan Saati (Örn: 🌅 Akşam 18:08)
+        VStack(alignment: .leading, spacing: 1.5) {
+            // 1. Satır: AKŞAM VAKTİNE (İkon + Büyük Harfli Net Hedef Vakit)
             HStack(spacing: 5) {
                 Image(systemName: entry.next.kind.symbol)
-                    .font(.system(size: 13, weight: .bold))
-                Text(entry.next.kind.name)
-                    .font(.system(size: 14.5, weight: .bold))
-                Spacer(minLength: 4)
-                Text(hhmm.string(from: entry.next.date))
-                    .font(.system(size: 14, weight: .semibold, design: .rounded))
-                    .opacity(0.95)
+                    .font(.system(size: 11, weight: .bold))
+                Text(WidgetLocalization.targetPrayerHeader(for: entry.next.kind))
+                    .font(.system(size: 11.5, weight: .bold))
+                    .tracking(0.7)
+                    .lineLimit(1)
             }
+            .foregroundColor(.white.opacity(0.95))
 
-            // Alt Satır: Canlı Geri Sayım Sayacı (Örn: 58:38)
+            // 2. Satır: 18:08 • Akşam Ezanı
+            HStack(spacing: 5) {
+                Text(hhmm.string(from: entry.next.date))
+                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                Text("•")
+                    .font(.system(size: 10, weight: .bold))
+                    .opacity(0.55)
+                Text(WidgetLocalization.prayerAdhanLabel(for: entry.next.kind))
+                    .font(.system(size: 12.5, weight: .medium))
+                    .lineLimit(1)
+            }
+            .foregroundColor(.white.opacity(0.85))
+
+            // 3. Satır: 58:38 (Büyük Canlı Geri Sayım Sayacı)
             Text(entry.next.date, style: .timer)
-                .font(.system(size: 23, weight: .bold, design: .rounded))
+                .font(.system(size: 24, weight: .bold, design: .rounded))
                 .monospacedDigit()
+                .foregroundColor(.white)
                 .lineLimit(1)
                 .minimumScaleFactor(0.75)
         }
