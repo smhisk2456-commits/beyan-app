@@ -508,16 +508,12 @@ struct PrayerRectangularView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 1.5) {
-            // 1. Satır: AKŞAM VAKTİNE (İkon + Büyük Harfli Net Hedef Vakit)
-            HStack(spacing: 5) {
-                Image(systemName: entry.next.kind.symbol)
-                    .font(.system(size: 11, weight: .bold))
-                Text(WidgetLocalization.targetPrayerHeader(for: entry.next.kind))
-                    .font(.system(size: 11.5, weight: .bold))
-                    .tracking(0.7)
-                    .lineLimit(1)
-            }
-            .foregroundColor(.white.opacity(0.95))
+            // 1. Satır: AKŞAM VAKTİNE (Tertemiz, emojiz, büyük harfli başlık)
+            Text(WidgetLocalization.targetPrayerHeader(for: entry.next.kind))
+                .font(.system(size: 11.5, weight: .bold))
+                .tracking(0.8)
+                .foregroundColor(.white.opacity(0.95))
+                .lineLimit(1)
 
             // 2. Satır: 18:08 • Akşam Ezanı
             HStack(spacing: 5) {
