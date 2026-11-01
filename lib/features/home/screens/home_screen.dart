@@ -31,6 +31,7 @@ import '../../quran/screens/thematic_atlas_screen.dart';
 import '../../../core/widgets/luxury_page_route.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../prayer_times/screens/wudu_guide_sheet.dart';
+import '../../prayer_times/screens/nafila_prayers_sheet.dart';
 import '../../zikr/screens/zikirmatik_screen.dart';
 import '../../monetization/providers/premium_provider.dart';
 import '../../monetization/screens/premium_paywall_sheet.dart';
@@ -686,7 +687,7 @@ class _SpiritualLifeHub extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
-                  '6 Rehber',
+                  '8 Rehber',
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w600,
@@ -803,6 +804,36 @@ class _SpiritualLifeHub extends ConsumerWidget {
                       LuxuryPageRoute(page: const NearbyMosquesScreen()),
                     );
                   },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+
+          // 4. Sıra: Nafile Namazlar Rehberi + Teveccüh Namazı
+          Row(
+            children: [
+              Expanded(
+                child: _HubCard(
+                  title: 'Nafile Namazlar',
+                  subtitle: 'Teheccüd, Kuşluk & Sünnet',
+                  badge: 'REHBER ✨',
+                  icon: Icons.stars_rounded,
+                  isDark: isDark,
+                  accentColor: BeyanColors.tone(0xFFFFDF7A),
+                  onTap: () => NafilaPrayersSheet.show(context),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _HubCard(
+                  title: 'Teveccüh Namazı',
+                  subtitle: 'Kalbi Allah\'a Yöneltme (2 Rekat)',
+                  badge: 'HUZUR 🤍',
+                  icon: Icons.favorite_rounded,
+                  isDark: isDark,
+                  accentColor: BeyanColors.tone(0xFFFFDF7A),
+                  onTap: () => NafilaPrayersSheet.show(context, 'teveccuh'),
                 ),
               ),
             ],

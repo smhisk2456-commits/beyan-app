@@ -1,5 +1,6 @@
 import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/localization/app_strings.dart';
 import '../../../core/theme/app_theme.dart';
@@ -12,6 +13,7 @@ import 'city_selector_sheet.dart';
 import '../../settings/screens/settings_screen.dart';
 import '../../monetization/widgets/banner_ad_widget.dart';
 import 'prayer_guide_sheet.dart';
+import 'nafila_prayers_sheet.dart';
 
 /// Tüm günlük namaz vakitlerini listeleyen tam ekran.
 /// Ana ekranın alt kısmında veya ayrı bir sekme olarak kullanılır.
@@ -102,6 +104,8 @@ class _PrayerTimesContent extends ConsumerWidget {
               isCurrent: PrayerName.fromAdhan(daily.currentPrayer) == entry.name,
             ),
           ),
+          const SizedBox(height: 16),
+          const _NafilePrayersBannerCard(),
           const SizedBox(height: 16),
           const BannerAdWidget(),
           const SizedBox(height: 110),
@@ -760,5 +764,105 @@ class _PrayerTimeServiceHelper {
     return '$h:$m';
   }
 }
+
+class _NafilePrayersBannerCard extends ConsumerWidget {
+  const _NafilePrayersBannerCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final effectivePalette = ref.watch(effectivePaletteProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final gold = BeyanColors.tone(0xFFFFDF7A);
+
+    return InkWell(
+      onTap: () {
+        HapticFeedback.lightImpact();
+        NafilaPrayersSheet.show(context);
+      },
+      borderRadius: BorderRadius.circular(18),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: isDark
+                ? [BeyanColors.tone(0xFF034A3E), BeyanColors.tone(0xFF01241E)]
+                : [effectivePalette.darkCard, effectivePalette.darkSurface],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: gold.withValues(alpha: 0.5), width: 1.2),
+          boxShadow: [
+            BoxShadow(
+              color: gold.withValues(alpha: 0.12),
+              blurRadius: 14,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: gold.withValues(alpha: 0.18),
+                border: Border.all(color: gold.withValues(alpha: 0.6), width: 1.2),
+              ),
+              child: Icon(Icons.stars_rounded, color: gold, size: 24),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        'Önemli & Nafile Namazlar',
+                        style: TextStyle(
+                          color: gold,
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                        decoration: BoxDecoration(
+                          color: gold,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          'YENİ ✨',
+                          style: TextStyle(
+                            color: BeyanColors.tone(0xFF01201B),
+                            fontSize: 9,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    'Teveccüh, Teheccüd, Kuşluk, İstihâre, Tesbih ve 15 Sünnetin Şartları ve Kılınışı',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.82),
+                      fontSize: 11.5,
+                      height: 1.35,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.arrow_forward_ios_rounded, color: gold, size: 14),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 
 

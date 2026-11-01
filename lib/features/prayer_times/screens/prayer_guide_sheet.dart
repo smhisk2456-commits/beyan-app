@@ -11,6 +11,7 @@ import '../../../core/widgets/luxury_page_route.dart';
 import '../models/prayer_how_to_model.dart';
 import '../models/prayer_time_model.dart';
 import 'wudu_guide_sheet.dart';
+import 'nafila_prayers_sheet.dart';
 
 /// Namaz Rekat Adımı Modeli
 class PrayerRakatStep {
@@ -237,7 +238,12 @@ class _PrayerGuideSheetState extends ConsumerState<PrayerGuideSheet> {
                   // ── 💧 Abdest Rehberi Hızlı Erişim Kartı ─────────────
                   _buildWuduQuickAccessCard(context),
 
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
+
+                  // ── ⭐ Önemli & Nafile Namazlar Hızlı Erişim Kartı ─────
+                  _buildNafilaQuickAccessCard(context),
+
+                  const SizedBox(height: 14),
 
                   // ── 0. Namaz Nasıl Kılınır? (Çentikli Açılır/Kapanır) ─────────────
                   _buildCollapsibleSectionHeader(
@@ -427,6 +433,107 @@ class _PrayerGuideSheetState extends ConsumerState<PrayerGuideSheet> {
             Icon(
               Icons.arrow_forward_ios_rounded,
               color: BeyanColors.tone(0xFFFFDF7A),
+              size: 14,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNafilaQuickAccessCard(BuildContext context) {
+    final gold = BeyanColors.tone(0xFFFFDF7A);
+    return InkWell(
+      onTap: () {
+        HapticFeedback.lightImpact();
+        NafilaPrayersSheet.show(context);
+      },
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              BeyanColors.tone(0xFF044237),
+              BeyanColors.tone(0xFF012B24),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: gold.withValues(alpha: 0.5),
+            width: 1.1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: gold.withValues(alpha: 0.12),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: gold.withValues(alpha: 0.18),
+                border: Border.all(
+                  color: gold.withValues(alpha: 0.55),
+                  width: 1,
+                ),
+              ),
+              child: const Text('⭐', style: TextStyle(fontSize: 16)),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        'Önemli & Nafile Namazlar',
+                        style: TextStyle(
+                          color: gold,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                        decoration: BoxDecoration(
+                          color: gold,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          'YENİ ✨',
+                          style: TextStyle(
+                            color: BeyanColors.tone(0xFF01201B),
+                            fontSize: 9,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  const Text(
+                    'Teveccüh, Teheccüd, Kuşluk, İstihâre & 15 Sünnet',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios_rounded,
+              color: gold,
               size: 14,
             ),
           ],
