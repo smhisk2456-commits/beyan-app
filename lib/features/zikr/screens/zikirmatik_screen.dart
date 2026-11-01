@@ -30,18 +30,9 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
   int _hapticMode = 1; // 0: Off, 1: Light, 2: Medium, 3: Heavy
 
   final ScrollController _chipScrollController = ScrollController();
-  late final AnimationController _pulseController;
-  late final Animation<double> _scaleAnimation;
-
-  late final AnimationController _plusOneController;
-  late final Animation<double> _plusOneOpacity;
-  late final Animation<Offset> _plusOneOffset;
-
-  late final AnimationController _shimmerController;
-  late final Animation<double> _shimmerAnimation;
-
-  late final AnimationController _countPopController;
-  late final Animation<double> _countPopScale;
+  late final AnimationController _shakeController;
+  late final Animation<double> _shakeOffset;
+  late final Animation<double> _shakeScale;
 
   Future<void> _loadSavedDhikrState() async {
     try {
@@ -221,72 +212,35 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
   void initState() {
     super.initState();
     _loadSavedDhikrState();
-    _pulseController = AnimationController(
+    _shakeController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 120),
-      lowerBound: 0.94,
-      upperBound: 1.0,
-      value: 1.0,
+      duration: const Duration(milliseconds: 150),
     );
-    _scaleAnimation = CurvedAnimation(
-      parent: _pulseController,
-      curve: Curves.easeInOut,
-    );
+    _shakeOffset = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: -4.5), weight: 15),
+      TweenSequenceItem(tween: Tween(begin: -4.5, end: 4.5), weight: 20),
+      TweenSequenceItem(tween: Tween(begin: 4.5, end: -3.0), weight: 20),
+      TweenSequenceItem(tween: Tween(begin: -3.0, end: 2.5), weight: 20),
+      TweenSequenceItem(tween: Tween(begin: 2.5, end: -1.0), weight: 15),
+      TweenSequenceItem(tween: Tween(begin: -1.0, end: 0.0), weight: 10),
+    ]).animate(CurvedAnimation(parent: _shakeController, curve: Curves.linear));
 
-    _plusOneController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 450),
-    );
-    _plusOneOpacity = Tween<double>(begin: 1.0, end: 0.0).animate(
-      CurvedAnimation(
-        parent: _plusOneController,
-        curve: const Interval(0.4, 1.0, curve: Curves.easeOut),
-      ),
-    );
-    _plusOneOffset = Tween<Offset>(
-      begin: const Offset(0, 0),
-      end: const Offset(0, -32),
-    ).animate(
-      CurvedAnimation(
-        parent: _plusOneController,
-        curve: Curves.easeOutCubic,
-      ),
-    );
-
-    _shimmerController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 900),
-    );
-    _shimmerAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _shimmerController,
-        curve: Curves.easeInOutCubic,
-      ),
-    );
-
-    _countPopController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 240),
-    );
-    _countPopScale = TweenSequence<double>([
+    _shakeScale = TweenSequence<double>([
       TweenSequenceItem(
-        tween: Tween<double>(begin: 1.0, end: 1.20).chain(CurveTween(curve: Curves.easeOutCubic)),
+        tween: Tween<double>(begin: 1.0, end: 1.15).chain(CurveTween(curve: Curves.easeOutQuad)),
         weight: 35,
       ),
       TweenSequenceItem(
-        tween: Tween<double>(begin: 1.20, end: 1.0).chain(CurveTween(curve: Curves.easeOutBack)),
+        tween: Tween<double>(begin: 1.15, end: 1.0).chain(CurveTween(curve: Curves.easeInQuad)),
         weight: 65,
       ),
-    ]).animate(_countPopController);
+    ]).animate(_shakeController);
   }
 
   @override
   void dispose() {
     _chipScrollController.dispose();
-    _pulseController.dispose();
-    _plusOneController.dispose();
-    _shimmerController.dispose();
-    _countPopController.dispose();
+    _shakeController.dispose();
     super.dispose();
   }
 
@@ -298,12 +252,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
     } else if (_hapticMode == 3) {
       HapticFeedback.heavyImpact();
     }
-    _pulseController.reverse().then((_) {
-      if (mounted) _pulseController.forward();
-    });
-    _plusOneController.forward(from: 0.0);
-    _shimmerController.forward(from: 0.0);
-    _countPopController.forward(from: 0.0);
+    _shakeController.forward(from: 0.0);
 
     setState(() {
       _count++; if (_count % 33 == 0 && _count != _target) { HapticFeedback.mediumImpact(); }
@@ -375,6 +324,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
   void _undo() {
     if (_count > 0) {
       HapticFeedback.selectionClick();
+      _shakeController.forward(from: 0.0);
       setState(() => _count--);
       _saveDhikrState();
     }
@@ -762,255 +712,126 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
 
           const SizedBox(height: 24),
 
-          // ── Lüks Sayaç Dokunma Alanı (33'lü 3B Tesbih Dizisi, Altın Şok Dalgası & Cam Yansıması) ─
-          ScaleTransition(
-            scale: _scaleAnimation,
-            child: GestureDetector(
-              onTap: _increment,
-              child: SizedBox(
-                width: 266,
-                height: 266,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    // 1. Dokunuşta Dışa Yayılan 24K Altın Şok Dalgası (Aura Ripple)
-                    IgnorePointer(
-                      child: AnimatedBuilder(
-                        animation: _shimmerAnimation,
-                        builder: (context, _) {
-                          final v = _shimmerAnimation.value;
-                          if (v <= 0.01 || v >= 0.99) return const SizedBox.shrink();
-                          final rippleSize = 202.0 + (v * 64.0);
-                          final rippleOpacity = ((1.0 - v) * 0.75).clamp(0.0, 1.0);
-                          return Container(
-                            width: rippleSize,
-                            height: rippleSize,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: rippleOpacity),
-                                width: 2.5 * (1.0 - v) + 0.5,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: rippleOpacity * 0.45),
-                                  blurRadius: 18,
-                                  spreadRadius: 2,
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
+          // ── Lüks Sayaç Dokunma Alanı (Sayı Titreme Animasyonu) ─────────────
+          GestureDetector(
+            onTap: _increment,
+            child: SizedBox(
+              width: 266,
+              height: 266,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // 1. Dış Altın Halkalı İlerleme Göstergesi
+                  SizedBox(
+                    width: 228,
+                    height: 228,
+                    child: CircularProgressIndicator(
+                      value: _target > 0 ? progress : 1.0,
+                      strokeWidth: 5.0,
+                      backgroundColor: isDark ? Colors.white10 : Colors.grey.shade200,
+                      valueColor: AlwaysStoppedAnimation<Color>(BeyanColors.tone(0xFFD4AF37)),
                     ),
+                  ),
 
-                    // 2. Dış Altın Halkalı İlerleme Göstergesi
-                    SizedBox(
-                      width: 228,
-                      height: 228,
-                      child: CircularProgressIndicator(
-                        value: _target > 0 ? progress : 1.0,
-                        strokeWidth: 5.0,
-                        backgroundColor: isDark ? Colors.white10 : Colors.grey.shade200,
-                        valueColor: AlwaysStoppedAnimation<Color>(BeyanColors.tone(0xFFD4AF37)),
-                      ),
-                    ),
-
-                    // 3. Lüks İç Sayaç Küresi (Mat Zümrüt & Saf Altın İpeksi Yüzey - Yansıma Arındırılmış)
-                    Container(
-                      width: 210,
-                      height: 210,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: RadialGradient(
-                          colors: [
-                            BeyanColors.tone(0xFF054C41),
-                            BeyanColors.tone(0xFF02312A),
-                            BeyanColors.tone(0xFF011A16),
-                          ],
-                          stops: const [0.0, 0.65, 1.0],
-                        ),
-                        border: Border.all(
-                          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.85),
-                          width: 2.2,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.28),
-                            blurRadius: 30,
-                            spreadRadius: 2,
-                          ),
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.5),
-                            blurRadius: 18,
-                            offset: const Offset(0, 8),
-                          ),
+                  // 2. Lüks İç Sayaç Küresi
+                  Container(
+                    width: 210,
+                    height: 210,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(
+                        colors: [
+                          BeyanColors.tone(0xFF054C41),
+                          BeyanColors.tone(0xFF02312A),
+                          BeyanColors.tone(0xFF011A16),
                         ],
+                        stops: const [0.0, 0.65, 1.0],
                       ),
-                      child: ClipOval(
-                        child: Stack(
-                          alignment: Alignment.center,
+                      border: Border.all(
+                        color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.85),
+                        width: 2.2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.28),
+                          blurRadius: 30,
+                          spreadRadius: 2,
+                        ),
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.5),
+                          blurRadius: 18,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: ClipOval(
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            // 4. Yeni Manevi Nefes & Altın Aura Dalga Animasyonu (Zarif Halka Şok Dalgası)
-                            IgnorePointer(
-                              child: AnimatedBuilder(
-                                animation: _shimmerAnimation,
-                                builder: (context, _) {
-                                  final v = _shimmerAnimation.value;
-                                  if (v <= 0.01 || v >= 0.99) return const SizedBox.shrink();
-                                  final coreSize = 50.0 + (v * 155.0);
-                                  final waveOpacity = ((1.0 - v) * 0.85).clamp(0.0, 1.0);
-                                  return Stack(
-                                    alignment: Alignment.center,
-                                    children: [
-                                      // Merkez Nurlu Parıltı (Soft Ambient Glow)
-                                      Container(
-                                        width: 140,
-                                        height: 140,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          gradient: RadialGradient(
-                                            colors: [
-                                              BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.30 * (1.0 - v)),
-                                              Colors.transparent,
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                      // Genişleyen Eşmerkezli Altın Halka Dalgası
-                                      Container(
-                                        width: coreSize,
-                                        height: coreSize,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          border: Border.all(
-                                            color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: waveOpacity),
-                                            width: 1.8 * (1.0 - v) + 0.6,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  );
-                                },
+                            // Titreme Animasyonu ile Artan Sayı
+                            AnimatedBuilder(
+                              animation: _shakeController,
+                              builder: (context, child) {
+                                return Transform.translate(
+                                  offset: Offset(_shakeOffset.value, 0),
+                                  child: Transform.scale(
+                                    scale: _shakeScale.value,
+                                    child: child,
+                                  ),
+                                );
+                              },
+                              child: Text(
+                                '$_count',
+                                key: ValueKey<int>(_count),
+                                style: TextStyle(
+                                  fontSize: 56,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  letterSpacing: 1.5,
+                                  shadows: [
+                                    Shadow(
+                                      color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.7),
+                                      blurRadius: 18,
+                                    ),
+                                    Shadow(
+                                      color: BeyanColors.tone(0xFFD4AF37),
+                                      blurRadius: 12,
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
 
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                // Yüzen +1 Parçacık Animasyonu
-                                SizedBox(
-                                  height: 22,
-                                  child: AnimatedBuilder(
-                                    animation: _plusOneController,
-                                    builder: (context, _) {
-                                      if (_plusOneController.value == 0.0 || _plusOneController.value == 1.0) {
-                                        return const SizedBox.shrink();
-                                      }
-                                      return Transform.translate(
-                                        offset: _plusOneOffset.value,
-                                        child: Opacity(
-                                          opacity: _plusOneOpacity.value,
-                                          child: Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
-                                            decoration: BoxDecoration(
-                                              color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35),
-                                              borderRadius: BorderRadius.circular(10),
-                                              border: Border.all(
-                                                color: BeyanColors.tone(0xFFFFDF7A),
-                                                width: 1,
-                                              ),
-                                            ),
-                                            child: Text(
-                                              '+1',
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w900,
-                                                color: BeyanColors.tone(0xFFFFDF7A),
-                                                shadows: [
-                                                  Shadow(color: BeyanColors.tone(0xFFD4AF37), blurRadius: 6),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      );
-                                    },
+                            if (_target > 0)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 2),
+                                child: Text(
+                                  '/ $_target',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: BeyanColors.tone(0xFFFFDF7A),
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
+                              ),
 
-                                // Sayı Yükselme & Yaylanma Animasyonu (Rolling Slide + Scale Bounce)
-                                ScaleTransition(
-                                  scale: _countPopScale,
-                                  child: AnimatedSwitcher(
-                                    duration: const Duration(milliseconds: 220),
-                                    transitionBuilder: (Widget child, Animation<double> animation) {
-                                      final isCurrent = (child.key as ValueKey<int>?)?.value == _count;
-                                      return SlideTransition(
-                                        position: Tween<Offset>(
-                                          begin: isCurrent ? const Offset(0.0, 0.45) : Offset.zero,
-                                          end: isCurrent ? Offset.zero : const Offset(0.0, -0.45),
-                                        ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic)),
-                                        child: FadeTransition(
-                                          opacity: animation,
-                                          child: child,
-                                        ),
-                                      );
-                                    },
-                                    child: Text(
-                                      '$_count',
-                                      key: ValueKey<int>(_count),
-                                      style: TextStyle(
-                                        fontSize: 56,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                        letterSpacing: 1.5,
-                                        shadows: [
-                                          Shadow(
-                                            color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.7),
-                                            blurRadius: 18,
-                                          ),
-                                          Shadow(
-                                            color: BeyanColors.tone(0xFFD4AF37),
-                                            blurRadius: 12,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-
-                                if (_target > 0)
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 2),
-                                    child: Text(
-                                      '/ $_target',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: BeyanColors.tone(0xFFFFDF7A),
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ),
-
-                                const SizedBox(height: 6),
-                                Text(
-                                  strings.tapToCount,
-                                  style: const TextStyle(
-                                    fontSize: 11,
-                                    color: Colors.white54,
-                                    letterSpacing: 2.2,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
+                            const SizedBox(height: 8),
+                            Text(
+                              strings.tapToCount,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: Colors.white54,
+                                letterSpacing: 2.2,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ],
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
