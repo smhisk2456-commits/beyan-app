@@ -452,6 +452,32 @@ class _NafilaPrayersSheetState extends ConsumerState<NafilaPrayersSheet> {
                     height: 1.4,
                   ),
                 ),
+                if (prayer.rewards.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: gold.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: gold.withValues(alpha: 0.25)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.stars_rounded, color: gold, size: 13),
+                        const SizedBox(width: 5),
+                        Text(
+                          '${prayer.rewards.length} Müjde ve İlahi Sevap Detaylı',
+                          style: TextStyle(
+                            color: gold,
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 12),
                 Row(
                   children: [
@@ -692,6 +718,12 @@ class _NafilaPrayersSheetState extends ConsumerState<NafilaPrayersSheet> {
                 gold: gold,
               ),
 
+              // ── 5. Kazandırdığı Sevaplar & İlahi Müjdeler ──
+              if (prayer.rewards.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                _buildRewardsSection(prayer.rewards, gold),
+              ],
+
               if (prayer.recommendedSurahs.isNotEmpty) ...[
                 const SizedBox(height: 16),
                 _buildBulletListSection(
@@ -829,6 +861,120 @@ class _NafilaPrayersSheetState extends ConsumerState<NafilaPrayersSheet> {
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRewardsSection(List<String> rewards, Color gold) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            BeyanColors.tone(0xFF033F34),
+            BeyanColors.tone(0xFF01241E),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: gold.withValues(alpha: 0.5), width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: gold.withValues(alpha: 0.12),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: gold.withValues(alpha: 0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.workspace_premium_rounded, color: gold, size: 18),
+              ),
+              const SizedBox(width: 8),
+              const Expanded(
+                child: Text(
+                  'Kazandırdığı Sevaplar & İlahi Müjdeler',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14.5,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ...rewards.asMap().entries.map((entry) {
+            final index = entry.key;
+            final reward = entry.value;
+            final parts = reward.split(': ');
+            final title = parts.isNotEmpty ? parts[0] : '';
+            final body = parts.length > 1 ? parts.sublist(1).join(': ') : '';
+
+            return Padding(
+              padding: EdgeInsets.only(bottom: index == rewards.length - 1 ? 0 : 10),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    margin: const EdgeInsets.only(top: 2, right: 8),
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: gold.withValues(alpha: 0.18),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: gold.withValues(alpha: 0.4), width: 0.8),
+                    ),
+                    child: Text(
+                      '${index + 1}',
+                      style: TextStyle(
+                        color: gold,
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: RichText(
+                      text: TextSpan(
+                        children: [
+                          if (title.isNotEmpty) ...[
+                            TextSpan(
+                              text: '$title: ',
+                              style: TextStyle(
+                                color: gold,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                                height: 1.4,
+                              ),
+                            ),
+                          ],
+                          TextSpan(
+                            text: body.isNotEmpty ? body : reward,
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.9),
+                              fontSize: 12.5,
+                              height: 1.45,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
         ],
       ),
     );

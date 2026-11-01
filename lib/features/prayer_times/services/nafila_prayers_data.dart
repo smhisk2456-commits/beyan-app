@@ -49,6 +49,12 @@ class NafilaPrayersData {
         '5. Namaz boyunca zihni ve kalbi yalnızca Allah Teâlâ\'nın azamet ve cemaline bağlamak.',
     virtues: 'Teveccüh namazı, kulun bütün benliği, ruhu ve kalbiyle fani dünyadan yüz çevirip bizzat Hâlık-ı Zülcelâl\'e yönelmesi (teveccüh etmesi) maksadıyla kılınan müstesna bir manevi rabıta ve huzur namazıdır. '
         'Kalpteki katılığın silinmesine, nefsin vesveselerinin kırılmasına, iç huzurun teminine ve ilahi feyiz kapılarının açılmasına vesile olur. Büyük İslam âlimleri ve arifler, manevi terbiyede kalbin uyanması için bu namazı tavsiye etmişlerdir.',
+    rewards: [
+      'Masivadan Arınma & Kalp Diriliği: Kalpteki katılık, vesvese ve dünya hırsları silinir; ruh manevi uyanıklığa (yakaza) kavuşur.',
+      'İlâhi Kurbiyet (Yakınlık): Cenâb-ı Hakk\'a tam bir teslimiyetle yönelen kul, "Bana bir karış yaklaşana Ben bir arşın yaklaşırım" sırrına erer.',
+      'İç Huzuru ve Sekînet: Zikir, rabıta ve sohbet meclislerinden önce kılındığında ibadetin feyzini ve huşûunu kat kat artırır.',
+      'Gaflet Perdesinin Kalkması: Kulun acziyetini anlayıp Rabbine boyun bükmesiyle nefsin kibri kırılır, ihlas makamı nasip olur.',
+    ],
     niyyah: 'Niyet ettim Allah rızası için Teveccüh namazı kılmaya.',
     shortSummary: 'Kalbi masivadan arındırıp Cenâb-ı Hakk\'a tam bir teslimiyet ve aşk ile yönelmek için kılınan 2 rekatlık manevi huzur namazı.',
     isFeatured: true,
@@ -131,6 +137,13 @@ class NafilaPrayersData {
         '3. Abdest alıp misvak veya fırça ile ağzı temizlemek.',
     virtues: 'Kur\'an-ı Kerim\'de: "Gecenin bir kısmında uyanarak, sana mahsus bir nafile olmak üzere teheccüd namazı kıl. Umulur ki Rabbin seni Makam-ı Mahmud\'a ulaştırır." (İsrâ, 79) buyrulmuştur.\n'
         'Peygamberimiz (s.a.v.): "Farz namazlardan sonra en faziletli namaz, gece kılınan teheccüd namazıdır." (Müslim) buyurmuştur.',
+    rewards: [
+      'Farzlardan Sonraki En Üstün Ecir: Peygamberimiz (s.a.v.) buyurur: "Farz namazlardan sonra en faziletli namaz, gece kılınan namazdır." (Müslim, Sıyâm 202).',
+      'Makam-ı Mahmûd Şefaati: Kur\'an-ı Kerim\'de doğrudan teheccüdle müjdelenen en yüce derece: "Gecenin bir kısmında uyanıp teheccüd kıl; Rabbin seni Makam-ı Mahmud\'a ulaştırsın." (İsrâ, 79).',
+      'Duaların Geri Çevrilmediği İcabet Vakti: "Rabbimiz her gece son üçte birinde dünya semasına tecelli eder ve \'Yok mu dua eden icabet edeyim, yok mu af dileyen bağışlayayım\' buyurur." (Buhârî, Teheccüd 14).',
+      'Cennetin Şeffaf Köşkleri: "Cennette öyle köşkler vardır ki içi dışından, dışı içinden görünür. Bunlar tatlı dilli olan, selamı yayan ve insanlar uyurken namaz kılanlar içindir." (Tirmizî, Birr 53).',
+      'Salihlerin Şiarı & Dertlere Şifa: "Gece ibadetine devam edin; çünkü o sizden önceki salihlerin âdetidir, günahlara kefarettir ve bedenden hastalıkları kovar." (Tirmizî, Deavât 101).',
+    ],
     niyyah: 'Niyet ettim Allah rızası için Teheccüd namazı kılmaya.',
     shortSummary: 'Gecenin sükunetinde uykuyu bölerek kılınan, Makam-ı Mahmud\'a vesile en faziletli nafile namaz.',
     isFeatured: true,
@@ -177,6 +190,12 @@ class NafilaPrayersData {
     conditions: 'Kerahet vaktinin tamamen çıkmış olması şarttır. İkişer rekat selamla kılınması efdaldir.',
     virtues: 'Resûlullah (s.a.v.) buyurdu: "İnsanoğlunun vücudunda 360 eklem vardır. Her gün her bir eklem için bir sadaka vermek gerekir. Kuşluk vaktinde kılınacak 2 rekat namaz ise bütün bunların yerine geçer." (Müslim)\n'
         'Rızkın bereketlenmesine, günün manevi zırhla korunmasına vesile olur.',
+    rewards: [
+      '360 Eklemin Günlük Şükür Sadakası: Peygamberimiz (s.a.v.): "Her birinizin her bir eklemi için her gün bir sadaka gerekir. Kuşluk vaktinde kılınan iki rekat namaz ise bütün bunların yerine geçer." (Müslim, Müsâfirîn 84).',
+      'Günün Bütün İşlerine İlahi Kifâyet: Kutsi Hadiste Cenâb-ı Hak buyurur: "Ey Âdemoğlu! Günün evvelinde benim için dört rekat namaz kıl, ben de günün sonuna kadar sana kâfi geleyim." (Ebû Dâvûd, Tatavvu 12; Tirmizî).',
+      'Deniz Köpüğü Kadar Günahların Bağışlanması: "Kim kuşluk namazının iki rekatına devam ederse, günahları deniz köpüğü kadar çok olsa bile bağışlanır." (İbn Mâce, İkâme 187).',
+      'Evvâbîn (Tevbekârlar) Arasına Yazılma: "Kuşluk namazına ancak tevbe ile Allah\'a çokça yönelenler (evvâbîn) devam eder. O, evvâbînin namazıdır." (Müslim).',
+    ],
     niyyah: 'Niyet ettim Allah rızası için Kuşluk (Duhâ) namazı kılmaya.',
     shortSummary: 'Vücuttaki 360 eklemin şükür sadakası sayılan, rızık ve bereket vesilesi gündüz sünneti.',
     isFeatured: true,
@@ -209,6 +228,11 @@ class NafilaPrayersData {
     conditions: 'Akşam namazından sonra dünyevi laflarla meşgul olmadan hemen nafileye niyet etmek edeplerdendir.',
     virtues: '"Evvâbîn", günahlarından tövbe edip daima Allah\'a yönelenler demektir. '
         'Hadis-i şerifte: "Kim akşam namazından sonra araya kötü bir söz sokmadan altı rekat namaz kılarsa, bu namaz onun için on iki senelik nafile ibadete denk tutulur." (Tirmizî) buyrulmuştur.',
+    rewards: [
+      '12 Yıllık Nafile İbadet Sevabı: Resûlullah (s.a.v.): "Kim akşam namazından sonra dünya kelamı konuşmaksızın altı rekat kılarsa, bu onun için on iki senelik nafile ibadete denk tutulur." (Tirmizî, Salât 321; İbn Mâce).',
+      'Allah\'a Yönelenler Kütüğüne Kaydolma: Kur\'an-ı Kerim\'deki "Şüphesiz O, evvâb olanları (kendisine çokça yönelenleri) çok bağışlayıcıdır" (İsrâ, 25) ilahi iltifatına nail olma.',
+      'Gaflet Saatini İhyâ: İnsanların akşam telaşı ve yemekle meşgul olduğu vakti seccade başında geçirip meleklerin gıpta ettiği kullardan olma bereketi.',
+    ],
     niyyah: 'Niyet ettim Allah rızası için Evvâbîn namazı kılmaya.',
     shortSummary: 'Akşam namazından sonra kılınan, günahları bağışlatan ve tevbe edenlerin nişanı olan 6 rekatlık sünnet.',
     steps: [
@@ -234,6 +258,11 @@ class NafilaPrayersData {
         '2. Namazdan sonra istihare duasını okumak ve lüzumsuz dünya kelamı konuşmadan sağ yana kıbleye dönük yatmak.\n'
         '3. Rüyada beyaz veya yeşil renk görmek hayra, siyah veya kırmızı görmek şerre yorulur; ancak asıl olan kalbin meylidir.',
     virtues: 'Cabir b. Abdullah (r.a.) anlatıyor: "Resûlullah (s.a.v.) bize, Kur\'an\'dan bir sûre öğretir gibi her işte istihare yapmayı öğretirdi." (Buhârî)',
+    rewards: [
+      'Pişmanlık ve Hüsrandan Muhafaza: "İstihâre eden hüsrana uğramaz, istişare eden pişman olmaz, iktisatlı olan da fakir düşmez." (Taberânî).',
+      'İlahi İlim ve Hikmete Teslimiyet: Kul, sınırlı aklını Cenâb-ı Hakk\'ın sonsuz ilmine emanet ederek doğru ve hayırlı kapıların açılmasını sağlar.',
+      'Gönül Ferahlığı & Şerlerden Korunma: Kararsızlık sıkıntısı son bulur; zahiren cazip görünse dahi sonu musibet getirecek tehlikeler bertaraf edilir.',
+    ],
     niyyah: 'Niyet ettim Allah rızası için İstihâre namazı kılmaya.',
     shortSummary: 'Önemli kararlar öncesinde hayırlı olanı Cenâb-ı Hakk\'tan talep etmek için kılınan 2 rekatlık istişare namazı.',
     recommendedSurahs: [
@@ -275,6 +304,11 @@ class NafilaPrayersData {
         '2. Gusül veya güzelce alınmış kamil bir abdest.\n'
         '3. Namaz sonrasında Allah\'a hamd, Peygamberimiz (s.a.v.)\'e bolca salavat getirip Hâcet Duasını okumak.',
     virtues: 'Peygamber Efendimiz (s.a.v.) buyurdu: "Kimin Allah\'tan veya insanlardan bir dileği ve ihtiyacı olursa, güzelce abdest alsın, sonra iki rekat namaz kılsın. Sonra Allah\'a hamd edip Resûlullah\'a salât ü selâm getirsin ve şu duayı okusun..." (Tirmizî, İbn Mâce)',
+    rewards: [
+      'Meleklerin Âmin Demesi & Darlıkların Açılması: Efendimiz (s.a.v.): "Kimin Allah\'tan veya kullardan bir dileği olursa güzelce abdest alıp iki rekat namaz kılsın, hamd ü senâ ve salavatla dua etsin... Muhakkak Allah ona bir çıkış yolu ihsan eder." (Tirmizî, Salât 348).',
+      'Sebeplerin Sahibi Olan Allah\'a İlticâ: Kula minnet etmeden, bizzat Hâcetlerin Mercii olan Kadîr-i Zülcelâl\'e boyun büküp istemenin vakar ve mükafatı.',
+      'Sabır, Teselli ve Manevi Sekînet: Çaresizlik girdabından kurtulup dertlerin yükünü sonsuz rahmet sahibine tevdi etmenin huzuru.',
+    ],
     niyyah: 'Niyet ettim Allah rızası için Hâcet namazı kılmaya.',
     shortSummary: 'Dünyevi ve uhrevi meşru bir dilek, şifa veya sıkıntının feraha kavuşması için kılınan dua namazı.',
     steps: [
@@ -307,6 +341,11 @@ class NafilaPrayersData {
     conditions: 'Her rekatta 75 defa olmak üzere 4 rekatta toplam 300 defa şu tesbih okunur:\n'
         '«Sübhânallâhi ve\'l-hamdü lillâhi ve lâ ilâhe illallâhü vallâhü ekber»',
     virtues: 'Peygamberimiz (s.a.v.) amcası Hz. Abbas\'a: "Ey amca! Sana on fazileti olan bir namaz öğreteyim mi? Bunu kıldığın zaman Allah senin günahlarının ilkini, sonunu, eskisini, yenisini, bilerek veya bilmeyerek işlediğini bağışlar. Gücün yeterse her gün, olmazsa her cuma, olmazsa ayda bir, olmazsa yılda bir, o da olmazsa ömründe bir defa kıl." buyurmuştur. (Ebû Dâvûd, Tirmizî)',
+    rewards: [
+      '10 Çeşit Günahın Toptan Affedilmesi: Peygamberimiz (s.a.v.) amcası Hz. Abbas\'a buyurdu: "Bu namazı kıldığın vakit Allah senin ilk ve son, eski ve yeni, bilerek veya bilmeyerek işlediğin, küçük ve büyük, gizli ve aşikâr on çeşit günahını bağışlar." (Ebû Dâvûd, Tatavvu 14; Tirmizî).',
+      '300 Defa En Yüce Tevhid ve Tesbih Ecri: 4 rekatta toplam 300 defa Arş\'ı titreten tesbih okunarak amel terazisinin sağ kefesi en ağır sevaplarla doldurulur.',
+      'Kandil ve Cuma Gecelerinin Manevi Tacı: Bütün ömrün günah yükünden arınıp melekler safına yükselme fırsatı sunan müstesna bir ilahi hediyedir.',
+    ],
     niyyah: 'Niyet ettim Allah rızası için Tesbih namazı kılmaya.',
     shortSummary: 'Ömürde en az bir kez kılınması tavsiye edilen, 300 tesbihle bütün günahlara kefaret olan muazzam namaz.',
     steps: [
@@ -341,6 +380,11 @@ class NafilaPrayersData {
         '2. Günahı derhal terk etmek ve bir daha dönmemeye kesin azmetmek.\n'
         '3. Kul hakkı varsa hak sahibine hakkını iade edip helallik almak.',
     virtues: 'Hz. Ebû Bekir (r.a.) rivayet eder: Resûlullah (s.a.v.) şöyle buyurdu: "Bir kul bir günah işler de ardından güzelce abdest alır, kalkıp iki rekat namaz kılar ve Allah\'tan bağışlanma dilerse, Allah onu mutlaka bağışlar." (Ebû Dâvûd, Tirmizî)',
+    rewards: [
+      'Günahsız Doğmuş Gibi Arınma: Fahr-i Kâinat Efendimiz (s.a.v.) müjdeler: "Günahtan tam tevbe eden, sanki hiç günah işlememiş gibidir." (İbn Mâce, Zühd 30).',
+      'Kötülüklerin Sevaba Dönüşmesi: Kur\'an-ı Kerim: "Ancak tevbe edip iman eden ve salih amel işleyenler müstesna; işte Allah onların kötülüklerini (seyyiatını) iyiliklere (hasenata) çevirir." (Furkân, 70).',
+      'Meleklerin Mağfiret Müjdesi: Bir günahın ardından abdest alıp iki rekat namaz kılan ve istiğfar eden kulun mutlaka affedileceği Hadis-i Şerif ile sabittir (Ebû Dâvûd, Vitir 26).',
+    ],
     niyyah: 'Niyet ettim Allah rızası için Tevbe namazı kılmaya.',
     shortSummary: 'Hata ve günahların ardından kulun günah kirinden arınıp tertemiz bir sayfa açması için kılınan 2 rekatlık mağfiret namazı.',
     steps: [
@@ -372,6 +416,11 @@ class NafilaPrayersData {
     timing: 'Bir camiye veya mescide girildiğinde, henüz oturmadan önce kılınır. Kerahet vakti ise kılınmaz, tesbih ile meşgul olunur.',
     conditions: 'Camiye ibadet veya ziyaret niyetiyle girilmiş olması ve oturmadan önce kılınması sünnettir.',
     virtues: 'Peygamberimiz (s.a.v.) buyurdu: "Biriniz mescide girdiğinde, oturmadan önce iki rekat namaz kılsın." (Buhârî, Müslim)',
+    rewards: [
+      'Allah\'ın Evine ve Sahibine Tazim: Peygamberimiz (s.a.v.): "Biriniz mescide girdiğinde oturmadan önce iki rekat namaz kılsın." buyurarak Beytullah\'ın şubelerini selamlama sünnetini emretmiştir (Buhârî, Salât 60).',
+      'Meleklerin Kesintisiz Duası: Camide bu hürmetle bekleyen kul için melekler "Allah\'ım ona merhamet et, onu bağışla, tövbesini kabul buyur" diye istiğfar eder.',
+      'Namazda Geçen Vakit Ecri: Mescide adım attığı andan itibaren kul, namaz kılmış gibi sevap hanesine aralıksız ecir yazılır.',
+    ],
     niyyah: 'Niyet ettim Allah rızası için Tahiyyetü\'l-Mescid namazı kılmaya.',
     shortSummary: 'Allah\'ın evi olan camiye girildiğinde hürmet ve selamlama olarak kılınan 2 rekatlık sünnet.',
     steps: [
@@ -394,6 +443,11 @@ class NafilaPrayersData {
     timing: 'Sevindirici bir haber alındığında, bir nimet ihsan edildiğinde veya büyük bir kaza, bela ve musibetten kurtulunduğunda kılınır.',
     conditions: 'Kerahet vakti dışında abdestli olarak kılınır. Vakit müsait değilse hemen secde-i şükür yapılır.',
     virtues: 'Peygamber Efendimiz (s.a.v.), kendisini sevindiren bir haber veya hayırlı bir durumla karşılaştığında Allah\'a şükretmek için namaz kılar veya secdeye kapanırdı. (Ebû Dâvûd)',
+    rewards: [
+      'Nimetlerin Kat Kat Artması Vaadi: Kur\'an-ı Kerim\'in ilahi fermanı: "Eğer şükrederseniz, elbette size (nimetimi) artırırım." (İbrâhîm, 7).',
+      'Peygamber Ahlakıyla Süslenme: Efendimiz (s.a.v.) sevinçli bir haber veya zafer kazandığında derhal secdeye varır veya iki rekat şükür namazı kılardı (Ebû Dâvûd, Cihâd 162).',
+      'Nimetin Elden Çıkmasından (Zevalinden) Korunma: Şükrü kılınan nimet zeval bulmaz, nankörlük afetinden korunur ve ilahi muhafazaya alınır.',
+    ],
     niyyah: 'Niyet ettim Allah rızası için Şükür namazı kılmaya.',
     shortSummary: 'İhsan edilen nimetlere, şifaya veya atlatılan belalara karşı kulun teşekkür nişanesi olan 2 rekat namaz.',
     steps: [
@@ -416,6 +470,11 @@ class NafilaPrayersData {
     timing: 'Yolculuğa çıkmadan önce evden ayrılırken 2 rekat; yolculuktan dönüldüğünde ise mahalleye/şehre girince mescitte 2 rekat kılınır.',
     conditions: 'Yolun hayırlı, kazasız ve bereketli geçmesi niyetiyle kılınır.',
     virtues: 'Resûlullah (s.a.v.) buyurdu: "Kişinin evinden ayrılırken geride bıraktığı en hayırlı şey, kılacağı iki rekat sefer namazıdır." (Taberânî)',
+    rewards: [
+      'Ev Halkına Bırakılan En Faziletli Emanet: Peygamberimiz (s.a.v.): "Kişinin sefere çıkarken geride bıraktığı en hayırlı vekil, evinde kıldığı iki rekat namazdır." (Taberânî).',
+      'Yolculuk Boyunca İlahi Muhafaza: Yolun kazalarından, belalarından, meşakkat ve kötü sürprizlerinden Cenâb-ı Hakk\'ın koruma kalkanına sığınma.',
+      'Salimen ve Afiyetle Dönüş Şükrü: Sefer dönüşü mescitte kılınan 2 rekat, yol yorgunluğunu manevi huzura dönüştürür ve aileyi selamete erdirir.',
+    ],
     niyyah: 'Niyet ettim Allah rızası için Sefer (Yolculuk) namazı kılmaya.',
     shortSummary: 'Yola çıkarken selamet ve bereket, dönüşte ise afiyet şükrü için kılınan 2 rekatlık sünnet.',
     steps: [
@@ -440,6 +499,11 @@ class NafilaPrayersData {
         '2. Farzdan önce hutbe okunması şarttır.\n'
         '3. Hür, mukim, sıhhati yerinde ve erkek Müslümanlara farz-ı ayındır.',
     virtues: 'Cuma günü müminlerin haftalık bayramıdır. "Üzerine güneşin doğduğu en hayırlı gün Cuma günüdür." (Müslim)',
+    rewards: [
+      'Haftalık Günahlara Kefaret: Peygamberimiz (s.a.v.): "Büyük günahlardan kaçınıldığı müddetçe, beş vakit namaz ve iki Cuma, aralarında işlenen küçük günahlara kefarettir." (Müslim, Tahâret 16).',
+      'Her Adımına 1 Yıllık Oruç ve Namaz Sevabı: "Kim Cuma günü erkenden camiye yürüyerek gider ve hutbeyi dinlerse; attığı her adım için bir yıllık nafile oruç ve gece namazı sevabı verilir." (Tirmizî, Cuma 356).',
+      'İcabet Saatiyle Duaların Kabulü: Cuma gününde gizli olan icabet vaktinde yapılan dualar semadan geri çevrilmez (Buhârî, Cuma 37).',
+    ],
     niyyah: 'Niyet ettim Allah rızası için Cuma namazının farzına / sünnetine uydum hazır olan imama.',
     shortSummary: 'Haftalık bayramımız olan Cuma gününde hutbe ile cemaat halinde eda edilen mübarek farz namaz.',
     steps: [
@@ -466,6 +530,11 @@ class NafilaPrayersData {
     timing: 'Bayramın 1. günü, güneş doğup kerahet vakti çıktıktan (yaklaşık 45-50 dakika sonra) istiva vaktine kadar kılınır.',
     conditions: 'Cuma namazının farz olduğu kimselere bayram namazı kılmak vaciptir. Cemaatle kılınır, ezanı ve kameti yoktur.',
     virtues: 'Bütün müminlerin neşe ve kardeşlikle camileri doldurduğu, birlik ve af bayramıdır.',
+    rewards: [
+      'Yevmü\'l-Câize (Mükafat ve Af Günü): Bayram sabahı Allah Teâlâ meleklere: "İşini bitiren işçinin karşılığı nedir?" diye sorar. Melekler: "Ücretini tam almaktır" der. Allah Teâlâ: "Şahit olun ki onları toptan affettim!" buyurur (Beyhakî).',
+      'Müminlerin Kardeşlik & Birlik Nişanı: Tekbirlerle gök kubbeyi inleten cemaat, günahlarından arınarak bayrama masum bir neşeyle başlar.',
+      'İbadetlerin Kabul Mührü: Ramazan orucunun veya Kurban fedakarlığının Cenâb-ı Hak katında kabul mührü hükmündedir.',
+    ],
     niyyah: 'Niyet ettim Allah rızası için Ramazan/Kurban Bayramı namazını kılmaya, uydum hazır olan imama.',
     shortSummary: 'Yılda iki kez Ramazan ve Kurban sabahlarında 6 ilave tekbirle cemaatle kılınan sevinç namazı.',
     steps: [
@@ -494,6 +563,11 @@ class NafilaPrayersData {
     timing: 'Ramazan ayına mahsustur. Yatsı namazının son sünnetinden sonra, Vitir namazından önce kılınır.',
     conditions: 'Kadın ve erkek her Müslümana sünnet-i müekkededir. Camide cemaatle kılınması sünnet-i kifayedir, evde tek başına da kılınabilir.',
     virtues: 'Peygamberimiz (s.a.v.): "Kim inanarak ve sevabını Allah\'tan umarak Ramazan gecelerini ihya ederse (teravih kılarsa), geçmiş günahları bağışlanır." (Buhârî, Müslim)',
+    rewards: [
+      'Geçmiş Günahların Bağışlanması: Resûl-i Ekrem (s.a.v.): "Kim inanarak ve sevabını Allah\'tan umarak Ramazan gecelerini (teravih ile) ihya ederse, geçmiş günahları bağışlanır." (Buhârî, Salâtü\'t-Terâvîh 1).',
+      'Bütün Geceyi İbadetle Geçirmiş Sayılma: "Kim imamla birlikte namazı tamamlayıncaya kadar kılarsa, ona bütün geceyi kıyamla (ibadetle) geçirmiş sevabı yazılır." (Ebû Dâvûd, Ramazân 1; Tirmizî).',
+      'Cemaat Bereketi ve Kur\'an Hatmi: Kur\'an ayetlerinin huşû ile tilaveti kalpleri diriltir ve cemaatle kılınan her rekatın ecri katlanır.',
+    ],
     niyyah: 'Niyet ettim Allah rızası için Teravih namazı kılmaya (varsa: uydum imama).',
     shortSummary: 'Ramazan gecelerinin neşesi, yatsı ile vitir arasında kılınan 20 rekatlık müekked sünnet.',
     steps: [
@@ -517,6 +591,11 @@ class NafilaPrayersData {
     timing: 'Güneş tutulması (Küsûf) veya Ay tutulması (Husûf) başladığında kılınır; tutulma bitene kadar dua ve istiğfar edilir.',
     conditions: 'Güneş veya ay tutulduğunda ezansız ve kametsiz olarak cemaatle veya münferit olarak kılınır.',
     virtues: 'Peygamberimiz (s.a.v.) oğlu İbrahim vefat ettiğinde güneş tutulunca buyurdu: "Şüphesiz güneş ve ay Allah\'ın âyetlerindendir; birinin ölümü veya doğumu için tutulmazlar. Bunu gördüğünüzde Allah\'ı zikredin, tekbir getirin, namaz kılın ve sadaka verin." (Buhârî, Müslim)',
+    rewards: [
+      'İlahi İhtişam Karşısında Secde Edebi: Peygamberimiz (s.a.v.): "Güneş ve ay Allah\'ın ayetlerindendir... Bunu gördüğünüzde Allah\'ı zikredin, tekbir getirin, namaz kılın ve sadaka verin." (Buhârî, Küsûf 2).',
+      'Kıyamet Dehşetini Hatırlayıp Uyanış: Kozmik düzenin sahibine sığınarak kalbi gafletten uyandırır ve haşyet makamına erdirir.',
+      'Belaların Def\'i ve Rahmetin Celbi: Tutulma esnasında yapılan toplu dua ve namazlar, ilahi gazabı teskin eder ve semavi rahmeti celbeder.',
+    ],
     niyyah: 'Niyet ettim Allah rızası için Küsûf/Husûf namazı kılmaya.',
     shortSummary: 'Güneş veya Ay tutulduğunda ilahi azamet karşısında ürperip kılınan sünnet namaz.',
     steps: [

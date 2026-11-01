@@ -77,6 +77,7 @@ class NafilaPrayer {
   final List<NafilaStep> steps;
   final List<NafilaSpecialDua> specialDuas;
   final List<String> recommendedSurahs;
+  final List<String> rewards; // Kazandırdığı Sevaplar ve İlahi Müjdeler
   final bool isFeatured;
 
   const NafilaPrayer({
@@ -93,6 +94,7 @@ class NafilaPrayer {
     required this.steps,
     this.specialDuas = const [],
     this.recommendedSurahs = const [],
+    this.rewards = const [],
     this.isFeatured = false,
   });
 }
