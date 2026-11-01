@@ -398,20 +398,22 @@ class _NafilaPrayersSheetState extends ConsumerState<NafilaPrayersSheet> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Wrap(
-                            crossAxisAlignment: WrapCrossAlignment.center,
-                            spacing: 8,
-                            runSpacing: 4,
+                          Row(
                             children: [
-                              Text(
-                                prayer.title,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16.5,
-                                  fontWeight: FontWeight.bold,
+                              Flexible(
+                                child: Text(
+                                  prayer.title,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 15.5,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                              if (prayer.isFeatured)
+                              if (prayer.isFeatured) ...[
+                                const SizedBox(width: 8),
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                                   decoration: BoxDecoration(
@@ -419,14 +421,15 @@ class _NafilaPrayersSheetState extends ConsumerState<NafilaPrayersSheet> {
                                     borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: Text(
-                                    prayer.id == 'teveccuh' ? 'ÖZEL HUZUR ✨' : 'ÖNE ÇIKAN ⭐',
+                                    prayer.id == 'teveccuh' ? 'ÖZEL HUZUR' : 'ÖNE ÇIKAN',
                                     style: TextStyle(
                                       color: BeyanColors.tone(0xFF01201B),
-                                      fontSize: 9.5,
+                                      fontSize: 9,
                                       fontWeight: FontWeight.w800,
                                     ),
                                   ),
                                 ),
+                              ],
                             ],
                           ),
                           const SizedBox(height: 2),

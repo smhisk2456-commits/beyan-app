@@ -204,16 +204,19 @@ class _PrayerCard extends ConsumerWidget {
                                     ),
                                     const SizedBox(width: 5),
                                     Flexible(
-                                      child: Text(
-                                        next.name.localizedRakat(langCode),
-                                        style: TextStyle(
-                                          color: BeyanColors.tone(0xFFFFDF7A),
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w600,
-                                          letterSpacing: 0.2,
+                                      child: FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        alignment: Alignment.centerLeft,
+                                        child: Text(
+                                          next.name.localizedRakat(langCode),
+                                          style: TextStyle(
+                                            color: BeyanColors.tone(0xFFFFDF7A),
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600,
+                                            letterSpacing: 0.2,
+                                          ),
+                                          maxLines: 1,
                                         ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
                                     const SizedBox(width: 4),
@@ -407,22 +410,27 @@ class _LocationRow extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 6),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-          decoration: BoxDecoration(
-            color: Colors.black.withValues(alpha: 0.25),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.3), width: 0.8),
-          ),
-          child: Text(
-            '$hijriStr • $dateStr',
-            style: TextStyle(
-              color: BeyanColors.tone(0xFFFFDF7A),
-              fontSize: 10.5,
-              fontWeight: FontWeight.w600,
+        Flexible(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.25),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.3), width: 0.8),
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerRight,
+              child: Text(
+                '$hijriStr • $dateStr',
+                style: TextStyle(
+                  color: BeyanColors.tone(0xFFFFDF7A),
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w600,
+                ),
+                maxLines: 1,
+              ),
+            ),
           ),
         ),
       ],

@@ -778,7 +778,7 @@ class _SpiritualLifeHub extends ConsumerWidget {
                 child: _HubCard(
                   title: isMorning ? 'Sabah Virdi' : 'Akşam Virdi',
                   subtitle: isMorning ? 'Koruyucu Dualar (3 Dk)' : 'Akşam Duaları (3 Dk)',
-                  badge: isMorning ? 'SABAH 🌅' : 'AKŞAM 🌙',
+                  badge: isMorning ? 'SABAH' : 'AKŞAM',
                   icon: isMorning ? Icons.wb_sunny_rounded : Icons.nightlight_round,
                   isDark: isDark,
                   onTap: () {
@@ -794,7 +794,7 @@ class _SpiritualLifeHub extends ConsumerWidget {
                 child: _HubCard(
                   title: 'Yakındaki Camiler',
                   subtitle: 'En Yakın Mescidler & GPS',
-                  badge: 'HARİTA 📍',
+                  badge: 'HARİTA',
                   icon: Icons.mosque_rounded,
                   isDark: isDark,
                   accentColor: const Color(0xFF34D399),
@@ -817,7 +817,7 @@ class _SpiritualLifeHub extends ConsumerWidget {
                 child: _HubCard(
                   title: 'Nafile Namazlar',
                   subtitle: 'Teheccüd, Kuşluk & Sünnet',
-                  badge: 'REHBER ✨',
+                  badge: 'REHBER',
                   icon: Icons.stars_rounded,
                   isDark: isDark,
                   accentColor: BeyanColors.tone(0xFFFFDF7A),
@@ -829,7 +829,7 @@ class _SpiritualLifeHub extends ConsumerWidget {
                 child: _HubCard(
                   title: 'Teveccüh Namazı',
                   subtitle: 'Kalbi Allah\'a Yöneltme (2 Rekat)',
-                  badge: 'HUZUR 🤍',
+                  badge: 'HUZUR',
                   icon: Icons.favorite_rounded,
                   isDark: isDark,
                   accentColor: BeyanColors.tone(0xFFFFDF7A),
@@ -950,24 +950,30 @@ class _HubCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 8),
-              Text(
-                title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: isDark ? Colors.white : BeyanColors.tone(0xFF052B24),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : BeyanColors.tone(0xFF052B24),
+                  ),
+                  maxLines: 1,
                 ),
               ),
               const SizedBox(height: 2),
-              Text(
-                subtitle,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 10.5,
-                  color: isDark ? Colors.white60 : Colors.black54,
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 10.5,
+                    color: isDark ? Colors.white60 : Colors.black54,
+                  ),
+                  maxLines: 1,
                 ),
               ),
             ],
@@ -1052,7 +1058,7 @@ class _DailyInspirationCardState extends ConsumerState<_DailyInspirationCard> {
                         setState(() => _tabIndex = 0);
                       },
                       child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 7),
+                        padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 6),
                         decoration: BoxDecoration(
                           color: _tabIndex == 0 ? BeyanColors.tone(0xFFD4AF37) : Colors.transparent,
                           borderRadius: BorderRadius.circular(9),
@@ -1065,13 +1071,19 @@ class _DailyInspirationCardState extends ConsumerState<_DailyInspirationCard> {
                               size: 14,
                               color: _tabIndex == 0 ? Colors.black87 : BeyanColors.tone(0xFFFFDF7A),
                             ),
-                            const SizedBox(width: 6),
-                            Text(
-                              strings.dailyVerseTitle,
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: _tabIndex == 0 ? Colors.black87 : Colors.white70,
+                            const SizedBox(width: 5),
+                            Flexible(
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  strings.language == AppLanguage.turkish ? 'Âyet-i Kerîme' : strings.dailyVerseTitle,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: _tabIndex == 0 ? Colors.black87 : Colors.white70,
+                                  ),
+                                  maxLines: 1,
+                                ),
                               ),
                             ),
                           ],
@@ -1087,7 +1099,7 @@ class _DailyInspirationCardState extends ConsumerState<_DailyInspirationCard> {
                         setState(() => _tabIndex = 1);
                       },
                       child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 7),
+                        padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 6),
                         decoration: BoxDecoration(
                           color: _tabIndex == 1 ? BeyanColors.tone(0xFFD4AF37) : Colors.transparent,
                           borderRadius: BorderRadius.circular(9),
@@ -1100,13 +1112,19 @@ class _DailyInspirationCardState extends ConsumerState<_DailyInspirationCard> {
                               size: 14,
                               color: _tabIndex == 1 ? Colors.black87 : BeyanColors.tone(0xFFFFDF7A),
                             ),
-                            const SizedBox(width: 6),
-                            Text(
-                              strings.dailyDuaTitle,
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: _tabIndex == 1 ? Colors.black87 : Colors.white70,
+                            const SizedBox(width: 5),
+                            Flexible(
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  strings.language == AppLanguage.turkish ? 'Günün Duası' : strings.dailyDuaTitle,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: _tabIndex == 1 ? Colors.black87 : Colors.white70,
+                                  ),
+                                  maxLines: 1,
+                                ),
                               ),
                             ),
                           ],
@@ -1298,7 +1316,7 @@ class _QuickActionGrid extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
+      padding: const EdgeInsets.fromLTRB(14, 8, 14, 4),
       child: Row(
         children: [
           _ActionCard(
@@ -1309,7 +1327,7 @@ class _QuickActionGrid extends ConsumerWidget {
             isDark: isDark,
             atmosphere: atmosphere,
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 6),
           _ActionCard(
             icon: Icons.auto_stories_rounded,
             title: strings.actionDuas,
@@ -1318,7 +1336,7 @@ class _QuickActionGrid extends ConsumerWidget {
             isDark: isDark,
             atmosphere: atmosphere,
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 6),
           _ActionCard(
             icon: Icons.calendar_month_rounded,
             title: strings.actionCalendar,
@@ -1327,7 +1345,7 @@ class _QuickActionGrid extends ConsumerWidget {
             isDark: isDark,
             atmosphere: atmosphere,
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 6),
           _ActionCard(
             icon: Icons.nights_stay_rounded,
             title: strings.actionRamadan,
@@ -1378,7 +1396,7 @@ class _ActionCard extends StatelessWidget {
             onTap();
           },
           child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 6),
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
@@ -1397,8 +1415,8 @@ class _ActionCard extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  width: 38,
-                  height: 38,
+                  width: 36,
+                  height: 36,
                   decoration: BoxDecoration(
                     color: iconColor.withValues(alpha: isDark ? 0.18 : 0.1),
                     shape: BoxShape.circle,
@@ -1409,30 +1427,34 @@ class _ActionCard extends StatelessWidget {
                   ),
                   child: Icon(
                     icon,
-                    size: 19,
+                    size: 18,
                     color: iconColor,
                   ),
                 ),
                 const SizedBox(height: 6),
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: isDark ? Colors.white : BeyanColors.tone(0xFF11221F),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: isDark ? Colors.white : BeyanColors.tone(0xFF11221F),
+                    ),
+                    maxLines: 1,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: isDark ? Colors.white54 : AppColors.textSecondary,
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 9.5,
+                      color: isDark ? Colors.white54 : AppColors.textSecondary,
+                    ),
+                    maxLines: 1,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -1454,17 +1476,17 @@ class _IslamicAppBar extends ConsumerWidget {
   String _getSpiritualGreeting(AppStrings strings) {
     final now = DateTime.now();
     if (now.weekday == DateTime.friday) {
-      return strings.language == AppLanguage.turkish ? 'Cumanız Mübarek Olsun 🕊️' : 'Jummah Mubarak 🕊️';
+      return strings.language == AppLanguage.turkish ? 'Cumanız Mübarek Olsun' : 'Jummah Mubarak';
     }
     final hour = now.hour;
     if (hour >= 4 && hour < 11) {
-      return strings.language == AppLanguage.turkish ? 'Hayırlı Sabahlar 🌅' : 'Good Morning 🌅';
+      return strings.language == AppLanguage.turkish ? 'Hayırlı Sabahlar' : 'Good Morning';
     } else if (hour >= 11 && hour < 17) {
-      return strings.language == AppLanguage.turkish ? 'Hayırlı Günler 🌿' : 'Blessed Day 🌿';
+      return strings.language == AppLanguage.turkish ? 'Hayırlı Günler' : 'Blessed Day';
     } else if (hour >= 17 && hour < 21) {
-      return strings.language == AppLanguage.turkish ? 'Hayırlı Akşamlar 🌇' : 'Good Evening 🌇';
+      return strings.language == AppLanguage.turkish ? 'Hayırlı Akşamlar' : 'Good Evening';
     } else {
-      return strings.language == AppLanguage.turkish ? 'Hayırlı Geceler 🌙' : 'Peaceful Night 🌙';
+      return strings.language == AppLanguage.turkish ? 'Hayırlı Geceler' : 'Peaceful Night';
     }
   }
 

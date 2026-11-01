@@ -59,9 +59,9 @@ enum PrayerName {
     english: 'Isha',
     key: 'isha',
     rakatTotal: 13,
-    rakatSummaryTurkish: '13 Rekat (4 Sünnet + 4 Farz + 2 Sünnet + 3 Vitir)',
-    rakatSummaryEnglish: '13 Rakats (4 Sunnah + 4 Fard + 2 Sunnah + 3 Witr)',
-    rakatSummaryArabic: '١٣ ركعة (٤ سنة + ٤ فرض + ٢ سنة + ٣ وتر)',
+    rakatSummaryTurkish: '13 Rekat (Farz, Sünnet, Vitir)',
+    rakatSummaryEnglish: '13 Rakats (Fard, Sunnah, Witr)',
+    rakatSummaryArabic: '١٣ ركعة (فرض، سنة، وتر)',
   );
 
   /// Türkçe adı
@@ -171,7 +171,7 @@ enum PrayerName {
           case PrayerName.dhuhr: return '10 Rakaat (4 Sunnah + 4 Fardhu + 2 Sunnah)';
           case PrayerName.asr: return '8 Rakaat (4 Sunnah + 4 Fardhu)';
           case PrayerName.maghrib: return '5 Rakaat (3 Fardhu + 2 Sunnah)';
-          case PrayerName.isha: return '13 Rakaat (4 Sunnah + 4 Fardhu + 2 Sunnah + 3 Witir)';
+          case PrayerName.isha: return '13 Rakaat (Fardhu, Sunnah, Witir)';
         }
       case 'fr':
         switch (this) {
@@ -180,7 +180,7 @@ enum PrayerName {
           case PrayerName.dhuhr: return '10 Rakats (4 Sounnah + 4 Fard + 2 Sounnah)';
           case PrayerName.asr: return '8 Rakats (4 Sounnah + 4 Fard)';
           case PrayerName.maghrib: return '5 Rakats (3 Fard + 2 Sounnah)';
-          case PrayerName.isha: return '13 Rakats (4 Sounnah + 4 Fard + 2 Sounnah + 3 Witr)';
+          case PrayerName.isha: return '13 Rakats (Fard, Sounnah, Witr)';
         }
       case 'ur':
         switch (this) {
@@ -189,7 +189,7 @@ enum PrayerName {
           case PrayerName.dhuhr: return '۱۰ رکعت (۴ سنت + ۴ فرض + ۲ سنت)';
           case PrayerName.asr: return '۸ رکعت (۴ سنت + ۴ فرض)';
           case PrayerName.maghrib: return '۵ رکعت (۳ فرض + ۲ سنت)';
-          case PrayerName.isha: return '۱۳ رکعت (۴ سنت + ۴ فرض + ۲ سنت + ۳ وتر)';
+          case PrayerName.isha: return '۱۳ رکعت (فرض، سنت، وتر)';
         }
       case 'de':
         switch (this) {
@@ -198,7 +198,7 @@ enum PrayerName {
           case PrayerName.dhuhr: return '10 Raka\'at (4 Sunnah + 4 Fard + 2 Sunnah)';
           case PrayerName.asr: return '8 Raka\'at (4 Sunnah + 4 Fard)';
           case PrayerName.maghrib: return '5 Raka\'at (3 Fard + 2 Sunnah)';
-          case PrayerName.isha: return '13 Raka\'at (4 Sunnah + 4 Fard + 2 Sunnah + 3 Witr)';
+          case PrayerName.isha: return '13 Raka\'at (Fard, Sunnah, Witr)';
         }
       case 'ru':
         switch (this) {
