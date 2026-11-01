@@ -8,7 +8,6 @@ import '../../../core/localization/app_strings.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/utils/app_constants.dart';
 import '../widget_service.dart';
-import '../../monetization/providers/premium_provider.dart';
 import '../../monetization/widgets/banner_ad_widget.dart';
 import '../../notifications/models/id_verse_translations.dart';
 import '../../notifications/models/short_verse_notification.dart';
@@ -1418,9 +1417,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                 setState(() => _selectedCategory = item.$1);
                 final prefs = await SharedPreferences.getInstance();
                 await prefs.setString('widget_active_category', item.$1.name);
-                if (ref.read(premiumProvider).hasWidgetAccess) {
-                  await WidgetService().updateAllWidgets();
-                }
+                await WidgetService().updateAllWidgets();
               },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),

@@ -771,9 +771,9 @@ class AppStrings {
 
   // ── Paywall & Monetization Localization ──
   String get paywallTitle => _t('paywallTitle', 'Beyân Premium Ayrıcalıkları', 'Beyân Premium Privileges', 'مميزات بيان بريميوم');
-  String get paywallSubtitle => _t('paywallSubtitle', 'Kilit ekranı widget\'ları, tarihi ezan makamları ve huşû dolu bir deneyim.', 'Lock screen widgets, historical adhan makams, and a serene worship experience.', 'أدوات شاشة القفل، ومقامات الأذان التاريخية، وتجربة عبادة خاشعة.');
-  String get paywallFeatWidgets => _t('paywallFeatWidgets', 'Kilit Ekranı & Ana Ekran Widget\'ları', 'Lock Screen & Home Screen Widgets', 'أدوات شاشة القفل والشاشة الرئيسية');
-  String get paywallFeatWidgetsDesc => _t('paywallFeatWidgetsDesc', 'Canlı geri sayım, sonraki namaz vakti ve günün ayeti daima kilit ekranınızda.', 'Live countdown, next prayer time, and verse of the day always on your lock screen.', 'عد تنازلي مباشر، وقت الصلاة القادمة، وآية اليوم دائماً على شاشة القفل.');
+  String get paywallSubtitle => _t('paywallSubtitle', 'Sınırsız AI İslami Rehber, tarihi ezan makamları ve huşû dolu reklamsız deneyim.', 'Unlimited AI Islamic Guide, historical adhan makams, and a serene ad-free experience.', 'المساعد الإسلامي الذكي بلا حدود، ومقامات الأذان التاريخية، وتجربة عبادة خاشعة.');
+  String get paywallFeatWidgets => _t('paywallFeatWidgets', 'Sınırsız Yapay Zeka İslami Rehber', 'Unlimited AI Islamic Guide & Assistant', 'المساعد الإسلامي الذكي بلا حدود');
+  String get paywallFeatWidgetsDesc => _t('paywallFeatWidgetsDesc', 'Günlük 3 soru sınırı olmadan 7/24 sınırsız dini soru-cevap, ayet tefsiri ve tefekkür asistanı.', '24/7 unlimited Islamic Q&A, verse tafsir, and spiritual reflection without the 3-question daily limit.', 'أسئلة وأجوبة دينية وتفسير الآيات على مدار الساعة دون حد ٣ أسئلة يومياً.');
   String get paywallFeatMakams => _t('paywallFeatMakams', 'Özel Ezan Makamları & Meşhur Müezzinler', 'Exclusive Adhan Makams & Muezzins', 'مقامات الأذان الحصرية وأشهر المؤذنين');
   String get paywallFeatMakamsDesc => _t('paywallFeatMakamsDesc', 'Mekke, Medine, Kudüs ve İstanbul (Saba, Hicaz, Rast) makamlarıyla vaktinde huzurlu çağrı.', 'Peaceful call to prayer with Mecca, Medina, Jerusalem, and Istanbul makams.', 'نداء الصلاة الخاشع بمقامات مكة والمدينة والقدس وإسطنبول.');
   String get paywallFeatAdFree => _t('paywallFeatAdFree', '%100 Reklamsız & Huşû Dolu', '100% Ad-Free & Serene', '١٠٠٪ خالي من الإعلانات وخاشع');

@@ -52,7 +52,8 @@ class PremiumService {
     return remaining > 0 ? remaining : 0;
   }
 
-  bool get hasWidgetAccess => isPremium;
+  // Kilit ekranı ve ana ekran widget'ları tüm kullanıcılara %100 ücretsizdir
+  bool get hasWidgetAccess => true;
 
   List<ProductDetails> _products = [];
   List<ProductDetails> get products => _products;

@@ -17,7 +17,7 @@ class PremiumState {
     this.isLoading = false,
     this.isTrialActive = false,
     this.trialDaysRemaining = 0,
-    this.hasWidgetAccess = false,
+    this.hasWidgetAccess = true,
   });
 
   PremiumState copyWith({

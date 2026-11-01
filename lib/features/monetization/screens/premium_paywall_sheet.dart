@@ -192,9 +192,9 @@ class _PremiumPaywallSheetState extends ConsumerState<PremiumPaywallSheet> {
             ),
             const SizedBox(height: 24),
 
-            // Avantajlar Kartları (Widget ve Makam Öncelikli)
+            // Avantajlar Kartları (Sınırsız AI Rehber ve Makam Öncelikli)
             _buildFeatureTile(
-              icon: Icons.widgets_rounded,
+              icon: Icons.auto_awesome_rounded,
               title: strings.paywallFeatWidgets,
               subtitle: strings.paywallFeatWidgetsDesc,
               gold: gold,

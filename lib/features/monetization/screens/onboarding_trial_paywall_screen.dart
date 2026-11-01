@@ -309,9 +309,9 @@ class _OnboardingTrialPaywallScreenState
                       ),
                       const SizedBox(height: 22),
 
-                      // ── Ana Premium Kozları (Widget & Makam Öncelikli) ────────
+                      // ── Ana Premium Kozları (AI Rehber & Makam Öncelikli) ────────
                       _buildFeatureRow(
-                        icon: Icons.widgets_rounded,
+                        icon: Icons.auto_awesome_rounded,
                         tag: _t(strings.language,
                             tr: 'ÖNE ÇIKAN',
                             en: 'FEATURED',
@@ -357,10 +357,10 @@ class _OnboardingTrialPaywallScreenState
                               ar: 'اليوم: فتح جميع الميزات',
                               id: 'Hari Ini: Semua Fitur Terbuka'),
                           subtitle: _t(strings.language,
-                              tr: 'Widget\'lar, tüm ezan makamları ve lüks temalar anında aktif.',
-                              en: 'Lock screen widgets, adhan makams, and luxury themes active.',
-                              ar: 'أدوات شاشة القفل، مقامات الأذان، والمظاهر الفاخرة فعالة.',
-                              id: 'Widget layar kunci, makam adzan, dan tema mewah langsung aktif.'),
+                              tr: 'Sınırsız AI İslami Rehber, tüm ezan makamları ve lüks temalar anında aktif.',
+                              en: 'Unlimited AI Islamic Guide, adhan makams, and luxury themes active.',
+                              ar: 'المساعد الإسلامي الذكي، مقامات الأذان، والمظاهر الفاخرة فعالة.',
+                              id: 'Asisten AI Islami tanpa batas, makam adzan, dan tema mewah langsung aktif.'),
                           isLast: false,
                         ),
                         _buildTimelineStep(
