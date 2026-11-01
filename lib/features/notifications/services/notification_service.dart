@@ -12,6 +12,7 @@ import '../../prayer_times/services/prayer_time_service.dart';
 import '../models/adhan_makam.dart';
 import '../models/short_verse_notification.dart';
 import '../../monetization/services/premium_service.dart';
+import '../../widget_service/widget_service.dart';
 import 'adhan_audio_player_service.dart';
 
 /// Ezan, Vakit ve Günün Âyeti Yerel Bildirim Servisi
@@ -687,6 +688,9 @@ class NotificationService {
         debugPrint('Gün $dayOffset için namaz bildirimi planlanamadı: $e');
       }
     }
+
+    // Namaz bildirimleri planlandıktan sonra kilit ekranı ve ana ekran widget'larını tam senkronize et
+    unawaited(WidgetService().updateAllWidgets());
   }
 
   /// Yalnızca namaz ve erken uyarı bildirimlerini iptal eder (Ayet bildirimlerini korur).

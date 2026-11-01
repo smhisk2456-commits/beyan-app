@@ -455,7 +455,7 @@ struct PrayerCalculator {
         }
 
         // Diyanet resmi takvim temkin düzeltmeleri (dakika)
-        let adjustments: [Double] = [0, -7, 5, 5, 8, 2]
+        let adjustments: [Double] = [0, -7, 5, 5, 9, 2]
 
         return PrayerKind.allCases.map { kind in
             let i = kind.rawValue
@@ -469,6 +469,11 @@ struct PrayerCalculator {
 
 // MARK: - Namaz Vakti Widget'ı
 
+struct PrayerScheduleItem: Codable {
+    let kind: Int
+    let epoch: Int
+}
+
 struct PrayerEntry: TimelineEntry {
     let date: Date
     let current: PrayerTime
@@ -478,6 +483,20 @@ struct PrayerEntry: TimelineEntry {
 
 struct PrayerProvider: TimelineProvider {
     private func schedule(around now: Date) -> [PrayerTime] {
+        let defaults = UserDefaults(suiteName: "group.com.smhisk60.beyan") ?? UserDefaults.standard
+        if let jsonStr = defaults.string(forKey: "widget_prayer_schedule_json"),
+           let data = jsonStr.data(using: .utf8),
+           let items = try? JSONDecoder().decode([PrayerScheduleItem].self, from: data),
+           !items.isEmpty {
+            let list = items.compactMap { item -> PrayerTime? in
+                guard let kind = PrayerKind(rawValue: item.kind) else { return nil }
+                return PrayerTime(kind: kind, date: Date(timeIntervalSince1970: TimeInterval(item.epoch)))
+            }
+            if !list.isEmpty {
+                return list.sorted { $0.date < $1.date }
+            }
+        }
+
         let loc = WidgetLocation.coordinate()
         let calc = PrayerCalculator(lat: loc.lat, lng: loc.lng)
         var all: [PrayerTime] = []
@@ -492,10 +511,14 @@ struct PrayerProvider: TimelineProvider {
     private func entry(at date: Date, in list: [PrayerTime]) -> PrayerEntry {
         let idx = list.lastIndex { $0.date <= date } ?? 0
         let nextIdx = min(idx + 1, list.count - 1)
-        let loc = WidgetLocation.coordinate()
-        let calc = PrayerCalculator(lat: loc.lat, lng: loc.lng)
         let refDate = list[nextIdx].date
-        let dayTimes = calc.times(for: refDate, timeZone: TimeZone.current)
+        let cal = Calendar.current
+        var dayTimes = list.filter { cal.isDate($0.date, inSameDayAs: refDate) }
+        if dayTimes.isEmpty {
+            let loc = WidgetLocation.coordinate()
+            let calc = PrayerCalculator(lat: loc.lat, lng: loc.lng)
+            dayTimes = calc.times(for: refDate, timeZone: TimeZone.current)
+        }
         return PrayerEntry(date: date, current: list[idx], next: list[nextIdx], dayTimes: dayTimes)
     }
 

@@ -286,7 +286,7 @@ class PrayerTimeService {
         tomorrowDateComponents,
         params,
       );
-      tomorrowFajr = tomorrowPrayerTimes.fajr;
+      tomorrowFajr = _toLocalTime(tomorrowPrayerTimes.fajr);
     } catch (_) {
       try {
         final safeCoords = Coordinates(loc.latitude.clamp(-65.0, 65.0), loc.longitude);
@@ -295,7 +295,7 @@ class PrayerTimeService {
           tomorrowDateComponents,
           params,
         );
-        tomorrowFajr = tomorrowPrayerTimes.fajr;
+        tomorrowFajr = _toLocalTime(tomorrowPrayerTimes.fajr);
       } catch (_) {}
     }
 
@@ -342,9 +342,20 @@ class PrayerTimeService {
     } catch (_) {}
   }
 
-  /// Yerel cihaz saat dilimi dönüşümü (adhan kütüphanesinden yerel saate)
+  /// Yerel cihaz saat dilimi dönüşümü ve saniyelerin 00'a yuvarlanması (Bildirim ve Widget tam senkronizasyonu için).
   DateTime _toLocalTime(DateTime time) {
-    return time.toLocal();
+    final local = time.toLocal();
+    final rounded = local.second >= 30
+        ? local.add(Duration(seconds: 60 - local.second))
+        : local.subtract(Duration(seconds: local.second));
+    return DateTime(
+      rounded.year,
+      rounded.month,
+      rounded.day,
+      rounded.hour,
+      rounded.minute,
+      0,
+    );
   }
 
   List<PrayerEntry> _buildPrayerEntries(PrayerTimes pt) {

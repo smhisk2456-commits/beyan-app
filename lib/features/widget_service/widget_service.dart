@@ -58,6 +58,25 @@ class WidgetService {
       final countdown = _prayerService.formatCountdown(daily.timeUntilNextPrayer, lang: lang);
       final nextPrayerName = next?.name.localizedName(langCode) ?? '--';
 
+      // 1.1 iOS ve Android Widget'ları için kesin namaz çizelgesi (Bildirimlerle tam senkronize)
+      final now = DateTime.now();
+      final scheduleList = <Map<String, dynamic>>[];
+      for (int dayOffset = -1; dayOffset <= 4; dayOffset++) {
+        final targetDate = DateTime(now.year, now.month, now.day + dayOffset);
+        final d = await _prayerService.calculatePrayerTimes(location: location, date: targetDate);
+        for (final p in d.prayers) {
+          final kind = _prayerNameToKind(p.name);
+          if (kind != null) {
+            scheduleList.add({
+              'kind': kind,
+              'epoch': p.time.millisecondsSinceEpoch ~/ 1000,
+            });
+          }
+        }
+      }
+      final prayerScheduleJson = jsonEncode(scheduleList);
+      await HomeWidget.saveWidgetData<String>('widget_prayer_schedule_json', prayerScheduleJson);
+
       // 2. Seçili kategoriye ve görünüme göre duygusal ayet havuzu oluştur
       final quoteCat = prefs.getString('widget_quote_category') ?? 'all';
       final verseView = prefs.getString('widget_verse_view') ?? 'meal_only';
@@ -246,6 +265,23 @@ class WidgetService {
       name: AppConstants.androidWidgetName,
       androidName: AppConstants.androidWidgetName,
     );
+  }
+
+  int? _prayerNameToKind(PrayerName name) {
+    switch (name) {
+      case PrayerName.fajr:
+        return 0;
+      case PrayerName.sunrise:
+        return 1;
+      case PrayerName.dhuhr:
+        return 2;
+      case PrayerName.asr:
+        return 3;
+      case PrayerName.maghrib:
+        return 4;
+      case PrayerName.isha:
+        return 5;
+    }
   }
 
   void _log(String msg) {
