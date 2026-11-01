@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/utils/navigator_guard.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -153,11 +154,11 @@ class _VerseCardStudioScreenState extends ConsumerState<VerseCardStudioScreen> {
                 GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onVerticalDragUpdate: (details) {
-                    if (details.primaryDelta != null && details.primaryDelta! > 6) {
-                      Navigator.pop(ctx);
-                    }
-                  },
-                  onTap: () => Navigator.pop(ctx),
+                      if (details.primaryDelta != null && details.primaryDelta! > 6) {
+                        BeyanNavigatorGuard.safePopOnDrag(ctx);
+                      }
+                    },
+                    onTap: () => BeyanNavigatorGuard.safePop(ctx),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: Center(
@@ -189,7 +190,7 @@ class _VerseCardStudioScreenState extends ConsumerState<VerseCardStudioScreen> {
                       const Spacer(),
                       TextButton.icon(
                         onPressed: () {
-                          Navigator.pop(ctx);
+                          BeyanNavigatorGuard.safePop(ctx);
                           _showCustomTextInputDialog();
                         },
                         icon: const Icon(Icons.edit_note_rounded, size: 18, color: Color(0xFFFFDF7A)),
@@ -289,7 +290,7 @@ class _VerseCardStudioScreenState extends ConsumerState<VerseCardStudioScreen> {
                                     _arabic = preset.arabic;
                                     _meaning = meanText;
                                   });
-                                  Navigator.pop(ctx);
+                                  BeyanNavigatorGuard.safePop(ctx);
                                 },
                               ),
                             );
@@ -359,7 +360,7 @@ class _VerseCardStudioScreenState extends ConsumerState<VerseCardStudioScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx),
+            onPressed: () => BeyanNavigatorGuard.safePop(ctx),
             child: Text(strings.cancel, style: const TextStyle(color: Colors.white54)),
           ),
           ElevatedButton(
@@ -371,7 +372,7 @@ class _VerseCardStudioScreenState extends ConsumerState<VerseCardStudioScreen> {
                   _meaning = meanCtrl.text.trim();
                 });
               }
-              Navigator.pop(ctx);
+              BeyanNavigatorGuard.safePop(ctx);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFD4AF37),

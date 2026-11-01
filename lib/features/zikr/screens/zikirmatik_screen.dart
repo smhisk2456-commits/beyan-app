@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/utils/navigator_guard.dart';
 import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -397,7 +398,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx),
+            onPressed: () => BeyanNavigatorGuard.safePop(ctx),
             child: Text(strings.cancel, style: const TextStyle(color: Colors.white60)),
           ),
           ElevatedButton(
@@ -411,7 +412,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                 _completedLaps = 0;
               });
               _saveDhikrState();
-              Navigator.pop(ctx);
+              BeyanNavigatorGuard.safePop(ctx);
             },
             child: Text(strings.reset),
           ),
@@ -460,7 +461,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx),
+            onPressed: () => BeyanNavigatorGuard.safePop(ctx),
             child: Text(strings.cancel, style: const TextStyle(color: Colors.white60)),
           ),
           ElevatedButton(
@@ -494,7 +495,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                   _completedLaps = 0;
                 });
               }
-              Navigator.pop(ctx);
+              BeyanNavigatorGuard.safePop(ctx);
             },
             child: Text(strings.add),
           ),
@@ -1641,11 +1642,11 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
               GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onVerticalDragUpdate: (details) {
-                  if (details.primaryDelta != null && details.primaryDelta! > 6) {
-                    Navigator.pop(context);
-                  }
-                },
-                onTap: () => Navigator.pop(context),
+                      if (details.primaryDelta != null && details.primaryDelta! > 6) {
+                        BeyanNavigatorGuard.safePopOnDrag(ctx);
+                      }
+                    },
+                    onTap: () => BeyanNavigatorGuard.safePop(ctx),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   child: Center(
@@ -2007,7 +2008,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                     ),
-                    onPressed: () => Navigator.of(ctx).pop(),
+                    onPressed: () => BeyanNavigatorGuard.safePop(ctx),
                     child: Text(
                       strings.acceptSpiritualBadge,
                       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),

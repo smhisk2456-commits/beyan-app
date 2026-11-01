@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/utils/navigator_guard.dart';
 import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -39,11 +40,11 @@ class _WidgetSettingsDialogState extends ConsumerState<WidgetSettingsDialog> {
           GestureDetector(
             behavior: HitTestBehavior.opaque,
             onVerticalDragUpdate: (details) {
-              if (details.primaryDelta != null && details.primaryDelta! > 6) {
-                Navigator.pop(context);
-              }
-            },
-            onTap: () => Navigator.pop(context),
+                      if (details.primaryDelta != null && details.primaryDelta! > 6) {
+                        BeyanNavigatorGuard.safePopOnDrag(context);
+                      }
+                    },
+                    onTap: () => BeyanNavigatorGuard.safePop(context),
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: Center(
@@ -162,7 +163,7 @@ class _WidgetSettingsDialogState extends ConsumerState<WidgetSettingsDialog> {
           InkWell(
             borderRadius: BorderRadius.circular(14),
             onTap: () {
-              Navigator.pop(context);
+              BeyanNavigatorGuard.safePop(context);
               AdhanMakamSelectorSheet.show(context);
             },
             child: Container(
@@ -221,7 +222,7 @@ class _WidgetSettingsDialogState extends ConsumerState<WidgetSettingsDialog> {
           InkWell(
             borderRadius: BorderRadius.circular(14),
             onTap: () {
-              Navigator.pop(context);
+              BeyanNavigatorGuard.safePop(context);
               NotificationSettingsSheet.show(context);
             },
             child: Container(

@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/utils/navigator_guard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -109,11 +110,11 @@ class _DuaAudioDownloadSheetState extends ConsumerState<DuaAudioDownloadSheet> {
               GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onVerticalDragUpdate: (details) {
-                  if (details.primaryDelta != null && details.primaryDelta! > 6) {
-                    Navigator.pop(context);
-                  }
-                },
-                onTap: () => Navigator.pop(context),
+                      if (details.primaryDelta != null && details.primaryDelta! > 6) {
+                        BeyanNavigatorGuard.safePopOnDrag(context);
+                      }
+                    },
+                    onTap: () => BeyanNavigatorGuard.safePop(context),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 6),
                   child: Center(
@@ -187,7 +188,7 @@ class _DuaAudioDownloadSheetState extends ConsumerState<DuaAudioDownloadSheet> {
                       if (_isDownloading) {
                         _isCancelled = true;
                       }
-                      Navigator.of(context).pop();
+                      BeyanNavigatorGuard.safePop(context);
                     },
                     icon: Container(
                       padding: const EdgeInsets.all(6),
@@ -531,7 +532,7 @@ class _DuaAudioDownloadSheetState extends ConsumerState<DuaAudioDownloadSheet> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
+            onPressed: () => BeyanNavigatorGuard.safePop(ctx, false),
             child: const Text('Vazgeç', style: TextStyle(color: Colors.white60)),
           ),
           ElevatedButton(
@@ -539,7 +540,7 @@ class _DuaAudioDownloadSheetState extends ConsumerState<DuaAudioDownloadSheet> {
               backgroundColor: Colors.redAccent,
               foregroundColor: Colors.white,
             ),
-            onPressed: () => Navigator.pop(ctx, true),
+            onPressed: () => BeyanNavigatorGuard.safePop(ctx, true),
             child: const Text('Sil'),
           ),
         ],

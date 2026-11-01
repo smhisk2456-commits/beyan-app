@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/utils/navigator_guard.dart';
 import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -341,15 +342,7 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
               ),
             )
           : NotificationListener<ScrollUpdateNotification>(
-              onNotification: (notification) {
-                if (notification.metrics.pixels <= 0 &&
-                    notification.scrollDelta != null &&
-                    notification.scrollDelta! < -10) {
-                  Navigator.pop(context);
-                  return true;
-                }
-                return false;
-              },
+              onNotification: (notification) => BeyanNavigatorGuard.handleOverscrollDismiss(notification, context),
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(20, 10, 20, 32),
                 physics: const BouncingScrollPhysics(),
@@ -361,11 +354,11 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                     GestureDetector(
                       behavior: HitTestBehavior.opaque,
                       onVerticalDragUpdate: (details) {
-                        if (details.primaryDelta != null && details.primaryDelta! > 6) {
-                          Navigator.pop(context);
-                        }
-                      },
-                      onTap: () => Navigator.pop(context),
+                      if (details.primaryDelta != null && details.primaryDelta! > 6) {
+                        BeyanNavigatorGuard.safePopOnDrag(context);
+                      }
+                    },
+                    onTap: () => BeyanNavigatorGuard.safePop(context),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8),
                         child: Center(
@@ -428,7 +421,7 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                         icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 30),
                         color: isDark ? Colors.white70 : Colors.black54,
                         tooltip: 'Kapat',
-                        onPressed: () => Navigator.pop(context),
+                        onPressed: () => BeyanNavigatorGuard.safePop(context),
                       ),
                     ],
                   ),

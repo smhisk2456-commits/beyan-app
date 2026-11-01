@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/utils/navigator_guard.dart';
 import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'dart:async';
 import 'dart:io' show Platform;
@@ -189,7 +190,7 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
         centerTitle: true,
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: BeyanColors.tone(0xFFD4AF37)),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => BeyanNavigatorGuard.safePop(context),
         ),
         title: Text(
           strings.qiblaCompassTitle,
@@ -716,7 +717,7 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx),
+            onPressed: () => BeyanNavigatorGuard.safePop(ctx),
             child: Text(strings.iUnderstand, style: TextStyle(color: BeyanColors.tone(0xFFD4AF37))),
           ),
         ],

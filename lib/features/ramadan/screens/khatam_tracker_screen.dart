@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/utils/navigator_guard.dart';
 import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -28,7 +29,7 @@ class KhatamTrackerScreen extends ConsumerWidget {
         centerTitle: true,
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: gold),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => BeyanNavigatorGuard.safePop(context),
         ),
         title: Text(
           '30 Günde Hatim Takipçisi',
@@ -354,7 +355,7 @@ class KhatamTrackerScreen extends ConsumerWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx),
+            onPressed: () => BeyanNavigatorGuard.safePop(ctx),
             child: Text('Kapat', style: TextStyle(color: gold, fontWeight: FontWeight.bold)),
           ),
         ],
@@ -370,13 +371,13 @@ class KhatamTrackerScreen extends ConsumerWidget {
         content: const Text('Tüm cüz ilerlemeniz sıfırlanacaktır. Yeni bir hatme başlamak istiyor musunuz?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx),
+            onPressed: () => BeyanNavigatorGuard.safePop(ctx),
             child: const Text('Vazgeç'),
           ),
           TextButton(
             onPressed: () {
               ref.read(khatamProgressProvider.notifier).resetAll();
-              Navigator.pop(ctx);
+              BeyanNavigatorGuard.safePop(ctx);
             },
             child: const Text('Sıfırla', style: TextStyle(color: Colors.red)),
           ),

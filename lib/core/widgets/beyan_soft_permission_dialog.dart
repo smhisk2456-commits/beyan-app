@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/utils/navigator_guard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -219,7 +220,7 @@ class BeyanSoftPermissionDialog extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(16),
                     onTap: () {
                       HapticFeedback.mediumImpact();
-                      Navigator.of(context).pop(true);
+                      BeyanNavigatorGuard.safePop(context, true);
                     },
                     child: Center(
                       child: Text(
@@ -242,7 +243,7 @@ class BeyanSoftPermissionDialog extends ConsumerWidget {
               TextButton(
                 onPressed: () {
                   HapticFeedback.lightImpact();
-                  Navigator.of(context).pop(false);
+                  BeyanNavigatorGuard.safePop(context, false);
                 },
                 style: TextButton.styleFrom(
                   foregroundColor: Colors.white60,

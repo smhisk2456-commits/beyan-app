@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/utils/navigator_guard.dart';
 import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -58,11 +59,11 @@ class _ElifBaHubScreenState extends ConsumerState<ElifBaHubScreen> with SingleTi
                 GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onVerticalDragUpdate: (details) {
-                    if (details.primaryDelta != null && details.primaryDelta! > 6) {
-                      Navigator.pop(context);
-                    }
-                  },
-                  onTap: () => Navigator.pop(context),
+                      if (details.primaryDelta != null && details.primaryDelta! > 6) {
+                        BeyanNavigatorGuard.safePopOnDrag(ctx);
+                      }
+                    },
+                    onTap: () => BeyanNavigatorGuard.safePop(ctx),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: Center(

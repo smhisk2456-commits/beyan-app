@@ -1,4 +1,5 @@
 import 'package:islamic_app/core/theme/beyan_colors.dart';
+import 'package:islamic_app/core/utils/navigator_guard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -30,15 +31,8 @@ class LanguageSelectorSheet extends ConsumerWidget {
           ),
           padding: const EdgeInsets.fromLTRB(20, 10, 20, 24),
           child: NotificationListener<ScrollUpdateNotification>(
-            onNotification: (notification) {
-              if (notification.metrics.pixels <= 0 &&
-                  notification.scrollDelta != null &&
-                  notification.scrollDelta! < -10) {
-                Navigator.pop(context);
-                return true;
-              }
-              return false;
-            },
+            onNotification: (notification) =>
+                BeyanNavigatorGuard.handleOverscrollDismiss(notification, context),
             child: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
               child: Column(
@@ -50,10 +44,10 @@ class LanguageSelectorSheet extends ConsumerWidget {
                     behavior: HitTestBehavior.opaque,
                     onVerticalDragUpdate: (details) {
                       if (details.primaryDelta != null && details.primaryDelta! > 6) {
-                        Navigator.pop(context);
+                        BeyanNavigatorGuard.safePopOnDrag(context);
                       }
                     },
-                    onTap: () => Navigator.pop(context),
+                    onTap: () => BeyanNavigatorGuard.safePop(context),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       child: Center(
@@ -100,7 +94,7 @@ class LanguageSelectorSheet extends ConsumerWidget {
                         icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 28),
                         color: Colors.white70,
                         tooltip: 'Kapat',
-                        onPressed: () => Navigator.pop(context),
+                        onPressed: () => BeyanNavigatorGuard.safePop(context),
                       ),
                     ],
                   ),
@@ -122,7 +116,7 @@ class LanguageSelectorSheet extends ConsumerWidget {
                         onTap: () {
                           HapticFeedback.mediumImpact();
                           ref.read(appLanguageProvider.notifier).setLanguage(lang);
-                          Navigator.pop(context);
+                          BeyanNavigatorGuard.safePop(context);
                         },
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),

@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/utils/navigator_guard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -93,11 +94,11 @@ class _WuduGuideSheetState extends ConsumerState<WuduGuideSheet>
             GestureDetector(
               behavior: HitTestBehavior.opaque,
               onVerticalDragUpdate: (details) {
-                if (details.primaryDelta != null && details.primaryDelta! > 6) {
-                  Navigator.pop(context);
-                }
-              },
-              onTap: () => Navigator.pop(context),
+                      if (details.primaryDelta != null && details.primaryDelta! > 6) {
+                        BeyanNavigatorGuard.safePopOnDrag(context);
+                      }
+                    },
+                    onTap: () => BeyanNavigatorGuard.safePop(context),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Center(
@@ -166,7 +167,7 @@ class _WuduGuideSheetState extends ConsumerState<WuduGuideSheet>
                     ),
                   ),
                   IconButton(
-                    onPressed: () => Navigator.of(context).pop(),
+                    onPressed: () => BeyanNavigatorGuard.safePop(context),
                     icon: Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(

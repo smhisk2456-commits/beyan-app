@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/utils/navigator_guard.dart';
 import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:islamic_app/core/theme/theme_provider.dart';
 import 'package:flutter/material.dart';
@@ -206,11 +207,11 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                     GestureDetector(
                       behavior: HitTestBehavior.opaque,
                       onVerticalDragUpdate: (details) {
-                        if (details.primaryDelta != null && details.primaryDelta! > 6) {
-                          Navigator.pop(context);
-                        }
-                      },
-                      onTap: () => Navigator.pop(context),
+                      if (details.primaryDelta != null && details.primaryDelta! > 6) {
+                        BeyanNavigatorGuard.safePopOnDrag(context);
+                      }
+                    },
+                    onTap: () => BeyanNavigatorGuard.safePop(context),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 4),
                         child: Center(
@@ -374,11 +375,11 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                     GestureDetector(
                       behavior: HitTestBehavior.opaque,
                       onVerticalDragUpdate: (details) {
-                        if (details.primaryDelta != null && details.primaryDelta! > 6) {
-                          Navigator.pop(context);
-                        }
-                      },
-                      onTap: () => Navigator.pop(context),
+                      if (details.primaryDelta != null && details.primaryDelta! > 6) {
+                        BeyanNavigatorGuard.safePopOnDrag(context);
+                      }
+                    },
+                    onTap: () => BeyanNavigatorGuard.safePop(context),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 4),
                         child: Center(
@@ -483,7 +484,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                         ),
                         onTap: () {
                           ref.read(quranAudioProvider.notifier).setReciter(reciter);
-                          Navigator.pop(ctx);
+                          BeyanNavigatorGuard.safePop(ctx);
                         },
                       );
                     }),
@@ -684,11 +685,11 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                       GestureDetector(
                         behavior: HitTestBehavior.opaque,
                         onVerticalDragUpdate: (details) {
-                          if (details.primaryDelta != null && details.primaryDelta! > 6) {
-                            Navigator.pop(context);
-                          }
-                        },
-                        onTap: () => Navigator.pop(context),
+                      if (details.primaryDelta != null && details.primaryDelta! > 6) {
+                        BeyanNavigatorGuard.safePopOnDrag(context);
+                      }
+                    },
+                    onTap: () => BeyanNavigatorGuard.safePop(context),
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 6),
                           child: Center(
@@ -746,7 +747,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                               label: isTr ? 'Hafız Seç' : 'Reciter',
                               isActive: false,
                               onTap: () {
-                                Navigator.pop(ctx);
+                                BeyanNavigatorGuard.safePop(ctx);
                                 _showReciterSheet(context, strings);
                               },
                             ),
@@ -758,7 +759,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                               label: isTr ? 'Yazı Boyutu' : 'Font Size',
                               isActive: false,
                               onTap: () {
-                                Navigator.pop(ctx);
+                                BeyanNavigatorGuard.safePop(ctx);
                                 _showFontSizeSheet(context, strings);
                               },
                             ),
@@ -771,7 +772,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                               isActive: audioState.activeAmbience != null ||
                                   audioState.sleepTimerSecondsRemaining != null,
                               onTap: () {
-                                Navigator.pop(ctx);
+                                BeyanNavigatorGuard.safePop(ctx);
                                 SleepAndAmbienceSheet.show(context, ref);
                               },
                             ),

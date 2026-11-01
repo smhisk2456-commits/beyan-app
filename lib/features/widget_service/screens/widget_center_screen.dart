@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/utils/navigator_guard.dart';
 import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -1218,11 +1219,11 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
               GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onVerticalDragUpdate: (details) {
-                  if (details.primaryDelta != null && details.primaryDelta! > 6) {
-                    Navigator.pop(ctx);
-                  }
-                },
-                onTap: () => Navigator.pop(ctx),
+                      if (details.primaryDelta != null && details.primaryDelta! > 6) {
+                        BeyanNavigatorGuard.safePopOnDrag(ctx);
+                      }
+                    },
+                    onTap: () => BeyanNavigatorGuard.safePop(ctx),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4),
                   child: Center(
@@ -1270,7 +1271,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   onTap: () {
-                    Navigator.pop(ctx);
+                    BeyanNavigatorGuard.safePop(ctx);
                     onSelected(opt);
                   },
                 );

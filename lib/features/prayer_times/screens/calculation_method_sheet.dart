@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/utils/navigator_guard.dart';
 import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -62,11 +63,11 @@ class _CalculationMethodSheetState extends State<CalculationMethodSheet> {
             GestureDetector(
               behavior: HitTestBehavior.opaque,
               onVerticalDragUpdate: (details) {
-                if (details.primaryDelta != null && details.primaryDelta! > 6) {
-                  Navigator.pop(context);
-                }
-              },
-              onTap: () => Navigator.pop(context),
+                      if (details.primaryDelta != null && details.primaryDelta! > 6) {
+                        BeyanNavigatorGuard.safePopOnDrag(context);
+                      }
+                    },
+                    onTap: () => BeyanNavigatorGuard.safePop(context),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Center(
@@ -109,7 +110,7 @@ class _CalculationMethodSheetState extends State<CalculationMethodSheet> {
                     icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 28),
                     color: Colors.white70,
                     tooltip: 'Kapat',
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () => BeyanNavigatorGuard.safePop(context),
                   ),
                 ],
               ),
@@ -140,7 +141,7 @@ class _CalculationMethodSheetState extends State<CalculationMethodSheet> {
                   await PrayerTimeService.instance.saveCalculationMethod(method);
                   setState(() => _currentMethod = method);
                   widget.ref.read(prayerTimesNotifierProvider.notifier).refresh();
-                  if (context.mounted) Navigator.pop(context);
+                  if (context.mounted) BeyanNavigatorGuard.safePop(context);
                 },
               );
             }),

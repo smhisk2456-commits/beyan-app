@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/utils/navigator_guard.dart';
 import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -141,7 +142,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
             ),
             actions: [
               TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
+                onPressed: () => BeyanNavigatorGuard.safePop(ctx, false),
                 child: const Text('Vazgeç', style: TextStyle(color: Colors.white60)),
               ),
               ElevatedButton(
@@ -150,7 +151,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
                   foregroundColor: const Color(0xFF012E2B),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                onPressed: () => Navigator.pop(ctx, true),
+                onPressed: () => BeyanNavigatorGuard.safePop(ctx, true),
                 child: const Text('Anladım ve Kabul Ediyorum', style: TextStyle(fontWeight: FontWeight.bold)),
               ),
             ],
@@ -252,12 +253,12 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
             TextButton(
               onPressed: () async {
                 await ref.read(aiAssistantProvider.notifier).setGeminiApiKey(null);
-                if (ctx.mounted) Navigator.pop(ctx);
+                if (ctx.mounted) BeyanNavigatorGuard.safePop(ctx);
               },
               child: const Text('Kaldır', style: TextStyle(color: Colors.redAccent)),
             ),
           TextButton(
-            onPressed: () => Navigator.pop(ctx),
+            onPressed: () => BeyanNavigatorGuard.safePop(ctx),
             child: const Text('İptal', style: TextStyle(color: Colors.white60)),
           ),
           ElevatedButton(
@@ -269,7 +270,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
             onPressed: () async {
               final newKey = keyController.text.trim();
               await ref.read(aiAssistantProvider.notifier).setGeminiApiKey(newKey.isEmpty ? null : newKey);
-              if (ctx.mounted) Navigator.pop(ctx);
+              if (ctx.mounted) BeyanNavigatorGuard.safePop(ctx);
             },
             child: const Text('Kaydet', style: TextStyle(fontWeight: FontWeight.bold)),
           ),
@@ -332,12 +333,12 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx),
+            onPressed: () => BeyanNavigatorGuard.safePop(ctx),
             child: const Text('Kapat', style: TextStyle(color: Colors.white60)),
           ),
           TextButton(
             onPressed: () {
-              Navigator.pop(ctx);
+              BeyanNavigatorGuard.safePop(ctx);
               _showApiKeyDialog(context);
             },
             child: Text(
@@ -353,7 +354,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             ),
             onPressed: () {
-              Navigator.pop(ctx);
+              BeyanNavigatorGuard.safePop(ctx);
               PremiumPaywallSheet.show(context);
             },
             child: const Text(
@@ -385,7 +386,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
         titleSpacing: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => BeyanNavigatorGuard.safePop(context),
         ),
         title: Row(
           children: [
@@ -600,11 +601,11 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
               GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onVerticalDragUpdate: (details) {
-                  if (details.primaryDelta != null && details.primaryDelta! > 6) {
-                    Navigator.pop(ctx);
-                  }
-                },
-                onTap: () => Navigator.pop(ctx),
+                      if (details.primaryDelta != null && details.primaryDelta! > 6) {
+                        BeyanNavigatorGuard.safePopOnDrag(ctx);
+                      }
+                    },
+                    onTap: () => BeyanNavigatorGuard.safePop(ctx),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4),
                   child: Center(
@@ -650,7 +651,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
-                  onPressed: () => Navigator.pop(ctx),
+                  onPressed: () => BeyanNavigatorGuard.safePop(ctx),
                   child: const Text('Anladım', style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
               ),

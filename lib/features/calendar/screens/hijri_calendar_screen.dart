@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/utils/navigator_guard.dart';
 import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -216,7 +217,7 @@ class HijriCalendarScreen extends ConsumerWidget {
                   selectedColor: BeyanColors.tone(0xFFD4AF37),
                   onSelected: (_) {
                     ref.read(hijriAdjustmentProvider.notifier).setAdjustment(d);
-                    Navigator.pop(ctx);
+                    BeyanNavigatorGuard.safePop(ctx);
                   },
                 );
               }).toList(),
@@ -225,7 +226,7 @@ class HijriCalendarScreen extends ConsumerWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx),
+            onPressed: () => BeyanNavigatorGuard.safePop(ctx),
             child: Text(strings.close, style: const TextStyle(color: Colors.white)),
           ),
         ],

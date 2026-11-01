@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/utils/navigator_guard.dart';
 import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -173,8 +174,8 @@ class _ElifBaLessonQuizScreenState extends ConsumerState<ElifBaLessonQuizScreen>
                 padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
               ),
               onPressed: () {
-                Navigator.pop(ctx); // Dialogu kapat
-                Navigator.pop(context); // Hub ekranına dön
+                BeyanNavigatorGuard.safePop(ctx); // Dialogu kapat
+                BeyanNavigatorGuard.safePop(context); // Hub ekranına dön
               },
               child: const Text('Devam Et', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             ),
@@ -199,7 +200,7 @@ class _ElifBaLessonQuizScreenState extends ConsumerState<ElifBaLessonQuizScreen>
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.close_rounded, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => BeyanNavigatorGuard.safePop(context),
         ),
         title: Text(
           widget.lesson.title,

@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/utils/navigator_guard.dart';
 import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -123,11 +124,11 @@ class _PrayerGuideSheetState extends ConsumerState<PrayerGuideSheet> {
             GestureDetector(
               behavior: HitTestBehavior.opaque,
               onVerticalDragUpdate: (details) {
-                if (details.primaryDelta != null && details.primaryDelta! > 6) {
-                  Navigator.pop(context);
-                }
-              },
-              onTap: () => Navigator.pop(context),
+                      if (details.primaryDelta != null && details.primaryDelta! > 6) {
+                        BeyanNavigatorGuard.safePopOnDrag(context);
+                      }
+                    },
+                    onTap: () => BeyanNavigatorGuard.safePop(context),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Center(
@@ -212,7 +213,7 @@ class _PrayerGuideSheetState extends ConsumerState<PrayerGuideSheet> {
                     ),
                   ),
                   IconButton(
-                    onPressed: () => Navigator.of(context).pop(),
+                    onPressed: () => BeyanNavigatorGuard.safePop(context),
                     icon: Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
@@ -1060,7 +1061,7 @@ class _PrayerGuideSheetState extends ConsumerState<PrayerGuideSheet> {
     final surah = await QuranRepository().getSurahById(surahId);
     if (surah != null && context.mounted) {
       // Bottom sheet'i kapat
-      Navigator.of(context).pop();
+      BeyanNavigatorGuard.safePop(context);
 
       // Kur'an Sekmesine Geçiş Yap (Tab 2)
       ref.read(selectedTabProvider.notifier).state = 2;

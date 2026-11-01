@@ -1,4 +1,5 @@
 import 'package:islamic_app/core/theme/beyan_colors.dart';
+import 'package:islamic_app/core/utils/navigator_guard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -69,15 +70,8 @@ class _PremiumPaywallSheetState extends ConsumerState<PremiumPaywallSheet> {
         ],
       ),
       child: NotificationListener<ScrollUpdateNotification>(
-        onNotification: (notification) {
-          if (notification.metrics.pixels <= 0 &&
-              notification.scrollDelta != null &&
-              notification.scrollDelta! < -10) {
-            Navigator.pop(context);
-            return true;
-          }
-          return false;
-        },
+        onNotification: (notification) =>
+            BeyanNavigatorGuard.handleOverscrollDismiss(notification, context),
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(20, 10, 20, 32),
           physics: const BouncingScrollPhysics(),
@@ -94,10 +88,10 @@ class _PremiumPaywallSheetState extends ConsumerState<PremiumPaywallSheet> {
                     behavior: HitTestBehavior.opaque,
                     onVerticalDragUpdate: (details) {
                       if (details.primaryDelta != null && details.primaryDelta! > 6) {
-                        Navigator.pop(context);
+                        BeyanNavigatorGuard.safePopOnDrag(context);
                       }
                     },
-                    onTap: () => Navigator.pop(context),
+                    onTap: () => BeyanNavigatorGuard.safePop(context),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       child: Container(
@@ -114,7 +108,7 @@ class _PremiumPaywallSheetState extends ConsumerState<PremiumPaywallSheet> {
                     icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 28),
                     color: isDark ? Colors.white70 : Colors.black54,
                     tooltip: 'Kapat',
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () => BeyanNavigatorGuard.safePop(context),
                   ),
                 ],
               ),
@@ -462,7 +456,7 @@ class _PremiumPaywallSheetState extends ConsumerState<PremiumPaywallSheet> {
                               .buyTier(_selectedTier);
                           if (context.mounted) {
                             if (success) {
-                              Navigator.pop(context);
+                              BeyanNavigatorGuard.safePop(context);
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: const Text('Tebrikler! Beyân Premium üyeliğiniz başlatıldı 👑'),

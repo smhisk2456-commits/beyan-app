@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/utils/navigator_guard.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -107,11 +108,11 @@ class _AdhanMakamSelectorSheetState
             GestureDetector(
               behavior: HitTestBehavior.opaque,
               onVerticalDragUpdate: (details) {
-                if (details.primaryDelta != null && details.primaryDelta! > 6) {
-                  Navigator.pop(context);
-                }
-              },
-              onTap: () => Navigator.pop(context),
+                      if (details.primaryDelta != null && details.primaryDelta! > 6) {
+                        BeyanNavigatorGuard.safePopOnDrag(context);
+                      }
+                    },
+                    onTap: () => BeyanNavigatorGuard.safePop(context),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Center(
@@ -167,7 +168,7 @@ class _AdhanMakamSelectorSheetState
                   icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 30),
                   color: isDark ? Colors.white70 : Colors.black54,
                   tooltip: 'Kapat',
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => BeyanNavigatorGuard.safePop(context),
                 ),
               ],
             ),
@@ -183,15 +184,7 @@ class _AdhanMakamSelectorSheetState
             else
               Flexible(
                 child: NotificationListener<ScrollUpdateNotification>(
-                  onNotification: (notification) {
-                    if (notification.metrics.pixels <= 0 &&
-                        notification.scrollDelta != null &&
-                        notification.scrollDelta! < -10) {
-                      Navigator.pop(context);
-                      return true;
-                    }
-                    return false;
-                  },
+                  onNotification: (notification) => BeyanNavigatorGuard.handleOverscrollDismiss(notification, context),
                   child: ListView(
                     shrinkWrap: true,
                     physics: const BouncingScrollPhysics(),

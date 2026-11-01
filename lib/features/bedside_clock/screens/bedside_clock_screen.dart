@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/utils/navigator_guard.dart';
 import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
@@ -242,7 +243,7 @@ class _BedsideClockScreenState extends ConsumerState<BedsideClockScreen> {
                     IconButton(
                       icon: const Icon(Icons.close_rounded, color: Colors.white60, size: 24),
                       tooltip: strings.closeBtn,
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () => BeyanNavigatorGuard.safePop(context),
                     ),
                   ],
                 ),

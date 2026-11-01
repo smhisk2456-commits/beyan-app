@@ -248,8 +248,9 @@ class _MainNavigationState extends ConsumerState<MainNavigation>
       }
     });
 
+    // Ana kabuk ekranı (MainNavigation) kök rotadır; asla pop edilip siyah ekrana düşmemelidir.
     return PopScope(
-      canPop: _currentTab == 0,
+      canPop: false,
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
         if (_currentTab != 0) {

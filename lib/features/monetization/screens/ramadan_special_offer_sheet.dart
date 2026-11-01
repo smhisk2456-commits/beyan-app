@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/utils/navigator_guard.dart';
 import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -39,7 +40,7 @@ class _RamadanSpecialOfferSheetState
           ),
         );
       } else if (mounted) {
-        Navigator.pop(context);
+        BeyanNavigatorGuard.safePop(context);
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -58,7 +59,7 @@ class _RamadanSpecialOfferSheetState
             backgroundColor: BeyanColors.tone(0xFF033E35),
           ),
         );
-        if (success) Navigator.pop(context);
+        if (success) BeyanNavigatorGuard.safePop(context);
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -363,7 +364,7 @@ class _RamadanSpecialOfferSheetState
                     style: TextStyle(color: Colors.white.withValues(alpha: 0.4)),
                   ),
                   TextButton(
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () => BeyanNavigatorGuard.safePop(context),
                     child: Text(
                       'Belki Daha Sonra',
                       style: TextStyle(

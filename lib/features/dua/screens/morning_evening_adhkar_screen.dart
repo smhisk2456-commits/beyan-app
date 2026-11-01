@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/utils/navigator_guard.dart';
 import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
@@ -641,7 +642,7 @@ class _MorningEveningAdhkarScreenState extends ConsumerState<MorningEveningAdhka
             ),
             const SizedBox(height: 28),
             ElevatedButton.icon(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => BeyanNavigatorGuard.safePop(context),
               icon: const Icon(Icons.home_rounded),
               label: Text(strings.language == AppLanguage.turkish ? 'Ana Sayfaya Dön' : 'Return Home'),
               style: ElevatedButton.styleFrom(

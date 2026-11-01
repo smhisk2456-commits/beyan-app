@@ -1,3 +1,4 @@
+import 'package:islamic_app/core/utils/navigator_guard.dart';
 import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -62,8 +63,8 @@ class _OnboardingTrialPaywallScreenState
     PremiumService.instance.markLaunchPaywallSeen();
     if (widget.onDismiss != null) {
       widget.onDismiss!();
-    } else {
-      Navigator.of(context).pop();
+    } else if (mounted && Navigator.of(context).canPop()) {
+      BeyanNavigatorGuard.safePop(context);
     }
   }
 
