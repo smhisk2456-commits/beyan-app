@@ -470,29 +470,38 @@ struct PrayerProvider: TimelineProvider {
 struct PrayerRectangularView: View {
     let entry: PrayerEntry
 
-    private func row(_ p: PrayerTime) -> some View {
-        HStack(spacing: 4) {
-            Image(systemName: p.kind.symbol)
-                .font(.system(size: 12, weight: .semibold))
-                .frame(width: 16)
-            Text("\(p.kind.name) \(hhmm.string(from: p.date))")
-                .font(.system(size: 14, weight: .semibold))
-                .lineLimit(1)
-        }
-    }
-
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            row(entry.current)
-            row(entry.next)
+        VStack(alignment: .leading, spacing: 2) {
+            // Üst Satır: Lüks "SIRADAKİ NAMAZ" Başlığı (Geçmiş vakit yerine net odak)
+            HStack(spacing: 4.5) {
+                Image(systemName: "sparkles")
+                    .font(.system(size: 9, weight: .bold))
+                Text(WidgetLocalization.nextPrayerTitle.uppercased())
+                    .font(.system(size: 10, weight: .bold))
+                    .tracking(0.9)
+                    .opacity(0.88)
+            }
+
+            // Orta Satır: Sıradaki Vakit ve Ezan Saati (Örn: 🌅 Akşam 18:08)
+            HStack(spacing: 5) {
+                Image(systemName: entry.next.kind.symbol)
+                    .font(.system(size: 13, weight: .bold))
+                Text(entry.next.kind.name)
+                    .font(.system(size: 14.5, weight: .bold))
+                Spacer(minLength: 4)
+                Text(hhmm.string(from: entry.next.date))
+                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                    .opacity(0.95)
+            }
+
+            // Alt Satır: Canlı Geri Sayım Sayacı (Örn: 58:38)
             Text(entry.next.date, style: .timer)
-                .font(.system(size: 24, weight: .bold, design: .rounded))
+                .font(.system(size: 23, weight: .bold, design: .rounded))
                 .monospacedDigit()
-                .multilineTextAlignment(.leading)
                 .lineLimit(1)
-                .minimumScaleFactor(0.7)
+                .minimumScaleFactor(0.75)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .widgetAccentable()
     }
 }
