@@ -825,7 +825,6 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
   String _verseViewMode = 'meal_only';
   String _refreshInterval = '1h';
   String _textSize = 'standard';
-  String _fontFamily = 'standard';
   String? _appliedVerseRef;
   bool _isPinned = false;
 
@@ -846,7 +845,6 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
       _verseViewMode = prefs.getString('widget_verse_view') ?? 'meal_only';
       _refreshInterval = prefs.getString('widget_refresh_interval') ?? '1h';
       _textSize = prefs.getString('widget_text_size') ?? 'standard';
-      _fontFamily = prefs.getString('widget_font_family') ?? 'standard';
       _isPinned = prefs.getBool('widget_is_pinned') ?? false;
       final savedRef = prefs.getString('widget_applied_verse_ref');
       _appliedVerseRef = (savedRef != null && savedRef.isNotEmpty) ? savedRef : null;
@@ -871,10 +869,6 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
       if (_textSize == 'Küçük') _textSize = 'small';
       if (_textSize == 'Standart') _textSize = 'standard';
       if (_textSize == 'Büyük') _textSize = 'large';
-
-      if (_fontFamily == 'Standart') _fontFamily = 'standard';
-      if (_fontFamily == 'Zarif (Lato)') _fontFamily = 'lato';
-      if (_fontFamily == 'Klasik (Amiri)') _fontFamily = 'amiri';
 
       if (_appliedVerseRef != null) {
         final list = kWidgetCategoryQuotes[_selectedQuoteCategory] ?? kWidgetCategoryQuotes['all']!;
@@ -975,7 +969,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
     await prefs.setString('widget_refresh_interval', _refreshInterval);
     await HomeWidget.saveWidgetData<String>('widget_refresh_interval', _refreshInterval);
     await prefs.setString('widget_text_size', _textSize);
-    await prefs.setString('widget_font_family', _fontFamily);
+    await HomeWidget.saveWidgetData<String>('widget_text_size', _textSize);
     await prefs.setString('widget_active_category', _selectedCategory.name);
 
     // Ayarları uygularken otomatik dinamik döngüye geç (sabitlemeyi kaldır)
@@ -1161,20 +1155,6 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
     return size;
   }
 
-  String _getLocalizedFontFamily(String font, AppLanguage lang) {
-    final strings = ref.read(appStringsProvider);
-    if (font == 'standard' || font == 'Standart') {
-      return strings.fontStandard;
-    }
-    if (font == 'lato' || font == 'Zarif (Lato)') {
-      return strings.fontLato;
-    }
-    if (font == 'amiri' || font == 'Klasik (Amiri)') {
-      return strings.fontAmiri;
-    }
-    return font;
-  }
-
   String _getAppliedPrefix(AppLanguage lang) {
     switch (lang) {
       case AppLanguage.turkish:
@@ -1284,6 +1264,408 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
               }),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _applyTextSizeChange(String size) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('widget_text_size', size);
+    await HomeWidget.setAppGroupId(AppConstants.appGroupId);
+    await HomeWidget.saveWidgetData<String>('widget_text_size', size);
+    await HomeWidget.updateWidget(name: 'IslamicAppWidget', iOSName: 'IslamicAppWidget');
+    await HomeWidget.updateWidget(name: 'PrayerWidget', iOSName: 'PrayerWidget');
+
+    if (!mounted) return;
+    setState(() {
+      _textSize = size;
+    });
+  }
+
+  void _showTextSizePickerSheet(AppStrings strings) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    String currentSelectedSize = _textSize;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      enableDrag: true,
+      isDismissible: true,
+      useSafeArea: true,
+      backgroundColor: isDark ? BeyanColors.tone(0xFF07211C) : Colors.white,
+      barrierColor: Colors.black.withValues(alpha: 0.65),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            double previewTitleSize;
+            double previewBodySize;
+            switch (currentSelectedSize) {
+              case 'small':
+              case 'Küçük':
+                previewTitleSize = 12.0;
+                previewBodySize = 11.0;
+                break;
+              case 'large':
+              case 'Büyük':
+                previewTitleSize = 16.5;
+                previewBodySize = 15.0;
+                break;
+              case 'standard':
+              case 'Standart':
+              default:
+                previewTitleSize = 14.0;
+                previewBodySize = 12.5;
+                break;
+            }
+
+            return SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Sürükleme Tutamacı
+                    Center(
+                      child: Container(
+                        width: 44,
+                        height: 5,
+                        decoration: BoxDecoration(
+                          color: isDark ? Colors.white24 : Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(2.5),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Başlık & Kapat
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(
+                            Icons.format_size_rounded,
+                            color: BeyanColors.tone(0xFFFFDF7A),
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                strings.textSize,
+                                style: TextStyle(
+                                  color: isDark ? Colors.white : Colors.black87,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'Widget ve Kilit Ekranı yazı büyüklüğü',
+                                style: TextStyle(
+                                  color: isDark ? Colors.white60 : Colors.black54,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () => BeyanNavigatorGuard.safePop(ctx),
+                          icon: Icon(
+                            Icons.close_rounded,
+                            color: isDark ? Colors.white60 : Colors.black54,
+                          ),
+                          visualDensity: VisualDensity.compact,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 18),
+
+                    // ── CANLI ÖNİZLEME KARTI ──────────────────────────
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: isDark
+                              ? [BeyanColors.tone(0xFF0F362C), BeyanColors.tone(0xFF07211C)]
+                              : [const Color(0xFFF1F8F5), const Color(0xFFE5F1EC)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(
+                          color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.35),
+                          width: 1.2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.18),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.2),
+                                  borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(
+                                    color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.4),
+                                    width: 0.6,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.remove_red_eye_rounded,
+                                      size: 11,
+                                      color: BeyanColors.tone(0xFFFFDF7A),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      'CANLI ÖNİZLEME',
+                                      style: TextStyle(
+                                        fontSize: 9.5,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 0.6,
+                                        color: BeyanColors.tone(0xFFFFDF7A),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const Spacer(),
+                              Text(
+                                _getLocalizedTextSize(currentSelectedSize, strings.language),
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: BeyanColors.tone(0xFFFFDF7A),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          AnimatedDefaultTextStyle(
+                            duration: const Duration(milliseconds: 200),
+                            curve: Curves.easeOutCubic,
+                            style: TextStyle(
+                              color: isDark ? Colors.white : Colors.black87,
+                              fontWeight: FontWeight.bold,
+                              fontSize: previewTitleSize,
+                            ),
+                            child: const Text('Âl-i İmrân 3:8'),
+                          ),
+                          const SizedBox(height: 6),
+                          AnimatedDefaultTextStyle(
+                            duration: const Duration(milliseconds: 200),
+                            curve: Curves.easeOutCubic,
+                            style: TextStyle(
+                              color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black87,
+                              fontWeight: FontWeight.w500,
+                              fontSize: previewBodySize,
+                              height: 1.35,
+                            ),
+                            child: const Text(
+                              '“Rabbimiz! Bizi doğru yola ilettikten sonra kalplerimizi kaydırma, bize rahmet bağışla.”',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+
+                    // ── BOYUT SEÇENEKLERİ ─────────────────────────────
+                    _buildTextSizeSelectTile(
+                      keyName: 'small',
+                      label: strings.textSizeSmall,
+                      percent: '%85',
+                      description: 'Daha derli toplu, uzun âyetler için ideal',
+                      iconText: 'A⁻',
+                      isSelected: currentSelectedSize == 'small' || currentSelectedSize == 'Küçük',
+                      isDark: isDark,
+                      onTap: () async {
+                        HapticFeedback.selectionClick();
+                        setModalState(() => currentSelectedSize = 'small');
+                        await _applyTextSizeChange('small');
+                      },
+                    ),
+                    const SizedBox(height: 10),
+                    _buildTextSizeSelectTile(
+                      keyName: 'standard',
+                      label: strings.textSizeStandard,
+                      percent: '%100',
+                      description: 'Dengeli ve önerilen standart büyüklük',
+                      iconText: 'A',
+                      isSelected: currentSelectedSize == 'standard' || currentSelectedSize == 'Standart',
+                      isDark: isDark,
+                      onTap: () async {
+                        HapticFeedback.selectionClick();
+                        setModalState(() => currentSelectedSize = 'standard');
+                        await _applyTextSizeChange('standard');
+                      },
+                    ),
+                    const SizedBox(height: 10),
+                    _buildTextSizeSelectTile(
+                      keyName: 'large',
+                      label: strings.textSizeLarge,
+                      percent: '%125',
+                      description: 'Daha büyük, belirgin ve çok rahat okunur',
+                      iconText: 'A⁺',
+                      isSelected: currentSelectedSize == 'large' || currentSelectedSize == 'Büyük',
+                      isDark: isDark,
+                      onTap: () async {
+                        HapticFeedback.selectionClick();
+                        setModalState(() => currentSelectedSize = 'large');
+                        await _applyTextSizeChange('large');
+                      },
+                    ),
+                    const SizedBox(height: 18),
+
+                    // Tamam Butonu
+                    ElevatedButton(
+                      onPressed: () => BeyanNavigatorGuard.safePop(ctx),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: BeyanColors.tone(0xFFFFDF7A),
+                        foregroundColor: BeyanColors.tone(0xFF071F1B),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: const Text(
+                        'Tamam',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildTextSizeSelectTile({
+    required String keyName,
+    required String label,
+    required String percent,
+    required String description,
+    required String iconText,
+    required bool isSelected,
+    required bool isDark,
+    required VoidCallback onTap,
+  }) {
+    final goldColor = BeyanColors.tone(0xFFFFDF7A);
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? (isDark ? BeyanColors.tone(0xFF0B2B24) : const Color(0xFFEBF7F2))
+              : (isDark ? BeyanColors.tone(0xFF0F362C).withValues(alpha: 0.35) : Colors.grey.shade50),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected ? goldColor : (isDark ? Colors.white12 : Colors.grey.shade300),
+            width: isSelected ? 1.5 : 1.0,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: isSelected ? goldColor.withValues(alpha: 0.18) : (isDark ? Colors.white10 : Colors.grey.shade200),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                iconText,
+                style: TextStyle(
+                  color: isSelected ? goldColor : (isDark ? Colors.white70 : Colors.black87),
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        label,
+                        style: TextStyle(
+                          color: isDark ? Colors.white : Colors.black87,
+                          fontSize: 15,
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                        decoration: BoxDecoration(
+                          color: isSelected ? goldColor.withValues(alpha: 0.2) : (isDark ? Colors.white10 : Colors.grey.shade200),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          percent,
+                          style: TextStyle(
+                            color: isSelected ? goldColor : (isDark ? Colors.white60 : Colors.black54),
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    description,
+                    style: TextStyle(
+                      color: isDark ? Colors.white54 : Colors.black45,
+                      fontSize: 11.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (isSelected)
+              Icon(Icons.check_circle_rounded, color: goldColor, size: 22)
+            else
+              Icon(Icons.circle_outlined, color: isDark ? Colors.white24 : Colors.grey.shade400, size: 22),
+          ],
         ),
       ),
     );
@@ -1676,19 +2058,6 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
     }
   }
 
-  String? get _previewFontFamily {
-    switch (_fontFamily) {
-      case 'amiri':
-      case 'Klasik (Amiri)':
-        return 'Amiri';
-      case 'lato':
-      case 'Zarif (Lato)':
-        return 'Lato';
-      default:
-        return null;
-    }
-  }
-
   // Kategori bazlı aktif ayet verisi
   WidgetPreviewQuote _getCurrentQuote() {
     final list = kWidgetCategoryQuotes[_selectedQuoteCategory] ??
@@ -1725,7 +2094,6 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
               color: BeyanColors.tone(0xFFFFDF7A),
               fontWeight: FontWeight.bold,
               fontSize: _previewTitleFontSize,
-              fontFamily: _previewFontFamily,
               letterSpacing: 0.2,
             ),
           ),
@@ -1760,7 +2128,6 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.95),
                   fontSize: _previewBodyFontSize,
-                  fontFamily: _previewFontFamily,
                   height: 1.3,
                   fontStyle: (_verseViewMode == 'arabic_meal' || _verseViewMode == 'Arapça + Meal') ? FontStyle.italic : FontStyle.normal,
                 ),
@@ -1804,11 +2171,11 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                 children: [
                   Icon(Icons.wb_sunny_rounded, color: Colors.white70, size: 13 * timeScale),
                   const SizedBox(width: 4),
-                  Text('${strings.dhuhr} 12:30 PM', style: TextStyle(color: Colors.white70, fontSize: 11 * timeScale, fontFamily: _previewFontFamily)),
+                  Text('${strings.dhuhr} 12:30 PM', style: TextStyle(color: Colors.white70, fontSize: 11 * timeScale)),
                   const SizedBox(width: 8),
                   Icon(Icons.wb_twilight_rounded, color: Colors.white70, size: 13 * timeScale),
                   const SizedBox(width: 4),
-                  Text('${strings.asr} 3:45 PM', style: TextStyle(color: Colors.white70, fontSize: 11 * timeScale, fontFamily: _previewFontFamily)),
+                  Text('${strings.asr} 3:45 PM', style: TextStyle(color: Colors.white70, fontSize: 11 * timeScale)),
                 ],
               ),
               const SizedBox(height: 4),
@@ -1819,7 +2186,6 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                   letterSpacing: 1.2,
-                  fontFamily: _previewFontFamily,
                 ),
               ),
             ],
@@ -1838,7 +2204,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                     : (strings.language == AppLanguage.indonesian
                         ? '2 jam 15 mnt menuju waktu Ashar'
                         : '2 hrs 15 mins until Asr prayer')),
-            style: TextStyle(color: Colors.white70, fontSize: 12 * timeScale, fontFamily: _previewFontFamily),
+            style: TextStyle(color: Colors.white70, fontSize: 12 * timeScale),
           ),
         );
 
@@ -1854,7 +2220,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                     : (strings.language == AppLanguage.arabic
                         ? '🌙 ١٨ رمضان ١٤٤٧'
                         : '🌙 18 Ramadan 1447'),
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13 * timeScale, fontFamily: _previewFontFamily),
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13 * timeScale),
               ),
               const SizedBox(height: 2),
               Text(
@@ -1865,7 +2231,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                         : (strings.language == AppLanguage.indonesian
                             ? '9 Hari menuju Malam Lailatul Qadr'
                             : '9 Days to Laylat al-Qadr')),
-                style: TextStyle(color: Colors.white70, fontSize: 11.5 * timeScale, fontFamily: _previewFontFamily),
+                style: TextStyle(color: Colors.white70, fontSize: 11.5 * timeScale),
               ),
             ],
           ),
@@ -1888,7 +2254,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                         : (strings.language == AppLanguage.indonesian
                             ? 'Terbit: 05:42 • Isyraq: 06:27'
                             : 'Sunrise: 05:42 • Ishraq: 06:27')),
-                style: TextStyle(color: Colors.white, fontSize: 12 * timeScale, fontWeight: FontWeight.w600, fontFamily: _previewFontFamily),
+                style: TextStyle(color: Colors.white, fontSize: 12 * timeScale, fontWeight: FontWeight.w600),
               ),
             ],
           ),
@@ -2017,31 +2383,11 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
           ),
           _buildDivider(),
 
-          // 4. Metin Boyutu
+          // 4. Metin Boyutu (Canlı Önizlemeli Seçici)
           _buildOptionTile(
             title: strings.textSize,
             value: _getLocalizedTextSize(_textSize, strings.language),
-            onTap: () => _showOptionSheet(
-              title: strings.textSize,
-              options: const ['small', 'standard', 'large'],
-              currentValue: _textSize,
-              labelBuilder: (s) => _getLocalizedTextSize(s, strings.language),
-              onSelected: (val) => _savePreference('widget_text_size', val, (v) => _textSize = v),
-            ),
-          ),
-          _buildDivider(),
-
-          // 5. Yazı Tipi
-          _buildOptionTile(
-            title: strings.fontFamily,
-            value: _getLocalizedFontFamily(_fontFamily, strings.language),
-            onTap: () => _showOptionSheet(
-              title: strings.fontFamily,
-              options: const ['standard', 'lato', 'amiri'],
-              currentValue: _fontFamily,
-              labelBuilder: (f) => _getLocalizedFontFamily(f, strings.language),
-              onSelected: (val) => _savePreference('widget_font_family', val, (v) => _fontFamily = v),
-            ),
+            onTap: () => _showTextSizePickerSheet(strings),
           ),
         ],
       ),

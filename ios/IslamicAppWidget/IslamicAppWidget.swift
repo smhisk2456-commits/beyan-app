@@ -28,6 +28,25 @@ enum WidgetLocation {
     }
 }
 
+// MARK: - Widget Görünüm ve Boyut Ayarları
+
+enum WidgetSettings {
+    private static let appGroupId = "group.com.smhisk60.beyan"
+
+    static var textScale: CGFloat {
+        let defaults = UserDefaults(suiteName: appGroupId) ?? UserDefaults.standard
+        let raw = (defaults.string(forKey: "widget_text_size") ?? "standard").lowercased()
+        switch raw {
+        case "small", "küçük", "kucuk":
+            return 0.85
+        case "large", "büyük", "buyuk":
+            return 1.25
+        default:
+            return 1.0
+        }
+    }
+}
+
 // MARK: - Çok Dilli Yerelleştirme (WidgetLocalization - 8 Dil)
 
 enum WidgetLocalization {
@@ -505,12 +524,13 @@ struct PrayerProvider: TimelineProvider {
 
 struct PrayerRectangularView: View {
     let entry: PrayerEntry
+    private let scale = WidgetSettings.textScale
 
     var body: some View {
         VStack(alignment: .leading, spacing: 1.5) {
             // 1. Satır: AKŞAM VAKTİNE (Tertemiz, emojiz, büyük harfli başlık)
             Text(WidgetLocalization.targetPrayerHeader(for: entry.next.kind))
-                .font(.system(size: 11.5, weight: .bold))
+                .font(.system(size: 11.5 * scale, weight: .bold))
                 .tracking(0.8)
                 .foregroundColor(.white.opacity(0.95))
                 .lineLimit(1)
@@ -518,23 +538,23 @@ struct PrayerRectangularView: View {
             // 2. Satır: 18:08 • Akşam Ezanı
             HStack(spacing: 5) {
                 Text(hhmm.string(from: entry.next.date))
-                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                    .font(.system(size: 14 * scale, weight: .bold, design: .rounded))
                 Text("•")
-                    .font(.system(size: 10, weight: .bold))
+                    .font(.system(size: 10 * scale, weight: .bold))
                     .opacity(0.55)
                 Text(WidgetLocalization.prayerAdhanLabel(for: entry.next.kind))
-                    .font(.system(size: 12.5, weight: .medium))
+                    .font(.system(size: 12.5 * scale, weight: .medium))
                     .lineLimit(1)
             }
             .foregroundColor(.white.opacity(0.85))
 
             // 3. Satır: 58:38 (Büyük Canlı Geri Sayım Sayacı)
             Text(entry.next.date, style: .timer)
-                .font(.system(size: 24, weight: .bold, design: .rounded))
+                .font(.system(size: 24 * scale, weight: .bold, design: .rounded))
                 .monospacedDigit()
                 .foregroundColor(.white)
                 .lineLimit(1)
-                .minimumScaleFactor(0.75)
+                .minimumScaleFactor(0.70)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .widgetAccentable()
@@ -1060,20 +1080,21 @@ struct VerseProvider: TimelineProvider {
 
 struct VerseRectangularView: View {
     let entry: VerseEntry
+    private let scale = WidgetSettings.textScale
 
     var body: some View {
         VStack(alignment: .leading, spacing: 3) {
             // Sûre Adı ve Âyet Numarası (Büyük ve kalın, görsel 1 ile birebir uyumlu)
             Text(entry.ref)
-                .font(.system(size: 13.5, weight: .bold))
+                .font(.system(size: 13.5 * scale, weight: .bold))
                 .foregroundColor(.white)
                 .lineLimit(1)
             // Âyet Meali
             Text(entry.text)
-                .font(.system(size: 10.5, weight: .medium))
+                .font(.system(size: 10.5 * scale, weight: .medium))
                 .foregroundColor(.white.opacity(0.92))
-                .lineLimit(3)
-                .minimumScaleFactor(0.72)
+                .lineLimit(scale > 1.1 ? 2 : 3)
+                .minimumScaleFactor(0.70)
                 .multilineTextAlignment(.leading)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -1093,6 +1114,7 @@ struct VerseSystemSmallView: View {
     let entry: VerseEntry
     private let gold = Color(red: 1.0, green: 0.86, blue: 0.48)
     private let cream = Color(red: 0.99, green: 0.97, blue: 0.92)
+    private let scale = WidgetSettings.textScale
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -1127,12 +1149,12 @@ struct VerseSystemSmallView: View {
 
             // Orta: Zarif Serif Ayet Metni
             Text("“\(entry.text)”")
-                .font(.system(size: 12, weight: .medium, design: .serif))
+                .font(.system(size: 12 * scale, weight: .medium, design: .serif))
                 .foregroundColor(cream)
                 .lineSpacing(2.0)
                 .multilineTextAlignment(.leading)
-                .lineLimit(4)
-                .minimumScaleFactor(0.75)
+                .lineLimit(scale > 1.1 ? 3 : 4)
+                .minimumScaleFactor(0.70)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             Spacer(minLength: 4)
@@ -1154,7 +1176,7 @@ struct VerseSystemSmallView: View {
                     .font(.system(size: 9, weight: .semibold))
                     .foregroundColor(gold)
                 Text(entry.ref)
-                    .font(.system(size: 10.5, weight: .bold))
+                    .font(.system(size: 10.5 * scale, weight: .bold))
                     .foregroundColor(gold)
                     .lineLimit(1)
                     .minimumScaleFactor(0.75)
@@ -1172,6 +1194,7 @@ struct VerseSystemMediumView: View {
     let entry: VerseEntry
     private let gold = Color(red: 1.0, green: 0.86, blue: 0.48)
     private let cream = Color(red: 0.99, green: 0.97, blue: 0.92)
+    private let scale = WidgetSettings.textScale
 
     var body: some View {
         let hijri = HijriHelper.info(for: entry.date)
@@ -1232,12 +1255,12 @@ struct VerseSystemMediumView: View {
                     .frame(maxHeight: 46)
 
                 Text("“\(entry.text)”")
-                    .font(.system(size: 13.5, weight: .medium, design: .serif))
+                    .font(.system(size: 13.5 * scale, weight: .medium, design: .serif))
                     .foregroundColor(cream)
                     .lineSpacing(2.5)
                     .multilineTextAlignment(.leading)
-                    .lineLimit(3)
-                    .minimumScaleFactor(0.78)
+                    .lineLimit(scale > 1.1 ? 2 : 3)
+                    .minimumScaleFactor(0.70)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
 
