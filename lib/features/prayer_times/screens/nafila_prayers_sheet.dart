@@ -398,7 +398,10 @@ class _NafilaPrayersSheetState extends ConsumerState<NafilaPrayersSheet> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
+                          Wrap(
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            spacing: 8,
+                            runSpacing: 4,
                             children: [
                               Text(
                                 prayer.title,
@@ -408,8 +411,7 @@ class _NafilaPrayersSheetState extends ConsumerState<NafilaPrayersSheet> {
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              if (prayer.isFeatured) ...[
-                                const SizedBox(width: 8),
+                              if (prayer.isFeatured)
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                                   decoration: BoxDecoration(
@@ -425,7 +427,6 @@ class _NafilaPrayersSheetState extends ConsumerState<NafilaPrayersSheet> {
                                     ),
                                   ),
                                 ),
-                              ],
                             ],
                           ),
                           const SizedBox(height: 2),

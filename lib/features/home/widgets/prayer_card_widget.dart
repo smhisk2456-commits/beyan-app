@@ -352,61 +352,77 @@ class _LocationRow extends StatelessWidget {
 
     return Row(
       children: [
-        GestureDetector(
-          onTap: () {
-            HapticFeedback.lightImpact();
-            Navigator.push(
-              context,
-              LuxuryPageRoute(page: const NearbyMosquesScreen()),
-            );
-          },
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.location_on_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 14),
-              const SizedBox(width: 4),
-              Text(
-                locationName,
-                style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(width: 6),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
-                decoration: BoxDecoration(
-                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.22),
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.35), width: 0.8),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.mosque_rounded, size: 10, color: BeyanColors.tone(0xFFFFDF7A)),
-                    const SizedBox(width: 3),
-                    Text(
-                      strings.mosquesPill,
-                      style: TextStyle(
-                        color: BeyanColors.tone(0xFFFFDF7A),
-                        fontSize: 9.5,
-                        fontWeight: FontWeight.bold,
-                      ),
+        Expanded(
+          child: GestureDetector(
+            onTap: () {
+              HapticFeedback.lightImpact();
+              Navigator.push(
+                context,
+                LuxuryPageRoute(page: const NearbyMosquesScreen()),
+              );
+            },
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.location_on_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 13.5),
+                const SizedBox(width: 4),
+                Flexible(
+                  child: Text(
+                    locationName,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
                     ),
-                  ],
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(width: 5),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                  decoration: BoxDecoration(
+                    color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.22),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.35), width: 0.8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.mosque_rounded, size: 9.5, color: BeyanColors.tone(0xFFFFDF7A)),
+                      const SizedBox(width: 3),
+                      Text(
+                        strings.mosquesPill,
+                        style: TextStyle(
+                          color: BeyanColors.tone(0xFFFFDF7A),
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-        const Spacer(),
+        const SizedBox(width: 6),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
           decoration: BoxDecoration(
-            color: Colors.black.withValues(alpha: 0.2),
+            color: Colors.black.withValues(alpha: 0.25),
             borderRadius: BorderRadius.circular(10),
             border: Border.all(color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.3), width: 0.8),
           ),
           child: Text(
             '$hijriStr • $dateStr',
-            style: TextStyle(color: BeyanColors.tone(0xFFFFDF7A), fontSize: 11, fontWeight: FontWeight.w600),
+            style: TextStyle(
+              color: BeyanColors.tone(0xFFFFDF7A),
+              fontSize: 10.5,
+              fontWeight: FontWeight.w600,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ],

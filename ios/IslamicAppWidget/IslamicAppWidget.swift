@@ -949,9 +949,10 @@ struct VerseProvider: TimelineProvider {
         return WidgetVerseData.all
     }
 
-    private func verse(at date: Date, preferApplied: Bool = false) -> VerseEntry {
+    private func verse(at date: Date) -> VerseEntry {
         let isPinned = Self.bool(forKey: "widget_is_pinned")
-        if (isPinned || preferApplied),
+        // Yalnızca kullanıcı özellikle "Bu Âyeti Sabitle" dediyse sabit ayet döner
+        if isPinned,
            let appliedRef = Self.string(forKey: "widget_applied_verse_ref"),
            let appliedText = Self.string(forKey: "widget_applied_verse_text"),
            !appliedRef.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
@@ -973,17 +974,17 @@ struct VerseProvider: TimelineProvider {
         let slotIndex = Int(date.timeIntervalSince(startOfDay) / slot)
         let nonce = Self.int(forKey: "widget_apply_nonce")
 
-        // Asla aynı sırayla tekrar etmeyen güçlü hash karıştırma algoritması
+        // Her slotta (15dk, 30dk, 1saat) farklı ve zengin bir ayete geçiş sağlayan karıştırma
         let hash = abs((dayOfYear * 7919) ^ (year * 104729) ^ (slotIndex * 31) ^ (nonce * 17))
         let index = hash % pool.count
         let item = pool[index]
         return VerseEntry(date: date, ref: item.ref, text: item.text)
     }
 
-    func placeholder(in context: Context) -> VerseEntry { verse(at: Date(), preferApplied: true) }
+    func placeholder(in context: Context) -> VerseEntry { verse(at: Date()) }
 
     func getSnapshot(in context: Context, completion: @escaping (VerseEntry) -> Void) {
-        completion(verse(at: Date(), preferApplied: true))
+        completion(verse(at: Date()))
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<VerseEntry>) -> Void) {
@@ -1001,13 +1002,13 @@ struct VerseProvider: TimelineProvider {
 
         let slot = Self.slotDuration()
         let slotStart = Date(timeIntervalSince1970: floor(now.timeIntervalSince1970 / slot) * slot)
-        var entries = [verse(at: now, preferApplied: true)]
+        var entries: [VerseEntry] = []
 
         // 24 ila 48 aralık üretip widget kit döngüsüne sun
         let count = min(48, max(24, Int(86400 / slot)))
-        for i in 1...count {
+        for i in 0..<count {
             let nextDate = slotStart.addingTimeInterval(Double(i) * slot)
-            entries.append(verse(at: nextDate, preferApplied: false))
+            entries.append(verse(at: nextDate))
         }
         completion(Timeline(entries: entries, policy: .atEnd))
     }

@@ -12,6 +12,7 @@ import '../widget_service.dart';
 import '../../monetization/widgets/banner_ad_widget.dart';
 import '../../notifications/models/id_verse_translations.dart';
 import '../../notifications/models/short_verse_notification.dart';
+import '../../notifications/screens/notification_settings_sheet.dart';
 
 /// Kilit Ekranı Widget Kategorileri
 enum WidgetCategoryType {
@@ -977,6 +978,10 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
     await prefs.setString('widget_font_family', _fontFamily);
     await prefs.setString('widget_active_category', _selectedCategory.name);
 
+    // Ayarları uygularken otomatik dinamik döngüye geç (sabitlemeyi kaldır)
+    await prefs.setBool('widget_is_pinned', false);
+    await HomeWidget.saveWidgetData<bool>('widget_is_pinned', false);
+
     final (refText, formattedText, arabicText, trRef) = _resolveActivePreviewVerse(strings.language);
     final nonce = DateTime.now().millisecondsSinceEpoch ~/ 1000;
 
@@ -1000,6 +1005,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
 
     if (!mounted) return;
     setState(() {
+      _isPinned = false;
       _appliedVerseRef = refText;
     });
 
@@ -1340,6 +1346,11 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
 
                   // ── Kilit Ekranı Widget'ına Uygula Butonu ─────────────────
                   _buildApplyWidgetButton(strings),
+
+                  const SizedBox(height: 16),
+
+                  // ── Günün Âyeti Bildirimleri Hızlı Erişim ─────────────────
+                  _buildVerseNotificationShortcut(strings),
 
                   const SizedBox(height: 24),
 
@@ -2201,6 +2212,51 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
       color: Colors.white.withValues(alpha: 0.08),
       indent: 16,
       endIndent: 16,
+    );
+  }
+
+  Widget _buildVerseNotificationShortcut(AppStrings strings) {
+    return Container(
+      decoration: BoxDecoration(
+        color: BeyanColors.tone(0xFF0A241F),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35),
+        ),
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.15),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(Icons.notifications_active_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 20),
+        ),
+        title: Text(
+          strings.verseNotifTitle,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        subtitle: Text(
+          strings.language == AppLanguage.turkish
+              ? 'Kilit ekranı ayet bildirim saatini ve sıklığını ayarla'
+              : 'Set lock screen verse alert times and frequency',
+          style: const TextStyle(
+            color: Colors.white60,
+            fontSize: 11,
+          ),
+        ),
+        trailing: Icon(Icons.arrow_forward_ios_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 14),
+        onTap: () {
+          HapticFeedback.lightImpact();
+          NotificationSettingsSheet.show(context, initialTab: 1);
+        },
+      ),
     );
   }
 

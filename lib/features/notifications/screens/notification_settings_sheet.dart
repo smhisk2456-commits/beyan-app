@@ -15,9 +15,10 @@ import 'adhan_makam_selector_sheet.dart';
 
 /// Ezan ve Namaz Bildirimleri Lüks Ayarlar Menüsü
 class NotificationSettingsSheet extends ConsumerStatefulWidget {
-  const NotificationSettingsSheet({super.key});
+  final int initialTab;
+  const NotificationSettingsSheet({super.key, this.initialTab = 0});
 
-  static Future<void> show(BuildContext context) {
+  static Future<void> show(BuildContext context, {int initialTab = 0}) {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -26,7 +27,7 @@ class NotificationSettingsSheet extends ConsumerStatefulWidget {
       useSafeArea: true,
       backgroundColor: Colors.transparent,
       barrierColor: Colors.black.withValues(alpha: 0.65),
-      builder: (ctx) => const NotificationSettingsSheet(),
+      builder: (ctx) => NotificationSettingsSheet(initialTab: initialTab),
     );
   }
 
@@ -46,6 +47,9 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
   AdhanMakam _currentMakam = AdhanMakam.istanbul;
   final Map<PrayerName, bool> _prayerStates = {};
 
+  // Sekme Durumu (0: Ezan & Vakitler, 1: Günün Âyeti & Sure)
+  late int _selectedNotificationTab;
+
   // Günün Âyeti & Sure Bildirimleri Durumu
   bool _verseEnabled = true;
   int _verseHour = 9;
@@ -55,6 +59,7 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
   @override
   void initState() {
     super.initState();
+    _selectedNotificationTab = widget.initialTab;
     WidgetsBinding.instance.addObserver(this);
     _loadSettings();
   }
@@ -500,6 +505,134 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                     const SizedBox(height: 16),
                   ],
 
+                  // ── Bildirim Sekmeleri (Ezan & Vakitler | Günün Âyeti) ─────
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 18),
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: isDark ? BeyanColors.tone(0xFF0D2823) : Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () {
+                              HapticFeedback.selectionClick();
+                              setState(() => _selectedNotificationTab = 0);
+                            },
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              decoration: BoxDecoration(
+                                color: _selectedNotificationTab == 0
+                                    ? BeyanColors.tone(0xFFD4AF37)
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: _selectedNotificationTab == 0
+                                    ? [
+                                        BoxShadow(
+                                          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.3),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ]
+                                    : null,
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.mosque_rounded,
+                                    size: 16,
+                                    color: _selectedNotificationTab == 0
+                                        ? BeyanColors.tone(0xFF01201B)
+                                        : (isDark ? Colors.white70 : Colors.black87),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    strings.sectionPrayerAlerts,
+                                    style: TextStyle(
+                                      fontSize: 12.5,
+                                      fontWeight: FontWeight.bold,
+                                      color: _selectedNotificationTab == 0
+                                          ? BeyanColors.tone(0xFF01201B)
+                                          : (isDark ? Colors.white70 : Colors.black87),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () {
+                              HapticFeedback.selectionClick();
+                              setState(() => _selectedNotificationTab = 1);
+                            },
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              decoration: BoxDecoration(
+                                color: _selectedNotificationTab == 1
+                                    ? BeyanColors.tone(0xFFD4AF37)
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: _selectedNotificationTab == 1
+                                    ? [
+                                        BoxShadow(
+                                          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.3),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ]
+                                    : null,
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.menu_book_rounded,
+                                    size: 16,
+                                    color: _selectedNotificationTab == 1
+                                        ? BeyanColors.tone(0xFF01201B)
+                                        : (isDark ? Colors.white70 : Colors.black87),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    strings.language == AppLanguage.turkish
+                                        ? 'Günün Âyeti'
+                                        : (strings.language == AppLanguage.arabic
+                                            ? 'آية اليوم'
+                                            : (strings.language == AppLanguage.indonesian
+                                                ? 'Ayat Harian'
+                                                : 'Daily Verse')),
+                                    style: TextStyle(
+                                      fontSize: 12.5,
+                                      fontWeight: FontWeight.bold,
+                                      color: _selectedNotificationTab == 1
+                                          ? BeyanColors.tone(0xFF01201B)
+                                          : (isDark ? Colors.white70 : Colors.black87),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // ════════════════════════════════════════════════════════════
+                  // 1. SEKME: EZAN & VAKİT BİLDİRİMLERİ
+                  // ════════════════════════════════════════════════════════════
+                  if (_selectedNotificationTab == 0) ...[
                   // ── Ana Açma / Kapama Kartı ──────────────────────
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -802,6 +935,35 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
 
                   const SizedBox(height: 24),
 
+                  // ── Ezan Test Bildirimi Butonu ───────────────────────
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: OutlinedButton.icon(
+                      onPressed: _sendTest,
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(color: BeyanColors.tone(0xFFD4AF37), width: 1.2),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      icon: Icon(Icons.notifications_active, color: BeyanColors.tone(0xFFD4AF37), size: 18),
+                      label: Text(
+                        strings.testAdhanBtn,
+                        style: TextStyle(
+                          color: BeyanColors.tone(0xFFD4AF37),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+
+                // ════════════════════════════════════════════════════════════
+                // 2. SEKME: GÜNÜN ÂYETİ VE SURE BİLDİRİMLERİ
+                // ════════════════════════════════════════════════════════════
+                if (_selectedNotificationTab == 1) ...[
                   // ── Günün Âyeti ve Sure Bildirimleri ───────────
                   Text(
                     strings.sectionVerseAlerts,
@@ -1119,35 +1281,41 @@ class _NotificationSettingsSheetState extends ConsumerState<NotificationSettings
                     ),
                   ),
 
-                  const SizedBox(height: 24),
-
-                  // ── Test Bildirimi Butonu ───────────────────────
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48,
-                    child: OutlinedButton.icon(
-                      onPressed: _sendTest,
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: BeyanColors.tone(0xFFD4AF37), width: 1.2),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: isDark ? BeyanColors.tone(0xFF0C2923) : Colors.grey.shade50,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: BeyanColors.tone(0xFF10B981).withValues(alpha: 0.3),
                       ),
-                      icon: Icon(Icons.notifications_active, color: BeyanColors.tone(0xFFD4AF37), size: 18),
-                      label: Text(
-                        strings.testAdhanBtn,
-                        style: TextStyle(
-                          color: BeyanColors.tone(0xFFD4AF37),
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(Icons.lightbulb_outline_rounded, color: BeyanColors.tone(0xFF2DD4BF), size: 20),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            strings.language == AppLanguage.turkish
+                                ? 'Günün ayeti bildirimleri; telefonunuzun kilit ekranında ve bildirim merkezinde zarif bir tefekkür fırsatı sunar. Sıklığı yukarıdan dilediğiniz gibi ayarlayabilirsiniz.'
+                                : 'Daily verse notifications offer inspiring moments of contemplation on your lock screen and notification center.',
+                            style: TextStyle(
+                              color: isDark ? Colors.white70 : Colors.black87,
+                              fontSize: 11.5,
+                              height: 1.4,
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
                   ),
                 ],
-              ),
+              ],
             ),
-            ),
+          ),
+          ),
     );
   }
 

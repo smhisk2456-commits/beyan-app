@@ -86,17 +86,19 @@ class WidgetService {
             'text': q.formatForViewMode(verseView, langCode),
           });
         }
-        // 'all' seçiliyse ve केवल meal görünümündeyse ek kısa ayetlerle zenginleştir
-        if (quoteCat == 'all' && langCode == 'tr' && verseView == 'meal_only') {
-          final dbVerses = await _quranRepo.getRandomWidgetVerses(limit: 40);
+        // Ayet havuzunu zenginleştir: Eğer Türkçe ise veritabanından zengin ve duygusal ayetler ekle
+        if (langCode == 'tr' && verseView == 'meal_only') {
+          final dbVerses = await _quranRepo.getRandomWidgetVerses(limit: 60);
           widgetVerses.addAll(dbVerses);
         }
       }
 
-      // Kullanıcının son uyguladığı ayeti listenin en başına ekle
+      final isPinned = prefs.getBool('widget_is_pinned') ?? false;
       final appliedRef = prefs.getString('widget_applied_verse_ref') ?? '';
       final appliedText = prefs.getString('widget_applied_verse_text') ?? '';
-      if (appliedRef.isNotEmpty && appliedText.isNotEmpty) {
+
+      // Yalnızca kullanıcı özellikle bu ayeti sabitle dediyse başa sabit olarak ekle
+      if (isPinned && appliedRef.isNotEmpty && appliedText.isNotEmpty) {
         widgetVerses.removeWhere((item) => item['ref'] == appliedRef);
         widgetVerses.insert(0, {
           'ref': appliedRef,
