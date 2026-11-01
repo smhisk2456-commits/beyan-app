@@ -470,12 +470,16 @@ class _NafilaPrayersSheetState extends ConsumerState<NafilaPrayersSheet> {
                       children: [
                         Icon(Icons.stars_rounded, color: gold, size: 13),
                         const SizedBox(width: 5),
-                        Text(
-                          '${prayer.rewards.length} Müjde ve İlahi Sevap Detaylı',
-                          style: TextStyle(
-                            color: gold,
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w700,
+                        Flexible(
+                          child: Text(
+                            '${prayer.rewards.length} Müjde ve İlahi Sevap Detaylı',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: gold,
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
                       ],
@@ -485,25 +489,34 @@ class _NafilaPrayersSheetState extends ConsumerState<NafilaPrayersSheet> {
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(Icons.repeat_rounded, color: gold, size: 14),
-                          const SizedBox(width: 4),
-                          Text(
-                            prayer.rakats,
-                            style: const TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w600),
-                          ),
-                        ],
+                    Flexible(
+                      flex: 3,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.repeat_rounded, color: gold, size: 14),
+                            const SizedBox(width: 4),
+                            Flexible(
+                              child: Text(
+                                prayer.rakats,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w600),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
+                      flex: 2,
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(

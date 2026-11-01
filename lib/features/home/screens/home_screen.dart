@@ -670,16 +670,23 @@ class _SpiritualLifeHub extends ConsumerWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              Text(
-                'Keşfet & İslami Yaşam',
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.2,
-                  color: isDark ? Colors.white : BeyanColors.tone(0xFF012E2B),
+              Expanded(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Keşfet & İslami Yaşam',
+                    maxLines: 1,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.2,
+                      color: isDark ? Colors.white : BeyanColors.tone(0xFF012E2B),
+                    ),
+                  ),
                 ),
               ),
-              const Spacer(),
+              const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                 decoration: BoxDecoration(
@@ -927,23 +934,30 @@ class _HubCard extends StatelessWidget {
                       child: Icon(icon, color: primaryAccent, size: 17),
                     ),
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: primaryAccent.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(
-                        color: primaryAccent.withValues(alpha: 0.3),
-                        width: 0.8,
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: primaryAccent.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: primaryAccent.withValues(alpha: 0.3),
+                          width: 0.8,
+                        ),
                       ),
-                    ),
-                    child: Text(
-                      badge,
-                      style: TextStyle(
-                        fontSize: 8.5,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? gold : BeyanColors.tone(0xFF01362F),
-                        letterSpacing: 0.2,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          badge,
+                          maxLines: 1,
+                          style: TextStyle(
+                            fontSize: 8.5,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? gold : BeyanColors.tone(0xFF01362F),
+                            letterSpacing: 0.2,
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -1530,30 +1544,36 @@ class _IslamicAppBar extends ConsumerWidget {
             ),
           ),
           const SizedBox(width: 10),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                'Beyân',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.4,
-                  height: 1.1,
+          Flexible(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text(
+                  'Beyân',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.4,
+                    height: 1.1,
+                  ),
                 ),
-              ),
-              Text(
-                _getSpiritualGreeting(strings),
-                style: TextStyle(
-                  color: BeyanColors.tone(0xFFFFDF7A),
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.2,
+                Text(
+                  _getSpiritualGreeting(strings),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: BeyanColors.tone(0xFFFFDF7A),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.2,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
