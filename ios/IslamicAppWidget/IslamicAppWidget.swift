@@ -455,7 +455,7 @@ struct PrayerCalculator {
         }
 
         // Diyanet resmi takvim temkin düzeltmeleri (dakika - Diyanet ve Adhan ile tam uyumlu)
-        let adjustments: [Double] = [0, -7, 5, 5, 10, 2]
+        let adjustments: [Double] = [0, -7, 5, 4, 7, 2]
 
         return PrayerKind.allCases.map { kind in
             let i = kind.rawValue
