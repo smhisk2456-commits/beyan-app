@@ -36,8 +36,8 @@ class AdService {
       // Google AdMob seviyesinde yetişkin (+18), kumar, flört vb. hassas kategorileri tamamen engeller.
       final configuration = RequestConfiguration(
         maxAdContentRating: MaxAdContentRating.g, // "G" = General Audiences (Yalnızca Genel İzleyici / Çocuk & Aile)
-        tagForChildDirectedTreatment: TagForChildDirectedTreatment.yes,
-        tagForUnderAgeOfConsent: TagForUnderAgeOfConsent.yes,
+        tagForChildDirectedTreatment: TagForChildDirectedTreatment.no,
+        tagForUnderAgeOfConsent: TagForUnderAgeOfConsent.no,
       );
       await MobileAds.instance.updateRequestConfiguration(configuration);
 

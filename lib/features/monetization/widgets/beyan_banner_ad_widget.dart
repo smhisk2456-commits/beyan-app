@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -19,6 +21,7 @@ class _BeyanBannerAdWidgetState extends ConsumerState<BeyanBannerAdWidget> {
   BannerAd? _bannerAd;
   bool _isLoaded = false;
   bool _isLoading = false;
+  Timer? _retryTimer;
 
   @override
   void initState() {
@@ -40,6 +43,8 @@ class _BeyanBannerAdWidgetState extends ConsumerState<BeyanBannerAdWidget> {
   }
 
   void _cleanAd() {
+    _retryTimer?.cancel();
+    _retryTimer = null;
     _bannerAd?.dispose();
     _bannerAd = null;
     if (mounted && (_isLoaded || _isLoading)) {
@@ -54,7 +59,9 @@ class _BeyanBannerAdWidgetState extends ConsumerState<BeyanBannerAdWidget> {
     final isPremium = ref.read(premiumProvider).isPremium;
     if (isPremium || !AdService.kAdsEnabled) return;
 
-    final adUnitId = isFallback
+    // RELEASE / App Store / TestFlight modunda ASLA test ID fallback'i yapılmaz!
+    // Yalnızca yerel emülatörde / kDebugMode aktifken test ID'ye izin verilir.
+    final adUnitId = (isFallback && kDebugMode)
         ? AdService.instance.testBannerAdUnitId
         : AdService.instance.bannerAdUnitId;
 
@@ -105,14 +112,19 @@ class _BeyanBannerAdWidgetState extends ConsumerState<BeyanBannerAdWidget> {
           ad.dispose();
           _bannerAd = null;
           if (mounted) {
-            if (!isFallback) {
-              // Canlı reklam birimi TestFlight veya bölgede no-fill verirse
-              // anında resmi Google test reklamına geçerek alanın dolu kalmasını sağla:
+            setState(() {
+              _isLoaded = false;
+              _isLoading = false;
+            });
+            if (!isFallback && kDebugMode) {
               _loadAd(isFallback: true);
             } else {
-              setState(() {
-                _isLoaded = false;
-                _isLoading = false;
+              // Canlı modda no-fill durumunda 45 saniye sonra sessizce tekrar dene
+              _retryTimer?.cancel();
+              _retryTimer = Timer(const Duration(seconds: 45), () {
+                if (mounted && !_isLoaded && !_isLoading) {
+                  _loadAd(isFallback: false);
+                }
               });
             }
           }
@@ -123,6 +135,7 @@ class _BeyanBannerAdWidgetState extends ConsumerState<BeyanBannerAdWidget> {
 
   @override
   void dispose() {
+    _retryTimer?.cancel();
     _bannerAd?.dispose();
     super.dispose();
   }
