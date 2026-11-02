@@ -168,6 +168,7 @@ class MainNavigation extends ConsumerStatefulWidget {
 class _MainNavigationState extends ConsumerState<MainNavigation>
     with WidgetsBindingObserver {
   final List<int> _tabHistory = [0];
+  final Set<int> _loadedTabs = {0};
   int _currentTab = 0;
 
   static const List<Widget> _tabs = [
@@ -200,6 +201,7 @@ class _MainNavigationState extends ConsumerState<MainNavigation>
     if (newTab == _currentTab) return;
     setState(() {
       _currentTab = newTab;
+      _loadedTabs.add(newTab);
       _tabHistory.add(newTab);
     });
     ref.read(selectedTabProvider.notifier).state = newTab;
@@ -209,7 +211,10 @@ class _MainNavigationState extends ConsumerState<MainNavigation>
     if (_tabHistory.length > 1) {
       _tabHistory.removeLast();
       final prevTab = _tabHistory.last;
-      setState(() => _currentTab = prevTab);
+      setState(() {
+        _currentTab = prevTab;
+        _loadedTabs.add(prevTab);
+      });
       ref.read(selectedTabProvider.notifier).state = prevTab;
     } else {
       _navigateToTab(0);
@@ -261,7 +266,12 @@ class _MainNavigationState extends ConsumerState<MainNavigation>
         extendBody: true,
         body: IndexedStack(
           index: _currentTab,
-          children: _tabs,
+          children: List.generate(_tabs.length, (i) {
+            if (_loadedTabs.contains(i)) {
+              return RepaintBoundary(child: _tabs[i]);
+            }
+            return const SizedBox.shrink();
+          }),
         ),
         bottomNavigationBar: RepaintBoundary(
           child: Column(

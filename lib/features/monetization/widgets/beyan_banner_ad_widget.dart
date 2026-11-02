@@ -171,10 +171,12 @@ class _BeyanBannerAdWidgetState extends ConsumerState<BeyanBannerAdWidget> {
           ),
         ),
       ),
-      child: SizedBox(
-        width: _bannerAd!.size.width.toDouble(),
-        height: _bannerAd!.size.height.toDouble(),
-        child: AdWidget(ad: _bannerAd!),
+      child: RepaintBoundary(
+        child: SizedBox(
+          width: _bannerAd!.size.width.toDouble(),
+          height: _bannerAd!.size.height.toDouble(),
+          child: AdWidget(ad: _bannerAd!),
+        ),
       ),
     );
   }

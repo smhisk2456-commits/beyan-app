@@ -63,43 +63,50 @@ class LuxuryFloatingDock extends ConsumerWidget {
                       ],
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
                           // 1. Sekme: Ana Sayfa
-                          _buildTabItem(
-                            index: 0,
-                            icon: Icons.explore_rounded,
-                            activeIcon: Icons.explore,
-                            label: strings.tabHome,
+                          Expanded(
+                            child: _buildTabItem(
+                              index: 0,
+                              icon: Icons.explore_rounded,
+                              activeIcon: Icons.explore,
+                              label: strings.tabHome,
+                            ),
                           ),
 
                           // 2. Sekme: Vakitler
-                          _buildTabItem(
-                            index: 1,
-                            icon: Icons.access_time_rounded,
-                            activeIcon: Icons.access_time_filled_rounded,
-                            label: strings.tabPrayers,
+                          Expanded(
+                            child: _buildTabItem(
+                              index: 1,
+                              icon: Icons.access_time_rounded,
+                              activeIcon: Icons.access_time_filled_rounded,
+                              label: strings.tabPrayers,
+                            ),
                           ),
 
                           // Merkez buton için boşluk (Kur'an-ı Kerim)
                           const SizedBox(width: 58),
 
                           // 3. Sekme: Zikirmatik (Index 3)
-                          _buildTabItem(
-                            index: 3,
-                            icon: Icons.fingerprint_rounded,
-                            activeIcon: Icons.fingerprint,
-                            label: strings.tabZikr,
+                          Expanded(
+                            child: _buildTabItem(
+                              index: 3,
+                              icon: Icons.fingerprint_rounded,
+                              activeIcon: Icons.fingerprint,
+                              label: strings.tabZikr,
+                            ),
                           ),
 
                           // 4. Sekme: Widget & Kilit Ekranı (Index 4)
-                          _buildTabItem(
-                            index: 4,
-                            icon: Icons.widgets_outlined,
-                            activeIcon: Icons.widgets_rounded,
-                            label: strings.tabWidget,
+                          Expanded(
+                            child: _buildTabItem(
+                              index: 4,
+                              icon: Icons.widgets_outlined,
+                              activeIcon: Icons.widgets_rounded,
+                              label: strings.tabWidget,
+                            ),
                           ),
                         ],
                       ),
@@ -128,51 +135,64 @@ class LuxuryFloatingDock extends ConsumerWidget {
   }) {
     final isSelected = currentIndex == index;
 
-    return GestureDetector(
-      onTap: () {
-        HapticFeedback.lightImpact();
-        onTap(index);
-      },
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeOutCubic,
-        padding: EdgeInsets.symmetric(
-          horizontal: isSelected ? 12 : 8,
-          vertical: 6,
-        ),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.18)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
-          border: isSelected
-              ? Border.all(
-                  color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.35),
-                  width: 1,
-                )
-              : null,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              isSelected ? activeIcon : icon,
-              size: isSelected ? 23 : 21,
-              color: isSelected ? BeyanColors.tone(0xFFFFE082) : Colors.white60,
-            ),
-            const SizedBox(height: 3),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 10.5,
-                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+    return Semantics(
+      label: label,
+      selected: isSelected,
+      button: true,
+      child: GestureDetector(
+        onTap: () {
+          HapticFeedback.lightImpact();
+          onTap(index);
+        },
+        behavior: HitTestBehavior.opaque,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOutCubic,
+          padding: EdgeInsets.symmetric(
+            horizontal: isSelected ? 4 : 2,
+            vertical: 5,
+          ),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.18)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(18),
+            border: isSelected
+                ? Border.all(
+                    color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.35),
+                    width: 1,
+                  )
+                : null,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                isSelected ? activeIcon : icon,
+                size: isSelected ? 22 : 20,
                 color: isSelected ? BeyanColors.tone(0xFFFFE082) : Colors.white60,
-                letterSpacing: 0.2,
               ),
-            ),
-          ],
+              const SizedBox(height: 3),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 1),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    softWrap: false,
+                    style: TextStyle(
+                      fontSize: 10.5,
+                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                      color: isSelected ? BeyanColors.tone(0xFFFFE082) : Colors.white60,
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

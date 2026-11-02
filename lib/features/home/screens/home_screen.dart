@@ -88,88 +88,103 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             // ── Cuma Tebriği & Kehf Sûresi Sünneti Kartı ────────────
             if (isFriday)
               SliverToBoxAdapter(
-                child: _FridayKahfBanner(
-                  allSurahs: allSurahs,
-                  atmosphere: atmosphere,
+                child: RepaintBoundary(
+                  child: _FridayKahfBanner(
+                    allSurahs: allSurahs,
+                    atmosphere: atmosphere,
+                  ),
                 ),
               ),
 
             // ── Yaklaşan Dini Gün / Kandil Bildirimi ────────────────
             if (nextReligiousDay != null)
               SliverToBoxAdapter(
-                child: _UpcomingReligiousDayBanner(
-                  day: nextReligiousDay,
-                  atmosphere: atmosphere,
+                child: RepaintBoundary(
+                  child: _UpcomingReligiousDayBanner(
+                    day: nextReligiousDay,
+                    atmosphere: atmosphere,
+                  ),
                 ),
               ),
 
             // ── Namaz Vakti Kartı (Zümrüt & Altın) ─────────────────
-            // ignore: prefer_const_constructors
-            SliverToBoxAdapter(child: PrayerCardWidget()),
+            const SliverToBoxAdapter(
+              child: RepaintBoundary(
+                child: PrayerCardWidget(),
+              ),
+            ),
 
             // ── Son Okunan Kur'an'a Devam Etme Kartı ────────────────
             if (lastRead != null)
               SliverToBoxAdapter(
-                child: _LastReadQuranCard(
-                  lastRead: lastRead,
-                  allSurahs: allSurahs,
-                  atmosphere: atmosphere,
+                child: RepaintBoundary(
+                  child: _LastReadQuranCard(
+                    lastRead: lastRead,
+                    allSurahs: allSurahs,
+                    atmosphere: atmosphere,
+                  ),
                 ),
               ),
 
             // ── Hızlı Erişim Butonları (Tek Sıra 4 Odaklı Araç) ───
             SliverToBoxAdapter(
-              child: _QuickActionGrid(
-                atmosphere: atmosphere,
-                onOpenQibla: () {
-                  Navigator.push(
-                    context,
-                    LuxuryPageRoute(page: const QiblaCompassScreen()),
-                  );
-                },
-                onOpenDuas: () {
-                  Navigator.push(
-                    context,
-                    LuxuryPageRoute(page: const DuaLibraryScreen()),
-                  );
-                },
-                onOpenCalendar: () {
-                  Navigator.push(
-                    context,
-                    LuxuryPageRoute(page: const HijriCalendarScreen()),
-                  );
-                },
-                onOpenRamadan: () {
-                  Navigator.push(
-                    context,
-                    LuxuryPageRoute(page: const RamadanDashboardScreen()),
-                  );
-                },
+              child: RepaintBoundary(
+                child: _QuickActionGrid(
+                  atmosphere: atmosphere,
+                  onOpenQibla: () {
+                    Navigator.push(
+                      context,
+                      LuxuryPageRoute(page: const QiblaCompassScreen()),
+                    );
+                  },
+                  onOpenDuas: () {
+                    Navigator.push(
+                      context,
+                      LuxuryPageRoute(page: const DuaLibraryScreen()),
+                    );
+                  },
+                  onOpenCalendar: () {
+                    Navigator.push(
+                      context,
+                      LuxuryPageRoute(page: const HijriCalendarScreen()),
+                    );
+                  },
+                  onOpenRamadan: () {
+                    Navigator.push(
+                      context,
+                      LuxuryPageRoute(page: const RamadanDashboardScreen()),
+                    );
+                  },
+                ),
               ),
             ),
 
             // ── Keşfet & İslami Rehber Hub (2x3 Bento Grid) ────────
             SliverToBoxAdapter(
-              child: _SpiritualLifeHub(atmosphere: atmosphere),
+              child: RepaintBoundary(
+                child: _SpiritualLifeHub(atmosphere: atmosphere),
+              ),
             ),
 
             // ── "Bugün Kalbin Nasıl Hissediyor?" (Ruh Haline Göre Âyet & Şifa) ───
-            // ignore: prefer_const_constructors
-            SliverToBoxAdapter(
-              // ignore: prefer_const_constructors
-              child: _SpiritualMoodsSection(),
+            const SliverToBoxAdapter(
+              child: RepaintBoundary(
+                child: _SpiritualMoodsSection(),
+              ),
             ),
 
             // ── Günün Manevi İlhamı (Âyet & Doğrulanmış Dua) ────────
             const SliverToBoxAdapter(
               child: Padding(
                 padding: EdgeInsets.fromLTRB(20, 6, 20, 10),
-                child: _DailyInspirationCard(),
+                child: RepaintBoundary(
+                  child: _DailyInspirationCard(),
+                ),
               ),
             ),
 
-            // Alt boşluk (Yüzen lüks dock ve banner için ferah alan)
-            const SliverToBoxAdapter(child: SizedBox(height: 120)),
+            // Alt boşluk (Yüzen lüks dock ve banner için ferah alan: 180px)
+            const SliverToBoxAdapter(child: SizedBox(height: 180)),
           ],
         ),
       ),
@@ -306,7 +321,7 @@ class _FridayKahfBanner extends ConsumerWidget {
                     shape: BoxShape.circle,
                     border: Border.all(color: BeyanColors.tone(0xFFFFDF7A), width: 1.2),
                   ),
-                  child: const Text('🕌', style: TextStyle(fontSize: 20)),
+                  child: Icon(Icons.mosque_rounded, size: 20, color: BeyanColors.tone(0xFFFFDF7A)),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -317,8 +332,8 @@ class _FridayKahfBanner extends ConsumerWidget {
                         children: [
                           Text(
                             lang == AppLanguage.turkish
-                                ? 'Hayırlı Cumalar 🌙'
-                                : (lang == AppLanguage.arabic ? 'جمعة مباركة 🌙' : 'Jummah Mubarak 🌙'),
+                                ? 'Hayırlı Cumalar'
+                                : (lang == AppLanguage.arabic ? 'جمعة مباركة' : 'Jummah Mubarak'),
                             style: TextStyle(
                               color: BeyanColors.tone(0xFFFFDF7A),
                               fontSize: 16,
@@ -447,7 +462,7 @@ class _FridayKahfBanner extends ConsumerWidget {
                       ),
                     );
                   },
-                  icon: const Text('📿', style: TextStyle(fontSize: 13)),
+                  icon: const Icon(Icons.fingerprint_rounded, size: 15),
                   label: Text(
                     lang == AppLanguage.turkish ? 'Salavât Sayacı' : 'Salawat',
                     style: TextStyle(
@@ -714,7 +729,7 @@ class _SpiritualLifeHub extends ConsumerWidget {
                 child: _HubCard(
                   title: 'Beyân AI',
                   subtitle: 'Manevi Rehber & Tefsir',
-                  badge: 'YAPAY ZEKA ✨',
+                  badge: 'YAPAY ZEKA',
                   icon: Icons.auto_awesome_rounded,
                   isDark: isDark,
                   onTap: () {

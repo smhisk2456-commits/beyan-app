@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:islamic_app/core/widgets/luxury_floating_dock.dart';
 import 'package:islamic_app/features/home/screens/home_screen.dart';
 import 'package:islamic_app/features/prayer_times/screens/nafila_prayers_sheet.dart';
 
@@ -100,6 +101,26 @@ void main() {
         await tester.tap(find.text('open'));
         await tester.pump(const Duration(seconds: 1));
         _expectNoErrors();
+      });
+
+      testWidgets('Lüks Alt Bar (Dock) taşma ve kırpılma yok: $name (yazı x$scale)',
+          (tester) async {
+        await _pump(
+          tester,
+          w,
+          h,
+          dpr,
+          scale,
+          Scaffold(
+            bottomNavigationBar: LuxuryFloatingDock(
+              currentIndex: 0,
+              onTap: (_) {},
+            ),
+          ),
+        );
+        _expectNoErrors();
+        expect(find.text('Widget'), findsOneWidget);
+        expect(find.text('Zikirmatik'), findsOneWidget);
       });
     }
   }

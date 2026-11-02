@@ -260,8 +260,10 @@ class _PrayerCard extends ConsumerWidget {
                               final countdownAsync = ref.watch(countdownStringProvider);
                               final strings = ref.watch(appStringsProvider);
                               return countdownAsync.when(
-                                data: (s) => _CountdownBadge(
-                                  text: '$s ${strings.remainingTime}',
+                                data: (s) => RepaintBoundary(
+                                  child: _CountdownBadge(
+                                    text: '$s ${strings.remainingTime}',
+                                  ),
                                 ),
                                 loading: () => const SizedBox.shrink(),
                                 error: (_, __) => const SizedBox.shrink(),
@@ -280,15 +282,17 @@ class _PrayerCard extends ConsumerWidget {
                   builder: (context, ref, _) {
                     final progressAsync = ref.watch(prayerProgressProvider);
                     final progress = progressAsync.valueOrNull ?? 0.0;
-                    return _ProgressBar(
-                      progress: progress,
-                      fromLabel: daily.localizedCurrentPrayerName(langCode),
-                      toLabel: next?.name.localizedName(langCode) ?? '',
-                      onTap: () {
-                        if (next != null) {
-                          PrayerGuideSheet.show(context, ref, next.name, next.time);
-                        }
-                      },
+                    return RepaintBoundary(
+                      child: _ProgressBar(
+                        progress: progress,
+                        fromLabel: daily.localizedCurrentPrayerName(langCode),
+                        toLabel: next?.name.localizedName(langCode) ?? '',
+                        onTap: () {
+                          if (next != null) {
+                            PrayerGuideSheet.show(context, ref, next.name, next.time);
+                          }
+                        },
+                      ),
                     );
                   },
                 ),
