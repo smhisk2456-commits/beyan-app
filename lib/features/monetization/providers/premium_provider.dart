@@ -105,17 +105,6 @@ class PremiumNotifier extends StateNotifier<PremiumState> {
     );
     return success;
   }
-
-  Future<void> toggleDevPremium() async {
-    await _service.toggleDevPremium();
-    state = state.copyWith(
-      isPremium: _service.isPremium,
-      activeTier: _service.activeTier,
-      isTrialActive: _service.isTrialActive,
-      trialDaysRemaining: _service.trialDaysRemaining,
-      hasWidgetAccess: _service.hasWidgetAccess,
-    );
-  }
 }
 
 final premiumProvider =

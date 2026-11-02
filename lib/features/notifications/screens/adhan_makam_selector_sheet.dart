@@ -348,37 +348,60 @@ class _AdhanMakamSelectorSheetState
                 ),
               ),
 
-              // Dinle / Önizleme Butonu (Sessiz hariç - PRO dahil herkes dinleyebilir)
+              // Dinle / Önizleme Butonu (PRO makamlar kilitlidir, yalnızca Premium üyeler dinleyebilir)
               if (makam != AdhanMakam.silent)
                 IconButton(
-                  tooltip: isPlaying ? strings.stopAudio : strings.listenAudio,
+                  tooltip: (makam.isPro && !ref.watch(premiumProvider).isPremium)
+                      ? 'Beyân Premium'
+                      : (isPlaying ? strings.stopAudio : strings.listenAudio),
                   icon: AnimatedSwitcher(
                     duration: const Duration(milliseconds: 200),
-                    child: Container(
-                      key: ValueKey(isPlaying),
-                      padding: const EdgeInsets.all(4),
-                      decoration: isPlaying
-                          ? BoxDecoration(
+                    child: (makam.isPro && !ref.watch(premiumProvider).isPremium)
+                        ? Container(
+                            key: const ValueKey('pro_locked_icon'),
+                            padding: const EdgeInsets.all(5),
+                            decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: Colors.amber.withValues(alpha: 0.2),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.amber.withValues(alpha: 0.4),
-                                  blurRadius: 8,
-                                ),
-                              ],
-                            )
-                          : null,
-                      child: Icon(
-                        isPlaying ? Icons.stop_circle_rounded : Icons.play_circle_outline_rounded,
-                        color: isPlaying ? Colors.amber : gold,
-                        size: 28,
-                      ),
-                    ),
+                              color: gold.withValues(alpha: 0.15),
+                            ),
+                            child: Icon(
+                              Icons.lock_rounded,
+                              color: gold,
+                              size: 20,
+                            ),
+                          )
+                        : Container(
+                            key: ValueKey(isPlaying),
+                            padding: const EdgeInsets.all(4),
+                            decoration: isPlaying
+                                ? BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.amber.withValues(alpha: 0.2),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.amber.withValues(alpha: 0.4),
+                                        blurRadius: 8,
+                                      ),
+                                    ],
+                                  )
+                                : null,
+                            child: Icon(
+                              isPlaying ? Icons.stop_circle_rounded : Icons.play_circle_outline_rounded,
+                              color: isPlaying ? Colors.amber : gold,
+                              size: 28,
+                            ),
+                          ),
                   ),
                   onPressed: () {
+                    final isPremium = ref.read(premiumProvider).isPremium;
+                    if (makam.isPro && !isPremium) {
+                      HapticFeedback.heavyImpact();
+                      _audioService.stop();
+                      PremiumPaywallSheet.show(context);
+                      return;
+                    }
                     HapticFeedback.lightImpact();
-                    _audioService.togglePlayPreview(makam);
+                    _audioService.togglePlayPreview(makam, isPremium: isPremium);
                   },
                 ),
 

@@ -61,6 +61,18 @@ class PremiumService {
   /// Servisi başlatır, yerel SharedPreferences durumunu ve mağaza bağlantısını yükler.
   Future<void> initialize() async {
     final prefs = await SharedPreferences.getInstance();
+
+    // v1.2.7 Güvenlik Temizliği: Önceki test sürümlerinde geliştirici butonuyla açılmış mock yetkileri sıfırla
+    if (prefs.getBool('beyan_dev_mock_cleared_v127') != true) {
+      await prefs.setBool('beyan_dev_mock_cleared_v127', true);
+      await prefs.remove(keyIsPremium);
+      await prefs.remove(keyTier);
+      await prefs.remove(keyIntegrityHash);
+      try {
+        await _secureStorage.deleteAll();
+      } catch (_) {}
+    }
+
     final savedPremium = prefs.getBool(keyIsPremium) ?? false;
     final tierStr = prefs.getString(keyTier);
     final savedHash = prefs.getString(keyIntegrityHash);
@@ -283,20 +295,6 @@ class PremiumService {
   Future<void> markLaunchPaywallSeen() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(keyHasSeenOnboardingPaywall, true);
-  }
-
-  /// Geliştirici ve test modu için Premium'u açıp kapatma (TestFlight ve Geliştirici testleri)
-  Future<void> toggleDevPremium() async {
-    final currentlyActive = isPremium;
-    final next = !currentlyActive;
-    final prefs = await SharedPreferences.getInstance();
-    if (next) {
-      await _setPremium(true, tier: PremiumTier.lifetime);
-    } else {
-      _trialStartDate = null;
-      await prefs.remove(keyWidgetTrialStart);
-      await _setPremium(false, tier: null);
-    }
   }
 
   void dispose() {

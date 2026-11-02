@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/services/now_playing_service.dart';
+import '../../monetization/services/premium_service.dart';
 import '../models/adhan_makam.dart';
 
 /// Ezan Makamları Ses Çalar Servisi
@@ -66,9 +67,17 @@ class AdhanAudioPlayerService with WidgetsBindingObserver {
   AdhanMakam? get currentlyPlaying => _currentlyPlaying;
 
   /// Seçili makamın sesini önizleme olarak çalar veya çalıyorsa durdurur.
-  Future<void> togglePlayPreview(AdhanMakam makam) async {
+  /// PRO makamlar yalnızca Premium üyelere dinletilebilir.
+  Future<void> togglePlayPreview(AdhanMakam makam, {bool? isPremium}) async {
     _autoStopTimer?.cancel();
     if (makam == AdhanMakam.silent) {
+      await stop();
+      return;
+    }
+
+    final hasAccess = isPremium ?? PremiumService.instance.isPremium;
+    if (makam.isPro && !hasAccess) {
+      debugPrint('[AdhanAudioPlayerService] PRO makam kilidi kapalı. Dinleme engellendi.');
       await stop();
       return;
     }

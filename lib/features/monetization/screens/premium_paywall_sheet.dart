@@ -114,49 +114,30 @@ class _PremiumPaywallSheetState extends ConsumerState<PremiumPaywallSheet> {
               ),
               const SizedBox(height: 10),
 
-            // Taç İkonu (Geliştirici testi için çift tıklamayla mock açıp kapama)
+            // Taç İkonu
             Center(
-              child: GestureDetector(
-                onDoubleTap: () async {
-                  HapticFeedback.heavyImpact();
-                  await ref.read(premiumProvider.notifier).toggleDevPremium();
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          ref.read(premiumProvider).isPremium
-                              ? 'Geliştirici Modu: Premium AKTİF edildi!'
-                              : 'Geliştirici Modu: Premium KAPATILDI.',
-                        ),
-                        backgroundColor: BeyanColors.tone(0xFF033E35),
-                        duration: const Duration(seconds: 2),
-                      ),
-                    );
-                  }
-                },
-                child: Container(
-                  width: 76,
-                  height: 76,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      colors: [BeyanColors.tone(0xFFFFDF7A), BeyanColors.tone(0xFFD4AF37), BeyanColors.tone(0xFF997A15)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+              child: Container(
+                width: 76,
+                height: 76,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    colors: [BeyanColors.tone(0xFFFFDF7A), BeyanColors.tone(0xFFD4AF37), BeyanColors.tone(0xFF997A15)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: gold.withValues(alpha: 0.45),
+                      blurRadius: 24,
+                      spreadRadius: 2,
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: gold.withValues(alpha: 0.45),
-                        blurRadius: 24,
-                        spreadRadius: 2,
-                      ),
-                    ],
-                  ),
-                  child: Icon(
-                    Icons.workspace_premium_rounded,
-                    color: BeyanColors.tone(0xFF071F1B),
-                    size: 42,
-                  ),
+                  ],
+                ),
+                child: Icon(
+                  Icons.workspace_premium_rounded,
+                  color: BeyanColors.tone(0xFF071F1B),
+                  size: 42,
                 ),
               ),
             ),
@@ -164,7 +145,7 @@ class _PremiumPaywallSheetState extends ConsumerState<PremiumPaywallSheet> {
 
             // Başlık & Açıklama
             Text(
-              premiumState.isPremium ? 'Beyân Premium Üyesisiniz 👑' : 'Beyân Premium',
+              premiumState.isPremium ? 'Beyân Premium Üyesisiniz' : 'Beyân Premium',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontFamily: 'Amiri',
@@ -246,7 +227,7 @@ class _PremiumPaywallSheetState extends ConsumerState<PremiumPaywallSheet> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Üyeliğiniz Aktif 👑',
+                                'Üyeliğiniz Aktif',
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
@@ -263,47 +244,20 @@ class _PremiumPaywallSheetState extends ConsumerState<PremiumPaywallSheet> {
                       ],
                     ),
                     const SizedBox(height: 14),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: () {
-                              setState(() => _showPackagesEvenIfPro = !_showPackagesEvenIfPro);
-                            },
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: gold,
-                              side: BorderSide(color: gold.withValues(alpha: 0.5)),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                              padding: const EdgeInsets.symmetric(vertical: 8),
-                            ),
-                            child: Text(
-                              _showPackagesEvenIfPro ? 'Paketleri Gizle' : 'Paketleri İncele',
-                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: () async {
-                              HapticFeedback.mediumImpact();
-                              await ref.read(premiumProvider.notifier).toggleDevPremium();
-                              await ref.read(themeProvider.notifier).ensureFreeTheme();
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white.withValues(alpha: 0.12),
-                              foregroundColor: Colors.white,
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                              padding: const EdgeInsets.symmetric(vertical: 8),
-                            ),
-                            child: const Text(
-                              'Ücretsiz Moda Geç',
-                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ),
-                      ],
+                    OutlinedButton(
+                      onPressed: () {
+                        setState(() => _showPackagesEvenIfPro = !_showPackagesEvenIfPro);
+                      },
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: gold,
+                        side: BorderSide(color: gold.withValues(alpha: 0.5)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                      ),
+                      child: Text(
+                        _showPackagesEvenIfPro ? 'Paketleri Gizle' : 'Paketleri İncele',
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                      ),
                     ),
                   ],
                 ),
@@ -459,14 +413,14 @@ class _PremiumPaywallSheetState extends ConsumerState<PremiumPaywallSheet> {
                               BeyanNavigatorGuard.safePop(context);
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: const Text('Tebrikler! Beyân Premium üyeliğiniz başlatıldı 👑'),
+                                  content: const Text('Tebrikler! Beyân Premium üyeliğiniz başlatıldı.'),
                                   backgroundColor: BeyanColors.tone(0xFF033E35),
                                 ),
                               );
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text('Mağaza bağlantısı henüz aktif değil (Geliştirici testi için taç simgesine çift tıklayabilirsiniz).'),
+                                  content: Text('Mağaza bağlantısı kurulamadı. Lütfen internet bağlantınızı veya App Store hesabınızı kontrol edin.'),
                                   backgroundColor: Color(0xFF3E1203),
                                 ),
                               );
@@ -499,20 +453,6 @@ class _PremiumPaywallSheetState extends ConsumerState<PremiumPaywallSheet> {
                         ),
                 ),
               ),
-              if (!premiumState.isPremium) ...[
-                const SizedBox(height: 8),
-                TextButton.icon(
-                  onPressed: () async {
-                    HapticFeedback.mediumImpact();
-                    await ref.read(premiumProvider.notifier).toggleDevPremium();
-                  },
-                  icon: Icon(Icons.workspace_premium_rounded, size: 16, color: gold),
-                  label: Text(
-                    'Pro Modunu Aç (Geliştirici / Test Modu)',
-                    style: TextStyle(color: gold, fontSize: 12, fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ],
               const SizedBox(height: 12),
             ],
 
