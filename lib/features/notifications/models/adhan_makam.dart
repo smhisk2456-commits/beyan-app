@@ -36,8 +36,12 @@ enum AdhanMakam {
 extension AdhanMakamExtension on AdhanMakam {
   String get id => name;
 
-  /// Kâbe (Mekke) ve Ravza-i Mutahhara (Medine) makamları Beyân Premium ayrıcalığıdır.
-  bool get isPro => this == AdhanMakam.mecca || this == AdhanMakam.medina;
+  /// Geleneksel 5 vakit Türk makam ezanları (Sabâ, Rast, Hicaz, Segâh, Uşşak)
+  /// ve Haremeyn (Mekke, Medine) makamları Beyân Premium PRO ayrıcalığıdır.
+  bool get isPro =>
+      this != AdhanMakam.tekbir &&
+      this != AdhanMakam.bell &&
+      this != AdhanMakam.silent;
 
   String get title => localizedTitle('tr');
 
@@ -185,11 +189,15 @@ extension AdhanMakamExtension on AdhanMakam {
   String? get soundResourceName {
     switch (this) {
       case AdhanMakam.saba:
-      case AdhanMakam.istanbul:
-      case AdhanMakam.ussak:
-        return 'adhan_istanbul';
+        return 'adhan_saba';
       case AdhanMakam.rast:
+        return 'adhan_rast';
+      case AdhanMakam.istanbul:
+        return 'adhan_istanbul';
       case AdhanMakam.segah:
+        return 'adhan_segah';
+      case AdhanMakam.ussak:
+        return 'adhan_ussak';
       case AdhanMakam.mecca:
         return 'adhan_mecca';
       case AdhanMakam.medina:
@@ -206,13 +214,17 @@ extension AdhanMakamExtension on AdhanMakam {
   String get assetPath {
     switch (this) {
       case AdhanMakam.saba:
-      case AdhanMakam.istanbul:
-      case AdhanMakam.ussak:
-        return 'audio/adhan_istanbul.mp3';
+        return 'audio/adhan_saba.mp3';
       case AdhanMakam.rast:
+        return 'audio/adhan_rast.mp3';
+      case AdhanMakam.istanbul:
+        return 'audio/adhan_istanbul.mp3';
+      case AdhanMakam.segah:
+        return 'audio/adhan_segah.mp3';
+      case AdhanMakam.ussak:
+        return 'audio/adhan_ussak.mp3';
       case AdhanMakam.mecca:
         return 'audio/adhan_mecca.mp3';
-      case AdhanMakam.segah:
       case AdhanMakam.medina:
         return 'audio/adhan_medina.mp3';
       case AdhanMakam.tekbir:

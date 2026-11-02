@@ -353,29 +353,30 @@ class NotificationService {
     await scheduleUpcomingPrayers();
   }
 
-  /// Seçili Ezan Makamını getirir (Varsayılan: İstanbul)
-  /// Eğer PRO makam (Mekke/Medine) seçilmişse ve kullanıcı Premium değilse güvenle İstanbul'a döner.
+  /// Seçili Ezan Makamını getirir (Varsayılan: Sade Kısa Tekbir / Premium ise İstanbul)
+  /// Eğer PRO makam seçilmişse ve kullanıcı Premium değilse güvenle Tekbir'e döner.
   Future<AdhanMakam> getSelectedMakam() async {
     final prefs = await SharedPreferences.getInstance();
     final makamStr = prefs.getString(keyAdhanMakam);
+    final defaultMakam = PremiumService.instance.isPremium ? AdhanMakam.istanbul : AdhanMakam.tekbir;
     if (makamStr != null) {
       final makam = AdhanMakam.values.firstWhere(
         (m) => m.name == makamStr,
-        orElse: () => AdhanMakam.istanbul,
+        orElse: () => defaultMakam,
       );
       if (makam.isPro && !PremiumService.instance.isPremium) {
-        return AdhanMakam.istanbul;
+        return AdhanMakam.tekbir;
       }
       return makam;
     }
-    return AdhanMakam.istanbul;
+    return defaultMakam;
   }
 
   /// Ezan Makamını değiştirir ve bildirimleri yeniden planlar.
   Future<void> setSelectedMakam(AdhanMakam makam) async {
     final prefs = await SharedPreferences.getInstance();
     if (makam.isPro && !PremiumService.instance.isPremium) {
-      await prefs.setString(keyAdhanMakam, AdhanMakam.istanbul.name);
+      await prefs.setString(keyAdhanMakam, AdhanMakam.tekbir.name);
     } else {
       await prefs.setString(keyAdhanMakam, makam.name);
     }
