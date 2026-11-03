@@ -652,7 +652,13 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
     String apiKey, {
     List<AiMessage> history = const [],
   }) async {
-    final candidateModels = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+    final candidateModels = [
+      'gemini-3.5-flash',
+      'gemini-3.5-flash-lite',
+      'gemini-3.7-flash',
+      'gemini-3.8-flash',
+      'gemini-flash-latest',
+    ];
 
     final contents = <Map<String, dynamic>>[];
     final validHistory = history
@@ -713,7 +719,7 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
       try {
         client = HttpClient()..connectionTimeout = const Duration(seconds: 10);
         final url = Uri.parse(
-          'https://generativelanguage.googleapis.com/v1beta/models/$modelName:generateContent',
+          'https://generativelanguage.googleapis.com/v1beta/models/$modelName:generateContent?key=$apiKey',
         );
         final request = await client.postUrl(url);
         request.headers.contentType = ContentType.json;
