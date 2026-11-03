@@ -45,14 +45,17 @@ void main() {
       expect(updated.activeTier, PremiumTier.yearly);
     });
 
-    test('PremiumService v1.0 sürümünde tüm özellikleri ücretsiz ve açık sağlamalı', () async {
+    test('PremiumService varsayılan olarak kilitli olmalı ve deneme ile açılabilmeli', () async {
       SharedPreferences.setMockInitialValues({});
       final service = PremiumService.instance;
-      await service.initialize();
 
-      expect(service.isPremium, isTrue);
       expect(service.hasWidgetAccess, isTrue);
       expect(await service.shouldShowLaunchPaywall(), isFalse);
+
+      // 3 Günlük ücretsiz deneme başlatıldığında Premium aktif olmalı
+      await service.activateFreeTrial();
+      expect(service.isPremium, isTrue);
+      expect(service.isTrialActive, isTrue);
     });
   });
 }

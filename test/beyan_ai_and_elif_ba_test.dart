@@ -188,9 +188,9 @@ void main() {
       SharedPreferences.setMockInitialValues({});
       final notifier = AiAssistantNotifier();
 
-      // Ücretsiz kullanıcı için başlangıç kotası 5 olmalı
+      // Ücretsiz kullanıcı için başlangıç kotası 3 olmalı
       final remainingInitial = await notifier.getRemainingQuota(false);
-      expect(remainingInitial, 5);
+      expect(remainingInitial, 3);
       expect(await notifier.canAskQuestion(false), isTrue);
 
       // Soru sorulduğunda kota 1 azalmalı
@@ -198,12 +198,52 @@ void main() {
       expect(res1, isTrue);
 
       final remainingAfter1 = await notifier.getRemainingQuota(false);
-      expect(remainingAfter1, 4);
+      expect(remainingAfter1, 2);
 
       // Premium kullanıcı için sınırsız kota (999) dönmeli
       final premiumQuota = await notifier.getRemainingQuota(true);
       expect(premiumQuota, 999);
       expect(await notifier.canAskQuestion(true), isTrue);
+
+      notifier.dispose();
+    });
+
+    test('Beyan AI Hz. Âdem sorusuna doğru ve markdown işaretlerinden arındırılmış yanıt vermeli', () async {
+      SharedPreferences.setMockInitialValues({});
+      final notifier = AiAssistantNotifier();
+
+      final success = await notifier.askQuestion('hazreti adem kaç yılında ölmüştür', isPremium: false);
+      expect(success, isTrue);
+
+      final reply = notifier.state.messages.last;
+      expect(reply.isUser, isFalse);
+      // Doğru içerik kontrolleri
+      expect(reply.text, contains('Hz. Âdem'));
+      expect(reply.text, contains('930'));
+      expect(reply.text, contains('Cuma'));
+      expect(reply.text, contains('Şit'));
+      // Markdown karmaşası bulunmamalı
+      expect(reply.text, isNot(contains('###')));
+      expect(reply.text, isNot(contains('**')));
+
+      notifier.dispose();
+    });
+
+    test('Kota dolduğunda hata mesajı kullanıcıdan API anahtarı istememeli', () async {
+      SharedPreferences.setMockInitialValues({
+        'beyan_ai_daily_count': 3,
+        'beyan_ai_daily_date': DateTime.now().toIso8601String().substring(0, 10),
+      });
+      final notifier = AiAssistantNotifier();
+
+      final canAsk = await notifier.canAskQuestion(false);
+      expect(canAsk, isFalse);
+
+      final success = await notifier.askQuestion('Namaz nasıl kılınır?', isPremium: false);
+      expect(success, isFalse);
+      expect(notifier.state.errorMessage, isNotNull);
+      expect(notifier.state.errorMessage, isNot(contains('API anahtar')));
+      expect(notifier.state.errorMessage, contains('Beyân Pro'));
 
       notifier.dispose();
     });

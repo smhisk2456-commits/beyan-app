@@ -165,6 +165,11 @@ class PremiumService {
         return false;
       }
 
+      if (_products.isEmpty || !_products.any((p) => p.id == tier.productId)) {
+        debugPrint('[PremiumService] Ürünler önbellekte yok, mağazadan tekrar sorgulanıyor: ${tier.productId}');
+        await loadProducts();
+      }
+
       ProductDetails? product;
       try {
         product = _products.firstWhere((p) => p.id == tier.productId);
@@ -179,18 +184,18 @@ class PremiumService {
       }
 
       final purchaseParam = PurchaseParam(productDetails: product);
-
-      if (tier == PremiumTier.lifetime) {
-        await _iap.buyNonConsumable(purchaseParam: purchaseParam);
-      } else {
-        await _iap.buyNonConsumable(purchaseParam: purchaseParam);
-      }
+      await _iap.buyNonConsumable(purchaseParam: purchaseParam);
 
       return true;
     } catch (e) {
       debugPrint('Satın alma başlatma hatası: $e');
       return false;
     }
+  }
+
+  /// Geliştirici veya kapalı test ortamında Pro özelliklerini test etmek için kullanılır.
+  Future<void> setTemporaryProForTesting(bool premium, {PremiumTier? tier}) async {
+    await _setPremium(premium, tier: tier ?? PremiumTier.yearly);
   }
 
   /// Önceki satın alımları geri yükler (Apple App Store kuralı).

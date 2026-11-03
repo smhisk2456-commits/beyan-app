@@ -160,127 +160,6 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
         false;
   }
 
-  void _showApiKeyDialog(BuildContext context) {
-    final currentKey = ref.read(aiAssistantProvider).geminiApiKey ?? '';
-    final keyController = TextEditingController(text: currentKey);
-
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: BeyanColors.tone(0xFF022B24),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-          side: BorderSide(color: BeyanColors.tone(0xFFFFDF7A), width: 1.2),
-        ),
-        title: Row(
-          children: [
-            Icon(Icons.key_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 24),
-            const SizedBox(width: 8),
-            Text(
-              'Gemini API Anahtarı',
-              style: TextStyle(color: BeyanColors.tone(0xFFFFDF7A), fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Google AI Studio\'dan (aistudio.google.com) 30 saniyede tamamen ücretsiz alabileceğiniz resmi Gemini API anahtarınızı girerek Beyân AI\'yı Google Gemini 1.5 Flash ile canlı olarak bağlayabilirsiniz.',
-              style: TextStyle(color: Colors.white70, fontSize: 13, height: 1.45),
-            ),
-            const SizedBox(height: 10),
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: BeyanColors.tone(0xFF032D26),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.3)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Nasıl Alınır? (Ücretsiz):',
-                    style: TextStyle(color: BeyanColors.tone(0xFFFFDF7A), fontSize: 11.5, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 4),
-                  const Text(
-                    '1. aistudio.google.com adresini açın\n'
-                    '2. "Get API key" butonuna dokunup anahtar oluşturun\n'
-                    '3. Kopyalayıp aşağıdaki alana yapıştırın',
-                    style: TextStyle(color: Colors.white70, fontSize: 11, height: 1.4),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 14),
-            TextField(
-              controller: keyController,
-              style: const TextStyle(color: Colors.white, fontSize: 13.5),
-              decoration: InputDecoration(
-                hintText: 'AIzaSy...',
-                hintStyle: const TextStyle(color: Colors.white30),
-                filled: true,
-                fillColor: BeyanColors.tone(0xFF04382F),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: BeyanColors.tone(0xFFD4AF37), width: 1),
-                ),
-                suffixIcon: IconButton(
-                  icon: Icon(Icons.paste_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 20),
-                  tooltip: 'Panodan Yapıştır',
-                  onPressed: () async {
-                    final data = await Clipboard.getData(Clipboard.kTextPlain);
-                    if (data?.text != null) {
-                      keyController.text = data!.text!.trim();
-                    }
-                  },
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              '• API anahtarı eklemeden de dahili ilimler motorumuz tüm dini suallerinize eksiksiz cevap verir.',
-              style: TextStyle(color: Colors.white38, fontSize: 11),
-            ),
-          ],
-        ),
-        actions: [
-          if (currentKey.isNotEmpty)
-            TextButton(
-              onPressed: () async {
-                await ref.read(aiAssistantProvider.notifier).setGeminiApiKey(null);
-                if (ctx.mounted) BeyanNavigatorGuard.safePop(ctx);
-              },
-              child: const Text('Kaldır', style: TextStyle(color: Colors.redAccent)),
-            ),
-          TextButton(
-            onPressed: () => BeyanNavigatorGuard.safePop(ctx),
-            child: const Text('İptal', style: TextStyle(color: Colors.white60)),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: BeyanColors.tone(0xFFD4AF37),
-              foregroundColor: BeyanColors.tone(0xFF01201B),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-            onPressed: () async {
-              final newKey = keyController.text.trim();
-              await ref.read(aiAssistantProvider.notifier).setGeminiApiKey(newKey.isEmpty ? null : newKey);
-              if (ctx.mounted) BeyanNavigatorGuard.safePop(ctx);
-            },
-            child: const Text('Kaydet', style: TextStyle(fontWeight: FontWeight.bold)),
-          ),
-        ],
-      ),
-    ).then((_) {
-      keyController.dispose();
-    });
-  }
-
   void _showQuotaExceededDialog() {
     showDialog(
       context: context,
@@ -305,7 +184,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Günlük 3 ücretsiz soru hakkınız tamamlandı. Soru sınırını tamamen kaldırmak için Beyân Pro\'ya geçebilir veya kendi ücretsiz Gemini API anahtarınızı tanımlayabilirsiniz.',
+              'Günlük 3 ücretsiz soru hakkınız tamamlandı. Soru sınırını tamamen kaldırmak ve sınırsız soru sormak için Beyân Pro\'ya geçebilirsiniz.',
               style: TextStyle(color: Colors.white, fontSize: 14, height: 1.5),
             ),
             const SizedBox(height: 12),
@@ -336,22 +215,12 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
             onPressed: () => BeyanNavigatorGuard.safePop(ctx),
             child: const Text('Kapat', style: TextStyle(color: Colors.white60)),
           ),
-          TextButton(
-            onPressed: () {
-              BeyanNavigatorGuard.safePop(ctx);
-              _showApiKeyDialog(context);
-            },
-            child: Text(
-              'API Anahtarı 🔑',
-              style: TextStyle(color: BeyanColors.tone(0xFFFFDF7A), fontSize: 12),
-            ),
-          ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: BeyanColors.tone(0xFFFFDF7A),
               foregroundColor: BeyanColors.tone(0xFF01201B),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             ),
             onPressed: () {
               BeyanNavigatorGuard.safePop(ctx);
@@ -463,8 +332,6 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
                 _buildQuotaBanner(
                   isPremium,
                   aiState.remainingQuestions,
-                  aiState.hasCustomApiKey,
-                  aiState.hasDeveloperGlobalKey,
                 ),
 
                 // ── Mesaj Akışı ──────────────────────────────────
@@ -494,8 +361,6 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
   Widget _buildQuotaBanner(
     bool isPremium,
     int remaining,
-    bool hasCustomApiKey,
-    bool hasDeveloperGlobalKey,
   ) {
     if (isPremium) {
       return Container(
@@ -770,7 +635,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
                   tooltip: 'Yanıtı Kopyala',
                   onPressed: () {
                     HapticFeedback.lightImpact();
-                    Clipboard.setData(ClipboardData(text: msg.text));
+                    Clipboard.setData(ClipboardData(text: _cleanForClipboard(msg.text)));
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text('Yanıt panoya kopyalandı'),
@@ -784,15 +649,8 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
             ),
             const SizedBox(height: 10),
 
-            // Message text
-            Text(
-              msg.text,
-              style: TextStyle(
-                color: isDark ? Colors.white : Colors.black87,
-                fontSize: 14.5,
-                height: 1.55,
-              ),
-            ),
+            // Message text (Biçimlendirilmiş, markdown işaretleri temizlenmiş)
+            _buildFormattedMessageText(msg.text, isDark),
 
             // References
             if (msg.references.isNotEmpty) ...[
@@ -965,6 +823,103 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  static String _cleanForClipboard(String text) {
+    var s = text;
+    s = s.replaceAll(RegExp(r'^#{1,6}\s*', multiLine: true), '');
+    s = s.replaceAll(RegExp(r'\*\*([^*]+)\*\*'), r'$1');
+    s = s.replaceAll(RegExp(r'\*([^*]+)\*'), r'$1');
+    return s.trim();
+  }
+
+  Widget _buildFormattedMessageText(String text, bool isDark) {
+    final textColor = isDark ? Colors.white : Colors.black87;
+    final lines = text.split('\n');
+    final widgets = <Widget>[];
+
+    for (int i = 0; i < lines.length; i++) {
+      var line = lines[i];
+
+      final isHeader = line.startsWith('#');
+      if (isHeader) {
+        line = line.replaceAll(RegExp(r'^#{1,6}\s*'), '');
+      }
+
+      if (line.trim().isEmpty) {
+        widgets.add(const SizedBox(height: 8));
+        continue;
+      }
+
+      if (isHeader) {
+        widgets.add(
+          Padding(
+            padding: const EdgeInsets.only(top: 6, bottom: 4),
+            child: Text(
+              line.replaceAll('**', ''),
+              style: TextStyle(
+                color: BeyanColors.tone(0xFFFFDF7A),
+                fontSize: 15.5,
+                fontWeight: FontWeight.bold,
+                height: 1.4,
+              ),
+            ),
+          ),
+        );
+        continue;
+      }
+
+      // Paragraf içinde **kalın** metinleri ayrıştırma
+      final spans = <TextSpan>[];
+      final regex = RegExp(r'\*\*([^*]+)\*\*');
+      int lastIndex = 0;
+
+      for (final match in regex.allMatches(line)) {
+        if (match.start > lastIndex) {
+          spans.add(
+            TextSpan(
+              text: line.substring(lastIndex, match.start),
+              style: TextStyle(color: textColor, fontSize: 14.5, height: 1.55),
+            ),
+          );
+        }
+        spans.add(
+          TextSpan(
+            text: match.group(1),
+            style: TextStyle(
+              color: isDark ? BeyanColors.tone(0xFFFFDF7A) : Colors.black,
+              fontSize: 14.5,
+              fontWeight: FontWeight.bold,
+              height: 1.55,
+            ),
+          ),
+        );
+        lastIndex = match.end;
+      }
+
+      if (lastIndex < line.length) {
+        spans.add(
+          TextSpan(
+            text: line.substring(lastIndex),
+            style: TextStyle(color: textColor, fontSize: 14.5, height: 1.55),
+          ),
+        );
+      }
+
+      widgets.add(
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 2),
+          child: RichText(
+            text: TextSpan(children: spans),
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: widgets,
     );
   }
 }

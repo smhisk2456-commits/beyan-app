@@ -8,6 +8,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../models/premium_product.dart';
 import '../providers/premium_provider.dart';
+import '../services/premium_service.dart';
 
 /// Lüks Beyân Premium Üyelik ve Abonelik Tanıtım Ekranı
 class PremiumPaywallSheet extends ConsumerStatefulWidget {
@@ -35,6 +36,58 @@ class PremiumPaywallSheet extends ConsumerStatefulWidget {
 class _PremiumPaywallSheetState extends ConsumerState<PremiumPaywallSheet> {
   PremiumTier _selectedTier = PremiumTier.yearly;
   bool _showPackagesEvenIfPro = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      PremiumService.instance.loadProducts();
+    });
+  }
+
+  void _showStoreKitErrorDialog(BuildContext context, PremiumTier tier) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: BeyanColors.tone(0xFF022B24),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(color: BeyanColors.tone(0xFFFFDF7A), width: 1.2),
+        ),
+        title: Row(
+          children: [
+            Icon(Icons.storefront_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 24),
+            const SizedBox(width: 8),
+            Text(
+              'App Store Bağlantısı',
+              style: TextStyle(
+                color: BeyanColors.tone(0xFFFFDF7A),
+                fontSize: 17,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          '${tier.title} paketi için App Store mağaza doğrulaması henüz tamamlanamadı.\n\n'
+          '• Lütfen cihazınızda internet bağlantısı ve geçerli bir Apple Kimliği olduğunu doğrulayın.\n'
+          '• Aboneliğiniz App Store üzerinden onaylandığında otomatik olarak aktif hale gelecektir.',
+          style: const TextStyle(color: Colors.white, fontSize: 13.5, height: 1.45),
+        ),
+        actions: [
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: BeyanColors.tone(0xFFFFDF7A),
+              foregroundColor: BeyanColors.tone(0xFF01201B),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            onPressed: () => BeyanNavigatorGuard.safePop(ctx),
+            child: const Text('Anladım', style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -114,30 +167,48 @@ class _PremiumPaywallSheetState extends ConsumerState<PremiumPaywallSheet> {
               ),
               const SizedBox(height: 10),
 
-            // Taç İkonu
+            // Taç İkonu (Geliştirici testi için uzun basma desteği)
             Center(
-              child: Container(
-                width: 76,
-                height: 76,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    colors: [BeyanColors.tone(0xFFFFDF7A), BeyanColors.tone(0xFFD4AF37), BeyanColors.tone(0xFF997A15)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: gold.withValues(alpha: 0.45),
-                      blurRadius: 24,
-                      spreadRadius: 2,
+              child: GestureDetector(
+                onLongPress: () async {
+                  HapticFeedback.heavyImpact();
+                  final isPrem = ref.read(premiumProvider).isPremium;
+                  await PremiumService.instance.setTemporaryProForTesting(!isPrem, tier: _selectedTier);
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(!isPrem
+                            ? 'Test Modu: Pro üyeliği aktif edildi.'
+                            : 'Test Modu: Pro üyeliği kapatıldı.'),
+                        backgroundColor: BeyanColors.tone(0xFF033E35),
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                  }
+                },
+                child: Container(
+                  width: 76,
+                  height: 76,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      colors: [BeyanColors.tone(0xFFFFDF7A), BeyanColors.tone(0xFFD4AF37), BeyanColors.tone(0xFF997A15)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
-                  ],
-                ),
-                child: Icon(
-                  Icons.workspace_premium_rounded,
-                  color: BeyanColors.tone(0xFF071F1B),
-                  size: 42,
+                    boxShadow: [
+                      BoxShadow(
+                        color: gold.withValues(alpha: 0.45),
+                        blurRadius: 24,
+                        spreadRadius: 2,
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    Icons.workspace_premium_rounded,
+                    color: BeyanColors.tone(0xFF071F1B),
+                    size: 42,
+                  ),
                 ),
               ),
             ),
@@ -408,23 +479,17 @@ class _PremiumPaywallSheetState extends ConsumerState<PremiumPaywallSheet> {
                           final success = await ref
                               .read(premiumProvider.notifier)
                               .buyTier(_selectedTier);
-                          if (context.mounted) {
-                            if (success) {
-                              BeyanNavigatorGuard.safePop(context);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: const Text('Tebrikler! Beyân Premium üyeliğiniz başlatıldı.'),
-                                  backgroundColor: BeyanColors.tone(0xFF033E35),
-                                ),
-                              );
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Mağaza bağlantısı kurulamadı. Lütfen internet bağlantınızı veya App Store hesabınızı kontrol edin.'),
-                                  backgroundColor: Color(0xFF3E1203),
-                                ),
-                              );
-                            }
+                          if (!context.mounted) return;
+                          if (success) {
+                            BeyanNavigatorGuard.safePop(context);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: const Text('Tebrikler! Beyân Premium üyeliğiniz başlatıldı.'),
+                                backgroundColor: BeyanColors.tone(0xFF033E35),
+                              ),
+                            );
+                          } else {
+                            _showStoreKitErrorDialog(context, _selectedTier);
                           }
                         },
                   style: ElevatedButton.styleFrom(

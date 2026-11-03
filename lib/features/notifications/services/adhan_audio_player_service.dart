@@ -67,7 +67,7 @@ class AdhanAudioPlayerService with WidgetsBindingObserver {
   AdhanMakam? get currentlyPlaying => _currentlyPlaying;
 
   /// Seçili makamın sesini önizleme olarak çalar veya çalıyorsa durdurur.
-  /// PRO makamlar yalnızca Premium üyelere dinletilebilir.
+  /// PRO makamlarda Premium olmayan kullanıcılara 5 saniyelik önizleme sunulur.
   Future<void> togglePlayPreview(AdhanMakam makam, {bool? isPremium}) async {
     _autoStopTimer?.cancel();
     if (makam == AdhanMakam.silent) {
@@ -76,11 +76,7 @@ class AdhanAudioPlayerService with WidgetsBindingObserver {
     }
 
     final hasAccess = isPremium ?? PremiumService.instance.isPremium;
-    if (makam.isPro && !hasAccess) {
-      debugPrint('[AdhanAudioPlayerService] PRO makam kilidi kapalı. Dinleme engellendi.');
-      await stop();
-      return;
-    }
+    final isPreviewLimited = makam.isPro && !hasAccess;
 
     if (_currentlyPlaying == makam) {
       await stop();
@@ -102,16 +98,17 @@ class AdhanAudioPlayerService with WidgetsBindingObserver {
       final asset = makam.assetPath;
       if (asset.isNotEmpty) {
         await _player.play(AssetSource(asset));
+        final previewSeconds = isPreviewLimited ? 5.0 : 12.0;
         NowPlayingService.instance.updateNowPlaying(
           title: makam.name,
-          artist: makam.description,
+          artist: isPreviewLimited ? '${makam.description} (5 sn Önizleme)' : makam.description,
           albumTitle: 'Beyân • Ezan Makamları',
-          durationSeconds: 10,
-          positionSeconds: 0,
+          durationSeconds: previewSeconds,
+          positionSeconds: 0.0,
           isPlaying: true,
         );
-        // 10 saniyelik şık canlı makam önizlemesi sonrasında otomatik durdur
-        _autoStopTimer = Timer(const Duration(seconds: 10), () {
+        // PRO için 5 saniye, Premium için 12 saniye sonra otomatik durdur
+        _autoStopTimer = Timer(Duration(seconds: previewSeconds.toInt()), () {
           if (_currentlyPlaying == makam) {
             stop();
           }

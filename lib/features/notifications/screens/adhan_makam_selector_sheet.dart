@@ -348,58 +348,67 @@ class _AdhanMakamSelectorSheetState
                 ),
               ),
 
-              // Dinle / Önizleme Butonu (PRO makamlar kilitlidir, yalnızca Premium üyeler dinleyebilir)
+              // Dinle / Önizleme Butonu (PRO makamlarda 5 saniyelik önizleme dinletilir)
               if (makam != AdhanMakam.silent)
                 IconButton(
-                  tooltip: (makam.isPro && !ref.watch(premiumProvider).isPremium)
-                      ? 'Beyân Premium'
-                      : (isPlaying ? strings.stopAudio : strings.listenAudio),
+                  tooltip: isPlaying
+                      ? strings.stopAudio
+                      : (makam.isPro && !ref.watch(premiumProvider).isPremium
+                          ? '5 sn Önizle'
+                          : strings.listenAudio),
                   icon: AnimatedSwitcher(
                     duration: const Duration(milliseconds: 200),
-                    child: (makam.isPro && !ref.watch(premiumProvider).isPremium)
+                    child: isPlaying
                         ? Container(
-                            key: const ValueKey('pro_locked_icon'),
-                            padding: const EdgeInsets.all(5),
+                            key: const ValueKey('playing'),
+                            padding: const EdgeInsets.all(4),
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: gold.withValues(alpha: 0.15),
+                              color: Colors.amber.withValues(alpha: 0.2),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.amber.withValues(alpha: 0.4),
+                                  blurRadius: 8,
+                                ),
+                              ],
                             ),
-                            child: Icon(
-                              Icons.lock_rounded,
-                              color: gold,
-                              size: 20,
-                            ),
-                          )
-                        : Container(
-                            key: ValueKey(isPlaying),
-                            padding: const EdgeInsets.all(4),
-                            decoration: isPlaying
-                                ? BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: Colors.amber.withValues(alpha: 0.2),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.amber.withValues(alpha: 0.4),
-                                        blurRadius: 8,
-                                      ),
-                                    ],
-                                  )
-                                : null,
-                            child: Icon(
-                              isPlaying ? Icons.stop_circle_rounded : Icons.play_circle_outline_rounded,
-                              color: isPlaying ? Colors.amber : gold,
+                            child: const Icon(
+                              Icons.stop_circle_rounded,
+                              color: Colors.amber,
                               size: 28,
                             ),
+                          )
+                        : Stack(
+                            key: ValueKey('preview_${makam.name}'),
+                            alignment: Alignment.bottomRight,
+                            children: [
+                              Icon(
+                                Icons.play_circle_outline_rounded,
+                                color: gold,
+                                size: 28,
+                              ),
+                              if (makam.isPro && !ref.watch(premiumProvider).isPremium)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 2.5, vertical: 0.5),
+                                  decoration: BoxDecoration(
+                                    color: BeyanColors.tone(0xFF071F1B),
+                                    borderRadius: BorderRadius.circular(4),
+                                    border: Border.all(color: gold, width: 0.6),
+                                  ),
+                                  child: Text(
+                                    '5s',
+                                    style: TextStyle(
+                                      color: gold,
+                                      fontSize: 8,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
                   ),
                   onPressed: () {
                     final isPremium = ref.read(premiumProvider).isPremium;
-                    if (makam.isPro && !isPremium) {
-                      HapticFeedback.heavyImpact();
-                      _audioService.stop();
-                      PremiumPaywallSheet.show(context);
-                      return;
-                    }
                     HapticFeedback.lightImpact();
                     _audioService.togglePlayPreview(makam, isPremium: isPremium);
                   },
