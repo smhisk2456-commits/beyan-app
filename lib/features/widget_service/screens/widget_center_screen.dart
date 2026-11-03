@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/localization/app_strings.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/utils/app_constants.dart';
 import '../widget_service.dart';
@@ -1676,16 +1677,18 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
     final effectivePalette = ref.watch(effectivePaletteProvider);
     BeyanColors.setPalette(effectivePalette);
     final strings = ref.watch(appStringsProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: BeyanColors.tone(0xFF051C17),
+      backgroundColor: isDark ? effectivePalette.darkBackground : effectivePalette.lightBackground,
       appBar: AppBar(
-        backgroundColor: BeyanColors.tone(0xFF051C17),
+        backgroundColor: isDark ? effectivePalette.darkBackground : effectivePalette.lightBackground,
+        foregroundColor: isDark ? Colors.white : AppColors.textPrimary,
         elevation: 0,
         title: Text(
           strings.lockScreenWidgetsTitle,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: isDark ? Colors.white : AppColors.textPrimary,
             fontSize: 18,
             fontWeight: FontWeight.bold,
             letterSpacing: -0.2,
@@ -1757,23 +1760,41 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
   // ── iOS Kilit Ekranı Ekleme Bilgilendirme Kartı ───────────────────────────
   Widget _buildLockScreenGuideBanner(AppStrings strings) {
     final tipText = strings.widgetTip;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
       decoration: BoxDecoration(
-        color: BeyanColors.tone(0xFF0C2923),
+        color: isDark ? BeyanColors.tone(0xFF0C2923) : Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: BeyanColors.tone(0xFF10B981).withValues(alpha: 0.35)),
+        border: Border.all(
+          color: isDark
+              ? BeyanColors.tone(0xFF10B981).withValues(alpha: 0.35)
+              : BeyanColors.tone(0xFF10B981).withValues(alpha: 0.25),
+        ),
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.03),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
       ),
       child: Row(
         children: [
-          Icon(Icons.info_outline_rounded, color: BeyanColors.tone(0xFF2DD4BF), size: 18),
+          Icon(
+            Icons.info_outline_rounded,
+            color: isDark ? BeyanColors.tone(0xFF2DD4BF) : BeyanColors.tone(0xFF0F766E),
+            size: 18,
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               tipText,
-              style: const TextStyle(
-                color: Colors.white70,
+              style: TextStyle(
+                color: isDark ? Colors.white70 : AppColors.textPrimary,
                 fontSize: 12,
                 height: 1.35,
               ),
@@ -1786,6 +1807,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
 
   // ── 6 İkonlu Yatay Kategori Çubuğu (Screenshots 2-5 üst kısmı) ─────────────
   Widget _buildCategoryIconsBar() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final categories = [
       (WidgetCategoryType.quotes, Icons.format_quote_rounded),
       (WidgetCategoryType.dailyVerse, Icons.menu_book_rounded),
@@ -1821,17 +1843,28 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                   shape: BoxShape.circle,
                   color: isSelected
                       ? BeyanColors.tone(0xFF10B981)
-                      : BeyanColors.tone(0xFF0E2C24),
+                      : (isDark ? BeyanColors.tone(0xFF0E2C24) : Colors.white),
                   border: Border.all(
                     color: isSelected
                         ? BeyanColors.tone(0xFF34D399)
-                        : Colors.white.withValues(alpha: 0.1),
+                        : (isDark ? Colors.white.withValues(alpha: 0.1) : BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.2)),
                     width: 1.2,
                   ),
+                  boxShadow: isDark || isSelected
+                      ? null
+                      : [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.04),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                 ),
                 child: Icon(
                   item.$2,
-                  color: isSelected ? Colors.white : Colors.white60,
+                  color: isSelected
+                      ? Colors.white
+                      : (isDark ? Colors.white60 : BeyanColors.tone(0xFF4A605B)),
                   size: 22,
                 ),
               ),
@@ -2271,6 +2304,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
 
   // ── Başlık & Açıklama Metni ───────────────────────────────────────────────
   Widget _buildWidgetTitleAndDescription(AppStrings strings) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     String title;
     String desc;
 
@@ -2306,10 +2340,10 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
         Text(
           title,
           textAlign: TextAlign.center,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: isDark ? Colors.white : AppColors.textPrimary,
             letterSpacing: -0.2,
           ),
         ),
@@ -2321,7 +2355,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 13.5,
-              color: Colors.white.withValues(alpha: 0.7),
+              color: isDark ? Colors.white.withValues(alpha: 0.7) : AppColors.textSecondary,
               height: 1.4,
             ),
           ),
@@ -2332,13 +2366,23 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
 
   // ── Özelleştirilebilir Seçenekler Kartı (Screenshots 2-3) ───────────────────
   Widget _buildCustomizationOptionsCard(AppStrings strings) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
-        color: BeyanColors.tone(0xFF0A241F),
+        color: isDark ? BeyanColors.tone(0xFF0A241F) : Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.1),
+          color: isDark ? Colors.white.withValues(alpha: 0.1) : BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.2),
         ),
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
       ),
       child: Column(
         children: [
@@ -2407,6 +2451,8 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
     final pinnedNotice = strings.currentlyPinnedLabel;
     final rotatingNotice = strings.dynamicVerseCycleActive;
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -2414,19 +2460,30 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           decoration: BoxDecoration(
-            color: BeyanColors.tone(0xFF0B2B24),
+            color: isDark ? BeyanColors.tone(0xFF0B2B24) : Colors.white,
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
               color: _isPinned
-                  ? BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.5)
-                  : BeyanColors.tone(0xFF2DD4BF).withValues(alpha: 0.4),
+                  ? (isDark ? BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.5) : BeyanColors.tone(0xFF8A6B1A).withValues(alpha: 0.6))
+                  : (isDark ? BeyanColors.tone(0xFF2DD4BF).withValues(alpha: 0.4) : BeyanColors.tone(0xFF10B981).withValues(alpha: 0.35)),
             ),
+            boxShadow: isDark
+                ? null
+                : [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.03),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
           ),
           child: Row(
             children: [
               Icon(
                 _isPinned ? Icons.push_pin : Icons.autorenew,
-                color: _isPinned ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF2DD4BF),
+                color: _isPinned
+                    ? (isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF8A6B1A))
+                    : (isDark ? BeyanColors.tone(0xFF2DD4BF) : BeyanColors.tone(0xFF0F766E)),
                 size: 18,
               ),
               const SizedBox(width: 8),
@@ -2439,8 +2496,8 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                           : rotatingNotice),
                   style: TextStyle(
                     color: (_isPinned || (_appliedVerseRef != null && _appliedVerseRef!.isNotEmpty))
-                        ? BeyanColors.tone(0xFFFFDF7A)
-                        : Colors.white70,
+                        ? (isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF8A6B1A))
+                        : (isDark ? Colors.white70 : AppColors.textSecondary),
                     fontSize: 12,
                     fontWeight: (_isPinned || (_appliedVerseRef != null && _appliedVerseRef!.isNotEmpty))
                         ? FontWeight.w600
@@ -2459,7 +2516,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                   child: Text(
                     strings.rotateAction,
                     style: TextStyle(
-                      color: BeyanColors.tone(0xFFFFDF7A),
+                      color: isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF8A6B1A),
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                       decoration: TextDecoration.underline,
@@ -2498,17 +2555,25 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
         const SizedBox(height: 8),
         OutlinedButton.icon(
           onPressed: _pinCurrentVerse,
-          icon: Icon(Icons.push_pin_outlined, color: BeyanColors.tone(0xFFFFDF7A), size: 18),
+          icon: Icon(
+            Icons.push_pin_outlined,
+            color: isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF8A6B1A),
+            size: 18,
+          ),
           label: Text(
             pinBtnText,
             style: TextStyle(
-              color: BeyanColors.tone(0xFFFFDF7A),
+              color: isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF8A6B1A),
               fontSize: 13,
               fontWeight: FontWeight.w600,
             ),
           ),
           style: OutlinedButton.styleFrom(
-            side: BorderSide(color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.35)),
+            side: BorderSide(
+              color: isDark
+                  ? BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.35)
+                  : BeyanColors.tone(0xFF8A6B1A).withValues(alpha: 0.4),
+            ),
             padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 16),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(14),
@@ -2524,6 +2589,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
     required String value,
     required VoidCallback onTap,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -2536,8 +2602,8 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
               Expanded(
                 child: Text(
                   title,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: isDark ? Colors.white : AppColors.textPrimary,
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                   ),
@@ -2547,17 +2613,17 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
               Flexible(
                 child: Text(
                   value,
-                  style: const TextStyle(
-                    color: Colors.white70,
+                  style: TextStyle(
+                    color: isDark ? Colors.white70 : AppColors.textSecondary,
                     fontSize: 13,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
               const SizedBox(width: 4),
-              const Icon(
+              Icon(
                 Icons.arrow_forward_ios_rounded,
-                color: Colors.white38,
+                color: isDark ? Colors.white38 : AppColors.textHint,
                 size: 13,
               ),
             ],
@@ -2568,23 +2634,36 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
   }
 
   Widget _buildDivider() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Divider(
       height: 1,
       thickness: 0.8,
-      color: Colors.white.withValues(alpha: 0.08),
+      color: isDark ? Colors.white.withValues(alpha: 0.08) : AppColors.divider,
       indent: 16,
       endIndent: 16,
     );
   }
 
   Widget _buildVerseNotificationShortcut(AppStrings strings) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
-        color: BeyanColors.tone(0xFF0A241F),
+        color: isDark ? BeyanColors.tone(0xFF0A241F) : Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35),
+          color: isDark
+              ? BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35)
+              : BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.25),
         ),
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
       ),
       child: Material(
         color: Colors.transparent,
@@ -2601,10 +2680,16 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.15),
+                    color: isDark
+                        ? BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.15)
+                        : BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.2),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.notifications_active_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 20),
+                  child: Icon(
+                    Icons.notifications_active_rounded,
+                    color: isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF8A6B1A),
+                    size: 20,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -2613,8 +2698,8 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                     children: [
                       Text(
                         strings.verseNotifTitle,
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: isDark ? Colors.white : AppColors.textPrimary,
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
                         ),
@@ -2624,15 +2709,19 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                         strings.language == AppLanguage.turkish
                             ? 'Kilit ekranı ayet bildirim saatini ve sıklığını ayarla'
                             : 'Set lock screen verse alert times and frequency',
-                        style: const TextStyle(
-                          color: Colors.white60,
+                        style: TextStyle(
+                          color: isDark ? Colors.white60 : AppColors.textSecondary,
                           fontSize: 11,
                         ),
                       ),
                     ],
                   ),
                 ),
-                Icon(Icons.arrow_forward_ios_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 14),
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  color: isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF8A6B1A),
+                  size: 14,
+                ),
               ],
             ),
           ),
@@ -2643,36 +2732,48 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
 
   // ── Özellikler Listesi (Screenshots 3-4) ──────────────────────────────────
   Widget _buildFeaturesCard(AppStrings strings) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           strings.features,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 17,
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: isDark ? Colors.white : AppColors.textPrimary,
           ),
         ),
         const SizedBox(height: 12),
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: BeyanColors.tone(0xFF0A241F),
+            color: isDark ? BeyanColors.tone(0xFF0A241F) : Colors.white,
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
-              color: Colors.white.withValues(alpha: 0.08),
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.08)
+                  : BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.2),
             ),
+            boxShadow: isDark
+                ? null
+                : [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.04),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
           ),
           child: Column(
             children: [
-              _buildFeatureItem(strings.featCountdown),
+              _buildFeatureItem(strings.featCountdown, isDark),
               const SizedBox(height: 12),
-              _buildFeatureItem(strings.featCurrentPrayers),
+              _buildFeatureItem(strings.featCurrentPrayers, isDark),
               const SizedBox(height: 12),
-              _buildFeatureItem(strings.featAutoUpdate),
+              _buildFeatureItem(strings.featAutoUpdate, isDark),
               const SizedBox(height: 12),
-              _buildFeatureItem(strings.featBatterySave),
+              _buildFeatureItem(strings.featBatterySave, isDark),
             ],
           ),
         ),
@@ -2680,7 +2781,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
     );
   }
 
-  Widget _buildFeatureItem(String text) {
+  Widget _buildFeatureItem(String text, bool isDark) {
     return Row(
       children: [
         Container(
@@ -2699,8 +2800,8 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
         Expanded(
           child: Text(
             text,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: isDark ? Colors.white : AppColors.textPrimary,
               fontSize: 13,
               fontWeight: FontWeight.w500,
             ),
@@ -2712,42 +2813,57 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
 
   // ── Nasıl Eklenir Adımları (Screenshots 4-5) ──────────────────────────────
   Widget _buildHowToAddGuide(AppStrings strings) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           strings.howToAdd,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 17,
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: isDark ? Colors.white : AppColors.textPrimary,
           ),
         ),
         const SizedBox(height: 12),
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: BeyanColors.tone(0xFF0A241F),
+            color: isDark ? BeyanColors.tone(0xFF0A241F) : Colors.white,
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
-              color: Colors.white.withValues(alpha: 0.08),
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.08)
+                  : BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.2),
             ),
+            boxShadow: isDark
+                ? null
+                : [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.04),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
           ),
           child: Column(
             children: [
               _buildStepItem(
                 number: '1',
                 text: strings.howToAddStep1,
+                isDark: isDark,
               ),
               const SizedBox(height: 14),
               _buildStepItem(
                 number: '2',
                 text: strings.howToAddStep2,
+                isDark: isDark,
               ),
               const SizedBox(height: 14),
               _buildStepItem(
                 number: '3',
                 text: strings.howToAddStep3,
+                isDark: isDark,
               ),
             ],
           ),
@@ -2756,7 +2872,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
     );
   }
 
-  Widget _buildStepItem({required String number, required String text}) {
+  Widget _buildStepItem({required String number, required String text, required bool isDark}) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -2783,7 +2899,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
           child: Text(
             text,
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.85),
+              color: isDark ? Colors.white.withValues(alpha: 0.85) : AppColors.textSecondary,
               fontSize: 12.5,
               height: 1.35,
             ),

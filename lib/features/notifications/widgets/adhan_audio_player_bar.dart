@@ -61,10 +61,11 @@ class AdhanAudioPlayerBar extends ConsumerWidget {
                 ),
               ],
             ),
-            child: const Center(
-              child: Text(
-                '🕌',
-                style: TextStyle(fontSize: 20),
+            child: Center(
+              child: Icon(
+                Icons.mosque_rounded,
+                color: BeyanColors.tone(0xFF071F1B),
+                size: 20,
               ),
             ),
           ),

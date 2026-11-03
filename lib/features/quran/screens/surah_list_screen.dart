@@ -88,9 +88,15 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
     return Scaffold(
       backgroundColor: isDark ? effectivePalette.darkBackground : effectivePalette.lightBackground,
       appBar: AppBar(
-        backgroundColor: isDark ? effectivePalette.darkSurface : effectivePalette.primaryColor,
+        backgroundColor: isDark ? effectivePalette.darkSurface : effectivePalette.lightBackground,
+        foregroundColor: isDark ? Colors.white : AppColors.textPrimary,
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: isDark ? Colors.white : AppColors.textPrimary,
+            size: 20,
+          ),
           tooltip: strings.language == AppLanguage.turkish ? 'Ana Sayfaya Dön' : 'Back to Home',
           onPressed: () {
             HapticFeedback.lightImpact();
@@ -99,12 +105,19 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
         ),
         title: Text(
           strings.quranTitle,
-          style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 0.3),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            letterSpacing: 0.3,
+            color: isDark ? Colors.white : AppColors.textPrimary,
+          ),
         ),
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings_outlined, color: Colors.white),
+            icon: Icon(
+              Icons.settings_outlined,
+              color: isDark ? Colors.white : AppColors.textPrimary,
+            ),
             tooltip: strings.settings,
             onPressed: () => SettingsScreen.show(context),
           ),

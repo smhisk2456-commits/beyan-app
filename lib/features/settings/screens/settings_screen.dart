@@ -45,10 +45,15 @@ class SettingsScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: isDark ? effectivePalette.darkBackground : effectivePalette.lightBackground,
       appBar: AppBar(
-        backgroundColor: isDark ? effectivePalette.darkSurface : effectivePalette.primaryColor,
+        backgroundColor: isDark ? effectivePalette.darkSurface : effectivePalette.lightBackground,
+        foregroundColor: isDark ? Colors.white : AppColors.textPrimary,
+        elevation: 0,
         title: Text(
           strings.settings,
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: isDark ? Colors.white : AppColors.textPrimary,
+          ),
         ),
         centerTitle: true,
       ),
@@ -367,17 +372,22 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   Widget _buildSectionHeader(String title) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(6, 4, 6, 8),
-      child: Text(
-        title.toUpperCase(),
-        style: TextStyle(
-          color: BeyanColors.tone(0xFFFFDF7A),
-          fontSize: 11.5,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 0.8,
-        ),
-      ),
+    return Builder(
+      builder: (context) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(6, 4, 6, 8),
+          child: Text(
+            title.toUpperCase(),
+            style: TextStyle(
+              color: isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF8A6B1A),
+              fontSize: 11.5,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.8,
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -387,8 +397,19 @@ class SettingsScreen extends ConsumerWidget {
         color: isDark ? BeyanColors.tone(0xFF032620) : Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.06),
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.08)
+              : BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.2),
         ),
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
       ),
       child: Column(children: children),
     );
@@ -402,48 +423,64 @@ class SettingsScreen extends ConsumerWidget {
     required String subtitle,
     required VoidCallback? onTap,
   }) {
-    return ListTile(
-      dense: true,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-      leading: customLeading ??
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: (iconColor ?? BeyanColors.tone(0xFFFFDF7A)).withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Center(
-              child: Icon(icon, color: iconColor, size: 20),
+    return Builder(
+      builder: (context) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final defaultIconColor = isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF8A6B1A);
+
+        return ListTile(
+          dense: true,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+          leading: customLeading ??
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: (iconColor ?? defaultIconColor).withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Center(
+                  child: Icon(icon, color: iconColor ?? defaultIconColor, size: 20),
+                ),
+              ),
+          title: Text(
+            title,
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
+              color: isDark ? Colors.white : AppColors.textPrimary,
             ),
           ),
-      title: Text(
-        title,
-        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-      ),
-      subtitle: Text(
-        subtitle,
-        style: TextStyle(
-          fontSize: 11.5,
-          color: Colors.white.withValues(alpha: 0.6),
-        ),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      ),
-      trailing: onTap != null
-          ? const Icon(Icons.arrow_forward_ios_rounded, size: 13, color: Colors.white38)
-          : null,
-      onTap: onTap,
+          subtitle: Text(
+            subtitle,
+            style: TextStyle(
+              fontSize: 11.5,
+              color: isDark ? Colors.white60 : AppColors.textSecondary,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          trailing: onTap != null
+              ? Icon(Icons.arrow_forward_ios_rounded, size: 13, color: isDark ? Colors.white38 : AppColors.textHint)
+              : null,
+          onTap: onTap,
+        );
+      },
     );
   }
 
   Widget _buildDivider() {
-    return Divider(
-      height: 1,
-      thickness: 0.7,
-      indent: 58,
-      endIndent: 16,
-      color: Colors.white.withValues(alpha: 0.06),
+    return Builder(
+      builder: (context) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        return Divider(
+          height: 1,
+          thickness: 0.7,
+          indent: 58,
+          endIndent: 16,
+          color: isDark ? Colors.white.withValues(alpha: 0.06) : AppColors.divider,
+        );
+      },
     );
   }
 }

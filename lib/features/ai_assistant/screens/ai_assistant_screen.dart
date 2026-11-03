@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../../monetization/providers/premium_provider.dart';
 import '../../monetization/screens/premium_paywall_sheet.dart';
 import '../models/ai_message.dart';
@@ -245,16 +246,21 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
     final aiState = ref.watch(aiAssistantProvider);
     final premiumState = ref.watch(premiumProvider);
     final isPremium = premiumState.isPremium;
+    final effectivePalette = ref.watch(effectivePaletteProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? BeyanColors.tone(0xFF021B16) : BeyanColors.tone(0xFFF4F8F6),
+      backgroundColor: isDark ? BeyanColors.tone(0xFF021B16) : effectivePalette.lightBackground,
       appBar: AppBar(
-        backgroundColor: isDark ? BeyanColors.tone(0xFF012720) : AppColors.teal,
+        backgroundColor: isDark ? BeyanColors.tone(0xFF012720) : effectivePalette.lightBackground,
+        foregroundColor: isDark ? Colors.white : AppColors.textPrimary,
         elevation: 0,
         titleSpacing: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: isDark ? Colors.white : AppColors.textPrimary,
+          ),
           onPressed: () => BeyanNavigatorGuard.safePop(context),
         ),
         title: Row(
@@ -284,12 +290,12 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
               children: [
                 Row(
                   children: [
-                    const Text(
+                    Text(
                       'Beyân AI',
                       style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: isDark ? Colors.white : AppColors.textPrimary,
                       ),
                     ),
                     const SizedBox(width: 6),
@@ -310,9 +316,12 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
                     ),
                   ],
                 ),
-                const Text(
+                Text(
                   'Tefsir & Fıkıh & Maneviyat',
-                  style: TextStyle(fontSize: 11, color: Colors.white70),
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: isDark ? Colors.white70 : AppColors.textSecondary,
+                  ),
                 ),
               ],
             ),
@@ -320,7 +329,10 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.info_outline_rounded, color: BeyanColors.tone(0xFFFFDF7A)),
+            icon: Icon(
+              Icons.info_outline_rounded,
+              color: isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF8A6B1A),
+            ),
             tooltip: 'Muteber Kaynaklar',
             onPressed: () => _showSourcesDialog(context),
           ),

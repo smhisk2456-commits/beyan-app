@@ -1037,6 +1037,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
     int? activeVerseNumber,
     AppStrings strings,
   ) {
+    final effectivePalette = ref.watch(effectivePaletteProvider);
     final hasActiveToolBadge = ref.watch(quranMemorizationProvider).isActive ||
         ref.watch(comparativeMealProvider) ||
         ref.watch(quranAudioProvider.select((s) => s.activeAmbience != null || s.sleepTimerSecondsRemaining != null));
@@ -1046,7 +1047,11 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
+            icon: Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: isDark ? Colors.white : AppColors.textPrimary,
+              size: 20,
+            ),
             tooltip: strings.language == AppLanguage.turkish ? 'Geri Dön' : 'Back',
             onPressed: () {
               HapticFeedback.lightImpact();
@@ -1134,9 +1139,13 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
         SliverAppBar(
           expandedHeight: 210,
           pinned: true,
-          backgroundColor: isDark ? BeyanColors.tone(0xFF01201B) : AppColors.teal,
+          backgroundColor: isDark ? BeyanColors.tone(0xFF01201B) : effectivePalette.lightBackground,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
+            icon: Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: isDark ? Colors.white : AppColors.textPrimary,
+              size: 20,
+            ),
             tooltip: strings.language == AppLanguage.turkish ? 'Geri Dön' : 'Back',
             onPressed: () {
               HapticFeedback.lightImpact();
@@ -1145,8 +1154,8 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
           ),
           title: Text(
             widget.surah.localizedName(strings.language.code),
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: isDark ? Colors.white : AppColors.textPrimary,
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),

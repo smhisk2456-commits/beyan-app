@@ -159,10 +159,13 @@ extension AppThemePaletteExtension on AppThemePalette {
         primaryColor,
       ];
 
-  Color get lightBackground => _t(0xFFF4F7F5);
+  /// Mat beyaz, gözü yormayan yumuşak fildişi/inci zemin tonu
+  Color get lightBackground => _t(0xFFF2F4F3);
 
-  Color get lightSurface => const Color(0xFFFFFFFF);
+  /// Mat fildişi yumuşak yüzey tonu
+  Color get lightSurface => const Color(0xFFFAFBF9);
 
+  /// Ferah kart tonu
   Color get lightCard => const Color(0xFFFFFFFF);
 }
 
@@ -180,8 +183,8 @@ abstract class AppColors {
   static Color get green => BeyanColors.tone(0xFF1B5E20);
   static const Color greenLight = Color(0xFF43A047);
 
-  static Color get background => BeyanColors.tone(0xFFF6F8F7);
-  static const Color surface = Color(0xFFFFFFFF);
+  static Color get background => BeyanColors.tone(0xFFF2F4F3);
+  static const Color surface = Color(0xFFFAFBF9);
   static const Color cardColor = Color(0xFFFFFFFF);
 
   static Color get darkBackground => BeyanColors.palette.darkBackground;
@@ -299,25 +302,25 @@ abstract class AppTheme {
         surfaceTintColor: Colors.transparent,
       ),
       appBarTheme: AppBarTheme(
-        backgroundColor: primary,
-        foregroundColor: Colors.white,
+        backgroundColor: palette.lightBackground,
+        foregroundColor: AppColors.textPrimary,
         elevation: 0,
         centerTitle: true,
         titleTextStyle: GoogleFonts.lato(
           fontSize: 20,
-          fontWeight: FontWeight.w600,
-          color: Colors.white,
+          fontWeight: FontWeight.w700,
+          color: AppColors.textPrimary,
         ),
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: AppColors.textPrimary),
       ),
       cardTheme: CardThemeData(
         color: palette.lightCard,
-        elevation: 2,
-        shadowColor: Colors.black.withValues(alpha: 0.06),
+        elevation: 1,
+        shadowColor: Colors.black.withValues(alpha: 0.04),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
           side: BorderSide(
-            color: gold.withValues(alpha: 0.18),
+            color: gold.withValues(alpha: 0.16),
             width: 1,
           ),
         ),

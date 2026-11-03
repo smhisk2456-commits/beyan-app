@@ -31,18 +31,32 @@ class PrayerTimesScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: isDark ? effectivePalette.darkBackground : effectivePalette.lightBackground,
       appBar: AppBar(
-        backgroundColor: isDark ? effectivePalette.darkSurface : effectivePalette.primaryColor,
-        title: Text(strings.tabPrayers),
+        backgroundColor: isDark ? effectivePalette.darkSurface : effectivePalette.lightBackground,
+        foregroundColor: isDark ? Colors.white : AppColors.textPrimary,
+        elevation: 0,
+        title: Text(
+          strings.tabPrayers,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: isDark ? Colors.white : AppColors.textPrimary,
+          ),
+        ),
         actions: [
           // Şehir / Konum Seçici Buton
           IconButton(
-            icon: Icon(Icons.location_on_rounded, color: BeyanColors.tone(0xFFFFDF7A)),
+            icon: Icon(
+              Icons.location_on_rounded,
+              color: isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF8A6B1A),
+            ),
             tooltip: strings.changeCity,
             onPressed: () => CitySelectorSheet.show(context, ref),
           ),
           // Lüks Ayarlar Butonu (Hesaplama Metodu, Ezan Makamları, Bildirimler, Dil vb.)
           IconButton(
-            icon: const Icon(Icons.settings_outlined, color: Colors.white),
+            icon: Icon(
+              Icons.settings_outlined,
+              color: isDark ? Colors.white : AppColors.textPrimary,
+            ),
             tooltip: strings.settings,
             onPressed: () => SettingsScreen.show(context),
           ),

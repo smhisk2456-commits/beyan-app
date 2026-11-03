@@ -21,6 +21,50 @@ class LuxuryFloatingDock extends ConsumerWidget {
     final strings = ref.watch(appStringsProvider);
     final effectivePalette = ref.watch(effectivePaletteProvider);
     BeyanColors.setPalette(effectivePalette);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final bgGradient = LinearGradient(
+      colors: isDark
+          ? [
+              BeyanColors.tone(0xFF012E2B),
+              BeyanColors.tone(0xFF021B17),
+            ]
+          : [
+              const Color(0xFFFFFFFF),
+              BeyanColors.tone(0xFFF1F6F3),
+            ],
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+    );
+
+    final borderColor = BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.4 : 0.35);
+
+    final shadows = isDark
+        ? [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.45),
+              blurRadius: 30,
+              offset: const Offset(0, 10),
+            ),
+            BoxShadow(
+              color: BeyanColors.tone(0xFF033E35).withValues(alpha: 0.3),
+              blurRadius: 16,
+              offset: const Offset(0, -2),
+            ),
+          ]
+        : [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 24,
+              offset: const Offset(0, 8),
+            ),
+            BoxShadow(
+              color: BeyanColors.tone(0xFF033E35).withValues(alpha: 0.06),
+              blurRadius: 12,
+              offset: const Offset(0, -1),
+            ),
+          ];
+
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
@@ -36,83 +80,69 @@ class LuxuryFloatingDock extends ConsumerWidget {
                 child: Container(
                   height: 66,
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        BeyanColors.tone(0xFF012E2B),
-                        BeyanColors.tone(0xFF021B17),
-                      ],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                    ),
+                    gradient: bgGradient,
                     borderRadius: BorderRadius.circular(36),
                     border: Border.all(
-                      color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.4),
+                      color: borderColor,
                       width: 1.2,
                     ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.45),
-                          blurRadius: 30,
-                          offset: const Offset(0, 10),
+                    boxShadow: shadows,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    child: Row(
+                      children: [
+                        // 1. Sekme: Ana Sayfa
+                        Expanded(
+                          child: _buildTabItem(
+                            index: 0,
+                            icon: Icons.explore_rounded,
+                            activeIcon: Icons.explore,
+                            label: strings.tabHome,
+                            isDark: isDark,
+                          ),
                         ),
-                        BoxShadow(
-                          color: BeyanColors.tone(0xFF033E35).withValues(alpha: 0.3),
-                          blurRadius: 16,
-                          offset: const Offset(0, -2),
+
+                        // 2. Sekme: Vakitler
+                        Expanded(
+                          child: _buildTabItem(
+                            index: 1,
+                            icon: Icons.access_time_rounded,
+                            activeIcon: Icons.access_time_filled_rounded,
+                            label: strings.tabPrayers,
+                            isDark: isDark,
+                          ),
+                        ),
+
+                        // Merkez buton için boşluk (Kur'an-ı Kerim)
+                        const SizedBox(width: 58),
+
+                        // 3. Sekme: Zikirmatik (Index 3)
+                        Expanded(
+                          child: _buildTabItem(
+                            index: 3,
+                            icon: Icons.fingerprint_rounded,
+                            activeIcon: Icons.fingerprint,
+                            label: strings.tabZikr,
+                            isDark: isDark,
+                          ),
+                        ),
+
+                        // 4. Sekme: Widget & Kilit Ekranı (Index 4)
+                        Expanded(
+                          child: _buildTabItem(
+                            index: 4,
+                            icon: Icons.widgets_outlined,
+                            activeIcon: Icons.widgets_rounded,
+                            label: strings.tabWidget,
+                            isDark: isDark,
+                          ),
                         ),
                       ],
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 6),
-                      child: Row(
-                        children: [
-                          // 1. Sekme: Ana Sayfa
-                          Expanded(
-                            child: _buildTabItem(
-                              index: 0,
-                              icon: Icons.explore_rounded,
-                              activeIcon: Icons.explore,
-                              label: strings.tabHome,
-                            ),
-                          ),
-
-                          // 2. Sekme: Vakitler
-                          Expanded(
-                            child: _buildTabItem(
-                              index: 1,
-                              icon: Icons.access_time_rounded,
-                              activeIcon: Icons.access_time_filled_rounded,
-                              label: strings.tabPrayers,
-                            ),
-                          ),
-
-                          // Merkez buton için boşluk (Kur'an-ı Kerim)
-                          const SizedBox(width: 58),
-
-                          // 3. Sekme: Zikirmatik (Index 3)
-                          Expanded(
-                            child: _buildTabItem(
-                              index: 3,
-                              icon: Icons.fingerprint_rounded,
-                              activeIcon: Icons.fingerprint,
-                              label: strings.tabZikr,
-                            ),
-                          ),
-
-                          // 4. Sekme: Widget & Kilit Ekranı (Index 4)
-                          Expanded(
-                            child: _buildTabItem(
-                              index: 4,
-                              icon: Icons.widgets_outlined,
-                              activeIcon: Icons.widgets_rounded,
-                              label: strings.tabWidget,
-                            ),
-                          ),
-                        ],
-                      ),
                     ),
                   ),
                 ),
+              ),
 
               // ── Merkez Yükseltilmiş Kur'an Mührü (Index 2) ──────
               Positioned(
@@ -132,8 +162,12 @@ class LuxuryFloatingDock extends ConsumerWidget {
     required IconData icon,
     required IconData activeIcon,
     required String label,
+    required bool isDark,
   }) {
     final isSelected = currentIndex == index;
+    final unselectedColor = isDark ? Colors.white60 : BeyanColors.tone(0xFF4A605B);
+    final selectedIconColor = isDark ? BeyanColors.tone(0xFFFFE082) : BeyanColors.tone(0xFF02362E);
+    final selectedTextColor = isDark ? BeyanColors.tone(0xFFFFE082) : BeyanColors.tone(0xFF02362E);
 
     return Semantics(
       label: label,
@@ -154,12 +188,12 @@ class LuxuryFloatingDock extends ConsumerWidget {
           ),
           decoration: BoxDecoration(
             color: isSelected
-                ? BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.18)
+                ? BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.18 : 0.22)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(18),
             border: isSelected
                 ? Border.all(
-                    color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.35),
+                    color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.35 : 0.55),
                     width: 1,
                   )
                 : null,
@@ -171,7 +205,7 @@ class LuxuryFloatingDock extends ConsumerWidget {
               Icon(
                 isSelected ? activeIcon : icon,
                 size: isSelected ? 22 : 20,
-                color: isSelected ? BeyanColors.tone(0xFFFFE082) : Colors.white60,
+                color: isSelected ? selectedIconColor : unselectedColor,
               ),
               const SizedBox(height: 3),
               Padding(
@@ -185,7 +219,7 @@ class LuxuryFloatingDock extends ConsumerWidget {
                     style: TextStyle(
                       fontSize: 10.5,
                       fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                      color: isSelected ? BeyanColors.tone(0xFFFFE082) : Colors.white60,
+                      color: isSelected ? selectedTextColor : unselectedColor,
                       letterSpacing: 0.2,
                     ),
                   ),

@@ -465,20 +465,34 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
     return Scaffold(
       backgroundColor: isDark ? effectivePalette.darkBackground : effectivePalette.lightBackground,
       appBar: AppBar(
-        backgroundColor: isDark ? effectivePalette.darkSurface : effectivePalette.primaryColor,
-        title: Text(_activeTab == 0 ? strings.actionZikr : strings.worshipTrackerTab),
+        backgroundColor: isDark ? effectivePalette.darkSurface : effectivePalette.lightBackground,
+        foregroundColor: isDark ? Colors.white : AppColors.textPrimary,
+        elevation: 0,
+        title: Text(
+          _activeTab == 0 ? strings.actionZikr : strings.worshipTrackerTab,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: isDark ? Colors.white : AppColors.textPrimary,
+          ),
+        ),
         centerTitle: true,
         actions: [
           // Özel zikir ekle butonu (Zikir sekmesinde aktif)
           if (_activeTab == 0)
             IconButton(
-              icon: Icon(Icons.add_circle_outline_rounded, color: BeyanColors.tone(0xFFFFDF7A)),
+              icon: Icon(
+                Icons.add_circle_outline_rounded,
+                color: isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF8A6B1A),
+              ),
               tooltip: strings.addCustomDhikr,
               onPressed: _showAddCustomDhikrDialog,
             ),
           // Lüks Ayarlar Butonu
           IconButton(
-            icon: const Icon(Icons.settings_outlined, color: Colors.white),
+            icon: Icon(
+              Icons.settings_outlined,
+              color: isDark ? Colors.white : AppColors.textPrimary,
+            ),
             tooltip: strings.settings,
             onPressed: () => SettingsScreen.show(context),
           ),
@@ -858,8 +872,10 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                 icon: const Icon(Icons.undo_rounded, size: 18),
                 label: Text(strings.undo),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.white70,
-                  side: const BorderSide(color: Colors.white24),
+                  foregroundColor: isDark ? Colors.white70 : AppColors.textPrimary,
+                  side: BorderSide(
+                    color: isDark ? Colors.white24 : AppColors.textHint.withValues(alpha: 0.5),
+                  ),
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 ),
@@ -869,8 +885,12 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                 icon: const Icon(Icons.refresh_rounded, size: 18),
                 label: Text(strings.reset),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: BeyanColors.tone(0xFFD4AF37),
-                  side: BorderSide(color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.5)),
+                  foregroundColor: isDark ? BeyanColors.tone(0xFFD4AF37) : BeyanColors.tone(0xFF8A6B1A),
+                  side: BorderSide(
+                    color: isDark
+                        ? BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.5)
+                        : BeyanColors.tone(0xFF8A6B1A).withValues(alpha: 0.6),
+                  ),
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 ),
@@ -1037,7 +1057,11 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
                       color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                     ),
-                    child: const Text('🔥', style: TextStyle(fontSize: 20)),
+                    child: Icon(
+                      Icons.local_fire_department_rounded,
+                      color: BeyanColors.tone(0xFFFFDF7A),
+                      size: 20,
+                    ),
                   ),
                   const SizedBox(width: 10),
                   Column(
@@ -1450,6 +1474,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
   /// Dönüm Noktaları, Sureler ve Ödüller Alt Sayfası
   void _showMilestonesSheet(BuildContext context, WorshipStreakData streak, bool isDark) {
     final strings = ref.read(appStringsProvider);
+    final effectivePalette = ref.read(effectivePaletteProvider);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -1464,7 +1489,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
             maxHeight: MediaQuery.of(context).size.height * 0.88,
           ),
           decoration: BoxDecoration(
-            color: isDark ? BeyanColors.tone(0xFF031B17) : BeyanColors.tone(0xFF052B24),
+            color: isDark ? BeyanColors.tone(0xFF031B17) : effectivePalette.lightSurface,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
             border: Border.all(
               color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.4),
@@ -1913,6 +1938,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
 
   Widget _targetButton(int val, {String? label}) {
     final isSelected = _target == val;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return InkWell(
       onTap: () {
         HapticFeedback.selectionClick();
@@ -1929,12 +1955,14 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
         decoration: BoxDecoration(
           color: isSelected
               ? BeyanColors.tone(0xFFD4AF37)
-              : (Theme.of(context).brightness == Brightness.dark
+              : (isDark
                   ? BeyanColors.tone(0xFF07211C)
-                  : Colors.grey.shade100),
+                  : Colors.white),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? BeyanColors.tone(0xFFD4AF37) : Colors.white12,
+            color: isSelected
+                ? BeyanColors.tone(0xFFD4AF37)
+                : (isDark ? Colors.white12 : BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.25)),
           ),
         ),
         child: Text(
@@ -1942,7 +1970,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.bold,
-            color: isSelected ? Colors.black : Colors.white70,
+            color: isSelected ? Colors.black : (isDark ? Colors.white70 : AppColors.textPrimary),
           ),
         ),
       ),

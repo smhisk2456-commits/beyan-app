@@ -1527,12 +1527,18 @@ class _IslamicAppBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final strings = ref.watch(appStringsProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final effectivePalette = ref.watch(effectivePaletteProvider);
+    final appBarBg = atmosphere?.appBarColor ??
+        (isDark
+            ? (Theme.of(context).appBarTheme.backgroundColor ?? BeyanColors.tone(0xFF01201D))
+            : effectivePalette.lightBackground);
 
     return SliverAppBar(
       floating: false,
       pinned: true,
       elevation: 0,
-      backgroundColor: atmosphere?.appBarColor ?? (Theme.of(context).appBarTheme.backgroundColor ?? BeyanColors.tone(0xFF01201D)),
+      backgroundColor: appBarBg,
       centerTitle: false,
       toolbarHeight: 64,
       title: Row(
@@ -1544,7 +1550,9 @@ class _IslamicAppBar extends ConsumerWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.6),
+                color: isDark
+                    ? BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.6)
+                    : BeyanColors.tone(0xFF8A6B1A).withValues(alpha: 0.6),
                 width: 1.2,
               ),
               boxShadow: [
@@ -1569,12 +1577,12 @@ class _IslamicAppBar extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text(
+                Text(
                   'Beyân',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: Colors.white,
+                    color: isDark ? Colors.white : AppColors.textPrimary,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 0.4,
@@ -1586,7 +1594,7 @@ class _IslamicAppBar extends ConsumerWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: BeyanColors.tone(0xFFFFDF7A),
+                    color: isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF8A6B1A),
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0.2,
@@ -1653,7 +1661,10 @@ class _IslamicAppBar extends ConsumerWidget {
         const SizedBox(width: 4),
         // Lüks Ayarlar Butonu (Tek & Ferah)
         IconButton(
-          icon: const Icon(Icons.settings_outlined, color: Colors.white),
+          icon: Icon(
+            Icons.settings_outlined,
+            color: isDark ? Colors.white : AppColors.textPrimary,
+          ),
           tooltip: strings.settings,
           onPressed: () => SettingsScreen.show(context),
         ),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/localization/app_strings.dart';
+import '../../../core/theme/app_theme.dart';
 import '../services/quran_audio_service.dart';
 import 'sleep_and_ambience_sheet.dart';
 
@@ -33,15 +34,15 @@ class QuranAudioPlayerBar extends ConsumerWidget {
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        color: isDark ? BeyanColors.tone(0xFF032822) : BeyanColors.tone(0xFF01362F),
+        color: isDark ? BeyanColors.tone(0xFF032822) : const Color(0xFFFAFBF9),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.5),
+          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: isDark ? 0.5 : 0.35),
           width: 1.2,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.4),
+            color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.06),
             blurRadius: 14,
             offset: const Offset(0, 4),
           ),
@@ -73,7 +74,7 @@ class QuranAudioPlayerBar extends ConsumerWidget {
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
-                        color: BeyanColors.tone(0xFFFFDF7A),
+                        color: isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF7A5C0E),
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -82,9 +83,9 @@ class QuranAudioPlayerBar extends ConsumerWidget {
                       audioState.activeWordIndex != null && audioState.isWordHighlightEnabled
                           ? '${audioState.selectedReciter.nameTr} • ${strings.wordTrackingBadge}'
                           : audioState.selectedReciter.nameTr,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 11,
-                        color: Colors.white70,
+                        color: isDark ? Colors.white70 : AppColors.textSecondary,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
