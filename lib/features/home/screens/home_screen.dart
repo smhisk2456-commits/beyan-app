@@ -35,6 +35,9 @@ import '../../prayer_times/screens/nafila_prayers_sheet.dart';
 import '../../zikr/screens/zikirmatik_screen.dart';
 import '../../monetization/providers/premium_provider.dart';
 import '../../monetization/screens/premium_paywall_sheet.dart';
+import '../widgets/worship_rings_card.dart';
+import '../../kaza/screens/kaza_tracker_screen.dart';
+import '../../prayer_guide/screens/interactive_prayer_guide_screen.dart';
 
 /// Ana Ekran – Beyân lüks İslami kontrol merkezi.
 class HomeScreen extends ConsumerStatefulWidget {
@@ -111,6 +114,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             const SliverToBoxAdapter(
               child: RepaintBoundary(
                 child: PrayerCardWidget(),
+              ),
+            ),
+
+            // ── Günlük İbadet Halkaları & Seri (Apple Fitness / Duolingo Tarzı) ───
+            const SliverToBoxAdapter(
+              child: RepaintBoundary(
+                child: WorshipRingsCard(),
               ),
             ),
 
@@ -832,7 +842,47 @@ class _SpiritualLifeHub extends ConsumerWidget {
           ),
           const SizedBox(height: 10),
 
-          // 4. Sıra: Nafile Namazlar Rehberi + Teveccüh Namazı
+          // 4. Sıra: Kaza Namazı & Oruç Takibi + Namaz & Dua Rehberi
+          Row(
+            children: [
+              Expanded(
+                child: _HubCard(
+                  title: 'Kaza Namazı Takibi',
+                  subtitle: 'Borç Hesapla & Takip',
+                  badge: 'KAZA 📊',
+                  icon: Icons.calculate_rounded,
+                  isDark: isDark,
+                  accentColor: const Color(0xFF00E676),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      LuxuryPageRoute(page: const KazaTrackerScreen()),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _HubCard(
+                  title: 'Namaz & Dua Rehberi',
+                  subtitle: 'Kılınış, Dualar & Abdest',
+                  badge: 'REHBER 📖',
+                  icon: Icons.menu_book_rounded,
+                  isDark: isDark,
+                  accentColor: BeyanColors.tone(0xFFFFDF7A),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      LuxuryPageRoute(page: const InteractivePrayerGuideScreen()),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+
+          // 5. Sıra: Nafile Namazlar Rehberi + Teveccüh Namazı
           Row(
             children: [
               Expanded(

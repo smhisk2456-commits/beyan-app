@@ -19,6 +19,8 @@ import '../../mosque_finder/screens/nearby_mosques_screen.dart';
 import '../../../core/widgets/luxury_page_route.dart';
 import '../../monetization/providers/premium_provider.dart';
 import '../../monetization/screens/premium_paywall_sheet.dart';
+import '../../kaza/screens/kaza_tracker_screen.dart';
+import '../../prayer_guide/screens/interactive_prayer_guide_screen.dart';
 
 /// Lüks & Kapsamlı Ayarlar Ekranı (Settings Hub)
 class SettingsScreen extends ConsumerWidget {
@@ -265,6 +267,32 @@ class SettingsScreen extends ConsumerWidget {
             context,
             isDark,
             children: [
+              _buildTile(
+                icon: Icons.calculate_rounded,
+                iconColor: const Color(0xFF00E676),
+                title: 'Kaza Namazı & Oruç Takibi',
+                subtitle: 'Borç Hesaplama & Akıllı Tahmin Motoru',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    LuxuryPageRoute(page: const KazaTrackerScreen()),
+                  );
+                },
+              ),
+              _buildDivider(),
+              _buildTile(
+                icon: Icons.menu_book_rounded,
+                iconColor: BeyanColors.tone(0xFFFFDF7A),
+                title: 'Namaz & Dua Rehberi',
+                subtitle: '5 Vakit Kılınışı, Dualar & Abdest',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    LuxuryPageRoute(page: const InteractivePrayerGuideScreen()),
+                  );
+                },
+              ),
+              _buildDivider(),
               _buildTile(
                 icon: Icons.mosque_rounded,
                 iconColor: BeyanColors.tone(0xFFD4AF37),
