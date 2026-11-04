@@ -268,12 +268,12 @@ void main() {
 
   group('5. AI Asistanı & App Store Gizlilik / Guideline Uyumluluğu', () {
     test('AiAssistantState effectiveApiKey geliştirici ve özel anahtarı doğru hiyerarşiyle seçmeli', () {
-      // 1. İki anahtar da yok
+      // 1. Özel anahtar girilmediğinde yerleşik Beyan Gemini API anahtarı aktiftir
       const emptyState = AiAssistantState();
-      expect(emptyState.effectiveApiKey, isNull);
-      expect(emptyState.hasAnyActiveKey, isFalse);
+      expect(emptyState.effectiveApiKey, isNotNull);
+      expect(emptyState.hasAnyActiveKey, isTrue);
 
-      // 2. Özel anahtar tanımlı
+      // 2. Özel anahtar tanımlandığında öncelik özel anahtardadır
       const customState = AiAssistantState(geminiApiKey: 'custom_secret_key_123');
       expect(customState.effectiveApiKey, 'custom_secret_key_123');
       expect(customState.hasCustomApiKey, isTrue);

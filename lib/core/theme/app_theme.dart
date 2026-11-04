@@ -159,17 +159,17 @@ extension AppThemePaletteExtension on AppThemePalette {
         primaryColor,
       ];
 
-  /// Mat beyaz, gözü yormayan yumuşak fildişi/inci zemin tonu
-  Color get lightBackground => _t(0xFFF2F4F3);
+  /// Lüks karanlık tema zemin tonu (açık tema tamamen kaldırıldığı için daima darkBackground döner)
+  Color get lightBackground => darkBackground;
 
-  /// Mat fildişi yumuşak yüzey tonu
-  Color get lightSurface => const Color(0xFFFAFBF9);
+  /// Lüks karanlık tema yüzey tonu
+  Color get lightSurface => darkSurface;
 
-  /// Ferah kart tonu
-  Color get lightCard => const Color(0xFFFFFFFF);
+  /// Lüks karanlık tema kart tonu
+  Color get lightCard => darkCard;
 }
 
-/// Palet duyarlı geri uyumluluk renkleri.
+/// Palet duyarlı geri uyumluluk renkleri (Daima lüks karanlık İslami palet garantisi).
 abstract class AppColors {
   static Color get primary => BeyanColors.tone(0xFF033E35);
   static Color get primaryDark => BeyanColors.tone(0xFF012E2B);
@@ -183,26 +183,26 @@ abstract class AppColors {
   static Color get green => BeyanColors.tone(0xFF1B5E20);
   static const Color greenLight = Color(0xFF43A047);
 
-  static Color get background => BeyanColors.tone(0xFFF2F4F3);
-  static const Color surface = Color(0xFFFAFBF9);
-  static const Color cardColor = Color(0xFFFFFFFF);
+  static Color get background => BeyanColors.palette.darkBackground;
+  static Color get surface => BeyanColors.palette.darkSurface;
+  static Color get cardColor => BeyanColors.palette.darkCard;
 
   static Color get darkBackground => BeyanColors.palette.darkBackground;
   static Color get darkSurface => BeyanColors.tone(0xFF0D2823);
   static Color get darkCard => BeyanColors.tone(0xFF133630);
 
-  static const Color textPrimary = Color(0xFF11221F);
-  static const Color textSecondary = Color(0xFF5B6E6A);
-  static const Color textHint = Color(0xFF94A3A0);
+  static const Color textPrimary = Color(0xFFFFFFFF);
+  static const Color textSecondary = Color(0xB3FFFFFF);
+  static const Color textHint = Color(0x66FFFFFF);
   static const Color textOnPrimary = Color(0xFFFFFFFF);
 
-  static const Color arabicText = Color(0xFF11221F);
+  static const Color arabicText = Color(0xFFF5EEDB);
   static const Color arabicTextDark = Color(0xFFF5EEDB);
 
   static Color get gold => BeyanColors.tone(0xFFD4AF37);
   static Color get goldLight => BeyanColors.tone(0xFFFFDF7A);
   static Color get goldDark => BeyanColors.tone(0xFFAA8018);
-  static Color get divider => BeyanColors.tone(0xFFE2EBE8);
+  static Color get divider => BeyanColors.tone(0xFF133B34);
   static Color get shadow => BeyanColors.tone(0x1A012E2B);
 }
 

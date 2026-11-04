@@ -382,7 +382,11 @@ class _VerseCardStudioScreenState extends ConsumerState<VerseCardStudioScreen> {
           ),
         ],
       ),
-    );
+    ).then((_) {
+      refCtrl.dispose();
+      arCtrl.dispose();
+      meanCtrl.dispose();
+    });
   }
 
   Future<void> _captureAndShare() async {

@@ -14,7 +14,15 @@ import 'package:islamic_app/features/home/models/dynamic_prayer_atmosphere.dart'
 import 'package:islamic_app/features/prayer_times/models/prayer_time_model.dart';
 import 'package:islamic_app/features/quran/services/quran_audio_service.dart';
 import 'package:islamic_app/features/quran/widgets/arabic_text_widget.dart';
+import 'package:islamic_app/features/monetization/providers/premium_provider.dart';
+import 'package:islamic_app/features/monetization/services/premium_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+class _AcousticMockPremiumNotifier extends PremiumNotifier {
+  _AcousticMockPremiumNotifier() : super(PremiumService.instance) {
+    state = state.copyWith(isPremium: true);
+  }
+}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -97,7 +105,11 @@ void main() {
   group('Dua Kütüphanesi Arama ve Favori Filtreleme Bug Testleri', () {
     test('Kategori seçili olsa bile favoriteDuasProvider tüm favorileri korumalı', () async {
       SharedPreferences.setMockInitialValues({});
-      final container = ProviderContainer();
+      final container = ProviderContainer(
+        overrides: [
+          premiumProvider.overrideWith((ref) => _AcousticMockPremiumNotifier()),
+        ],
+      );
       addTearDown(container.dispose);
 
       expect(verifiedDuasList, isNotEmpty);
@@ -148,7 +160,11 @@ void main() {
 
     test('effectivePaletteProvider ve DynamicPrayerAtmosphere tüm ekranları tek palet altında birleştirmeli', () async {
       SharedPreferences.setMockInitialValues({});
-      final container = ProviderContainer();
+      final container = ProviderContainer(
+        overrides: [
+          premiumProvider.overrideWith((ref) => _AcousticMockPremiumNotifier()),
+        ],
+      );
       addTearDown(container.dispose);
 
       // 1. Manuel palet seçildiğinde effectivePaletteProvider ve BeyanColors senkronize olmalı

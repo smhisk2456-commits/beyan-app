@@ -451,7 +451,10 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
           ),
         ],
       ),
-    );
+    ).then((_) {
+      titleController.dispose();
+      meaningController.dispose();
+    });
   }
 
   @override

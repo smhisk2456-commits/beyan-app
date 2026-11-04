@@ -87,11 +87,11 @@ void main() {
     test('Tüm ezan makamları ve ses kaynakları doğru tanımlanmış olmalı', () {
       expect(AdhanMakam.values.length, 10);
 
-      expect(AdhanMakam.saba.soundResourceName, 'adhan_istanbul');
-      expect(AdhanMakam.rast.soundResourceName, 'adhan_mecca');
+      expect(AdhanMakam.saba.soundResourceName, 'adhan_saba');
+      expect(AdhanMakam.rast.soundResourceName, 'adhan_rast');
       expect(AdhanMakam.istanbul.soundResourceName, 'adhan_istanbul');
-      expect(AdhanMakam.segah.soundResourceName, 'adhan_mecca');
-      expect(AdhanMakam.ussak.soundResourceName, 'adhan_istanbul');
+      expect(AdhanMakam.segah.soundResourceName, 'adhan_segah');
+      expect(AdhanMakam.ussak.soundResourceName, 'adhan_ussak');
       expect(AdhanMakam.mecca.soundResourceName, 'adhan_mecca');
       expect(AdhanMakam.medina.soundResourceName, 'adhan_medina');
       expect(AdhanMakam.tekbir.soundResourceName, 'adhan_tekbir');
@@ -115,10 +115,10 @@ void main() {
     });
 
     test('Yerel asset yolları doğru formatta olmalı', () {
-      expect(AdhanMakam.saba.assetPath, 'audio/adhan_istanbul.mp3');
-      expect(AdhanMakam.rast.assetPath, 'audio/adhan_mecca.mp3');
-      expect(AdhanMakam.segah.assetPath, 'audio/adhan_medina.mp3');
-      expect(AdhanMakam.ussak.assetPath, 'audio/adhan_istanbul.mp3');
+      expect(AdhanMakam.saba.assetPath, 'audio/adhan_saba.mp3');
+      expect(AdhanMakam.rast.assetPath, 'audio/adhan_rast.mp3');
+      expect(AdhanMakam.segah.assetPath, 'audio/adhan_segah.mp3');
+      expect(AdhanMakam.ussak.assetPath, 'audio/adhan_ussak.mp3');
       expect(AdhanMakam.istanbul.assetPath, 'audio/adhan_istanbul.mp3');
       expect(AdhanMakam.mecca.assetPath, 'audio/adhan_mecca.mp3');
       expect(AdhanMakam.medina.assetPath, 'audio/adhan_medina.mp3');
@@ -127,14 +127,14 @@ void main() {
       expect(AdhanMakam.bell.assetPath, isEmpty);
     });
 
-    test('Mecca ve Medina PRO makam olmalı, diğerleri ücretsiz olmalı', () {
+    test('Özel makamlar PRO makam olmalı, tekbir/çan/sessiz ücretsiz olmalı', () {
       expect(AdhanMakam.mecca.isPro, isTrue);
       expect(AdhanMakam.medina.isPro, isTrue);
-      expect(AdhanMakam.saba.isPro, isFalse);
-      expect(AdhanMakam.rast.isPro, isFalse);
-      expect(AdhanMakam.segah.isPro, isFalse);
-      expect(AdhanMakam.ussak.isPro, isFalse);
-      expect(AdhanMakam.istanbul.isPro, isFalse);
+      expect(AdhanMakam.saba.isPro, isTrue);
+      expect(AdhanMakam.rast.isPro, isTrue);
+      expect(AdhanMakam.segah.isPro, isTrue);
+      expect(AdhanMakam.ussak.isPro, isTrue);
+      expect(AdhanMakam.istanbul.isPro, isTrue);
       expect(AdhanMakam.tekbir.isPro, isFalse);
       expect(AdhanMakam.bell.isPro, isFalse);
       expect(AdhanMakam.silent.isPro, isFalse);

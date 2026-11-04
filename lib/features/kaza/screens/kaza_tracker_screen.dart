@@ -856,6 +856,6 @@ class _KazaTrackerScreenState extends ConsumerState<KazaTrackerScreen> {
           ),
         ],
       ),
-    );
+    ).then((_) => controller.dispose());
   }
 }

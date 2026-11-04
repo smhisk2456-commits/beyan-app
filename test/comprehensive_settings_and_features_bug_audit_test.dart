@@ -59,12 +59,13 @@ void main() {
   });
 
   group('Ayar 2: Tema ve Görünüm Paletleri Bug Testi', () {
-    test('Tüm tema paletleri hem açık hem koyu ThemeData hatasız üretebilmeli', () {
+    test('Tüm tema paletleri lüks karanlık ThemeData hatasız üretebilmeli', () {
       for (final palette in AppThemePalette.values) {
         final lightTheme = AppTheme.buildTheme(palette, isDark: false);
         final darkTheme = AppTheme.buildTheme(palette, isDark: true);
 
-        expect(lightTheme.brightness, Brightness.light);
+        // Açık tema tamamen kaldırıldığı için her zaman lüks koyu tema üretilir
+        expect(lightTheme.brightness, Brightness.dark);
         expect(darkTheme.brightness, Brightness.dark);
         expect(lightTheme.scaffoldBackgroundColor, isNotNull);
         expect(darkTheme.scaffoldBackgroundColor, isNotNull);
@@ -114,7 +115,8 @@ void main() {
     test('Mecca ve Medina makamları PRO olarak işaretlenmeli, standart makamlar ücretsiz olmalı', () {
       expect(AdhanMakam.mecca.isPro, isTrue);
       expect(AdhanMakam.medina.isPro, isTrue);
-      expect(AdhanMakam.istanbul.isPro, isFalse);
+      expect(AdhanMakam.istanbul.isPro, isTrue);
+      expect(AdhanMakam.tekbir.isPro, isFalse);
       expect(AdhanMakam.silent.isPro, isFalse);
     });
   });
