@@ -146,53 +146,7 @@ class ThemeSelectionSheet extends ConsumerWidget {
               ),
               const SizedBox(height: 16),
 
-              // Bölüm 1: Karanlık Mod Seçici
-              Text(
-                strings.appearanceModeSection,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.2,
-                  color: themeState.palette.accentGold,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  _buildModeOption(
-                    context: context,
-                    title: strings.modeLight,
-                    icon: Icons.wb_sunny_rounded,
-                    selected: themeState.mode == ThemeMode.light,
-                    onTap: () => themeNotifier.setThemeMode(ThemeMode.light),
-                    isDark: isDark,
-                    accentColor: themeState.palette.accentGold,
-                  ),
-                  const SizedBox(width: 8),
-                  _buildModeOption(
-                    context: context,
-                    title: strings.modeDark,
-                    icon: Icons.nightlight_round,
-                    selected: themeState.mode == ThemeMode.dark,
-                    onTap: () => themeNotifier.setThemeMode(ThemeMode.dark),
-                    isDark: isDark,
-                    accentColor: themeState.palette.accentGold,
-                  ),
-                  const SizedBox(width: 8),
-                  _buildModeOption(
-                    context: context,
-                    title: strings.modeSystem,
-                    icon: Icons.settings_suggest_rounded,
-                    selected: themeState.mode == ThemeMode.system,
-                    onTap: () => themeNotifier.setThemeMode(ThemeMode.system),
-                    isDark: isDark,
-                    accentColor: themeState.palette.accentGold,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 22),
-
-              // Bölüm 2: Lüks Renk Paletleri
+              // Lüks Renk Paletleri
               Text(
                 strings.colorPaletteSection,
                 style: TextStyle(
@@ -303,58 +257,6 @@ class ThemeSelectionSheet extends ConsumerWidget {
             ],
           ),
         ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildModeOption({
-    required BuildContext context,
-    required String title,
-    required IconData icon,
-    required bool selected,
-    required VoidCallback onTap,
-    required bool isDark,
-    required Color accentColor,
-  }) {
-    final bgColor = selected
-        ? accentColor.withValues(alpha: 0.18)
-        : (isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.04));
-
-    final borderColor = selected
-        ? accentColor
-        : (isDark ? Colors.white10 : Colors.black12);
-
-    final textColor = selected
-        ? accentColor
-        : (isDark ? Colors.white70 : Colors.black87);
-
-    return Expanded(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            color: bgColor,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: borderColor, width: selected ? 1.8 : 1),
-          ),
-          child: Column(
-            children: [
-              Icon(icon, color: textColor, size: 20),
-              const SizedBox(height: 6),
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: selected ? FontWeight.bold : FontWeight.w500,
-                  color: textColor,
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );

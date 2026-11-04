@@ -47,14 +47,11 @@ void main() {
       expect(oled.accentGold, isNotNull);
     });
 
-    test('Her palet için hem açık hem koyu tema başarıyla inşa edilebilmeli', () {
+    test('Her palet için lüks karanlık tema başarıyla inşa edilebilmeli', () {
       for (final palette in AppThemePalette.values) {
-        final light = AppTheme.buildTheme(palette, isDark: false);
         final dark = AppTheme.buildTheme(palette, isDark: true);
 
-        expect(light.brightness, Brightness.light);
         expect(dark.brightness, Brightness.dark);
-        expect(light.colorScheme.primary, isNotNull);
         expect(dark.colorScheme.primary, isNotNull);
       }
     });

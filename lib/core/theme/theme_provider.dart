@@ -42,7 +42,7 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
 
   ThemeNotifier()
       : super(const ThemeState(
-          mode: ThemeMode.system,
+          mode: ThemeMode.dark,
           palette: AppThemePalette.emerald,
           isDynamicPrayerTheme: false,
         )) {
@@ -74,13 +74,10 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
   Future<void> _loadFromPrefs() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final modeStr = prefs.getString(_keyThemeMode);
       final paletteStr = prefs.getString(_keyThemePalette);
       final dynamicPrayerTheme = prefs.getBool(_keyDynamicPrayerTheme) ?? false;
 
-      ThemeMode mode = ThemeMode.system;
-      if (modeStr == 'light') mode = ThemeMode.light;
-      if (modeStr == 'dark') mode = ThemeMode.dark;
+      const ThemeMode mode = ThemeMode.dark;
 
       AppThemePalette palette = AppThemePalette.emerald;
       if (paletteStr != null) {
@@ -100,12 +97,9 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {
-    state = state.copyWith(mode: mode);
+    state = state.copyWith(mode: ThemeMode.dark);
     final prefs = await SharedPreferences.getInstance();
-    String modeStr = 'system';
-    if (mode == ThemeMode.light) modeStr = 'light';
-    if (mode == ThemeMode.dark) modeStr = 'dark';
-    await prefs.setString(_keyThemeMode, modeStr);
+    await prefs.setString(_keyThemeMode, 'dark');
   }
 
   Future<void> setPalette(AppThemePalette palette) async {

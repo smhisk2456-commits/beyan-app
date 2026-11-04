@@ -119,7 +119,6 @@ class IslamicApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentLang = ref.watch(appLanguageProvider);
-    final themeState = ref.watch(themeProvider);
     final effectivePalette = ref.watch(effectivePaletteProvider);
     BeyanColors.setPalette(effectivePalette);
 
@@ -144,9 +143,9 @@ class IslamicApp extends ConsumerWidget {
         Locale('ru'),
       ],
       themeAnimationDuration: Duration.zero,
-      theme: AppTheme.buildTheme(effectivePalette, isDark: false),
+      theme: AppTheme.buildTheme(effectivePalette, isDark: true),
       darkTheme: AppTheme.buildTheme(effectivePalette, isDark: true),
-      themeMode: themeState.mode,
+      themeMode: ThemeMode.dark,
       home: const SplashScreen(),
     );
   }
