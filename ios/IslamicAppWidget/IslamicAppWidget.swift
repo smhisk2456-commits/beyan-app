@@ -887,27 +887,57 @@ struct PrayerSystemMediumView: View {
     private let gold = Color(red: 1.0, green: 0.88, blue: 0.52)
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            // ── 1. Üst Bar: Sol (Logo) • Sağ (Zarif Canlı Sayaç Rozeti) ──
-            HStack(alignment: .center) {
-                BeyanAppLogoBadge(size: 18, showTitle: true)
+        HStack(spacing: 8) {
+            // ── SOL KART: HERO SIRADAKİ VAKİT & DİNAMİK CANLI SAYAÇ (%52) ──
+            VStack(alignment: .leading, spacing: 0) {
+                // Logo & Canlı Durum
+                HStack(spacing: 4) {
+                    BeyanAppLogoBadge(size: 16, showTitle: true)
+                    Spacer()
+                    Circle()
+                        .fill(Color(red: 0.20, green: 0.85, blue: 0.55))
+                        .frame(width: 5.5, height: 5.5)
+                        .shadow(color: Color(red: 0.20, green: 0.85, blue: 0.55), radius: 3)
+                }
 
-                Spacer(minLength: 8)
+                Spacer(minLength: 3)
 
-                // Canlı Geri Sayım Kapsülü (Apple Frosted Glass Hap)
-                HStack(spacing: 4.5) {
+                // Sıradaki Vakit Başlığı
+                Text(WidgetLocalization.nextPrayerTitle.uppercased())
+                    .font(.system(size: 8, weight: .heavy, design: .rounded))
+                    .tracking(0.9)
+                    .foregroundColor(gold.opacity(0.85))
+
+                // Vakit İsmi & Saati (Hero)
+                HStack(alignment: .firstTextBaseline, spacing: 5) {
+                    Text(entry.next.kind.name)
+                        .font(.system(size: 23, weight: .black, design: .rounded))
+                        .foregroundColor(.white)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+
+                    Text(hhmm.string(from: entry.next.date))
+                        .font(.system(size: 18, weight: .heavy, design: .rounded))
+                        .foregroundColor(gold)
+                        .lineLimit(1)
+                }
+
+                Spacer(minLength: 5)
+
+                // Canlı Geri Sayım Cam Kapsülü
+                HStack(spacing: 4) {
                     Image(systemName: "timer")
-                        .font(.system(size: 9.5, weight: .bold))
+                        .font(.system(size: 9, weight: .bold))
                         .foregroundColor(gold)
                     Text(entry.next.date, style: .timer)
-                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                        .font(.system(size: 12.5, weight: .black, design: .rounded))
                         .monospacedDigit()
                         .foregroundColor(.white)
                     Text("kaldı")
-                        .font(.system(size: 9.5, weight: .medium))
+                        .font(.system(size: 8.5, weight: .medium))
                         .foregroundColor(.white.opacity(0.65))
                 }
-                .padding(.horizontal, 9)
+                .padding(.horizontal, 7.5)
                 .padding(.vertical, 4)
                 .background(
                     Capsule()
@@ -919,97 +949,35 @@ struct PrayerSystemMediumView: View {
                                     startPoint: .topLeading,
                                     endPoint: .bottomTrailing
                                 ),
-                                lineWidth: 0.75
+                                lineWidth: 0.7
                             )
                         )
-                        .shadow(color: Color.black.opacity(0.20), radius: 3, x: 0, y: 1)
                 )
-            }
 
-            Spacer(minLength: 5)
+                Spacer(minLength: 4)
 
-            // ── 2. Orta Hero Alanı: Sıradaki Vakit & Devasa Saat ──
-            HStack(alignment: .firstTextBaseline, spacing: 8) {
-                Text(entry.next.kind.name)
-                    .font(.system(size: 26, weight: .black, design: .rounded))
-                    .foregroundColor(.white)
-                    .lineLimit(1)
-
-                Text(hhmm.string(from: entry.next.date))
-                    .font(.system(size: 22, weight: .heavy, design: .rounded))
-                    .foregroundColor(gold)
-                    .lineLimit(1)
-
-                Spacer()
-
-                HStack(spacing: 4) {
-                    Image(systemName: entry.next.kind.symbol)
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(gold)
-                    Text(WidgetLocalization.nextPrayerTitle)
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundColor(.white.opacity(0.65))
-                }
-            }
-
-            Spacer(minLength: 7)
-
-            // ── 3. Alt Çizelge: Tek Parça Akıcı Vakit Şeridi (iOS 18/27 Fluid Glass Timeline) ──
-            HStack(spacing: 2) {
-                ForEach(entry.dayTimes, id: \.kind.rawValue) { p in
-                    let isNext = (p.kind == entry.next.kind)
-                    VStack(spacing: 2) {
-                        Image(systemName: p.kind.symbol)
-                            .font(.system(size: 9.5, weight: isNext ? .bold : .medium))
-                            .foregroundColor(isNext ? gold : .white.opacity(0.45))
-
-                        Text(p.kind.name)
-                            .font(.system(size: 9, weight: isNext ? .heavy : .medium))
-                            .foregroundColor(isNext ? gold : .white.opacity(0.65))
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.7)
-
-                        Text(hhmm.string(from: p.date))
-                            .font(.system(size: 11, weight: isNext ? .black : .semibold, design: .rounded))
-                            .foregroundColor(isNext ? .white : .white.opacity(0.85))
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.75)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 4.5)
-                    .background(
-                        isNext
-                            ? AnyView(
-                                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                    .fill(
-                                        LinearGradient(
-                                            colors: [
-                                                Color(red: 0.03, green: 0.44, blue: 0.35),
-                                                Color(red: 0.015, green: 0.24, blue: 0.19)
-                                            ],
-                                            startPoint: .topLeading,
-                                            endPoint: .bottomTrailing
-                                        )
-                                    )
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                            .strokeBorder(
-                                                LinearGradient(
-                                                    colors: [gold, gold.opacity(0.45)],
-                                                    startPoint: .topLeading,
-                                                    endPoint: .bottomTrailing
-                                                ),
-                                                lineWidth: 0.85
-                                            )
-                                    )
-                                    .shadow(color: gold.opacity(0.35), radius: 6, x: 0, y: 1.5)
+                // Dinamik Vakit İlerleme Çubuğu
+                GeometryReader { geo in
+                    let progress = prayerProgress(current: entry.current.date, next: entry.next.date, now: entry.date)
+                    ZStack(alignment: .leading) {
+                        Capsule()
+                            .fill(Color.white.opacity(0.10))
+                            .frame(height: 3)
+                        Capsule()
+                            .fill(
+                                LinearGradient(
+                                    colors: [Color(red: 0.10, green: 0.65, blue: 0.45), gold],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
                             )
-                            : AnyView(Color.clear)
-                    )
+                            .frame(width: max(6, geo.size.width * CGFloat(progress)), height: 3)
+                            .shadow(color: gold.opacity(0.35), radius: 2)
+                    }
                 }
+                .frame(height: 3)
             }
-            .padding(.horizontal, 3)
-            .padding(.vertical, 3)
+            .padding(9)
             .background(
                 RoundedRectangle(cornerRadius: 13, style: .continuous)
                     .fill(Color.white.opacity(0.05))
@@ -1017,7 +985,83 @@ struct PrayerSystemMediumView: View {
                         RoundedRectangle(cornerRadius: 13, style: .continuous)
                             .strokeBorder(
                                 LinearGradient(
-                                    colors: [Color.white.opacity(0.14), Color.white.opacity(0.02)],
+                                    colors: [Color.white.opacity(0.14), Color.white.opacity(0.03)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 0.6
+                            )
+                    )
+            )
+
+            // ── SAĞ KART: DİNAMİK VAKİTLER ÇİZELGESİ (%48) ──
+            VStack(alignment: .leading, spacing: 0) {
+                HStack {
+                    Text("GÜNÜN VAKİTLERİ")
+                        .font(.system(size: 7.5, weight: .black, design: .rounded))
+                        .tracking(0.8)
+                        .foregroundColor(gold.opacity(0.80))
+                    Spacer()
+                    Image(systemName: "sun.and.horizon.fill")
+                        .font(.system(size: 8.5))
+                        .foregroundColor(gold.opacity(0.70))
+                }
+                .padding(.bottom, 3)
+
+                VStack(spacing: 1.5) {
+                    ForEach(entry.dayTimes, id: \.kind.rawValue) { p in
+                        let isNext = (p.kind == entry.next.kind)
+                        HStack(spacing: 3.5) {
+                            Image(systemName: p.kind.symbol)
+                                .font(.system(size: 8, weight: isNext ? .bold : .medium))
+                                .foregroundColor(isNext ? gold : .white.opacity(0.45))
+                                .frame(width: 11)
+
+                            Text(p.kind.name)
+                                .font(.system(size: 9, weight: isNext ? .heavy : .medium))
+                                .foregroundColor(isNext ? .white : .white.opacity(0.70))
+
+                            Spacer(minLength: 2)
+
+                            Text(hhmm.string(from: p.date))
+                                .font(.system(size: 9.5, weight: isNext ? .black : .semibold, design: .rounded))
+                                .foregroundColor(isNext ? gold : .white.opacity(0.85))
+                        }
+                        .padding(.horizontal, 5)
+                        .padding(.vertical, 2)
+                        .background(
+                            isNext
+                                ? AnyView(
+                                    RoundedRectangle(cornerRadius: 5, style: .continuous)
+                                        .fill(
+                                            LinearGradient(
+                                                colors: [
+                                                    Color(red: 0.04, green: 0.45, blue: 0.35),
+                                                    Color(red: 0.02, green: 0.25, blue: 0.20)
+                                                ],
+                                                startPoint: .leading,
+                                                endPoint: .trailing
+                                            )
+                                        )
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 5, style: .continuous)
+                                                .strokeBorder(gold.opacity(0.75), lineWidth: 0.6)
+                                        )
+                                )
+                                : AnyView(Color.clear)
+                        )
+                    }
+                }
+            }
+            .padding(8)
+            .background(
+                RoundedRectangle(cornerRadius: 13, style: .continuous)
+                    .fill(Color.white.opacity(0.04))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 13, style: .continuous)
+                            .strokeBorder(
+                                LinearGradient(
+                                    colors: [Color.white.opacity(0.12), Color.white.opacity(0.02)],
                                     startPoint: .topLeading,
                                     endPoint: .bottomTrailing
                                 ),
@@ -1027,6 +1071,13 @@ struct PrayerSystemMediumView: View {
             )
         }
         .beyanHomePadding()
+    }
+
+    private func prayerProgress(current: Date, next: Date, now: Date) -> Double {
+        let total = next.timeIntervalSince(current)
+        guard total > 0 else { return 0.5 }
+        let elapsed = now.timeIntervalSince(current)
+        return min(max(elapsed / total, 0.0), 1.0)
     }
 }
 
