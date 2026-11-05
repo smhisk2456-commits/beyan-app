@@ -152,7 +152,7 @@ class _SplashScreenState extends State<SplashScreen>
   Widget build(BuildContext context) {
     debugPrint('>>> SPLASH SCREEN BUILD CALLED');
     return Scaffold(
-      backgroundColor: const Color(0xFF07080A),
+      backgroundColor: const Color(0xFF01201D),
       body: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () {
@@ -163,21 +163,23 @@ class _SplashScreenState extends State<SplashScreen>
           width: double.infinity,
           height: double.infinity,
           decoration: const BoxDecoration(
-            gradient: RadialGradient(
-              center: Alignment.center,
-              radius: 1.25,
+            gradient: LinearGradient(
               colors: [
-                Color(0xFF13151E),
-                Color(0xFF0A0C10),
-                Color(0xFF07080A),
+                Color(0xFF001512),
+                Color(0xFF01201D),
+                Color(0xFF012E2B),
+                Color(0xFF023E36),
+                Color(0xFF001714),
               ],
-              stops: [0.0, 0.55, 1.0],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              stops: [0.0, 0.25, 0.5, 0.75, 1.0],
             ),
           ),
           child: Stack(
             alignment: Alignment.center,
             children: [
-              // ── Arka Plan Yumuşak Şampanya Altın Işık Aurası (Breathing Halo) ──
+              // ── Arka Plan Yumuşak 24K Altın Işık Aurası (Breathing Halo) ──
               AnimatedBuilder(
                 animation: _haloPulse,
                 builder: (context, child) {
@@ -190,11 +192,11 @@ class _SplashScreenState extends State<SplashScreen>
                         shape: BoxShape.circle,
                         gradient: RadialGradient(
                           colors: [
-                            const Color(0xFFF0D399).withValues(alpha: 0.28),
-                            const Color(0xFFD4AF37).withValues(alpha: 0.10),
+                            const Color(0xFFFFDF7A).withValues(alpha: 0.28),
+                            const Color(0xFF033E35).withValues(alpha: 0.15),
                             Colors.transparent,
                           ],
-                          stops: const [0.0, 0.45, 1.0],
+                          stops: const [0.0, 0.5, 1.0],
                         ),
                       ),
                     ),
@@ -227,20 +229,20 @@ class _SplashScreenState extends State<SplashScreen>
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(38),
                           border: Border.all(
-                            color: const Color(0xFFF0D399).withValues(alpha: 0.75),
-                            width: 1.6,
+                            color: const Color(0xFFFFDF7A).withValues(alpha: 0.65),
+                            width: 1.8,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFFF0D399).withValues(alpha: 0.35),
+                              color: const Color(0xFFD4AF37).withValues(alpha: 0.38),
                               blurRadius: 40,
                               spreadRadius: 4,
                               offset: const Offset(0, 8),
                             ),
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.8),
+                              color: Colors.black.withValues(alpha: 0.55),
                               blurRadius: 28,
-                              offset: const Offset(0, 14),
+                              offset: const Offset(0, 12),
                             ),
                           ],
                         ),
@@ -277,10 +279,10 @@ class _SplashScreenState extends State<SplashScreen>
                           ShaderMask(
                             shaderCallback: (bounds) => const LinearGradient(
                               colors: [
-                                Color(0xFFFFFFFF),
-                                Color(0xFFFFF2D4),
-                                Color(0xFFF0D399),
-                                Color(0xFFC8A765),
+                                Color(0xFFFFF4D0),
+                                Color(0xFFFFDF7A),
+                                Color(0xFFD4AF37),
+                                Color(0xFFA57D1B),
                               ],
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
@@ -306,7 +308,7 @@ class _SplashScreenState extends State<SplashScreen>
                               gradient: const LinearGradient(
                                 colors: [
                                   Colors.transparent,
-                                  Color(0xFFF0D399),
+                                  Color(0xFFD4AF37),
                                   Colors.transparent,
                                 ],
                               ),
@@ -317,13 +319,13 @@ class _SplashScreenState extends State<SplashScreen>
                           const SizedBox(height: 12),
 
                           // Sade ve Zarif Alt Başlık
-                          Text(
-                            'VAKİTLER • KUR\'AN • MANEVİYAT',
+                          const Text(
+                            'Vakitler • Kur\'an • Tesbihat',
                             style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 2.8,
-                              color: const Color(0xFFF0D399).withValues(alpha: 0.9),
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                              letterSpacing: 2.0,
+                              color: Color(0xFFFFDF7A),
                             ),
                           ),
                         ],
@@ -346,8 +348,8 @@ class _SplashScreenState extends State<SplashScreen>
                                 height: 4,
                                 decoration: BoxDecoration(
                                   color: index == 1
-                                      ? const Color(0xFFF0D399)
-                                      : const Color(0xFFF0D399).withValues(alpha: 0.25),
+                                      ? const Color(0xFFD4AF37)
+                                      : const Color(0xFFD4AF37).withValues(alpha: 0.35),
                                   borderRadius: BorderRadius.circular(2),
                                 ),
                               );

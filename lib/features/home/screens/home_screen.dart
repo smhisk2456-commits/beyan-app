@@ -1464,13 +1464,12 @@ class _ActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bgColor = isDark
-        ? const Color(0xFF13151D)
-        : Colors.white;
-    final borderColor = isDark
-        ? const Color(0xFFF0D399).withValues(alpha: 0.24)
-        : BeyanColors.tone(0xFFE2EBE8);
-    const iconColor = Color(0xFFF0D399);
+    final bgColor = atmosphere?.actionCardBg ??
+        (isDark ? BeyanColors.tone(0xFF0D2823) : Colors.white);
+    final borderColor = atmosphere != null
+        ? atmosphere!.actionCardBorder.withValues(alpha: 0.6)
+        : (isDark ? BeyanColors.tone(0xFF133B34) : BeyanColors.tone(0xFFE2EBE8));
+    final iconColor = atmosphere?.accentGold ?? BeyanColors.tone(0xFFFFDF7A);
 
     return Expanded(
       child: Material(
@@ -1492,16 +1491,10 @@ class _ActionCard extends StatelessWidget {
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: isDark ? 0.40 : 0.04),
+                  color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
                   blurRadius: 10,
                   offset: const Offset(0, 3),
                 ),
-                if (isDark)
-                  BoxShadow(
-                    color: const Color(0xFFF0D399).withValues(alpha: 0.05),
-                    blurRadius: 8,
-                    offset: const Offset(0, -1),
-                  ),
               ],
             ),
             child: Column(
@@ -1511,7 +1504,7 @@ class _ActionCard extends StatelessWidget {
                   width: 38,
                   height: 38,
                   decoration: BoxDecoration(
-                    color: iconColor.withValues(alpha: isDark ? 0.12 : 0.08),
+                    color: iconColor.withValues(alpha: isDark ? 0.16 : 0.08),
                     shape: BoxShape.circle,
                     border: Border.all(
                       color: iconColor.withValues(alpha: 0.35),
@@ -1521,7 +1514,7 @@ class _ActionCard extends StatelessWidget {
                   child: Icon(
                     icon,
                     size: 19,
-                    color: isDark ? iconColor : BeyanColors.tone(0xFF8A6B1A),
+                    color: iconColor,
                   ),
                 ),
                 const SizedBox(height: 7),
@@ -1546,7 +1539,7 @@ class _ActionCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 9.5,
                       fontWeight: FontWeight.w500,
-                      color: isDark ? const Color(0xFF8E929B) : AppColors.textSecondary,
+                      color: isDark ? BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.75) : AppColors.textSecondary,
                     ),
                     maxLines: 1,
                   ),

@@ -250,9 +250,9 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF07080A) : effectivePalette.lightBackground,
+      backgroundColor: isDark ? BeyanColors.tone(0xFF021B16) : effectivePalette.lightBackground,
       appBar: AppBar(
-        backgroundColor: isDark ? const Color(0xFF0A0C10) : effectivePalette.lightBackground,
+        backgroundColor: isDark ? BeyanColors.tone(0xFF012720) : effectivePalette.lightBackground,
         foregroundColor: isDark ? Colors.white : AppColors.textPrimary,
         elevation: 0,
         centerTitle: true,
@@ -283,15 +283,15 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF0D399),
+                    color: BeyanColors.tone(0xFFFFDF7A),
                     borderRadius: BorderRadius.circular(5),
                   ),
-                  child: const Text(
+                  child: Text(
                     'İslami Rehber',
                     style: TextStyle(
                       fontSize: 9,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF07080A),
+                      color: BeyanColors.tone(0xFF012E2B),
                     ),
                   ),
                 ),
@@ -302,7 +302,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
               'Tefsir & Fıkıh & Maneviyat',
               style: TextStyle(
                 fontSize: 10.5,
-                color: isDark ? const Color(0xFF8E929B) : AppColors.textSecondary,
+                color: isDark ? Colors.white70 : AppColors.textSecondary,
               ),
             ),
           ],
@@ -323,7 +323,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
             icon: Icon(
               Icons.info_outline_rounded,
               size: 20,
-              color: isDark ? const Color(0xFFF0D399) : const Color(0xFF8A6B1A),
+              color: isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF8A6B1A),
             ),
             tooltip: 'Muteber Kaynaklar',
             onPressed: () => _showSourcesDialog(context),
@@ -377,7 +377,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
             Stack(
               alignment: Alignment.center,
               children: [
-                // Arka plan atmosferik mor/safir ve şampanya aurası
+                // Arka plan atmosferik palet aurası ve şampanya/altın parıltısı
                 Container(
                   width: 220,
                   height: 220,
@@ -385,9 +385,9 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
                     shape: BoxShape.circle,
                     gradient: RadialGradient(
                       colors: [
-                        const Color(0xFF4C2A85).withValues(alpha: isDark ? 0.45 : 0.20),
-                        const Color(0xFF1E1738).withValues(alpha: isDark ? 0.30 : 0.10),
-                        const Color(0xFFF0D399).withValues(alpha: isDark ? 0.08 : 0.04),
+                        BeyanColors.tone(0xFF03443A).withValues(alpha: isDark ? 0.45 : 0.20),
+                        BeyanColors.tone(0xFF01201B).withValues(alpha: isDark ? 0.30 : 0.10),
+                        BeyanColors.tone(0xFFFFDF7A).withValues(alpha: isDark ? 0.10 : 0.05),
                         Colors.transparent,
                       ],
                       stops: const [0.0, 0.45, 0.75, 1.0],
@@ -403,14 +403,14 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
                       height: 68,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: const Color(0xFF141722),
+                        color: isDark ? BeyanColors.tone(0xFF012E2B) : Colors.white,
                         border: Border.all(
-                          color: const Color(0xFFF0D399).withValues(alpha: 0.5),
+                          color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.6),
                           width: 1.5,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFFF0D399).withValues(alpha: 0.25),
+                            color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.25),
                             blurRadius: 20,
                             spreadRadius: 2,
                           ),
@@ -427,11 +427,11 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
                     ),
                     const SizedBox(height: 12),
                     ShaderMask(
-                      shaderCallback: (bounds) => const LinearGradient(
+                      shaderCallback: (bounds) => LinearGradient(
                         colors: [
-                          Color(0xFFFFFFFF),
-                          Color(0xFFF5E4BE),
-                          Color(0xFFF0D399),
+                          Colors.white,
+                          BeyanColors.tone(0xFFF5E4BE),
+                          BeyanColors.tone(0xFFFFDF7A),
                         ],
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
@@ -533,10 +533,12 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
           decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF141720).withValues(alpha: 0.9) : Colors.white,
+            color: isDark ? BeyanColors.tone(0xFF032620).withValues(alpha: 0.9) : Colors.white,
             borderRadius: BorderRadius.circular(22),
             border: Border.all(
-              color: isDark ? const Color(0xFFF0D399).withValues(alpha: 0.22) : const Color(0xFFD4AF37).withValues(alpha: 0.3),
+              color: isDark
+                  ? BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.25)
+                  : BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.3),
               width: 1.0,
             ),
             boxShadow: [
@@ -562,7 +564,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
               Icon(
                 Icons.arrow_forward_ios_rounded,
                 size: 13,
-                color: isDark ? const Color(0xFFF0D399) : const Color(0xFF8A6B1A),
+                color: isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF8A6B1A),
               ),
             ],
           ),
@@ -580,19 +582,19 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
         margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: const Color(0xFF141720),
+          color: BeyanColors.tone(0xFF032B24),
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: const Color(0xFFF0D399).withValues(alpha: 0.35)),
+          border: Border.all(color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.35)),
         ),
-        child: const Row(
+        child: Row(
           children: [
-            Icon(Icons.workspace_premium_rounded, color: Color(0xFFF0D399), size: 18),
-            SizedBox(width: 8),
+            Icon(Icons.workspace_premium_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 18),
+            const SizedBox(width: 8),
             Expanded(
               child: Text(
                 'Beyân Pro: Sınırsız Soru & Tefsir Asistanı',
                 style: TextStyle(
-                  color: Color(0xFFF0D399),
+                  color: BeyanColors.tone(0xFFFFDF7A),
                   fontWeight: FontWeight.bold,
                   fontSize: 12,
                 ),
@@ -607,13 +609,13 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
       margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFF12141C),
+        color: BeyanColors.tone(0xFF01201B),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
       ),
       child: Row(
         children: [
-          const Icon(Icons.auto_awesome_rounded, color: Color(0xFFF0D399), size: 16),
+          Icon(Icons.auto_awesome_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 16),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
@@ -631,20 +633,20 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFFF0D399), Color(0xFFD4AF37)],
+                gradient: LinearGradient(
+                  colors: [BeyanColors.tone(0xFFFFDF7A), BeyanColors.tone(0xFFD4AF37)],
                 ),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Row(
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.workspace_premium_rounded, size: 12, color: Color(0xFF07080A)),
-                  SizedBox(width: 3),
+                  Icon(Icons.workspace_premium_rounded, size: 12, color: BeyanColors.tone(0xFF01201D)),
+                  const SizedBox(width: 3),
                   Text(
                     'Sınırsız Yap 👑',
                     style: TextStyle(
-                      color: Color(0xFF07080A),
+                      color: BeyanColors.tone(0xFF01201D),
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
                     ),
@@ -770,7 +772,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
           margin: const EdgeInsets.only(bottom: 14, left: 48),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF1B1E28) : const Color(0xFF0A4D40),
+            color: isDark ? BeyanColors.tone(0xFF04342C) : const Color(0xFF0A4D40),
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(18),
               topRight: Radius.circular(4),
@@ -779,7 +781,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
             ),
             border: Border.all(
               color: isDark
-                  ? const Color(0xFFF0D399).withValues(alpha: 0.4)
+                  ? BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.4)
                   : BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.5),
             ),
           ),
@@ -801,7 +803,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
         margin: const EdgeInsets.only(bottom: 20, right: 28),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF101218) : Colors.white,
+          color: isDark ? BeyanColors.tone(0xFF011E18) : Colors.white,
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(4),
             topRight: Radius.circular(20),
@@ -810,7 +812,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
           ),
           border: Border.all(
             color: isDark
-                ? const Color(0xFFF0D399).withValues(alpha: 0.25)
+                ? BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.25)
                 : BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35),
             width: 1.1,
           ),
@@ -831,19 +833,19 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
                 Container(
                   width: 24,
                   height: 24,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFF0D399),
+                  decoration: BoxDecoration(
+                    color: BeyanColors.tone(0xFFFFDF7A),
                     shape: BoxShape.circle,
                   ),
-                  child: const Center(
-                    child: Icon(Icons.auto_awesome_rounded, size: 14, color: Color(0xFF07080A)),
+                  child: Center(
+                    child: Icon(Icons.auto_awesome_rounded, size: 14, color: BeyanColors.tone(0xFF01201D)),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Text(
                   'Beyân AI',
                   style: TextStyle(
-                    color: isDark ? const Color(0xFFF0D399) : BeyanColors.tone(0xFFFFDF7A),
+                    color: isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF8A6B1A),
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
                   ),
@@ -958,14 +960,14 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
         margin: const EdgeInsets.only(bottom: 20),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF101218) : Colors.white,
+          color: isDark ? BeyanColors.tone(0xFF011E18) : Colors.white,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
-            color: const Color(0xFFF0D399).withValues(alpha: 0.35),
+            color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.35),
             width: 1.1,
           ),
         ),
-        child: const Row(
+        child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             SizedBox(
@@ -973,14 +975,14 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
               height: 16,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFF0D399)),
+                valueColor: AlwaysStoppedAnimation<Color>(BeyanColors.tone(0xFFFFDF7A)),
               ),
             ),
-            SizedBox(width: 10),
+            const SizedBox(width: 10),
             Text(
               'Ayet ve hadis kaynakları taranıyor...',
               style: TextStyle(
-                color: Color(0xFFF0D399),
+                color: BeyanColors.tone(0xFFFFDF7A),
                 fontSize: 13,
                 fontStyle: FontStyle.italic,
               ),
@@ -996,10 +998,10 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
       child: Container(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF090A0D) : Colors.white,
+          color: isDark ? BeyanColors.tone(0xFF011814) : Colors.white,
           border: Border(
             top: BorderSide(
-              color: isDark ? const Color(0xFF1C1E26) : const Color(0xFFE2EBE8),
+              color: isDark ? BeyanColors.tone(0xFF022A23) : const Color(0xFFE2EBE8),
             ),
           ),
         ),
@@ -1009,11 +1011,11 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14),
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF13151D) : const Color(0xFFF1F8F5),
+                  color: isDark ? BeyanColors.tone(0xFF02241E) : const Color(0xFFF1F8F5),
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
                     color: isDark
-                        ? const Color(0xFFF0D399).withValues(alpha: 0.25)
+                        ? BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.25)
                         : BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.3),
                   ),
                 ),
@@ -1037,14 +1039,14 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
             ),
             const SizedBox(width: 8),
             Container(
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Color(0xFFF0D399), Color(0xFFD4AF37)],
+                  colors: [BeyanColors.tone(0xFFFFDF7A), BeyanColors.tone(0xFFD4AF37)],
                 ),
                 shape: BoxShape.circle,
               ),
               child: IconButton(
-                icon: const Icon(Icons.send_rounded, color: Color(0xFF07080A), size: 20),
+                icon: Icon(Icons.send_rounded, color: BeyanColors.tone(0xFF01201D), size: 20),
                 onPressed: () => _handleSend(),
               ),
             ),

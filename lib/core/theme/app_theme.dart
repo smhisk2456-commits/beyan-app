@@ -40,9 +40,9 @@ extension AppThemePaletteExtension on AppThemePalette {
         if (langCode == 'ar') return 'الزمرد والذهب';
         return 'Zümrüt & Altın';
       case AppThemePalette.oledBlack:
-        if (langCode == 'en') return 'Midnight Black (OLED)';
-        if (langCode == 'ar') return 'الأسود الليلي (OLED)';
-        return 'Gece Siyahı (OLED)';
+        if (langCode == 'en') return 'Onyx Stealth (Apple Pro)';
+        if (langCode == 'ar') return 'أونيكس الشبح (آبل برو)';
+        return 'Onyx Stealth (Apple Pro)';
       case AppThemePalette.kaabaSlate:
         if (langCode == 'en') return 'Kaaba Graphite';
         if (langCode == 'ar') return 'جرافيت الكعبة';

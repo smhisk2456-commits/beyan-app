@@ -43,17 +43,17 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
   ThemeNotifier()
       : super(const ThemeState(
           mode: ThemeMode.dark,
-          palette: AppThemePalette.oledBlack,
+          palette: AppThemePalette.emerald,
           isDynamicPrayerTheme: false,
         )) {
-    BeyanColors.setPalette(AppThemePalette.oledBlack);
+    BeyanColors.setPalette(AppThemePalette.emerald);
     _loadFromPrefs();
   }
 
   /// Namaz vaktine karşılık gelen birleşik uygulama paleti.
   static AppThemePalette paletteForPrayer(
     PrayerName? nextPrayer, {
-    AppThemePalette fallback = AppThemePalette.oledBlack,
+    AppThemePalette fallback = AppThemePalette.emerald,
   }) {
     switch (nextPrayer) {
       case PrayerName.fajr:
@@ -65,7 +65,7 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
       case PrayerName.maghrib:
         return AppThemePalette.amethystNight;
       case PrayerName.dhuhr:
-        return AppThemePalette.oledBlack;
+        return AppThemePalette.emerald;
       case null:
         return fallback;
     }
@@ -79,11 +79,11 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
 
       const ThemeMode mode = ThemeMode.dark;
 
-      AppThemePalette palette = AppThemePalette.oledBlack;
+      AppThemePalette palette = AppThemePalette.emerald;
       if (paletteStr != null) {
         palette = AppThemePalette.values.firstWhere(
           (p) => p.name == paletteStr,
-          orElse: () => AppThemePalette.oledBlack,
+          orElse: () => AppThemePalette.emerald,
         );
       }
 

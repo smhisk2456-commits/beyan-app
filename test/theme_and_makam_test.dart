@@ -16,7 +16,7 @@ void main() {
       final titles = AppThemePalette.values.map((p) => p.title).toSet();
       expect(titles.length, 7);
       expect(titles.contains('Zümrüt & Altın'), isTrue);
-      expect(titles.contains('Gece Siyahı (OLED)'), isTrue);
+      expect(titles.contains('Onyx Stealth (Apple Pro)'), isTrue);
       expect(titles.contains('Kâbe Füme'), isTrue);
       expect(titles.contains('Derin Lacivert'), isTrue);
       expect(titles.contains('Osmanlı Bordosu'), isTrue);
