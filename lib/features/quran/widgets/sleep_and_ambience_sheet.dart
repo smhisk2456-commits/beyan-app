@@ -38,7 +38,23 @@ class SleepAndAmbienceSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final audioState = ref.watch(quranAudioProvider);
+    final (
+      activeAmbience,
+      ambienceVolume,
+      currentSurahId,
+      isPlaying,
+      sleepTimerSecondsRemaining,
+      sleepTimerMinutes,
+    ) = ref.watch(
+      quranAudioProvider.select((s) => (
+        s.activeAmbience,
+        s.ambienceVolume,
+        s.currentSurahId,
+        s.isPlaying,
+        s.sleepTimerSecondsRemaining,
+        s.sleepTimerMinutes,
+      )),
+    );
     final audioNotifier = ref.read(quranAudioProvider.notifier);
     final strings = ref.watch(appStringsProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -148,7 +164,7 @@ class SleepAndAmbienceSheet extends ConsumerWidget {
               _AmbienceChip(
                 label: strings.language == AppLanguage.turkish ? 'Kapalı' : 'Off',
                 icon: Icons.volume_off_rounded,
-                isSelected: audioState.activeAmbience == null,
+                isSelected: activeAmbience == null,
                 onTap: () {
                   HapticFeedback.lightImpact();
                   audioNotifier.setAmbience(null);
@@ -158,10 +174,10 @@ class SleepAndAmbienceSheet extends ConsumerWidget {
               _AmbienceChip(
                 label: strings.language == AppLanguage.turkish ? '🌧️ Yağmur' : '🌧️ Rain',
                 icon: Icons.water_drop_rounded,
-                isSelected: audioState.activeAmbience == 'rain',
+                isSelected: activeAmbience == 'rain',
                 onTap: () {
                   HapticFeedback.lightImpact();
-                  if (audioState.activeAmbience == 'rain') {
+                  if (activeAmbience == 'rain') {
                     audioNotifier.setAmbience(null);
                   } else {
                     audioNotifier.setAmbience('rain');
@@ -172,10 +188,10 @@ class SleepAndAmbienceSheet extends ConsumerWidget {
               _AmbienceChip(
                 label: strings.language == AppLanguage.turkish ? '🌊 Dalga' : '🌊 Waves',
                 icon: Icons.waves_rounded,
-                isSelected: audioState.activeAmbience == 'waves',
+                isSelected: activeAmbience == 'waves',
                 onTap: () {
                   HapticFeedback.lightImpact();
-                  if (audioState.activeAmbience == 'waves') {
+                  if (activeAmbience == 'waves') {
                     audioNotifier.setAmbience(null);
                   } else {
                     audioNotifier.setAmbience('waves');
@@ -186,10 +202,10 @@ class SleepAndAmbienceSheet extends ConsumerWidget {
               _AmbienceChip(
                 label: strings.language == AppLanguage.turkish ? '🍃 Esinti' : '🍃 Breeze',
                 icon: Icons.air_rounded,
-                isSelected: audioState.activeAmbience == 'breeze',
+                isSelected: activeAmbience == 'breeze',
                 onTap: () {
                   HapticFeedback.lightImpact();
-                  if (audioState.activeAmbience == 'breeze') {
+                  if (activeAmbience == 'breeze') {
                     audioNotifier.setAmbience(null);
                   } else {
                     audioNotifier.setAmbience('breeze');
@@ -200,10 +216,10 @@ class SleepAndAmbienceSheet extends ConsumerWidget {
               _AmbienceChip(
                 label: strings.language == AppLanguage.turkish ? '🌌 Gece' : '🌌 Night',
                 icon: Icons.nights_stay_rounded,
-                isSelected: audioState.activeAmbience == 'night',
+                isSelected: activeAmbience == 'night',
                 onTap: () {
                   HapticFeedback.lightImpact();
-                  if (audioState.activeAmbience == 'night') {
+                  if (activeAmbience == 'night') {
                     audioNotifier.setAmbience(null);
                   } else {
                     audioNotifier.setAmbience('night');
@@ -214,7 +230,7 @@ class SleepAndAmbienceSheet extends ConsumerWidget {
           ),
 
           // Ambiyans Ses Seviyesi Sliderı
-          if (audioState.activeAmbience != null) ...[
+          if (activeAmbience != null) ...[
             const SizedBox(height: 14),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -226,7 +242,7 @@ class SleepAndAmbienceSheet extends ConsumerWidget {
                   style: const TextStyle(fontSize: 11.5, color: Colors.white70),
                 ),
                 Text(
-                  '%${(audioState.ambienceVolume * 100).round()}',
+                  '%${(ambienceVolume * 100).round()}',
                   style: TextStyle(
                     fontSize: 11.5,
                     fontWeight: FontWeight.bold,
@@ -252,7 +268,7 @@ class SleepAndAmbienceSheet extends ConsumerWidget {
                       thumbColor: BeyanColors.tone(0xFFFFDF7A),
                     ),
                     child: Slider(
-                      value: audioState.ambienceVolume,
+                      value: ambienceVolume,
                       min: 0.0,
                       max: 1.0,
                       onChanged: (val) => audioNotifier.setAmbienceVolume(val),
@@ -294,7 +310,7 @@ class SleepAndAmbienceSheet extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(14),
                       onTap: () {
                         HapticFeedback.lightImpact();
-                        if (audioState.currentSurahId == item.id) {
+                        if (currentSurahId == item.id) {
                           audioNotifier.togglePlayPause();
                         } else {
                           audioNotifier.playSurah(item.id, item.name);
@@ -303,12 +319,12 @@ class SleepAndAmbienceSheet extends ConsumerWidget {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
                         decoration: BoxDecoration(
-                          color: audioState.currentSurahId == item.id && audioState.isPlaying
+                          color: currentSurahId == item.id && isPlaying
                               ? BeyanColors.tone(0xFFD4AF37)
                               : Colors.white.withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color: audioState.currentSurahId == item.id && audioState.isPlaying
+                            color: currentSurahId == item.id && isPlaying
                                 ? BeyanColors.tone(0xFFFFDF7A)
                                 : BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35),
                           ),
@@ -317,11 +333,11 @@ class SleepAndAmbienceSheet extends ConsumerWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
-                              audioState.currentSurahId == item.id && audioState.isPlaying
+                              currentSurahId == item.id && isPlaying
                                   ? Icons.pause_circle_filled_rounded
                                   : Icons.play_circle_fill_rounded,
                               size: 20,
-                              color: audioState.currentSurahId == item.id && audioState.isPlaying
+                              color: currentSurahId == item.id && isPlaying
                                   ? BeyanColors.tone(0xFF012E2B)
                                   : BeyanColors.tone(0xFFFFDF7A),
                             ),
@@ -335,7 +351,7 @@ class SleepAndAmbienceSheet extends ConsumerWidget {
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
-                                    color: audioState.currentSurahId == item.id && audioState.isPlaying
+                                    color: currentSurahId == item.id && isPlaying
                                         ? BeyanColors.tone(0xFF012E2B)
                                         : Colors.white,
                                   ),
@@ -344,7 +360,7 @@ class SleepAndAmbienceSheet extends ConsumerWidget {
                                   item.sub,
                                   style: TextStyle(
                                     fontSize: 9.5,
-                                    color: audioState.currentSurahId == item.id && audioState.isPlaying
+                                    color: currentSurahId == item.id && isPlaying
                                         ? BeyanColors.tone(0xFF012E2B).withValues(alpha: 0.8)
                                         : Colors.white60,
                                   ),
@@ -372,7 +388,7 @@ class SleepAndAmbienceSheet extends ConsumerWidget {
                 strings.language == AppLanguage.turkish ? 'Uyku Zamanlayıcısı' : 'Sleep Timer',
                 style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
               ),
-              if (audioState.sleepTimerSecondsRemaining != null)
+              if (sleepTimerSecondsRemaining != null)
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
@@ -381,7 +397,7 @@ class SleepAndAmbienceSheet extends ConsumerWidget {
                     border: Border.all(color: BeyanColors.tone(0xFFFFDF7A), width: 1),
                   ),
                   child: Text(
-                    '⏳ ${_formatSeconds(audioState.sleepTimerSecondsRemaining!)}',
+                    '⏳ ${_formatSeconds(sleepTimerSecondsRemaining)}',
                     style: TextStyle(
                       color: BeyanColors.tone(0xFFFFDF7A),
                       fontSize: 12,
@@ -404,14 +420,14 @@ class SleepAndAmbienceSheet extends ConsumerWidget {
                     child: OutlinedButton(
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 10),
-                        backgroundColor: audioState.sleepTimerMinutes == mins
+                        backgroundColor: sleepTimerMinutes == mins
                             ? BeyanColors.tone(0xFFD4AF37)
                             : Colors.transparent,
-                        foregroundColor: audioState.sleepTimerMinutes == mins
+                        foregroundColor: sleepTimerMinutes == mins
                             ? BeyanColors.tone(0xFF012E2B)
                             : Colors.white,
                         side: BorderSide(
-                          color: audioState.sleepTimerMinutes == mins
+                          color: sleepTimerMinutes == mins
                               ? BeyanColors.tone(0xFFFFDF7A)
                               : Colors.white24,
                         ),
@@ -425,7 +441,7 @@ class SleepAndAmbienceSheet extends ConsumerWidget {
                         '$mins ${strings.language == AppLanguage.turkish ? 'Dk' : 'm'}',
                         style: TextStyle(
                           fontSize: 12,
-                          fontWeight: audioState.sleepTimerMinutes == mins
+                          fontWeight: sleepTimerMinutes == mins
                               ? FontWeight.bold
                               : FontWeight.w500,
                         ),
@@ -437,7 +453,7 @@ class SleepAndAmbienceSheet extends ConsumerWidget {
             ],
           ),
 
-          if (audioState.sleepTimerMinutes != null) ...[
+          if (sleepTimerMinutes != null) ...[
             const SizedBox(height: 10),
             Center(
               child: TextButton.icon(

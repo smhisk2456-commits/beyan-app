@@ -385,8 +385,13 @@ class _MushafPageViewState extends ConsumerState<MushafPageView> {
   Widget build(BuildContext context) {
     final strings = ref.watch(appStringsProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final audioState = ref.watch(quranAudioProvider);
-    final activeVerseNumber = audioState.activeVerseNumber;
+    final (activeVerseNumber, activeWordIndex, wordProgress) = ref.watch(
+      quranAudioProvider.select((s) => (
+        s.currentSurahId == widget.surah.id ? s.activeVerseNumber : null,
+        s.currentSurahId == widget.surah.id ? s.activeWordIndex : null,
+        s.currentSurahId == widget.surah.id ? s.wordProgress : 1.0,
+      )),
+    );
 
     // Sayfalar boşsa
     if (_pages.isEmpty) {
@@ -394,18 +399,21 @@ class _MushafPageViewState extends ConsumerState<MushafPageView> {
     }
 
     // Sesli tilavet ilerlerken aktif ayet başka bir sayfadaysa sayfayı otomatik çevir
-    ref.listen<QuranAudioState>(quranAudioProvider, (prev, next) {
-      if (next.currentSurahId == widget.surah.id && next.isPlaying && next.activeVerseNumber != null) {
-        final targetPageIdx = _pages.indexWhere((p) => p.any((v) => v.verseNumber == next.activeVerseNumber));
-        if (targetPageIdx != -1 && targetPageIdx != _currentPageIndex && _pageController.hasClients) {
-          _pageController.animateToPage(
-            targetPageIdx,
-            duration: const Duration(milliseconds: 350),
-            curve: Curves.easeInOut,
-          );
+    ref.listen<int?>(
+      quranAudioProvider.select((s) => s.currentSurahId == widget.surah.id && s.isPlaying ? s.activeVerseNumber : null),
+      (prev, nextVerseNumber) {
+        if (nextVerseNumber != null) {
+          final targetPageIdx = _pages.indexWhere((p) => p.any((v) => v.verseNumber == nextVerseNumber));
+          if (targetPageIdx != -1 && targetPageIdx != _currentPageIndex && _pageController.hasClients) {
+            _pageController.animateToPage(
+              targetPageIdx,
+              duration: const Duration(milliseconds: 350),
+              curve: Curves.easeInOut,
+            );
+          }
         }
-      }
-    });
+      },
+    );
 
     final totalPages = _pages.length;
 
@@ -689,10 +697,10 @@ class _MushafPageViewState extends ConsumerState<MushafPageView> {
                                                     isDark: isDark,
                                                     isActiveVerse: activeVerseNumber == verse.verseNumber,
                                                     activeWordIndex: (activeVerseNumber == verse.verseNumber)
-                                                        ? audioState.activeWordIndex
+                                                        ? activeWordIndex
                                                         : null,
                                                     wordProgress: (activeVerseNumber == verse.verseNumber)
-                                                        ? audioState.wordProgress
+                                                        ? wordProgress
                                                         : 1.0,
                                                   ),
                                                 ),

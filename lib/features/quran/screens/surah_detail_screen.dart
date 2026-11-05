@@ -43,14 +43,16 @@ class SurahDetailScreen extends ConsumerStatefulWidget {
 
 class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
   final ScrollController _scrollController = ScrollController();
-  final GlobalKey _targetVerseKey = GlobalKey();
-  final GlobalKey _playingVerseKey = GlobalKey();
+  final Map<int, GlobalKey> _verseKeys = {};
   bool _showScrollToTop = false;
   bool _hasScrolledToInitialVerse = false;
   bool _isMushafMode = false;
   bool _isZenMode = false;
   ZenReadingTheme _zenTheme = ZenReadingTheme.standard;
   int? _lastScrolledVerseNumber;
+
+  GlobalKey _keyForVerse(int verseNumber) =>
+      _verseKeys.putIfAbsent(verseNumber, GlobalKey.new);
 
   @override
   void initState() {
@@ -65,7 +67,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || !_scrollController.hasClients) return;
 
-      final playingCtx = _playingVerseKey.currentContext;
+      final playingCtx = _verseKeys[verseNumber]?.currentContext;
       if (playingCtx != null && playingCtx.mounted) {
         Scrollable.ensureVisible(
           playingCtx,
@@ -96,7 +98,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
       _scrollController.jumpTo(targetScroll);
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        final ctx = _playingVerseKey.currentContext;
+        final ctx = _verseKeys[verseNumber]?.currentContext;
         if (ctx != null && ctx.mounted) {
           Scrollable.ensureVisible(
             ctx,
@@ -142,7 +144,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
       void tryEnsureVisible([int attempts = 0]) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
-          final targetCtx = _targetVerseKey.currentContext;
+          final targetCtx = _verseKeys[target]?.currentContext;
           if (targetCtx != null && targetCtx.mounted) {
             Scrollable.ensureVisible(
               targetCtx,
@@ -281,8 +283,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
     );
   }
 
-  Widget _buildDownloadButton(BuildContext context, QuranAudioState audioState, AppStrings strings) {
-    final reciter = audioState.selectedReciter;
+  Widget _buildDownloadButton(BuildContext context, QuranReciter reciter, AppStrings strings) {
     final isDownloaded = ref.watch(quranDownloadsProvider).contains('${reciter.id}_${widget.surah.id}');
 
     return IconButton(
@@ -365,7 +366,9 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
       builder: (ctx) {
         return Consumer(
           builder: (context, ref, _) {
-            final audioState = ref.watch(quranAudioProvider);
+            final selectedReciterId = ref.watch(
+              quranAudioProvider.select((s) => s.selectedReciter.id),
+            );
             return SafeArea(
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12),
@@ -405,7 +408,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                     ),
                     const SizedBox(height: 10),
                     ...quranRecitersList.map((reciter) {
-                      final isSel = audioState.selectedReciter.id == reciter.id;
+                      final isSel = selectedReciterId == reciter.id;
                       final isDownloaded = ref.watch(quranDownloadsProvider).contains('${reciter.id}_${widget.surah.id}');
 
                       return ListTile(
@@ -659,7 +662,14 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
       builder: (ctx) {
         return Consumer(
           builder: (context, ref, _) {
-            final audioState = ref.watch(quranAudioProvider);
+            final (selectedReciter, hasAmbienceOrSleep, isLiveTracking, isWordHighlight) = ref.watch(
+              quranAudioProvider.select((s) => (
+                s.selectedReciter,
+                s.activeAmbience != null || s.sleepTimerSecondsRemaining != null,
+                s.isLiveTrackingEnabled,
+                s.isWordHighlightEnabled,
+              )),
+            );
             final isFavoriteSurah = ref.watch(favoriteSurahsProvider).contains(widget.surah.id);
             final isMemorization = ref.watch(quranMemorizationProvider).isActive;
             final isComparative = ref.watch(comparativeMealProvider);
@@ -719,7 +729,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                               ),
                             ),
                           ),
-                          _buildDownloadButton(context, audioState, strings),
+                          _buildDownloadButton(context, selectedReciter, strings),
                         ],
                       ),
                       const SizedBox(height: 14),
@@ -769,8 +779,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                             child: _buildToolActionTile(
                               icon: Icons.bedtime_rounded,
                               label: isTr ? 'Uyku & Ses' : 'Ambience',
-                              isActive: audioState.activeAmbience != null ||
-                                  audioState.sleepTimerSecondsRemaining != null,
+                              isActive: hasAmbienceOrSleep,
                               onTap: () {
                                 BeyanNavigatorGuard.safePop(ctx);
                                 SleepAndAmbienceSheet.show(context, ref);
@@ -862,7 +871,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                         icon: Icons.auto_stories_rounded,
                         title: isTr ? 'Canlı Âyet Takibi (Otomatik Kaydırma)' : 'Live Verse Auto-Scroll',
                         subtitle: isTr ? 'Tilavet esnasında okunan âyete otomatik kaydırır' : 'Automatically scrolls to active verse',
-                        value: audioState.isLiveTrackingEnabled,
+                        value: isLiveTracking,
                         onChanged: (_) {
                           HapticFeedback.lightImpact();
                           ref.read(quranAudioProvider.notifier).toggleLiveTracking();
@@ -872,7 +881,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
                         icon: Icons.spellcheck_rounded,
                         title: strings.wordByWordLiveTracking,
                         subtitle: isTr ? 'Okunan Arapça kelimeyi altın renkle vurgular' : 'Highlights the active Arabic word in gold',
-                        value: audioState.isWordHighlightEnabled,
+                        value: isWordHighlight,
                         onChanged: (_) {
                           HapticFeedback.lightImpact();
                           ref.read(quranAudioProvider.notifier).toggleWordHighlight();
@@ -1294,7 +1303,7 @@ class _SurahDetailScreenState extends ConsumerState<SurahDetailScreen> {
               final sName = widget.surah.localizedName(strings.language.code);
               return RepaintBoundary(
                 child: VerseCard(
-                  key: isPlayingVerse ? _playingVerseKey : (isTarget ? _targetVerseKey : ValueKey('v_${verse.id}')),
+                  key: _keyForVerse(verse.verseNumber),
                   verse: verse,
                   surahName: sName,
                   isHighlighted: isTarget,

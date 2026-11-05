@@ -24,8 +24,14 @@ class QiblaCompassScreen extends ConsumerStatefulWidget {
 }
 
 class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   StreamSubscription<CompassEvent>? _compassSub;
+
+  final ValueNotifier<double> _headingVN = ValueNotifier<double>(0.0);
+  DateTime _lastUi = DateTime.fromMillisecondsSinceEpoch(0);
+  _CompassDialPainter? _cachedDialPainter;
+  bool? _lastPainterDark;
+  bool? _lastPainterTurkish;
 
   double? _heading;
   double _smoothedHeading = 0.0;
@@ -43,9 +49,21 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
   late final AnimationController _lockPulseController;
   late final Animation<double> _lockPulseScale;
 
+  _CompassDialPainter _getDialPainter(bool isDark, bool isTurkish) {
+    if (_cachedDialPainter == null ||
+        _lastPainterDark != isDark ||
+        _lastPainterTurkish != isTurkish) {
+      _lastPainterDark = isDark;
+      _lastPainterTurkish = isTurkish;
+      _cachedDialPainter = _CompassDialPainter(isDark: isDark, isTurkish: isTurkish);
+    }
+    return _cachedDialPainter!;
+  }
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _lockPulseController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 400),
@@ -65,9 +83,21 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+      _compassSub?.cancel();
+      _compassSub = null;
+    } else if (state == AppLifecycleState.resumed && _compassSub == null) {
+      _startCompass();
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _compassSub?.cancel();
     _lockPulseController.dispose();
+    _headingVN.dispose();
     super.dispose();
   }
 
@@ -111,14 +141,15 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
 
   void _startCompass() {
     if (FlutterCompass.events == null) {
-      setState(() => _hasCompassSensor = false);
+      if (mounted) setState(() => _hasCompassSensor = false);
       return;
     }
 
     _compassSub = FlutterCompass.events!.listen((event) {
       if (!mounted) return;
       final h = event.heading;
-      if (h == null) return;
+      // iOS'ta heading negatifse (-1) konum/kalibrasyon hatasıdır; atla
+      if (h == null || h < 0) return;
 
       // Manyetik Sapma (Magnetic Declination) düzeltmesi:
       // iOS CoreLocation 'CLHeading.trueHeading' ile donanım/GPS seviyesinde gerçek kuzeyi verir.
@@ -128,6 +159,8 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
       final trueHeading = (h + headingOffset + 360) % 360;
       if (_heading == null) {
         _smoothedHeading = trueHeading;
+        _heading = trueHeading;
+        _headingVN.value = trueHeading;
       } else {
         // Dairesel low-pass filtre (0-360 geçişlerini sarsıntısız yumuşatır)
         _smoothedHeading = _smoothedHeading + 0.30 * (((trueHeading - _smoothedHeading + 540) % 360) - 180);
@@ -163,10 +196,20 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
       }
       _wasAligned = aligned;
 
-      setState(() {
-        _heading = _smoothedHeading;
-        _isAligned = aligned;
-      });
+      // UI frekans limitlemesi: En fazla 25 Hz (40 ms) ve en az 0.5° açı farkı
+      final now = DateTime.now();
+      final delta = (((_smoothedHeading - _headingVN.value) + 540) % 360 - 180).abs();
+      if (now.difference(_lastUi).inMilliseconds >= 40 && delta >= 0.5) {
+        _lastUi = now;
+        _headingVN.value = _smoothedHeading;
+      }
+
+      // Yalnızca hizalanma/kilit durumu değiştiğinde ekranı rebuild et
+      if (aligned != _isAligned) {
+        setState(() {
+          _isAligned = aligned;
+        });
+      }
     }, onError: (_) {
       if (mounted) setState(() => _hasCompassSensor = false);
     });
@@ -177,9 +220,6 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
     final strings = ref.watch(appStringsProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final currentHeading = _heading ?? 0.0;
-    double diff = (_qiblaAngle - currentHeading + 360) % 360;
-    if (diff > 180) diff -= 360;
     final isAligned = _isAligned;
 
     return Scaffold(
@@ -395,20 +435,27 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
                             size: 20,
                           ),
                           const SizedBox(width: 10),
-                          Text(
-                            isAligned
-                                ? (strings.language == AppLanguage.turkish
-                                    ? 'KIBLEYE KİLİTLENDİ (0°)'
-                                    : strings.facingQibla)
-                                : (diff > 0
-                                    ? strings.turnRightDeg(diff.round())
-                                    : strings.turnLeftDeg((-diff).round())),
-                            style: TextStyle(
-                              color: isAligned ? Colors.white : (isDark ? Colors.white : Colors.black87),
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15,
-                              letterSpacing: isAligned ? 0.8 : 0,
-                            ),
+                          ValueListenableBuilder<double>(
+                            valueListenable: _headingVN,
+                            builder: (context, heading, _) {
+                              double diff = (_qiblaAngle - heading + 360) % 360;
+                              if (diff > 180) diff -= 360;
+                              return Text(
+                                isAligned
+                                    ? (strings.language == AppLanguage.turkish
+                                        ? 'KIBLEYE KİLİTLENDİ (0°)'
+                                        : strings.facingQibla)
+                                    : (diff > 0
+                                        ? strings.turnRightDeg(diff.round())
+                                        : strings.turnLeftDeg((-diff).round())),
+                                style: TextStyle(
+                                  color: isAligned ? Colors.white : (isDark ? Colors.white : Colors.black87),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                  letterSpacing: isAligned ? 0.8 : 0,
+                                ),
+                              );
+                            },
                           ),
                         ],
                       ),
@@ -428,7 +475,7 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
                             child: Stack(
                               alignment: Alignment.center,
                               children: [
-                                // Dış Parıltı Halkası
+                                // Dış Parıltı Halkası (Yalnızca kilitlenme durumunda güncellenir)
                                 AnimatedContainer(
                                   duration: const Duration(milliseconds: 300),
                                   width: dialSize,
@@ -461,111 +508,124 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
                                   ),
                                 ),
 
-                                // Dönen Pusula Diski (Cihaz yönüne göre ters döner: -heading)
-                                Transform.rotate(
-                                  angle: -currentHeading * (math.pi / 180),
-                                  child: CustomPaint(
-                                    size: Size(dialSize - 10, dialSize - 10),
-                                    painter: _CompassDialPainter(
-                                      isDark: isDark,
-                                      isTurkish: strings.language == AppLanguage.turkish,
-                                    ),
-                                  ),
-                                ),
+                                // Dönen Pusula Diski ve İbreler (25 Hz throttled ValueListenableBuilder + RepaintBoundary)
+                                ValueListenableBuilder<double>(
+                                  valueListenable: _headingVN,
+                                  builder: (context, currentHeading, _) {
+                                    return Stack(
+                                      alignment: Alignment.center,
+                                      children: [
+                                        // Dönen Pusula Diski (Cihaz yönüne göre ters döner: -heading)
+                                        Transform.rotate(
+                                          angle: -currentHeading * (math.pi / 180),
+                                          child: RepaintBoundary(
+                                            child: CustomPaint(
+                                              size: Size(dialSize - 10, dialSize - 10),
+                                              painter: _getDialPainter(
+                                                isDark,
+                                                strings.language == AppLanguage.turkish,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
 
-                          // Kâbe İbresi ve İkonu (Diske göre Kıble açısında durur: _qiblaAngle - currentHeading)
-                          Transform.rotate(
-                            angle: (_qiblaAngle - currentHeading) * (math.pi / 180),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                const SizedBox(height: 18),
-                                Container(
-                                  padding: const EdgeInsets.all(7),
-                                  decoration: BoxDecoration(
-                                    color: BeyanColors.tone(0xFF011C18),
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: BeyanColors.tone(0xFFFFDF7A),
-                                      width: 2,
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: BeyanColors.tone(0xFFD4AF37),
-                                        blurRadius: 10,
-                                      ),
-                                    ],
-                                  ),
-                                  child: const Text(
-                                    '🕋',
-                                    style: TextStyle(fontSize: 20),
-                                  ),
-                                ),
-                                Container(
-                                  width: 3,
-                                  height: 48,
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [BeyanColors.tone(0xFFFFDF7A), Colors.transparent],
-                                      begin: Alignment.topCenter,
-                                      end: Alignment.bottomCenter,
-                                    ),
-                                    borderRadius: BorderRadius.circular(2),
-                                  ),
+                                        // Kâbe İbresi ve İkonu (Diske göre Kıble açısında durur: _qiblaAngle - currentHeading)
+                                        Transform.rotate(
+                                          angle: (_qiblaAngle - currentHeading) * (math.pi / 180),
+                                          child: Column(
+                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            children: [
+                                              const SizedBox(height: 18),
+                                              Container(
+                                                padding: const EdgeInsets.all(7),
+                                                decoration: BoxDecoration(
+                                                  color: BeyanColors.tone(0xFF011C18),
+                                                  shape: BoxShape.circle,
+                                                  border: Border.all(
+                                                    color: BeyanColors.tone(0xFFFFDF7A),
+                                                    width: 2,
+                                                  ),
+                                                  boxShadow: [
+                                                    BoxShadow(
+                                                      color: BeyanColors.tone(0xFFD4AF37),
+                                                      blurRadius: 10,
+                                                    ),
+                                                  ],
+                                                ),
+                                                child: const Text(
+                                                  '🕋',
+                                                  style: TextStyle(fontSize: 20),
+                                                ),
+                                              ),
+                                              Container(
+                                                width: 3,
+                                                height: 48,
+                                                decoration: BoxDecoration(
+                                                  gradient: LinearGradient(
+                                                    colors: [BeyanColors.tone(0xFFFFDF7A), Colors.transparent],
+                                                    begin: Alignment.topCenter,
+                                                    end: Alignment.bottomCenter,
+                                                  ),
+                                                  borderRadius: BorderRadius.circular(2),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+
+                                        // Sabit Cihaz Ön İbresi (Tepe oku)
+                                        Positioned(
+                                          top: 4,
+                                          child: Container(
+                                            width: 14,
+                                            height: 14,
+                                            decoration: BoxDecoration(
+                                              color: BeyanColors.tone(0xFFFFDF7A),
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: const Icon(Icons.arrow_drop_down,
+                                                size: 14, color: Colors.black),
+                                          ),
+                                        ),
+
+                                        // Merkez Göbek
+                                        Container(
+                                          width: 60,
+                                          height: 60,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            gradient: RadialGradient(
+                                              colors: [BeyanColors.tone(0xFFD4AF37), BeyanColors.tone(0xFF7A5F12)],
+                                            ),
+                                            border: Border.all(color: Colors.white, width: 2),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.black.withValues(alpha: 0.3),
+                                                blurRadius: 8,
+                                              ),
+                                            ],
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              '${currentHeading.round()}°',
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  },
                                 ),
                               ],
                             ),
                           ),
-
-                          // Sabit Cihaz Ön İbresi (Tepe oku)
-                          Positioned(
-                            top: 4,
-                            child: Container(
-                              width: 14,
-                              height: 14,
-                              decoration: BoxDecoration(
-                                color: BeyanColors.tone(0xFFFFDF7A),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(Icons.arrow_drop_down,
-                                  size: 14, color: Colors.black),
-                            ),
-                          ),
-
-                          // Merkez Göbek
-                          Container(
-                            width: 60,
-                            height: 60,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              gradient: RadialGradient(
-                                colors: [BeyanColors.tone(0xFFD4AF37), BeyanColors.tone(0xFF7A5F12)],
-                              ),
-                              border: Border.all(color: Colors.white, width: 2),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.3),
-                                  blurRadius: 8,
-                                ),
-                              ],
-                            ),
-                            child: Center(
-                              child: Text(
-                                '${currentHeading.round()}°',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                        );
+                      },
                     ),
-                  );
-                },
-              ),
 
                     const SizedBox(height: 32),
 
@@ -580,12 +640,17 @@ class _QiblaCompassScreenState extends ConsumerState<QiblaCompassScreen>
                           isDark: isDark,
                         ),
                         const SizedBox(width: 12),
-                        _buildInfoCard(
-                          title: strings.deviceHeadingTitle,
-                          value: '${currentHeading.round()}°',
-                          subtitle: _getCompassDirection(currentHeading, strings),
-                          icon: Icons.navigation_rounded,
-                          isDark: isDark,
+                        ValueListenableBuilder<double>(
+                          valueListenable: _headingVN,
+                          builder: (context, currentHeading, _) {
+                            return _buildInfoCard(
+                              title: strings.deviceHeadingTitle,
+                              value: '${currentHeading.round()}°',
+                              subtitle: _getCompassDirection(currentHeading, strings),
+                              icon: Icons.navigation_rounded,
+                              isDark: isDark,
+                            );
+                          },
                         ),
                       ],
                     ),

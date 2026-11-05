@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -44,9 +45,11 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
   _SurahFilter _selectedFilter = _SurahFilter.all;
 
   static const _famousSurahIds = {1, 2, 18, 36, 48, 55, 56, 67, 78, 94, 112, 113, 114};
+  Timer? _searchDebounce;
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
     _searchController.dispose();
     super.dispose();
   }
@@ -150,7 +153,10 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
                   child: TextField(
                     controller: _searchController,
                     onChanged: (q) {
-                      setState(() {});
+                      _searchDebounce?.cancel();
+                      _searchDebounce = Timer(const Duration(milliseconds: 250), () {
+                        if (mounted) setState(() {});
+                      });
                     },
                     style: TextStyle(
                       fontSize: 14.5,
@@ -171,6 +177,7 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
                           ? IconButton(
                               icon: const Icon(Icons.clear_rounded, size: 18),
                               onPressed: () {
+                                _searchDebounce?.cancel();
                                 _searchController.clear();
                                 setState(() {});
                               },

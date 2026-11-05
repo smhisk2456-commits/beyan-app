@@ -37,13 +37,13 @@ final allSurahsProvider = FutureProvider<List<Surah>>((ref) async {
 });
 
 /// ID'ye göre tek bir sure getirir.
-final surahByIdProvider = FutureProvider.family<Surah?, int>((ref, id) async {
+final surahByIdProvider = FutureProvider.autoDispose.family<Surah?, int>((ref, id) async {
   final repo = ref.watch(quranRepositoryProvider);
   return repo.getSurahById(id);
 });
 
 /// Arama sorgusuna göre filtrelenmiş sure listesi.
-final surahSearchProvider = FutureProvider.family<List<Surah>, String>(
+final surahSearchProvider = FutureProvider.autoDispose.family<List<Surah>, String>(
   (ref, query) async {
     final repo = ref.watch(quranRepositoryProvider);
     return repo.searchSurahsByName(query);
@@ -56,7 +56,7 @@ final surahSearchProvider = FutureProvider.family<List<Surah>, String>(
 
 /// Bir suredeki tüm ayetleri getirir.
 /// [surahId] parametre olarak alır.
-final versesBySurahProvider = FutureProvider.family<List<Verse>, int>(
+final versesBySurahProvider = FutureProvider.autoDispose.family<List<Verse>, int>(
   (ref, surahId) async {
     final repo = ref.watch(quranRepositoryProvider);
     return repo.getVersesBySurah(surahId);
@@ -64,7 +64,7 @@ final versesBySurahProvider = FutureProvider.family<List<Verse>, int>(
 );
 
 /// Sure:Ayet referansına göre tek ayet.
-final verseByReferenceProvider = FutureProvider.family<
+final verseByReferenceProvider = FutureProvider.autoDispose.family<
   Verse?,
   ({int surahId, int verseNumber})
 >((ref, args) async {
@@ -96,11 +96,11 @@ final allDuasProvider = FutureProvider<List<DailyDua>>((ref) async {
 /// Sure arama kutusunun anlık içeriği.
 /// UI tarafından `ref.read(surahSearchQueryProvider.notifier).state = query`
 /// şeklinde güncellenir.
-final surahSearchQueryProvider = StateProvider<String>((ref) => '');
+final surahSearchQueryProvider = StateProvider.autoDispose<String>((ref) => '');
 
 /// Arama sorgusuna bağlı dinamik sure listesi.
 /// Boş sorgu → tüm sureler, dolu sorgu → filtrelenmiş liste.
-final filteredSurahsProvider = FutureProvider<List<Surah>>((ref) async {
+final filteredSurahsProvider = FutureProvider.autoDispose<List<Surah>>((ref) async {
   final query = ref.watch(surahSearchQueryProvider);
   final repo = ref.watch(quranRepositoryProvider);
 
