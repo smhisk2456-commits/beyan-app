@@ -131,12 +131,12 @@ class _PaletteSpec {
           goldHueShift: -4, goldSat: 0.72, goldLight: 1.04,
         );
       case AppThemePalette.oledBlack:
-        // Zifiri saf siyah + sıcak kehribar
+        // Onyx Stealth (Apple Pro Titanium) + şampanya altın
         return const _PaletteSpec(
-          hue: 0, satMul: 0.0, lightMul: 0.35,
-          accentHue: 38, accentSat: 0.85, accentLight: 1.1,
-          lightTintSat: 0.0,
-          goldHueShift: -6, goldSat: 1.0, goldLight: 1.0,
+          hue: 220, satMul: 0.08, lightMul: 0.38,
+          accentHue: 40, accentSat: 0.85, accentLight: 1.15,
+          lightTintSat: 0.05,
+          goldHueShift: -4, goldSat: 0.80, goldLight: 1.05,
         );
       case AppThemePalette.kaabaSlate:
         // Kâbe örtüsü füme / grafit + antik altın

@@ -250,105 +250,100 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? BeyanColors.tone(0xFF021B16) : effectivePalette.lightBackground,
+      backgroundColor: isDark ? const Color(0xFF07080A) : effectivePalette.lightBackground,
       appBar: AppBar(
-        backgroundColor: isDark ? BeyanColors.tone(0xFF012720) : effectivePalette.lightBackground,
+        backgroundColor: isDark ? const Color(0xFF0A0C10) : effectivePalette.lightBackground,
         foregroundColor: isDark ? Colors.white : AppColors.textPrimary,
         elevation: 0,
-        titleSpacing: 0,
+        centerTitle: true,
         leading: IconButton(
           icon: Icon(
-            Icons.arrow_back_ios_new_rounded,
+            Icons.close_rounded,
             color: isDark ? Colors.white : AppColors.textPrimary,
+            size: 22,
           ),
           onPressed: () => BeyanNavigatorGuard.safePop(context),
         ),
-        title: Row(
+        title: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                gradient: RadialGradient(
-                  colors: [BeyanColors.tone(0xFFFFDF7A), BeyanColors.tone(0xFFB8860B)],
-                ),
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.3),
-                    blurRadius: 8,
-                  ),
-                ],
-              ),
-              child: Center(
-                child: Icon(Icons.auto_awesome_rounded, color: BeyanColors.tone(0xFF01201B), size: 20),
-              ),
-            ),
-            const SizedBox(width: 10),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Row(
-                  children: [
-                    Text(
-                      'Beyân AI',
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: BeyanColors.tone(0xFFFFDF7A),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        'İslami Rehber',
-                        style: TextStyle(
-                          fontSize: 9.5,
-                          fontWeight: FontWeight.bold,
-                          color: BeyanColors.tone(0xFF012E2B),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
                 Text(
-                  'Tefsir & Fıkıh & Maneviyat',
+                  'Beyân AI',
                   style: TextStyle(
-                    fontSize: 11,
-                    color: isDark ? Colors.white70 : AppColors.textSecondary,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.2,
+                    color: isDark ? Colors.white : AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(width: 5),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF0D399),
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  child: const Text(
+                    'İslami Rehber',
+                    style: TextStyle(
+                      fontSize: 9,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF07080A),
+                    ),
                   ),
                 ),
               ],
+            ),
+            const SizedBox(height: 1),
+            Text(
+              'Tefsir & Fıkıh & Maneviyat',
+              style: TextStyle(
+                fontSize: 10.5,
+                color: isDark ? const Color(0xFF8E929B) : AppColors.textSecondary,
+              ),
             ),
           ],
         ),
         actions: [
           IconButton(
+            icon: const Icon(
+              Icons.add_rounded,
+              size: 24,
+            ),
+            tooltip: 'Yeni Sohbet',
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              ref.read(aiAssistantProvider.notifier).resetChat();
+            },
+          ),
+          IconButton(
             icon: Icon(
               Icons.info_outline_rounded,
-              color: isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF8A6B1A),
+              size: 20,
+              color: isDark ? const Color(0xFFF0D399) : const Color(0xFF8A6B1A),
             ),
             tooltip: 'Muteber Kaynaklar',
             onPressed: () => _showSourcesDialog(context),
           ),
+          const SizedBox(width: 4),
         ],
       ),
       body: Column(
-              children: [
-                // ── Quota & Status Banner ────────────────────────
-                _buildQuotaBanner(
-                  isPremium,
-                  aiState.remainingQuestions,
-                ),
+        children: [
+          // ── Quota & Status Banner ────────────────────────
+          _buildQuotaBanner(
+            isPremium,
+            aiState.remainingQuestions,
+          ),
 
-                // ── Mesaj Akışı ──────────────────────────────────
-                Expanded(
-                  child: ListView.builder(
+          // ── İçerik: Boş Durum Karşılama Ekranı VEYA Mesaj Akışı ─
+          Expanded(
+            child: (aiState.messages.isEmpty && !aiState.isThinking)
+                ? _buildWelcomeHeroView(isDark)
+                : ListView.builder(
                     controller: _scrollController,
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
                     itemCount: aiState.messages.length + (aiState.isThinking ? 1 : 0),
@@ -361,12 +356,218 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
                       }
                     },
                   ),
-                ),
+          ),
 
-                // ── Giriş Alanı ──────────────────────────────────
-                _buildInputBar(isDark),
+          // ── Giriş Alanı ──────────────────────────────────
+          _buildInputBar(isDark),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWelcomeHeroView(bool isDark) {
+    return Center(
+      child: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // ── Merkezi Işıltı Aurası ve Beyân Logo Markası ──
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                // Arka plan atmosferik mor/safir ve şampanya aurası
+                Container(
+                  width: 220,
+                  height: 220,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [
+                        const Color(0xFF4C2A85).withValues(alpha: isDark ? 0.45 : 0.20),
+                        const Color(0xFF1E1738).withValues(alpha: isDark ? 0.30 : 0.10),
+                        const Color(0xFFF0D399).withValues(alpha: isDark ? 0.08 : 0.04),
+                        Colors.transparent,
+                      ],
+                      stops: const [0.0, 0.45, 0.75, 1.0],
+                    ),
+                  ),
+                ),
+                // Ortadaki şık tipografik marka & Arapça monogram
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 68,
+                      height: 68,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: const Color(0xFF141722),
+                        border: Border.all(
+                          color: const Color(0xFFF0D399).withValues(alpha: 0.5),
+                          width: 1.5,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFFF0D399).withValues(alpha: 0.25),
+                            blurRadius: 20,
+                            spreadRadius: 2,
+                          ),
+                        ],
+                      ),
+                      child: ClipOval(
+                        child: Image.asset(
+                          'assets/images/app_logo.png',
+                          width: 68,
+                          height: 68,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    ShaderMask(
+                      shaderCallback: (bounds) => const LinearGradient(
+                        colors: [
+                          Color(0xFFFFFFFF),
+                          Color(0xFFF5E4BE),
+                          Color(0xFFF0D399),
+                        ],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ).createShader(bounds),
+                      child: const Text(
+                        'beyân',
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 2.5,
+                          color: Colors.white,
+                          height: 1.0,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
+
+            const SizedBox(height: 20),
+
+            // ── Büyük Karşılama Başlığı ──
+            Text(
+              'Esselâmü Aleyküm!',
+              style: TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.w800,
+                color: isDark ? Colors.white : AppColors.textPrimary,
+                letterSpacing: 0.2,
+              ),
+            ),
+            const SizedBox(height: 8),
+
+            // ── Açıklayıcı İslami Asistan Alt Başlığı ──
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                'Ben Beyân İslami Yapay Zekâ rehberinizim. Kur\'an, Sünnet ve muteber ilmi kaynaklar ışığında manevi sorularınızı yanıtlayabilirim.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 13.5,
+                  height: 1.45,
+                  color: isDark ? const Color(0xFF8E929B) : AppColors.textSecondary,
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 28),
+
+            // ── Referans Görseldeki Gibi Yüzen Cam Kapsül Önerileri ──
+            Column(
+              children: [
+                _buildSuggestionCapsule(
+                  '📖  İnşirah Suresi ve manasını açıkla',
+                  isDark: isDark,
+                  onTap: () => _handleSend('İnşirah Suresi bana ne anlatıyor ve Türkçe anlamı nedir?'),
+                ),
+                const SizedBox(height: 10),
+                _buildSuggestionCapsule(
+                  '⏰  Sabah namazına nasıl rahat kalkarım?',
+                  isDark: isDark,
+                  onTap: () => _handleSend('Sabah namazına vaktinde kalkmak için manevi ve pratik tavsiyeler nelerdir?'),
+                ),
+                const SizedBox(height: 10),
+                _buildSuggestionCapsule(
+                  '🤲  Günün manevi duası ve meali nedir?',
+                  isDark: isDark,
+                  onTap: () => _handleSend('Bugün için Peygamber Efendimiz\'den (s.a.v.) sahih ve faziletli bir dua ve anlamı nedir?'),
+                ),
+                const SizedBox(height: 10),
+                _buildSuggestionCapsule(
+                  '🕋  Kaza namazı borçları nasıl hesaplanır?',
+                  isDark: isDark,
+                  onTap: () => _handleSend('Geçmiş namaz borçları (kaza namazı) nasıl hesaplanır ve en pratik nasıl kılınır?'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSuggestionCapsule(
+    String label, {
+    required bool isDark,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.lightImpact();
+          onTap();
+        },
+        borderRadius: BorderRadius.circular(22),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF141720).withValues(alpha: 0.9) : Colors.white,
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(
+              color: isDark ? const Color(0xFFF0D399).withValues(alpha: 0.22) : const Color(0xFFD4AF37).withValues(alpha: 0.3),
+              width: 1.0,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
+                blurRadius: 10,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white : AppColors.textPrimary,
+                  ),
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 13,
+                color: isDark ? const Color(0xFFF0D399) : const Color(0xFF8A6B1A),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -379,19 +580,19 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
         margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: BeyanColors.tone(0xFF0F5A47).withValues(alpha: 0.25),
+          color: const Color(0xFF141720),
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.35)),
+          border: Border.all(color: const Color(0xFFF0D399).withValues(alpha: 0.35)),
         ),
-        child: Row(
+        child: const Row(
           children: [
-            Icon(Icons.workspace_premium_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 18),
-            const SizedBox(width: 8),
+            Icon(Icons.workspace_premium_rounded, color: Color(0xFFF0D399), size: 18),
+            SizedBox(width: 8),
             Expanded(
               child: Text(
                 'Beyân Pro: Sınırsız Soru & Tefsir Asistanı',
                 style: TextStyle(
-                  color: BeyanColors.tone(0xFFFFDF7A),
+                  color: Color(0xFFF0D399),
                   fontWeight: FontWeight.bold,
                   fontSize: 12,
                 ),
@@ -406,13 +607,13 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
       margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
+        color: const Color(0xFF12141C),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
       ),
       child: Row(
         children: [
-          Icon(Icons.auto_awesome_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 16),
+          const Icon(Icons.auto_awesome_rounded, color: Color(0xFFF0D399), size: 16),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
@@ -430,20 +631,20 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [BeyanColors.tone(0xFFFFDF7A), BeyanColors.tone(0xFFD4AF37)],
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFF0D399), Color(0xFFD4AF37)],
                 ),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Row(
+              child: const Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.workspace_premium_rounded, size: 12, color: BeyanColors.tone(0xFF071F1B)),
-                  const SizedBox(width: 3),
+                  Icon(Icons.workspace_premium_rounded, size: 12, color: Color(0xFF07080A)),
+                  SizedBox(width: 3),
                   Text(
                     'Sınırsız Yap 👑',
                     style: TextStyle(
-                      color: BeyanColors.tone(0xFF071F1B),
+                      color: Color(0xFF07080A),
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
                     ),
@@ -569,14 +770,18 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
           margin: const EdgeInsets.only(bottom: 14, left: 48),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            color: BeyanColors.tone(0xFF0A4D40),
+            color: isDark ? const Color(0xFF1B1E28) : const Color(0xFF0A4D40),
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(18),
               topRight: Radius.circular(4),
               bottomLeft: Radius.circular(18),
               bottomRight: Radius.circular(18),
             ),
-            border: Border.all(color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.5)),
+            border: Border.all(
+              color: isDark
+                  ? const Color(0xFFF0D399).withValues(alpha: 0.4)
+                  : BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.5),
+            ),
           ),
           child: Text(
             msg.text,
@@ -596,7 +801,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
         margin: const EdgeInsets.only(bottom: 20, right: 28),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isDark ? BeyanColors.tone(0xFF082C25) : Colors.white,
+          color: isDark ? const Color(0xFF101218) : Colors.white,
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(4),
             topRight: Radius.circular(20),
@@ -604,12 +809,14 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
             bottomRight: Radius.circular(20),
           ),
           border: Border.all(
-            color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35),
-            width: 1.2,
+            color: isDark
+                ? const Color(0xFFF0D399).withValues(alpha: 0.25)
+                : BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35),
+            width: 1.1,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.06),
+              color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.06),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -624,19 +831,19 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
                 Container(
                   width: 24,
                   height: 24,
-                  decoration: BoxDecoration(
-                    color: BeyanColors.tone(0xFFFFDF7A),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFF0D399),
                     shape: BoxShape.circle,
                   ),
-                  child: Center(
-                    child: Icon(Icons.mosque_rounded, size: 14, color: BeyanColors.tone(0xFF01201B)),
+                  child: const Center(
+                    child: Icon(Icons.auto_awesome_rounded, size: 14, color: Color(0xFF07080A)),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Text(
                   'Beyân AI',
                   style: TextStyle(
-                    color: BeyanColors.tone(0xFFFFDF7A),
+                    color: isDark ? const Color(0xFFF0D399) : BeyanColors.tone(0xFFFFDF7A),
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
                   ),
@@ -751,11 +958,14 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
         margin: const EdgeInsets.only(bottom: 20),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: isDark ? BeyanColors.tone(0xFF082C25) : Colors.white,
+          color: isDark ? const Color(0xFF101218) : Colors.white,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.4)),
+          border: Border.all(
+            color: const Color(0xFFF0D399).withValues(alpha: 0.35),
+            width: 1.1,
+          ),
         ),
-        child: Row(
+        child: const Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             SizedBox(
@@ -763,13 +973,17 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
               height: 16,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(BeyanColors.tone(0xFFFFDF7A)),
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFF0D399)),
               ),
             ),
-            const SizedBox(width: 10),
+            SizedBox(width: 10),
             Text(
               'Ayet ve hadis kaynakları taranıyor...',
-              style: TextStyle(color: BeyanColors.tone(0xFFFFDF7A), fontSize: 13, fontStyle: FontStyle.italic),
+              style: TextStyle(
+                color: Color(0xFFF0D399),
+                fontSize: 13,
+                fontStyle: FontStyle.italic,
+              ),
             ),
           ],
         ),
@@ -782,10 +996,10 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
       child: Container(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
         decoration: BoxDecoration(
-          color: isDark ? BeyanColors.tone(0xFF011F1A) : Colors.white,
+          color: isDark ? const Color(0xFF090A0D) : Colors.white,
           border: Border(
             top: BorderSide(
-              color: isDark ? BeyanColors.tone(0xFF0D3830) : BeyanColors.tone(0xFFE2EBE8),
+              color: isDark ? const Color(0xFF1C1E26) : const Color(0xFFE2EBE8),
             ),
           ),
         ),
@@ -795,10 +1009,12 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14),
                 decoration: BoxDecoration(
-                  color: isDark ? BeyanColors.tone(0xFF072922) : BeyanColors.tone(0xFFF1F8F5),
+                  color: isDark ? const Color(0xFF13151D) : const Color(0xFFF1F8F5),
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
-                    color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.3),
+                    color: isDark
+                        ? const Color(0xFFF0D399).withValues(alpha: 0.25)
+                        : BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.3),
                   ),
                 ),
                 child: TextField(
@@ -821,14 +1037,14 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
             ),
             const SizedBox(width: 8),
             Container(
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [BeyanColors.tone(0xFFFFDF7A), BeyanColors.tone(0xFFD4AF37)],
+                  colors: [Color(0xFFF0D399), Color(0xFFD4AF37)],
                 ),
                 shape: BoxShape.circle,
               ),
               child: IconButton(
-                icon: Icon(Icons.send_rounded, color: BeyanColors.tone(0xFF01201B), size: 20),
+                icon: const Icon(Icons.send_rounded, color: Color(0xFF07080A), size: 20),
                 onPressed: () => _handleSend(),
               ),
             ),

@@ -102,8 +102,10 @@ class _PrayerCard extends ConsumerWidget {
     final List<Color> gradientColors = effectivePalette.prayerCardGradient;
     final Color glowColor = effectivePalette.prayerCardGlow;
     final Color borderColor = isApproaching
-        ? BeyanColors.tone(0xFFFFDF7A)
-        : effectivePalette.accentGold.withValues(alpha: 0.42);
+        ? const Color(0xFFF0D399)
+        : (effectivePalette == AppThemePalette.oledBlack
+            ? const Color(0xFFF0D399).withValues(alpha: 0.35)
+            : effectivePalette.accentGold.withValues(alpha: 0.42));
 
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
@@ -121,9 +123,14 @@ class _PrayerCard extends ConsumerWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: (isApproaching ? BeyanColors.tone(0xFFFFDF7A) : glowColor).withValues(alpha: isApproaching ? 0.3 : 0.22),
+            color: (isApproaching ? const Color(0xFFF0D399) : glowColor).withValues(alpha: isApproaching ? 0.35 : 0.16),
             blurRadius: isApproaching ? 28 : 20,
             offset: const Offset(0, 8),
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.45),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
           ),
         ],
       ),

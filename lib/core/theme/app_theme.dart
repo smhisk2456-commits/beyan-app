@@ -75,9 +75,9 @@ extension AppThemePaletteExtension on AppThemePalette {
         if (langCode == 'ar') return 'الأخضر الزمردي الوقور والذهب الأصيل';
         return 'Geleneksel vakarlı zümrüt yeşili ve asil altın';
       case AppThemePalette.oledBlack:
-        if (langCode == 'en') return 'Pure deep black and warm amber, OLED-friendly';
-        if (langCode == 'ar') return 'سواد نقي عميق وعنبر دافئ لشاشات أوليد';
-        return 'Saf zifiri siyah ve sıcak kehribar, OLED dostu';
+        if (langCode == 'en') return 'OLED deep black, titanium quartz and warm champagne gold';
+        if (langCode == 'ar') return 'سواد أوليد عميق وكوارتز التيتانيوم وذهب الشامبانيا';
+        return 'OLED derin siyah, titanyum kuvars ve şampanya altın';
       case AppThemePalette.kaabaSlate:
         if (langCode == 'en') return 'Kiswah graphite, steel grey and antique gold';
         if (langCode == 'ar') return 'جرافيت الكسوة والرمادي الفولاذي والذهب العتيق';
@@ -106,9 +106,15 @@ extension AppThemePaletteExtension on AppThemePalette {
 
   Color get primaryColor => _t(0xFF033E35);
 
-  Color get accentGold => _t(0xFFD4AF37);
+  Color get accentGold {
+    if (this == AppThemePalette.oledBlack) return const Color(0xFFF0D399);
+    return _t(0xFFD4AF37);
+  }
 
-  Color get accentGoldLight => _t(0xFFFFDF7A);
+  Color get accentGoldLight {
+    if (this == AppThemePalette.oledBlack) return const Color(0xFFFFF2D4);
+    return _t(0xFFFFDF7A);
+  }
 
   Color get darkBackground {
     if (this == AppThemePalette.oledBlack) return const Color(0xFF000000);
@@ -116,21 +122,30 @@ extension AppThemePaletteExtension on AppThemePalette {
   }
 
   Color get darkSurface {
-    if (this == AppThemePalette.oledBlack) return const Color(0xFF070707);
+    if (this == AppThemePalette.oledBlack) return const Color(0xFF0F1116);
     return _t(0xFF0D2823);
   }
 
   Color get darkCard {
-    if (this == AppThemePalette.oledBlack) return const Color(0xFF111111);
+    if (this == AppThemePalette.oledBlack) return const Color(0xFF14171E);
     return _t(0xFF133630);
   }
 
   /// Namaz vakti ana kartı için palete özel uyumlu lüks gradyan
-  List<Color> get prayerCardGradient => [
-        _t(0xFF02362E),
-        _t(0xFF01201B),
-        _t(0xFF03443A),
+  List<Color> get prayerCardGradient {
+    if (this == AppThemePalette.oledBlack) {
+      return const [
+        Color(0xFF151821),
+        Color(0xFF0C0E13),
+        Color(0xFF13161D),
       ];
+    }
+    return [
+      _t(0xFF02362E),
+      _t(0xFF01201B),
+      _t(0xFF03443A),
+    ];
+  }
 
   /// Namaz vakti ana kartı için ışıltı rengi
   Color get prayerCardGlow {
@@ -138,7 +153,7 @@ extension AppThemePaletteExtension on AppThemePalette {
       case AppThemePalette.emerald:
         return const Color(0xFF00BFA5);
       case AppThemePalette.oledBlack:
-        return const Color(0xFFFFB800);
+        return const Color(0xFFF0D399);
       case AppThemePalette.kaabaSlate:
         return const Color(0xFFC5A059);
       case AppThemePalette.deepSapphire:

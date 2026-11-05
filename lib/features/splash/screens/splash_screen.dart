@@ -1,4 +1,3 @@
-import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -153,7 +152,7 @@ class _SplashScreenState extends State<SplashScreen>
   Widget build(BuildContext context) {
     debugPrint('>>> SPLASH SCREEN BUILD CALLED');
     return Scaffold(
-      backgroundColor: BeyanColors.tone(0xFF01201D),
+      backgroundColor: const Color(0xFF07080A),
       body: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () {
@@ -163,41 +162,39 @@ class _SplashScreenState extends State<SplashScreen>
         child: Container(
           width: double.infinity,
           height: double.infinity,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
+          decoration: const BoxDecoration(
+            gradient: RadialGradient(
+              center: Alignment.center,
+              radius: 1.25,
               colors: [
-                BeyanColors.tone(0xFF001512),
-                BeyanColors.tone(0xFF012522),
-                BeyanColors.tone(0xFF012E2B),
-                BeyanColors.tone(0xFF023E36),
-                BeyanColors.tone(0xFF001714),
+                Color(0xFF13151E),
+                Color(0xFF0A0C10),
+                Color(0xFF07080A),
               ],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              stops: const [0.0, 0.25, 0.5, 0.75, 1.0],
+              stops: [0.0, 0.55, 1.0],
             ),
           ),
           child: Stack(
             alignment: Alignment.center,
             children: [
-              // ── Arka Plan Yumuşak Altın Işık Aurası ──
+              // ── Arka Plan Yumuşak Şampanya Altın Işık Aurası (Breathing Halo) ──
               AnimatedBuilder(
                 animation: _haloPulse,
                 builder: (context, child) {
                   return Transform.scale(
                     scale: _haloPulse.value,
                     child: Container(
-                      width: 290,
-                      height: 290,
+                      width: 320,
+                      height: 320,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         gradient: RadialGradient(
                           colors: [
-                            BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.22),
-                            BeyanColors.tone(0xFF033E35).withValues(alpha: 0.12),
+                            const Color(0xFFF0D399).withValues(alpha: 0.28),
+                            const Color(0xFFD4AF37).withValues(alpha: 0.10),
                             Colors.transparent,
                           ],
-                          stops: const [0.0, 0.6, 1.0],
+                          stops: const [0.0, 0.45, 1.0],
                         ),
                       ),
                     ),
@@ -230,20 +227,20 @@ class _SplashScreenState extends State<SplashScreen>
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(38),
                           border: Border.all(
-                            color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.6),
-                            width: 1.8,
+                            color: const Color(0xFFF0D399).withValues(alpha: 0.75),
+                            width: 1.6,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35),
-                              blurRadius: 36,
+                              color: const Color(0xFFF0D399).withValues(alpha: 0.35),
+                              blurRadius: 40,
                               spreadRadius: 4,
-                              offset: const Offset(0, 10),
+                              offset: const Offset(0, 8),
                             ),
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.5),
-                              blurRadius: 24,
-                              offset: const Offset(0, 12),
+                              color: Colors.black.withValues(alpha: 0.8),
+                              blurRadius: 28,
+                              offset: const Offset(0, 14),
                             ),
                           ],
                         ),
@@ -278,12 +275,12 @@ class _SplashScreenState extends State<SplashScreen>
                         children: [
                           // Beyân Başlığı
                           ShaderMask(
-                            shaderCallback: (bounds) => LinearGradient(
+                            shaderCallback: (bounds) => const LinearGradient(
                               colors: [
-                                const Color(0xFFFFF4D0),
-                                BeyanColors.tone(0xFFFFDF7A),
-                                BeyanColors.tone(0xFFD4AF37),
-                                BeyanColors.tone(0xFFA57D1B),
+                                Color(0xFFFFFFFF),
+                                Color(0xFFFFF2D4),
+                                Color(0xFFF0D399),
+                                Color(0xFFC8A765),
                               ],
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
@@ -291,9 +288,9 @@ class _SplashScreenState extends State<SplashScreen>
                             child: const Text(
                               'Beyân',
                               style: TextStyle(
-                                fontSize: 34,
+                                fontSize: 36,
                                 fontWeight: FontWeight.w800,
-                                letterSpacing: 3.0,
+                                letterSpacing: 3.2,
                                 color: Colors.white,
                               ),
                             ),
@@ -306,10 +303,10 @@ class _SplashScreenState extends State<SplashScreen>
                             width: 64,
                             height: 2,
                             decoration: BoxDecoration(
-                              gradient: LinearGradient(
+                              gradient: const LinearGradient(
                                 colors: [
                                   Colors.transparent,
-                                  BeyanColors.tone(0xFFD4AF37),
+                                  Color(0xFFF0D399),
                                   Colors.transparent,
                                 ],
                               ),
@@ -321,12 +318,12 @@ class _SplashScreenState extends State<SplashScreen>
 
                           // Sade ve Zarif Alt Başlık
                           Text(
-                            'Vakitler • Kur\'an • Tesbihat',
+                            'VAKİTLER • KUR\'AN • MANEVİYAT',
                             style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                              letterSpacing: 2.0,
-                              color: BeyanColors.tone(0xFFFFDF7A),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 2.8,
+                              color: const Color(0xFFF0D399).withValues(alpha: 0.9),
                             ),
                           ),
                         ],
@@ -349,8 +346,8 @@ class _SplashScreenState extends State<SplashScreen>
                                 height: 4,
                                 decoration: BoxDecoration(
                                   color: index == 1
-                                      ? BeyanColors.tone(0xFFD4AF37)
-                                      : BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.35),
+                                      ? const Color(0xFFF0D399)
+                                      : const Color(0xFFF0D399).withValues(alpha: 0.25),
                                   borderRadius: BorderRadius.circular(2),
                                 ),
                               );

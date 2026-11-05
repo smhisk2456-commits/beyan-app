@@ -13,7 +13,6 @@ import '../../dua/screens/dua_library_screen.dart';
 import '../../dua/providers/dua_providers.dart';
 import '../../calendar/screens/hijri_calendar_screen.dart';
 import '../../calendar/services/hijri_calendar_service.dart';
-import '../../ramadan/screens/ramadan_dashboard_screen.dart';
 import '../../quran/providers/quran_reading_providers.dart';
 import '../../quran/providers/quran_providers.dart';
 import '../../quran/screens/surah_detail_screen.dart';
@@ -137,7 +136,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
 
-            // ── Hızlı Erişim Butonları (Tek Sıra 4 Odaklı Araç) ───
+            // ── Hızlı Erişim Butonları (Tek Sıra 4 Odaklı Araç: Kıble, Kur'an, Zikir, Kaza) ───
             SliverToBoxAdapter(
               child: RepaintBoundary(
                 child: _QuickActionGrid(
@@ -148,22 +147,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       LuxuryPageRoute(page: const QiblaCompassScreen()),
                     );
                   },
-                  onOpenDuas: () {
+                  onOpenQuran: () {
+                    ref.read(selectedTabProvider.notifier).state = 1;
+                  },
+                  onOpenZikr: () {
                     Navigator.push(
                       context,
-                      LuxuryPageRoute(page: const DuaLibraryScreen()),
+                      LuxuryPageRoute(page: const ZikirmatikScreen()),
                     );
                   },
-                  onOpenCalendar: () {
+                  onOpenKaza: () {
                     Navigator.push(
                       context,
-                      LuxuryPageRoute(page: const HijriCalendarScreen()),
-                    );
-                  },
-                  onOpenRamadan: () {
-                    Navigator.push(
-                      context,
-                      LuxuryPageRoute(page: const RamadanDashboardScreen()),
+                      LuxuryPageRoute(page: const KazaTrackerScreen()),
                     );
                   },
                 ),
@@ -1386,16 +1382,16 @@ class _DailyInspirationCardState extends ConsumerState<_DailyInspirationCard> {
 
 class _QuickActionGrid extends ConsumerWidget {
   final VoidCallback onOpenQibla;
-  final VoidCallback onOpenDuas;
-  final VoidCallback onOpenCalendar;
-  final VoidCallback onOpenRamadan;
+  final VoidCallback onOpenQuran;
+  final VoidCallback onOpenZikr;
+  final VoidCallback onOpenKaza;
   final DynamicPrayerAtmosphere? atmosphere;
 
   const _QuickActionGrid({
     required this.onOpenQibla,
-    required this.onOpenDuas,
-    required this.onOpenCalendar,
-    required this.onOpenRamadan,
+    required this.onOpenQuran,
+    required this.onOpenZikr,
+    required this.onOpenKaza,
     this.atmosphere,
   });
 
@@ -1416,30 +1412,30 @@ class _QuickActionGrid extends ConsumerWidget {
             isDark: isDark,
             atmosphere: atmosphere,
           ),
-          const SizedBox(width: 6),
+          const SizedBox(width: 8),
           _ActionCard(
-            icon: Icons.auto_stories_rounded,
-            title: strings.actionDuas,
-            subtitle: strings.actionDuasSub,
-            onTap: onOpenDuas,
+            icon: Icons.menu_book_rounded,
+            title: strings.language == AppLanguage.turkish ? 'Kur\'an' : 'Quran',
+            subtitle: strings.language == AppLanguage.turkish ? 'Tilavet' : 'Recite',
+            onTap: onOpenQuran,
             isDark: isDark,
             atmosphere: atmosphere,
           ),
-          const SizedBox(width: 6),
+          const SizedBox(width: 8),
           _ActionCard(
-            icon: Icons.calendar_month_rounded,
-            title: strings.actionCalendar,
-            subtitle: strings.actionCalendarSub,
-            onTap: onOpenCalendar,
+            icon: Icons.fingerprint_rounded,
+            title: strings.language == AppLanguage.turkish ? 'Zikir' : 'Dhikr',
+            subtitle: strings.language == AppLanguage.turkish ? 'Zikirmatik' : 'Counter',
+            onTap: onOpenZikr,
             isDark: isDark,
             atmosphere: atmosphere,
           ),
-          const SizedBox(width: 6),
+          const SizedBox(width: 8),
           _ActionCard(
-            icon: Icons.nights_stay_rounded,
-            title: strings.actionRamadan,
-            subtitle: strings.actionRamadanSub,
-            onTap: onOpenRamadan,
+            icon: Icons.calculate_rounded,
+            title: strings.language == AppLanguage.turkish ? 'Kaza' : 'Qada',
+            subtitle: strings.language == AppLanguage.turkish ? 'Takip' : 'Tracker',
+            onTap: onOpenKaza,
             isDark: isDark,
             atmosphere: atmosphere,
           ),
@@ -1468,67 +1464,76 @@ class _ActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bgColor = atmosphere?.actionCardBg ?? (isDark ? BeyanColors.tone(0xFF0D2823) : Colors.white);
-    final borderColor = atmosphere != null
-        ? atmosphere!.actionCardBorder.withValues(alpha: 0.6)
-        : (isDark ? BeyanColors.tone(0xFF133B34) : BeyanColors.tone(0xFFE2EBE8));
-    final iconColor = atmosphere?.accentGold ?? BeyanColors.tone(0xFFD4AF37);
+    final bgColor = isDark
+        ? const Color(0xFF13151D)
+        : Colors.white;
+    final borderColor = isDark
+        ? const Color(0xFFF0D399).withValues(alpha: 0.24)
+        : BeyanColors.tone(0xFFE2EBE8);
+    const iconColor = Color(0xFFF0D399);
 
     return Expanded(
       child: Material(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(16),
+        color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(18),
           onTap: () {
             HapticFeedback.lightImpact();
             onTap();
           },
           child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
+              color: bgColor,
+              borderRadius: BorderRadius.circular(18),
               border: Border.all(
                 color: borderColor,
-                width: 1,
+                width: 1.1,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
+                  color: Colors.black.withValues(alpha: isDark ? 0.40 : 0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
                 ),
+                if (isDark)
+                  BoxShadow(
+                    color: const Color(0xFFF0D399).withValues(alpha: 0.05),
+                    blurRadius: 8,
+                    offset: const Offset(0, -1),
+                  ),
               ],
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  width: 36,
-                  height: 36,
+                  width: 38,
+                  height: 38,
                   decoration: BoxDecoration(
-                    color: iconColor.withValues(alpha: isDark ? 0.18 : 0.1),
+                    color: iconColor.withValues(alpha: isDark ? 0.12 : 0.08),
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: iconColor.withValues(alpha: 0.4),
+                      color: iconColor.withValues(alpha: 0.35),
                       width: 1,
                     ),
                   ),
                   child: Icon(
                     icon,
-                    size: 18,
-                    color: iconColor,
+                    size: 19,
+                    color: isDark ? iconColor : BeyanColors.tone(0xFF8A6B1A),
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 7),
                 FittedBox(
                   fit: BoxFit.scaleDown,
                   child: Text(
                     title,
                     style: TextStyle(
-                      fontSize: 11,
+                      fontSize: 12,
                       fontWeight: FontWeight.w700,
-                      color: isDark ? Colors.white : BeyanColors.tone(0xFF11221F),
+                      color: isDark ? Colors.white : AppColors.textPrimary,
+                      letterSpacing: 0.2,
                     ),
                     maxLines: 1,
                   ),
@@ -1540,7 +1545,8 @@ class _ActionCard extends StatelessWidget {
                     subtitle,
                     style: TextStyle(
                       fontSize: 9.5,
-                      color: isDark ? Colors.white54 : AppColors.textSecondary,
+                      fontWeight: FontWeight.w500,
+                      color: isDark ? const Color(0xFF8E929B) : AppColors.textSecondary,
                     ),
                     maxLines: 1,
                   ),

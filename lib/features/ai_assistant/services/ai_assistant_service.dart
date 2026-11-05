@@ -110,36 +110,18 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
     final remaining = await getRemainingQuota(false);
     if (!mounted) return;
 
-    final welcomeMessage = AiMessage(
-      id: 'welcome_1',
-      text: 'Selâmün aleyküm ve rahmetullâhi ve berekâtüh.\n\n'
-          'Ben Beyân AI Manevi Rehber & Tefsir Asistanı.\n'
-          'Kur\'an-ı Kerim ayetleri, Sahih Sünnet ve muteber İslam kaynakları ışığında; '
-          'namaz, oruç, dua, tefsir, fıkıh, peygamberler tarihi ve günlük manevi hayatınızla ilgili '
-          'tüm sorularınızda size hürmet ve muhabbetle refakat etmek için buradayım.\n\n'
-          'Aşağıdaki hazır konulardan birini seçebilir veya kalbinizdeki soruyu doğrudan yazabilirsiniz.',
-      isUser: false,
-      timestamp: DateTime.now(),
-      references: const [
-        'Nahl Suresi, 43. Ayet: "Eğer bilmiyorsanız ilim ehline sorun."',
-        'Sahih-i Buhari & Müslim Muteber Kaynakları'
-      ],
-      suggestedFollowUps: const [
-        'Hz. Âdem ne zaman vefat etmiştir, kaç yıl yaşamıştır?',
-        'Namaz borçları (kaza) nasıl hesaplanır ve kılınır?',
-        'Abdest ve guslün farzları nelerdir?',
-        'Kalp huzuru ve vesveseden korunmak için hangi dualar okunur?',
-      ],
-    );
-
     if (!mounted) return;
 
     state = state.copyWith(
-      messages: [welcomeMessage],
+      messages: const [],
       remainingQuestions: remaining,
       dailyLimit: freeDailyLimit,
       geminiApiKey: savedApiKey,
     );
+  }
+
+  void resetChat() {
+    state = state.copyWith(messages: const []);
   }
 
   Future<void> setGeminiApiKey(String? key) async {
