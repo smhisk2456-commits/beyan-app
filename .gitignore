@@ -65,3 +65,7 @@ app_store_screenshots/
 **/android/local.properties
 **/android/app/upload-keystore.jks
 **/android/key.properties
+
+# Local Agent skills & artifacts
+.agent/
+

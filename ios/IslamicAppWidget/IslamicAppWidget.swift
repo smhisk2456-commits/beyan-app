@@ -725,12 +725,12 @@ extension View {
 // MARK: - Namaz Vakti Widget Görünümleri
 
 struct BeyanAppLogoBadge: View {
-    var size: CGFloat = 20
+    var size: CGFloat = 18
     var showTitle: Bool = true
     private let gold = Color(red: 1.0, green: 0.86, blue: 0.48)
 
     var body: some View {
-        HStack(spacing: 5.5) {
+        HStack(spacing: 5) {
             // Lüks Zümrüt & Altın Uygulama İkon Rozeti
             ZStack {
                 RoundedRectangle(cornerRadius: size * 0.28, style: .continuous)
@@ -747,19 +747,9 @@ struct BeyanAppLogoBadge: View {
                     .frame(width: size, height: size)
                     .overlay(
                         RoundedRectangle(cornerRadius: size * 0.28, style: .continuous)
-                            .strokeBorder(
-                                LinearGradient(
-                                    colors: [
-                                        gold.opacity(0.85),
-                                        gold.opacity(0.25)
-                                    ],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ),
-                                lineWidth: 0.8
-                            )
+                            .strokeBorder(gold.opacity(0.75), lineWidth: 0.8)
                     )
-                    .shadow(color: gold.opacity(0.18), radius: 3, x: 0, y: 1)
+                    .shadow(color: gold.opacity(0.20), radius: 3, x: 0, y: 1)
 
                 // Beyân 'ب' Kaligrafik Monogramı
                 Text("ب")
@@ -770,11 +760,14 @@ struct BeyanAppLogoBadge: View {
 
             if showTitle {
                 Text("BEYÂN")
-                    .font(.system(size: 10, weight: .heavy, design: .rounded))
-                    .tracking(1.4)
+                    .font(.system(size: 10.5, weight: .black, design: .rounded))
+                    .tracking(1.0)
                     .foregroundColor(gold)
+                    .lineLimit(1)
+                    .fixedSize(horizontal: true, vertical: false)
             }
         }
+        .fixedSize(horizontal: true, vertical: false)
     }
 }
 
@@ -786,19 +779,19 @@ struct PrayerSystemSmallView: View {
         VStack(alignment: .leading, spacing: 0) {
             // 1. Üst Başlık: Sol tarafta Lüks Beyân İkon Rozeti & Sağda Vakit İkonu
             HStack(alignment: .center) {
-                BeyanAppLogoBadge(size: 20, showTitle: true)
+                BeyanAppLogoBadge(size: 18, showTitle: true)
 
                 Spacer(minLength: 4)
 
                 ZStack {
                     Circle()
                         .fill(gold.opacity(0.14))
-                        .frame(width: 24, height: 24)
+                        .frame(width: 22, height: 22)
                     Circle()
                         .strokeBorder(gold.opacity(0.35), lineWidth: 0.7)
-                        .frame(width: 24, height: 24)
+                        .frame(width: 22, height: 22)
                     Image(systemName: entry.next.kind.symbol)
-                        .font(.system(size: 11, weight: .semibold))
+                        .font(.system(size: 10, weight: .semibold))
                         .foregroundColor(gold)
                 }
             }
@@ -806,16 +799,16 @@ struct PrayerSystemSmallView: View {
             Spacer(minLength: 4)
 
             // 2. Orta: Sıradaki Vakit Başlığı & Büyük Saat
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 1) {
                 Text(WidgetLocalization.nextPrayerTitle.uppercased())
-                    .font(.system(size: 9, weight: .heavy, design: .rounded))
+                    .font(.system(size: 8.5, weight: .heavy, design: .rounded))
                     .tracking(0.9)
                     .foregroundColor(gold.opacity(0.78))
                     .lineLimit(1)
 
                 HStack(alignment: .firstTextBaseline) {
                     Text(entry.next.kind.name)
-                        .font(.system(size: 23, weight: .heavy, design: .rounded))
+                        .font(.system(size: 24, weight: .heavy, design: .rounded))
                         .foregroundColor(.white)
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)
@@ -823,7 +816,7 @@ struct PrayerSystemSmallView: View {
                     Spacer(minLength: 2)
 
                     Text(hhmm.string(from: entry.next.date))
-                        .font(.system(size: 17, weight: .black, design: .rounded))
+                        .font(.system(size: 18, weight: .black, design: .rounded))
                         .foregroundColor(gold)
                         .lineLimit(1)
                 }
@@ -831,7 +824,7 @@ struct PrayerSystemSmallView: View {
 
             Spacer(minLength: 6)
 
-            // 3. Alt: Canlı Geri Sayım Kapsülü (Glassmorphism & İnce Altın Parıltı)
+            // 3. Alt: Canlı Geri Sayım Kapsülü
             HStack(spacing: 5) {
                 Image(systemName: "timer")
                     .font(.system(size: 10, weight: .bold))
@@ -850,12 +843,12 @@ struct PrayerSystemSmallView: View {
                     .foregroundColor(.white.opacity(0.65))
             }
             .padding(.horizontal, 9)
-            .padding(.vertical, 5.5)
+            .padding(.vertical, 5)
             .background(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                Capsule()
                     .fill(Color.white.opacity(0.07))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        Capsule()
                             .strokeBorder(
                                 LinearGradient(
                                     colors: [gold.opacity(0.40), Color.white.opacity(0.08)],
@@ -877,129 +870,121 @@ struct PrayerSystemMediumView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Üst Bölüm: Sol tarafta İkon + Sıradaki Vakit, Sağda Canlı Sayaç
-            HStack(alignment: .center, spacing: 10) {
-                VStack(alignment: .leading, spacing: 3) {
-                    HStack(spacing: 6) {
-                        BeyanAppLogoBadge(size: 19, showTitle: true)
-                        Text("•")
-                            .font(.system(size: 9))
-                            .foregroundColor(.white.opacity(0.35))
-                        Text(WidgetLocalization.nextPrayerTitle)
-                            .font(.system(size: 10, weight: .semibold))
-                            .foregroundColor(.white.opacity(0.72))
-                            .lineLimit(1)
-                    }
+            // ── 1. Üst Bar: Sol (Logo) • Sağ (Zarif Canlı Sayaç Rozeti) ──
+            HStack(alignment: .center) {
+                BeyanAppLogoBadge(size: 18, showTitle: true)
 
-                    HStack(alignment: .firstTextBaseline, spacing: 8) {
-                        Text(entry.next.kind.name)
-                            .font(.system(size: 23, weight: .heavy, design: .rounded))
-                            .foregroundColor(.white)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.8)
+                Spacer(minLength: 8)
 
-                        Text(hhmm.string(from: entry.next.date))
-                            .font(.system(size: 19, weight: .black, design: .rounded))
-                            .foregroundColor(gold)
-                            .lineLimit(1)
-                    }
-                }
-
-                Spacer(minLength: 4)
-
-                // Sağ Canlı Geri Sayım Kapsülü
-                VStack(alignment: .trailing, spacing: 2) {
-                    HStack(spacing: 3.5) {
-                        Image(systemName: "timer")
-                            .font(.system(size: 9.5, weight: .bold))
-                            .foregroundColor(gold)
-                        Text(WidgetLocalization.countdownTitle.uppercased())
-                            .font(.system(size: 9, weight: .heavy, design: .rounded))
-                            .tracking(0.6)
-                            .foregroundColor(gold)
-                            .lineLimit(1)
-                    }
+                // Canlı Geri Sayım Kapsülü (Kaba kutu değil, ultra-zarif Apple hapı)
+                HStack(spacing: 4.5) {
+                    Image(systemName: "timer")
+                        .font(.system(size: 9.5, weight: .bold))
+                        .foregroundColor(gold)
                     Text(entry.next.date, style: .timer)
-                        .font(.system(size: 16.5, weight: .black, design: .rounded))
+                        .font(.system(size: 13, weight: .bold, design: .rounded))
                         .monospacedDigit()
                         .foregroundColor(.white)
-                        .multilineTextAlignment(.trailing)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.75)
+                    Text("kaldı")
+                        .font(.system(size: 9.5, weight: .medium))
+                        .foregroundColor(.white.opacity(0.6))
                 }
-                .padding(.horizontal, 11)
-                .padding(.vertical, 6)
+                .padding(.horizontal, 9)
+                .padding(.vertical, 4)
                 .background(
-                    RoundedRectangle(cornerRadius: 11, style: .continuous)
+                    Capsule()
                         .fill(Color.white.opacity(0.07))
                         .overlay(
-                            RoundedRectangle(cornerRadius: 11, style: .continuous)
-                                .strokeBorder(
-                                    LinearGradient(
-                                        colors: [gold.opacity(0.45), gold.opacity(0.15)],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    ),
-                                    lineWidth: 0.8
-                                )
+                            Capsule().strokeBorder(gold.opacity(0.35), lineWidth: 0.7)
                         )
                 )
             }
 
+            Spacer(minLength: 4)
+
+            // ── 2. Orta Hero Alanı: Sıradaki Vakit & Devasa Saat ──
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Text(entry.next.kind.name)
+                    .font(.system(size: 26, weight: .black, design: .rounded))
+                    .foregroundColor(.white)
+                    .lineLimit(1)
+
+                Text(hhmm.string(from: entry.next.date))
+                    .font(.system(size: 22, weight: .heavy, design: .rounded))
+                    .foregroundColor(gold)
+                    .lineLimit(1)
+
+                Spacer()
+
+                HStack(spacing: 4) {
+                    Image(systemName: entry.next.kind.symbol)
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(gold)
+                    Text(WidgetLocalization.nextPrayerTitle)
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(.white.opacity(0.65))
+                }
+            }
+
             Spacer(minLength: 6)
 
-            // Alt Bölüm: 6 Vakit Modern Çizelgesi (Timeline)
-            HStack(spacing: 5) {
+            // ── 3. Alt Çizelge: Tek Parça Akıcı Vakit Şeridi (Kutu Kutu Değil!) ──
+            HStack(spacing: 2) {
                 ForEach(entry.dayTimes, id: \.kind.rawValue) { p in
                     let isNext = (p.kind == entry.next.kind)
-                    VStack(spacing: 2.5) {
+                    VStack(spacing: 2) {
                         Image(systemName: p.kind.symbol)
-                            .font(.system(size: 10, weight: isNext ? .bold : .medium))
-                            .foregroundColor(isNext ? gold : .white.opacity(0.55))
+                            .font(.system(size: 9.5, weight: isNext ? .bold : .medium))
+                            .foregroundColor(isNext ? gold : .white.opacity(0.45))
 
                         Text(p.kind.name)
                             .font(.system(size: 9, weight: isNext ? .heavy : .medium))
-                            .foregroundColor(isNext ? gold : .white.opacity(0.70))
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.65)
-
-                        Text(hhmm.string(from: p.date))
-                            .font(.system(size: 10.5, weight: isNext ? .black : .semibold, design: .rounded))
-                            .foregroundColor(isNext ? .white : .white.opacity(0.85))
+                            .foregroundColor(isNext ? gold : .white.opacity(0.65))
                             .lineLimit(1)
                             .minimumScaleFactor(0.7)
+
+                        Text(hhmm.string(from: p.date))
+                            .font(.system(size: 11, weight: isNext ? .black : .semibold, design: .rounded))
+                            .foregroundColor(isNext ? .white : .white.opacity(0.85))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.75)
                     }
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 5)
+                    .padding(.vertical, 4)
                     .background(
-                        RoundedRectangle(cornerRadius: 9, style: .continuous)
-                            .fill(
-                                isNext
-                                    ? LinearGradient(
-                                        colors: [
-                                            Color(red: 0.02, green: 0.38, blue: 0.30),
-                                            Color(red: 0.01, green: 0.22, blue: 0.17)
-                                        ],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    )
-                                    : LinearGradient(
-                                        colors: [Color.white.opacity(0.04), Color.white.opacity(0.02)],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    )
-                            )
-                            .overlay(
+                        isNext
+                            ? AnyView(
                                 RoundedRectangle(cornerRadius: 9, style: .continuous)
-                                    .strokeBorder(
-                                        isNext ? gold.opacity(0.75) : Color.white.opacity(0.06),
-                                        lineWidth: isNext ? 1.0 : 0.5
+                                    .fill(
+                                        LinearGradient(
+                                            colors: [
+                                                Color(red: 0.02, green: 0.40, blue: 0.32),
+                                                Color(red: 0.01, green: 0.22, blue: 0.17)
+                                            ],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        )
                                     )
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 9, style: .continuous)
+                                            .strokeBorder(gold.opacity(0.85), lineWidth: 1.0)
+                                    )
+                                    .shadow(color: gold.opacity(0.3), radius: 5, x: 0, y: 1)
                             )
-                            .shadow(color: isNext ? gold.opacity(0.25) : Color.clear, radius: 4, x: 0, y: 1)
+                            : AnyView(Color.clear)
                     )
                 }
             }
+            .padding(.horizontal, 3)
+            .padding(.vertical, 3)
+            .background(
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(Color.white.opacity(0.04))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .strokeBorder(Color.white.opacity(0.06), lineWidth: 0.6)
+                    )
+            )
         }
         .beyanHomePadding()
     }
@@ -1220,7 +1205,7 @@ struct VerseSystemSmallView: View {
         VStack(alignment: .leading, spacing: 0) {
             // Üst Başlık: Beyân Logosu & Âyet Rozeti
             HStack(spacing: 4) {
-                BeyanAppLogoBadge(size: 20, showTitle: true)
+                BeyanAppLogoBadge(size: 18, showTitle: true)
 
                 Spacer(minLength: 2)
 
@@ -1499,7 +1484,7 @@ struct CountdownWidgetView: View {
                 VStack(alignment: .leading, spacing: 0) {
                     // Üst Başlık: Sol tarafta Beyân İkon Rozeti & Sağda Vakit İkonu
                     HStack(alignment: .center) {
-                        BeyanAppLogoBadge(size: 20, showTitle: true)
+                        BeyanAppLogoBadge(size: 18, showTitle: true)
                         Spacer()
                         ZStack {
                             Circle()
@@ -1818,7 +1803,7 @@ struct HijriWidgetView: View {
                 let gold = Color(red: 1.0, green: 0.86, blue: 0.48)
                 VStack(alignment: .leading, spacing: 0) {
                     HStack {
-                        BeyanAppLogoBadge(size: 20, showTitle: true)
+                        BeyanAppLogoBadge(size: 18, showTitle: true)
                         Spacer()
                         ZStack {
                             Circle()
@@ -2403,7 +2388,7 @@ struct KazaWidgetView: View {
             case .systemSmall:
                 VStack(alignment: .leading, spacing: 6) {
                     HStack {
-                        BeyanAppLogoBadge(size: 20, showTitle: true)
+                        BeyanAppLogoBadge(size: 18, showTitle: true)
                         Spacer()
                         ZStack {
                             Circle()
