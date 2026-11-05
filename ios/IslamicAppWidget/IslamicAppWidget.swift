@@ -616,77 +616,76 @@ struct PrayerInlineView: View {
 struct BeyanLuxuryHomeBackground: View {
     private let goldLight = Color(red: 1.0, green: 0.90, blue: 0.58)
     private let goldMid   = Color(red: 0.85, green: 0.68, blue: 0.25)
-    private let goldDark  = Color(red: 0.58, green: 0.44, blue: 0.14)
+    private let emeraldVibrant = Color(red: 0.04, green: 0.45, blue: 0.35)
 
     var body: some View {
         ZStack {
-            // 1. Zengin Zümrüt & Gece Yeşili Ana Tuval
+            // 1. Zengin Zümrüt & Derin Gece Yeşili Tuval (Ultra-lüks iOS 18/27 Derinliği)
             LinearGradient(
                 colors: [
-                    Color(red: 0.035, green: 0.23, blue: 0.19),
-                    Color(red: 0.015, green: 0.13, blue: 0.11),
-                    Color(red: 0.005, green: 0.07, blue: 0.06)
+                    Color(red: 0.025, green: 0.18, blue: 0.14),
+                    Color(red: 0.012, green: 0.10, blue: 0.08),
+                    Color(red: 0.003, green: 0.045, blue: 0.038)
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
 
-            // 2. Sağ Üst Altın Nur Halesi (Aura)
+            // 2. Sağ Üst Yumuşak Altın Nur Halesi (Ambient Golden Aura)
             RadialGradient(
                 colors: [
-                    goldMid.opacity(0.24),
+                    goldMid.opacity(0.25),
                     goldMid.opacity(0.06),
                     Color.clear
                 ],
                 center: .topTrailing,
-                startRadius: 4,
-                endRadius: 150
+                startRadius: 0,
+                endRadius: 180
             )
 
-            // 3. Sol Alt Zümrüt Işıltısı
+            // 3. Sol Alt Zümrüt Işıltısı (Ambient Emerald Aurora)
             RadialGradient(
                 colors: [
-                    Color(red: 0.06, green: 0.48, blue: 0.38).opacity(0.20),
+                    emeraldVibrant.opacity(0.20),
+                    emeraldVibrant.opacity(0.04),
                     Color.clear
                 ],
                 center: .bottomLeading,
-                startRadius: 8,
-                endRadius: 130
+                startRadius: 0,
+                endRadius: 160
             )
 
-            // 4. Selçuklu / Osmanlı Sekiz Köşeli Yıldız (Rub el Hizb) Filigranı
+            // 4. Selçuklu / İslami Geometrik Filigran (Derinlikte Saydamca Yüzen)
             GeometryReader { geo in
                 ZStack {
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .stroke(goldLight.opacity(0.055), lineWidth: 1.2)
-                        .frame(width: 76, height: 76)
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .stroke(goldLight.opacity(0.055), lineWidth: 1.2)
-                        .frame(width: 76, height: 76)
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .stroke(goldLight.opacity(0.045), lineWidth: 1.0)
+                        .frame(width: 84, height: 84)
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .stroke(goldLight.opacity(0.045), lineWidth: 1.0)
+                        .frame(width: 84, height: 84)
                         .rotationEffect(.degrees(45))
                     Circle()
-                        .stroke(goldLight.opacity(0.05), lineWidth: 1.0)
-                        .frame(width: 44, height: 44)
+                        .stroke(goldLight.opacity(0.035), lineWidth: 0.8)
+                        .frame(width: 50, height: 50)
                 }
-                .position(x: geo.size.width - 26, y: 26)
+                .position(x: geo.size.width - 24, y: 24)
             }
 
-            // 5. Müzehhep Çift Katmanlı Altın Varak İç Çerçeve
-            RoundedRectangle(cornerRadius: 17, style: .continuous)
-                .strokeBorder(
-                    LinearGradient(
-                        colors: [
-                            goldLight.opacity(0.48),
-                            goldMid.opacity(0.20),
-                            goldDark.opacity(0.15),
-                            goldLight.opacity(0.38)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    lineWidth: 1.0
+            // 5. Apple Yeni Nesil Cam Yüzey Işık Yansıması (Top Specular Glass Sheen)
+            VStack {
+                LinearGradient(
+                    colors: [
+                        Color.white.opacity(0.12),
+                        Color.white.opacity(0.02),
+                        Color.clear
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
                 )
-                .padding(6.5)
+                .frame(height: 42)
+                Spacer()
+            }
         }
     }
 }
@@ -727,18 +726,18 @@ extension View {
 struct BeyanAppLogoBadge: View {
     var size: CGFloat = 18
     var showTitle: Bool = true
-    private let gold = Color(red: 1.0, green: 0.86, blue: 0.48)
+    private let gold = Color(red: 1.0, green: 0.88, blue: 0.52)
 
     var body: some View {
         HStack(spacing: 5) {
-            // Lüks Zümrüt & Altın Uygulama İkon Rozeti
+            // Lüks Zümrüt & Altın Uygulama İkon Rozeti (Cam Efektli)
             ZStack {
                 RoundedRectangle(cornerRadius: size * 0.28, style: .continuous)
                     .fill(
                         LinearGradient(
                             colors: [
-                                Color(red: 0.02, green: 0.32, blue: 0.26),
-                                Color(red: 0.01, green: 0.16, blue: 0.13)
+                                Color(red: 0.04, green: 0.38, blue: 0.30),
+                                Color(red: 0.015, green: 0.18, blue: 0.14)
                             ],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
@@ -747,9 +746,19 @@ struct BeyanAppLogoBadge: View {
                     .frame(width: size, height: size)
                     .overlay(
                         RoundedRectangle(cornerRadius: size * 0.28, style: .continuous)
-                            .strokeBorder(gold.opacity(0.75), lineWidth: 0.8)
+                            .strokeBorder(
+                                LinearGradient(
+                                    colors: [
+                                        gold.opacity(0.85),
+                                        gold.opacity(0.30)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 0.8
+                            )
                     )
-                    .shadow(color: gold.opacity(0.20), radius: 3, x: 0, y: 1)
+                    .shadow(color: gold.opacity(0.25), radius: 3, x: 0, y: 1)
 
                 // Beyân 'ب' Kaligrafik Monogramı
                 Text("ب")
@@ -773,7 +782,7 @@ struct BeyanAppLogoBadge: View {
 
 struct PrayerSystemSmallView: View {
     let entry: PrayerEntry
-    private let gold = Color(red: 1.0, green: 0.86, blue: 0.48)
+    private let gold = Color(red: 1.0, green: 0.88, blue: 0.52)
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -785,15 +794,23 @@ struct PrayerSystemSmallView: View {
 
                 ZStack {
                     Circle()
-                        .fill(gold.opacity(0.14))
-                        .frame(width: 22, height: 22)
+                        .fill(Color.white.opacity(0.07))
+                        .frame(width: 24, height: 24)
                     Circle()
-                        .strokeBorder(gold.opacity(0.35), lineWidth: 0.7)
-                        .frame(width: 22, height: 22)
+                        .strokeBorder(
+                            LinearGradient(
+                                colors: [gold.opacity(0.55), Color.white.opacity(0.12)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 0.75
+                        )
+                        .frame(width: 24, height: 24)
                     Image(systemName: entry.next.kind.symbol)
-                        .font(.system(size: 10, weight: .semibold))
+                        .font(.system(size: 10.5, weight: .semibold))
                         .foregroundColor(gold)
                 }
+                .shadow(color: gold.opacity(0.15), radius: 3, x: 0, y: 1)
             }
 
             Spacer(minLength: 4)
@@ -802,13 +819,13 @@ struct PrayerSystemSmallView: View {
             VStack(alignment: .leading, spacing: 1) {
                 Text(WidgetLocalization.nextPrayerTitle.uppercased())
                     .font(.system(size: 8.5, weight: .heavy, design: .rounded))
-                    .tracking(0.9)
-                    .foregroundColor(gold.opacity(0.78))
+                    .tracking(1.0)
+                    .foregroundColor(gold.opacity(0.80))
                     .lineLimit(1)
 
                 HStack(alignment: .firstTextBaseline) {
                     Text(entry.next.kind.name)
-                        .font(.system(size: 24, weight: .heavy, design: .rounded))
+                        .font(.system(size: 25, weight: .heavy, design: .rounded))
                         .foregroundColor(.white)
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)
@@ -824,7 +841,7 @@ struct PrayerSystemSmallView: View {
 
             Spacer(minLength: 6)
 
-            // 3. Alt: Canlı Geri Sayım Kapsülü
+            // 3. Alt: Canlı Geri Sayım Kapsülü (Frosted Glass Pill)
             HStack(spacing: 5) {
                 Image(systemName: "timer")
                     .font(.system(size: 10, weight: .bold))
@@ -846,18 +863,19 @@ struct PrayerSystemSmallView: View {
             .padding(.vertical, 5)
             .background(
                 Capsule()
-                    .fill(Color.white.opacity(0.07))
+                    .fill(Color.white.opacity(0.08))
                     .overlay(
                         Capsule()
                             .strokeBorder(
                                 LinearGradient(
-                                    colors: [gold.opacity(0.40), Color.white.opacity(0.08)],
+                                    colors: [gold.opacity(0.45), Color.white.opacity(0.10)],
                                     startPoint: .topLeading,
                                     endPoint: .bottomTrailing
                                 ),
-                                lineWidth: 0.8
+                                lineWidth: 0.75
                             )
                     )
+                    .shadow(color: Color.black.opacity(0.20), radius: 3, x: 0, y: 1)
             )
         }
         .beyanHomePadding()
@@ -866,7 +884,7 @@ struct PrayerSystemSmallView: View {
 
 struct PrayerSystemMediumView: View {
     let entry: PrayerEntry
-    private let gold = Color(red: 1.0, green: 0.86, blue: 0.48)
+    private let gold = Color(red: 1.0, green: 0.88, blue: 0.52)
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -876,7 +894,7 @@ struct PrayerSystemMediumView: View {
 
                 Spacer(minLength: 8)
 
-                // Canlı Geri Sayım Kapsülü (Kaba kutu değil, ultra-zarif Apple hapı)
+                // Canlı Geri Sayım Kapsülü (Apple Frosted Glass Hap)
                 HStack(spacing: 4.5) {
                     Image(systemName: "timer")
                         .font(.system(size: 9.5, weight: .bold))
@@ -887,20 +905,28 @@ struct PrayerSystemMediumView: View {
                         .foregroundColor(.white)
                     Text("kaldı")
                         .font(.system(size: 9.5, weight: .medium))
-                        .foregroundColor(.white.opacity(0.6))
+                        .foregroundColor(.white.opacity(0.65))
                 }
                 .padding(.horizontal, 9)
                 .padding(.vertical, 4)
                 .background(
                     Capsule()
-                        .fill(Color.white.opacity(0.07))
+                        .fill(Color.white.opacity(0.08))
                         .overlay(
-                            Capsule().strokeBorder(gold.opacity(0.35), lineWidth: 0.7)
+                            Capsule().strokeBorder(
+                                LinearGradient(
+                                    colors: [gold.opacity(0.45), Color.white.opacity(0.10)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 0.75
+                            )
                         )
+                        .shadow(color: Color.black.opacity(0.20), radius: 3, x: 0, y: 1)
                 )
             }
 
-            Spacer(minLength: 4)
+            Spacer(minLength: 5)
 
             // ── 2. Orta Hero Alanı: Sıradaki Vakit & Devasa Saat ──
             HStack(alignment: .firstTextBaseline, spacing: 8) {
@@ -926,9 +952,9 @@ struct PrayerSystemMediumView: View {
                 }
             }
 
-            Spacer(minLength: 6)
+            Spacer(minLength: 7)
 
-            // ── 3. Alt Çizelge: Tek Parça Akıcı Vakit Şeridi (Kutu Kutu Değil!) ──
+            // ── 3. Alt Çizelge: Tek Parça Akıcı Vakit Şeridi (iOS 18/27 Fluid Glass Timeline) ──
             HStack(spacing: 2) {
                 ForEach(entry.dayTimes, id: \.kind.rawValue) { p in
                     let isNext = (p.kind == entry.next.kind)
@@ -950,26 +976,33 @@ struct PrayerSystemMediumView: View {
                             .minimumScaleFactor(0.75)
                     }
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 4)
+                    .padding(.vertical, 4.5)
                     .background(
                         isNext
                             ? AnyView(
-                                RoundedRectangle(cornerRadius: 9, style: .continuous)
+                                RoundedRectangle(cornerRadius: 10, style: .continuous)
                                     .fill(
                                         LinearGradient(
                                             colors: [
-                                                Color(red: 0.02, green: 0.40, blue: 0.32),
-                                                Color(red: 0.01, green: 0.22, blue: 0.17)
+                                                Color(red: 0.03, green: 0.44, blue: 0.35),
+                                                Color(red: 0.015, green: 0.24, blue: 0.19)
                                             ],
                                             startPoint: .topLeading,
                                             endPoint: .bottomTrailing
                                         )
                                     )
                                     .overlay(
-                                        RoundedRectangle(cornerRadius: 9, style: .continuous)
-                                            .strokeBorder(gold.opacity(0.85), lineWidth: 1.0)
+                                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                            .strokeBorder(
+                                                LinearGradient(
+                                                    colors: [gold, gold.opacity(0.45)],
+                                                    startPoint: .topLeading,
+                                                    endPoint: .bottomTrailing
+                                                ),
+                                                lineWidth: 0.85
+                                            )
                                     )
-                                    .shadow(color: gold.opacity(0.3), radius: 5, x: 0, y: 1)
+                                    .shadow(color: gold.opacity(0.35), radius: 6, x: 0, y: 1.5)
                             )
                             : AnyView(Color.clear)
                     )
@@ -978,11 +1011,18 @@ struct PrayerSystemMediumView: View {
             .padding(.horizontal, 3)
             .padding(.vertical, 3)
             .background(
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(Color.white.opacity(0.04))
+                RoundedRectangle(cornerRadius: 13, style: .continuous)
+                    .fill(Color.white.opacity(0.05))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .strokeBorder(Color.white.opacity(0.06), lineWidth: 0.6)
+                        RoundedRectangle(cornerRadius: 13, style: .continuous)
+                            .strokeBorder(
+                                LinearGradient(
+                                    colors: [Color.white.opacity(0.14), Color.white.opacity(0.02)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 0.6
+                            )
                     )
             )
         }
@@ -1197,7 +1237,7 @@ struct VerseInlineView: View {
 
 struct VerseSystemSmallView: View {
     let entry: VerseEntry
-    private let gold = Color(red: 1.0, green: 0.86, blue: 0.48)
+    private let gold = Color(red: 1.0, green: 0.88, blue: 0.52)
     private let cream = Color(red: 0.99, green: 0.97, blue: 0.92)
     private let scale = WidgetSettings.textScale
 
@@ -1273,7 +1313,7 @@ struct VerseSystemSmallView: View {
 
 struct VerseSystemMediumView: View {
     let entry: VerseEntry
-    private let gold = Color(red: 1.0, green: 0.86, blue: 0.48)
+    private let gold = Color(red: 1.0, green: 0.88, blue: 0.52)
     private let cream = Color(red: 0.99, green: 0.97, blue: 0.92)
     private let scale = WidgetSettings.textScale
 
@@ -1480,7 +1520,7 @@ struct CountdownWidgetView: View {
                 }
                 .widgetAccentable()
             case .systemSmall:
-                let gold = Color(red: 1.0, green: 0.86, blue: 0.48)
+                let gold = Color(red: 1.0, green: 0.88, blue: 0.52)
                 VStack(alignment: .leading, spacing: 0) {
                     // Üst Başlık: Sol tarafta Beyân İkon Rozeti & Sağda Vakit İkonu
                     HStack(alignment: .center) {
@@ -1488,15 +1528,23 @@ struct CountdownWidgetView: View {
                         Spacer()
                         ZStack {
                             Circle()
-                                .fill(gold.opacity(0.14))
+                                .fill(Color.white.opacity(0.07))
                                 .frame(width: 24, height: 24)
                             Circle()
-                                .strokeBorder(gold.opacity(0.35), lineWidth: 0.7)
+                                .strokeBorder(
+                                    LinearGradient(
+                                        colors: [gold.opacity(0.55), Color.white.opacity(0.12)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    ),
+                                    lineWidth: 0.75
+                                )
                                 .frame(width: 24, height: 24)
                             Image(systemName: entry.next.kind.symbol)
                                 .font(.system(size: 11, weight: .semibold))
                                 .foregroundColor(gold)
                         }
+                        .shadow(color: gold.opacity(0.15), radius: 3, x: 0, y: 1)
                     }
 
                     Spacer(minLength: 4)
@@ -1504,22 +1552,22 @@ struct CountdownWidgetView: View {
                     // Orta: Vakte Kalan Metni & Devasa Canlı Sayaç
                     VStack(alignment: .leading, spacing: 1) {
                         Text(WidgetLocalization.timeUntil(prayer: entry.next.kind.name).uppercased())
-                            .font(.system(size: 9, weight: .heavy, design: .rounded))
-                            .tracking(0.8)
-                            .foregroundColor(gold.opacity(0.78))
+                            .font(.system(size: 8.5, weight: .heavy, design: .rounded))
+                            .tracking(1.0)
+                            .foregroundColor(gold.opacity(0.80))
                             .lineLimit(1)
 
                         Text(entry.next.date, style: .timer)
-                            .font(.system(size: 26, weight: .black, design: .rounded))
+                            .font(.system(size: 27, weight: .black, design: .rounded))
                             .monospacedDigit()
                             .foregroundColor(.white)
                             .lineLimit(1)
                             .minimumScaleFactor(0.75)
                     }
 
-                    Spacer(minLength: 5)
+                    Spacer(minLength: 6)
 
-                    // Alt: Ezan Vakti Rozeti
+                    // Alt: Ezan Vakti Rozeti (Frosted Glass Pill)
                     HStack(spacing: 5) {
                         Image(systemName: "bell.fill")
                             .font(.system(size: 9.5))
@@ -1535,19 +1583,20 @@ struct CountdownWidgetView: View {
                     .padding(.horizontal, 9)
                     .padding(.vertical, 5)
                     .background(
-                        RoundedRectangle(cornerRadius: 10, style: .continuous)
-                            .fill(Color.white.opacity(0.07))
+                        RoundedRectangle(cornerRadius: 11, style: .continuous)
+                            .fill(Color.white.opacity(0.08))
                             .overlay(
-                                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                RoundedRectangle(cornerRadius: 11, style: .continuous)
                                     .strokeBorder(
                                         LinearGradient(
-                                            colors: [gold.opacity(0.35), Color.white.opacity(0.08)],
+                                            colors: [gold.opacity(0.42), Color.white.opacity(0.08)],
                                             startPoint: .topLeading,
                                             endPoint: .bottomTrailing
                                         ),
-                                        lineWidth: 0.8
+                                        lineWidth: 0.75
                                     )
                             )
+                            .shadow(color: Color.black.opacity(0.20), radius: 3, x: 0, y: 1)
                     )
                 }
                 .beyanHomePadding()
@@ -1800,22 +1849,30 @@ struct HijriWidgetView: View {
                 }
                 .widgetAccentable()
             case .systemSmall:
-                let gold = Color(red: 1.0, green: 0.86, blue: 0.48)
+                let gold = Color(red: 1.0, green: 0.88, blue: 0.52)
                 VStack(alignment: .leading, spacing: 0) {
                     HStack {
                         BeyanAppLogoBadge(size: 18, showTitle: true)
                         Spacer()
                         ZStack {
                             Circle()
-                                .fill(gold.opacity(0.14))
+                                .fill(Color.white.opacity(0.07))
                                 .frame(width: 24, height: 24)
                             Circle()
-                                .strokeBorder(gold.opacity(0.35), lineWidth: 0.7)
+                                .strokeBorder(
+                                    LinearGradient(
+                                        colors: [gold.opacity(0.55), Color.white.opacity(0.12)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    ),
+                                    lineWidth: 0.75
+                                )
                                 .frame(width: 24, height: 24)
                             Image(systemName: "calendar")
                                 .font(.system(size: 11, weight: .semibold))
                                 .foregroundColor(gold)
                         }
+                        .shadow(color: gold.opacity(0.15), radius: 3, x: 0, y: 1)
                     }
                     Spacer(minLength: 4)
                     HStack(alignment: .firstTextBaseline, spacing: 5) {
@@ -1832,11 +1889,25 @@ struct HijriWidgetView: View {
                         .font(.system(size: 10.5, weight: .semibold))
                         .foregroundColor(.white.opacity(0.68))
                     Spacer(minLength: 4)
-                    Text(entry.notice)
-                        .font(.system(size: 10, weight: .medium))
-                        .foregroundColor(gold.opacity(0.92))
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.75)
+                    if !entry.notice.isEmpty {
+                        HStack(spacing: 4) {
+                            Image(systemName: "sparkles")
+                                .font(.system(size: 8))
+                                .foregroundColor(gold)
+                            Text(entry.notice)
+                                .font(.system(size: 9.5, weight: .bold))
+                                .foregroundColor(gold)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.75)
+                        }
+                        .padding(.horizontal, 7)
+                        .padding(.vertical, 3)
+                        .background(
+                            Capsule()
+                                .fill(gold.opacity(0.14))
+                                .overlay(Capsule().strokeBorder(gold.opacity(0.35), lineWidth: 0.7))
+                        )
+                    }
                 }
                 .beyanHomePadding()
             default: // .accessoryRectangular
@@ -2386,33 +2457,44 @@ struct KazaWidgetView: View {
                 }
 
             case .systemSmall:
-                VStack(alignment: .leading, spacing: 6) {
+                let gold = Color(red: 1.0, green: 0.88, blue: 0.52)
+                VStack(alignment: .leading, spacing: 0) {
                     HStack {
                         BeyanAppLogoBadge(size: 18, showTitle: true)
                         Spacer()
                         ZStack {
                             Circle()
-                                .fill(Color(red: 1.0, green: 0.85, blue: 0.45).opacity(0.14))
+                                .fill(Color.white.opacity(0.07))
                                 .frame(width: 24, height: 24)
                             Circle()
-                                .strokeBorder(Color(red: 1.0, green: 0.85, blue: 0.45).opacity(0.35), lineWidth: 0.7)
+                                .strokeBorder(
+                                    LinearGradient(
+                                        colors: [gold.opacity(0.55), Color.white.opacity(0.12)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    ),
+                                    lineWidth: 0.75
+                                )
                                 .frame(width: 24, height: 24)
                             Image(systemName: "clock.arrow.circlepath")
                                 .font(.system(size: 11, weight: .semibold))
-                                .foregroundColor(Color(red: 1.0, green: 0.85, blue: 0.45))
+                                .foregroundColor(gold)
                         }
+                        .shadow(color: gold.opacity(0.15), radius: 3, x: 0, y: 1)
                     }
+
+                    Spacer(minLength: 4)
 
                     VStack(alignment: .leading, spacing: 1) {
                         Text("\(entry.totalPrayers)")
                             .font(.system(size: 26, weight: .black, design: .rounded))
-                            .foregroundColor(Color(red: 1.0, green: 0.87, blue: 0.48))
+                            .foregroundColor(gold)
                         Text(entry.totalPrayers > 0 ? "Kalan Kaza Vakti" : "Tüm Borçlar Bitti ✨")
-                            .font(.system(size: 10, weight: .medium))
-                            .foregroundColor(.white.opacity(0.7))
+                            .font(.system(size: 9.5, weight: .medium))
+                            .foregroundColor(.white.opacity(0.70))
                     }
 
-                    Spacer()
+                    Spacer(minLength: 6)
 
                     VStack(spacing: 3) {
                         HStack {
@@ -2422,7 +2504,7 @@ struct KazaWidgetView: View {
                             Spacer()
                             Text("İ: \(entry.asr)")
                         }
-                        .font(.system(size: 10, weight: .semibold))
+                        .font(.system(size: 9.5, weight: .semibold))
                         .foregroundColor(.white.opacity(0.85))
 
                         HStack {
@@ -2432,14 +2514,21 @@ struct KazaWidgetView: View {
                             Spacer()
                             Text("V: \(entry.vitr)")
                         }
-                        .font(.system(size: 10, weight: .semibold))
+                        .font(.system(size: 9.5, weight: .semibold))
                         .foregroundColor(.white.opacity(0.85))
                     }
-                    .padding(5)
-                    .background(Color.white.opacity(0.08))
-                    .cornerRadius(8)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 5)
+                    .background(
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .fill(Color.white.opacity(0.06))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                    .strokeBorder(Color.white.opacity(0.08), lineWidth: 0.6)
+                            )
+                    )
                 }
-                .padding(12)
+                .beyanHomePadding()
 
             default:
                 EmptyView()
