@@ -1832,11 +1832,6 @@ struct HijriWidgetView: View {
                                 .foregroundColor(gold)
                         }
                     }
-                        Spacer()
-                        Text("۞")
-                            .font(.system(size: 12))
-                            .foregroundColor(gold.opacity(0.85))
-                    }
                     Spacer(minLength: 4)
                     HStack(alignment: .firstTextBaseline, spacing: 5) {
                         Text("\(entry.day)")
