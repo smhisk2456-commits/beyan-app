@@ -317,7 +317,8 @@ class _WorshipRingsCardState extends ConsumerState<WorshipRingsCard>
     Future.delayed(const Duration(milliseconds: 700), () {
       if (mounted) {
         final entry = ref.read(todayWorshipEntryProvider);
-        if (entry.isFullyCompleted) {
+        final streak = ref.read(worshipStreakProvider);
+        if (entry.isFullyCompleted || streak.currentStreak >= 7) {
           AppReviewService.instance.requestReviewIfAppropriate();
         }
       }

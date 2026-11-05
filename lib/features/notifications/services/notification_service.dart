@@ -217,6 +217,8 @@ class NotificationService {
 
       // Günün ayeti bildirimlerini arka planda kontrol et/planla
       await scheduleDailyVerseNotifications();
+      // Gün sonu ibadet halkaları ve seri koruma bildirimini planla (21:30)
+      await scheduleDailyWorshipReminder();
     } catch (e) {
       debugPrint('NotificationService başlatma hatası: $e');
     }
@@ -1133,6 +1135,90 @@ class NotificationService {
     } catch (e) {
       debugPrint('Ayet test bildirimi hatası: $e');
     }
+  }
+
+  static const String keyDailyWorshipReminder = 'daily_worship_reminder_enabled';
+
+  /// Gün sonu ibadet ve halka tamamlama hatırlatıcısı (Her akşam 21:30)
+  Future<void> scheduleDailyWorshipReminder() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final enabled = prefs.getBool(keyDailyWorshipReminder) ?? true;
+      if (!enabled) {
+        await cancelDailyWorshipReminder();
+        return;
+      }
+
+      final langCode = prefs.getString('selected_app_language') ?? 'tr';
+      final now = DateTime.now();
+      final scheduleMode = await _resolveAndroidScheduleMode();
+
+      // iOS bildirim kotasını korumak için önümüzdeki 7 gün planlanır
+      for (int dayOffset = 0; dayOffset < 7; dayOffset++) {
+        final targetDate = DateTime(now.year, now.month, now.day + dayOffset, 21, 30);
+        if (targetDate.isAfter(now)) {
+          final notifId = 7700 + dayOffset;
+          final scheduledTz = tz.TZDateTime.from(targetDate, tz.local);
+
+          String title;
+          String body;
+          switch (langCode) {
+            case 'en':
+              title = 'Your Spiritual Rings Await 🌙';
+              body = 'Complete your prayer, Quran, and dhikr rings to keep your streak going! 🌟';
+              break;
+            case 'ar':
+              title = 'حلقات العبادة في انتظارك 🌙';
+              body = 'أكمل صلواتك ووردك اليومي من القرآن والذكر لتحافظ على تتابعك 🌟';
+              break;
+            case 'tr':
+            default:
+              title = 'İbadet Halkaların Seni Bekliyor 🌙';
+              body = 'Bugünkü ibadet halkalarını tamamlamana çok az kaldı! Serini korumak için Beyân\'a göz at 🌟';
+              break;
+          }
+
+          await _notifications.zonedSchedule(
+            id: notifId,
+            title: title,
+            body: body,
+            scheduledDate: scheduledTz,
+            notificationDetails: const NotificationDetails(
+              android: AndroidNotificationDetails(
+                'beyan_worship_reminder',
+                'Günlük İbadet Hatırlatıcısı',
+                channelDescription: 'Gün sonu ibadet halkaları ve seri koruma bildirimi',
+                importance: Importance.high,
+                priority: Priority.high,
+                playSound: true,
+                enableVibration: true,
+              ),
+              iOS: DarwinNotificationDetails(
+                presentAlert: true,
+                presentBanner: true,
+                presentList: true,
+                presentBadge: true,
+                presentSound: true,
+              ),
+            ),
+            androidScheduleMode: scheduleMode,
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('[NotificationService] scheduleDailyWorshipReminder error: $e');
+    }
+  }
+
+  Future<void> cancelDailyWorshipReminder() async {
+    try {
+      final pending = await _notifications.pendingNotificationRequests();
+      for (final req in pending) {
+        if (req.id >= 7700 && req.id <= 7799) {
+          await _notifications.cancel(id: req.id);
+        }
+      }
+    } catch (_) {}
   }
 }
 

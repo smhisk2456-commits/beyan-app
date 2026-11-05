@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/localization/app_strings.dart';
+import '../../../core/services/app_review_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../settings/screens/settings_screen.dart';
@@ -28,6 +29,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
   int _completedLaps = 0;
   int _verseShuffleOffset = 0;
   int _hapticMode = 1; // 0: Off, 1: Light, 2: Medium, 3: Heavy
+  bool _isFullScreenTapMode = false; // Gözü kapalı / tam ekran dokunuş modu
 
   final ScrollController _chipScrollController = ScrollController();
   late final AnimationController _shakeController;
@@ -260,6 +262,9 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
         _completedLaps++; Future.delayed(const Duration(milliseconds: 100), () => HapticFeedback.mediumImpact());
         HapticFeedback.heavyImpact();
 
+        // 33 / 99 veya hedef tamamlandığında App Store değerlendirmesi tetikle
+        AppReviewService.instance.requestReviewIfAppropriate();
+
         final prevDhikr = _dhikrList[_selectedDhikrIndex];
         final nextIndex = (_selectedDhikrIndex + 1) % _dhikrList.length;
         final nextDhikr = _dhikrList[nextIndex];
@@ -481,7 +486,48 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
         centerTitle: true,
         actions: [
           // Özel zikir ekle butonu (Zikir sekmesinde aktif)
-          if (_activeTab == 0)
+          if (_activeTab == 0) ...[
+            IconButton(
+              icon: Icon(
+                _isFullScreenTapMode ? Icons.touch_app_rounded : Icons.touch_app_outlined,
+                color: _isFullScreenTapMode ? BeyanColors.tone(0xFFFFDF7A) : (isDark ? Colors.white70 : AppColors.textPrimary),
+              ),
+              tooltip: 'Gözü Kapalı / Tam Ekran Dokunma Modu',
+              onPressed: () {
+                HapticFeedback.mediumImpact();
+                setState(() => _isFullScreenTapMode = !_isFullScreenTapMode);
+                ScaffoldMessenger.of(context).clearSnackBars();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    backgroundColor: BeyanColors.tone(0xFF012E2B),
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      side: BorderSide(color: BeyanColors.tone(0xFFD4AF37), width: 1.2),
+                    ),
+                    duration: const Duration(seconds: 2),
+                    content: Row(
+                      children: [
+                        Icon(
+                          _isFullScreenTapMode ? Icons.check_circle_rounded : Icons.info_outline_rounded,
+                          color: BeyanColors.tone(0xFFFFDF7A),
+                          size: 20,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            _isFullScreenTapMode
+                                ? 'Gözü Kapalı Mod Açık: Ekranın herhangi bir yerine dokunarak zikredebilirsiniz.'
+                                : 'Gözü Kapalı Mod Kapatıldı.',
+                            style: TextStyle(color: BeyanColors.tone(0xFFFFDF7A), fontSize: 13),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
             IconButton(
               icon: Icon(
                 Icons.add_circle_outline_rounded,
@@ -490,6 +536,7 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
               tooltip: strings.addCustomDhikr,
               onPressed: _showAddCustomDhikrDialog,
             ),
+          ],
           // Lüks Ayarlar Butonu
           IconButton(
             icon: Icon(
@@ -589,13 +636,67 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
     final activeDhikr = _dhikrList[_selectedDhikrIndex];
     final progress = _target > 0 ? (_count % _target) / _target : 0.0;
 
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 90),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // ── Zikir Seçim Çipleri ─────────────────────────────────
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: _isFullScreenTapMode ? _increment : null,
+      child: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 90),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // ── Gözü Kapalı Mod Bilgilendirme Rozeti ──
+            if (_isFullScreenTapMode)
+              Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.25),
+                      BeyanColors.tone(0xFF012E2B).withValues(alpha: 0.6),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.6),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.touch_app_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 18),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Gözü Kapalı Mod Aktif • Ekranın her yerine dokunabilirsiniz',
+                        style: TextStyle(
+                          color: BeyanColors.tone(0xFFFFDF7A),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        setState(() => _isFullScreenTapMode = false);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.white12,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.white24, width: 0.8),
+                        ),
+                        child: const Text('Kapat', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+            // ── Zikir Seçim Çipleri ─────────────────────────────────
           SizedBox(
             height: 38,
             child: ListView.separated(
@@ -948,8 +1049,9 @@ class _ZikirmatikScreenState extends ConsumerState<ZikirmatikScreen>
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _hapticChip(int mode, String label, bool isDark) {
     final isSelected = _hapticMode == mode;

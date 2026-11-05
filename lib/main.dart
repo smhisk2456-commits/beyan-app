@@ -97,6 +97,7 @@ void main() async {
       await NotificationService.instance.initialize();
       await NotificationService.instance.scheduleUpcomingPrayers();
       await NotificationService.instance.scheduleDailyVerseNotifications();
+      await NotificationService.instance.scheduleDailyWorshipReminder();
     } catch (e) {
       debugPrint('NotificationService başlatma hatası: $e');
     }

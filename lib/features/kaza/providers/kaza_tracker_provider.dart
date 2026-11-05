@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:home_widget/home_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/utils/app_constants.dart';
 import '../models/kaza_tracker_model.dart';
 
 class KazaTrackerNotifier extends StateNotifier<KazaTrackerState> {
@@ -15,6 +17,7 @@ class KazaTrackerNotifier extends StateNotifier<KazaTrackerState> {
       final jsonStr = prefs.getString(_prefsKey);
       if (jsonStr != null && jsonStr.isNotEmpty) {
         state = KazaTrackerState.fromJson(jsonStr);
+        await _syncToWidget();
       }
     } catch (_) {}
   }
@@ -23,6 +26,29 @@ class KazaTrackerNotifier extends StateNotifier<KazaTrackerState> {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_prefsKey, state.toJson());
+      await _syncToWidget();
+    } catch (_) {}
+  }
+
+  Future<void> _syncToWidget() async {
+    try {
+      await HomeWidget.setAppGroupId(AppConstants.appGroupId);
+      await HomeWidget.saveWidgetData<int>('widget_kaza_total', state.totalRemainingPrayers);
+      await HomeWidget.saveWidgetData<int>('widget_kaza_fajr', state.getCount(KazaType.fajr));
+      await HomeWidget.saveWidgetData<int>('widget_kaza_dhuhr', state.getCount(KazaType.dhuhr));
+      await HomeWidget.saveWidgetData<int>('widget_kaza_asr', state.getCount(KazaType.asr));
+      await HomeWidget.saveWidgetData<int>('widget_kaza_maghrib', state.getCount(KazaType.maghrib));
+      await HomeWidget.saveWidgetData<int>('widget_kaza_isha', state.getCount(KazaType.isha));
+      await HomeWidget.saveWidgetData<int>('widget_kaza_vitr', state.getCount(KazaType.witr));
+      await HomeWidget.saveWidgetData<int>('widget_kaza_fasting', state.getCount(KazaType.fasting));
+
+      final summary = 'S:${state.getCount(KazaType.fajr)} Ö:${state.getCount(KazaType.dhuhr)} İ:${state.getCount(KazaType.asr)} A:${state.getCount(KazaType.maghrib)} Y:${state.getCount(KazaType.isha)}';
+      await HomeWidget.saveWidgetData<String>('widget_kaza_summary', summary);
+
+      await HomeWidget.updateWidget(
+        name: 'BeyanKazaWidget',
+        iOSName: 'BeyanKazaWidget',
+      );
     } catch (_) {}
   }
 

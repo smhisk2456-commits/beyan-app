@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_widget/home_widget.dart';
 import '../../features/quran/repositories/quran_repository.dart';
 import '../../features/quran/screens/surah_detail_screen.dart';
+import '../../features/kaza/screens/kaza_tracker_screen.dart';
 import '../widgets/luxury_page_route.dart';
 import '../../main.dart';
 
@@ -78,6 +79,14 @@ class DeepLinkService {
       final host = uri.host.toLowerCase();
       final isPrayer = host == 'prayer' || (host.isEmpty && uri.pathSegments.firstOrNull == 'prayer');
       final isVerse = host == 'verse' || (host.isEmpty && uri.pathSegments.firstOrNull == 'verse');
+      final isKaza = host == 'kaza' || (host.isEmpty && uri.pathSegments.firstOrNull == 'kaza');
+
+      if (isKaza && context.mounted) {
+        Navigator.of(context).push(
+          LuxuryPageRoute(page: const KazaTrackerScreen()),
+        );
+        return;
+      }
 
       if (!isPrayer && !isVerse) {
         _isHandling = false;

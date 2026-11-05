@@ -2200,6 +2200,186 @@ struct BeyanLiveActivity: Widget {
     }
 }
 
+// MARK: - Kaza Namazı & Oruç Borcu Widget'ı
+
+struct KazaEntry: TimelineEntry {
+    let date: Date
+    let totalPrayers: Int
+    let fajr: Int
+    let dhuhr: Int
+    let asr: Int
+    let maghrib: Int
+    let isha: Int
+    let vitr: Int
+    let fasting: Int
+    let summary: String
+}
+
+struct KazaProvider: TimelineProvider {
+    private static let appGroupId = "group.com.smhisk60.beyan"
+
+    private func readEntry(at date: Date) -> KazaEntry {
+        let defaults = UserDefaults(suiteName: KazaProvider.appGroupId) ?? UserDefaults.standard
+        let total = defaults.integer(forKey: "widget_kaza_total")
+        let fajr = defaults.integer(forKey: "widget_kaza_fajr")
+        let dhuhr = defaults.integer(forKey: "widget_kaza_dhuhr")
+        let asr = defaults.integer(forKey: "widget_kaza_asr")
+        let maghrib = defaults.integer(forKey: "widget_kaza_maghrib")
+        let isha = defaults.integer(forKey: "widget_kaza_isha")
+        let vitr = defaults.integer(forKey: "widget_kaza_vitr")
+        let fasting = defaults.integer(forKey: "widget_kaza_fasting")
+        let summary = defaults.string(forKey: "widget_kaza_summary") ?? "Kaza takibi hazır"
+
+        return KazaEntry(
+            date: date,
+            totalPrayers: total,
+            fajr: fajr,
+            dhuhr: dhuhr,
+            asr: asr,
+            maghrib: maghrib,
+            isha: isha,
+            vitr: vitr,
+            fasting: fasting,
+            summary: summary
+        )
+    }
+
+    func placeholder(in context: Context) -> KazaEntry {
+        KazaEntry(date: Date(), totalPrayers: 42, fajr: 7, dhuhr: 7, asr: 7, maghrib: 7, isha: 7, vitr: 7, fasting: 3, summary: "S:7 Ö:7 İ:7 A:7 Y:7")
+    }
+
+    func getSnapshot(in context: Context, completion: @escaping (KazaEntry) -> Void) {
+        completion(readEntry(at: Date()))
+    }
+
+    func getTimeline(in context: Context, completion: @escaping (Timeline<KazaEntry>) -> Void) {
+        let entry = readEntry(at: Date())
+        let nextUpdate = Calendar.current.date(byAdding: .minute, value: 30, to: Date()) ?? Date().addingTimeInterval(1800)
+        completion(Timeline(entries: [entry], policy: .after(nextUpdate)))
+    }
+}
+
+struct KazaWidgetView: View {
+    @Environment(\.widgetFamily) var family
+    let entry: KazaEntry
+
+    var body: some View {
+        Group {
+            switch family {
+            case .accessoryCircular:
+                ZStack {
+                    AccessoryWidgetBackground()
+                    VStack(spacing: 1) {
+                        Image(systemName: "clock.arrow.circlepath")
+                            .font(.system(size: 11, weight: .bold))
+                        Text("\(entry.totalPrayers)")
+                            .font(.system(size: 14, weight: .black, design: .rounded))
+                            .minimumScaleFactor(0.7)
+                        Text("KAZA")
+                            .font(.system(size: 8, weight: .bold))
+                            .foregroundColor(.secondary)
+                    }
+                }
+                .widgetAccentable()
+
+            case .accessoryRectangular:
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "checkmark.seal.fill")
+                            .font(.system(size: 10, weight: .bold))
+                        Text("Kaza Borcu: \(entry.totalPrayers) Vakit")
+                            .font(.system(size: 11, weight: .bold))
+                    }
+                    Text("Sabah:\(entry.fajr) • Öğle:\(entry.dhuhr) • İkindi:\(entry.asr)")
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundColor(.secondary)
+                    Text("Akşam:\(entry.maghrib) • Yatsı:\(entry.isha) • Vitir:\(entry.vitr)")
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundColor(.secondary)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .widgetAccentable()
+
+            case .accessoryInline:
+                HStack {
+                    Image(systemName: "clock.arrow.circlepath")
+                    Text("Kaza: \(entry.totalPrayers) Vakit Kaldı")
+                }
+
+            case .systemSmall:
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack {
+                        HStack(spacing: 4) {
+                            Image(systemName: "clock.arrow.circlepath")
+                                .font(.system(size: 12, weight: .bold))
+                                .foregroundColor(Color(red: 1.0, green: 0.85, blue: 0.45))
+                            Text("Kaza Takibi")
+                                .font(.system(size: 12, weight: .bold))
+                                .foregroundColor(.white)
+                        }
+                        Spacer()
+                    }
+
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text("\(entry.totalPrayers)")
+                            .font(.system(size: 26, weight: .black, design: .rounded))
+                            .foregroundColor(Color(red: 1.0, green: 0.87, blue: 0.48))
+                        Text(entry.totalPrayers > 0 ? "Kalan Kaza Vakti" : "Tüm Borçlar Bitti ✨")
+                            .font(.system(size: 10, weight: .medium))
+                            .foregroundColor(.white.opacity(0.7))
+                    }
+
+                    Spacer()
+
+                    VStack(spacing: 3) {
+                        HStack {
+                            Text("S: \(entry.fajr)")
+                            Spacer()
+                            Text("Ö: \(entry.dhuhr)")
+                            Spacer()
+                            Text("İ: \(entry.asr)")
+                        }
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundColor(.white.opacity(0.85))
+
+                        HStack {
+                            Text("A: \(entry.maghrib)")
+                            Spacer()
+                            Text("Y: \(entry.isha)")
+                            Spacer()
+                            Text("V: \(entry.vitr)")
+                        }
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundColor(.white.opacity(0.85))
+                    }
+                    .padding(5)
+                    .background(Color.white.opacity(0.08))
+                    .cornerRadius(8)
+                }
+                .padding(12)
+
+            default:
+                EmptyView()
+            }
+        }
+        .beyanWidgetBackground(for: family)
+        .widgetURL(URL(string: "beyan://kaza"))
+    }
+}
+
+struct BeyanKazaWidget: Widget {
+    let kind = "BeyanKazaWidget"
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: KazaProvider()) { entry in
+            KazaWidgetView(entry: entry)
+        }
+        .configurationDisplayName("Kaza Namazı & Oruç")
+        .description("Kilit ve ana ekranda kalan kaza namazı borçlarınızı takip edin.")
+        .supportedFamilies([.accessoryRectangular, .accessoryInline, .accessoryCircular, .systemSmall])
+    }
+}
+
 // MARK: - Bundle
 
 @main
@@ -2211,6 +2391,7 @@ struct BeyanWidgetBundle: WidgetBundle {
         BeyanCountdownWidget()
         BeyanHijriWidget()
         BeyanSunWidget()
+        BeyanKazaWidget()
         if #available(iOSApplicationExtension 16.1, *) {
             BeyanLiveActivity()
         }
