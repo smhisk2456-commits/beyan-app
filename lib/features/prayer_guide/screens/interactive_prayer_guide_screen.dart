@@ -22,6 +22,7 @@ class _InteractivePrayerGuideScreenState
     extends State<InteractivePrayerGuideScreen> {
   late int _activeTab;
   int _selectedVakitIndex = 0;
+  String _duaSearchQuery = '';
 
   @override
   void initState() {
@@ -379,12 +380,51 @@ class _InteractivePrayerGuideScreenState
   // ════════════════════════════════════════════════════════════════
   Widget _buildDuasLibraryTab() {
     final gold = BeyanColors.tone(0xFFFFDF7A);
+    final goldPrimary = BeyanColors.tone(0xFFD4AF37);
     final cardBg = BeyanColors.tone(0xFF072620);
+
+    final filteredDuas = _duaSearchQuery.isEmpty
+        ? NamazDuaItem.allDuas
+        : NamazDuaItem.allDuas.where((d) {
+            final q = _duaSearchQuery;
+            return d.title.toLowerCase().contains(q) ||
+                   d.subtitle.toLowerCase().contains(q) ||
+                   d.transliteration.toLowerCase().contains(q) ||
+                   d.meaning.toLowerCase().contains(q);
+          }).toList();
 
     return ListView(
       physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(18, 8, 18, 30),
       children: [
+        // Arama Kutusu
+        TextField(
+          onChanged: (val) => setState(() => _duaSearchQuery = val.trim().toLowerCase()),
+          style: const TextStyle(color: Colors.white, fontSize: 13.5),
+          decoration: InputDecoration(
+            hintText: 'Dua veya sûre ara (örn: Kunut, Sübhaneke)...',
+            hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 12.5),
+            prefixIcon: Icon(Icons.search_rounded, color: gold, size: 20),
+            filled: true,
+            fillColor: cardBg.withValues(alpha: 0.7),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: goldPrimary),
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 12),
+
         Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
@@ -408,7 +448,18 @@ class _InteractivePrayerGuideScreenState
 
         const SizedBox(height: 12),
 
-        ...NamazDuaItem.allDuas.map((item) => _buildDuaCard(item)),
+        if (filteredDuas.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 40),
+            child: Center(
+              child: Text(
+                'Aradığınız dua veya sûre bulunamadı.',
+                style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 13),
+              ),
+            ),
+          )
+        else
+          ...filteredDuas.map((item) => _buildDuaCard(item)),
       ],
     );
   }

@@ -36,6 +36,7 @@ import '../../zikr/screens/zikirmatik_screen.dart';
 import '../../monetization/providers/premium_provider.dart';
 import '../../monetization/screens/premium_paywall_sheet.dart';
 import '../widgets/worship_rings_card.dart';
+import '../../kaza/providers/kaza_tracker_provider.dart';
 import '../../kaza/screens/kaza_tracker_screen.dart';
 import '../../prayer_guide/screens/interactive_prayer_guide_screen.dart';
 
@@ -677,6 +678,10 @@ class _SpiritualLifeHub extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final hour = DateTime.now().hour;
     final isMorning = hour >= 4 && hour < 15;
+    final kazaState = ref.watch(kazaTrackerProvider);
+    final kazaSubtitle = kazaState.totalRemainingPrayers > 0
+        ? 'Kalan: ${kazaState.totalRemainingPrayers} Vakit'
+        : (kazaState.totalInitialPrayers > 0 ? 'Tüm Borçlar Bitti ✨' : 'Borç Hesapla & Takip');
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 10, 20, 8),
@@ -848,7 +853,7 @@ class _SpiritualLifeHub extends ConsumerWidget {
               Expanded(
                 child: _HubCard(
                   title: 'Kaza Namazı Takibi',
-                  subtitle: 'Borç Hesapla & Takip',
+                  subtitle: kazaSubtitle,
                   badge: 'KAZA 📊',
                   icon: Icons.calculate_rounded,
                   isDark: isDark,

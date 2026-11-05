@@ -596,7 +596,9 @@ class _KazaTrackerScreenState extends ConsumerState<KazaTrackerScreen> {
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    count > 0 ? '+1 Kıldım' : 'Bitti',
+                    count > 0
+                        ? (type == KazaType.fasting ? '+1 Tuttum' : '+1 Kıldım')
+                        : 'Bitti',
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
