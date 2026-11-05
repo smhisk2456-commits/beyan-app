@@ -1187,6 +1187,8 @@ class AppStrings {
   String get lockscreenWidgetsTitle => _t('lockscreenWidgetsTitle', 'Kilit Ekranı & Widget Tercihleri', 'Lock Screen & Widget Settings', 'شاشة القفل وإعدادات الويدجت');
   String get lockscreenWidgetsSubtitle => _t('lockscreenWidgetsSubtitle', 'Yenileme sıklığı ve widget görünüm ayarları', 'Refresh interval and widget style options', 'تكرار التحديث وخيارات مظهر الويدجت');
   String get aboutAndShareSection => _t('aboutAndShareSection', 'Hakkında & Paylaş', 'About & Share', 'حول التطبيق والمشاركة');
+  String get rateAppTitle => _t('rateAppTitle', 'Beyan\'a 5 Yildiz Ver', 'Rate Beyan 5 Stars', 'Rate App');
+  String get rateAppSubtitle => _t('rateAppSubtitle', 'Gelisimimize ve hayra vesile olmamiza destek verin', 'Support our development and ongoing mission', 'Support App');
   String get shareBeyanTitle => _t('shareBeyanTitle', 'Beyân\'ı Sevdiklerinle Paylaş', 'Share Beyân with Loved Ones', 'شارك تطبيق بيان مع أحبائك');
   String get shareBeyanSubtitle => _t('shareBeyanSubtitle', 'Sadaka-i cariye niyetiyle hayra vesile ol', 'Be a means of goodness as ongoing charity', 'كن مفتاحاً للخير وصدقة جارية');
   String get shareAppMessage => _t('shareAppMessage', 'Namaz vakitleri, kilit ekranı ayet widget\'ları ve tarihi ezan makamları içeren Beyân uygulamasını keşfedin: https://testflight.apple.com/join/Q3UDfndV', 'Discover Beyân with accurate prayer times, lock screen Quran widgets, and authentic adhan makams: https://testflight.apple.com/join/Q3UDfndV', 'اكتشف تطبيق بيان لأوقات الصلاة وأدوات آيات شاشة القفل ومقامات الأذان: https://testflight.apple.com/join/Q3UDfndV');
