@@ -28,6 +28,7 @@ import 'features/quran/widgets/quran_audio_player_bar.dart';
 import 'features/notifications/widgets/adhan_audio_player_bar.dart';
 import 'core/widgets/luxury_floating_dock.dart';
 import 'core/services/deep_link_service.dart';
+import 'core/services/app_review_service.dart';
 import 'features/monetization/widgets/beyan_banner_ad_widget.dart';
 
 void main() async {
@@ -104,6 +105,7 @@ void main() async {
     try {
       await PremiumService.instance.initialize();
       await AdService.instance.initialize();
+      await AppReviewService.instance.recordAppOpen();
     } catch (e) {
       debugPrint('Monetization servisleri başlatma hatası: $e');
     }

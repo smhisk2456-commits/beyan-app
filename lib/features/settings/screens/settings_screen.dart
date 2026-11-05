@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
+import '../../../core/services/app_review_service.dart';
 import '../../../core/localization/app_strings.dart';
 import '../../../core/localization/language_selector_sheet.dart';
 import '../../../core/theme/app_theme.dart';
@@ -362,12 +362,7 @@ class SettingsScreen extends ConsumerWidget {
                 subtitle: strings.rateAppSubtitle,
                 onTap: () async {
                   HapticFeedback.mediumImpact();
-                  final uri = Uri.parse(
-                    'https://apps.apple.com/app/id6820956134?action=write-review',
-                  );
-                  try {
-                    await launchUrl(uri, mode: LaunchMode.externalApplication);
-                  } catch (_) {}
+                  await AppReviewService.instance.requestReviewOrOpenStore();
                 },
               ),
               _buildDivider(),

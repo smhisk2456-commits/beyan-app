@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/beyan_colors.dart';
+import '../../../core/services/app_review_service.dart';
 import '../../zikr/models/worship_tracker_model.dart';
 
 /// Apple Fitness & Duolingo Tarzı 3'lü Lüks İbadet Halkası ve Günlük Seri Kartı
@@ -313,6 +314,14 @@ class _WorshipRingsCardState extends ConsumerState<WorshipRingsCard>
     HapticFeedback.lightImpact();
     notifier.toggleHabit(habitKey: key);
     _animController.forward(from: 0.6);
+    Future.delayed(const Duration(milliseconds: 700), () {
+      if (mounted) {
+        final entry = ref.read(todayWorshipEntryProvider);
+        if (entry.isFullyCompleted) {
+          AppReviewService.instance.requestReviewIfAppropriate();
+        }
+      }
+    });
   }
 
   Widget _ringLegendRow({

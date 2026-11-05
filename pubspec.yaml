@@ -57,6 +57,7 @@ dependencies:
   flutter_tts: ^4.2.5
   flutter_secure_storage: ^11.2.0
   geomag: ^0.3.0
+  in_app_review: ^2.0.12
 
 dev_dependencies:
   flutter_test:
