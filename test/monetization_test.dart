@@ -66,6 +66,11 @@ void main() {
       expect(AdService.iosTestRewardedInterstitialId, isNotEmpty);
       expect(AdService.androidTestRewardedInterstitialId, isNotEmpty);
 
+      // Yerel Gelişmiş (Native Advanced) reklam ID kontrolü
+      expect(AdService.iosNativeAdUnitId, 'ca-app-pub-1904469452707859/3374454909');
+      expect(AdService.iosTestNativeId, isNotEmpty);
+      expect(AdService.androidTestNativeId, isNotEmpty);
+
       // Geçici reklamsız kullanım testi
       s1.updateAdFreeStatus(false);
       expect(s1.isAdFree, isFalse);

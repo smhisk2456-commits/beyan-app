@@ -99,6 +99,33 @@ class AdService {
     return '';
   }
 
+  // ── YEREL GELİŞMİŞ (NATIVE ADVANCED) REKLAM KİMLİKLERİ ───────────────────────
+  static const String iosTestNativeId = 'ca-app-pub-3940256099942544/3986624511';
+  static const String androidTestNativeId = 'ca-app-pub-3940256099942544/2247696110';
+  static const String iosNativeAdUnitId = 'ca-app-pub-1904469452707859/3374454909';
+
+  /// Resmi Google Test Yerel Reklam Ad Unit ID'si
+  String get testNativeAdUnitId {
+    if (Platform.isAndroid) return androidTestNativeId;
+    if (Platform.isIOS) return iosTestNativeId;
+    return '';
+  }
+
+  /// Platforma göre Yerel Gelişmiş Reklam Birimi Kimliği (Ad Unit ID).
+  String get nativeAdUnitId {
+    if (kDebugMode) {
+      return testNativeAdUnitId;
+    }
+
+    // Canlı Prodüksiyon ID'leri
+    if (Platform.isAndroid) {
+      return androidTestNativeId;
+    } else if (Platform.isIOS) {
+      return iosNativeAdUnitId;
+    }
+    return '';
+  }
+
   // ── ÖDÜLLÜ GEÇİŞ (REWARDED INTERSTITIAL) REKLAM KİMLİKLERİ ──────────────────
   static const String iosTestRewardedInterstitialId = 'ca-app-pub-3940256099942544/6978759866';
   static const String androidTestRewardedInterstitialId = 'ca-app-pub-3940256099942544/5354046379';

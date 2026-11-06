@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/localization/app_strings.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../monetization/widgets/banner_ad_widget.dart';
+import '../../monetization/widgets/beyan_native_ad_card.dart';
 import '../../quran/services/quran_audio_service.dart';
 import '../../quran/providers/quran_providers.dart';
 import '../../quran/widgets/quran_audio_player_bar.dart';
@@ -680,9 +681,10 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
       addRepaintBoundaries: true,
       padding: EdgeInsets.fromLTRB(16, 4, 16, bottomPadding),
       children: [
-        for (final cat in DuaCategory.values) ...[
+        for (var i = 0; i < DuaCategory.values.length; i++) ...[
           Builder(
             builder: (context) {
+              final cat = DuaCategory.values[i];
               final catDuas = duas.where((d) => d.category == cat).toList();
               if (catDuas.isEmpty) return const SizedBox.shrink();
               return Column(
@@ -699,6 +701,11 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
                     },
                   ),
                   ...catDuas.map((dua) => _DuaCardItem(dua: dua, isDark: isDark)),
+                  if (i == 1)
+                    const BeyanNativeAdCard(
+                      isSmall: false,
+                      margin: EdgeInsets.symmetric(vertical: 12),
+                    ),
                 ],
               );
             },

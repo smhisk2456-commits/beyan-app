@@ -3,6 +3,7 @@ import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/localization/app_strings.dart';
+import '../../monetization/widgets/beyan_native_ad_card.dart';
 import '../models/religious_day_model.dart';
 import '../services/hijri_calendar_service.dart';
 
@@ -185,9 +186,14 @@ class HijriCalendarScreen extends ConsumerWidget {
           const SizedBox(height: 12),
 
           // ── Dini Gün Kartları ─────────────────────────────────────────
-          ...upcomingDays.map((item) {
-            return _ReligiousDayCard(item: item, isDark: isDark);
-          }),
+          for (var i = 0; i < upcomingDays.length; i++) ...[
+            _ReligiousDayCard(item: upcomingDays[i], isDark: isDark),
+            if (i == 1)
+              const BeyanNativeAdCard(
+                isSmall: true,
+                margin: EdgeInsets.symmetric(vertical: 8),
+              ),
+          ],
         ],
       ),
     );

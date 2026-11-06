@@ -10,6 +10,7 @@ import '../../../core/theme/theme_provider.dart';
 import '../../../core/widgets/common_widgets.dart' as app_widgets;
 import '../../home/widgets/surah_list_item.dart';
 import '../../monetization/widgets/banner_ad_widget.dart';
+import '../../monetization/widgets/beyan_native_ad_card.dart';
 import '../../ramadan/models/khatam_tracker_model.dart';
 import '../../settings/screens/settings_screen.dart';
 import '../../dua/screens/dua_library_screen.dart';
@@ -670,12 +671,18 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
     return ListView.builder(
       padding: const EdgeInsets.only(bottom: 90, top: 2),
       physics: const BouncingScrollPhysics(),
-      itemExtent: 74.0,
       scrollCacheExtent: const ScrollCacheExtent.viewport(2.0),
       addRepaintBoundaries: true,
-      itemCount: filtered.length,
+      itemCount: filtered.length + (filtered.length >= 20 ? 1 : 0),
       itemBuilder: (context, index) {
-        final surah = filtered[index];
+        if (filtered.length >= 20 && index == 20) {
+          return const BeyanNativeAdCard(
+            isSmall: true,
+            margin: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+          );
+        }
+        final actualIndex = (filtered.length >= 20 && index > 20) ? index - 1 : index;
+        final surah = filtered[actualIndex];
         return SurahListItem(
           surah: surah,
           langCode: strings.language.code,
