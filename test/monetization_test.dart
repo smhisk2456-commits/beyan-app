@@ -98,20 +98,48 @@ void main() {
       expect(service.isTrialActive, isTrue);
     });
 
-    test('AiAssistantNotifier.grantBonusQuestions ödüllü reklam sonrası soru hakkını doğru artırmalı', () async {
+    test('AiAssistantNotifier.grantBonusQuestions her video izlendiğinde +1 soru hakkı eklemeli', () async {
       final todayStr = DateTime.now().toIso8601String().substring(0, 10);
       SharedPreferences.setMockInitialValues({
         'beyan_ai_daily_count': 3,
-        'beyan_ai_daily_date': todayStr,
+        'beyan_ai_cycle_date': todayStr,
       });
 
       final notifier = AiAssistantNotifier();
       await notifier.refreshQuota(false);
       expect(notifier.state.remainingQuestions, 0);
 
-      // +3 Soru hakkı ver
-      await notifier.grantBonusQuestions(3);
-      expect(notifier.state.remainingQuestions, 3);
+      // İlk video izlendiğinde +1 soru
+      await notifier.grantBonusQuestions(1);
+      expect(notifier.state.remainingQuestions, 1);
+
+      // İkinci video izlendiğinde +1 daha (toplam 2)
+      await notifier.grantBonusQuestions(1);
+      expect(notifier.state.remainingQuestions, 2);
+    });
+
+    test('Beyân AI 3 günde bir 3 ücretsiz soruyu sıfırlamalı', () async {
+      final now = DateTime.now();
+      final twoDaysAgo = now.subtract(const Duration(days: 2)).toIso8601String().substring(0, 10);
+      final fourDaysAgo = now.subtract(const Duration(days: 4)).toIso8601String().substring(0, 10);
+
+      // 1. Durum: 2 gün geçti (< 3 gün), haklar hala bitmiş kalmalı
+      SharedPreferences.setMockInitialValues({
+        'beyan_ai_daily_count': 3,
+        'beyan_ai_cycle_date': twoDaysAgo,
+      });
+      final notifier1 = AiAssistantNotifier();
+      await notifier1.refreshQuota(false);
+      expect(notifier1.state.remainingQuestions, 0);
+
+      // 2. Durum: 4 gün geçti (>= 3 gün), 3 ücretsiz soru yeniden tanımlanmalı
+      SharedPreferences.setMockInitialValues({
+        'beyan_ai_daily_count': 3,
+        'beyan_ai_cycle_date': fourDaysAgo,
+      });
+      final notifier2 = AiAssistantNotifier();
+      await notifier2.refreshQuota(false);
+      expect(notifier2.state.remainingQuestions, 3);
     });
   });
 }

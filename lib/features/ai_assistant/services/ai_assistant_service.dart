@@ -65,8 +65,12 @@ class AiAssistantState {
 class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
   static const String _prefKeyCount = 'beyan_ai_daily_count';
   static const String _prefKeyDate = 'beyan_ai_daily_date';
+  static const String _prefKeyCycleDate = 'beyan_ai_cycle_date';
+  static const String _prefKeyBonus = 'beyan_ai_bonus_count';
   static const String _prefKeyGeminiKey = 'beyan_gemini_api_key';
   static const int freeDailyLimit = 3;
+  static const int freeCycleLimit = 3;
+  static const int cycleDurationDays = 3;
 
   static const _secureStorage = FlutterSecureStorage(
     iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock_this_device),
@@ -154,16 +158,39 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
 
     try {
       final prefs = await SharedPreferences.getInstance();
-      final todayStr = DateTime.now().toIso8601String().substring(0, 10);
-      final lastDate = prefs.getString(_prefKeyDate);
-      if (lastDate != todayStr) {
-        return freeDailyLimit;
+      final now = DateTime.now();
+      final todayStr = now.toIso8601String().substring(0, 10);
+      final cycleDateStr = prefs.getString(_prefKeyCycleDate) ?? prefs.getString(_prefKeyDate);
+
+      int usedCount = 0;
+      if (cycleDateStr != null) {
+        final cycleStartDate = DateTime.tryParse(cycleDateStr);
+        if (cycleStartDate != null) {
+          final daysPassed = DateTime(now.year, now.month, now.day)
+              .difference(DateTime(cycleStartDate.year, cycleStartDate.month, cycleStartDate.day))
+              .inDays;
+          if (daysPassed >= cycleDurationDays) {
+            // 3 günlük döngü tamamlandı: 3 ücretsiz soru hakkı sıfırlanır
+            await prefs.setString(_prefKeyCycleDate, todayStr);
+            await prefs.setInt(_prefKeyCount, 0);
+            usedCount = 0;
+          } else {
+            usedCount = prefs.getInt(_prefKeyCount) ?? 0;
+          }
+        } else {
+          await prefs.setString(_prefKeyCycleDate, todayStr);
+          await prefs.setInt(_prefKeyCount, 0);
+        }
+      } else {
+        await prefs.setString(_prefKeyCycleDate, todayStr);
+        await prefs.setInt(_prefKeyCount, 0);
       }
-      final count = prefs.getInt(_prefKeyCount) ?? 0;
-      final remaining = freeDailyLimit - count;
-      return remaining < 0 ? 0 : remaining;
+
+      final bonusCount = prefs.getInt(_prefKeyBonus) ?? 0;
+      final freeRemaining = (freeCycleLimit - usedCount).clamp(0, freeCycleLimit);
+      return freeRemaining + bonusCount;
     } catch (_) {
-      return freeDailyLimit;
+      return freeCycleLimit;
     }
   }
 
@@ -174,23 +201,17 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
     return remaining > 0;
   }
 
-  /// Ödüllü video izleme karşılığı bonus soru hakkı tanımlar
-  Future<void> grantBonusQuestions(int bonusCount) async {
+  /// Ödüllü video izleme karşılığı bonus soru hakkı tanımlar (+1)
+  Future<void> grantBonusQuestions([int bonusCount = 1]) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final todayStr = DateTime.now().toIso8601String().substring(0, 10);
-      final lastDate = prefs.getString(_prefKeyDate);
-      int count = 0;
-      if (lastDate == todayStr) {
-        count = prefs.getInt(_prefKeyCount) ?? 0;
-      }
-      final newCount = (count - bonusCount).clamp(0, 999);
-      await prefs.setString(_prefKeyDate, todayStr);
-      await prefs.setInt(_prefKeyCount, newCount);
+      final currentBonus = prefs.getInt(_prefKeyBonus) ?? 0;
+      final newBonus = currentBonus + bonusCount;
+      await prefs.setInt(_prefKeyBonus, newBonus);
 
-      final newRemaining = freeDailyLimit - newCount;
+      final totalRemaining = await getRemainingQuota(false);
       state = state.copyWith(
-        remainingQuestions: newRemaining > 0 ? newRemaining : 0,
+        remainingQuestions: totalRemaining,
         clearError: true,
       );
     } catch (_) {}
@@ -199,14 +220,14 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
   Future<void> _incrementQuotaUsage() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final todayStr = DateTime.now().toIso8601String().substring(0, 10);
-      final lastDate = prefs.getString(_prefKeyDate);
-      int count = 0;
-      if (lastDate == todayStr) {
-        count = prefs.getInt(_prefKeyCount) ?? 0;
+      final bonusCount = prefs.getInt(_prefKeyBonus) ?? 0;
+      final usedCount = prefs.getInt(_prefKeyCount) ?? 0;
+
+      if (usedCount < freeCycleLimit) {
+        await prefs.setInt(_prefKeyCount, usedCount + 1);
+      } else if (bonusCount > 0) {
+        await prefs.setInt(_prefKeyBonus, bonusCount - 1);
       }
-      await prefs.setString(_prefKeyDate, todayStr);
-      await prefs.setInt(_prefKeyCount, count + 1);
     } catch (_) {}
   }
 
@@ -217,7 +238,7 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
     final allowed = await canAskQuestion(isPremium);
     if (!allowed) {
       state = state.copyWith(
-        errorMessage: 'Günlük 3 ücretsiz soru hakkınız tamamlandı. Soru sınırını tamamen kaldırmak için Beyân Pro\'ya geçebilirsiniz.',
+        errorMessage: '3 günde bir yenilenen 3 ücretsiz soru hakkınız tamamlandı. Video izleyerek soru hakkı kazanabilir veya sınırsız erişim için Beyân Pro\'ya geçebilirsiniz.',
       );
       return false;
     }
