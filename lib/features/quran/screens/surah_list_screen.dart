@@ -668,20 +668,35 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
       }
     }).toList();
 
+    final hasFirstAd = filtered.length >= 6;
+    final hasSecondAd = filtered.length >= 25;
+    final extraAds = (hasFirstAd ? 1 : 0) + (hasSecondAd ? 1 : 0);
+
     return ListView.builder(
       padding: const EdgeInsets.only(bottom: 90, top: 2),
       physics: const BouncingScrollPhysics(),
       scrollCacheExtent: const ScrollCacheExtent.viewport(2.0),
       addRepaintBoundaries: true,
-      itemCount: filtered.length + (filtered.length >= 20 ? 1 : 0),
+      itemCount: filtered.length + extraAds,
       itemBuilder: (context, index) {
-        if (filtered.length >= 20 && index == 20) {
+        if (hasFirstAd && index == 6) {
           return const BeyanNativeAdCard(
             isSmall: true,
             margin: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
           );
         }
-        final actualIndex = (filtered.length >= 20 && index > 20) ? index - 1 : index;
+        if (hasSecondAd && index == 26) {
+          return const BeyanNativeAdCard(
+            isSmall: true,
+            margin: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+          );
+        }
+        var actualIndex = index;
+        if (hasSecondAd && index > 26) {
+          actualIndex -= 2;
+        } else if (hasFirstAd && index > 6) {
+          actualIndex -= 1;
+        }
         final surah = filtered[actualIndex];
         return SurahListItem(
           surah: surah,

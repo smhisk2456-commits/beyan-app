@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +10,7 @@ import '../services/ad_service.dart';
 
 /// Beyân Arayüzüne Tam Uyumlu Yerel Gelişmiş (Native Advanced) Reklam Kartı
 /// Zümrüt yeşili, altın sarısı ve buzlu cam paletiyle liste akışında organik durur.
-/// Premium kullanıcılarda veya reklam yüklenemediğinde sıfır piksel yer kaplar.
+/// Premium kullanıcılarda sıfır piksel yer kaplar.
 class BeyanNativeAdCard extends ConsumerStatefulWidget {
   /// true ise kompakt liste öğesi boyutu (96px), false ise zengin kart boyutu (340px)
   final bool isSmall;
@@ -29,6 +30,7 @@ class _BeyanNativeAdCardState extends ConsumerState<BeyanNativeAdCard> {
   NativeAd? _nativeAd;
   bool _isLoaded = false;
   bool _isLoading = false;
+  Timer? _retryTimer;
 
   @override
   void initState() {
@@ -40,12 +42,14 @@ class _BeyanNativeAdCardState extends ConsumerState<BeyanNativeAdCard> {
 
   @override
   void dispose() {
+    _retryTimer?.cancel();
+    _retryTimer = null;
     _nativeAd?.dispose();
     _nativeAd = null;
     super.dispose();
   }
 
-  void _loadNativeAd() {
+  void _loadNativeAd({bool isFallback = false}) {
     if (!mounted) return;
     final isPremium = ref.read(premiumProvider).isPremium;
     if (isPremium || !AdService.kAdsEnabled || AdService.instance.isAdFree) {
@@ -61,9 +65,14 @@ class _BeyanNativeAdCardState extends ConsumerState<BeyanNativeAdCard> {
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final adUnitId = kDebugMode
+    final adUnitId = (isFallback || kDebugMode)
         ? AdService.instance.testNativeAdUnitId
         : AdService.instance.nativeAdUnitId;
+
+    if (adUnitId.isEmpty) {
+      _isLoading = false;
+      return;
+    }
 
     _nativeAd = NativeAd(
       adUnitId: adUnitId,
@@ -94,7 +103,7 @@ class _BeyanNativeAdCardState extends ConsumerState<BeyanNativeAdCard> {
       ),
       listener: NativeAdListener(
         onAdLoaded: (ad) {
-          debugPrint('BeyanNativeAdCard başarıyla yüklendi.');
+          debugPrint('BeyanNativeAdCard başarıyla yüklendi (isFallback: $isFallback).');
           if (mounted) {
             setState(() {
               _isLoaded = true;
@@ -103,7 +112,7 @@ class _BeyanNativeAdCardState extends ConsumerState<BeyanNativeAdCard> {
           }
         },
         onAdFailedToLoad: (ad, error) {
-          debugPrint('BeyanNativeAdCard yükleme hatası: $error');
+          debugPrint('BeyanNativeAdCard yükleme hatası (isFallback: $isFallback): $error');
           ad.dispose();
           _nativeAd = null;
           if (mounted) {
@@ -111,6 +120,12 @@ class _BeyanNativeAdCardState extends ConsumerState<BeyanNativeAdCard> {
               _isLoaded = false;
               _isLoading = false;
             });
+
+            // Canlı ID AdMob'da yeni oluşturulduğunda ilk birkaç saat No-Fill verebilir.
+            // Bu durumda test ID ile kartın görünürlüğünü garantiye al.
+            if (!isFallback) {
+              _loadNativeAd(isFallback: true);
+            }
           }
         },
       ),

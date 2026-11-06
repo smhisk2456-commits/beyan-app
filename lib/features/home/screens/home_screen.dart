@@ -34,6 +34,7 @@ import '../../prayer_times/screens/nafila_prayers_sheet.dart';
 import '../../zikr/screens/zikirmatik_screen.dart';
 import '../../monetization/providers/premium_provider.dart';
 import '../../monetization/screens/premium_paywall_sheet.dart';
+import '../../monetization/widgets/beyan_native_ad_card.dart';
 import '../widgets/worship_rings_card.dart';
 import '../../kaza/providers/kaza_tracker_provider.dart';
 import '../../kaza/screens/kaza_tracker_screen.dart';
@@ -148,7 +149,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     );
                   },
                   onOpenQuran: () {
-                    ref.read(selectedTabProvider.notifier).state = 1;
+                    ref.read(selectedTabProvider.notifier).state = 2;
                   },
                   onOpenZikr: () {
                     Navigator.push(
@@ -170,6 +171,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             SliverToBoxAdapter(
               child: RepaintBoundary(
                 child: _SpiritualLifeHub(atmosphere: atmosphere),
+              ),
+            ),
+
+            // ── Yerel Gelişmiş Reklam Kartı (Ana Sayfa) ─────────────
+            const SliverToBoxAdapter(
+              child: RepaintBoundary(
+                child: BeyanNativeAdCard(
+                  isSmall: false,
+                  margin: EdgeInsets.fromLTRB(16, 12, 16, 6),
+                ),
               ),
             ),
 

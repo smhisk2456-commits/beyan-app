@@ -12,6 +12,7 @@ import '../../../core/widgets/common_widgets.dart' as app_widgets;
 import 'city_selector_sheet.dart';
 import '../../settings/screens/settings_screen.dart';
 import '../../monetization/widgets/banner_ad_widget.dart';
+import '../../monetization/widgets/beyan_native_ad_card.dart';
 import 'prayer_guide_sheet.dart';
 import 'nafila_prayers_sheet.dart';
 
@@ -120,7 +121,12 @@ class _PrayerTimesContent extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           const _NafilePrayersBannerCard(),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
+          const BeyanNativeAdCard(
+            isSmall: false,
+            margin: EdgeInsets.symmetric(vertical: 4),
+          ),
+          const SizedBox(height: 12),
           const BannerAdWidget(),
           const SizedBox(height: 110),
         ],

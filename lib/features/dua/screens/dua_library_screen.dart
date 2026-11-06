@@ -721,19 +721,23 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
     required double bottomPadding,
     required Function(DuaCategory) onSelectCategory,
   }) {
-    return GridView.builder(
+    return ListView(
       physics: const BouncingScrollPhysics(),
       padding: EdgeInsets.fromLTRB(16, 8, 16, bottomPadding),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
-        childAspectRatio: (MediaQuery.textScalerOf(context).scale(1.0) > 1.1 || MediaQuery.sizeOf(context).width < 360)
-            ? 0.88
-            : 1.02,
-      ),
-      itemCount: DuaCategory.values.length,
-      itemBuilder: (context, index) {
+      children: [
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 10,
+            childAspectRatio: (MediaQuery.textScalerOf(context).scale(1.0) > 1.1 || MediaQuery.sizeOf(context).width < 360)
+                ? 0.88
+                : 1.02,
+          ),
+          itemCount: DuaCategory.values.length,
+          itemBuilder: (context, index) {
         final cat = DuaCategory.values[index];
         final count = verifiedDuasList.where((d) => d.category == cat).length;
         return Material(
@@ -839,7 +843,14 @@ class _DuaLibraryScreenState extends ConsumerState<DuaLibraryScreen> {
           ),
         );
       },
-    );
+    ),
+    const SizedBox(height: 14),
+    const BeyanNativeAdCard(
+      isSmall: false,
+      margin: EdgeInsets.symmetric(vertical: 4),
+    ),
+  ],
+);
   }
 
   Widget _buildCategorySectionHeader({
