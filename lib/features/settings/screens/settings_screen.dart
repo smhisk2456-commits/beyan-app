@@ -399,7 +399,7 @@ class SettingsScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-                title: 'Beyân v1.2.12',
+                title: 'Beyân v1.2.13',
                 subtitle: 'Google Flutter & iOS 18+ Apple Design',
                 onTap: null,
               ),
