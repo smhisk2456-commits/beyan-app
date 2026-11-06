@@ -10,7 +10,6 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/utils/app_constants.dart';
 import '../widget_service.dart';
-import '../../monetization/widgets/banner_ad_widget.dart';
 import '../../notifications/models/id_verse_translations.dart';
 import '../../notifications/models/short_verse_notification.dart';
 import '../../notifications/screens/notification_settings_sheet.dart';
@@ -891,6 +890,8 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
   Future<void> _savePreference(String key, String value, Function(String) updater) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(key, value);
+    await HomeWidget.setAppGroupId(AppConstants.appGroupId);
+    await HomeWidget.saveWidgetData<String>(key, value);
     if (!mounted) return;
     setState(() {
       updater(value);
@@ -968,54 +969,78 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
     await prefs.setString('widget_quote_category', _selectedQuoteCategory);
     await prefs.setString('widget_verse_view', _verseViewMode);
     await prefs.setString('widget_refresh_interval', _refreshInterval);
-    await HomeWidget.saveWidgetData<String>('widget_refresh_interval', _refreshInterval);
     await prefs.setString('widget_text_size', _textSize);
-    await HomeWidget.saveWidgetData<String>('widget_text_size', _textSize);
     await prefs.setString('widget_active_category', _selectedCategory.name);
 
-    // Ayarları uygularken otomatik dinamik döngüye geç (sabitlemeyi kaldır)
-    await prefs.setBool('widget_is_pinned', false);
-    await HomeWidget.saveWidgetData<bool>('widget_is_pinned', false);
+    await HomeWidget.saveWidgetData<String>('widget_quote_category', _selectedQuoteCategory);
+    await HomeWidget.saveWidgetData<String>('widget_verse_view', _verseViewMode);
+    await HomeWidget.saveWidgetData<String>('widget_refresh_interval', _refreshInterval);
+    await HomeWidget.saveWidgetData<String>('widget_text_size', _textSize);
+    await HomeWidget.saveWidgetData<String>('widget_active_category', _selectedCategory.name);
 
-    final (refText, formattedText, arabicText, trRef) = _resolveActivePreviewVerse(strings.language);
-    final nonce = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    if (_selectedCategory == WidgetCategoryType.quotes || _selectedCategory == WidgetCategoryType.dailyVerse) {
+      final (refText, formattedText, arabicText, trRef) = _resolveActivePreviewVerse(strings.language);
+      final nonce = DateTime.now().millisecondsSinceEpoch ~/ 1000;
 
-    await prefs.setString('widget_applied_verse_ref', refText);
-    await prefs.setString('widget_applied_verse_text', formattedText);
-    await prefs.setInt('widget_apply_nonce', nonce);
-    await HomeWidget.saveWidgetData<String>('widget_applied_verse_ref', refText);
-    await HomeWidget.saveWidgetData<String>('widget_applied_verse_text', formattedText);
-    await HomeWidget.saveWidgetData<String>('widget_applied_verse_arabic', arabicText);
-    await HomeWidget.saveWidgetData<int>('widget_apply_nonce', nonce);
+      // Uygulanan ayeti hemen aktif hale getir ve sabitle (kullanıcı bunu seçti)
+      await prefs.setBool('widget_is_pinned', true);
+      await HomeWidget.saveWidgetData<bool>('widget_is_pinned', true);
 
-    final refMatch = RegExp(r'(\d+):(\d+)').firstMatch(trRef);
-    final surahNum = refMatch != null ? int.tryParse(refMatch.group(1)!) ?? 0 : 0;
-    final verseNum = refMatch != null ? int.tryParse(refMatch.group(2)!) ?? 0 : 0;
-    if (surahNum > 0) {
-      await prefs.setInt('widget_applied_verse_surah', surahNum);
-      await prefs.setInt('widget_applied_verse_number', verseNum);
-      await HomeWidget.saveWidgetData<int>('widget_applied_verse_surah', surahNum);
-      await HomeWidget.saveWidgetData<int>('widget_applied_verse_number', verseNum);
-    }
+      await prefs.setString('widget_applied_verse_ref', refText);
+      await prefs.setString('widget_applied_verse_text', formattedText);
+      await prefs.setInt('widget_apply_nonce', nonce);
+      await HomeWidget.saveWidgetData<String>('widget_applied_verse_ref', refText);
+      await HomeWidget.saveWidgetData<String>('widget_applied_verse_text', formattedText);
+      await HomeWidget.saveWidgetData<String>('widget_applied_verse_arabic', arabicText);
+      await HomeWidget.saveWidgetData<int>('widget_apply_nonce', nonce);
 
-    if (!mounted) return;
-    setState(() {
-      _isPinned = false;
-      _appliedVerseRef = refText;
-    });
+      final refMatch = RegExp(r'(\d+):(\d+)').firstMatch(trRef);
+      final surahNum = refMatch != null ? int.tryParse(refMatch.group(1)!) ?? 0 : 0;
+      final verseNum = refMatch != null ? int.tryParse(refMatch.group(2)!) ?? 0 : 0;
+      if (surahNum > 0) {
+        await prefs.setInt('widget_applied_verse_surah', surahNum);
+        await prefs.setInt('widget_applied_verse_number', verseNum);
+        await HomeWidget.saveWidgetData<int>('widget_applied_verse_surah', surahNum);
+        await HomeWidget.saveWidgetData<int>('widget_applied_verse_number', verseNum);
+      }
 
-    await WidgetService().updateAllWidgets();
+      if (!mounted) return;
+      setState(() {
+        _isPinned = true;
+        _appliedVerseRef = refText;
+      });
 
-    if (mounted) {
-      final msg = strings.language == AppLanguage.turkish
-          ? '✨ $refText kilit ekranı widget\'ına uygulandı!'
-          : (strings.language == AppLanguage.arabic
-              ? '✨ تم تطبيق $refText على ويدجت شاشة القفل!'
-              : (strings.language == AppLanguage.indonesian
-                  ? '✨ $refText diterapkan ke widget layar kunci!'
-                  : '✨ $refText applied to Lock Screen widget!'));
+      await WidgetService().updateAllWidgets();
 
-      _showWidgetFeedbackSnackBar(Icons.check_circle, msg);
+      if (mounted) {
+        final msg = strings.language == AppLanguage.turkish
+            ? '✨ $refText kilit ekranı widget\'ına uygulandı ve sabitlendi!'
+            : (strings.language == AppLanguage.arabic
+                ? '✨ تم تطبيق $refText على ويدجت شاشة القفل وتثبيتها!'
+                : (strings.language == AppLanguage.indonesian
+                    ? '✨ $refText diterapkan ke widget layar kunci!'
+                    : '✨ $refText applied to Lock Screen widget!'));
+
+        _showWidgetFeedbackSnackBar(Icons.check_circle, msg);
+      }
+    } else {
+      if (!mounted) return;
+      setState(() {});
+
+      await WidgetService().updateAllWidgets();
+
+      if (mounted) {
+        final catTitle = _getCategoryTitle(strings);
+        final msg = strings.language == AppLanguage.turkish
+            ? '✨ $catTitle ayarları kilit ekranına uygulandı!'
+            : (strings.language == AppLanguage.arabic
+                ? '✨ تم تطبيق إعدادات $catTitle على شاشة القفل!'
+                : (strings.language == AppLanguage.indonesian
+                    ? '✨ Pengaturan $catTitle diterapkan ke widget layar kunci!'
+                    : '✨ $catTitle settings applied to Lock Screen widget!'));
+
+        _showWidgetFeedbackSnackBar(Icons.check_circle, msg);
+      }
     }
   }
 
@@ -1140,6 +1165,23 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
       return strings.moralsAndEthics;
     }
     return cat;
+  }
+
+  String _getCategoryTitle(AppStrings strings) {
+    switch (_selectedCategory) {
+      case WidgetCategoryType.quotes:
+        return strings.widgetFeatureTitle;
+      case WidgetCategoryType.dailyVerse:
+        return strings.dailyVerseWidgetTitle;
+      case WidgetCategoryType.prayerTimes:
+        return strings.prayerTimesWidgetTitle;
+      case WidgetCategoryType.countdown:
+        return strings.countdownWidgetTitle;
+      case WidgetCategoryType.hijri:
+        return strings.hijriCalendarWidgetTitle;
+      case WidgetCategoryType.sunTimes:
+        return strings.sunIshraqWidgetTitle;
+    }
   }
 
   String _getLocalizedTextSize(String size, AppLanguage lang) {
@@ -1275,13 +1317,13 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
     await prefs.setString('widget_text_size', size);
     await HomeWidget.setAppGroupId(AppConstants.appGroupId);
     await HomeWidget.saveWidgetData<String>('widget_text_size', size);
-    await HomeWidget.updateWidget(name: 'IslamicAppWidget', iOSName: 'IslamicAppWidget');
-    await HomeWidget.updateWidget(name: 'PrayerWidget', iOSName: 'PrayerWidget');
 
     if (!mounted) return;
     setState(() {
       _textSize = size;
     });
+
+    await WidgetService().updateAllWidgets();
   }
 
   void _showTextSizePickerSheet(AppStrings strings) {
@@ -1699,7 +1741,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
       body: _isLoading
           ? Center(child: CircularProgressIndicator(color: BeyanColors.tone(0xFFD4AF37)))
           : SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
+              padding: EdgeInsets.fromLTRB(16, 8, 16, MediaQuery.of(context).padding.bottom + 210),
               physics: const BouncingScrollPhysics(),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1746,11 +1788,6 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
 
                   // ── Nasıl Eklenir Adımları ────────────────────────────────
                   _buildHowToAddGuide(strings),
-
-                  const SizedBox(height: 20),
-
-                  // Alt banner reklam
-                  const BannerAdWidget(),
                 ],
               ),
             ),
@@ -2059,11 +2096,11 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
         return 11.0;
       case 'large':
       case 'Büyük':
-        return 15.0;
+        return 17.0;
       case 'standard':
       case 'Standart':
       default:
-        return 13.0;
+        return 13.5;
     }
   }
 
@@ -2071,10 +2108,10 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
     switch (_textSize) {
       case 'small':
       case 'Küçük':
-        return 11.0;
+        return 10.5;
       case 'large':
       case 'Büyük':
-        return 15.0;
+        return 15.5;
       case 'standard':
       case 'Standart':
       default:
@@ -2086,14 +2123,14 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
     switch (_textSize) {
       case 'small':
       case 'Küçük':
-        return 14.5;
+        return 15.0;
       case 'large':
       case 'Büyük':
-        return 21.0;
+        return 22.5;
       case 'standard':
       case 'Standart':
       default:
-        return 17.5;
+        return 18.0;
     }
   }
 
@@ -2127,14 +2164,16 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           // Sûre Referansı
-          Text(
-            reference,
+          AnimatedDefaultTextStyle(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOutCubic,
             style: TextStyle(
               color: BeyanColors.tone(0xFFFFDF7A),
               fontWeight: FontWeight.bold,
               fontSize: _previewTitleFontSize,
               letterSpacing: 0.2,
             ),
+            child: Text(reference),
           ),
           const SizedBox(height: 4),
 
@@ -2142,15 +2181,19 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
           if (showArabic) ...[
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 6),
-              child: Text(
-                arabic,
-                textAlign: TextAlign.center,
-                textDirection: TextDirection.rtl,
+              child: AnimatedDefaultTextStyle(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOutCubic,
                 style: TextStyle(
                   fontFamily: 'Amiri',
                   fontSize: _previewArabicFontSize,
                   height: 1.45,
                   color: Colors.white,
+                ),
+                child: Text(
+                  arabic,
+                  textAlign: TextAlign.center,
+                  textDirection: TextDirection.rtl,
                 ),
               ),
             ),
@@ -2161,14 +2204,20 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
           if (showMeal)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 6),
-              child: Text(
-                meaning,
-                textAlign: TextAlign.center,
+              child: AnimatedDefaultTextStyle(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOutCubic,
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.95),
                   fontSize: _previewBodyFontSize,
                   height: 1.3,
-                  fontStyle: (_verseViewMode == 'arabic_meal' || _verseViewMode == 'Arapça + Meal') ? FontStyle.italic : FontStyle.normal,
+                  fontStyle: (_verseViewMode == 'arabic_meal' || _verseViewMode == 'Arapça + Meal')
+                      ? FontStyle.italic
+                      : FontStyle.normal,
+                ),
+                child: Text(
+                  meaning,
+                  textAlign: TextAlign.center,
                 ),
               ),
             ),
@@ -2419,21 +2468,66 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
             _buildDivider(),
           ],
 
-          // 3. Alıntı Yenileme Sıklığı
-          _buildOptionTile(
-            title: strings.quoteRefreshInterval,
-            value: _getLocalizedRefreshInterval(_refreshInterval, strings.language),
-            onTap: () => _showOptionSheet(
+          // 3. Alıntı Yenileme Sıklığı (Yalnızca Quotes ve DailyVerse için)
+          if (_selectedCategory == WidgetCategoryType.quotes ||
+              _selectedCategory == WidgetCategoryType.dailyVerse) ...[
+            _buildOptionTile(
               title: strings.quoteRefreshInterval,
-              options: const ['15m', '30m', '1h', '1d'],
-              currentValue: _refreshInterval,
-              labelBuilder: (i) => _getLocalizedRefreshInterval(i, strings.language),
-              onSelected: (val) => _savePreference('widget_refresh_interval', val, (v) => _refreshInterval = v),
+              value: _getLocalizedRefreshInterval(_refreshInterval, strings.language),
+              onTap: () => _showOptionSheet(
+                title: strings.quoteRefreshInterval,
+                options: const ['15m', '30m', '1h', '1d'],
+                currentValue: _refreshInterval,
+                labelBuilder: (i) => _getLocalizedRefreshInterval(i, strings.language),
+                onSelected: (val) => _savePreference('widget_refresh_interval', val, (v) => _refreshInterval = v),
+              ),
             ),
-          ),
-          _buildDivider(),
+            _buildDivider(),
+          ],
 
-          // 4. Metin Boyutu (Canlı Önizlemeli Seçici)
+          // Diğer kategoriler için özel bilgi satırları
+          if (_selectedCategory == WidgetCategoryType.prayerTimes) ...[
+            _buildOptionTile(
+              title: strings.prayerTimesWidgetTitle,
+              value: strings.language == AppLanguage.turkish
+                  ? 'Canlı Ezan & Geri Sayım'
+                  : 'Live Prayer & Timer',
+              onTap: null,
+            ),
+            _buildDivider(),
+          ],
+          if (_selectedCategory == WidgetCategoryType.countdown) ...[
+            _buildOptionTile(
+              title: strings.countdownWidgetTitle,
+              value: strings.language == AppLanguage.turkish
+                  ? 'Sıradaki Namaza Kalan Süre'
+                  : 'Time to Next Prayer',
+              onTap: null,
+            ),
+            _buildDivider(),
+          ],
+          if (_selectedCategory == WidgetCategoryType.hijri) ...[
+            _buildOptionTile(
+              title: strings.hijriCalendarWidgetTitle,
+              value: strings.language == AppLanguage.turkish
+                  ? 'Hicri Gün & Kandil Sayacı'
+                  : 'Hijri & Holy Nights',
+              onTap: null,
+            ),
+            _buildDivider(),
+          ],
+          if (_selectedCategory == WidgetCategoryType.sunTimes) ...[
+            _buildOptionTile(
+              title: strings.sunIshraqWidgetTitle,
+              value: strings.language == AppLanguage.turkish
+                  ? 'Güneş Doğuşu & İşrak'
+                  : 'Sunrise & Ishraq',
+              onTap: null,
+            ),
+            _buildDivider(),
+          ],
+
+          // 4. Metin Boyutu (Canlı Önizlemeli Seçici - Tüm Kategorilerde)
           _buildOptionTile(
             title: strings.textSize,
             value: _getLocalizedTextSize(_textSize, strings.language),
@@ -2446,12 +2540,80 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
 
   // ── Kilit Ekranı Widget'ına Uygula Butonu ─────────────────────────────────
   Widget _buildApplyWidgetButton(AppStrings strings) {
-    final btnText = strings.applySettingsToWidget;
-    final pinBtnText = strings.pinVerseToLockscreen;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isVerseCategory = _selectedCategory == WidgetCategoryType.quotes ||
+        _selectedCategory == WidgetCategoryType.dailyVerse;
+
+    if (!isVerseCategory) {
+      final catTitle = _getCategoryTitle(strings);
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+            decoration: BoxDecoration(
+              color: isDark ? BeyanColors.tone(0xFF0B2B24) : Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: isDark
+                    ? BeyanColors.tone(0xFF2DD4BF).withValues(alpha: 0.4)
+                    : BeyanColors.tone(0xFF10B981).withValues(alpha: 0.35),
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.check_circle_rounded,
+                  color: isDark ? BeyanColors.tone(0xFF2DD4BF) : BeyanColors.tone(0xFF0F766E),
+                  size: 18,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    strings.language == AppLanguage.turkish
+                        ? 'Kilit Ekranı $catTitle Hazır • Canlı Senkronizasyon'
+                        : 'Lock Screen $catTitle Ready • Live Sync',
+                    style: TextStyle(
+                      color: isDark ? BeyanColors.tone(0xFF2DD4BF) : BeyanColors.tone(0xFF0F766E),
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          ElevatedButton.icon(
+            onPressed: _syncAndApplyWidgetSettings,
+            icon: Icon(Icons.sync_rounded, color: BeyanColors.tone(0xFF071F1B), size: 20),
+            label: Text(
+              strings.language == AppLanguage.turkish
+                  ? '⚡ Ayarları Kilit Ekranına Uygula'
+                  : '⚡ Apply Settings to Lock Screen',
+              style: TextStyle(
+                color: BeyanColors.tone(0xFF071F1B),
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: BeyanColors.tone(0xFFFFDF7A),
+              foregroundColor: BeyanColors.tone(0xFF071F1B),
+              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              elevation: 2,
+            ),
+          ),
+        ],
+      );
+    }
+
+    // Âyet ve Dua kategorileri için
     final pinnedNotice = strings.currentlyPinnedLabel;
     final rotatingNotice = strings.dynamicVerseCycleActive;
-
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -2480,7 +2642,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
           child: Row(
             children: [
               Icon(
-                _isPinned ? Icons.push_pin : Icons.autorenew,
+                _isPinned ? Icons.push_pin_rounded : Icons.autorenew_rounded,
                 color: _isPinned
                     ? (isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF8A6B1A))
                     : (isDark ? BeyanColors.tone(0xFF2DD4BF) : BeyanColors.tone(0xFF0F766E)),
@@ -2492,7 +2654,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                   _isPinned
                       ? '$pinnedNotice ${_appliedVerseRef ?? ""}'
                       : (_appliedVerseRef != null && _appliedVerseRef!.isNotEmpty
-                          ? '${_getAppliedPrefix(strings.language)} : $_appliedVerseRef • $rotatingNotice'
+                          ? '${_getAppliedPrefix(strings.language)}: $_appliedVerseRef • $rotatingNotice'
                           : rotatingNotice),
                   style: TextStyle(
                     color: (_isPinned || (_appliedVerseRef != null && _appliedVerseRef!.isNotEmpty))
@@ -2528,12 +2690,14 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
         ),
         const SizedBox(height: 12),
 
-        // Ana Uygula Butonu
+        // Ana Uygula Butonu (Şu anki önizlenen ayeti kilit ekranına doğrudan uygular ve timeline'ı tetikler)
         ElevatedButton.icon(
           onPressed: _syncAndApplyWidgetSettings,
-          icon: Icon(Icons.sync_rounded, color: BeyanColors.tone(0xFF071F1B), size: 20),
+          icon: Icon(Icons.flash_on_rounded, color: BeyanColors.tone(0xFF071F1B), size: 20),
           label: Text(
-            btnText,
+            strings.language == AppLanguage.turkish
+                ? '⚡ Bu Âyeti Şimdi Kilit Ekranına Uygula'
+                : '⚡ Apply This Verse to Lock Screen Now',
             style: TextStyle(
               color: BeyanColors.tone(0xFF071F1B),
               fontSize: 15,
@@ -2551,17 +2715,21 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
           ),
         ),
 
-        // Özel Olarak Sabitlemek İsteyenler İçin Buton
+        // Sabitleme veya Döngüye Alma İkincil Butonu
         const SizedBox(height: 8),
         OutlinedButton.icon(
-          onPressed: _pinCurrentVerse,
+          onPressed: _isPinned ? _restoreAutomaticVerseRotation : _pinCurrentVerse,
           icon: Icon(
-            Icons.push_pin_outlined,
+            _isPinned ? Icons.autorenew_rounded : Icons.push_pin_outlined,
             color: isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF8A6B1A),
             size: 18,
           ),
           label: Text(
-            pinBtnText,
+            _isPinned
+                ? (strings.language == AppLanguage.turkish
+                    ? '🔄 Otomatik Döngüye Al (Periyodik Değişsin)'
+                    : '🔄 Switch to Auto Rotation')
+                : strings.pinVerseToLockscreen,
             style: TextStyle(
               color: isDark ? BeyanColors.tone(0xFFFFDF7A) : BeyanColors.tone(0xFF8A6B1A),
               fontSize: 13,
@@ -2587,7 +2755,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
   Widget _buildOptionTile({
     required String title,
     required String value,
-    required VoidCallback onTap,
+    VoidCallback? onTap,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Material(
@@ -2620,12 +2788,14 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              const SizedBox(width: 4),
-              Icon(
-                Icons.arrow_forward_ios_rounded,
-                color: isDark ? Colors.white38 : AppColors.textHint,
-                size: 13,
-              ),
+              if (onTap != null) ...[
+                const SizedBox(width: 4),
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  color: isDark ? Colors.white38 : AppColors.textHint,
+                  size: 13,
+                ),
+              ],
             ],
           ),
         ),

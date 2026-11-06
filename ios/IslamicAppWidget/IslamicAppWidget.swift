@@ -35,15 +35,14 @@ enum WidgetSettings {
 
     static var textScale: CGFloat {
         let defaults = UserDefaults(suiteName: appGroupId) ?? UserDefaults.standard
-        let raw = (defaults.string(forKey: "widget_text_size") ?? "standard").lowercased()
-        switch raw {
-        case "small", "küçük", "kucuk":
+        let raw = (defaults.string(forKey: "widget_text_size") ?? "standard").lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+        if raw == "small" || raw.contains("kucuk") || raw.contains("küçük") || raw == "k" {
             return 0.85
-        case "large", "büyük", "buyuk":
-            return 1.25
-        default:
-            return 1.0
         }
+        if raw == "large" || raw.contains("buyuk") || raw.contains("büyük") || raw == "b" {
+            return 1.25
+        }
+        return 1.0
     }
 }
 
@@ -1221,20 +1220,34 @@ struct VerseProvider: TimelineProvider {
         return VerseEntry(date: date, ref: item.ref, text: item.text)
     }
 
-    func placeholder(in context: Context) -> VerseEntry { verse(at: Date()) }
+    func placeholder(in context: Context) -> VerseEntry {
+        if let appliedRef = Self.string(forKey: "widget_applied_verse_ref"),
+           let appliedText = Self.string(forKey: "widget_applied_verse_text"),
+           !appliedRef.isEmpty && !appliedText.isEmpty {
+            return VerseEntry(date: Date(), ref: appliedRef, text: appliedText)
+        }
+        return verse(at: Date())
+    }
 
     func getSnapshot(in context: Context, completion: @escaping (VerseEntry) -> Void) {
+        if let appliedRef = Self.string(forKey: "widget_applied_verse_ref"),
+           let appliedText = Self.string(forKey: "widget_applied_verse_text"),
+           !appliedRef.isEmpty && !appliedText.isEmpty {
+            completion(VerseEntry(date: Date(), ref: appliedRef, text: appliedText))
+            return
+        }
         completion(verse(at: Date()))
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<VerseEntry>) -> Void) {
         let now = Date()
         let isPinned = Self.bool(forKey: "widget_is_pinned")
-        if isPinned,
-           let appliedRef = Self.string(forKey: "widget_applied_verse_ref"),
-           let appliedText = Self.string(forKey: "widget_applied_verse_text"),
-           !appliedRef.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
-           !appliedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+        let appliedRef = Self.string(forKey: "widget_applied_verse_ref") ?? ""
+        let appliedText = Self.string(forKey: "widget_applied_verse_text") ?? ""
+        let hasApplied = !appliedRef.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+                         !appliedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+
+        if isPinned && hasApplied {
             let singleEntry = VerseEntry(date: now, ref: appliedRef, text: appliedText)
             completion(Timeline(entries: [singleEntry], policy: .never))
             return
@@ -1248,7 +1261,11 @@ struct VerseProvider: TimelineProvider {
         let count = min(48, max(24, Int(86400 / slot)))
         for i in 0..<count {
             let nextDate = slotStart.addingTimeInterval(Double(i) * slot)
-            entries.append(verse(at: nextDate))
+            if i == 0 && hasApplied {
+                entries.append(VerseEntry(date: nextDate, ref: appliedRef, text: appliedText))
+            } else {
+                entries.append(verse(at: nextDate))
+            }
         }
         completion(Timeline(entries: entries, policy: .atEnd))
     }

@@ -40,6 +40,7 @@ abstract class AppConstants {
   static const String iOSCountdownWidgetName = 'BeyanCountdownWidget';
   static const String iOSHijriWidgetName = 'BeyanHijriWidget';
   static const String iOSSunWidgetName = 'BeyanSunWidget';
+  static const String iOSKazaWidgetName = 'BeyanKazaWidget';
   static const String androidWidgetName = 'IslamicAppWidget';
 
   // ── WorkManager ──────────────────────────────────────────────

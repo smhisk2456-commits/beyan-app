@@ -253,6 +253,7 @@ class WidgetService {
       AppConstants.iOSCountdownWidgetName,
       AppConstants.iOSHijriWidgetName,
       AppConstants.iOSSunWidgetName,
+      AppConstants.iOSKazaWidgetName,
     ];
 
     for (final widgetName in iosWidgets) {
