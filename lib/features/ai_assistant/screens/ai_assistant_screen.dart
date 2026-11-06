@@ -8,6 +8,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../monetization/providers/premium_provider.dart';
 import '../../monetization/screens/premium_paywall_sheet.dart';
+import '../../monetization/services/ad_service.dart';
 import '../models/ai_message.dart';
 import '../services/ai_assistant_service.dart';
 
@@ -29,6 +30,9 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final isPremium = ref.read(premiumProvider).isPremium;
       ref.read(aiAssistantProvider.notifier).refreshQuota(isPremium);
+      if (!isPremium) {
+        AdService.instance.loadRewardedInterstitialAd();
+      }
     });
   }
 
@@ -161,6 +165,46 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
         false;
   }
 
+  Future<void> _watchRewardedAdForBonusQuestions() async {
+    final adService = AdService.instance;
+    if (!adService.isRewardedInterstitialLoaded) {
+      adService.loadRewardedInterstitialAd();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Kısa video hazırlanıyor, lütfen 2-3 saniye sonra tekrar dokunun...'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+      return;
+    }
+
+    final success = await adService.showRewardedInterstitialAd(
+      onUserEarnedReward: () async {
+        await ref.read(aiAssistantProvider.notifier).grantBonusQuestions(3);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Tebrikler! +3 Bonus Soru Hakkı tanımlandı. 🎉'),
+              backgroundColor: Color(0xFF0F5A47),
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+      },
+    );
+
+    if (!success && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Reklam yüklenemedi. Lütfen internet bağlantınızı kontrol edin.'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
   void _showQuotaExceededDialog() {
     showDialog(
       context: context,
@@ -185,7 +229,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Günlük 3 ücretsiz soru hakkınız tamamlandı. Soru sınırını tamamen kaldırmak ve sınırsız soru sormak için Beyân Pro\'ya geçebilirsiniz.',
+              'Günlük 3 ücretsiz soru hakkınız tamamlandı. Kısa bir video izleyerek anında +3 soru hakkı kazanabilir veya sınırsız soru sormak için Beyân Pro\'ya geçebilirsiniz.',
               style: TextStyle(color: Colors.white, fontSize: 14, height: 1.5),
             ),
             const SizedBox(height: 12),
@@ -202,7 +246,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
                   const SizedBox(width: 8),
                   const Expanded(
                     child: Text(
-                      'Beyân Pro ile sınırsız soru-cevap ve reklamsız deneyim.',
+                      'Beyân Pro ile sınırsız soru-cevap ve tamamen reklamsız huzurlu deneyim.',
                       style: TextStyle(color: Colors.white70, fontSize: 11),
                     ),
                   ),
@@ -216,12 +260,29 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
             onPressed: () => BeyanNavigatorGuard.safePop(ctx),
             child: const Text('Kapat', style: TextStyle(color: Colors.white60)),
           ),
+          OutlinedButton.icon(
+            style: OutlinedButton.styleFrom(
+              foregroundColor: BeyanColors.tone(0xFFFFDF7A),
+              side: BorderSide(color: BeyanColors.tone(0xFFFFDF7A), width: 1.2),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+            ),
+            onPressed: () {
+              BeyanNavigatorGuard.safePop(ctx);
+              _watchRewardedAdForBonusQuestions();
+            },
+            icon: const Icon(Icons.play_circle_outline_rounded, size: 18),
+            label: const Text(
+              '+3 Soru Kazan 🎬',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+            ),
+          ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: BeyanColors.tone(0xFFFFDF7A),
               foregroundColor: BeyanColors.tone(0xFF01201B),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             ),
             onPressed: () {
               BeyanNavigatorGuard.safePop(ctx);
@@ -619,7 +680,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              'Kalan Ücretsiz Soru: $remaining / 3',
+              'Kalan Soru: $remaining / 3',
               style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
@@ -627,6 +688,39 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
               ),
             ),
           ),
+          if (remaining <= 2) ...[
+            InkWell(
+              onTap: _watchRewardedAdForBonusQuestions,
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+                decoration: BoxDecoration(
+                  color: BeyanColors.tone(0xFF0F5A47),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.4),
+                    width: 0.8,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.play_circle_fill_rounded, size: 12, color: BeyanColors.tone(0xFFFFDF7A)),
+                    const SizedBox(width: 3),
+                    Text(
+                      '+3 Soru 🎬',
+                      style: TextStyle(
+                        color: BeyanColors.tone(0xFFFFDF7A),
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: 6),
+          ],
           InkWell(
             onTap: () => PremiumPaywallSheet.show(context),
             borderRadius: BorderRadius.circular(8),

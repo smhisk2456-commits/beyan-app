@@ -174,6 +174,28 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
     return remaining > 0;
   }
 
+  /// Ödüllü video izleme karşılığı bonus soru hakkı tanımlar
+  Future<void> grantBonusQuestions(int bonusCount) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final todayStr = DateTime.now().toIso8601String().substring(0, 10);
+      final lastDate = prefs.getString(_prefKeyDate);
+      int count = 0;
+      if (lastDate == todayStr) {
+        count = prefs.getInt(_prefKeyCount) ?? 0;
+      }
+      final newCount = (count - bonusCount).clamp(0, 999);
+      await prefs.setString(_prefKeyDate, todayStr);
+      await prefs.setInt(_prefKeyCount, newCount);
+
+      final newRemaining = freeDailyLimit - newCount;
+      state = state.copyWith(
+        remainingQuestions: newRemaining > 0 ? newRemaining : 0,
+        clearError: true,
+      );
+    } catch (_) {}
+  }
+
   Future<void> _incrementQuotaUsage() async {
     try {
       final prefs = await SharedPreferences.getInstance();
