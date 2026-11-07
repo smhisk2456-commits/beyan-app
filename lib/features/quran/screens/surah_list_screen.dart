@@ -668,8 +668,8 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
       }
     }).toList();
 
-    final hasFirstAd = filtered.length >= 6;
-    final hasSecondAd = filtered.length >= 25;
+    final hasFirstAd = filtered.length >= 15;
+    final hasSecondAd = filtered.length >= 35;
     final extraAds = (hasFirstAd ? 1 : 0) + (hasSecondAd ? 1 : 0);
 
     return ListView.builder(
@@ -679,22 +679,22 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
       addRepaintBoundaries: true,
       itemCount: filtered.length + extraAds,
       itemBuilder: (context, index) {
-        if (hasFirstAd && index == 6) {
+        if (hasFirstAd && index == 15) {
           return const BeyanNativeAdCard(
-            isSmall: true,
-            margin: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            isSmall: false,
+            margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           );
         }
-        if (hasSecondAd && index == 26) {
+        if (hasSecondAd && index == 36) {
           return const BeyanNativeAdCard(
-            isSmall: true,
-            margin: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            isSmall: false,
+            margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           );
         }
         var actualIndex = index;
-        if (hasSecondAd && index > 26) {
+        if (hasSecondAd && index > 36) {
           actualIndex -= 2;
-        } else if (hasFirstAd && index > 6) {
+        } else if (hasFirstAd && index > 15) {
           actualIndex -= 1;
         }
         final surah = filtered[actualIndex];

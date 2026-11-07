@@ -66,6 +66,9 @@
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-3940256099942544~3347511713" />
+        <meta-data
+            android:name="com.google.android.gms.ads.flag.NATIVE_AD_VALIDATOR_ENABLED"
+            android:value="false" />
 
         <!-- Flutter Engine için -->
         <meta-data

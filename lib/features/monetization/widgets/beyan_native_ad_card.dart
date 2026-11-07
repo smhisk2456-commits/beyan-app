@@ -10,9 +10,10 @@ import '../services/ad_service.dart';
 
 /// Beyân Arayüzüne Tam Uyumlu Yerel Gelişmiş (Native Advanced) Reklam Kartı
 /// Zümrüt yeşili, altın sarısı ve buzlu cam paletiyle liste akışında organik durur.
-/// Premium kullanıcılarda sıfır piksel yer kaplar.
+/// Video reklamlar için AdMob'un zorunlu kıldığı >= 120x120pt MediaView standardını
+/// (TemplateType.medium, 350pt yükseklik) tam olarak karşılar.
+/// Premium kullanıcılarda veya reklam henüz hazır olmadığında sıfır piksel yer kaplar.
 class BeyanNativeAdCard extends ConsumerStatefulWidget {
-  /// true ise kompakt liste öğesi boyutu (96px), false ise zengin kart boyutu (340px)
   final bool isSmall;
   final EdgeInsetsGeometry? margin;
 
@@ -30,6 +31,7 @@ class _BeyanNativeAdCardState extends ConsumerState<BeyanNativeAdCard> {
   NativeAd? _nativeAd;
   bool _isLoaded = false;
   bool _isLoading = false;
+  int _retryCount = 0;
   Timer? _retryTimer;
 
   @override
@@ -49,7 +51,7 @@ class _BeyanNativeAdCardState extends ConsumerState<BeyanNativeAdCard> {
     super.dispose();
   }
 
-  void _loadNativeAd({bool isFallback = false}) {
+  void _loadNativeAd() {
     if (!mounted) return;
     final isPremium = ref.read(premiumProvider).isPremium;
     if (isPremium || !AdService.kAdsEnabled || AdService.instance.isAdFree) {
@@ -65,7 +67,7 @@ class _BeyanNativeAdCardState extends ConsumerState<BeyanNativeAdCard> {
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final adUnitId = (isFallback || kDebugMode)
+    final adUnitId = kDebugMode
         ? AdService.instance.testNativeAdUnitId
         : AdService.instance.nativeAdUnitId;
 
@@ -74,11 +76,14 @@ class _BeyanNativeAdCardState extends ConsumerState<BeyanNativeAdCard> {
       return;
     }
 
+    // AdMob video yerel reklam politikası gereği MediaView en az 120x120pt olmalıdır.
+    // TemplateType.medium >= 300x180pt MediaView alanı sunarak hem video hem görsel
+    // reklamları kırpılmadan ve doğrulayıcı uyarısı olmadan gösterir.
     _nativeAd = NativeAd(
       adUnitId: adUnitId,
       request: const AdRequest(),
       nativeTemplateStyle: NativeTemplateStyle(
-        templateType: widget.isSmall ? TemplateType.small : TemplateType.medium,
+        templateType: TemplateType.medium,
         mainBackgroundColor: isDark ? const Color(0xFF022B24) : Colors.white,
         cornerRadius: 16.0,
         callToActionTextStyle: NativeTemplateTextStyle(
@@ -103,7 +108,7 @@ class _BeyanNativeAdCardState extends ConsumerState<BeyanNativeAdCard> {
       ),
       listener: NativeAdListener(
         onAdLoaded: (ad) {
-          debugPrint('BeyanNativeAdCard başarıyla yüklendi (isFallback: $isFallback).');
+          debugPrint('BeyanNativeAdCard başarıyla yüklendi.');
           if (mounted) {
             setState(() {
               _isLoaded = true;
@@ -112,7 +117,7 @@ class _BeyanNativeAdCardState extends ConsumerState<BeyanNativeAdCard> {
           }
         },
         onAdFailedToLoad: (ad, error) {
-          debugPrint('BeyanNativeAdCard yükleme hatası (isFallback: $isFallback): $error');
+          debugPrint('BeyanNativeAdCard yükleme hatası: $error');
           ad.dispose();
           _nativeAd = null;
           if (mounted) {
@@ -121,10 +126,14 @@ class _BeyanNativeAdCardState extends ConsumerState<BeyanNativeAdCard> {
               _isLoading = false;
             });
 
-            // Canlı ID AdMob'da yeni oluşturulduğunda ilk birkaç saat No-Fill verebilir.
-            // Bu durumda test ID ile kartın görünürlüğünü garantiye al.
-            if (!isFallback) {
-              _loadNativeAd(isFallback: true);
+            if (_retryCount < 2) {
+              _retryCount++;
+              _retryTimer?.cancel();
+              _retryTimer = Timer(const Duration(seconds: 25), () {
+                if (mounted) {
+                  _loadNativeAd();
+                }
+              });
             }
           }
         },
@@ -140,11 +149,15 @@ class _BeyanNativeAdCardState extends ConsumerState<BeyanNativeAdCard> {
     }
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final height = widget.isSmall ? 96.0 : 340.0;
 
     return Container(
       margin: widget.margin ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      height: height,
+      constraints: const BoxConstraints(
+        minWidth: 320,
+        minHeight: 320,
+        maxHeight: 355,
+      ),
+      height: 350.0,
       decoration: BoxDecoration(
         color: isDark ? BeyanColors.tone(0xFF022B24) : Colors.white,
         borderRadius: BorderRadius.circular(16),
