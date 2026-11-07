@@ -2,12 +2,114 @@ import WidgetKit
 import SwiftUI
 import ActivityKit
 import Foundation
+import Security
+
 private let hhmm: DateFormatter = {
     let f = DateFormatter()
     f.locale = Locale(identifier: "tr_TR")
     f.dateFormat = "HH:mm"
     return f
 }()
+
+// MARK: - Paylaşımlı Veri Köprüsü (Shared Keychain + App Group UserDefaults)
+
+enum WidgetSharedStore {
+    static let appGroupId = "group.com.smhisk60.beyan"
+    private static let keychainService = "com.smhisk60.beyan.widget_bridge"
+    private static let keychainAccount = "shared_widget_data"
+    private static let accessGroup = "6ABRXTHFD8.com.smhisk60.beyan"
+
+    private static func readKeychainDict(group: String?) -> [String: Any]? {
+        var query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: keychainService,
+            kSecAttrAccount as String: keychainAccount,
+            kSecReturnData as String: true,
+            kSecMatchLimit as String: kSecMatchLimitOne
+        ]
+        if let g = group {
+            query[kSecAttrAccessGroup as String] = g
+        }
+        var item: CFTypeRef?
+        let status = SecItemCopyMatching(query as CFDictionary, &item)
+        guard status == errSecSuccess,
+              let data = item as? Data,
+              let dict = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
+            return nil
+        }
+        return dict
+    }
+
+    private static var keychainCache: [String: Any]? {
+        readKeychainDict(group: accessGroup) ?? readKeychainDict(group: nil)
+    }
+
+    static func object(forKey key: String) -> Any? {
+        if let dict = keychainCache, let val = dict[key], !(val is NSNull) {
+            return val
+        }
+        if let defaults = UserDefaults(suiteName: appGroupId), let val = defaults.object(forKey: key) {
+            return val
+        }
+        return UserDefaults.standard.object(forKey: key)
+    }
+
+    static func string(forKey key: String) -> String? {
+        if let dict = keychainCache, let val = dict[key] {
+            if let s = val as? String, !s.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                return s
+            }
+            if let n = val as? NSNumber {
+                return n.stringValue
+            }
+        }
+        if let val = UserDefaults(suiteName: appGroupId)?.string(forKey: key),
+           !val.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return val
+        }
+        if let val = UserDefaults.standard.string(forKey: key),
+           !val.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return val
+        }
+        return nil
+    }
+
+    static func bool(forKey key: String) -> Bool {
+        if let dict = keychainCache, let val = dict[key] {
+            if let b = val as? Bool { return b }
+            if let n = val as? NSNumber { return n.boolValue }
+            if let s = val as? String { return s == "true" || s == "1" }
+        }
+        if let defaults = UserDefaults(suiteName: appGroupId), defaults.object(forKey: key) != nil {
+            return defaults.bool(forKey: key)
+        }
+        return UserDefaults.standard.bool(forKey: key)
+    }
+
+    static func integer(forKey key: String) -> Int {
+        if let dict = keychainCache, let val = dict[key] {
+            if let i = val as? Int { return i }
+            if let n = val as? NSNumber { return n.intValue }
+            if let s = val as? String, let i = Int(s) { return i }
+        }
+        if let defaults = UserDefaults(suiteName: appGroupId), defaults.object(forKey: key) != nil {
+            return defaults.integer(forKey: key)
+        }
+        return UserDefaults.standard.integer(forKey: key)
+    }
+
+    static func double(forKey key: String) -> Double {
+        if let dict = keychainCache, let val = dict[key] {
+            if let d = val as? Double { return d }
+            if let n = val as? NSNumber { return n.doubleValue }
+            if let s = val as? String, let d = Double(s) { return d }
+        }
+        if let defaults = UserDefaults(suiteName: appGroupId), defaults.object(forKey: key) != nil {
+            return defaults.double(forKey: key)
+        }
+        return UserDefaults.standard.double(forKey: key)
+    }
+}
 
 // MARK: - Konum
 
@@ -16,10 +118,9 @@ enum WidgetLocation {
     private static let lngKey = "beyan_widget_lng"
 
     static func coordinate() -> (lat: Double, lng: Double) {
-        let defaults = UserDefaults(suiteName: "group.com.smhisk60.beyan") ?? UserDefaults.standard
-        if defaults.object(forKey: latKey) != nil {
-            let lat = defaults.double(forKey: latKey)
-            let lng = defaults.double(forKey: lngKey)
+        if WidgetSharedStore.object(forKey: latKey) != nil {
+            let lat = WidgetSharedStore.double(forKey: latKey)
+            let lng = WidgetSharedStore.double(forKey: lngKey)
             if lat != 0 && lng != 0 {
                 return (lat, lng)
             }
@@ -31,18 +132,48 @@ enum WidgetLocation {
 // MARK: - Widget Görünüm ve Boyut Ayarları
 
 enum WidgetSettings {
-    private static let appGroupId = "group.com.smhisk60.beyan"
-
     static var textScale: CGFloat {
-        let defaults = UserDefaults(suiteName: appGroupId) ?? UserDefaults.standard
-        let raw = (defaults.string(forKey: "widget_text_size") ?? "standard").lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+        let raw = (WidgetSharedStore.string(forKey: "widget_text_size") ?? "standard").lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
         if raw == "small" || raw.contains("kucuk") || raw.contains("küçük") || raw == "k" {
             return 0.85
         }
         if raw == "large" || raw.contains("buyuk") || raw.contains("büyük") || raw == "b" {
-            return 1.25
+            return 1.22
         }
         return 1.0
+    }
+
+    static var prayerStyle: String {
+        WidgetSharedStore.string(forKey: "widget_prayer_style") ?? "detailed"
+    }
+
+    static var countdownStyle: String {
+        WidgetSharedStore.string(forKey: "widget_countdown_style") ?? "timer_and_time"
+    }
+
+    static var hijriStyle: String {
+        WidgetSharedStore.string(forKey: "widget_hijri_style") ?? "hijri_and_kandil"
+    }
+
+    static var hijriOffset: Int {
+        if let str = WidgetSharedStore.string(forKey: "widget_hijri_offset"),
+           let val = Int(str.replacingOccurrences(of: "+", with: "")) {
+            return max(-2, min(2, val))
+        }
+        return max(-2, min(2, WidgetSharedStore.integer(forKey: "widget_hijri_offset")))
+    }
+
+    static var kerahetMinutes: Int {
+        if let str = WidgetSharedStore.string(forKey: "widget_kerahet_minutes"),
+           let val = Int(str), val >= 30 && val <= 65 {
+            return val
+        }
+        let val = WidgetSharedStore.integer(forKey: "widget_kerahet_minutes")
+        return (val >= 30 && val <= 65) ? val : 45
+    }
+
+    static var sunStyle: String {
+        WidgetSharedStore.string(forKey: "widget_sun_style") ?? "full"
     }
 }
 
@@ -50,8 +181,7 @@ enum WidgetSettings {
 
 enum WidgetLocalization {
     static var currentLanguage: String {
-        let defaults = UserDefaults(suiteName: "group.com.smhisk60.beyan") ?? UserDefaults.standard
-        if let lang = defaults.string(forKey: "widget_app_language"), !lang.isEmpty {
+        if let lang = WidgetSharedStore.string(forKey: "widget_app_language"), !lang.isEmpty {
             return lang
         }
         if let pref = Locale.preferredLanguages.first {
@@ -482,8 +612,7 @@ struct PrayerEntry: TimelineEntry {
 
 struct PrayerProvider: TimelineProvider {
     private func schedule(around now: Date) -> [PrayerTime] {
-        let defaults = UserDefaults(suiteName: "group.com.smhisk60.beyan") ?? UserDefaults.standard
-        if let jsonStr = defaults.string(forKey: "widget_prayer_schedule_json"),
+        if let jsonStr = WidgetSharedStore.string(forKey: "widget_prayer_schedule_json"),
            let data = jsonStr.data(using: .utf8),
            let items = try? JSONDecoder().decode([PrayerScheduleItem].self, from: data),
            !items.isEmpty {
@@ -546,37 +675,63 @@ struct PrayerProvider: TimelineProvider {
 
 struct PrayerRectangularView: View {
     let entry: PrayerEntry
-    private let scale = WidgetSettings.textScale
+    private var scale: CGFloat { WidgetSettings.textScale }
+    private var style: String { WidgetSettings.prayerStyle }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 1.5) {
-            // 1. Satır: AKŞAM VAKTİNE (Tertemiz, emojiz, büyük harfli başlık)
-            Text(WidgetLocalization.targetPrayerHeader(for: entry.next.kind))
-                .font(.system(size: 11.5 * scale, weight: .bold))
-                .tracking(0.8)
-                .foregroundColor(.white.opacity(0.95))
+            if style == "compact" {
+                HStack(spacing: 4) {
+                    Text(entry.current.kind.name)
+                        .font(.system(size: 10.5 * scale, weight: .semibold))
+                    Text(hhmm.string(from: entry.current.date))
+                        .font(.system(size: 10.5 * scale, weight: .bold, design: .rounded))
+                    Text("•")
+                        .font(.system(size: 9 * scale, weight: .bold))
+                        .opacity(0.5)
+                    Text(entry.next.kind.name)
+                        .font(.system(size: 10.5 * scale, weight: .semibold))
+                    Text(hhmm.string(from: entry.next.date))
+                        .font(.system(size: 10.5 * scale, weight: .bold, design: .rounded))
+                }
+                .foregroundColor(.white.opacity(0.90))
                 .lineLimit(1)
 
-            // 2. Satır: 18:08 • Akşam Ezanı
-            HStack(spacing: 5) {
-                Text(hhmm.string(from: entry.next.date))
-                    .font(.system(size: 14 * scale, weight: .bold, design: .rounded))
-                Text("•")
-                    .font(.system(size: 10 * scale, weight: .bold))
-                    .opacity(0.55)
-                Text(WidgetLocalization.prayerAdhanLabel(for: entry.next.kind))
-                    .font(.system(size: 12.5 * scale, weight: .medium))
+                Text(entry.next.date, style: .timer)
+                    .font(.system(size: 25 * scale, weight: .bold, design: .rounded))
+                    .monospacedDigit()
+                    .foregroundColor(.white)
                     .lineLimit(1)
-            }
-            .foregroundColor(.white.opacity(0.85))
+                    .minimumScaleFactor(0.70)
+            } else {
+                // 1. Satır: AKŞAM VAKTİNE (Tertemiz, emojiz, büyük harfli başlık)
+                Text(WidgetLocalization.targetPrayerHeader(for: entry.next.kind))
+                    .font(.system(size: 11.5 * scale, weight: .bold))
+                    .tracking(0.8)
+                    .foregroundColor(.white.opacity(0.95))
+                    .lineLimit(1)
 
-            // 3. Satır: 58:38 (Büyük Canlı Geri Sayım Sayacı)
-            Text(entry.next.date, style: .timer)
-                .font(.system(size: 24 * scale, weight: .bold, design: .rounded))
-                .monospacedDigit()
-                .foregroundColor(.white)
-                .lineLimit(1)
-                .minimumScaleFactor(0.70)
+                // 2. Satır: 18:08 • Akşam Ezanı
+                HStack(spacing: 5) {
+                    Text(hhmm.string(from: entry.next.date))
+                        .font(.system(size: 14 * scale, weight: .bold, design: .rounded))
+                    Text("•")
+                        .font(.system(size: 10 * scale, weight: .bold))
+                        .opacity(0.55)
+                    Text(WidgetLocalization.prayerAdhanLabel(for: entry.next.kind))
+                        .font(.system(size: 12.5 * scale, weight: .medium))
+                        .lineLimit(1)
+                }
+                .foregroundColor(.white.opacity(0.85))
+
+                // 3. Satır: 58:38 (Büyük Canlı Geri Sayım Sayacı)
+                Text(entry.next.date, style: .timer)
+                    .font(.system(size: 24 * scale, weight: .bold, design: .rounded))
+                    .monospacedDigit()
+                    .foregroundColor(.white)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.70)
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .widgetAccentable()
@@ -1126,30 +1281,16 @@ struct DynamicVerseJsonItem: Codable {
 }
 
 struct VerseProvider: TimelineProvider {
-    private static let appGroupId = "group.com.smhisk60.beyan"
-
     private static func string(forKey key: String) -> String? {
-        if let val = UserDefaults(suiteName: appGroupId)?.string(forKey: key), !val.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            return val
-        }
-        if let val = UserDefaults.standard.string(forKey: key), !val.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            return val
-        }
-        return nil
+        WidgetSharedStore.string(forKey: key)
     }
 
     private static func bool(forKey key: String) -> Bool {
-        if let defaults = UserDefaults(suiteName: appGroupId), defaults.object(forKey: key) != nil {
-            return defaults.bool(forKey: key)
-        }
-        return UserDefaults.standard.bool(forKey: key)
+        WidgetSharedStore.bool(forKey: key)
     }
 
     private static func int(forKey key: String) -> Int {
-        if let defaults = UserDefaults(suiteName: appGroupId), defaults.object(forKey: key) != nil {
-            return defaults.integer(forKey: key)
-        }
-        return UserDefaults.standard.integer(forKey: key)
+        WidgetSharedStore.integer(forKey: key)
     }
 
     private static func slotDuration() -> TimeInterval {
@@ -1273,21 +1414,21 @@ struct VerseProvider: TimelineProvider {
 
 struct VerseRectangularView: View {
     let entry: VerseEntry
-    private let scale = WidgetSettings.textScale
+    private var scale: CGFloat { WidgetSettings.textScale }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 3) {
+        VStack(alignment: .leading, spacing: 2.5) {
             // Sûre Adı ve Âyet Numarası (Büyük ve kalın, görsel 1 ile birebir uyumlu)
             Text(entry.ref)
-                .font(.system(size: 13.5 * scale, weight: .bold))
+                .font(.system(size: 13 * scale, weight: .bold))
                 .foregroundColor(.white)
                 .lineLimit(1)
-            // Âyet Meali
+            // Âyet Meali / Arapça
             Text(entry.text)
                 .font(.system(size: 10.5 * scale, weight: .medium))
                 .foregroundColor(.white.opacity(0.92))
-                .lineLimit(scale > 1.1 ? 2 : 3)
-                .minimumScaleFactor(0.70)
+                .lineLimit(entry.text.contains("\n") ? 3 : (scale > 1.1 ? 2 : 3))
+                .minimumScaleFactor(0.68)
                 .multilineTextAlignment(.leading)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -1299,7 +1440,7 @@ struct VerseInlineView: View {
     let entry: VerseEntry
 
     var body: some View {
-        Label("\(entry.ref): \(entry.text)", systemImage: "book.closed.fill")
+        Label("\(entry.ref): \(entry.text.replacingOccurrences(of: "\n", with: " "))", systemImage: "book.closed.fill")
     }
 }
 
@@ -1307,7 +1448,7 @@ struct VerseSystemSmallView: View {
     let entry: VerseEntry
     private let gold = Color(red: 1.0, green: 0.88, blue: 0.52)
     private let cream = Color(red: 0.99, green: 0.97, blue: 0.92)
-    private let scale = WidgetSettings.textScale
+    private var scale: CGFloat { WidgetSettings.textScale }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -1383,7 +1524,7 @@ struct VerseSystemMediumView: View {
     let entry: VerseEntry
     private let gold = Color(red: 1.0, green: 0.88, blue: 0.52)
     private let cream = Color(red: 0.99, green: 0.97, blue: 0.92)
-    private let scale = WidgetSettings.textScale
+    private var scale: CGFloat { WidgetSettings.textScale }
 
     var body: some View {
         let hijri = HijriHelper.info(for: entry.date)
@@ -1514,12 +1655,11 @@ struct VerseWidgetView: View {
             }
         }
 
-        // 2. Eğer entry.ref içinde numara bulunamadıysa, kaydedilen özel ayet bu ref ile eşleşiyorsa UserDefaults'a başvur
+        // 2. Eğer entry.ref içinde numara bulunamadıysa, kaydedilen özel ayet bu ref ile eşleşiyorsa paylaşımlı depoya başvur
         if surahStr.isEmpty {
-            let defaults = UserDefaults(suiteName: "group.com.smhisk60.beyan") ?? UserDefaults.standard
-            let savedRef = defaults.string(forKey: "widget_applied_verse_ref") ?? ""
-            let savedSurah = defaults.integer(forKey: "widget_applied_verse_surah")
-            let savedVerse = defaults.integer(forKey: "widget_applied_verse_number")
+            let savedRef = WidgetSharedStore.string(forKey: "widget_applied_verse_ref") ?? ""
+            let savedSurah = WidgetSharedStore.integer(forKey: "widget_applied_verse_surah")
+            let savedVerse = WidgetSharedStore.integer(forKey: "widget_applied_verse_number")
             if savedSurah > 0 && (cleanRef == savedRef || cleanRef.isEmpty) {
                 surahStr = String(savedSurah)
                 verseStr = savedVerse > 0 ? String(savedVerse) : ""
@@ -1562,6 +1702,8 @@ struct BeyanVerseWidget: Widget {
 struct CountdownWidgetView: View {
     @Environment(\.widgetFamily) var family
     let entry: PrayerEntry
+    private var scale: CGFloat { WidgetSettings.textScale }
+    private var countdownStyle: String { WidgetSettings.countdownStyle }
 
     var body: some View {
         Group {
@@ -1577,9 +1719,9 @@ struct CountdownWidgetView: View {
                     AccessoryWidgetBackground()
                     VStack(spacing: 1) {
                         Image(systemName: entry.next.kind.symbol)
-                            .font(.system(size: 12))
+                            .font(.system(size: 12 * scale))
                         Text(entry.next.date, style: .timer)
-                            .font(.system(size: 11, weight: .bold, design: .rounded))
+                            .font(.system(size: 11 * scale, weight: .bold, design: .rounded))
                             .monospacedDigit()
                             .minimumScaleFactor(0.6)
                             .lineLimit(1)
@@ -1620,17 +1762,17 @@ struct CountdownWidgetView: View {
                     // Orta: Vakte Kalan Metni & Devasa Canlı Sayaç
                     VStack(alignment: .leading, spacing: 1) {
                         Text(WidgetLocalization.timeUntil(prayer: entry.next.kind.name).uppercased())
-                            .font(.system(size: 8.5, weight: .heavy, design: .rounded))
+                            .font(.system(size: 8.5 * scale, weight: .heavy, design: .rounded))
                             .tracking(1.0)
                             .foregroundColor(gold.opacity(0.80))
                             .lineLimit(1)
 
                         Text(entry.next.date, style: .timer)
-                            .font(.system(size: 27, weight: .black, design: .rounded))
+                            .font(.system(size: 27 * scale, weight: .black, design: .rounded))
                             .monospacedDigit()
                             .foregroundColor(.white)
                             .lineLimit(1)
-                            .minimumScaleFactor(0.75)
+                            .minimumScaleFactor(0.70)
                     }
 
                     Spacer(minLength: 6)
@@ -1641,11 +1783,11 @@ struct CountdownWidgetView: View {
                             .font(.system(size: 9.5))
                             .foregroundColor(gold)
                         Text(entry.next.kind.name)
-                            .font(.system(size: 11, weight: .bold))
+                            .font(.system(size: 11 * scale, weight: .bold))
                             .foregroundColor(.white)
                         Spacer()
                         Text(hhmm.string(from: entry.next.date))
-                            .font(.system(size: 13, weight: .black, design: .rounded))
+                            .font(.system(size: 13 * scale, weight: .black, design: .rounded))
                             .foregroundColor(gold)
                     }
                     .padding(.horizontal, 9)
@@ -1672,22 +1814,24 @@ struct CountdownWidgetView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 4) {
                         Image(systemName: "timer")
-                            .font(.system(size: 11, weight: .semibold))
+                            .font(.system(size: 11 * scale, weight: .semibold))
                         Text(WidgetLocalization.timeUntil(prayer: entry.next.kind.name))
-                            .font(.system(size: 11.5, weight: .bold))
+                            .font(.system(size: 11.5 * scale, weight: .bold))
                             .lineLimit(1)
                     }
                     .foregroundColor(.white.opacity(0.85))
                     Text(entry.next.date, style: .timer)
-                        .font(.system(size: 25, weight: .bold, design: .rounded))
+                        .font(.system(size: (countdownStyle == "timer_only" ? 28 : 24) * scale, weight: .bold, design: .rounded))
                         .monospacedDigit()
                         .foregroundColor(.white)
-                        .minimumScaleFactor(0.75)
+                        .minimumScaleFactor(0.70)
                         .lineLimit(1)
-                    Text(WidgetLocalization.prayerTimeLabel(prayer: entry.next.kind.name, time: hhmm.string(from: entry.next.date)))
-                        .font(.system(size: 10.5, weight: .medium))
-                        .foregroundColor(.white.opacity(0.75))
-                        .lineLimit(1)
+                    if countdownStyle != "timer_only" {
+                        Text(WidgetLocalization.prayerTimeLabel(prayer: entry.next.kind.name, time: hhmm.string(from: entry.next.date)))
+                            .font(.system(size: 10.5 * scale, weight: .medium))
+                            .foregroundColor(.white.opacity(0.75))
+                            .lineLimit(1)
+                    }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 .widgetAccentable()
@@ -1736,11 +1880,13 @@ enum HijriHelper {
     ]
 
     static func info(for date: Date) -> (day: Int, monthName: String, year: Int, specialNotice: String) {
+        let offsetDays = WidgetSettings.hijriOffset
+        let adjustedDate = Calendar.current.date(byAdding: .day, value: offsetDays, to: date) ?? date
         var cal = Calendar(identifier: .islamicUmmAlQura)
         cal.timeZone = TimeZone.current
-        let day = cal.component(.day, from: date)
-        let month = cal.component(.month, from: date)
-        let year = cal.component(.year, from: date)
+        let day = cal.component(.day, from: adjustedDate)
+        let month = cal.component(.month, from: adjustedDate)
+        let year = cal.component(.year, from: adjustedDate)
 
         let lang = WidgetLocalization.currentLanguage
         let months: [String] = {
@@ -1897,6 +2043,8 @@ struct HijriProvider: TimelineProvider {
 struct HijriWidgetView: View {
     @Environment(\.widgetFamily) var family
     let entry: HijriEntry
+    private var scale: CGFloat { WidgetSettings.textScale }
+    private var hijriStyle: String { WidgetSettings.hijriStyle }
 
     var body: some View {
         Group {
@@ -1908,9 +2056,9 @@ struct HijriWidgetView: View {
                     AccessoryWidgetBackground()
                     VStack(spacing: 0) {
                         Text("\(entry.day)")
-                            .font(.system(size: 16, weight: .bold, design: .rounded))
+                            .font(.system(size: 16 * scale, weight: .bold, design: .rounded))
                         Text(entry.monthName.prefix(4))
-                            .font(.system(size: 9, weight: .semibold))
+                            .font(.system(size: 9 * scale, weight: .semibold))
                             .lineLimit(1)
                     }
                     .padding(2)
@@ -1945,25 +2093,25 @@ struct HijriWidgetView: View {
                     Spacer(minLength: 4)
                     HStack(alignment: .firstTextBaseline, spacing: 5) {
                         Text("\(entry.day)")
-                            .font(.system(size: 28, weight: .bold, design: .rounded))
+                            .font(.system(size: 28 * scale, weight: .bold, design: .rounded))
                             .foregroundColor(.white)
                         Text(entry.monthName)
-                            .font(.system(size: 13.5, weight: .bold, design: .serif))
+                            .font(.system(size: 13.5 * scale, weight: .bold, design: .serif))
                             .foregroundColor(gold)
                             .lineLimit(1)
                             .minimumScaleFactor(0.75)
                     }
                     Text("\(String(entry.year)) Hicrî")
-                        .font(.system(size: 10.5, weight: .semibold))
+                        .font(.system(size: 10.5 * scale, weight: .semibold))
                         .foregroundColor(.white.opacity(0.68))
                     Spacer(minLength: 4)
-                    if !entry.notice.isEmpty {
+                    if !entry.notice.isEmpty && hijriStyle != "hijri_only" {
                         HStack(spacing: 4) {
                             Image(systemName: "sparkles")
                                 .font(.system(size: 8))
                                 .foregroundColor(gold)
                             Text(entry.notice)
-                                .font(.system(size: 9.5, weight: .bold))
+                                .font(.system(size: 9.5 * scale, weight: .bold))
                                 .foregroundColor(gold)
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.75)
@@ -1982,18 +2130,20 @@ struct HijriWidgetView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 4) {
                         Image(systemName: "moon.fill")
-                            .font(.system(size: 11))
+                            .font(.system(size: 11 * scale))
                             .foregroundColor(Color(red: 1.0, green: 0.85, blue: 0.45))
                         Text("\(entry.day) \(entry.monthName) \(String(entry.year))")
-                            .font(.system(size: 13, weight: .bold))
+                            .font(.system(size: 13 * scale, weight: .bold))
                             .foregroundColor(.white)
                             .lineLimit(1)
                     }
-                    Text(entry.notice)
-                        .font(.system(size: 11, weight: .medium))
-                        .foregroundColor(.white.opacity(0.88))
-                        .lineLimit(2)
-                        .minimumScaleFactor(0.8)
+                    if hijriStyle != "hijri_only" {
+                        Text(entry.notice)
+                            .font(.system(size: 11 * scale, weight: .medium))
+                            .foregroundColor(.white.opacity(0.88))
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.8)
+                    }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 .widgetAccentable()
@@ -2031,7 +2181,8 @@ struct SunProvider: TimelineProvider {
         let calc = PrayerCalculator(lat: loc.lat, lng: loc.lng)
         let list = calc.times(for: date, timeZone: TimeZone.current)
         let gunes = list.first { $0.kind == .gunes }?.date ?? date
-        let ishraq = gunes.addingTimeInterval(45 * 60)
+        let kerahetMins = Double(WidgetSettings.kerahetMinutes)
+        let ishraq = gunes.addingTimeInterval(kerahetMins * 60)
         return SunEntry(date: date, sunrise: gunes, ishraq: ishraq)
     }
 
@@ -2052,6 +2203,8 @@ struct SunProvider: TimelineProvider {
 struct SunWidgetView: View {
     @Environment(\.widgetFamily) var family
     let entry: SunEntry
+    private var scale: CGFloat { WidgetSettings.textScale }
+    private var sunStyle: String { WidgetSettings.sunStyle }
 
     var body: some View {
         Group {
@@ -2062,20 +2215,22 @@ struct SunWidgetView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 4) {
                         Image(systemName: "sunrise.fill")
-                            .font(.system(size: 11))
+                            .font(.system(size: 11 * scale))
                             .foregroundColor(Color(red: 1.0, green: 0.85, blue: 0.45))
                         Text(WidgetLocalization.sunAndIshraq)
-                            .font(.system(size: 12.5, weight: .bold))
+                            .font(.system(size: 12.5 * scale, weight: .bold))
                             .foregroundColor(.white)
                             .lineLimit(1)
                     }
                     Text(WidgetLocalization.sunDetail(sunrise: hhmm.string(from: entry.sunrise), ishraq: hhmm.string(from: entry.ishraq)))
-                        .font(.system(size: 11.5, weight: .semibold, design: .rounded))
+                        .font(.system(size: 11.5 * scale, weight: .semibold, design: .rounded))
                         .foregroundColor(.white.opacity(0.95))
-                    Text(WidgetLocalization.duhaTime(ishraq: hhmm.string(from: entry.ishraq)))
-                        .font(.system(size: 10, weight: .medium))
-                        .foregroundColor(.white.opacity(0.72))
-                        .lineLimit(1)
+                    if sunStyle != "compact" {
+                        Text(WidgetLocalization.duhaTime(ishraq: hhmm.string(from: entry.ishraq)))
+                            .font(.system(size: 10 * scale, weight: .medium))
+                            .foregroundColor(.white.opacity(0.72))
+                            .lineLimit(1)
+                    }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 .widgetAccentable()
@@ -2434,19 +2589,16 @@ struct KazaEntry: TimelineEntry {
 }
 
 struct KazaProvider: TimelineProvider {
-    private static let appGroupId = "group.com.smhisk60.beyan"
-
     private func readEntry(at date: Date) -> KazaEntry {
-        let defaults = UserDefaults(suiteName: KazaProvider.appGroupId) ?? UserDefaults.standard
-        let total = defaults.integer(forKey: "widget_kaza_total")
-        let fajr = defaults.integer(forKey: "widget_kaza_fajr")
-        let dhuhr = defaults.integer(forKey: "widget_kaza_dhuhr")
-        let asr = defaults.integer(forKey: "widget_kaza_asr")
-        let maghrib = defaults.integer(forKey: "widget_kaza_maghrib")
-        let isha = defaults.integer(forKey: "widget_kaza_isha")
-        let vitr = defaults.integer(forKey: "widget_kaza_vitr")
-        let fasting = defaults.integer(forKey: "widget_kaza_fasting")
-        let summary = defaults.string(forKey: "widget_kaza_summary") ?? "Kaza takibi hazır"
+        let total = WidgetSharedStore.integer(forKey: "widget_kaza_total")
+        let fajr = WidgetSharedStore.integer(forKey: "widget_kaza_fajr")
+        let dhuhr = WidgetSharedStore.integer(forKey: "widget_kaza_dhuhr")
+        let asr = WidgetSharedStore.integer(forKey: "widget_kaza_asr")
+        let maghrib = WidgetSharedStore.integer(forKey: "widget_kaza_maghrib")
+        let isha = WidgetSharedStore.integer(forKey: "widget_kaza_isha")
+        let vitr = WidgetSharedStore.integer(forKey: "widget_kaza_vitr")
+        let fasting = WidgetSharedStore.integer(forKey: "widget_kaza_fasting")
+        let summary = WidgetSharedStore.string(forKey: "widget_kaza_summary") ?? "Kaza takibi hazır"
 
         return KazaEntry(
             date: date,

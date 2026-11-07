@@ -3,19 +3,48 @@
 require 'xcodeproj'
 
 PROJECT_PATH = File.expand_path('../ios/Runner.xcodeproj', __dir__)
+PUBSPEC_PATH = File.expand_path('../pubspec.yaml', __dir__)
 TARGET_NAME  = 'BeyanWidgetExtension'
 TEAM_ID      = '6ABRXTHFD8'
+
+pubspec_version = File.exist?(PUBSPEC_PATH) ? (File.read(PUBSPEC_PATH)[/^version:\s*([^\s+]+)/, 1] || '1.2.14') : '1.2.14'
+build_number    = (ENV['GITHUB_RUN_NUMBER'] && !ENV['GITHUB_RUN_NUMBER'].empty?) ? ENV['GITHUB_RUN_NUMBER'] : '1'
 
 project = Xcodeproj::Project.open(PROJECT_PATH)
 
 app_target = project.targets.find { |t| t.name == 'Runner' } or abort('Runner target bulunamadı')
 app_bundle_id = app_target.build_configurations.first.build_settings['PRODUCT_BUNDLE_IDENTIFIER']
 
-# 1. Runner ana uygulama hedefi için imzalama ayarları
+# 1. Provisioning profillerde App Group ve Keychain desteğini kontrol et ve entitlements dosyalarını oluştur
 runner_pp_path = File.join(ENV['RUNNER_TEMP'].to_s, 'build_pp.mobileprovision')
 widget_pp_path = File.join(ENV['RUNNER_TEMP'].to_s, 'widget_pp.mobileprovision')
 runner_has_app_group = File.exist?(runner_pp_path) && File.binread(runner_pp_path).include?('group.com.smhisk60.beyan')
 widget_has_app_group = File.exist?(widget_pp_path) && File.binread(widget_pp_path).include?('group.com.smhisk60.beyan')
+
+def write_entitlements(rel_path, include_app_group)
+  full_path = File.expand_path("../ios/#{rel_path}", __dir__)
+  app_group_xml = if include_app_group
+                    "\t<key>com.apple.security.application-groups</key>\n\t<array>\n\t\t<string>group.com.smhisk60.beyan</string>\n\t</array>\n"
+                  else
+                    ""
+                  end
+  content = <<~XML
+    <?xml version="1.0" encoding="UTF-8"?>
+    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+    <plist version="1.0">
+    <dict>
+    \t<key>keychain-access-groups</key>
+    \t<array>
+    \t\t<string>$(AppIdentifierPrefix)com.smhisk60.beyan</string>
+    \t</array>
+    #{app_group_xml}</dict>
+    </plist>
+  XML
+  File.write(full_path, content)
+end
+
+write_entitlements('Runner/Runner.entitlements', runner_has_app_group)
+write_entitlements('IslamicAppWidget/IslamicAppWidget.entitlements', widget_has_app_group)
 
 app_target.build_configurations.each do |config|
   s = config.build_settings
@@ -23,7 +52,7 @@ app_target.build_configurations.each do |config|
   s['CODE_SIGN_STYLE']                = 'Manual'
   s['CODE_SIGN_IDENTITY']             = 'Apple Distribution'
   s['PROVISIONING_PROFILE_SPECIFIER'] = 'Beyan AppStore Profile'
-  s['CODE_SIGN_ENTITLEMENTS']         = 'Runner/Runner.entitlements' if runner_has_app_group
+  s['CODE_SIGN_ENTITLEMENTS']         = 'Runner/Runner.entitlements'
 end
 
 # 2. Ses dosyalarını Runner target'ının Resources build phase'ine ekle:
@@ -47,7 +76,7 @@ unless widget
   sources = %w[IslamicAppWidget.swift WidgetVerseData.swift].map { |f| group.new_reference(f) }
   group.new_reference('Info.plist')
   widget.add_file_references(sources)
-  widget.add_system_frameworks(%w[WidgetKit SwiftUI ActivityKit])
+  widget.add_system_frameworks(%w[WidgetKit SwiftUI ActivityKit Security])
 
   # Runner'a bağımlılık + .appex'i PlugIns klasörüne göm
   app_target.add_dependency(widget)
@@ -69,8 +98,8 @@ widget.build_configurations.each do |config|
   s['PRODUCT_BUNDLE_IDENTIFIER']      = "#{app_bundle_id}.BeyanWidget"
   s['INFOPLIST_FILE']                 = 'IslamicAppWidget/Info.plist'
   s['GENERATE_INFOPLIST_FILE']        = 'NO'
-  s['MARKETING_VERSION']              = '1.2.5'
-  s['CURRENT_PROJECT_VERSION']        = '1'
+  s['MARKETING_VERSION']              = pubspec_version
+  s['CURRENT_PROJECT_VERSION']        = build_number
   s['SWIFT_VERSION']                  = '5.0'
   s['IPHONEOS_DEPLOYMENT_TARGET']     = '16.0'
   s['TARGETED_DEVICE_FAMILY']         = '1,2'
@@ -80,9 +109,9 @@ widget.build_configurations.each do |config|
   s['CODE_SIGN_STYLE']                = 'Manual'
   s['CODE_SIGN_IDENTITY']             = 'Apple Distribution'
   s['PROVISIONING_PROFILE_SPECIFIER'] = 'Beyan Widget AppStore Profile'
-  s['CODE_SIGN_ENTITLEMENTS']         = 'IslamicAppWidget/IslamicAppWidget.entitlements' if widget_has_app_group
+  s['CODE_SIGN_ENTITLEMENTS']         = 'IslamicAppWidget/IslamicAppWidget.entitlements'
   s['LD_RUNPATH_SEARCH_PATHS']        = ['$(inherited)', '@executable_path/Frameworks', '@executable_path/../../Frameworks']
 end
 
 project.save
-puts "Xcode projesi basariyla guncellendi (Runner AppGroup: #{runner_has_app_group}, Widget AppGroup: #{widget_has_app_group})."
+puts "Xcode projesi basariyla guncellendi (Version: #{pubspec_version}+#{build_number}, Keychain Group: aktif, Runner AppGroup: #{runner_has_app_group}, Widget AppGroup: #{widget_has_app_group})."

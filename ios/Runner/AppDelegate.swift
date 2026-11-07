@@ -3,6 +3,10 @@ import Flutter
 import UserNotifications
 import MediaPlayer
 import AVFoundation
+import Security
+#if canImport(WidgetKit)
+import WidgetKit
+#endif
 #if canImport(ActivityKit)
 import ActivityKit
 #endif
@@ -37,6 +41,7 @@ struct BeyanPrayerAttributes: ActivityAttributes {
         setupLiveActivityChannel()
         setupScreenChannel()
         setupNowPlayingChannel()
+        setupWidgetBridgeChannel()
 
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)
     }
@@ -322,5 +327,132 @@ struct BeyanPrayerAttributes: ActivityAttributes {
         }
 
         MPNowPlayingInfoCenter.default().nowPlayingInfo = info
+    }
+
+    // ── Widget Veri Köprüsü (Shared Keychain + AppGroup + Anında WidgetCenter Reload) ──
+    private static let widgetKeychainService = "com.smhisk60.beyan.widget_bridge"
+    private static let widgetKeychainAccount = "shared_widget_data"
+    private static let widgetAccessGroup = "6ABRXTHFD8.com.smhisk60.beyan"
+    private static let widgetAppGroup = "group.com.smhisk60.beyan"
+
+    private func setupWidgetBridgeChannel() {
+        guard let controller = window?.rootViewController as? FlutterViewController else {
+            DispatchQueue.main.async { [weak self] in
+                self?.setupWidgetBridgeChannel()
+            }
+            return
+        }
+
+        let channel = FlutterMethodChannel(
+            name: "com.smhisk60.beyan/widget_bridge",
+            binaryMessenger: controller.binaryMessenger
+        )
+
+        channel.setMethodCallHandler { [weak self] (call: FlutterMethodCall, result: @escaping FlutterResult) in
+            switch call.method {
+            case "syncWidgetData":
+                if let args = call.arguments as? [String: Any] {
+                    self?.saveToSharedWidgetStore(args)
+                }
+                self?.reloadAllNativeWidgets()
+                result(true)
+            case "reloadWidgets":
+                self?.reloadAllNativeWidgets()
+                result(true)
+            default:
+                result(FlutterMethodNotImplemented)
+            }
+        }
+    }
+
+    private func saveToSharedWidgetStore(_ newValues: [String: Any]) {
+        // 1. UserDefaults (App Group + Standard) senkronizasyonu
+        let groupDefaults = UserDefaults(suiteName: AppDelegate.widgetAppGroup)
+        let stdDefaults = UserDefaults.standard
+        for (key, value) in newValues {
+            if value is NSNull {
+                groupDefaults?.removeObject(forKey: key)
+                stdDefaults.removeObject(forKey: key)
+            } else {
+                groupDefaults?.set(value, forKey: key)
+                stdDefaults.set(value, forKey: key)
+            }
+        }
+        groupDefaults?.synchronize()
+        stdDefaults.synchronize()
+
+        // 2. Shared Keychain JSON birleştirme ve yazma (App Group profilde olmasa bile %100 çalışır)
+        var merged = readSharedKeychainDict(accessGroup: AppDelegate.widgetAccessGroup)
+            ?? readSharedKeychainDict(accessGroup: nil)
+            ?? [String: Any]()
+
+        for (key, value) in newValues {
+            if value is NSNull {
+                merged.removeValue(forKey: key)
+            } else {
+                merged[key] = value
+            }
+        }
+
+        guard let jsonData = try? JSONSerialization.data(withJSONObject: merged, options: []) else {
+            return
+        }
+
+        writeSharedKeychainData(jsonData, accessGroup: AppDelegate.widgetAccessGroup)
+        writeSharedKeychainData(jsonData, accessGroup: nil)
+    }
+
+    private func readSharedKeychainDict(accessGroup: String?) -> [String: Any]? {
+        var query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: AppDelegate.widgetKeychainService,
+            kSecAttrAccount as String: AppDelegate.widgetKeychainAccount,
+            kSecReturnData as String: true,
+            kSecMatchLimit as String: kSecMatchLimitOne
+        ]
+        if let group = accessGroup {
+            query[kSecAttrAccessGroup as String] = group
+        }
+        var item: CFTypeRef?
+        let status = SecItemCopyMatching(query as CFDictionary, &item)
+        guard status == errSecSuccess,
+              let data = item as? Data,
+              let dict = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
+            return nil
+        }
+        return dict
+    }
+
+    private func writeSharedKeychainData(_ data: Data, accessGroup: String?) {
+        var query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: AppDelegate.widgetKeychainService,
+            kSecAttrAccount as String: AppDelegate.widgetKeychainAccount
+        ]
+        if let group = accessGroup {
+            query[kSecAttrAccessGroup as String] = group
+        }
+
+        let attributesToUpdate: [String: Any] = [
+            kSecValueData as String: data,
+            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock
+        ]
+
+        let updateStatus = SecItemUpdate(query as CFDictionary, attributesToUpdate as CFDictionary)
+        if updateStatus != errSecSuccess {
+            var addQuery = query
+            addQuery[kSecValueData as String] = data
+            addQuery[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlock
+            SecItemDelete(query as CFDictionary)
+            SecItemAdd(addQuery as CFDictionary, nil)
+        }
+    }
+
+    private func reloadAllNativeWidgets() {
+        #if canImport(WidgetKit)
+        if #available(iOS 14.0, *) {
+            WidgetCenter.shared.reloadAllTimelines()
+        }
+        #endif
     }
 }

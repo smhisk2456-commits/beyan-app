@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:islamic_app/core/utils/navigator_guard.dart';
 import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
@@ -10,9 +11,12 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/utils/app_constants.dart';
 import '../widget_service.dart';
+import '../../calendar/services/hijri_calendar_service.dart';
 import '../../notifications/models/id_verse_translations.dart';
 import '../../notifications/models/short_verse_notification.dart';
 import '../../notifications/screens/notification_settings_sheet.dart';
+import '../../prayer_times/models/prayer_time_model.dart';
+import '../../prayer_times/providers/prayer_time_providers.dart';
 
 /// Kilit Ekranı Widget Kategorileri
 enum WidgetCategoryType {
@@ -820,21 +824,42 @@ class WidgetCenterScreen extends ConsumerStatefulWidget {
 class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
   WidgetCategoryType _selectedCategory = WidgetCategoryType.quotes;
 
-  // Özelleştirme ayarları (Artık standart kodlarla saklanır)
+  // Özelleştirme ayarları (Standart kodlarla saklanır)
   String _selectedQuoteCategory = 'all';
   String _verseViewMode = 'meal_only';
   String _refreshInterval = '1h';
   String _textSize = 'standard';
+  String _prayerStyle = 'detailed';
+  String _countdownStyle = 'timer_and_time';
+  String _hijriStyle = 'hijri_and_kandil';
+  String _hijriOffset = '0';
+  String _kerahetMinutes = '45';
+  String _sunStyle = 'full';
+  int _liveActivityTrigger = -1;
+
   String? _appliedVerseRef;
   bool _isPinned = false;
 
   int _quoteIndex = 0;
   bool _isLoading = true;
+  Timer? _clockTimer;
+  DateTime _now = DateTime.now();
 
   @override
   void initState() {
     super.initState();
     _loadSavedPreferences();
+    _clockTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) {
+        setState(() => _now = DateTime.now());
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _clockTimer?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadSavedPreferences() async {
@@ -845,6 +870,14 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
       _verseViewMode = prefs.getString('widget_verse_view') ?? 'meal_only';
       _refreshInterval = prefs.getString('widget_refresh_interval') ?? '1h';
       _textSize = prefs.getString('widget_text_size') ?? 'standard';
+      _prayerStyle = prefs.getString('widget_prayer_style') ?? 'detailed';
+      _countdownStyle = prefs.getString('widget_countdown_style') ?? 'timer_and_time';
+      _hijriStyle = prefs.getString('widget_hijri_style') ?? 'hijri_and_kandil';
+      _hijriOffset = prefs.getString('widget_hijri_offset') ?? '0';
+      _kerahetMinutes = prefs.getString('widget_kerahet_minutes') ?? '45';
+      _sunStyle = prefs.getString('widget_sun_style') ?? 'full';
+      _liveActivityTrigger = prefs.getInt('live_activity_trigger_minutes') ?? -1;
+
       _isPinned = prefs.getBool('widget_is_pinned') ?? false;
       final savedRef = prefs.getString('widget_applied_verse_ref');
       _appliedVerseRef = (savedRef != null && savedRef.isNotEmpty) ? savedRef : null;
@@ -885,6 +918,30 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
 
       _isLoading = false;
     });
+
+    // Ekran açıldığında mevcut tercihleri native widget'lara hemen senkronize et
+    unawaited(WidgetService().syncImmediateSettings());
+  }
+
+  Future<void> _persistActivePreviewVerseToPrefs(SharedPreferences prefs) async {
+    final strings = ref.read(appStringsProvider);
+    final (refText, formattedText, arabicText, trRef) =
+        _resolveActivePreviewVerse(strings.language);
+    final nonce = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+
+    await prefs.setString('widget_applied_verse_ref', refText);
+    await prefs.setString('widget_applied_verse_text', formattedText);
+    await prefs.setString('widget_applied_verse_arabic', arabicText);
+    await prefs.setInt('widget_apply_nonce', nonce);
+
+    final refMatch = RegExp(r'(\d+):(\d+)').firstMatch(trRef);
+    final surahNum = refMatch != null ? int.tryParse(refMatch.group(1)!) ?? 0 : 0;
+    final verseNum = refMatch != null ? int.tryParse(refMatch.group(2)!) ?? 0 : 0;
+    if (surahNum > 0) {
+      await prefs.setInt('widget_applied_verse_surah', surahNum);
+      await prefs.setInt('widget_applied_verse_number', verseNum);
+    }
+    _appliedVerseRef = refText;
   }
 
   Future<void> _savePreference(String key, String value, Function(String) updater) async {
@@ -892,16 +949,48 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
     await prefs.setString(key, value);
     await HomeWidget.setAppGroupId(AppConstants.appGroupId);
     await HomeWidget.saveWidgetData<String>(key, value);
+
+    if (key == 'widget_hijri_offset') {
+      final offsetInt = int.tryParse(value.replaceAll('+', '')) ?? 0;
+      await HijriCalendarService.instance.saveAdjustment(offsetInt);
+    }
+
     if (!mounted) return;
     setState(() {
       updater(value);
       if (key == 'widget_quote_category') {
         _quoteIndex = 0;
+        _isPinned = false;
+      } else if (key == 'widget_refresh_interval') {
+        _isPinned = false;
       }
     });
+
+    if (key == 'widget_quote_category' || key == 'widget_refresh_interval') {
+      await prefs.setBool('widget_is_pinned', false);
+      await HomeWidget.saveWidgetData<bool>('widget_is_pinned', false);
+    }
+
+    if (key == 'widget_quote_category' ||
+        key == 'widget_verse_view' ||
+        key == 'widget_refresh_interval') {
+      await _persistActivePreviewVerseToPrefs(prefs);
+      if (mounted) setState(() {});
+    }
+
     HapticFeedback.lightImpact();
 
-    await WidgetService().updateAllWidgets();
+    await WidgetService().syncImmediateSettings();
+    unawaited(WidgetService().updateAllWidgets());
+  }
+
+  Future<void> _onPreviewVerseChanged(int newIndex) async {
+    HapticFeedback.selectionClick();
+    setState(() => _quoteIndex = newIndex);
+    final prefs = await SharedPreferences.getInstance();
+    await _persistActivePreviewVerseToPrefs(prefs);
+    if (mounted) setState(() {});
+    await WidgetService().syncImmediateSettings();
   }
 
    (String, String, String, String) _resolveActivePreviewVerse(AppLanguage lang) {
@@ -971,52 +1060,40 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
     await prefs.setString('widget_refresh_interval', _refreshInterval);
     await prefs.setString('widget_text_size', _textSize);
     await prefs.setString('widget_active_category', _selectedCategory.name);
+    await prefs.setString('widget_prayer_style', _prayerStyle);
+    await prefs.setString('widget_countdown_style', _countdownStyle);
+    await prefs.setString('widget_hijri_style', _hijriStyle);
+    await prefs.setString('widget_hijri_offset', _hijriOffset);
+    await prefs.setString('widget_kerahet_minutes', _kerahetMinutes);
+    await prefs.setString('widget_sun_style', _sunStyle);
 
     await HomeWidget.saveWidgetData<String>('widget_quote_category', _selectedQuoteCategory);
     await HomeWidget.saveWidgetData<String>('widget_verse_view', _verseViewMode);
     await HomeWidget.saveWidgetData<String>('widget_refresh_interval', _refreshInterval);
     await HomeWidget.saveWidgetData<String>('widget_text_size', _textSize);
     await HomeWidget.saveWidgetData<String>('widget_active_category', _selectedCategory.name);
+    await HomeWidget.saveWidgetData<String>('widget_prayer_style', _prayerStyle);
+    await HomeWidget.saveWidgetData<String>('widget_countdown_style', _countdownStyle);
+    await HomeWidget.saveWidgetData<String>('widget_hijri_style', _hijriStyle);
+    await HomeWidget.saveWidgetData<String>('widget_hijri_offset', _hijriOffset);
+    await HomeWidget.saveWidgetData<String>('widget_kerahet_minutes', _kerahetMinutes);
+    await HomeWidget.saveWidgetData<String>('widget_sun_style', _sunStyle);
 
     if (_selectedCategory == WidgetCategoryType.quotes || _selectedCategory == WidgetCategoryType.dailyVerse) {
-      final (refText, formattedText, arabicText, trRef) = _resolveActivePreviewVerse(strings.language);
-      final nonce = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-
-      // Uygulanan ayeti hemen aktif hale getir ve sabitle (kullanıcı bunu seçti)
-      await prefs.setBool('widget_is_pinned', true);
-      await HomeWidget.saveWidgetData<bool>('widget_is_pinned', true);
-
-      await prefs.setString('widget_applied_verse_ref', refText);
-      await prefs.setString('widget_applied_verse_text', formattedText);
-      await prefs.setInt('widget_apply_nonce', nonce);
-      await HomeWidget.saveWidgetData<String>('widget_applied_verse_ref', refText);
-      await HomeWidget.saveWidgetData<String>('widget_applied_verse_text', formattedText);
-      await HomeWidget.saveWidgetData<String>('widget_applied_verse_arabic', arabicText);
-      await HomeWidget.saveWidgetData<int>('widget_apply_nonce', nonce);
-
-      final refMatch = RegExp(r'(\d+):(\d+)').firstMatch(trRef);
-      final surahNum = refMatch != null ? int.tryParse(refMatch.group(1)!) ?? 0 : 0;
-      final verseNum = refMatch != null ? int.tryParse(refMatch.group(2)!) ?? 0 : 0;
-      if (surahNum > 0) {
-        await prefs.setInt('widget_applied_verse_surah', surahNum);
-        await prefs.setInt('widget_applied_verse_number', verseNum);
-        await HomeWidget.saveWidgetData<int>('widget_applied_verse_surah', surahNum);
-        await HomeWidget.saveWidgetData<int>('widget_applied_verse_number', verseNum);
-      }
+      await _persistActivePreviewVerseToPrefs(prefs);
+      final refText = _appliedVerseRef ?? '';
 
       if (!mounted) return;
-      setState(() {
-        _isPinned = true;
-        _appliedVerseRef = refText;
-      });
+      setState(() {});
 
-      await WidgetService().updateAllWidgets();
+      await WidgetService().syncImmediateSettings();
+      unawaited(WidgetService().updateAllWidgets());
 
       if (mounted) {
         final msg = strings.language == AppLanguage.turkish
-            ? '✨ $refText kilit ekranı widget\'ına uygulandı ve sabitlendi!'
+            ? '✨ $refText kilit ekranı ve ana ekran widget\'ına anında uygulandı!'
             : (strings.language == AppLanguage.arabic
-                ? '✨ تم تطبيق $refText على ويدجت شاشة القفل وتثبيتها!'
+                ? '✨ تم تطبيق $refText على ويدجت شاشة القفل فوراً!'
                 : (strings.language == AppLanguage.indonesian
                     ? '✨ $refText diterapkan ke widget layar kunci!'
                     : '✨ $refText applied to Lock Screen widget!'));
@@ -1027,12 +1104,13 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
       if (!mounted) return;
       setState(() {});
 
-      await WidgetService().updateAllWidgets();
+      await WidgetService().syncImmediateSettings();
+      unawaited(WidgetService().updateAllWidgets());
 
       if (mounted) {
         final catTitle = _getCategoryTitle(strings);
         final msg = strings.language == AppLanguage.turkish
-            ? '✨ $catTitle ayarları kilit ekranına uygulandı!'
+            ? '✨ $catTitle ayarları kilit ekranı ve ana ekran widget\'ına uygulandı!'
             : (strings.language == AppLanguage.arabic
                 ? '✨ تم تطبيق إعدادات $catTitle على شاشة القفل!'
                 : (strings.language == AppLanguage.indonesian
@@ -1323,6 +1401,87 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
       _textSize = size;
     });
 
+    await WidgetService().syncImmediateSettings();
+    unawaited(WidgetService().updateAllWidgets());
+  }
+
+  String _getLocalizedPrayerStyle(String style, AppLanguage lang) {
+    final isTr = lang == AppLanguage.turkish;
+    if (style == 'compact') {
+      return isTr ? 'Kompakt Saat & Sayaç' : 'Compact Time & Timer';
+    }
+    return isTr ? 'Ezan Vakti & Tam Bilgi' : 'Adhan Time & Full Info';
+  }
+
+  String _getLocalizedCountdownStyle(String style, AppLanguage lang) {
+    final isTr = lang == AppLanguage.turkish;
+    if (style == 'timer_only') {
+      return isTr ? 'Yalnızca Büyük Sayaç' : 'Large Timer Only';
+    }
+    return isTr ? 'Sayaç + Ezan Saati' : 'Timer + Adhan Time';
+  }
+
+  String _getLocalizedHijriStyle(String style, AppLanguage lang) {
+    final isTr = lang == AppLanguage.turkish;
+    if (style == 'hijri_only') {
+      return isTr ? 'Yalnızca Hicri Tarih' : 'Hijri Date Only';
+    }
+    return isTr ? 'Hicri + Kandil Sayacı' : 'Hijri + Holy Nights';
+  }
+
+  String _getLocalizedHijriOffset(String offset, AppLanguage lang) {
+    final isTr = lang == AppLanguage.turkish;
+    final clean = offset.replaceAll('+', '');
+    final val = int.tryParse(clean) ?? 0;
+    if (val == 0) {
+      return isTr ? 'Diyanet Uyumlu (0 Gün)' : 'Standard (0 Days)';
+    }
+    final sign = val > 0 ? '+$val' : '$val';
+    return isTr ? '$sign Gün' : '$sign Days';
+  }
+
+  String _getLocalizedKerahetMinutes(String mins, AppLanguage lang) {
+    final isTr = lang == AppLanguage.turkish;
+    if (mins == '45') {
+      return isTr ? '45 Dakika (Standart)' : '45 Minutes (Standard)';
+    }
+    return isTr ? '$mins Dakika' : '$mins Minutes';
+  }
+
+  String _getLocalizedSunStyle(String style, AppLanguage lang) {
+    final isTr = lang == AppLanguage.turkish;
+    if (style == 'compact') {
+      return isTr ? 'Kompakt (Güneş & İşrak)' : 'Compact (Sunrise & Ishraq)';
+    }
+    return isTr ? 'Tam Detay (Duhâ Dahil)' : 'Full Detail (With Duha)';
+  }
+
+  String _getLocalizedLiveActivityTrigger(int mins, AppLanguage lang) {
+    final isTr = lang == AppLanguage.turkish;
+    switch (mins) {
+      case -1:
+        return isTr ? 'Her Zaman Aktif (Önerilen)' : 'Always Active (Recommended)';
+      case 45:
+        return isTr ? 'Vakte 45 Dk Kala' : '45 Mins Before Prayer';
+      case 30:
+        return isTr ? 'Vakte 30 Dk Kala' : '30 Mins Before Prayer';
+      case 15:
+        return isTr ? 'Vakte 15 Dk Kala' : '15 Mins Before Prayer';
+      case -999:
+        return isTr ? 'Devre Dışı' : 'Disabled';
+      default:
+        return isTr ? 'Her Zaman Aktif' : 'Always Active';
+    }
+  }
+
+  Future<void> _saveLiveActivityTrigger(int mins) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('live_activity_trigger_minutes', mins);
+    await HomeWidget.setAppGroupId(AppConstants.appGroupId);
+    await HomeWidget.saveWidgetData<int>('live_activity_trigger_minutes', mins);
+    if (!mounted) return;
+    setState(() => _liveActivityTrigger = mins);
+    HapticFeedback.lightImpact();
     await WidgetService().updateAllWidgets();
   }
 
@@ -1912,12 +2071,64 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
     );
   }
 
+  String _formatLiveDate(DateTime dt, AppLanguage lang) {
+    if (lang == AppLanguage.turkish) {
+      const days = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
+      const months = [
+        '', 'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
+        'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
+      ];
+      return '${days[dt.weekday - 1]}, ${dt.day} ${months[dt.month]}';
+    }
+    const daysEn = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const monthsEn = [
+      '', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    return '${daysEn[dt.weekday - 1]}, ${monthsEn[dt.month]} ${dt.day}';
+  }
+
+  String _formatLiveClock(DateTime dt) {
+    final h = dt.hour.toString().padLeft(2, '0');
+    final m = dt.minute.toString().padLeft(2, '0');
+    return '$h:$m';
+  }
+
+  String _formatDurationHms(Duration d) {
+    final safe = d.isNegative ? Duration.zero : d;
+    final h = safe.inHours;
+    final m = safe.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final s = safe.inSeconds.remainder(60).toString().padLeft(2, '0');
+    if (h > 0) {
+      return '$h:$m:$s';
+    }
+    return '$m:$s';
+  }
+
+  String _formatTimeHhMm(DateTime dt) {
+    final h = dt.hour.toString().padLeft(2, '0');
+    final m = dt.minute.toString().padLeft(2, '0');
+    return '$h:$m';
+  }
+
   // ── Gerçekçi iPhone Kilit Ekranı Önizlemesi ────────────────────────────────
   Widget _buildLockScreenPhoneMockup(AppStrings strings) {
-    final asrLabel = '${strings.asr}: 2:15:30';
+    final dailyAsync = ref.watch(prayerTimesNotifierProvider);
+    final daily = dailyAsync.valueOrNull;
+    final nextEntry = daily?.nextPrayerEntry;
+    final nextName = nextEntry != null
+        ? nextEntry.name.localizedName(strings.language.code)
+        : strings.asr;
+    final remaining = nextEntry != null
+        ? nextEntry.time.difference(_now)
+        : const Duration(hours: 1, minutes: 24, seconds: 15);
+    final countdownStr = _formatDurationHms(remaining);
+    final inlineLabel = '$nextName: $countdownStr';
+    final liveDateStr = _formatLiveDate(_now, strings.language);
+    final liveClockStr = _formatLiveClock(_now);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 36),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 32),
       decoration: BoxDecoration(
         color: BeyanColors.tone(0xFF041713),
         borderRadius: BorderRadius.circular(28),
@@ -1938,16 +2149,18 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
         children: [
           // ── Kilit Ekranı Tarihi veya Kompakt Satır Widget'ı ───────────────
           if (_selectedCategory == WidgetCategoryType.countdown) ...[
-            // Screenshot 5: "Pazartesi, 6 Haziran | ⏱️ İkindi: 2:15:30"
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  strings.mockupDate,
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
+                Flexible(
+                  child: Text(
+                    liveDateStr,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 6),
@@ -1959,7 +2172,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                 const Icon(Icons.timer_outlined, color: Colors.white, size: 14),
                 const SizedBox(width: 4),
                 Text(
-                  asrLabel,
+                  inlineLabel,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 13,
@@ -1970,7 +2183,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
             ),
           ] else ...[
             Text(
-              strings.mockupDate,
+              liveDateStr,
               style: const TextStyle(
                 color: Colors.white70,
                 fontSize: 14,
@@ -1981,11 +2194,11 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
 
           const SizedBox(height: 6),
 
-          // ── Büyük Saat: "9:41" ───────────────────────────────────────────
-          const Text(
-            '9:41',
-            style: TextStyle(
-              fontSize: 76,
+          // ── Canlı Büyük Saat ─────────────────────────────────────────────
+          Text(
+            liveClockStr,
+            style: const TextStyle(
+              fontSize: 72,
               fontWeight: FontWeight.w300,
               color: Colors.white,
               letterSpacing: -2,
@@ -1996,7 +2209,7 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
           const SizedBox(height: 14),
 
           // ── Kilit Ekranı Saat Altı Widget Alanı ───────────────────────────
-          _buildActiveWidgetPreviewContent(),
+          _buildActiveWidgetPreviewContent(daily),
 
           // ── Önizlemede Farklı Âyet Gösterme Butonu (< Başka Ayet Dene >) ──
           if (_selectedCategory == WidgetCategoryType.quotes ||
@@ -2008,11 +2221,10 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                 InkWell(
                   borderRadius: BorderRadius.circular(10),
                   onTap: () {
-                    HapticFeedback.selectionClick();
                     final total = _selectedCategory == WidgetCategoryType.dailyVerse
                         ? ShortVerseNotification.pool.length
                         : (kWidgetCategoryQuotes[_selectedQuoteCategory] ?? kWidgetCategoryQuotes['all']!).length;
-                    setState(() => _quoteIndex = (_quoteIndex - 1 + total) % total);
+                    _onPreviewVerseChanged((_quoteIndex - 1 + total) % total);
                   },
                   child: Container(
                     padding: const EdgeInsets.all(6),
@@ -2027,49 +2239,43 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
                 const SizedBox(width: 8),
                 Flexible(
                   child: InkWell(
-                  borderRadius: BorderRadius.circular(12),
-                  onTap: () {
-                    HapticFeedback.selectionClick();
-                    setState(() => _quoteIndex++);
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.08),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () => _onPreviewVerseChanged(_quoteIndex + 1),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.15),
+                        ),
                       ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.shuffle_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 14),
-                        const SizedBox(width: 5),
-                        Flexible(
-                          child: Text(
-                            strings.previewAnotherVerse,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: BeyanColors.tone(0xFFFFDF7A),
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.bold,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.shuffle_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 14),
+                          const SizedBox(width: 5),
+                          Flexible(
+                            child: Text(
+                              strings.previewAnotherVerse,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: BeyanColors.tone(0xFFFFDF7A),
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
                 ),
                 const SizedBox(width: 8),
                 InkWell(
                   borderRadius: BorderRadius.circular(10),
-                  onTap: () {
-                    HapticFeedback.selectionClick();
-                    setState(() => _quoteIndex++);
-                  },
+                  onTap: () => _onPreviewVerseChanged(_quoteIndex + 1),
                   child: Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
@@ -2226,10 +2432,33 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
     );
   }
 
-  // Aktif Kategoriye Göre Widget Önizleme İçeriği
-  Widget _buildActiveWidgetPreviewContent() {
+  // Aktif Kategoriye Göre Canlı Widget Önizleme İçeriği
+  Widget _buildActiveWidgetPreviewContent(DailyPrayerTimes? daily) {
     final strings = ref.watch(appStringsProvider);
     final langCode = strings.language.code;
+    final isTr = strings.language == AppLanguage.turkish;
+    final timeScale = (_textSize == 'small' || _textSize == 'Küçük')
+        ? 0.85
+        : ((_textSize == 'large' || _textSize == 'Büyük') ? 1.22 : 1.0);
+
+    final nextEntry = daily?.nextPrayerEntry;
+    final currentEntry = daily?.currentPrayerEntry;
+    final nextName = nextEntry != null
+        ? nextEntry.name.localizedName(langCode)
+        : strings.asr;
+    final currentName = currentEntry != null
+        ? currentEntry.name.localizedName(langCode)
+        : strings.dhuhr;
+    final nextTimeStr = nextEntry != null
+        ? _formatTimeHhMm(nextEntry.time)
+        : '16:45';
+    final currentTimeStr = currentEntry != null
+        ? _formatTimeHhMm(currentEntry.time)
+        : '13:10';
+    final remaining = nextEntry != null
+        ? nextEntry.time.difference(_now)
+        : const Duration(hours: 1, minutes: 24, seconds: 15);
+    final timerStr = _formatDurationHms(remaining);
 
     switch (_selectedCategory) {
       case WidgetCategoryType.quotes:
@@ -2249,101 +2478,181 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
         );
 
       case WidgetCategoryType.prayerTimes:
-        final timeScale = (_textSize == 'small' || _textSize == 'Küçük') ? 0.85 : ((_textSize == 'large' || _textSize == 'Büyük') ? 1.25 : 1.0);
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           child: Column(
             children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.wb_sunny_rounded, color: Colors.white70, size: 13 * timeScale),
-                  const SizedBox(width: 4),
-                  Text('${strings.dhuhr} 12:30 PM', style: TextStyle(color: Colors.white70, fontSize: 11 * timeScale)),
-                  const SizedBox(width: 8),
-                  Icon(Icons.wb_twilight_rounded, color: Colors.white70, size: 13 * timeScale),
-                  const SizedBox(width: 4),
-                  Text('${strings.asr} 3:45 PM', style: TextStyle(color: Colors.white70, fontSize: 11 * timeScale)),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '2:15:30',
-                style: TextStyle(
-                  fontSize: 26 * timeScale,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  letterSpacing: 1.2,
+              if (_prayerStyle == 'compact') ...[
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.wb_sunny_rounded, color: Colors.white70, size: 13 * timeScale),
+                    const SizedBox(width: 4),
+                    Text(
+                      '$currentName $currentTimeStr',
+                      style: TextStyle(color: Colors.white70, fontSize: 11.5 * timeScale, fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(width: 8),
+                    Icon(Icons.wb_twilight_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 13 * timeScale),
+                    const SizedBox(width: 4),
+                    Text(
+                      '$nextName $nextTimeStr',
+                      style: TextStyle(color: BeyanColors.tone(0xFFFFDF7A), fontSize: 11.5 * timeScale, fontWeight: FontWeight.bold),
+                    ),
+                  ],
                 ),
-              ),
+                const SizedBox(height: 4),
+                Text(
+                  timerStr,
+                  style: TextStyle(
+                    fontSize: 25 * timeScale,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    letterSpacing: 1.1,
+                  ),
+                ),
+              ] else ...[
+                Text(
+                  isTr ? '${nextName.toUpperCase()} VAKTİNE' : 'UNTIL ${nextName.toUpperCase()}',
+                  style: TextStyle(
+                    color: BeyanColors.tone(0xFFFFDF7A),
+                    fontSize: 11 * timeScale,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  isTr ? '$nextTimeStr • $nextName Ezanı' : '$nextTimeStr • $nextName Adhan',
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.9),
+                    fontSize: 12.5 * timeScale,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  timerStr,
+                  style: TextStyle(
+                    fontSize: 25 * timeScale,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    letterSpacing: 1.1,
+                  ),
+                ),
+              ],
             ],
           ),
         );
 
       case WidgetCategoryType.countdown:
-        final timeScale = (_textSize == 'small' || _textSize == 'Küçük') ? 0.9 : ((_textSize == 'large' || _textSize == 'Büyük') ? 1.25 : 1.0);
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-          child: Text(
-            strings.language == AppLanguage.turkish
-                ? 'İkindi vaktine 2 saat 15 dk kaldı'
-                : (strings.language == AppLanguage.arabic
-                    ? 'ساعتان و١٥ دقيقة حتى صلاة العصر'
-                    : (strings.language == AppLanguage.indonesian
-                        ? '2 jam 15 mnt menuju waktu Ashar'
-                        : '2 hrs 15 mins until Asr prayer')),
-            style: TextStyle(color: Colors.white70, fontSize: 12 * timeScale),
+          child: Column(
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.timer_outlined, color: BeyanColors.tone(0xFFFFDF7A), size: 13 * timeScale),
+                  const SizedBox(width: 4),
+                  Text(
+                    isTr ? '$nextName Vaktine Kalan:' : 'Until $nextName:',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.9),
+                      fontSize: 11.5 * timeScale,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 2),
+              Text(
+                timerStr,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: (_countdownStyle == 'timer_only' ? 27 : 23) * timeScale,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.0,
+                ),
+              ),
+              if (_countdownStyle != 'timer_only') ...[
+                const SizedBox(height: 2),
+                Text(
+                  isTr ? '$nextName Saati: $nextTimeStr' : '$nextName Time: $nextTimeStr',
+                  style: TextStyle(color: Colors.white70, fontSize: 11 * timeScale),
+                ),
+              ],
+            ],
           ),
         );
 
       case WidgetCategoryType.hijri:
-        final timeScale = (_textSize == 'small' || _textSize == 'Küçük') ? 0.9 : ((_textSize == 'large' || _textSize == 'Büyük') ? 1.25 : 1.0);
+        final offsetInt = int.tryParse(_hijriOffset.replaceAll('+', '')) ?? 0;
+        final hijriDate = HijriCalendarService.instance.getHijriDate(_now, adjustmentDays: offsetInt);
+        final nextRelDay = HijriCalendarService.instance.getNextReligiousDay();
+        final relNotice = nextRelDay != null
+            ? (nextRelDay.daysRemaining == 0
+                ? '✨ ${nextRelDay.title}'
+                : (isTr
+                    ? '${nextRelDay.title}\'ne ${nextRelDay.daysRemaining} Gün Kaldı'
+                    : '${nextRelDay.daysRemaining} Days to ${nextRelDay.title}'))
+            : (isTr ? 'Mübarek Hicri ${hijriDate.year}' : 'Blessed Hijri ${hijriDate.year}');
+
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
           child: Column(
             children: [
               Text(
-                strings.language == AppLanguage.turkish
-                    ? '🌙 18 Ramazan 1447'
-                    : (strings.language == AppLanguage.arabic
-                        ? '🌙 ١٨ رمضان ١٤٤٧'
-                        : '🌙 18 Ramadan 1447'),
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13 * timeScale),
+                '🌙 ${hijriDate.localizedFormat(langCode)}',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13.5 * timeScale),
               ),
-              const SizedBox(height: 2),
-              Text(
-                strings.language == AppLanguage.turkish
-                    ? 'Kadir Gecesine 9 Gün Kaldı'
-                    : (strings.language == AppLanguage.arabic
-                        ? '٩ أيام حتى ليلة القدر'
-                        : (strings.language == AppLanguage.indonesian
-                            ? '9 Hari menuju Malam Lailatul Qadr'
-                            : '9 Days to Laylat al-Qadr')),
-                style: TextStyle(color: Colors.white70, fontSize: 11.5 * timeScale),
-              ),
+              if (_hijriStyle != 'hijri_only') ...[
+                const SizedBox(height: 3),
+                Text(
+                  relNotice,
+                  style: TextStyle(color: BeyanColors.tone(0xFFFFDF7A), fontSize: 11.5 * timeScale, fontWeight: FontWeight.w500),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ],
           ),
         );
 
       case WidgetCategoryType.sunTimes:
-        final timeScale = (_textSize == 'small' || _textSize == 'Küçük') ? 0.9 : ((_textSize == 'large' || _textSize == 'Büyük') ? 1.25 : 1.0);
+        final sunriseEntry = daily?.prayers.where((p) => p.name == PrayerName.sunrise).firstOrNull;
+        final sunriseTime = sunriseEntry?.time ?? DateTime(_now.year, _now.month, _now.day, 6, 12);
+        final kerahetMins = int.tryParse(_kerahetMinutes) ?? 45;
+        final ishraqTime = sunriseTime.add(Duration(minutes: kerahetMins));
+        final sunriseStr = _formatTimeHhMm(sunriseTime);
+        final ishraqStr = _formatTimeHhMm(ishraqTime);
+
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
+          child: Column(
             children: [
-              Icon(Icons.wb_sunny_outlined, color: Colors.amber, size: 16 * timeScale),
-              const SizedBox(width: 6),
-              Text(
-                strings.language == AppLanguage.turkish
-                    ? 'Güneş: 05:42 • İşrak: 06:27'
-                    : (strings.language == AppLanguage.arabic
-                        ? 'الشروق: ٠٥:٤٢ • الإشراق: ٠٦:٢٧'
-                        : (strings.language == AppLanguage.indonesian
-                            ? 'Terbit: 05:42 • Isyraq: 06:27'
-                            : 'Sunrise: 05:42 • Ishraq: 06:27')),
-                style: TextStyle(color: Colors.white, fontSize: 12 * timeScale, fontWeight: FontWeight.w600),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.wb_sunny_outlined, color: Colors.amber, size: 15 * timeScale),
+                  const SizedBox(width: 6),
+                  Text(
+                    isTr
+                        ? 'Güneş: $sunriseStr • İşrak: $ishraqStr'
+                        : 'Sunrise: $sunriseStr • Ishraq: $ishraqStr',
+                    style: TextStyle(color: Colors.white, fontSize: 12.5 * timeScale, fontWeight: FontWeight.w600),
+                  ),
+                ],
               ),
+              if (_sunStyle != 'compact') ...[
+                const SizedBox(height: 3),
+                Text(
+                  isTr
+                      ? 'Kerâhet çıkışı: $ishraqStr (Duhâ namazı • $kerahetMins dk)'
+                      : 'Duha prayer starts: $ishraqStr ($kerahetMins mins)',
+                  style: TextStyle(color: Colors.white70, fontSize: 11 * timeScale),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ],
           ),
         );
@@ -2485,44 +2794,105 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
             _buildDivider(),
           ],
 
-          // Diğer kategoriler için özel bilgi satırları
+          // Diğer kategoriler için etkileşimli özelleştirme seçenekleri
           if (_selectedCategory == WidgetCategoryType.prayerTimes) ...[
             _buildOptionTile(
-              title: strings.prayerTimesWidgetTitle,
-              value: strings.language == AppLanguage.turkish
-                  ? 'Canlı Ezan & Geri Sayım'
-                  : 'Live Prayer & Timer',
-              onTap: null,
+              title: strings.language == AppLanguage.turkish ? 'Görünüm Stili' : 'Display Style',
+              value: _getLocalizedPrayerStyle(_prayerStyle, strings.language),
+              onTap: () => _showOptionSheet(
+                title: strings.language == AppLanguage.turkish ? 'Namaz Vakti Görünüm Stili' : 'Prayer Widget Style',
+                options: const ['detailed', 'compact'],
+                currentValue: _prayerStyle,
+                labelBuilder: (s) => _getLocalizedPrayerStyle(s, strings.language),
+                onSelected: (val) => _savePreference('widget_prayer_style', val, (v) => _prayerStyle = v),
+              ),
+            ),
+            _buildDivider(),
+            _buildOptionTile(
+              title: strings.language == AppLanguage.turkish ? 'Canlı Etkinlik (Dynamic Island)' : 'Live Activity (Dynamic Island)',
+              value: _getLocalizedLiveActivityTrigger(_liveActivityTrigger, strings.language),
+              onTap: () => _showOptionSheet(
+                title: strings.language == AppLanguage.turkish ? 'Canlı Etkinlik Gösterim Zamanı' : 'Live Activity Trigger',
+                options: const ['-1', '45', '30', '15', '-999'],
+                currentValue: _liveActivityTrigger.toString(),
+                labelBuilder: (s) => _getLocalizedLiveActivityTrigger(int.tryParse(s) ?? -1, strings.language),
+                onSelected: (val) => _saveLiveActivityTrigger(int.tryParse(val) ?? -1),
+              ),
             ),
             _buildDivider(),
           ],
           if (_selectedCategory == WidgetCategoryType.countdown) ...[
             _buildOptionTile(
-              title: strings.countdownWidgetTitle,
-              value: strings.language == AppLanguage.turkish
-                  ? 'Sıradaki Namaza Kalan Süre'
-                  : 'Time to Next Prayer',
-              onTap: null,
+              title: strings.language == AppLanguage.turkish ? 'Sayaç Görünümü' : 'Timer Style',
+              value: _getLocalizedCountdownStyle(_countdownStyle, strings.language),
+              onTap: () => _showOptionSheet(
+                title: strings.language == AppLanguage.turkish ? 'Geri Sayım Görünümü' : 'Countdown Style',
+                options: const ['timer_and_time', 'timer_only'],
+                currentValue: _countdownStyle,
+                labelBuilder: (s) => _getLocalizedCountdownStyle(s, strings.language),
+                onSelected: (val) => _savePreference('widget_countdown_style', val, (v) => _countdownStyle = v),
+              ),
+            ),
+            _buildDivider(),
+            _buildOptionTile(
+              title: strings.language == AppLanguage.turkish ? 'Vakit Uyarı & Bildirimleri' : 'Prayer Alerts & Notifications',
+              value: strings.language == AppLanguage.turkish ? 'Ezan & Vakit Öncesi Uyarı' : 'Adhan & Pre-Prayer Alerts',
+              onTap: () {
+                HapticFeedback.lightImpact();
+                NotificationSettingsSheet.show(context, initialTab: 0);
+              },
             ),
             _buildDivider(),
           ],
           if (_selectedCategory == WidgetCategoryType.hijri) ...[
             _buildOptionTile(
-              title: strings.hijriCalendarWidgetTitle,
-              value: strings.language == AppLanguage.turkish
-                  ? 'Hicri Gün & Kandil Sayacı'
-                  : 'Hijri & Holy Nights',
-              onTap: null,
+              title: strings.language == AppLanguage.turkish ? 'Takvim Görünümü' : 'Calendar View',
+              value: _getLocalizedHijriStyle(_hijriStyle, strings.language),
+              onTap: () => _showOptionSheet(
+                title: strings.language == AppLanguage.turkish ? 'Hicri Takvim Görünümü' : 'Hijri Calendar View',
+                options: const ['hijri_and_kandil', 'hijri_only'],
+                currentValue: _hijriStyle,
+                labelBuilder: (s) => _getLocalizedHijriStyle(s, strings.language),
+                onSelected: (val) => _savePreference('widget_hijri_style', val, (v) => _hijriStyle = v),
+              ),
+            ),
+            _buildDivider(),
+            _buildOptionTile(
+              title: strings.language == AppLanguage.turkish ? 'Hicri Gün Düzeltmesi' : 'Hijri Day Adjustment',
+              value: _getLocalizedHijriOffset(_hijriOffset, strings.language),
+              onTap: () => _showOptionSheet(
+                title: strings.language == AppLanguage.turkish ? 'Hicri Gün Düzeltmesi' : 'Hijri Day Adjustment',
+                options: const ['-2', '-1', '0', '+1', '+2'],
+                currentValue: _hijriOffset,
+                labelBuilder: (s) => _getLocalizedHijriOffset(s, strings.language),
+                onSelected: (val) => _savePreference('widget_hijri_offset', val, (v) => _hijriOffset = v),
+              ),
             ),
             _buildDivider(),
           ],
           if (_selectedCategory == WidgetCategoryType.sunTimes) ...[
             _buildOptionTile(
-              title: strings.sunIshraqWidgetTitle,
-              value: strings.language == AppLanguage.turkish
-                  ? 'Güneş Doğuşu & İşrak'
-                  : 'Sunrise & Ishraq',
-              onTap: null,
+              title: strings.language == AppLanguage.turkish ? 'Kerâhet Süresi' : 'Kerahat Duration',
+              value: _getLocalizedKerahetMinutes(_kerahetMinutes, strings.language),
+              onTap: () => _showOptionSheet(
+                title: strings.language == AppLanguage.turkish ? 'Güneş Sonrası Kerâhet Süresi' : 'Post-Sunrise Kerahat Duration',
+                options: const ['40', '45', '50', '55'],
+                currentValue: _kerahetMinutes,
+                labelBuilder: (s) => _getLocalizedKerahetMinutes(s, strings.language),
+                onSelected: (val) => _savePreference('widget_kerahet_minutes', val, (v) => _kerahetMinutes = v),
+              ),
+            ),
+            _buildDivider(),
+            _buildOptionTile(
+              title: strings.language == AppLanguage.turkish ? 'Görünüm Detayı' : 'Display Detail',
+              value: _getLocalizedSunStyle(_sunStyle, strings.language),
+              onTap: () => _showOptionSheet(
+                title: strings.language == AppLanguage.turkish ? 'Güneş & İşrak Görünümü' : 'Sun & Ishraq View',
+                options: const ['full', 'compact'],
+                currentValue: _sunStyle,
+                labelBuilder: (s) => _getLocalizedSunStyle(s, strings.language),
+                onSelected: (val) => _savePreference('widget_sun_style', val, (v) => _sunStyle = v),
+              ),
             ),
             _buildDivider(),
           ],

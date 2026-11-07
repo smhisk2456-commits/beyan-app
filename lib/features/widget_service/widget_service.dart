@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -12,11 +14,12 @@ import 'screens/widget_center_screen.dart';
 
 import '../../core/localization/app_strings.dart';
 
-/// Home Widget ve SharedPreferences köprüsü.
+/// Home Widget, Shared Keychain ve SharedPreferences köprüsü.
 ///
 /// Sorumlulukları:
-/// 1. Namaz vakitlerini ve günlük ayeti [home_widget] ortak alanına yazar.
-/// 2. iOS WidgetKit ve Android AppWidget bu verileri okur.
+/// 1. Namaz vakitlerini, günlük ayeti ve tüm widget özelleştirmelerini hem [home_widget]
+///    hem de iOS Shared Keychain köprüsüne (`com.smhisk60.beyan/widget_bridge`) yazar.
+/// 2. iOS WidgetKit ve Android AppWidget bu verileri anında okur.
 /// 3. WorkManager arka plan görevi bu servisi çağırır.
 class WidgetService {
   // ── Singleton ──────────────────────────────────────────────
@@ -25,28 +28,185 @@ class WidgetService {
   WidgetService._internal();
 
   final PrayerTimeService _prayerService = PrayerTimeService();
+  final QuranRepository _quranRepo = QuranRepository();
 
-  // ── iOS App Group Identifier ──────────────────────────────
-  /// home_widget'ın iOS'ta SharedPreferences yerine
-  /// UserDefaults App Group'unu kullanması için gerekli.
   static const String _appGroupId = 'group.com.smhisk60.beyan';
-
-  // ── Başlatma ───────────────────────────────────────────────
+  static const MethodChannel _bridgeChannel =
+      MethodChannel('com.smhisk60.beyan/widget_bridge');
 
   /// Uygulamanın başında bir kez çağrılır.
-  /// App Group kaydı yapar.
   static Future<void> initialize() async {
     await HomeWidget.setAppGroupId(_appGroupId);
   }
 
-  final QuranRepository _quranRepo = QuranRepository();
+  /// Kullanıcının Widget sekmesinde yaptığı her değişikliği (<10ms içinde)
+  /// beklemeden iOS Shared Keychain ve WidgetCenter'a anında yazar.
+  Future<void> syncImmediateSettings([Map<String, dynamic>? extraData]) async {
+    try {
+      await HomeWidget.setAppGroupId(_appGroupId);
+      final prefs = await SharedPreferences.getInstance();
+      final langCode = prefs.getString('selected_app_language') ?? 'tr';
+      final quoteCat = prefs.getString('widget_quote_category') ?? 'all';
+      final verseView = prefs.getString('widget_verse_view') ?? 'meal_only';
+      final textSize = prefs.getString('widget_text_size') ?? 'standard';
+      final activeCat = prefs.getString('widget_active_category') ?? 'quotes';
+      final refreshInterval = prefs.getString('widget_refresh_interval') ?? '1h';
+      final prayerStyle = prefs.getString('widget_prayer_style') ?? 'detailed';
+      final countdownStyle =
+          prefs.getString('widget_countdown_style') ?? 'timer_and_time';
+      final hijriStyle =
+          prefs.getString('widget_hijri_style') ?? 'hijri_and_kandil';
+      final hijriOffset = prefs.getString('widget_hijri_offset') ?? '0';
+      final kerahetMinutes = prefs.getString('widget_kerahet_minutes') ?? '45';
+      final sunStyle = prefs.getString('widget_sun_style') ?? 'full';
+
+      final isPinned = prefs.getBool('widget_is_pinned') ?? false;
+      var appliedRef = prefs.getString('widget_applied_verse_ref') ?? '';
+      var appliedText = prefs.getString('widget_applied_verse_text') ?? '';
+      final appliedArabic = prefs.getString('widget_applied_verse_arabic') ?? '';
+      final appliedSurah = prefs.getInt('widget_applied_verse_surah') ?? 0;
+      final appliedVerseNum = prefs.getInt('widget_applied_verse_number') ?? 0;
+      final applyNonce = prefs.getInt('widget_apply_nonce') ??
+          (DateTime.now().millisecondsSinceEpoch ~/ 1000);
+
+      // Seçili kategori ve görünüme göre hızlı bellek-içi ayet listesini oluştur
+      final List<Map<String, String>> fastVerses = _buildCuratedVerseList(
+        activeCat: activeCat,
+        quoteCat: quoteCat,
+        verseView: verseView,
+        langCode: langCode,
+        isPinned: isPinned,
+        appliedRef: appliedRef,
+        appliedText: appliedText,
+      );
+      final fastVersesJson = jsonEncode(fastVerses);
+
+      final payload = <String, dynamic>{
+        'widget_app_language': langCode,
+        'widget_quote_category': quoteCat,
+        'widget_verse_view': verseView,
+        'widget_text_size': textSize,
+        'widget_active_category': activeCat,
+        'widget_refresh_interval': refreshInterval,
+        'widget_prayer_style': prayerStyle,
+        'widget_countdown_style': countdownStyle,
+        'widget_hijri_style': hijriStyle,
+        'widget_hijri_offset': hijriOffset,
+        'widget_kerahet_minutes': kerahetMinutes,
+        'widget_sun_style': sunStyle,
+        'widget_is_pinned': isPinned,
+        'widget_applied_verse_ref': appliedRef,
+        'widget_applied_verse_text': appliedText,
+        'widget_applied_verse_arabic': appliedArabic,
+        'widget_applied_verse_surah': appliedSurah,
+        'widget_applied_verse_number': appliedVerseNum,
+        'widget_apply_nonce': applyNonce,
+        'widget_verses_json': fastVersesJson,
+        if (extraData != null) ...extraData,
+      };
+
+      // 1. iOS Shared Keychain + Native WidgetCenter köprüsüne anında gönder
+      await _invokeNativeBridge(payload);
+
+      // 2. HomeWidget UserDefaults alanına da yaz
+      await HomeWidget.saveWidgetData<String>('widget_app_language', langCode);
+      await HomeWidget.saveWidgetData<String>('widget_quote_category', quoteCat);
+      await HomeWidget.saveWidgetData<String>('widget_verse_view', verseView);
+      await HomeWidget.saveWidgetData<String>('widget_text_size', textSize);
+      await HomeWidget.saveWidgetData<String>('widget_active_category', activeCat);
+      await HomeWidget.saveWidgetData<String>(
+          'widget_refresh_interval', refreshInterval);
+      await HomeWidget.saveWidgetData<String>('widget_prayer_style', prayerStyle);
+      await HomeWidget.saveWidgetData<String>(
+          'widget_countdown_style', countdownStyle);
+      await HomeWidget.saveWidgetData<String>('widget_hijri_style', hijriStyle);
+      await HomeWidget.saveWidgetData<String>('widget_hijri_offset', hijriOffset);
+      await HomeWidget.saveWidgetData<String>(
+          'widget_kerahet_minutes', kerahetMinutes);
+      await HomeWidget.saveWidgetData<String>('widget_sun_style', sunStyle);
+      await HomeWidget.saveWidgetData<bool>('widget_is_pinned', isPinned);
+      await HomeWidget.saveWidgetData<String>(
+          'widget_applied_verse_ref', appliedRef);
+      await HomeWidget.saveWidgetData<String>(
+          'widget_applied_verse_text', appliedText);
+      await HomeWidget.saveWidgetData<String>(
+          'widget_applied_verse_arabic', appliedArabic);
+      await HomeWidget.saveWidgetData<int>(
+          'widget_applied_verse_surah', appliedSurah);
+      await HomeWidget.saveWidgetData<int>(
+          'widget_applied_verse_number', appliedVerseNum);
+      await HomeWidget.saveWidgetData<int>('widget_apply_nonce', applyNonce);
+      await HomeWidget.saveWidgetData<String>('widget_verses_json', fastVersesJson);
+
+      await _refreshNativeWidgets();
+    } catch (e) {
+      _log('Hızlı widget senkronizasyon hatası: $e');
+    }
+  }
+
+  List<Map<String, String>> _buildCuratedVerseList({
+    required String activeCat,
+    required String quoteCat,
+    required String verseView,
+    required String langCode,
+    required bool isPinned,
+    required String appliedRef,
+    required String appliedText,
+  }) {
+    final List<Map<String, String>> widgetVerses = [];
+
+    if (activeCat == 'dailyVerse') {
+      for (final v in ShortVerseNotification.pool) {
+        final meal = v.localizedText(langCode);
+        final text = (verseView == 'arabic_only' || verseView == 'Yalnızca Arapça')
+            ? v.arabicText
+            : ((verseView == 'arabic_meal' || verseView == 'Arapça + Meal')
+                ? '${v.arabicText}\n$meal'
+                : meal);
+        widgetVerses.add({
+          'ref': v.localizedReference(langCode),
+          'text': text,
+        });
+      }
+    } else {
+      final categoryList =
+          kWidgetCategoryQuotes[quoteCat] ?? kWidgetCategoryQuotes['all']!;
+      for (final q in categoryList) {
+        widgetVerses.add({
+          'ref': q.localizedReference(langCode),
+          'text': q.formatForViewMode(verseView, langCode),
+        });
+      }
+    }
+
+    if (appliedRef.isNotEmpty && appliedText.isNotEmpty) {
+      widgetVerses.removeWhere((item) => item['ref'] == appliedRef);
+      widgetVerses.insert(0, {
+        'ref': appliedRef,
+        'text': appliedText,
+      });
+    }
+
+    return widgetVerses;
+  }
+
+  Future<void> _invokeNativeBridge(Map<String, dynamic> payload) async {
+    if (kIsWeb || defaultTargetPlatform != TargetPlatform.iOS) return;
+    try {
+      await _bridgeChannel.invokeMethod('syncWidgetData', payload);
+    } catch (e) {
+      _log('Native widget bridge uyarısı: $e');
+    }
+  }
 
   // ── Ana Güncelleme Metodu ─────────────────────────────────
 
   /// Widget verilerini hesaplar ve platforma yazar.
   Future<void> updateAllWidgets() async {
     try {
-      await HomeWidget.setAppGroupId(_appGroupId);
+      // 0. Önce kullanıcı tercihlerini ve seçili ayeti hiç bekletmeden anında gönder
+      await syncImmediateSettings();
+
       final prefs = await SharedPreferences.getInstance();
       final langCode = prefs.getString('selected_app_language') ?? 'tr';
       final lang = AppLanguage.fromCode(langCode);
@@ -55,7 +215,8 @@ class WidgetService {
       final location = await _prayerService.getCachedOrFastLocation();
       final daily = await _prayerService.calculatePrayerTimes(location: location);
       final next = daily.nextPrayerEntry;
-      final countdown = _prayerService.formatCountdown(daily.timeUntilNextPrayer, lang: lang);
+      final countdown =
+          _prayerService.formatCountdown(daily.timeUntilNextPrayer, lang: lang);
       final nextPrayerName = next?.name.localizedName(langCode) ?? '--';
 
       // 1.1 iOS ve Android Widget'ları için kesin namaz çizelgesi (Bildirimlerle tam senkronize)
@@ -63,7 +224,8 @@ class WidgetService {
       final scheduleList = <Map<String, dynamic>>[];
       for (int dayOffset = -1; dayOffset <= 4; dayOffset++) {
         final targetDate = DateTime(now.year, now.month, now.day + dayOffset);
-        final d = await _prayerService.calculatePrayerTimes(location: location, date: targetDate);
+        final d = await _prayerService.calculatePrayerTimes(
+            location: location, date: targetDate);
         for (final p in d.prayers) {
           final kind = _prayerNameToKind(p.name);
           if (kind != null) {
@@ -75,78 +237,73 @@ class WidgetService {
         }
       }
       final prayerScheduleJson = jsonEncode(scheduleList);
-      await HomeWidget.saveWidgetData<String>('widget_prayer_schedule_json', prayerScheduleJson);
-      await HomeWidget.saveWidgetData<double>('beyan_widget_lat', location.latitude);
-      await HomeWidget.saveWidgetData<double>('beyan_widget_lng', location.longitude);
+      await HomeWidget.saveWidgetData<String>(
+          'widget_prayer_schedule_json', prayerScheduleJson);
+      await HomeWidget.saveWidgetData<double>(
+          'beyan_widget_lat', location.latitude);
+      await HomeWidget.saveWidgetData<double>(
+          'beyan_widget_lng', location.longitude);
 
       // 2. Seçili kategoriye ve görünüme göre duygusal ayet havuzu oluştur
       final quoteCat = prefs.getString('widget_quote_category') ?? 'all';
       final verseView = prefs.getString('widget_verse_view') ?? 'meal_only';
       final activeCat = prefs.getString('widget_active_category') ?? 'quotes';
-
-      final List<Map<String, String>> widgetVerses = [];
-
-      if (activeCat == 'dailyVerse') {
-        for (final v in ShortVerseNotification.pool) {
-          final meal = v.localizedText(langCode);
-          final text = (verseView == 'arabic_only' || verseView == 'Yalnızca Arapça')
-              ? v.arabicText
-              : ((verseView == 'arabic_meal' || verseView == 'Arapça + Meal')
-                  ? '${v.arabicText}\n$meal'
-                  : meal);
-          widgetVerses.add({
-            'ref': v.localizedReference(langCode),
-            'text': text,
-          });
-        }
-      } else {
-        final categoryList = kWidgetCategoryQuotes[quoteCat] ?? kWidgetCategoryQuotes['all']!;
-        for (final q in categoryList) {
-          widgetVerses.add({
-            'ref': q.localizedReference(langCode),
-            'text': q.formatForViewMode(verseView, langCode),
-          });
-        }
-        // Ayet havuzunu zenginleştir: Eğer Türkçe ise veritabanından zengin ve duygusal ayetler ekle
-        if (langCode == 'tr' && verseView == 'meal_only') {
-          final dbVerses = await _quranRepo.getRandomWidgetVerses(limit: 60);
-          widgetVerses.addAll(dbVerses);
-        }
-      }
-
       final isPinned = prefs.getBool('widget_is_pinned') ?? false;
       final appliedRef = prefs.getString('widget_applied_verse_ref') ?? '';
       final appliedText = prefs.getString('widget_applied_verse_text') ?? '';
 
-      // Yalnızca kullanıcı özellikle bu ayeti sabitle dediyse başa sabit olarak ekle
-      if (isPinned && appliedRef.isNotEmpty && appliedText.isNotEmpty) {
-        widgetVerses.removeWhere((item) => item['ref'] == appliedRef);
-        widgetVerses.insert(0, {
-          'ref': appliedRef,
-          'text': appliedText,
-        });
+      final List<Map<String, String>> widgetVerses = _buildCuratedVerseList(
+        activeCat: activeCat,
+        quoteCat: quoteCat,
+        verseView: verseView,
+        langCode: langCode,
+        isPinned: isPinned,
+        appliedRef: appliedRef,
+        appliedText: appliedText,
+      );
+
+      // Eğer "Tüm Kategoriler" ve Türkçe Yalnızca Meal seçiliyse veritabanından da ekle
+      if (activeCat != 'dailyVerse' &&
+          quoteCat == 'all' &&
+          langCode == 'tr' &&
+          verseView == 'meal_only') {
+        try {
+          final dbVerses = await _quranRepo.getRandomWidgetVerses(limit: 40);
+          widgetVerses.addAll(dbVerses);
+        } catch (_) {}
       }
 
       final versesJson = jsonEncode(widgetVerses);
-
-      // Kullanıcının seçtiği güncelleme aralığını al (varsayılan 5 dk, 3-15 dk arası güvenli sınır)
       final interval = (prefs.getInt('widget_update_interval') ?? 5).clamp(3, 15);
 
       // 3. home_widget ortak alanına yaz
       await _writeToHomeWidget(
         langCode: langCode,
         nextPrayerName: nextPrayerName,
-        nextPrayerTime: next != null ? _prayerService.formatTime(next.time) : '--:--',
+        nextPrayerTime:
+            next != null ? _prayerService.formatTime(next.time) : '--:--',
         countdown: countdown,
         allPrayers: daily.prayers,
         versesJson: versesJson,
         interval: interval,
       );
 
-      // 4. Native widget'ları yenile
+      // 4. iOS Shared Keychain köprüsüne tam çizelge ve konum verilerini de gönder
+      await _invokeNativeBridge({
+        'widget_prayer_schedule_json': prayerScheduleJson,
+        'beyan_widget_lat': location.latitude,
+        'beyan_widget_lng': location.longitude,
+        'widget_verses_json': versesJson,
+        AppConstants.widgetNextPrayer: nextPrayerName,
+        AppConstants.widgetNextPrayerTime:
+            next != null ? _prayerService.formatTime(next.time) : '--:--',
+        AppConstants.widgetCountdown: countdown,
+      });
+
+      // 5. Native widget'ları yenile
       await _refreshNativeWidgets();
 
-      // 5. iOS Canlı Etkinlik (Live Activity) & Dynamic Island senkronizasyonu
+      // 6. iOS Canlı Etkinlik (Live Activity) & Dynamic Island senkronizasyonu
       await LiveActivityService().syncLiveActivity(
         dailyPrayerTimes: daily,
         cityName: location.cityName,
@@ -167,10 +324,13 @@ class WidgetService {
     required int interval,
   }) async {
     await HomeWidget.saveWidgetData<String>('widget_app_language', langCode);
-    await HomeWidget.saveWidgetData<String>(AppConstants.widgetNextPrayer, nextPrayerName);
-    await HomeWidget.saveWidgetData<String>(AppConstants.widgetNextPrayerTime, nextPrayerTime);
-    await HomeWidget.saveWidgetData<String>(AppConstants.widgetCountdown, countdown);
-    
+    await HomeWidget.saveWidgetData<String>(
+        AppConstants.widgetNextPrayer, nextPrayerName);
+    await HomeWidget.saveWidgetData<String>(
+        AppConstants.widgetNextPrayerTime, nextPrayerTime);
+    await HomeWidget.saveWidgetData<String>(
+        AppConstants.widgetCountdown, countdown);
+
     // Ayet listesi ve döngü aralığı
     await HomeWidget.saveWidgetData<String>('widget_verses_json', versesJson);
     await HomeWidget.saveWidgetData<int>('widget_update_interval', interval);
@@ -187,11 +347,13 @@ class WidgetService {
     await HomeWidget.saveWidgetData<String>('widget_verse_view', verseView);
     await HomeWidget.saveWidgetData<String>('widget_text_size', textSize);
     await HomeWidget.saveWidgetData<String>('widget_active_category', activeCat);
-    await HomeWidget.saveWidgetData<String>('widget_refresh_interval', refreshInterval);
+    await HomeWidget.saveWidgetData<String>(
+        'widget_refresh_interval', refreshInterval);
 
     // Live Activity & Dynamic Island tetiklenme süresi (dk)
     final triggerMinutes = prefs.getInt('live_activity_trigger_minutes') ?? -1;
-    await HomeWidget.saveWidgetData<int>('live_activity_trigger_minutes', triggerMinutes);
+    await HomeWidget.saveWidgetData<int>(
+        'live_activity_trigger_minutes', triggerMinutes);
 
     // Kilit ekranına uygulanan / sabitlenen özel ayet durumu
     final isPinned = prefs.getBool('widget_is_pinned') ?? false;
@@ -201,7 +363,10 @@ class WidgetService {
     final appliedVerseNum = prefs.getInt('widget_applied_verse_number') ?? 0;
     final applyNonce = prefs.getInt('widget_apply_nonce') ?? 0;
 
-    if (appliedRef.isNotEmpty && langCode != 'tr' && appliedSurah > 0 && appliedVerseNum > 0) {
+    if (appliedRef.isNotEmpty &&
+        langCode != 'tr' &&
+        appliedSurah > 0 &&
+        appliedVerseNum > 0) {
       final needle = '$appliedSurah:$appliedVerseNum';
       for (final v in ShortVerseNotification.pool) {
         if (v.verseReference.contains(needle)) {
@@ -213,23 +378,33 @@ class WidgetService {
     }
 
     await HomeWidget.saveWidgetData<bool>('widget_is_pinned', isPinned);
-    await HomeWidget.saveWidgetData<String>('widget_applied_verse_ref', appliedRef);
-    await HomeWidget.saveWidgetData<String>('widget_applied_verse_text', appliedText);
-    await HomeWidget.saveWidgetData<int>('widget_applied_verse_surah', appliedSurah);
-    await HomeWidget.saveWidgetData<int>('widget_applied_verse_number', appliedVerseNum);
+    await HomeWidget.saveWidgetData<String>(
+        'widget_applied_verse_ref', appliedRef);
+    await HomeWidget.saveWidgetData<String>(
+        'widget_applied_verse_text', appliedText);
+    await HomeWidget.saveWidgetData<int>(
+        'widget_applied_verse_surah', appliedSurah);
+    await HomeWidget.saveWidgetData<int>(
+        'widget_applied_verse_number', appliedVerseNum);
     await HomeWidget.saveWidgetData<int>('widget_apply_nonce', applyNonce);
 
     // Günün Duası & Âyeti Widget Verileri
-    final dailyDua = prefs.getString('widget_daily_dua_title') ?? 'Sübhanallâhi ve bihamdihî';
-    final dailyDuaArabic = prefs.getString('widget_daily_dua_arabic') ?? 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ';
-    final dailyDuaMeaning = prefs.getString('widget_daily_dua_meaning') ?? 'Allah\'ı hamd ile tesbih ederim.';
+    final dailyDua = prefs.getString('widget_daily_dua_title') ??
+        'Sübhanallâhi ve bihamdihî';
+    final dailyDuaArabic = prefs.getString('widget_daily_dua_arabic') ??
+        'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ';
+    final dailyDuaMeaning = prefs.getString('widget_daily_dua_meaning') ??
+        'Allah\'ı hamd ile tesbih ederim.';
     await HomeWidget.saveWidgetData<String>('widget_daily_dua_title', dailyDua);
-    await HomeWidget.saveWidgetData<String>('widget_daily_dua_arabic', dailyDuaArabic);
-    await HomeWidget.saveWidgetData<String>('widget_daily_dua_meaning', dailyDuaMeaning);
+    await HomeWidget.saveWidgetData<String>(
+        'widget_daily_dua_arabic', dailyDuaArabic);
+    await HomeWidget.saveWidgetData<String>(
+        'widget_daily_dua_meaning', dailyDuaMeaning);
 
     // Kompakt Vakit Sayacı Widget Verileri
     final compactCountdown = '$nextPrayerName • $countdown';
-    await HomeWidget.saveWidgetData<String>('widget_compact_countdown', compactCountdown);
+    await HomeWidget.saveWidgetData<String>(
+        'widget_compact_countdown', compactCountdown);
 
     // Hızlı Zikirmatik Widget Verileri
     final zikrCount = prefs.getInt('zikirmatik_count') ?? 0;
@@ -240,13 +415,13 @@ class WidgetService {
 
     // Tüm vakitler
     for (final prayer in allPrayers) {
-      await HomeWidget.saveWidgetData<String>('widget_${prayer.name.key}_time', _prayerService.formatTime(prayer.time));
+      await HomeWidget.saveWidgetData<String>(
+          'widget_${prayer.name.key}_time', _prayerService.formatTime(prayer.time));
     }
   }
 
   /// iOS ve Android native widget'larını yeniler.
   Future<void> _refreshNativeWidgets() async {
-    // iOS WidgetKit Timeline'larını geçersiz kılıp yenile
     final iosWidgets = [
       AppConstants.iOSVerseWidgetName,
       AppConstants.iOSPrayerWidgetName,
@@ -263,7 +438,6 @@ class WidgetService {
       );
     }
 
-    // Android AppWidget'ı yenile
     await HomeWidget.updateWidget(
       name: AppConstants.androidWidgetName,
       androidName: AppConstants.androidWidgetName,
