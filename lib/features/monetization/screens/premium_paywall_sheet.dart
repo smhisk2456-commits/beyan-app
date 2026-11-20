@@ -3,6 +3,7 @@ import 'package:islamic_app/core/utils/navigator_guard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/localization/app_strings.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/theme_provider.dart';
@@ -521,9 +522,11 @@ class _PremiumPaywallSheetState extends ConsumerState<PremiumPaywallSheet> {
               const SizedBox(height: 12),
             ],
 
-            // Satın Alımları Geri Yükle & Şartlar (Apple Store Zorunluluğu)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            // Satın Alımları Geri Yükle, Kullanım Koşulları (EULA) & Gizlilik Politikası (Apple Guideline 3.1.2(c) Zorunluluğu)
+            Wrap(
+              alignment: WrapAlignment.center,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 4,
               children: [
                 TextButton(
                   onPressed: () async {
@@ -542,28 +545,62 @@ class _PremiumPaywallSheetState extends ConsumerState<PremiumPaywallSheet> {
                     'Satın Alımları Geri Yükle',
                     style: TextStyle(
                       fontSize: 12,
-                      color: isDark ? Colors.white60 : Colors.black54,
+                      color: isDark ? Colors.white70 : Colors.black54,
                       decoration: TextDecoration.underline,
                     ),
                   ),
                 ),
                 Text(
-                  ' • ',
+                  '•',
                   style: TextStyle(color: isDark ? Colors.white38 : Colors.black26),
                 ),
                 TextButton(
-                  onPressed: () {
-                    // Gizlilik & Şartlar modal
+                  onPressed: () async {
+                    HapticFeedback.lightImpact();
+                    final uri = Uri.parse('https://www.apple.com/legal/internet-services/itunes/dev/stdeula/');
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
                   },
                   child: Text(
-                    'Gizlilik & Şartlar',
+                    'Kullanım Koşulları (EULA)',
                     style: TextStyle(
                       fontSize: 12,
-                      color: isDark ? Colors.white60 : Colors.black54,
+                      color: isDark ? Colors.white70 : Colors.black54,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ),
+                Text(
+                  '•',
+                  style: TextStyle(color: isDark ? Colors.white38 : Colors.black26),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    HapticFeedback.lightImpact();
+                    final uri = Uri.parse('https://smhisk2456-commits.github.io/beyan-app/privacy.html');
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  },
+                  child: Text(
+                    'Gizlilik Politikası',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isDark ? Colors.white70 : Colors.black54,
+                      decoration: TextDecoration.underline,
                     ),
                   ),
                 ),
               ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Abonelik ödemesi satın alma onayında Apple Kimliği hesabınıza yansıtılır. '
+              'Mevcut dönemin bitiminden en az 24 saat önce iptal edilmediği sürece abonelik otomatik olarak yenilenir. '
+              'Aboneliğinizi satın alma işleminden sonra App Store Hesap Ayarları üzerinden yönetebilir ve iptal edebilirsiniz.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 10.5,
+                height: 1.35,
+                color: isDark ? Colors.white54 : Colors.black45,
+              ),
             ),
           ],
         ),
