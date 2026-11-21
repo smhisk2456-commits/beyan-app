@@ -928,7 +928,7 @@ class _SpiritualLifeHub extends ConsumerWidget {
   }
 }
 
-class _HubCard extends StatelessWidget {
+class _HubCard extends StatefulWidget {
   final String title;
   final String subtitle;
   final String badge;
@@ -948,126 +948,163 @@ class _HubCard extends StatelessWidget {
   });
 
   @override
+  State<_HubCard> createState() => _HubCardState();
+}
+
+class _HubCardState extends State<_HubCard> {
+  bool _isPressed = false;
+
+  @override
   Widget build(BuildContext context) {
     final gold = BeyanColors.tone(0xFFFFDF7A);
-    final primaryAccent = accentColor ?? BeyanColors.tone(0xFFD4AF37);
+    final primaryAccent = widget.accentColor ?? BeyanColors.tone(0xFFD4AF37);
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () {
-          HapticFeedback.lightImpact();
-          onTap();
-        },
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: isDark
-                  ? [
-                      BeyanColors.tone(0xFF062923),
-                      BeyanColors.tone(0xFF031A16),
-                    ]
-                  : [
-                      const Color(0xFFF6FAF8),
-                      Colors.white,
-                    ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: primaryAccent.withValues(alpha: isDark ? 0.35 : 0.25),
-              width: 1,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: primaryAccent.withValues(alpha: 0.18),
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: primaryAccent.withValues(alpha: 0.4),
-                        width: 1,
-                      ),
-                    ),
-                    child: Center(
-                      child: Icon(icon, color: primaryAccent, size: 17),
-                    ),
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) => setState(() => _isPressed = false),
+      onTapCancel: () => setState(() => _isPressed = false),
+      child: AnimatedScale(
+        scale: _isPressed ? 0.96 : 1.0,
+        duration: const Duration(milliseconds: 120),
+        curve: Curves.easeOutCubic,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () {
+              HapticFeedback.lightImpact();
+              widget.onTap();
+            },
+            borderRadius: BorderRadius.circular(18),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(18),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: widget.isDark
+                        ? [
+                            BeyanColors.tone(0xFF072D26),
+                            BeyanColors.tone(0xFF031A16),
+                          ]
+                        : [
+                            const Color(0xFFF6FAF8),
+                            Colors.white,
+                          ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                  const SizedBox(width: 6),
-                  Flexible(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: primaryAccent.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(
-                          color: primaryAccent.withValues(alpha: 0.3),
-                          width: 0.8,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: primaryAccent.withValues(alpha: widget.isDark ? 0.38 : 0.25),
+                    width: 1.1,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: widget.isDark ? 0.22 : 0.03),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    // Sağ alt Bento arka plan ikon filigranı (Watermark)
+                    Positioned(
+                      right: -10,
+                      bottom: -10,
+                      child: IgnorePointer(
+                        child: Icon(
+                          widget.icon,
+                          size: 54,
+                          color: primaryAccent.withValues(alpha: widget.isDark ? 0.075 : 0.05),
                         ),
                       ),
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          badge,
-                          maxLines: 1,
-                          style: TextStyle(
-                            fontSize: 8.5,
-                            fontWeight: FontWeight.bold,
-                            color: isDark ? gold : BeyanColors.tone(0xFF01362F),
-                            letterSpacing: 0.2,
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                              width: 32,
+                              height: 32,
+                              decoration: BoxDecoration(
+                                color: primaryAccent.withValues(alpha: 0.18),
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: primaryAccent.withValues(alpha: 0.45),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Center(
+                                child: Icon(widget.icon, color: primaryAccent, size: 17),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Flexible(
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: primaryAccent.withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(
+                                    color: primaryAccent.withValues(alpha: 0.32),
+                                    width: 0.8,
+                                  ),
+                                ),
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(
+                                    widget.badge,
+                                    maxLines: 1,
+                                    style: TextStyle(
+                                      fontSize: 8.5,
+                                      fontWeight: FontWeight.bold,
+                                      color: widget.isDark ? gold : BeyanColors.tone(0xFF01362F),
+                                      letterSpacing: 0.2,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            widget.title,
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: widget.isDark ? Colors.white : BeyanColors.tone(0xFF052B24),
+                            ),
+                            maxLines: 1,
                           ),
                         ),
-                      ),
+                        const SizedBox(height: 2),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            widget.subtitle,
+                            style: TextStyle(
+                              fontSize: 10.5,
+                              color: widget.isDark ? Colors.white60 : Colors.black54,
+                            ),
+                            maxLines: 1,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    color: isDark ? Colors.white : BeyanColors.tone(0xFF052B24),
-                  ),
-                  maxLines: 1,
+                  ],
                 ),
               ),
-              const SizedBox(height: 2),
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  subtitle,
-                  style: TextStyle(
-                    fontSize: 10.5,
-                    color: isDark ? Colors.white60 : Colors.black54,
-                  ),
-                  maxLines: 1,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -1456,7 +1493,7 @@ class _QuickActionGrid extends ConsumerWidget {
   }
 }
 
-class _ActionCard extends StatelessWidget {
+class _ActionCard extends StatefulWidget {
   final IconData icon;
   final String title;
   final String subtitle;
@@ -1474,88 +1511,127 @@ class _ActionCard extends StatelessWidget {
   });
 
   @override
+  State<_ActionCard> createState() => _ActionCardState();
+}
+
+class _ActionCardState extends State<_ActionCard> {
+  bool _isPressed = false;
+
+  @override
   Widget build(BuildContext context) {
-    final bgColor = atmosphere?.actionCardBg ??
-        (isDark ? BeyanColors.tone(0xFF0D2823) : Colors.white);
-    final borderColor = atmosphere != null
-        ? atmosphere!.actionCardBorder.withValues(alpha: 0.6)
-        : (isDark ? BeyanColors.tone(0xFF133B34) : BeyanColors.tone(0xFFE2EBE8));
-    final iconColor = atmosphere?.accentGold ?? BeyanColors.tone(0xFFFFDF7A);
+    final bgColor = widget.atmosphere?.actionCardBg ??
+        (widget.isDark ? BeyanColors.tone(0xFF0D2823) : Colors.white);
+    final borderColor = widget.atmosphere != null
+        ? widget.atmosphere!.actionCardBorder.withValues(alpha: 0.6)
+        : (widget.isDark ? BeyanColors.tone(0xFF133B34) : BeyanColors.tone(0xFFE2EBE8));
+    final iconColor = widget.atmosphere?.accentGold ?? BeyanColors.tone(0xFFFFDF7A);
 
     return Expanded(
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(18),
-          onTap: () {
-            HapticFeedback.lightImpact();
-            onTap();
-          },
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
-            decoration: BoxDecoration(
-              color: bgColor,
+      child: GestureDetector(
+        onTapDown: (_) => setState(() => _isPressed = true),
+        onTapUp: (_) => setState(() => _isPressed = false),
+        onTapCancel: () => setState(() => _isPressed = false),
+        child: AnimatedScale(
+          scale: _isPressed ? 0.94 : 1.0,
+          duration: const Duration(milliseconds: 110),
+          curve: Curves.easeOutCubic,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(
-                color: borderColor,
-                width: 1.1,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
-                  blurRadius: 10,
-                  offset: const Offset(0, 3),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 38,
-                  height: 38,
+              onTap: () {
+                HapticFeedback.lightImpact();
+                widget.onTap();
+              },
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(18),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
                   decoration: BoxDecoration(
-                    color: iconColor.withValues(alpha: isDark ? 0.16 : 0.08),
-                    shape: BoxShape.circle,
+                    color: bgColor,
+                    borderRadius: BorderRadius.circular(18),
                     border: Border.all(
-                      color: iconColor.withValues(alpha: 0.35),
-                      width: 1,
+                      color: borderColor,
+                      width: 1.1,
                     ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: widget.isDark ? 0.25 : 0.04),
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
                   ),
-                  child: Icon(
-                    icon,
-                    size: 19,
-                    color: iconColor,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    clipBehavior: Clip.none,
+                    children: [
+                      Positioned(
+                        right: -12,
+                        bottom: -14,
+                        child: IgnorePointer(
+                          child: Icon(
+                            widget.icon,
+                            size: 44,
+                            color: iconColor.withValues(alpha: widget.isDark ? 0.06 : 0.04),
+                          ),
+                        ),
+                      ),
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 38,
+                            height: 38,
+                            decoration: BoxDecoration(
+                              color: iconColor.withValues(alpha: widget.isDark ? 0.16 : 0.08),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: iconColor.withValues(alpha: 0.35),
+                                width: 1,
+                              ),
+                            ),
+                            child: Icon(
+                              widget.icon,
+                              size: 19,
+                              color: iconColor,
+                            ),
+                          ),
+                          const SizedBox(height: 7),
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              widget.title,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: widget.isDark ? Colors.white : AppColors.textPrimary,
+                                letterSpacing: 0.2,
+                              ),
+                              maxLines: 1,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              widget.subtitle,
+                              style: TextStyle(
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.w500,
+                                color: widget.isDark
+                                    ? BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.75)
+                                    : AppColors.textSecondary,
+                              ),
+                              maxLines: 1,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 7),
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: isDark ? Colors.white : AppColors.textPrimary,
-                      letterSpacing: 0.2,
-                    ),
-                    maxLines: 1,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    subtitle,
-                    style: TextStyle(
-                      fontSize: 9.5,
-                      fontWeight: FontWeight.w500,
-                      color: isDark ? BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.75) : AppColors.textSecondary,
-                    ),
-                    maxLines: 1,
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ),

@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -132,11 +133,25 @@ class _PrayerCard extends ConsumerWidget {
           ),
         ],
       ),
-      child: Column(
-        children: [
-          // ── Ana İçerik ────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.fromLTRB(22, 20, 22, 16),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: Stack(
+          children: [
+            // Sağ üst köşede zarif Selçuklu/Osmanlı Geometrik Yıldız & Mihrap Saray İşlemesi Filigranı
+            Positioned.fill(
+              child: IgnorePointer(
+                child: CustomPaint(
+                  painter: _IslamicPalaceWatermarkPainter(
+                    color: BeyanColors.tone(0xFFFFDF7A),
+                  ),
+                ),
+              ),
+            ),
+            Column(
+              children: [
+                // ── Ana İçerik ────────────────────────────────────────
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(22, 20, 22, 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -310,6 +325,9 @@ class _PrayerCard extends ConsumerWidget {
           _MiniPrayerRow(daily: daily, langCode: langCode),
         ],
       ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -318,6 +336,71 @@ class _PrayerCard extends ConsumerWidget {
     final m = dt.minute.toString().padLeft(2, '0');
     return '$h:$m';
   }
+}
+
+/// Namaz Vakti Kartı için zarif Selçuklu/Osmanlı 12 Köşeli Yıldız Rozeti & Mihrap Kemeri Filigranı
+class _IslamicPalaceWatermarkPainter extends CustomPainter {
+  final Color color;
+  const _IslamicPalaceWatermarkPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width - 42, 46);
+    final strokePaint = Paint()
+      ..color = color.withValues(alpha: 0.065)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.1;
+
+    final innerPaint = Paint()
+      ..color = color.withValues(alpha: 0.045)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 0.85;
+
+    // Dış ve iç saray halkaları
+    canvas.drawCircle(center, 92, innerPaint);
+    canvas.drawCircle(center, 72, strokePaint);
+    canvas.drawCircle(center, 46, innerPaint);
+
+    // 12 köşeli Selçuklu yıldızı (3 adet 30° döndürülmüş kare)
+    const double r = 68.0;
+    for (int k = 0; k < 3; k++) {
+      final offsetAngle = k * (math.pi / 6);
+      final path = Path();
+      for (int i = 0; i < 4; i++) {
+        final a = offsetAngle + i * (math.pi / 2);
+        final pt = Offset(center.dx + r * math.cos(a), center.dy + r * math.sin(a));
+        if (i == 0) {
+          path.moveTo(pt.dx, pt.dy);
+        } else {
+          path.lineTo(pt.dx, pt.dy);
+        }
+      }
+      path.close();
+      canvas.drawPath(path, strokePaint);
+    }
+
+    // Merkez sekizgen rozet
+    const double innerR = 32.0;
+    for (int k = 0; k < 2; k++) {
+      final offsetAngle = k * (math.pi / 4);
+      final path = Path();
+      for (int i = 0; i < 4; i++) {
+        final a = offsetAngle + i * (math.pi / 2);
+        final pt = Offset(center.dx + innerR * math.cos(a), center.dy + innerR * math.sin(a));
+        if (i == 0) {
+          path.moveTo(pt.dx, pt.dy);
+        } else {
+          path.lineTo(pt.dx, pt.dy);
+        }
+      }
+      path.close();
+      canvas.drawPath(path, innerPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _IslamicPalaceWatermarkPainter oldDelegate) =>
+      oldDelegate.color != color;
 }
 
 /// Konum ve tarih satırı.

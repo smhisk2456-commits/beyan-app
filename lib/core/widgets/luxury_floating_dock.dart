@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+import 'dart:ui' show ImageFilter;
 import 'package:islamic_app/core/theme/beyan_colors.dart';
 import 'package:islamic_app/core/theme/theme_provider.dart';
 import 'package:flutter/material.dart';
@@ -26,12 +28,12 @@ class LuxuryFloatingDock extends ConsumerWidget {
     final bgGradient = LinearGradient(
       colors: isDark
           ? [
-              BeyanColors.tone(0xFF012E2B),
-              BeyanColors.tone(0xFF021B17),
+              BeyanColors.tone(0xFF012E2B).withValues(alpha: 0.88),
+              BeyanColors.tone(0xFF021B17).withValues(alpha: 0.94),
             ]
           : [
-              const Color(0xFFFFFFFF),
-              BeyanColors.tone(0xFFF1F6F3),
+              const Color(0xFFFFFFFF).withValues(alpha: 0.90),
+              BeyanColors.tone(0xFFF1F6F3).withValues(alpha: 0.95),
             ],
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
@@ -74,71 +76,74 @@ class LuxuryFloatingDock extends ConsumerWidget {
             alignment: Alignment.bottomCenter,
             clipBehavior: Clip.none,
             children: [
-              // ── Ana Yüzen Bar Gövdesi ──────────────────────────────
+              // ── Ana Yüzen Bar Gövdesi (iOS 18 Buzlu Cam / Glassmorphism) ──
               ClipRRect(
                 borderRadius: BorderRadius.circular(36),
-                child: Container(
-                  height: 66,
-                  decoration: BoxDecoration(
-                    gradient: bgGradient,
-                    borderRadius: BorderRadius.circular(36),
-                    border: Border.all(
-                      color: borderColor,
-                      width: 1.2,
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+                  child: Container(
+                    height: 66,
+                    decoration: BoxDecoration(
+                      gradient: bgGradient,
+                      borderRadius: BorderRadius.circular(36),
+                      border: Border.all(
+                        color: borderColor,
+                        width: 1.2,
+                      ),
+                      boxShadow: shadows,
                     ),
-                    boxShadow: shadows,
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 6),
-                    child: Row(
-                      children: [
-                        // 1. Sekme: Ana Sayfa
-                        Expanded(
-                          child: _buildTabItem(
-                            index: 0,
-                            icon: Icons.explore_rounded,
-                            activeIcon: Icons.explore,
-                            label: strings.tabHome,
-                            isDark: isDark,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
+                      child: Row(
+                        children: [
+                          // 1. Sekme: Ana Sayfa
+                          Expanded(
+                            child: _buildTabItem(
+                              index: 0,
+                              icon: Icons.explore_rounded,
+                              activeIcon: Icons.explore,
+                              label: strings.tabHome,
+                              isDark: isDark,
+                            ),
                           ),
-                        ),
 
-                        // 2. Sekme: Vakitler
-                        Expanded(
-                          child: _buildTabItem(
-                            index: 1,
-                            icon: Icons.access_time_rounded,
-                            activeIcon: Icons.access_time_filled_rounded,
-                            label: strings.tabPrayers,
-                            isDark: isDark,
+                          // 2. Sekme: Vakitler
+                          Expanded(
+                            child: _buildTabItem(
+                              index: 1,
+                              icon: Icons.access_time_rounded,
+                              activeIcon: Icons.access_time_filled_rounded,
+                              label: strings.tabPrayers,
+                              isDark: isDark,
+                            ),
                           ),
-                        ),
 
-                        // Merkez buton için boşluk (Kur'an-ı Kerim)
-                        const SizedBox(width: 58),
+                          // Merkez buton için boşluk (Kur'an-ı Kerim)
+                          const SizedBox(width: 58),
 
-                        // 3. Sekme: Zikirmatik (Index 3)
-                        Expanded(
-                          child: _buildTabItem(
-                            index: 3,
-                            icon: Icons.fingerprint_rounded,
-                            activeIcon: Icons.fingerprint,
-                            label: strings.tabZikr,
-                            isDark: isDark,
+                          // 3. Sekme: Zikirmatik (Index 3)
+                          Expanded(
+                            child: _buildTabItem(
+                              index: 3,
+                              icon: Icons.fingerprint_rounded,
+                              activeIcon: Icons.fingerprint,
+                              label: strings.tabZikr,
+                              isDark: isDark,
+                            ),
                           ),
-                        ),
 
-                        // 4. Sekme: Widget & Kilit Ekranı (Index 4)
-                        Expanded(
-                          child: _buildTabItem(
-                            index: 4,
-                            icon: Icons.widgets_outlined,
-                            activeIcon: Icons.widgets_rounded,
-                            label: strings.tabWidget,
-                            isDark: isDark,
+                          // 4. Sekme: Widget & Kilit Ekranı (Index 4)
+                          Expanded(
+                            child: _buildTabItem(
+                              index: 4,
+                              icon: Icons.widgets_outlined,
+                              activeIcon: Icons.widgets_rounded,
+                              label: strings.tabWidget,
+                              isDark: isDark,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -202,12 +207,32 @@ class LuxuryFloatingDock extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              // Aktif sekme altın spot ışığı hüzmesi (Spotlight Glow)
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 220),
+                width: isSelected ? 18 : 0,
+                height: isSelected ? 2.2 : 0,
+                margin: EdgeInsets.only(bottom: isSelected ? 2.5 : 0),
+                decoration: BoxDecoration(
+                  color: BeyanColors.tone(0xFFFFDF7A),
+                  borderRadius: BorderRadius.circular(2),
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.75),
+                            blurRadius: 6,
+                            spreadRadius: 0.5,
+                          ),
+                        ]
+                      : null,
+                ),
+              ),
               Icon(
                 isSelected ? activeIcon : icon,
-                size: isSelected ? 22 : 20,
+                size: isSelected ? 21 : 20,
                 color: isSelected ? selectedIconColor : unselectedColor,
               ),
-              const SizedBox(height: 3),
+              const SizedBox(height: 2.5),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 1),
                 child: FittedBox(
@@ -286,12 +311,24 @@ class LuxuryFloatingDock extends ConsumerWidget {
                   radius: 0.85,
                 ),
               ),
-              child: Center(
-                child: Icon(
-                  Icons.menu_book_rounded,
-                  color: BeyanColors.tone(0xFFFFEA75),
-                  size: 26,
-                ),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Positioned.fill(
+                    child: IgnorePointer(
+                      child: CustomPaint(
+                        painter: _RubElHizbSealPainter(
+                          color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: isSelected ? 0.34 : 0.20),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Icon(
+                    Icons.menu_book_rounded,
+                    color: BeyanColors.tone(0xFFFFEA75),
+                    size: 25,
+                  ),
+                ],
               ),
             ),
           ),
@@ -299,4 +336,41 @@ class LuxuryFloatingDock extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// Ortadaki Kur'an-ı Kerim mührü için ince İslami Sekizgen Yıldız (Rub el Hizb ۞) işlemeli halka
+class _RubElHizbSealPainter extends CustomPainter {
+  final Color color;
+  const _RubElHizbSealPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final r = size.width * 0.39;
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 0.9;
+
+    // İki adet 45° döndürülmüş kare ile klasik Rub el Hizb (۞) sekizgeni
+    for (int k = 0; k < 2; k++) {
+      final angleOffset = k * (math.pi / 4);
+      final path = Path();
+      for (int i = 0; i < 4; i++) {
+        final a = angleOffset + i * (math.pi / 2);
+        final pt = Offset(center.dx + r * math.cos(a), center.dy + r * math.sin(a));
+        if (i == 0) {
+          path.moveTo(pt.dx, pt.dy);
+        } else {
+          path.lineTo(pt.dx, pt.dy);
+        }
+      }
+      path.close();
+      canvas.drawPath(path, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _RubElHizbSealPainter oldDelegate) =>
+      oldDelegate.color != color;
 }

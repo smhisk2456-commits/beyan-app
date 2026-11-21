@@ -168,10 +168,14 @@ class MainNavigation extends ConsumerStatefulWidget {
 }
 
 class _MainNavigationState extends ConsumerState<MainNavigation>
-    with WidgetsBindingObserver {
+    with WidgetsBindingObserver, SingleTickerProviderStateMixin {
   final List<int> _tabHistory = [0];
   final Set<int> _loadedTabs = {0};
   int _currentTab = 0;
+
+  late final AnimationController _tabTransitionController;
+  late final Animation<double> _tabFadeAnimation;
+  late final Animation<double> _tabScaleAnimation;
 
   static const List<Widget> _tabs = [
     HomeScreen(key: PageStorageKey('tab_home')),
@@ -186,6 +190,18 @@ class _MainNavigationState extends ConsumerState<MainNavigation>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
 
+    _tabTransitionController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 210),
+      value: 1.0,
+    );
+    final curved = CurvedAnimation(
+      parent: _tabTransitionController,
+      curve: Curves.easeOutCubic,
+    );
+    _tabFadeAnimation = Tween<double>(begin: 0.84, end: 1.0).animate(curved);
+    _tabScaleAnimation = Tween<double>(begin: 0.988, end: 1.0).animate(curved);
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       DeepLinkService.instance.init(ref);
       DeepLinkService.instance.processPending(ref);
@@ -194,6 +210,7 @@ class _MainNavigationState extends ConsumerState<MainNavigation>
 
   @override
   void dispose() {
+    _tabTransitionController.dispose();
     DeepLinkService.instance.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
@@ -206,6 +223,7 @@ class _MainNavigationState extends ConsumerState<MainNavigation>
       _loadedTabs.add(newTab);
       _tabHistory.add(newTab);
     });
+    _tabTransitionController.forward(from: 0.0);
     ref.read(selectedTabProvider.notifier).state = newTab;
   }
 
@@ -217,6 +235,7 @@ class _MainNavigationState extends ConsumerState<MainNavigation>
         _currentTab = prevTab;
         _loadedTabs.add(prevTab);
       });
+      _tabTransitionController.forward(from: 0.0);
       ref.read(selectedTabProvider.notifier).state = prevTab;
     } else {
       _navigateToTab(0);
@@ -266,14 +285,20 @@ class _MainNavigationState extends ConsumerState<MainNavigation>
       },
       child: Scaffold(
         extendBody: true,
-        body: IndexedStack(
-          index: _currentTab,
-          children: List.generate(_tabs.length, (i) {
-            if (_loadedTabs.contains(i)) {
-              return RepaintBoundary(child: _tabs[i]);
-            }
-            return const SizedBox.shrink();
-          }),
+        body: FadeTransition(
+          opacity: _tabFadeAnimation,
+          child: ScaleTransition(
+            scale: _tabScaleAnimation,
+            child: IndexedStack(
+              index: _currentTab,
+              children: List.generate(_tabs.length, (i) {
+                if (_loadedTabs.contains(i)) {
+                  return RepaintBoundary(child: _tabs[i]);
+                }
+                return const SizedBox.shrink();
+              }),
+            ),
+          ),
         ),
         bottomNavigationBar: RepaintBoundary(
           child: Column(
