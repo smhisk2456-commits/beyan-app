@@ -268,6 +268,7 @@ class _PrayerCard extends ConsumerWidget {
                                 data: (s) => RepaintBoundary(
                                   child: _CountdownBadge(
                                     text: '$s ${strings.remainingTime}',
+                                    isApproaching: isApproaching,
                                   ),
                                 ),
                                 loading: () => const SizedBox.shrink(),
@@ -466,7 +467,11 @@ class _LocationRow extends StatelessWidget {
 /// Gerçek zamanlı geri sayım rozeti.
 class _CountdownBadge extends StatelessWidget {
   final String text;
-  const _CountdownBadge({required this.text});
+  final bool isApproaching;
+  const _CountdownBadge({
+    required this.text,
+    this.isApproaching = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -476,14 +481,30 @@ class _CountdownBadge extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
         decoration: BoxDecoration(
-          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.18),
+          color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: isApproaching ? 0.28 : 0.18),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.4), width: 1),
+          border: Border.all(
+            color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: isApproaching ? 0.85 : 0.4),
+            width: isApproaching ? 1.3 : 1,
+          ),
+          boxShadow: isApproaching
+              ? [
+                  BoxShadow(
+                    color: BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.28),
+                    blurRadius: 10,
+                    spreadRadius: 1,
+                  ),
+                ]
+              : null,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.timer_outlined, size: 13, color: BeyanColors.tone(0xFFFFDF7A)),
+            Icon(
+              isApproaching ? Icons.notifications_active_outlined : Icons.timer_outlined,
+              size: 13,
+              color: BeyanColors.tone(0xFFFFDF7A),
+            ),
             const SizedBox(width: 5),
             Text(
               text,

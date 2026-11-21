@@ -144,39 +144,47 @@ class _BeyanNativeAdCardState extends ConsumerState<BeyanNativeAdCard> {
   @override
   Widget build(BuildContext context) {
     final isPremium = ref.watch(premiumProvider).isPremium;
-    if (isPremium || AdService.instance.isAdFree || !_isLoaded || _nativeAd == null) {
-      return const SizedBox.shrink();
-    }
-
+    final shouldShow = !isPremium && !AdService.instance.isAdFree && _isLoaded && _nativeAd != null;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Container(
-      margin: widget.margin ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      constraints: const BoxConstraints(
-        minWidth: 320,
-        minHeight: 320,
-        maxHeight: 355,
-      ),
-      height: 350.0,
-      decoration: BoxDecoration(
-        color: isDark ? BeyanColors.tone(0xFF022B24) : Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isDark
-              ? BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.25)
-              : BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.25),
-          width: 1.0,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: AdWidget(ad: _nativeAd!),
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeOutCubic,
+      alignment: Alignment.topCenter,
+      child: !shouldShow
+          ? const SizedBox.shrink()
+          : AnimatedOpacity(
+              duration: const Duration(milliseconds: 300),
+              opacity: shouldShow ? 1.0 : 0.0,
+              child: Container(
+                margin: widget.margin ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                constraints: const BoxConstraints(
+                  minWidth: 320,
+                  minHeight: 320,
+                  maxHeight: 355,
+                ),
+                height: 350.0,
+                decoration: BoxDecoration(
+                  color: isDark ? BeyanColors.tone(0xFF022B24) : Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: isDark
+                        ? BeyanColors.tone(0xFFFFDF7A).withValues(alpha: 0.28)
+                        : BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.28),
+                    width: 1.1,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: isDark ? 0.32 : 0.06),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: AdWidget(ad: _nativeAd!),
+              ),
+            ),
     );
   }
 }

@@ -41,9 +41,23 @@ class _PremiumPaywallSheetState extends ConsumerState<PremiumPaywallSheet> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      PremiumService.instance.loadProducts();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await PremiumService.instance.loadProducts();
+      if (mounted) setState(() {});
     });
+  }
+
+  String _resolvedPriceForTier(PremiumTier tier) {
+    try {
+      final matched = PremiumService.instance.products.where((p) => p.id == tier.productId);
+      if (matched.isNotEmpty && matched.first.price.trim().isNotEmpty) {
+        final rawPrice = matched.first.price.trim();
+        if (tier == PremiumTier.monthly) return '$rawPrice / ay';
+        if (tier == PremiumTier.yearly) return '$rawPrice / yıl';
+        return '$rawPrice (Tek Seferlik)';
+      }
+    } catch (_) {}
+    return tier.defaultPriceText;
   }
 
   void _showStoreKitErrorDialog(BuildContext context, PremiumTier tier) {
@@ -59,12 +73,14 @@ class _PremiumPaywallSheetState extends ConsumerState<PremiumPaywallSheet> {
           children: [
             Icon(Icons.storefront_rounded, color: BeyanColors.tone(0xFFFFDF7A), size: 24),
             const SizedBox(width: 8),
-            Text(
-              'App Store Bağlantısı',
-              style: TextStyle(
-                color: BeyanColors.tone(0xFFFFDF7A),
-                fontSize: 17,
-                fontWeight: FontWeight.bold,
+            Expanded(
+              child: Text(
+                'App Store Bağlantısı',
+                style: TextStyle(
+                  color: BeyanColors.tone(0xFFFFDF7A),
+                  fontSize: 17,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ],
@@ -76,6 +92,27 @@ class _PremiumPaywallSheetState extends ConsumerState<PremiumPaywallSheet> {
           style: const TextStyle(color: Colors.white, fontSize: 13.5, height: 1.45),
         ),
         actions: [
+          TextButton(
+            onPressed: () async {
+              BeyanNavigatorGuard.safePop(ctx);
+              HapticFeedback.lightImpact();
+              await PremiumService.instance.loadProducts();
+              if (!context.mounted) return;
+              setState(() {});
+              final ok = await ref.read(premiumProvider.notifier).buyTier(tier);
+              if (!context.mounted) return;
+              if (ok) {
+                BeyanNavigatorGuard.safePop(context);
+              }
+            },
+            child: Text(
+              'Tekrar Dene',
+              style: TextStyle(
+                color: BeyanColors.tone(0xFFFFDF7A),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: BeyanColors.tone(0xFFFFDF7A),
@@ -452,9 +489,9 @@ class _PremiumPaywallSheetState extends ConsumerState<PremiumPaywallSheet> {
                             ),
                           ),
 
-                          // Fiyat
+                          // Fiyat (Canlı StoreKit fiyatı veya varsayılan fiyat)
                           Text(
-                            tier.defaultPriceText,
+                            _resolvedPriceForTier(tier),
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 14,

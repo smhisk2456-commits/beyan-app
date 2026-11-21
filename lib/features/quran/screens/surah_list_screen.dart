@@ -698,10 +698,16 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
           actualIndex -= 1;
         }
         final surah = filtered[actualIndex];
+        final lastRead = ref.watch(lastReadProvider);
+        final isLastReadSurah = lastRead != null && lastRead.surahId == surah.id;
         return SurahListItem(
           surah: surah,
           langCode: strings.language.code,
-          onTap: () => _openSurahAtVerse(surah, 1),
+          lastReadVerse: isLastReadSurah ? lastRead.verseNumber : null,
+          onTap: () => _openSurahAtVerse(
+            surah,
+            isLastReadSurah ? lastRead.verseNumber : 1,
+          ),
         );
       },
     );

@@ -7,17 +7,20 @@ class SurahListItem extends StatelessWidget {
   final Surah surah;
   final VoidCallback onTap;
   final String langCode;
+  final int? lastReadVerse;
 
   const SurahListItem({
     super.key,
     required this.surah,
     required this.onTap,
     this.langCode = 'tr',
+    this.lastReadVerse,
   });
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isCurrentSurah = lastReadVerse != null;
 
     return RepaintBoundary(
       child: Container(
@@ -26,8 +29,10 @@ class SurahListItem extends StatelessWidget {
           color: isDark ? BeyanColors.tone(0xFF0D2823) : Colors.white,
           borderRadius: BorderRadius.circular(15),
           border: Border.all(
-            color: isDark ? BeyanColors.tone(0xFF133B34) : BeyanColors.tone(0xFFE5ECE9),
-            width: 1,
+            color: isCurrentSurah
+                ? BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.75)
+                : (isDark ? BeyanColors.tone(0xFF133B34) : BeyanColors.tone(0xFFE5ECE9)),
+            width: isCurrentSurah ? 1.4 : 1.0,
           ),
         ),
         child: Material(
@@ -79,6 +84,43 @@ class SurahListItem extends StatelessWidget {
                                 color: isDark ? Colors.white54 : BeyanColors.tone(0xFF5B6E6A),
                               ),
                             ),
+                            if (isCurrentSurah) ...[
+                              const SizedBox(width: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                                decoration: BoxDecoration(
+                                  color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.2),
+                                  borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(
+                                    color: BeyanColors.tone(0xFFD4AF37).withValues(alpha: 0.5),
+                                    width: 0.8,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.bookmark_rounded,
+                                      size: 10,
+                                      color: BeyanColors.tone(0xFFFFDF7A),
+                                    ),
+                                    const SizedBox(width: 2),
+                                    Text(
+                                      langCode == 'tr'
+                                          ? 'Âyet $lastReadVerse'
+                                          : 'Ayah $lastReadVerse',
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                        color: isDark
+                                            ? BeyanColors.tone(0xFFFFDF7A)
+                                            : BeyanColors.tone(0xFF8A6B1A),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                       ],
