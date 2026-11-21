@@ -95,6 +95,7 @@ class _PrayerTimesContent extends ConsumerWidget {
     final strings = ref.watch(appStringsProvider);
 
     return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -150,42 +151,49 @@ class _LocationDateCard extends ConsumerWidget {
 
     return Card(
       color: isDark ? effectivePalette.darkCard : effectivePalette.lightCard,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Icon(
-              Icons.location_on_rounded,
-              color: isDark ? BeyanColors.tone(0xFFFFDF7A) : AppColors.primary,
-              size: 20,
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    daily.locationName == 'Mevcut Konum'
-                        ? strings.currentLocation
-                        : daily.locationName,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  Text(
-                    dateStr,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.lightImpact();
+          CitySelectorSheet.show(context, ref);
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Icon(
+                Icons.location_on_rounded,
+                color: isDark ? BeyanColors.tone(0xFFFFDF7A) : AppColors.primary,
+                size: 20,
               ),
-            ),
-            // GPS veya varsayılan konum ikonu
-            Icon(
-              daily.latitude == AppConstants.defaultLatitude
-                  ? Icons.location_city_rounded
-                  : Icons.gps_fixed_rounded,
-              color: isDark ? Colors.white54 : AppColors.textHint,
-              size: 16,
-            ),
-          ],
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      daily.locationName == 'Mevcut Konum'
+                          ? strings.currentLocation
+                          : daily.locationName,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    Text(
+                      dateStr,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+              ),
+              // GPS veya varsayılan konum ikonu
+              Icon(
+                daily.latitude == AppConstants.defaultLatitude
+                    ? Icons.location_city_rounded
+                    : Icons.gps_fixed_rounded,
+                color: isDark ? Colors.white54 : AppColors.textHint,
+                size: 16,
+              ),
+            ],
+          ),
         ),
       ),
     );

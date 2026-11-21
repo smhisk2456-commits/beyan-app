@@ -273,9 +273,15 @@ class VerseCard extends ConsumerWidget {
     final strings = ref.watch(appStringsProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final arabicFontSize = ref.watch(arabicFontSizeProvider);
-    final isBookmarked = ref.watch(bookmarkedVersesProvider).contains('${verse.surahId}:${verse.verseNumber}');
-    final lastRead = ref.watch(lastReadProvider);
-    final isLastRead = lastRead?.surahId == verse.surahId && lastRead?.verseNumber == verse.verseNumber;
+    final verseKey = '${verse.surahId}:${verse.verseNumber}';
+    final isBookmarked = ref.watch(
+      bookmarkedVersesProvider.select((s) => s.contains(verseKey)),
+    );
+    final isLastRead = ref.watch(
+      lastReadProvider.select(
+        (lr) => lr?.surahId == verse.surahId && lr?.verseNumber == verse.verseNumber,
+      ),
+    );
     final shouldHighlight = isLastRead || isHighlighted || isPlaying;
 
     final memorizationState = ref.watch(quranMemorizationProvider);

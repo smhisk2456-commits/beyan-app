@@ -671,6 +671,7 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
     final hasFirstAd = filtered.length >= 15;
     final hasSecondAd = filtered.length >= 35;
     final extraAds = (hasFirstAd ? 1 : 0) + (hasSecondAd ? 1 : 0);
+    final lastRead = ref.watch(lastReadProvider);
 
     return ListView.builder(
       padding: const EdgeInsets.only(bottom: 90, top: 2),
@@ -698,7 +699,6 @@ class _SurahListScreenState extends ConsumerState<SurahListScreen> {
           actualIndex -= 1;
         }
         final surah = filtered[actualIndex];
-        final lastRead = ref.watch(lastReadProvider);
         final isLastReadSurah = lastRead != null && lastRead.surahId == surah.id;
         return SurahListItem(
           surah: surah,

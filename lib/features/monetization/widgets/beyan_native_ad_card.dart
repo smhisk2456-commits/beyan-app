@@ -141,9 +141,31 @@ class _BeyanNativeAdCardState extends ConsumerState<BeyanNativeAdCard> {
     )..load();
   }
 
+  void _disposeAd() {
+    _retryTimer?.cancel();
+    _retryTimer = null;
+    _nativeAd?.dispose();
+    _nativeAd = null;
+    if (mounted && (_isLoaded || _isLoading)) {
+      setState(() {
+        _isLoaded = false;
+        _isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isPremium = ref.watch(premiumProvider).isPremium;
+    ref.listen<bool>(premiumProvider.select((s) => s.isPremium), (prev, isPrem) {
+      if (isPrem) {
+        _disposeAd();
+      } else if (_nativeAd == null && !_isLoading) {
+        _retryCount = 0;
+        _loadNativeAd();
+      }
+    });
+
+    final isPremium = ref.watch(premiumProvider.select((s) => s.isPremium));
     final shouldShow = !isPremium && !AdService.instance.isAdFree && _isLoaded && _nativeAd != null;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 

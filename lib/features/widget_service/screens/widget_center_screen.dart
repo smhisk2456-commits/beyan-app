@@ -17,6 +17,7 @@ import '../../notifications/models/short_verse_notification.dart';
 import '../../notifications/screens/notification_settings_sheet.dart';
 import '../../prayer_times/models/prayer_time_model.dart';
 import '../../prayer_times/providers/prayer_time_providers.dart';
+import '../../../main.dart';
 
 /// Kilit Ekranı Widget Kategorileri
 enum WidgetCategoryType {
@@ -850,8 +851,13 @@ class _WidgetCenterScreenState extends ConsumerState<WidgetCenterScreen> {
     super.initState();
     _loadSavedPreferences();
     _clockTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (mounted) {
-        setState(() => _now = DateTime.now());
+      if (!mounted) return;
+      // Yalnızca Widget sekmesi (index 4) ekranda aktifken rebuild tetikle (arka planda sıfır CPU tüketimi)
+      if (ref.read(selectedTabProvider) != 4) return;
+      final nextNow = DateTime.now();
+      if (_selectedCategory == WidgetCategoryType.countdown ||
+          nextNow.minute != _now.minute) {
+        setState(() => _now = nextNow);
       }
     });
   }
